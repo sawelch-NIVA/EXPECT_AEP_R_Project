@@ -1,0 +1,56 @@
+CAMPAIGN_ID,CAMPAIGN,CAMPAIGN_DESCRIPTION_NO,CAMPAIGN_DESCRIPTION_EN,DATA_REPO,DATA_REPO_REF_ID
+1,ANNE,Annet,Other,Vannmiljø,NA
+2,AREA,Effekter av planlagt arealbruk,Effects of planned land use,Vannmiljø,NA
+3,BADE,Overvåking av badevann,Bathing water monitoring,Vannmiljø,NA
+4,BAPO,Basisovervåking - påvirka områder,Basic monitoring - affected areas,Vannmiljø,NA
+5,BARE,Basisovervåking - referanseforhold,Basic monitoring - reference conditions,Vannmiljø,NA
+6,BIOM,Overvåking av biologisk mangfold,Biodiversity monitoring,Vannmiljø,NA
+7,CEMP,Miljøgifter langs norskekysten,Norwegian coastal pollutants,Vannmiljø,NA
+8,DEPO,Overvåking av avrenning fra landdeponi,Landfill runoff monitoring,Vannmiljø,NA
+9,DRIK,Overvåking av drikkevann,Drinking water monitoring,Vannmiljø,NA
+10,ELVE,Elveovervåkingsprogrammet,River monitoring program,Vannmiljø,NA
+11,FLYP,Overvåking av påvirkning fra flyplasser,Airport effect monitoring,Vannmiljø,NA
+12,FORS,Forsuringsovervåking,Pollution monitoring,Vannmiljø,NA
+13,FOSJ,Overvåking av forurenset sjøbunn,Polluted seabed monitoring,Vannmiljø,NA
+14,GEOS,Geologi i Oslo-regionen (GEOS),Geology in the Oslo region,Vannmiljø,NA
+15,GRUV,Overvåking av gruvepåvirka vassdrag,Mine-affected river system monitoring,Vannmiljø,NA
+16,GRVN,Overvåking av grunnvann,Groundwater monitoring,Vannmiljø,NA
+17,INDU,Overvåking av påvirkning fra industri,Industrial effect montoring,Vannmiljø,NA
+18,INNL,Overvåking av innlandsfisk,Inland fish monitoring,Vannmiljø,NA
+19,JOVA,Jord- og vannovervåking i landbruket,Soil and water monitoring in agriculture,Vannmiljø,NA
+20,JRBN,Overvåking av påvirkning fra jernbane,Railway effect monitoring,Vannmiljø,NA
+21,KALK,Tiltaksovervåking i kalkede laksevassdrag,Action monitoring in calcified salmon river systems,Vannmiljø,NA
+22,KALL,Lokal overvåking av kalka vassdrag,Local monitoring of calcified river systems,Vannmiljø,NA
+23,KART,Kartlegging av arter,Species mapping,Vannmiljø,NA
+24,KAVE,Overvåking av påvirkning fra vegtrafikk,Road traffic effect monitoring,Vannmiljø,NA
+25,KOMM,Overvåking av påvirkning fra avløp,Sewage effect monitoring,Vannmiljø,NA
+26,LANG,Lange tidsserier,Long time series,Vannmiljø,NA
+27,LTAM,Langtransporterte atmosfæriske miljøgifter,Long-distance transport of atmospheric pollutants,Vannmiljø,NA
+28,MARE,Kartlegging av miljøgifter i sedimenter - MAREANO,Mapping of pollutants in sediments- MAREANO,Vannmiljø,NA
+29,MGKK,Marine grunnkart i kystsonen,Basic marine map of the coastal zone,Vannmiljø,NA
+30,MIFE,Miljøgifter i ferskvann,Pollutants in fresh water,Vannmiljø,NA
+31,MILK,Miljøgifter i kystområdene (MilKys),Pollutants in coastal zones (MilKys),Vannmiljø,NA
+32,MINN,Miljøgifter i ferskvann (MilFersk),Pollutants in fresh water (MilFersk),Vannmiljø,NA
+33,MITE,Miljøgifter i terrestrisk og bynært miljø,Pollutants in terrestrial and near-urban environmentals,Vannmiljø,NA
+34,MIUR,Miljøgifter i en urban fjord,Pollutants in an urban fjord,Vannmiljø,NA
+35,MOMC,Miljøovervåking akvakulturanlegg,Environmental monitoring of aquaculture facilties,Vannmiljø,NA
+36,MYFO,Myndighetspålagt forurensningsovervåking,Local authority-led pollutant monitoring,Vannmiljø,NA
+37,OEKF,Økosystemovervåkning i ferskvann (ØkoFersk),Freshwater ecosystem monitoring (OekoFersk),Vannmiljø,NA
+38,OEKS,Økosystemovervåking i store innsjøer (ØkoStor),Large lake ecosystem monitoring (OekoStor),Vannmiljø,NA
+39,OMAS,Organiske miljøgifter i norsk avløpsslam,Organic pollutants in Norwegian sewage sludge,Vannmiljø,NA
+40,PASV,Pasvikprogrammet,Pasvik program,Vannmiljø,NA
+41,PROB,Problemkartlegging,Problem mapping,Vannmiljø,NA
+42,RELV,Referanseelver,Reference rivers,Vannmiljø,NA
+43,RIDD,Elvetilførselsprogrammet,River supply program,Vannmiljø,NA
+44,SCRE,Kartlegging av nye miljøgifter,Mapping of new pollutants,Vannmiljø,NA
+45,SJOM,Sjømatdata,Seafood data,Vannmiljø,NA
+46,SKYT,Overvåking av påvirkning fra skytefelt,Shooting range effect monitoring,Vannmiljø,NA
+47,TILF,Tilførselsprogrammet,Supply program,Vannmiljø,NA
+48,TILT,Tiltaksorientert overvåking,Action-oriented monitoring,Vannmiljø,NA
+49,VASS,Effekter av vassdragsinngrep,Effects of river system intervention,Vannmiljø,NA
+50,MONS,Feltspesifikk miljøovervåking på norsk sokkel,Field-specific environmental monitoring on the Norwegian shelf,Vannmiljø,NA
+51,SOFP,Samordnet overvåking av flere påvirkninger,Coordinated monitoring of multiple impacts,Vannmiljø,NA
+52,ANLA,Overvåking av anadrom laksefisk,Monitoring of anadromous salmonids,Vannmiljø,NA
+53,KAKA,Kartlegging av kalksjøer,Mapping of limestone lakes,Vannmiljø,NA
+54,SPFO,Statlig program 1980-2000,Government programme 1980-2000,Vannmiljø,NA
+55,EMUD,"Effekter av mudring, utfylling og dumping","Effects of dredging, filling and dumping",,

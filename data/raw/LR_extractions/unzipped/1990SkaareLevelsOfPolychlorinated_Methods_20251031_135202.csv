@@ -1,0 +1,5 @@
+﻿"PROTOCOL_ID","CAMPAIGN_NAME","PROTOCOL_CATEGORY","PROTOCOL_NAME","PROTOCOL_COMMENT"
+"S01_Other_NorSeal198","Norwegian harbour seal disease outbreak pollutant analysis 1988","Sampling Protocol","Other","Samples of various tissues from 82 individuals were collected from dead animals brought to the National Veterinary Institute for autopsy during summer 1988."
+"F01_Other_NorSeal198","Norwegian harbour seal disease outbreak pollutant analysis 1988","Fractionation Protocol","Acid-extractable fraction","Samples of liver were digested in a mixture of nitric and perchloric acid."
+"E01_Other_NorSeal198","Norwegian harbour seal disease outbreak pollutant analysis 1988","Extraction Protocol","Acid digestion","Samples of liver were digested in a mixture of nitric and perchloric acid."
+"A01_Other_NorSeal198","Norwegian harbour seal disease outbreak pollutant analysis 1988","Analytical Protocol","Atomic absorption spectroscopy","Cadmium, copper and zinc were determined by flame atomic absorption spectroscopy. Detection limits were 1 mg kg-1 tissue for copper and zinc when starting with 3 g of sample."

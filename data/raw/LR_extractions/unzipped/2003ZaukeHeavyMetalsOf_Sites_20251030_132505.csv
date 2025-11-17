@@ -1,0 +1,4 @@
+"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY","AREA","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
+"BarentsSea1994_Site1","Dalniye Zelentsy site 1","Coastal, fjord","Water benthos","WGS 84",69.117,36.083,"Russia","Barents Sea",0,"m","Sam Welch","2025-10-30","Approximate locations converted from degree minutes."
+"BarentsSea1994_Site2","Dalniye Zelentsy site 2","Coastal, fjord","Water benthos","WGS 84",69.117,36.083,"Russia","Barents Sea",0,"m","Sam Welch","2025-10-30","Approximate locations converted from degree minutes."
+"BarentsSea1994_Site3","Hornoya","Coastal, fjord","Water benthos","WGS 84",70.333,31.167,"Norway","Barents Sea",0,"m","Sam Welch","2025-10-30","Approximate locations converted from degree minutes."

@@ -1,0 +1,5 @@
+﻿SITE_CODE,SITE_NAME,PARAMETER_NAME,PARAMETER_TYPE,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,MEASURED_CATEGORY,SAMPLING_DATE,SUBSAMPLE,SAMPLE_ID
+ArcticSeals1999_Barents,Barents Sea around Svalbard,Copper,Stressor,Biota,"Biota, Aquatic",Internal,01/01/1999,Hooded Liver,ArcticSeals1999_Barents-Copper-BiotaAquatic-1999-01-01-RHooded Liver
+ArcticSeals1999_Barents,Barents Sea around Svalbard,Copper,Stressor,Biota,"Biota, Aquatic",Internal,01/01/1999,Hooded Kidney,ArcticSeals1999_Barents-Copper-BiotaAquatic-1999-01-01-RHooded Kidney
+ArcticSeals1999_Barents,Barents Sea around Svalbard,Copper,Stressor,Biota,"Biota, Aquatic",Internal,01/01/1999,Harp Liver,ArcticSeals1999_Barents-Copper-BiotaAquatic-1999-01-01-RHarp Liver
+ArcticSeals1999_Barents,Barents Sea around Svalbard,Copper,Stressor,Biota,"Biota, Aquatic",Internal,01/01/1999,Harp Kidney,ArcticSeals1999_Barents-Copper-BiotaAquatic-1999-01-01-RHarp Kidney

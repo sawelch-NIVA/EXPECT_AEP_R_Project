@@ -1,0 +1,6 @@
+﻿"ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","MEASURED_CATEGORY"
+"Aquatic","Freshwater","External"
+"Aquatic","Aquatic Sediment","External"
+"Terrestrial","Soil O Horizon (Organic)","External"
+"Terrestrial","Soil E Horizon (Mineral)","External Media"
+"Aquatic","Groundwater","External Media"
