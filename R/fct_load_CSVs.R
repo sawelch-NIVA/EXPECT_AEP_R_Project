@@ -12,7 +12,7 @@
 #'
 #' @importFrom dplyr filter as_tibble
 #' @importFrom stringr str_detect
-#' @importFrom magrittr |>
+
 #'
 #' @export
 get_literature_csv_tibble <- function(
@@ -76,7 +76,7 @@ literature_module_vocab <- function() {
 #' @importFrom data.table fread
 #' @importFrom dplyr summarise_all as_tibble
 #' @importFrom purrr as_vector
-#' @importFrom magrittr |>
+
 #'
 #' @export
 fread_module_csv <- function(filepath, format_initialiser) {
@@ -98,8 +98,6 @@ fread_module_csv <- function(filepath, format_initialiser) {
     # Convert IDate columns back to standard Date for compatibility
     # Probably less efficient, definitely less work.
     mutate(across(where(\(x) inherits(x, "IDate")), as.Date))
-
-  print(result)
 
   return(result)
 }

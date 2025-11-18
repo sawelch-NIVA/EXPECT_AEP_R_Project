@@ -176,7 +176,7 @@ list(
       methods_data = methods_data
     )
   ),
-
+  # create a megatable by merging measurements, sites, references, campaign, methods
   tar_target(
     name = literature_clean,
     command = clean_joined_columns(
@@ -184,18 +184,24 @@ list(
       columns_to_drop = c() # Add column names here as you identify them
     )
   ),
-
+  # save the resulting file as a parquet
   tar_target(
-    name = literature_parquet,
+    name = save_literature_parquet,
     command = save_literature_parquet(
       data = literature_clean,
       output_path = "data/clean",
       filename = "literature_data.parquet"
     ),
     format = "file"
-  )
-  # create a megatable by merging measurements, sites, references, campaign, methods
-  # save the resulting file as a parquet
+  ),
   # load the resulting file
+  # Why this level of redundancy? Because with target, it means we can avoid constantly reloading CSVs unless they've actually changed
+  tar_target(
+    name = load_literature_parquet,
+    command = load_literature_parquet(
+      input_path = "data/clean",
+      filename = "literature_data.parquet"
+    )
+  )
   # do analysis
 )

@@ -13,7 +13,6 @@
 #' @return A tibble with all tables joined to measurements
 #'
 #' @importFrom dplyr left_join
-#' @importFrom magrittr |>
 #'
 #' @export
 join_all_literature_modules <- function(
@@ -77,7 +76,7 @@ join_all_literature_modules <- function(
 #' @return A tibble with specified columns removed
 #'
 #' @importFrom dplyr select all_of
-#' @importFrom magrittr |>
+
 #'
 #' @export
 clean_joined_columns <- function(data, columns_to_drop = character()) {

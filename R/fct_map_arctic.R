@@ -1,285 +1,313 @@
-# Geographic constants ----
+# ggplot2 extensions ----
 
-#' Get study area bounding box
+#' Add shadow text to sf plots
 #'
-#' Returns the bounding box coordinates for the Arctic study area
+#' Custom geom for adding text with shadow/outline to sf plots, useful for
+#' improving label visibility over complex backgrounds
 #'
-#' @return An sf bbox object with study area extent
+#' @param mapping Set of aesthetic mappings created by aes()
+#' @param data The data to be displayed
+#' @param stat The statistical transformation to use
+#' @param position Position adjustment
+#' @param ... Other arguments passed to layer
+#' @param parse If TRUE, labels will be parsed as expressions
+#' @param nudge_x Horizontal adjustment to nudge labels by
+#' @param nudge_y Vertical adjustment to nudge labels by
+#' @param check_overlap If TRUE, overlapping labels will be removed
+#' @param na.rm If FALSE (default), removes missing values with warning
+#' @param show.legend Logical indicating whether this layer should be included in legends
+#' @param inherit.aes If FALSE, overrides default aesthetics
+#' @param fun.geometry Function for transforming geometry (sf-specific)
 #'
-#' @importFrom sf st_bbox
+#' @return A ggplot2 layer
+#'
+#' @importFrom ggplot2 aes layer_sf position_nudge
+#' @importFrom rlang list2
+#' @importFrom cli cli_abort
 #'
 #' @export
-get_study_area_bbox <- function() {
-  sf::st_bbox(c(xmin = -70, xmax = 90, ymin = 55, ymax = 90))
-}
-
-# Shapefile reading and processing ----
-
-#' Read and process ocean shapefiles
-#'
-#' Reads raw ocean shapefile, crops to study area, and simplifies geometry.
-#' Caches processed shapefile to avoid reprocessing.
-#'
-#' @param raw_path Character string, path to raw ocean shapefile
-#' @param output_path Character string, path to save processed shapefile
-#' @param bbox sf bbox object, bounding box to crop to (default: study area bbox)
-#' @param force_reprocess Logical, whether to force reprocessing even if cached file exists
-#'
-#' @return An sf object with processed ocean polygons
-#'
-#' @importFrom sf read_sf st_crop st_simplify write_sf sf_use_s2
-#' @importFrom magrittr |>
-#'
-#' @export
-read_and_process_oceans <- function(
-  raw_path = "data/raw/shapefiles/World_Seas_IHO_v3.shp",
-  output_path = "data/clean/study_area_shapefile.shp",
-  bbox = get_study_area_bbox(),
-  force_reprocess = FALSE
+geom_sf_shadowtext <- function(
+  mapping = aes(),
+  data = NULL,
+  stat = "sf_coordinates",
+  position = "identity",
+  ...,
+  parse = FALSE,
+  nudge_x = 0,
+  nudge_y = 0,
+  check_overlap = FALSE,
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  fun.geometry = NULL
 ) {
-  # Disable spherical geometry for cropping
-  sf::sf_use_s2(FALSE)
-
-  # Check if processed file exists
-  if (file.exists(output_path) && !force_reprocess) {
-    message(sprintf("Reading cached shapefile from: %s", output_path))
-    return(sf::read_sf(output_path))
+  if (!missing(nudge_x) || !missing(nudge_y)) {
+    if (!missing(position)) {
+      cli::cli_abort(c(
+        "Both {.arg position} and {.arg nudge_x}/{.arg nudge_y} are supplied.",
+        i = "Only use one approach to alter the position."
+      ))
+    }
+    position <- position_nudge(nudge_x, nudge_y)
   }
 
-  # Process from raw data
-  message(sprintf("Processing ocean shapefile from: %s", raw_path))
-
-  oceans_raw <- sf::read_sf(raw_path)
-
-  study_area <- oceans_raw |>
-    sf::st_crop(bbox) |>
-    sf::st_simplify()
-
-  # Ensure output directory exists
-  output_dir <- dirname(output_path)
-  if (!dir.exists(output_dir)) {
-    dir.create(output_dir, recursive = TRUE)
-  }
-
-  # Save processed shapefile
-  sf::write_sf(study_area, output_path)
-  message(sprintf("Processed shapefile saved to: %s", output_path))
-
-  return(study_area)
-}
-
-#' Read and process country shapefiles
-#'
-#' Reads country boundaries from Natural Earth, crops to study area,
-#' and flags countries within the study region
-#'
-#' @param scale Numeric, Natural Earth scale (10, 50, or 110)
-#' @param bbox sf bbox object, bounding box to crop to (default: study area bbox)
-#' @param study_countries Character vector, names of countries in study area
-#'
-#' @return An sf object with country polygons and study area flag
-#'
-#' @importFrom rnaturalearth ne_countries
-#' @importFrom dplyr mutate select case_match
-#' @importFrom sf st_as_sf st_crop
-#' @importFrom magrittr |>
-#'
-#' @export
-read_and_process_countries <- function(
-  scale = 10,
-  bbox = get_study_area_bbox(),
-  study_countries = c("Norway", "Greenland", "Iceland")
-) {
-  message("Reading country boundaries from Natural Earth")
-
-  countries <- rnaturalearth::ne_countries(scale = scale) |>
-    mutate(
-      in_study = case_match(
-        name,
-        study_countries ~ TRUE,
-        .default = FALSE
-      )
-    ) |>
-    select(
-      sovereignt,
-      in_study,
-      admin,
-      geounit,
-      subunit,
-      name,
-      name_long,
-      abbrev,
-      postal,
-      note_brk,
-      fips_10,
-      iso_a2,
-      iso_a3,
-      woe_note,
-      geometry
-    ) |>
-    st_as_sf() |>
-    sf::st_crop(bbox)
-
-  return(countries)
-}
-
-# Geographic feature creation ----
-
-#' Create Arctic Circle line
-#'
-#' Generates an sf linestring representing the Arctic Circle at 66.5°N
-#'
-#' @param lon_range Numeric vector of length 2, longitude range (default: c(-70, 90))
-#' @param lat Numeric, latitude of Arctic Circle (default: 66.5)
-#' @param resolution Numeric, spacing between points along line (default: 1 degree)
-#'
-#' @return An sf LINESTRING object
-#'
-#' @importFrom sf st_as_sf st_cast
-#' @importFrom dplyr summarise
-#' @importFrom magrittr |>
-#'
-#' @export
-create_arctic_circle <- function(
-  lon_range = c(-70, 90),
-  lat = 66.5,
-  resolution = 1
-) {
-  # Generate points along Arctic Circle
-  arctic_coords <- data.frame(
-    lon = seq(lon_range[1], lon_range[2], by = resolution),
-    lat = lat
-  )
-
-  arctic_circle <- arctic_coords |>
-    st_as_sf(coords = c("lon", "lat"), crs = 4326) |>
-    summarise(do_union = FALSE) |>
-    st_cast("LINESTRING")
-
-  return(arctic_circle)
-}
-
-# Data annotation and styling ----
-
-#' Annotate ocean polygons for mapping
-#'
-#' Adds display names, visibility flags, and color mappings to ocean polygons
-#'
-#' @param ocean_sf An sf object with ocean polygons (must have NAME column)
-#' @param named_oceans Character vector, names of oceans to highlight
-#'
-#' @return An sf object with annotation columns added
-#'
-#' @importFrom dplyr mutate case_match case_when
-#' @importFrom magrittr |>
-#'
-#' @export
-annotate_oceans_for_display <- function(
-  ocean_sf,
-  named_oceans = c(
-    "Norwegian Sea",
-    "Greenland Sea",
-    "Barents Sea",
-    "Arctic Ocean"
-  )
-) {
-  ocean_sf |>
-    mutate(
-      # Standardize names
-      NAME = case_match(NAME, "Barentsz Sea" ~ "Barents Sea", .default = NAME),
-
-      # Flag which names to show
-      show_name = NAME %in% named_oceans,
-
-      # Assign colors to named oceans
-      ocean_color = case_when(
-        NAME == "Norwegian Sea" ~ "#4A90E2", # Medium blue
-        NAME == "Greenland Sea" ~ "#7BB3F0", # Light blue
-        NAME == "Barents Sea" ~ "#2E5C8A", # Dark blue
-        NAME == "Arctic Ocean" ~ "#5BA3D0", # Blue-cyan
-        TRUE ~ "#E8E8E8" # Light gray for others
-      )
+  layer_sf(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomShadowText,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list2(
+      parse = parse,
+      check_overlap = check_overlap,
+      na.rm = na.rm,
+      fun.geometry = fun.geometry,
+      ...
     )
+  )
 }
+
 
 # Map creation ----
 
-#' Create Arctic study area base map
+#' Create Arctic study area base map (WGS84 projection)
 #'
 #' Generates a ggplot map showing the Arctic study area with oceans,
-#' countries, and the Arctic Circle
+#' countries, and the Arctic Circle using WGS84 (EPSG:4326) coordinate system
 #'
 #' @param ocean_sf An sf object with annotated ocean polygons
 #' @param country_sf An sf object with country polygons
 #' @param arctic_circle_sf An sf object with Arctic Circle line
+#' @param graticule_sf An sf object with graticule lines (optional)
 #' @param background_color Character string, hex color for background (default: "#f8f9fa")
+#' @param bbox A bounding box used to crop the displayed map. Defaults to none.
 #'
 #' @return A ggplot object
 #'
-#' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity guides theme element_rect
+#' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin
 #' @importFrom magrittr |>
 #'
 #' @export
-create_study_area_map <- function(
+create_study_area_map_wgs84 <- function(
   ocean_sf,
   country_sf,
   arctic_circle_sf,
-  background_color = "#f8f9fa"
+  graticule_sf = NULL,
+  background_color = "#f8f9fa",
+  bbox = NULL
 ) {
-  ggplot() +
+  if (!is.null(bbox)) {
+    ocean_sf |> st_crop(ocean_sf, bbox)
+    country_sf |> st_crop(country_sf, bbox)
+    arctic_circle_sf |> st_crop(arctic_circle_sf, bbox)
+    if (!is.null(graticule_sf)) {
+      graticule_sf |> st_crop(graticule_sf, bbox)
+    }
+  }
+
+  map <- ggplot() +
     # Ocean polygons with custom colors
     geom_sf(
       data = ocean_sf,
       aes(fill = ocean_color),
-      color = "white",
-      size = 0.2
+      color = "black",
+      linewidth = 0.1
     ) +
-    # Ocean labels
-    geom_sf_text(
-      data = ocean_sf,
-      mapping = aes(label = NAME, color = show_name),
-      size = 3.5,
-      fontface = "bold"
-    ) +
-    scale_fill_identity() +
-    guides(fill = "none") +
     # Country polygons
     geom_sf(
       data = country_sf,
-      mapping = aes(fill = ifelse(in_study, "lightgreen", "grey"))
-    ) +
-    # Country abbreviations
-    geom_sf_text(
-      data = country_sf,
-      aes(label = abbrev)
-    ) +
+      aes(fill = ifelse(highlight_name, "#5c887b", "#e3d7bf")),
+      color = "black",
+      linewidth = 0.2
+    )
+
+  # Add graticules if provided
+  if (!is.null(graticule_sf)) {
+    map <- map +
+      geom_sf(
+        data = graticule_sf,
+        size = 0.5,
+        color = "gray40",
+        alpha = 0.5
+      )
+  }
+
+  map <- map +
     # Arctic Circle line
     geom_sf(
       data = arctic_circle_sf,
-      color = "#333333",
+      color = "darkred",
       linetype = "dashed",
-      size = 0.8
+      linewidth = 0.5
     ) +
+    # Ocean labels
+    geom_sf_shadowtext(
+      data = ocean_sf,
+      aes(
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold.italic", "italic"),
+        # size = if_else(major_body, "12px", "10px"),
+        color = "#EEE",
+        alpha = if_else(major_body | highlight_name, 1, 0)
+      )
+    ) +
+    # Country names
+    geom_sf_shadowtext(
+      data = country_sf,
+      aes(
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold", "plain"),
+        alpha = if_else(highlight_name, 1, 0)
+      ),
+      # size = 3,
+      color = "#2C3E50",
+      bg.color = "white",
+      stat = "sf_coordinates",
+      inherit.aes = TRUE
+    ) +
+    # Styling
+    scale_fill_identity() +
+    scale_color_identity() +
     theme(
       panel.background = element_rect(fill = background_color, color = NA),
-      plot.background = element_rect(fill = background_color, color = NA),
-      legend.position = "none"
+      plot.margin = margin(0, 0, 0, 0),
+      legend.position = "none",
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      axis.ticks.length = unit(0, "pt")
     )
+  if (!is.null(bbox)) {
+    map <- map +
+      coord_sf(
+        xlim = c(
+          northern_hemisphere_bbox()[[1]],
+          northern_hemisphere_bbox()[[3]]
+        ),
+        ylim = c(
+          northern_hemisphere_bbox()[[2]],
+          northern_hemisphere_bbox()[[4]]
+        )
+      )
+  }
+
+  return(map)
 }
 
-# Usage example (not exported) ----
-#
-# # Load and process geographic data
-# study_area <- read_and_process_oceans()
-# study_countries <- read_and_process_countries()
-# arctic_circle <- create_arctic_circle()
-#
-# # Annotate for display
-# study_area_annotated <- annotate_oceans_for_display(study_area)
-#
-# # Create map
-# study_map <- create_study_area_map(
-#   ocean_sf = study_area_annotated,
-#   country_sf = study_countries,
-#   arctic_circle_sf = arctic_circle
-# )
+#' Create Arctic study area base map (North Polar Stereographic projection)
+#'
+#' Generates a ggplot map showing the Arctic study area with oceans,
+#' countries, and the Arctic Circle using North Polar Stereographic projection
+#' (EPSG:3575 or custom stereographic)
+#'
+#' @param ocean_sf An sf object with annotated ocean polygons (should be in polar projection)
+#' @param country_sf An sf object with country polygons (should be in polar projection)
+#' @param arctic_circle_sf An sf object with Arctic Circle line
+#' @param graticule_sf An sf object with graticule lines (optional)
+#' @param background_color Character string, hex color for background (default: "#6e98b2")
+#' @param crs Character string or CRS object, coordinate reference system for projection
+#'   (default: "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0")
+#' @param xlim Numeric vector of length 2, x-axis limits in projected coordinates
+#' @param ylim Numeric vector of length 2, y-axis limits in projected coordinates
+#'
+#' @return A ggplot object
+#'
+#' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin coord_sf
+#' @importFrom sf st_crs
+#' @importFrom magrittr |>
+#'
+#' @export
+create_study_area_map_polar <- function(
+  ocean_sf,
+  country_sf,
+  arctic_circle_sf,
+  graticule_sf = NULL,
+  background_color = "#6e98b2",
+  crs = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0",
+  xlim = c(-9000000, 9000000),
+  ylim = c(-5000000, 3000000)
+) {
+  map <- ggplot() +
+    # Ocean polygons with custom colors
+    geom_sf(
+      data = ocean_sf,
+      aes(fill = ocean_color),
+      color = "black",
+      linewidth = 0.1
+    ) +
+    # Country polygons
+    geom_sf(
+      data = country_sf,
+      aes(fill = ifelse(highlight_name, "#5c887b", "#e3d7bf")),
+      color = "black",
+      linewidth = 0.2
+    )
+
+  # Add graticules if provided
+  if (!is.null(graticule_sf)) {
+    map <- map +
+      geom_sf(
+        data = graticule_sf,
+        size = 0.5,
+        color = "gray40",
+        alpha = 0.5
+      )
+  }
+
+  map <- map +
+    # Arctic Circle line
+    geom_sf(
+      data = arctic_circle_sf,
+      color = "darkred",
+      linetype = "dashed",
+      linewidth = 0.5
+    ) +
+    # Ocean labels
+    geom_sf_shadowtext(
+      data = ocean_sf,
+      aes(
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold.italic", "italic"),
+        size = if_else(major_body, "12px", "10px"),
+        color = "#EEE",
+        alpha = if_else(major_body | highlight_name, 1, 0)
+      )
+    ) +
+    # Country names
+    geom_sf_shadowtext(
+      data = country_sf,
+      aes(
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold", "plain"),
+        alpha = if_else(highlight_name, 1, 0)
+      ),
+      size = 3,
+      color = "#2C3E50",
+      bg.color = "white",
+      stat = "sf_coordinates",
+      inherit.aes = TRUE
+    ) +
+    # Styling
+    scale_fill_identity() +
+    scale_color_identity() +
+    theme(
+      panel.background = element_rect(fill = background_color, color = NA),
+      plot.margin = margin(0, 0, 0, 0),
+      legend.position = "none",
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      axis.ticks.length = unit(0, "pt")
+    ) +
+    # Apply polar stereographic projection
+    coord_sf(
+      crs = st_crs(crs),
+      xlim = xlim,
+      ylim = ylim,
+      expand = FALSE
+    )
+
+  return(map)
+}
