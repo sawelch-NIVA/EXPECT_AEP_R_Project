@@ -96,7 +96,7 @@ create_study_area_map_wgs84 <- function(
   arctic_circle_sf,
   graticule_sf = NULL,
   background_color = background_colors["wgs84"],
-  bbox = NULL
+  bbox = get_study_area_bbox()
 ) {
   # if (!is.null(bbox)) {
   #   ocean_sf |> st_crop(ocean_sf, bbox)
@@ -181,12 +181,12 @@ create_study_area_map_wgs84 <- function(
     map <- map +
       coord_sf(
         xlim = c(
-          northern_hemisphere_bbox()[[1]],
-          northern_hemisphere_bbox()[[3]]
+          bbox[[1]],
+          bbox[[3]]
         ),
         ylim = c(
-          northern_hemisphere_bbox()[[2]],
-          northern_hemisphere_bbox()[[4]]
+          bbox[[2]],
+          bbox[[4]]
         )
       )
   }

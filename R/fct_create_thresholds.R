@@ -10,7 +10,7 @@
 #'
 #' @export
 get_study_area_bbox <- function() {
-  sf::st_bbox(c(xmin = -80, xmax = 90, ymin = 55, ymax = 90))
+  sf::st_bbox(c(xmin = -100, xmax = 90, ymin = 30, ymax = 90))
 }
 
 #' Get Northern Hemisphere bounding box
