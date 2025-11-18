@@ -20,6 +20,11 @@ get_literature_csv_tibble <- function(
   pattern = ".csv",
   module = NULL
 ) {
+  stopifnot(
+    "Module name module not valid. Call literature_module_vocab() for valid options." = module %in%
+      literature_module_vocab()
+  )
+
   paths <- list.files(
     path = path,
     pattern = pattern,
@@ -57,65 +62,6 @@ literature_module_vocab <- function() {
   )
 }
 
-# Reading functions ----
-
-#' Read campaign CSV files with fread
-#'
-#' Uses data.table::fread for fast reading with explicit column types
-#' based on the campaign tibble initialiser
-#'
-#' @param filepath Character string, path to CSV file
-#'
-#' @return A tibble with validated columns matching campaign structure
-#'
-#' @importFrom data.table fread
-#' @importFrom dplyr summarise_all as_tibble
-#' @importFrom purrr as_vector
-#' @importFrom magrittr |>
-#'
-#' @export
-read_campaign_csv <- function(filepath) {
-  # Get expected column names and classes from initialiser
-  expected_structure <- initialise_campaign_tibble()
-  expected_names <- names(expected_structure)
-  expected_classes <- expected_structure |>
-    summarise_all(class) |>
-    as_vector()
-
-  # Read with fread using explicit specifications
-  result <- fread(
-    input = filepath,
-    select = expected_names,
-    colClasses = expected_classes
-  ) |>
-    as_tibble()
-
-  return(result)
-}
-
-#' Read all campaign CSV files from literature module
-#'
-#' Reads all campaign files listed in the literature CSV tibble and combines them
-#'
-#' @return A tibble with all campaign data combined
-#'
-#' @importFrom dplyr pull bind_rows
-#' @importFrom purrr map
-#' @importFrom magrittr |>
-#'
-#' @export
-read_all_campaign_files <- function() {
-  # Get all campaign file paths
-  campaign_paths <- get_literature_csv_tibble(module = "Campaign") |>
-    pull(value)
-
-  # Read each file and combine
-  campaign_paths |>
-    purrr::map(read_campaign_csv) |>
-    bind_rows()
-}
-
-# Generalized version ----
 
 #' Read module CSV files with fread
 #'
@@ -133,7 +79,7 @@ read_all_campaign_files <- function() {
 #' @importFrom magrittr |>
 #'
 #' @export
-read_module_csv <- function(filepath, format_initialiser) {
+fread_module_csv <- function(filepath, format_initialiser) {
   # Get expected structure from initialiser function
   expected_structure <- format_initialiser()
   expected_names <- names(expected_structure)
@@ -145,9 +91,15 @@ read_module_csv <- function(filepath, format_initialiser) {
   result <- fread(
     input = filepath,
     select = expected_names, # sets column order to expected (and, for better and worse, drops unexpected columns)
-    colClasses = expected_classes # this /should/ mean that our downstream data is entirely consistent
+    colClasses = expected_classes # this generally works but can raise issues downstream
+    # because IDate ~= Date here, but not when we call reduce() in fread_all_module_files()
   ) |>
-    as_tibble()
+    as_tibble() |>
+    # Convert IDate columns back to standard Date for compatibility
+    # Probably less efficient, definitely less work.
+    mutate(across(where(\(x) inherits(x, "IDate")), as.Date))
+
+  print(result)
 
   return(result)
 }
@@ -163,17 +115,30 @@ read_module_csv <- function(filepath, format_initialiser) {
 #' @return A tibble with all module data combined
 #'
 #' @importFrom dplyr pull bind_rows
-#' @importFrom purrr map
-#' @importFrom magrittr |>
+#' @importFrom purrr map reduce
 #'
 #' @export
-read_all_module_files <- function(module_name, format_initialiser) {
+fread_all_module_files <- function(module_name, format_initialiser) {
   # Get all file paths for this module
   file_paths <- get_literature_csv_tibble(module = module_name) |>
     pull(value)
 
-  # Read each file with appropriate initialiser
+  stopifnot(
+    "No paths found matching module name." = length(file_paths) > 0
+  )
+
+  # Read each file and reduce by binding rows sequentially
   file_paths |>
-    purrr::map(\(x) read_module_csv(x, format_initialiser)) |>
-    bind_rows()
+    purrr::map(\(x) {
+      # message(sprintf("Reading: %s", x))
+      fread_module_csv(x, format_initialiser)
+    }) |>
+    purrr::reduce(bind_rows, .init = format_initialiser())
+}
+
+initialise_tibble_IDate <- function(tibble) {
+  IDate_tibble <- tibble |>
+    mutate(across(where(is.Date), .fns = as.IDate))
+
+  return(IDate_tibble)
 }

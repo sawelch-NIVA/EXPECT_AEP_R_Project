@@ -18,6 +18,7 @@ library(shiny)
 library(readxl)
 library(purrr)
 library(STOPeData)
+library(qs2)
 
 `%notin%` <- negate(`%in%`)
 
@@ -36,10 +37,18 @@ result <- measurements_data |>
   left_join(reference_data, by = "REFERENCE_ID") |>
   left_join(parameters_data, by = "PARAMETER_NAME")
 
-test_sites <- read_all_module_files(
-  module = "Sites",
-  format_initialiser = initialise_sites_tibble
+# something fucked here
+# fixme
+#
+test_refs <- fread_all_module_files(
+  module = "Reference",
+  format_initialiser = initialise_references_tibble
 )
+
+# References data types bug
+filepath = get_literature_csv_tibble(module = "Reference")[[1, 1]]
+module_name = "Reference"
+
 
 biiiig_table <- arrow::read_parquet("data/clean/literature_data.parquet")
 

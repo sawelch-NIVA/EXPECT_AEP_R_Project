@@ -35,7 +35,7 @@ tar_option_set(
     "STOPeData", # local package, used for format functions
     "tarchetypes" # extend targets
   ),
-  format = "qs", # Optionally set the default storage format. qs is fast.
+  format = "qs" # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
   # optional distributed computing. To use this capability
@@ -46,7 +46,7 @@ tar_option_set(
   # which run as local R processes. Each worker launches when there is work
   # to do and exits if 60 seconds pass with no tasks to run.
   #
-  controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
+  # controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
   #
   # Alternatively, if you want workers to run on a high-performance computing
   # cluster, select a controller from the {crew.cluster} package.
@@ -95,24 +95,25 @@ list(
   # ),
 
   # Read and combine all files per module (watching individual files via pattern)
+  # fread = data.table's fast file reader
   tar_target(
     name = campaign_data,
-    command = read_all_module_files("Campaign", initialise_campaign_tibble)
+    command = fread_all_module_files("Campaign", initialise_campaign_tibble)
   ),
 
   tar_target(
     name = samples_data,
-    command = read_all_module_files("Samples", initialise_samples_tibble)
+    command = fread_all_module_files("Samples", initialise_samples_tibble)
   ),
 
   tar_target(
     name = biota_data,
-    command = read_all_module_files("Biota", initialise_biota_tibble)
+    command = fread_all_module_files("Biota", initialise_biota_tibble)
   ),
 
   tar_target(
     name = compartments_data,
-    command = read_all_module_files(
+    command = fread_all_module_files(
       "Compartments",
       initialise_compartments_tibble
     )
@@ -120,7 +121,7 @@ list(
 
   tar_target(
     name = measurements_data,
-    command = read_all_module_files(
+    command = fread_all_module_files(
       "Measurements",
       initialise_measurements_tibble
     )
@@ -128,28 +129,28 @@ list(
 
   tar_target(
     name = methods_data,
-    command = read_all_module_files("Methods", initialise_methods_tibble)
+    command = fread_all_module_files("Methods", initialise_methods_tibble)
   ),
 
   tar_target(
     name = parameters_data,
-    command = read_all_module_files("Parameters", initialise_parameters_tibble)
+    command = fread_all_module_files("Parameters", initialise_parameters_tibble)
   ),
 
   tar_target(
     name = reference_data,
-    command = read_all_module_files("Reference", initialise_references_tibble)
+    command = fread_all_module_files("Reference", initialise_references_tibble)
   ),
 
   tar_target(
     name = sites_data,
-    command = read_all_module_files("Sites", initialise_sites_tibble)
+    command = fread_all_module_files("Sites", initialise_sites_tibble)
   ),
 
   # FIXME: Enable once we have CREED data
   # tar_target(
   #   name = creed_scores_data,
-  #   command = read_all_module_files(
+  #   command = fread_all_module_files(
   #     "CREED_Scores",
   #     initialise_creed_scores_tibble
   #   ),
