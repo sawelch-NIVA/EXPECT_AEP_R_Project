@@ -24,6 +24,7 @@ tar_option_set(
     "rlang",
     "data.table",
     "dtplyr",
+    "dplyr",
     "leaflet",
     "janitor",
     "shiny",
@@ -186,7 +187,7 @@ list(
   ),
   # save the resulting file as a parquet
   tar_target(
-    name = save_literature_parquet,
+    name = save_literature_pqt,
     command = save_literature_parquet(
       data = literature_clean,
       output_path = "data/clean",
@@ -197,11 +198,57 @@ list(
   # load the resulting file
   # Why this level of redundancy? Because with target, it means we can avoid constantly reloading CSVs unless they've actually changed
   tar_target(
-    name = load_literature_parquet,
+    name = load_literature_pqt,
     command = load_literature_parquet(
       input_path = "data/clean",
       filename = "literature_data.parquet"
     )
+  ),
+  # set up maps
+  # Geography data preparation targets ----
+
+  # WGS84 geography data
+  tar_target(
+    name = wgs84_geography,
+    command = prepare_geography_wgs84(
+      scale = 10,
+      destdir = "data/raw/shapefiles/"
+    )
+  ),
+
+  # Polar projection geography data
+  tar_target(
+    name = polar_geography,
+    command = prepare_geography_polar(
+      scale = 10,
+      destdir = "data/raw/shapefiles/",
+      crs = "EPSG:3575"
+    )
+  ),
+
+  # Map creation targets ----
+
+  # WGS84 map
+  tar_target(
+    name = wgs84_map,
+    command = create_study_area_map_wgs84(
+      ocean_sf = wgs84_geography$marine_polys,
+      country_sf = wgs84_geography$countries,
+      arctic_circle_sf = wgs84_geography$arctic_circle,
+      graticule_sf = wgs84_geography$graticule
+    )
+  ),
+
+  # Polar projection map
+  tar_target(
+    name = polar_map,
+    command = create_study_area_map_polar(
+      ocean_sf = polar_geography$marine_polys,
+      country_sf = polar_geography$countries,
+      arctic_circle_sf = polar_geography$arctic_circle,
+      graticule_sf = polar_geography$graticule
+    )
   )
+
   # do analysis
 )

@@ -24,7 +24,7 @@ get_study_area_bbox <- function() {
 #'
 #' @export
 northern_hemisphere_bbox <- function() {
-  sf::st_bbox(c(xmin = -180, xmax = 180, ymin = -1, ymax = 90))
+  sf::st_bbox(c(xmin = -180, xmax = 180, ymin = 0, ymax = 90))
 }
 
 

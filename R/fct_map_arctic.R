@@ -81,13 +81,13 @@ geom_sf_shadowtext <- function(
 #' @param country_sf An sf object with country polygons
 #' @param arctic_circle_sf An sf object with Arctic Circle line
 #' @param graticule_sf An sf object with graticule lines (optional)
-#' @param background_color Character string, hex color for background (default: "#f8f9fa")
+#' @param background_color Character string, hex color for background
 #' @param bbox A bounding box used to crop the displayed map. Defaults to none.
 #'
 #' @return A ggplot object
 #'
 #' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin
-#' @importFrom magrittr |>
+#' @importFrom dplyr if_else
 #'
 #' @export
 create_study_area_map_wgs84 <- function(
@@ -95,17 +95,17 @@ create_study_area_map_wgs84 <- function(
   country_sf,
   arctic_circle_sf,
   graticule_sf = NULL,
-  background_color = "#f8f9fa",
+  background_color = background_colors["wgs84"],
   bbox = NULL
 ) {
-  if (!is.null(bbox)) {
-    ocean_sf |> st_crop(ocean_sf, bbox)
-    country_sf |> st_crop(country_sf, bbox)
-    arctic_circle_sf |> st_crop(arctic_circle_sf, bbox)
-    if (!is.null(graticule_sf)) {
-      graticule_sf |> st_crop(graticule_sf, bbox)
-    }
-  }
+  # if (!is.null(bbox)) {
+  #   ocean_sf |> st_crop(ocean_sf, bbox)
+  #   country_sf |> st_crop(country_sf, bbox)
+  #   arctic_circle_sf |> st_crop(arctic_circle_sf, bbox)
+  #   if (!is.null(graticule_sf)) {
+  #     graticule_sf |> st_crop(graticule_sf, bbox)
+  #   }
+  # }
 
   map <- ggplot() +
     # Ocean polygons with custom colors
@@ -118,7 +118,13 @@ create_study_area_map_wgs84 <- function(
     # Country polygons
     geom_sf(
       data = country_sf,
-      aes(fill = ifelse(highlight_name, "#5c887b", "#e3d7bf")),
+      aes(
+        fill = ifelse(
+          highlight_name,
+          country_colors["highlight"],
+          country_colors["default"]
+        )
+      ),
       color = "black",
       linewidth = 0.2
     )
@@ -129,7 +135,7 @@ create_study_area_map_wgs84 <- function(
       geom_sf(
         data = graticule_sf,
         size = 0.5,
-        color = "gray40",
+        color = graticule_color,
         alpha = 0.5
       )
   }
@@ -138,7 +144,7 @@ create_study_area_map_wgs84 <- function(
     # Arctic Circle line
     geom_sf(
       data = arctic_circle_sf,
-      color = "darkred",
+      color = arctic_circle_color,
       linetype = "dashed",
       linewidth = 0.5
     ) +
@@ -146,23 +152,23 @@ create_study_area_map_wgs84 <- function(
     geom_sf_shadowtext(
       data = ocean_sf,
       aes(
-        label = if_else(highlight_name, name, NA_character_),
-        fontface = if_else(highlight_name, "bold.italic", "italic"),
-        # size = if_else(major_body, "12px", "10px"),
-        color = "#EEE",
-        alpha = if_else(major_body | highlight_name, 1, 0)
+        label = dplyr::if_else(highlight_name, name, NA_character_),
+        fontface = dplyr::if_else(highlight_name, "bold.italic", "italic"),
+        # size = dplyr::if_else(major_body, "12px", "10px"),
+        color = label_colors["ocean"],
+        alpha = dplyr::if_else(major_body | highlight_name, 1, 0)
       )
     ) +
     # Country names
     geom_sf_shadowtext(
       data = country_sf,
       aes(
-        label = if_else(highlight_name, name, NA_character_),
-        fontface = if_else(highlight_name, "bold", "plain"),
-        alpha = if_else(highlight_name, 1, 0)
+        label = dplyr::if_else(highlight_name, name, NA_character_),
+        fontface = dplyr::if_else(highlight_name, "bold", "plain"),
+        alpha = dplyr::if_else(highlight_name, 1, 0)
       ),
       # size = 3,
-      color = "#2C3E50",
+      color = label_colors["country"],
       bg.color = "white",
       stat = "sf_coordinates",
       inherit.aes = TRUE
@@ -170,15 +176,7 @@ create_study_area_map_wgs84 <- function(
     # Styling
     scale_fill_identity() +
     scale_color_identity() +
-    theme(
-      panel.background = element_rect(fill = background_color, color = NA),
-      plot.margin = margin(0, 0, 0, 0),
-      legend.position = "none",
-      axis.title = element_blank(),
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      axis.ticks.length = unit(0, "pt")
-    )
+    theme_arctic_map(background_color = background_color)
   if (!is.null(bbox)) {
     map <- map +
       coord_sf(
@@ -206,7 +204,7 @@ create_study_area_map_wgs84 <- function(
 #' @param country_sf An sf object with country polygons (should be in polar projection)
 #' @param arctic_circle_sf An sf object with Arctic Circle line
 #' @param graticule_sf An sf object with graticule lines (optional)
-#' @param background_color Character string, hex color for background (default: "#6e98b2")
+#' @param background_color Character string, hex color for background
 #' @param crs Character string or CRS object, coordinate reference system for projection
 #'   (default: "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0")
 #' @param xlim Numeric vector of length 2, x-axis limits in projected coordinates
@@ -216,7 +214,7 @@ create_study_area_map_wgs84 <- function(
 #'
 #' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin coord_sf
 #' @importFrom sf st_crs
-#' @importFrom magrittr |>
+#' @importFrom dplyr if_else
 #'
 #' @export
 create_study_area_map_polar <- function(
@@ -224,7 +222,7 @@ create_study_area_map_polar <- function(
   country_sf,
   arctic_circle_sf,
   graticule_sf = NULL,
-  background_color = "#6e98b2",
+  background_color = background_colors["polar"],
   crs = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0",
   xlim = c(-9000000, 9000000),
   ylim = c(-5000000, 3000000)
@@ -240,7 +238,13 @@ create_study_area_map_polar <- function(
     # Country polygons
     geom_sf(
       data = country_sf,
-      aes(fill = ifelse(highlight_name, "#5c887b", "#e3d7bf")),
+      aes(
+        fill = ifelse(
+          highlight_name,
+          country_colors["highlight"],
+          country_colors["default"]
+        )
+      ),
       color = "black",
       linewidth = 0.2
     )
@@ -251,7 +255,7 @@ create_study_area_map_polar <- function(
       geom_sf(
         data = graticule_sf,
         size = 0.5,
-        color = "gray40",
+        color = graticule_color,
         alpha = 0.5
       )
   }
@@ -260,7 +264,7 @@ create_study_area_map_polar <- function(
     # Arctic Circle line
     geom_sf(
       data = arctic_circle_sf,
-      color = "darkred",
+      color = arctic_circle_color,
       linetype = "dashed",
       linewidth = 0.5
     ) +
@@ -268,23 +272,23 @@ create_study_area_map_polar <- function(
     geom_sf_shadowtext(
       data = ocean_sf,
       aes(
-        label = if_else(highlight_name, name, NA_character_),
-        fontface = if_else(highlight_name, "bold.italic", "italic"),
-        size = if_else(major_body, "12px", "10px"),
-        color = "#EEE",
-        alpha = if_else(major_body | highlight_name, 1, 0)
+        label = dplyr::if_else(highlight_name, name, NA_character_),
+        fontface = dplyr::if_else(highlight_name, "bold.italic", "italic"),
+        size = dplyr::if_else(major_body, "12px", "10px"),
+        color = label_colors["ocean"],
+        alpha = dplyr::if_else(major_body | highlight_name, 1, 0)
       )
     ) +
     # Country names
     geom_sf_shadowtext(
       data = country_sf,
       aes(
-        label = if_else(highlight_name, name, NA_character_),
-        fontface = if_else(highlight_name, "bold", "plain"),
-        alpha = if_else(highlight_name, 1, 0)
+        label = dplyr::if_else(highlight_name, name, NA_character_),
+        fontface = dplyr::if_else(highlight_name, "bold", "plain"),
+        alpha = dplyr::if_else(highlight_name, 1, 0)
       ),
       size = 3,
-      color = "#2C3E50",
+      color = label_colors["country"],
       bg.color = "white",
       stat = "sf_coordinates",
       inherit.aes = TRUE
@@ -292,22 +296,14 @@ create_study_area_map_polar <- function(
     # Styling
     scale_fill_identity() +
     scale_color_identity() +
-    theme(
-      panel.background = element_rect(fill = background_color, color = NA),
-      plot.margin = margin(0, 0, 0, 0),
-      legend.position = "none",
-      axis.title = element_blank(),
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      axis.ticks.length = unit(0, "pt")
-    ) +
-    # Apply polar stereographic projection
-    coord_sf(
-      crs = st_crs(crs),
-      xlim = xlim,
-      ylim = ylim,
-      expand = FALSE
-    )
+    theme_arctic_map(background_color = background_color)
+  # Apply polar stereographic projection
+  coord_sf(
+    crs = st_crs(crs),
+    xlim = xlim,
+    ylim = ylim,
+    expand = FALSE
+  )
 
   return(map)
 }

@@ -1,3 +1,282 @@
+# Data annotation and styling ----
+
+#' Annotate ocean polygons for mapping
+#'
+#' Adds display names, visibility flags, and color mappings to ocean polygons
+#'
+#' @param ocean_sf An sf object with ocean polygons (must have NAME column)
+#' @param named_oceans Character vector, names of oceans to highlight
+#'
+#' @return An sf object with annotation columns added
+#'
+#' @importFrom dplyr mutate case_match case_when
+#'
+#' @export
+annotate_oceans_for_display <- function(
+  ocean_sf,
+  named_oceans = c(
+    "Norwegian Sea",
+    "Greenland Sea",
+    "Barents Sea",
+    "Arctic Ocean"
+  )
+) {
+  ocean_sf |>
+    mutate(
+      # Standardize names
+      NAME = case_match(NAME, "Barentsz Sea" ~ "Barents Sea", .default = NAME),
+
+      # Flag which names to show
+      show_name = NAME %in% named_oceans,
+
+      # Assign colors to named oceans
+      ocean_color = case_when(
+        NAME == "Norwegian Sea" ~ ocean_colors[1],
+        NAME == "Greenland Sea" ~ ocean_colors[2],
+        NAME == "Barents Sea" ~ ocean_colors[3],
+        NAME == "Arctic Ocean" ~ ocean_colors[4],
+        TRUE ~ ocean_colors[5]
+      )
+    )
+}
+
+# Ocean polygon processing ----
+
+#' Process marine geography polygons
+#'
+#' Reads Natural Earth marine geography data, splits the Atlantic Ocean
+#' into North and South, and adds annotation columns for display
+#'
+#' @param scale Numeric, Natural Earth scale (10, 50, or 110)
+#' @param destdir Character string, destination directory for cached files
+#' @param highlight_oceans Character vector, names of oceans to highlight
+#' @param major_oceans Character vector, names of major ocean bodies
+#'
+#' @return An sf object with processed marine geography polygons in WGS84
+#'
+#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n
+#' @importFrom sf st_as_sf
+#' @importFrom stringr str_replace_all
+#'
+#' @export
+process_marine_geography_wgs84 <- function(
+  scale = 10,
+  destdir = "data/raw/shapefiles/",
+  highlight_oceans = c(
+    "Norwegian Sea",
+    "North Atlantic Ocean",
+    "Greenland Sea",
+    "Barents Sea",
+    "Arctic Ocean",
+    "Vestfjorden",
+    "Storfjorden",
+    "Denmark Strait"
+  ),
+  major_oceans = c(
+    "Norwegian Sea",
+    "North Atlantic Ocean",
+    "Greenland Sea",
+    "Barents Sea",
+    "Arctic Ocean",
+    "Kara Sea",
+    "North Sea",
+    "Davis Strait",
+    "Baffin Bay",
+    "Lincoln Sea"
+  )
+) {
+  # Read marine geography data
+  marine_polys <- ne_get(
+    scale = scale,
+    type = "geography_marine_polys",
+    category = "physical",
+    destdir = destdir
+  ) |>
+    select(name_en, geometry) |>
+    rename(name = name_en)
+
+  # Split Atlantic Ocean into North and South
+  atlantic <- marine_polys |>
+    group_by(name) |>
+    reframe(n = row_number(), geometry) |>
+    filter(name == "Atlantic Ocean", n == 1) |>
+    st_as_sf()
+
+  atlantic_split <- st_line_split(
+    atlantic,
+    c(0, 180),
+    direction = "horizontal"
+  ) |>
+    mutate(name = c("North Atlantic Ocean", "South Atlantic Ocean")) |>
+    select(-n)
+
+  # Replace original Atlantic with split versions
+  marine_polys <- marine_polys |>
+    filter(name != "Atlantic Ocean") |>
+    bind_rows(atlantic_split)
+
+  # Add annotation columns, split any two-word seas onto two lines
+  marine_polys_annotated <- marine_polys |>
+    mutate(
+      highlight_name = name %in% highlight_oceans,
+      major_body = name %in% major_oceans,
+      name = str_replace_all(name, "(Sea|Ocean|Gulf|Bay|Strait)", "\n\\1")
+    ) |>
+    st_as_sf() |>
+    group_by(name) |>
+    mutate(
+      count = n(),
+      ocean_color = case_when(
+        highlight_name ~ marine_colors["highlight"],
+        TRUE ~ marine_colors["default"]
+      )
+    )
+
+  return(marine_polys_annotated)
+}
+
+#' Transform marine geography to polar projection
+#'
+#' Transforms marine geography polygons to North Polar Stereographic projection
+#' and stitches up the Arctic Ocean polygon across the polar seam
+#'
+#' @param marine_polys_wgs84 An sf object with marine geography in WGS84
+#' @param crs Character string or CRS object, target projection (default: EPSG:3575)
+#' @param add_line_breaks Logical, whether to add line breaks in ocean names (default: TRUE)
+#'
+#' @return An sf object with marine geography in polar projection
+#'
+#' @importFrom sf st_transform st_convex_hull
+#' @importFrom dplyr filter mutate bind_rows
+#' @importFrom stringr str_replace_all
+
+#'
+#' @export
+transform_marine_to_polar <- function(
+  marine_polys_wgs84,
+  crs = "EPSG:3575",
+  add_line_breaks = TRUE
+) {
+  # Transform to polar projection
+  marine_polys_polar <- marine_polys_wgs84 |>
+    st_transform(crs)
+
+  # Fix Arctic Ocean polar seam issue
+  arctic <- marine_polys_polar |>
+    filter(name == "Arctic Ocean") |>
+    mutate(geometry = st_convex_hull(geometry))
+
+  marine_polys_polar <- marine_polys_polar |>
+    filter(name != "Arctic Ocean") |>
+    bind_rows(arctic)
+
+  # Add line breaks to ocean names if requested
+  if (add_line_breaks) {
+    marine_polys_polar <- marine_polys_polar |>
+      mutate(
+        name = str_replace_all(name, "(Sea|Ocean|Gulf|Bay|Strait)", "\n\\1")
+      )
+  }
+
+  return(marine_polys_polar)
+}
+
+# Country polygon processing ----
+
+#' Process country polygons with special handling for Norway
+#'
+#' Reads Natural Earth country data and processes Norway separately to
+#' distinguish continental Norway, Jan Mayen, and Svalbard
+#'
+#' @param scale Numeric, Natural Earth scale (10, 50, or 110)
+#' @param highlight_countries Character vector, names of countries to highlight
+#' @param exclude_countries Character vector, countries to exclude from general dataset
+#'
+#' @return An sf object with processed country polygons in WGS84
+#'
+#' @importFrom rnaturalearth ne_countries ne_states
+#' @importFrom dplyr mutate select filter bind_rows case_match reframe row_number
+#' @importFrom sf st_as_sf st_crop st_union
+
+#'
+#' @export
+process_countries_wgs84 <- function(
+  scale = 10,
+  highlight_countries = c("Norway", "Greenland", "Iceland"),
+  exclude_countries = c("Norway", "Antarctica")
+) {
+  # Get general country polygons (excluding special cases)
+  countries_general <- rnaturalearth::ne_countries(scale = scale) |>
+    mutate(
+      highlight_name = case_match(
+        name,
+        highlight_countries ~ TRUE,
+        .default = FALSE
+      )
+    ) |>
+    select(
+      name,
+      geometry,
+      highlight_name
+    ) |>
+    filter(name %notin% exclude_countries)
+
+  # Process Norway components separately
+  norway_mainland <- ne_states(geounit = "norway") |>
+    select(name, geometry) |>
+    st_crop(c(xmin = 0, xmax = 40, ymin = 57, ymax = 90)) |>
+    reframe(name = "Norway", geometry = st_union(geometry))
+
+  norway_janmayen <- ne_states(geounit = "norway") |>
+    filter(name == "Nordland") |>
+    st_crop(c(xmin = -10, xmax = 5, ymin = 70, ymax = 90)) |>
+    select(name, geometry) |>
+    mutate(name = "Jan \nMayen")
+
+  norway_svalbard <- ne_states(geounit = "svalbard") |>
+    select(name, geometry) |>
+    mutate(name = "Svalbard & \nBear Island")
+
+  # Combine Norway components
+  norway_combined <- bind_rows(
+    norway_mainland,
+    norway_janmayen,
+    norway_svalbard
+  ) |>
+    mutate(highlight_name = TRUE) |>
+    st_as_sf()
+
+  # Combine all countries
+  countries_all <- bind_rows(
+    norway_combined,
+    countries_general
+  ) |>
+    st_as_sf()
+
+  return(countries_all)
+}
+
+#' Transform country polygons to polar projection
+#'
+#' Transforms country polygons to North Polar Stereographic projection
+#'
+#' @param countries_wgs84 An sf object with country polygons in WGS84
+#' @param crs Character string or CRS object, target projection (default: EPSG:3575)
+#'
+#' @return An sf object with country polygons in polar projection
+#'
+#' @importFrom sf st_transform
+
+#'
+#' @export
+transform_countries_to_polar <- function(
+  countries_wgs84,
+  crs = "EPSG:3575"
+) {
+  countries_wgs84 |>
+    st_transform(crs)
+}
+
 # Geometry utilities ----
 
 #' Split sf geometry along a line
@@ -95,287 +374,6 @@ st_line_split <- function(
   } else {
     return(geometry) # Return original if splitting failed
   }
-}
-
-# Data annotation and styling ----
-
-#' Annotate ocean polygons for mapping
-#'
-#' Adds display names, visibility flags, and color mappings to ocean polygons
-#'
-#' @param ocean_sf An sf object with ocean polygons (must have NAME column)
-#' @param named_oceans Character vector, names of oceans to highlight
-#'
-#' @return An sf object with annotation columns added
-#'
-#' @importFrom dplyr mutate case_match case_when
-
-#'
-#' @export
-annotate_oceans_for_display <- function(
-  ocean_sf,
-  named_oceans = c(
-    "Norwegian Sea",
-    "Greenland Sea",
-    "Barents Sea",
-    "Arctic Ocean"
-  )
-) {
-  ocean_sf |>
-    mutate(
-      # Standardize names
-      NAME = case_match(NAME, "Barentsz Sea" ~ "Barents Sea", .default = NAME),
-
-      # Flag which names to show
-      show_name = NAME %in% named_oceans,
-
-      # Assign colors to named oceans
-      ocean_color = case_when(
-        NAME == "Norwegian Sea" ~ "#4A90E2", # Medium blue
-        NAME == "Greenland Sea" ~ "#7BB3F0", # Light blue
-        NAME == "Barents Sea" ~ "#2E5C8A", # Dark blue
-        NAME == "Arctic Ocean" ~ "#5BA3D0", # Blue-cyan
-        TRUE ~ "#E8E8E8" # Light gray for others
-      )
-    )
-}
-
-# Ocean polygon processing ----
-
-#' Process marine geography polygons
-#'
-#' Reads Natural Earth marine geography data, splits the Atlantic Ocean
-#' into North and South, and adds annotation columns for display
-#'
-#' @param scale Numeric, Natural Earth scale (10, 50, or 110)
-#' @param destdir Character string, destination directory for cached files
-#' @param highlight_oceans Character vector, names of oceans to highlight
-#' @param major_oceans Character vector, names of major ocean bodies
-#'
-#' @return An sf object with processed marine geography polygons in WGS84
-#'
-#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n
-#' @importFrom sf st_as_sf
-#' @importFrom stringr str_replace_all
-#' @importFrom magrittr |>
-#'
-#' @export
-process_marine_geography_wgs84 <- function(
-  scale = 10,
-  destdir = "data/raw/shapefiles/",
-  highlight_oceans = c(
-    "Norwegian Sea",
-    "North Atlantic Ocean",
-    "Greenland Sea",
-    "Barents Sea",
-    "Arctic Ocean",
-    "Vestfjorden",
-    "Storfjorden",
-    "Denmark Strait"
-  ),
-  major_oceans = c(
-    "Norwegian Sea",
-    "North Atlantic Ocean",
-    "Greenland Sea",
-    "Barents Sea",
-    "Arctic Ocean",
-    "Kara Sea",
-    "North Sea",
-    "Davis Strait",
-    "Baffin Bay",
-    "Lincoln Sea"
-  )
-) {
-  # Read marine geography data
-  marine_polys <- ne_get(
-    scale = scale,
-    type = "geography_marine_polys",
-    category = "physical",
-    destdir = destdir
-  ) |>
-    select(name_en, geometry) |>
-    rename(name = name_en)
-
-  # Split Atlantic Ocean into North and South
-  atlantic <- marine_polys |>
-    group_by(name) |>
-    reframe(n = row_number(), geometry) |>
-    filter(name == "Atlantic Ocean", n == 1) |>
-    st_as_sf()
-
-  atlantic_split <- st_line_split(
-    atlantic,
-    c(0, 180),
-    direction = "horizontal"
-  ) |>
-    mutate(name = c("North Atlantic Ocean", "South Atlantic Ocean")) |>
-    select(-n)
-
-  # Replace original Atlantic with split versions
-  marine_polys <- marine_polys |>
-    filter(name != "Atlantic Ocean") |>
-    bind_rows(atlantic_split)
-
-  # Add annotation columns, split any two-word seas onto two lines
-  marine_polys_annotated <- marine_polys |>
-    mutate(
-      highlight_name = name %in% highlight_oceans,
-      major_body = name %in% major_oceans,
-      name = str_replace_all(name, "(Sea|Ocean|Gulf|Bay|Strait)", "\n\\1")
-    ) |>
-    st_as_sf() |>
-    group_by(name) |>
-    mutate(
-      count = n(),
-      ocean_color = case_when(
-        highlight_name ~ "#9dd9fe",
-        TRUE ~ "#6e98b2"
-      )
-    )
-
-  return(marine_polys_annotated)
-}
-
-#' Transform marine geography to polar projection
-#'
-#' Transforms marine geography polygons to North Polar Stereographic projection
-#' and stitches up the Arctic Ocean polygon across the polar seam
-#'
-#' @param marine_polys_wgs84 An sf object with marine geography in WGS84
-#' @param crs Character string or CRS object, target projection (default: EPSG:3575)
-#' @param add_line_breaks Logical, whether to add line breaks in ocean names (default: TRUE)
-#'
-#' @return An sf object with marine geography in polar projection
-#'
-#' @importFrom sf st_transform st_convex_hull
-#' @importFrom dplyr filter mutate bind_rows
-#' @importFrom stringr str_replace_all
-#' @importFrom magrittr |>
-#'
-#' @export
-transform_marine_to_polar <- function(
-  marine_polys_wgs84,
-  crs = "EPSG:3575",
-  add_line_breaks = TRUE
-) {
-  # Transform to polar projection
-  marine_polys_polar <- marine_polys_wgs84 |>
-    st_transform(crs)
-
-  # Fix Arctic Ocean polar seam issue
-  arctic <- marine_polys_polar |>
-    filter(name == "Arctic Ocean") |>
-    mutate(geometry = st_convex_hull(geometry))
-
-  marine_polys_polar <- marine_polys_polar |>
-    filter(name != "Arctic Ocean") |>
-    bind_rows(arctic)
-
-  # Add line breaks to ocean names if requested
-  if (add_line_breaks) {
-    marine_polys_polar <- marine_polys_polar |>
-      mutate(
-        name = str_replace_all(name, "(Sea|Ocean|Gulf|Bay|Strait)", "\n\\1")
-      )
-  }
-
-  return(marine_polys_polar)
-}
-
-# Country polygon processing ----
-
-#' Process country polygons with special handling for Norway
-#'
-#' Reads Natural Earth country data and processes Norway separately to
-#' distinguish continental Norway, Jan Mayen, and Svalbard
-#'
-#' @param scale Numeric, Natural Earth scale (10, 50, or 110)
-#' @param highlight_countries Character vector, names of countries to highlight
-#' @param exclude_countries Character vector, countries to exclude from general dataset
-#'
-#' @return An sf object with processed country polygons in WGS84
-#'
-#' @importFrom rnaturalearth ne_countries ne_states
-#' @importFrom dplyr mutate select filter bind_rows case_match reframe
-#' @importFrom sf st_as_sf st_crop st_union
-#' @importFrom magrittr |>
-#'
-#' @export
-process_countries_wgs84 <- function(
-  scale = 10,
-  highlight_countries = c("Norway", "Greenland", "Iceland"),
-  exclude_countries = c("Norway", "Antarctica")
-) {
-  # Get general country polygons (excluding special cases)
-  countries_general <- rnaturalearth::ne_countries(scale = scale) |>
-    mutate(
-      highlight_name = case_match(
-        name,
-        highlight_countries ~ TRUE,
-        .default = FALSE
-      )
-    ) |>
-    select(
-      name,
-      geometry,
-      highlight_name
-    ) |>
-    filter(name %notin% exclude_countries)
-
-  # Process Norway components separately
-  norway_mainland <- ne_states(geounit = "norway") |>
-    select(name, geometry) |>
-    st_crop(c(xmin = 0, xmax = 40, ymin = 57, ymax = 90)) |>
-    reframe(name = "Norway", geometry = st_union(geometry))
-
-  norway_janmayen <- ne_states(geounit = "norway") |>
-    filter(name == "Nordland") |>
-    st_crop(c(xmin = -10, xmax = 5, ymin = 70, ymax = 90)) |>
-    select(name, geometry) |>
-    mutate(name = "Jan \nMayen")
-
-  norway_svalbard <- ne_states(geounit = "svalbard") |>
-    select(name, geometry) |>
-    mutate(name = "Svalbard & \nBear Island")
-
-  # Combine Norway components
-  norway_combined <- bind_rows(
-    norway_mainland,
-    norway_janmayen,
-    norway_svalbard
-  ) |>
-    mutate(highlight_name = TRUE) |>
-    st_as_sf()
-
-  # Combine all countries
-  countries_all <- bind_rows(
-    norway_combined,
-    countries_general
-  ) |>
-    st_as_sf()
-
-  return(countries_all)
-}
-
-#' Transform country polygons to polar projection
-#'
-#' Transforms country polygons to North Polar Stereographic projection
-#'
-#' @param countries_wgs84 An sf object with country polygons in WGS84
-#' @param crs Character string or CRS object, target projection (default: EPSG:3575)
-#'
-#' @return An sf object with country polygons in polar projection
-#'
-#' @importFrom sf st_transform
-#' @importFrom magrittr |>
-#'
-#' @export
-transform_countries_to_polar <- function(
-  countries_wgs84,
-  crs = "EPSG:3575"
-) {
-  countries_wgs84 |>
-    st_transform(crs)
 }
 
 # Graticule creation ----

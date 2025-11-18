@@ -21,7 +21,9 @@ library(STOPeData)
 library(qs2)
 
 `%notin%` <- negate(`%in%`)
+devtools::load_all()
 
+roxygen2::roxygenise()
 source("_targets.R")
 tar_make()
 

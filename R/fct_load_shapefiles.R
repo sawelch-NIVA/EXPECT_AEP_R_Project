@@ -75,7 +75,6 @@ read_and_process_oceans <- function(
 #' @importFrom rnaturalearth ne_countries
 #' @importFrom dplyr mutate select case_match
 #' @importFrom sf st_as_sf st_crop
-#' @importFrom magrittr |>
 #'
 #' @export
 read_and_process_countries <- function(
