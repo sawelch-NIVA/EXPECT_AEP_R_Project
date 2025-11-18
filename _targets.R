@@ -204,6 +204,9 @@ list(
       filename = "literature_data.parquet"
     )
   ),
+
+  # TODO: Convert reported units into g/L, g/g (dry) and g/g (wet)
+
   # set up maps
   # Geography data preparation targets ----
 
@@ -250,5 +253,13 @@ list(
     )
   )
 
-  # do analysis
+  # TODO: Map data sites onto study area map
+
+  # TODO: Just make some big boxplots for each unit type
+
+  # TODO: Toxicity threshholds!
+
+  # TODO: Are we allowed (statistically) to group similar compartments together?
+  # i.e., if we do a t-test (or something) are our populations significantly different
+  # do we need to do some sort of multi-factorial doodah
 )
