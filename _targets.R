@@ -34,7 +34,8 @@ tar_option_set(
     "arrow",
     "qs2",
     "STOPeData", # local package, used for format functions
-    "tarchetypes" # extend targets
+    "tarchetypes", # extend targets
+    "glue"
   ),
   format = "qs" # Optionally set the default storage format. qs is fast.
   #
@@ -76,96 +77,118 @@ tar_source()
 
 # Replace the target list below with your own:
 list(
-  # watch all files for changes
-  tar_files(
-    watch_unzipped,
-    command = get_literature_csv_tibble() |> pull(value)
+  # Literature data reading targets ----
+  # File-watching targets for each module
+  tar_target(
+    name = campaign_files,
+    command = get_literature_csv_paths(module = "Campaign"),
+    format = "file"
   ),
   tar_target(
-    "watch_CSVs_raw",
-    command = fread(watch_unzipped),
-    pattern = map(watch_unzipped)
+    name = samples_files,
+    command = get_literature_csv_paths(module = "Samples"),
+    format = "file"
   ),
-  # Literature data reading targets ----
-  # Currently this doesn't watch for changes in the source files, so we're clearly doing something wrong
+  tar_target(
+    name = biota_files,
+    command = get_literature_csv_paths(module = "Biota"),
+    format = "file"
+  ),
+  tar_target(
+    name = compartments_files,
+    command = get_literature_csv_paths(module = "Compartments"),
+    format = "file"
+  ),
+  tar_target(
+    name = measurements_files,
+    command = get_literature_csv_paths(module = "Measurements"),
+    format = "file"
+  ),
+  tar_target(
+    name = methods_files,
+    command = get_literature_csv_paths(module = "Methods"),
+    format = "file"
+  ),
+  tar_target(
+    name = parameters_files,
+    command = get_literature_csv_paths(module = "Parameters"),
+    format = "file"
+  ),
+  tar_target(
+    name = reference_files,
+    command = get_literature_csv_paths(module = "Reference"),
+    format = "file"
+  ),
+  tar_target(
+    name = sites_files,
+    command = get_literature_csv_paths(module = "Sites"),
+    format = "file"
+  ),
 
   # FIXME: Enable once we have CREED data
   # tar_target(
   #   name = creed_scores_files,
-  #   command = get_literature_csv_tibble(module = "CREED_Scores") |> pull(value)
+  #   command = get_literature_csv_paths(module = "CREED_Scores"),
+  #   format = "file"
   # ),
 
-  # Read and combine all files per module (watching individual files via pattern)
-  # fread = data.table's fast file reader
+  # Data reading targets for each module
   tar_target(
     name = campaign_data,
-    command = fread_all_module_files("Campaign", initialise_campaign_tibble)
+    command = fread_all_module_files(campaign_files, initialise_campaign_tibble)
   ),
-
   tar_target(
     name = samples_data,
-    command = fread_all_module_files("Samples", initialise_samples_tibble)
+    command = fread_all_module_files(samples_files, initialise_samples_tibble)
   ),
-
   tar_target(
     name = biota_data,
-    command = fread_all_module_files("Biota", initialise_biota_tibble)
+    command = fread_all_module_files(biota_files, initialise_biota_tibble)
   ),
-
   tar_target(
     name = compartments_data,
     command = fread_all_module_files(
-      "Compartments",
+      compartments_files,
       initialise_compartments_tibble
     )
   ),
-
   tar_target(
     name = measurements_data,
     command = fread_all_module_files(
-      "Measurements",
+      measurements_files,
       initialise_measurements_tibble
     )
   ),
-
   tar_target(
     name = methods_data,
-    command = fread_all_module_files("Methods", initialise_methods_tibble)
+    command = fread_all_module_files(methods_files, initialise_methods_tibble)
   ),
-
   tar_target(
     name = parameters_data,
-    command = fread_all_module_files("Parameters", initialise_parameters_tibble)
+    command = fread_all_module_files(
+      parameters_files,
+      initialise_parameters_tibble
+    )
   ),
-
   tar_target(
     name = reference_data,
-    command = fread_all_module_files("Reference", initialise_references_tibble)
+    command = fread_all_module_files(
+      reference_files,
+      initialise_references_tibble
+    )
   ),
-
   tar_target(
     name = sites_data,
-    command = fread_all_module_files("Sites", initialise_sites_tibble)
+    command = fread_all_module_files(sites_files, initialise_sites_tibble)
   ),
 
   # FIXME: Enable once we have CREED data
   # tar_target(
   #   name = creed_scores_data,
-  #   command = fread_all_module_files(
-  #     "CREED_Scores",
-  #     initialise_creed_scores_tibble
-  #   ),
-  #   pattern = map(creed_scores_files),
-  #   iteration = "list"
-  # )
-  # merge together each module's data
-  # Join and save literature data ----
-
-  # tar_target(
-  #   name = methods_spread,
-  #   command = spread_methods_for_join(methods_data)
+  #   command = fread_all_module_files(creed_scores_files, initialise_creed_scores_tibble)
   # ),
 
+  # Join and save literature data ----
   tar_target(
     name = literature_joined,
     command = join_all_literature_modules(
@@ -177,7 +200,8 @@ list(
       methods_data = methods_data
     )
   ),
-  # create a megatable by merging measurements, sites, references, campaign, methods
+
+  # Create a megatable by merging measurements, sites, references, campaign, methods
   tar_target(
     name = literature_clean,
     command = clean_joined_columns(
@@ -185,7 +209,8 @@ list(
       columns_to_drop = c() # Add column names here as you identify them
     )
   ),
-  # save the resulting file as a parquet
+
+  # Save the resulting file as a parquet
   tar_target(
     name = save_literature_pqt,
     command = save_literature_parquet(
@@ -195,8 +220,9 @@ list(
     ),
     format = "file"
   ),
-  # load the resulting file
-  # Why this level of redundancy? Because with target, it means we can avoid constantly reloading CSVs unless they've actually changed
+
+  # Load the resulting file
+  # Why this level of redundancy? Because with targets, it means we can avoid constantly reloading CSVs unless they've actually changed
   tar_target(
     name = load_literature_pqt,
     command = load_literature_parquet(
@@ -205,9 +231,28 @@ list(
     )
   ),
 
-  # TODO: Convert reported units into g/L, g/g (dry) and g/g (wet)
+  # TODO: Ought to fix SAMPLING_DATE and YEAR too, which for some reason are chr and int
+  # Probably clean data, /then/ save.
+  # Standardise reported units
+  tar_target(
+    name = clean_literature_units,
+    command = {
+      standardise_measured_units(
+        load_literature_pqt,
+        value_column = "MEASURED_VALUE",
+        unit_column = "MEASURED_UNIT"
+      ) |>
+        standardise_measured_units(
+          value_column = "LOQ_VALUE",
+          unit_column = "LOQ_UNIT"
+        ) |>
+        standardise_measured_units(
+          value_column = "LOD_VALUE",
+          unit_column = "LOD_UNIT"
+        )
+    }
+  ),
 
-  # set up maps
   # Geography data preparation targets ----
 
   # WGS84 geography data
@@ -229,7 +274,7 @@ list(
     )
   ),
 
-  # Map creation targets ----
+  # Map creation  ----
 
   # WGS84 map
   tar_target(
@@ -251,13 +296,31 @@ list(
       arctic_circle_sf = polar_geography$arctic_circle,
       graticule_sf = polar_geography$graticule
     )
-  )
+  ),
 
-  # TODO: Map data sites onto study area map
-
+  # TODO: The bounding box on this is pretty bad, because pretty much all our data points so far are actually in the Norwegian/Greenland sea. What do?
+  # Map literature data points
+  tar_target(
+    name = wgs84_literature_map,
+    command = map_literature_data_wgs84(
+      wgs84_map = wgs84_map,
+      literature_data = literature_clean
+    )
+  ),
   # TODO: Just make some big boxplots for each unit type
-
+  # Boxplot using standardised units
+  tar_target(
+    name = measurement_by_year,
+    command = make_measurement_boxplot(
+      data = clean_literature_units,
+      value_column = "MEASURED_VALUE_STANDARD",
+      unit_column = "MEASURED_UNIT_STANDARD"
+    )
+  )
   # TODO: Toxicity threshholds!
+
+  # TODO: Imputation of missing values. What's best practice?
+  # Ask KET/Chemists
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

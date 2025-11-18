@@ -8,16 +8,15 @@
 #' @param pattern Character string, file pattern to match
 #' @param module Character string or NULL, module name to filter by (e.g., "Campaign")
 #'
-#' @return A tibble with one column 'value' containing file paths
+#' @return a vector of file paths
 #'
-#' @importFrom dplyr filter as_tibble
-#' @importFrom stringr str_detect
-
+#' @importFrom dplyr filter if_else
+#' @importFrom glue glue
 #'
 #' @export
-get_literature_csv_tibble <- function(
+get_literature_csv_paths <- function(
   path = "data/raw/LR_extractions/unzipped",
-  pattern = ".csv",
+  format = ".csv",
   module = NULL
 ) {
   stopifnot(
@@ -25,17 +24,14 @@ get_literature_csv_tibble <- function(
       literature_module_vocab()
   )
 
+  # generate a regex to match .csv and the module name
+  pattern <- if (is.null(module)) format else glue("({module}).*\\.csv$")
+
   paths <- list.files(
     path = path,
     pattern = pattern,
     full.names = TRUE
-  ) |>
-    as_tibble()
-
-  if (!is.null(module)) {
-    paths <- paths |>
-      filter(str_detect(value, module))
-  }
+  )
 
   return(paths)
 }
@@ -107,7 +103,7 @@ fread_module_csv <- function(filepath, format_initialiser) {
 #' Generic function to read and combine all CSV files for a specified module
 #' using the appropriate format initialiser
 #'
-#' @param module_name Character string, name of module (e.g., "Campaign")
+#' @param file_paths A tibble/df of file paths supplied by get_literature_csv_tibble
 #' @param format_initialiser Function that returns expected tibble structure
 #'
 #' @return A tibble with all module data combined
@@ -116,11 +112,7 @@ fread_module_csv <- function(filepath, format_initialiser) {
 #' @importFrom purrr map reduce
 #'
 #' @export
-fread_all_module_files <- function(module_name, format_initialiser) {
-  # Get all file paths for this module
-  file_paths <- get_literature_csv_tibble(module = module_name) |>
-    pull(value)
-
+fread_all_module_files <- function(file_paths, format_initialiser) {
   stopifnot(
     "No paths found matching module name." = length(file_paths) > 0
   )
@@ -132,11 +124,4 @@ fread_all_module_files <- function(module_name, format_initialiser) {
       fread_module_csv(x, format_initialiser)
     }) |>
     purrr::reduce(bind_rows, .init = format_initialiser())
-}
-
-initialise_tibble_IDate <- function(tibble) {
-  IDate_tibble <- tibble |>
-    mutate(across(where(is.Date), .fns = as.IDate))
-
-  return(IDate_tibble)
 }

@@ -1,3 +1,5 @@
+# Stuff for testing and half-complete code we can't put in /R or it'll get sourced
+
 # Load required libraries ----
 library(STOPeData)
 library(sf)
@@ -20,11 +22,15 @@ library(readxl)
 library(purrr)
 library(qs2)
 library(units)
+library(targets)
+library(glue)
 
 `%notin%` <- negate(`%in%`)
 devtools::load_all()
 
 roxygen2::roxygenise()
+
+# TODO: Run the pipeline with these two lines
 source("_targets.R")
 tar_make()
 
@@ -40,16 +46,14 @@ result <- measurements_data |>
   left_join(reference_data, by = "REFERENCE_ID") |>
   left_join(parameters_data, by = "PARAMETER_NAME")
 
-# something fucked here
-# fixme
 #
 test_refs <- fread_all_module_files(
-  module = "Reference",
-  format_initialiser = initialise_references_tibble
+  module = "Samples",
+  format_initialiser = initialise_samples_tibble
 )
 
 # References data types bug
-filepath = get_literature_csv_tibble(module = "Reference")[[1, 1]]
+filepath = get_literature_csv_list(module = "Reference")[[1, 1]]
 module_name = "Reference"
 
 
@@ -83,12 +87,10 @@ polar_map <- create_study_area_map_polar(
 
 ### Units ---
 
-setup_ecotox_units()
-cleanup_ecotox_units()
-
 test_units <- biiiig_table |>
-  sample_n(size = 5) |>
-  select(MEASURED_UNIT, MEASURED_VALUE)
+  select(MEASURED_UNIT) |>
+  distinct()
+
 
 # ok, we can't do mixed units in one table
 test_units |>
@@ -99,19 +101,18 @@ test_units |>
 # what do our units actually look like?
 biiiig_table |> select(MEASURED_UNIT) |> distinct()
 
-# Ugh.
-#    MEASURED_UNIT
-#    <chr>
-#  1 "mg/L"
-#  2 "mg/kg"
-#  3 "μg/g (wet)"
-#  4 "µg/g (wet)"
-#  5 "µg/L"
-#  6 "mg/kg (dry)"
-#  7 "μg/g (dry)"
-#  8 ""
-#  9 "mg/kg (wet)"
-# 10 "mg/kg wet"
+# and post-standardisation
+test <- standardise_measured_units(biiiig_table) |>
+  slice_sample(n = 10) |>
+  select(
+    SITE_CODE,
+    MEASURED_VALUE,
+    MEASURED_UNIT,
+    MEASURED_VALUE_STANDARD,
+    MEASURED_UNIT_STANDARD
+  )
+
+# from a sample of 10 it looks fine, although we have lost some precision in places
 
 biiiig_table |>
   group_by(MEASURED_UNIT) |>
@@ -129,7 +130,7 @@ data_sf <- data |>
 wgs84_map +
   geom_sf(
     data = data_sf,
-    aes(fill = SITE_CODE)
+    fill = "red"
   ) + # I guess we need to constrain again?
   coord_sf(
     xlim = c(
