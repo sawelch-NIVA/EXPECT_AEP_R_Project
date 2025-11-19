@@ -452,18 +452,16 @@ sites_data|stem|8bf29178c3baf46a|ff1f0bf6834d9480|2e3bfa7c1fd0f1b2|-1536032229||
 reference_data|stem|2b8ec5243d978bb5|a0f39f29f17efba7|80d5f9abdf741fc7|1978057081||t20410.7254841499s|s3497b|3497|qs|local|vector|||0.281||
 biota_data|stem|d124f95e3f94595a|fe475edfe004aba5|76e7df70d742a470|1323719113||t20410.7254870069s|s3553b|3553|qs|local|vector|||0.203||
 make_boxplot|function|283f7af5349a657f
-measurements_files|stem|573889015dd282dd|bb324f0a4e3b10fd|96bf63254b4abb62|1989178559|data/raw/LR_extractions/unzipped/1990SkaareLevelsOfPolychlorinated_Measurements_20251031_135202.csv*data/raw/LR_extractions/unzipped/1997RitterhoffTraceMetalsIn_Measurements_20251030_145522.csv*data/raw/LR_extractions/unzipped/2000JulshamnTraceElementLevels_Measurements_20251031_132104.csv*data/raw/LR_extractions/unzipped/2001OlsvikMetalAccumulationAnd_Measurements_20251102_121500.csv*data/raw/LR_extractions/unzipped/2002HellandTransportAndSedimentation_Measurements_20251104_075533.csv*data/raw/LR_extractions/unzipped/2003ZaukeHeavyMetalsOf_Measurements_20251030_132505.csv*data/raw/LR_extractions/unzipped/2005GillanStructureOfSediment_Measurements_20251031_130250.csv*data/raw/LR_extractions/unzipped/2009SonneAStudyOf_Measurements_20251031_123807.csv*data/raw/LR_extractions/unzipped/2011CaiContentAndDistribution_Measurements_20251031_150640.csv*data/raw/LR_extractions/unzipped/2015verjordetToxicAndEssential_Measurements_20251103_115903.csv*data/raw/LR_extractions/unzipped/2018BrooksAnIntegrativeBiological_Measurements_20251031_084903.csv*data/raw/LR_extractions/unzipped/2020FarkasMonitoringAndModelling_Measurements_20251104_084350.csv*data/raw/LR_extractions/unzipped/2021WojtasikTemporalIsolationBetween_Measurements_20251030_163338.csv*data/raw/LR_extractions/unzipped/2022ParoliniTrendsAndPotential_Measurements_20251102_130348.csv*data/raw/LR_extractions/unzipped/2025PelkonenEnvironmentalImpactOf_Measurements_20251104_092150.csv|t20410.7278793108s|s76119b|76119|file|local|vector|||8.89||
 measurements_data|stem|1f6d5ee329c7d12a|3f0c33dc3f8991ac|de34fea400156382|284038171||t20410.7432144304s|s6950b|6950|qs|local|vector|||0.344|Column name 'MEASUREMENT_COMMENT' not found in column name header (case sensitive), skipping.. Column name 'MEASUREMENT_COMMENT' (colClasses[[1]][20]) not found. Column name 'MEASUREMENT_COMMENT' not found in column name header (case sensitive), skipping.. Column name 'MEASUREMENT_COMMENT' (colClasses[[1]][20]) not found. Column name 'MEASUREMENT_COMMENT' not found in column name header (case sensitive), skipping.. Column name 'MEASUREMENT_COMMENT' (colClasses[[1]][20]) not found|
 literature_joined|stem|24792f227612cd9b|264c0291410f4dc3|d4863033aff20dd0|-1662473634||t20410.7432172687s|s12432b|12432|qs|local|vector|||0.078||
-literature_clean|stem|24792f227612cd9b|fe557b1fea0c7643|79fcc781a778d2b3|383615012||t20410.7432176376s|s12432b|12432|qs|local|vector|||0||
-wgs84_literature_map|stem|429273ba6b999288|fafbd2dd86a828b7|ec703e6ba11bac43|-425591411||t20410.7432481046s|s61697047b|61697047|qs|local|vector|||0.062||
-save_literature_pqt|stem|08d5f59e833de599|aa5d8a8cab58500a|94952678b53a6e0d|1810594247||t0s|s0b|0|file|local|vector|||0.078||
 clean_literature_units|stem|546abc2193f7f1c6|eff0fbb29826a261|8c79bdfab0b547e1|835429335||t20410.7457347801s|s13096b|13096|qs|local|vector|||0.141||
 measurement_by_year|stem|69ce015b6d043f82|29bca012d1210829|5863469e711bcfb6|-538045949||t20410.7457373825s|s180426b|180426|qs|local|vector|||0.063||
+copper_toxicity_thresholds|stem|16946c25ff3ef5ac|bef75b69e87379f0|a715f3c422f7288c|-1379705966||t20411.3467334104s|s1972b|1972|qs|local|vector|||29.484||
 ocean_colors|object|895978c666ba7c58
 load_literature_parquet|function|23e724ad0da47991
 save_literature_parquet|function|3b8e9e863b978a0b
 join_all_literature_modules|function|28361a478b84a99e
+standardise_IDate|function|2637be108481b4d8
 generate_copper_thresholds|function|cc645e557d39bf24
 arctic_circle_color|object|3470232b761689e1
 background_colors|object|baad052ea0abe4a4
@@ -471,7 +469,7 @@ country_colors|object|518c5cc2e7343c5b
 geom_sf_shadowtext|function|428e95065d867115
 graticule_color|object|ae5d01624a4bf6b0
 label_colors|object|34a05b21b83f806b
-.Random.seed|object|ccafe556b01f9ded
+.Random.seed|object|596e7d48efe7f971
 northern_hemisphere_bbox|function|df7cf8d82e268c1d
 make_measurement_boxplot|function|e7f58535a709dadc
 get_study_area_bbox|function|2b389dff77260f22
@@ -488,6 +486,7 @@ marine_colors|object|7b3a2b11c99c18d9
 ne_get|function|fd28a17c4aae9dfe
 clean_joined_columns|function|cc7756f4c945b315
 annotate_oceans_for_display|function|d60f3efd22075441
+standardise_IDate_all|function|5703aa5a971fd14f
 theme_arctic_map|function|4e60c94dcaf242d9
 read_and_process_countries|function|fda2f44d8673051c
 read_and_process_oceans|function|6e7d4d5bd8e99471
@@ -499,4 +498,7 @@ create_study_area_map_polar|function|e05ab0764146a612
 create_study_area_map_wgs84|function|699908a8859be5d6
 prepare_geography_wgs84|function|b73367f9f12d334d
 prepare_geography_polar|function|162fa3e17835c328
-copper_toxicity_thresholds|stem|16946c25ff3ef5ac|bef75b69e87379f0|a715f3c422f7288c|-1379705966||t20411.3467334104s|s1972b|1972|qs|local|vector|||29.484||
+measurements_files|stem|573889015dd282dd|bb324f0a4e3b10fd|96bf63254b4abb62|1989178559|data/raw/LR_extractions/unzipped/1990SkaareLevelsOfPolychlorinated_Measurements_20251031_135202.csv*data/raw/LR_extractions/unzipped/1997RitterhoffTraceMetalsIn_Measurements_20251030_145522.csv*data/raw/LR_extractions/unzipped/2000JulshamnTraceElementLevels_Measurements_20251031_132104.csv*data/raw/LR_extractions/unzipped/2001OlsvikMetalAccumulationAnd_Measurements_20251102_121500.csv*data/raw/LR_extractions/unzipped/2002HellandTransportAndSedimentation_Measurements_20251104_075533.csv*data/raw/LR_extractions/unzipped/2003ZaukeHeavyMetalsOf_Measurements_20251030_132505.csv*data/raw/LR_extractions/unzipped/2005GillanStructureOfSediment_Measurements_20251031_130250.csv*data/raw/LR_extractions/unzipped/2009SonneAStudyOf_Measurements_20251031_123807.csv*data/raw/LR_extractions/unzipped/2011CaiContentAndDistribution_Measurements_20251031_150640.csv*data/raw/LR_extractions/unzipped/2015verjordetToxicAndEssential_Measurements_20251103_115903.csv*data/raw/LR_extractions/unzipped/2018BrooksAnIntegrativeBiological_Measurements_20251031_084903.csv*data/raw/LR_extractions/unzipped/2020FarkasMonitoringAndModelling_Measurements_20251104_084350.csv*data/raw/LR_extractions/unzipped/2021WojtasikTemporalIsolationBetween_Measurements_20251030_163338.csv*data/raw/LR_extractions/unzipped/2022ParoliniTrendsAndPotential_Measurements_20251102_130348.csv*data/raw/LR_extractions/unzipped/2025PelkonenEnvironmentalImpactOf_Measurements_20251104_092150.csv|t20411.3608406885s|s76119b|76119|file|local|vector|||8.89||
+literature_clean|stem|a43177708cac1b96|29b0fa3109f95a63|4fa2b8068947357d|383615012||t20411.405855493s|s12317b|12317|qs|local|vector|||0.062||
+save_literature_pqt|stem|08d5f59e833de599|aa5d8a8cab58500a|5354f74cf891791a|1810594247||t0s|s0b|0|file|local|vector|||0.063||
+wgs84_literature_map|stem|d9822988330f889e|fafbd2dd86a828b7|36d4888a0e5c34a0|-425591411||t20411.4059057375s|s61697047b|61697047|qs|local|vector|||0.141||

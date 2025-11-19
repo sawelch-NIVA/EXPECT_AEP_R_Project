@@ -13,29 +13,33 @@ tar_option_set(
   # Packages that your targets need for their tasks.
   packages = c(
     "sf",
-    "tidyverse",
     "sfhelper",
     "rnaturalearth",
     "rnaturalearthdata",
     "mapproj",
-    "ggspatial",
-    "shadowtext",
-    "ggrepel",
     "rlang",
     "data.table",
-    "dtplyr",
-    "dplyr",
     "leaflet",
     "janitor",
     "shiny",
     "readxl",
-    "purrr",
-    "tibble",
     "arrow",
     "qs2",
     "STOPeData", # local package, used for format functions
     "tarchetypes", # extend targets
-    "glue"
+    "glue",
+    "purrr",
+    "lubridate",
+    "stringr",
+    "readr",
+    "tibble",
+    "tidyr",
+    "ggplot2",
+    "ggspatial",
+    "shadowtext",
+    "ggrepel",
+    "dplyr",
+    "dtplyr"
   ),
   format = "qs" # Optionally set the default storage format. qs is fast.
   #
@@ -204,10 +208,14 @@ list(
   # Create a megatable by merging measurements, sites, references, campaign, methods
   tar_target(
     name = literature_clean,
-    command = clean_joined_columns(
-      data = literature_joined,
-      columns_to_drop = c() # Add column names here as you identify them
-    )
+    command = {
+      clean_joined_columns(
+        data = literature_joined,
+        columns_to_drop = c() # Add column names here as you identify them
+      ) |>
+        # some of our date columns have been reformatted wrongly. let's clean them up
+        standardise_IDate_all()
+    }
   ),
 
   # Save the resulting file as a parquet

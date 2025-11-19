@@ -66,3 +66,173 @@ standardise_measured_units <- function(
       )
     )
 }
+
+#' Standardise a date column to IDate format
+#'
+#' Converts Date, character, or POSIXct columns to data.table's IDate format.
+#' Handles character dates in both dmy and ymd formats.
+#'
+#' @param column A vector to be converted to IDate. Can be IDate, Date,
+#'   character (in dmy or ymd format), or POSIXct.
+#' @param verbose Logical. If TRUE, prints messages about conversions performed.
+#'   Default is FALSE.
+#'
+#' @return An IDate vector
+#'
+#' @examples
+#' standardise_IDate(as.Date("2024-01-15"))
+#' standardise_IDate("15/01/2024", verbose = TRUE)
+#' standardise_IDate("2024-01-15", verbose = TRUE)
+#'
+#' @export
+standardise_IDate <- function(column, verbose = FALSE) {
+  if (inherits(column, "IDate")) {
+    if (verbose) {
+      message(glue("Column already of class IDate."))
+    }
+    as.IDate(column)
+  } else if (inherits_only(column, "Date")) {
+    if (verbose) {
+      message(glue("Column reformatted from Date to IDate."))
+    }
+    as.IDate(column)
+  } else if (inherits_only(column, "character")) {
+    # Try to detect date format
+    sample_val <- column[!is.na(column)][1]
+
+    # Simple heuristic: if contains "/" likely dmy, if "-" and starts with 4 digits likely ymd
+    if (grepl("/", sample_val)) {
+      if (verbose) {
+        message(glue("Column reformatted from character (dmy) to IDate."))
+      }
+      as.IDate(dmy(column))
+    } else if (grepl("^\\d{4}-", sample_val)) {
+      if (verbose) {
+        message(glue("Column reformatted from character (ymd) to IDate."))
+      }
+      as.IDate(ymd(column))
+    } else {
+      # Default to dmy for backwards compatibility
+      if (verbose) {
+        message(glue("Column reformatted from character (dmy) to IDate."))
+      }
+      as.IDate(dmy(column))
+    }
+  } else if (inherits(column, "POSIXct") || inherits(column, "POSIXlt")) {
+    if (verbose) {
+      message(glue("Column reformatted from POSIXct/POSIXlt to IDate."))
+    }
+    as.IDate(column)
+  } else {
+    stop(glue("Cannot convert column of class {class(column)} to IDate."))
+  }
+}
+
+
+#' Standardise a date column to IDate format
+#'
+#' Converts Date, character, or POSIXct columns to data.table's IDate format.
+#' Handles character dates in both dmy and ymd formats.
+#'
+#' @param column A vector to be converted to IDate. Can be IDate, Date,
+#'   character (in dmy or ymd format), or POSIXct.
+#' @param verbose Logical. If TRUE, prints messages about conversions performed.
+#'   Default is FALSE.
+#' @param char_format Character. The expected format for character dates.
+#'   One of "dmy" (default) or "ymd". Only used when column is character.
+#'
+#' @return An IDate vector
+#'
+#' @examples
+#' standardise_IDate(as.Date("2024-01-15"))
+#' standardise_IDate("15/01/2024", verbose = TRUE)
+#' standardise_IDate("2024-01-15", char_format = "ymd", verbose = TRUE)
+#'
+#' @importFrom data.table as.IDate
+#' @importFrom lubridate dmy ymd
+#' @importFrom glue glue
+#' @export
+standardise_IDate <- function(column, verbose = FALSE, char_format = "dmy") {
+  if (inherits(column, "IDate")) {
+    if (verbose) {
+      message(glue("Column already of class IDate."))
+    }
+    as.IDate(column)
+  } else if (inherits_only(column, "Date")) {
+    if (verbose) {
+      message(glue("Column reformatted from Date to IDate."))
+    }
+    as.IDate(column)
+  } else if (inherits_only(column, "character")) {
+    # Detect format from first non-NA value
+    sample_val <- column[!is.na(column)][1]
+
+    detected_format <- if (grepl("^\\d{4}", sample_val)) {
+      "ymd"
+    } else {
+      "dmy"
+    }
+
+    # Use char_format argument, fallback to detected
+    format_to_use <- char_format
+
+    if (format_to_use == "ymd") {
+      if (verbose) {
+        message(glue("Column reformatted from character (ymd) to IDate."))
+      }
+      as.IDate(ymd(column))
+    } else {
+      if (verbose) {
+        message(glue("Column reformatted from character (dmy) to IDate."))
+      }
+      as.IDate(dmy(column))
+    }
+  } else if (inherits(column, "POSIXct") || inherits(column, "POSIXlt")) {
+    if (verbose) {
+      message(glue("Column reformatted from POSIXct/POSIXlt to IDate."))
+    }
+    as.IDate(column)
+  } else {
+    stop(glue("Cannot convert column of class {class(column)} to IDate."))
+  }
+}
+
+
+#' Standardise all date columns in a tibble to IDate format
+#'
+#' Applies `standardise_IDate()` to all columns containing "DATE" in their name
+#' (case-insensitive).
+#'
+#' @param tibble A tibble or data.frame containing date columns
+#' @param verbose Logical. If TRUE, prints messages about conversions performed.
+#'   Default is FALSE.
+#' @param char_format Character. The expected format for character dates.
+#'   One of "dmy" (default) or "ymd". Passed to `standardise_IDate()`.
+#'
+#' @return A tibble with date columns converted to IDate format
+#'
+#' @examples
+#' df <- tibble(
+#'   SAMPLE_DATE = as.Date("2024-01-15"),
+#'   VALUE_DATE = "15/01/2024",
+#'   other_col = 1:2
+#' )
+#' standardise_IDate_all(df, verbose = TRUE)
+#'
+#' @importFrom dplyr mutate across contains
+#' @export
+standardise_IDate_all <- function(
+  tibble,
+  verbose = FALSE,
+  char_format = "dmy"
+) {
+  tibble |>
+    mutate(across(
+      .cols = contains("DATE", ignore.case = TRUE),
+      .fns = ~ standardise_IDate(
+        .x,
+        verbose = verbose,
+        char_format = char_format
+      )
+    ))
+}

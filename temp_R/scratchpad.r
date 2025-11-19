@@ -24,6 +24,7 @@ library(qs2)
 library(units)
 library(targets)
 library(glue)
+library(rlang)
 
 `%notin%` <- negate(`%in%`)
 devtools::load_all()
@@ -150,3 +151,6 @@ dates <- biiiig_table |>
   reframe(count = n()) |>
   arrange(desc(count))
 dates
+
+# I guess we don't have a lot of dates in here. Still, looks fine... to me.
+biiiig_table |> standardise_IDate_all() |> select(contains("DATE"))
