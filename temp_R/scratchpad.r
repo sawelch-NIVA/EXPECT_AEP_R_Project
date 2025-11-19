@@ -142,3 +142,11 @@ wgs84_map +
       get_study_area_bbox()[[4]]
     )
   )
+
+# Messy Dates
+
+dates <- biiiig_table |>
+  group_by(SAMPLING_DATE) |>
+  reframe(count = n()) |>
+  arrange(desc(count))
+dates

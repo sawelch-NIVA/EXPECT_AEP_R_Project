@@ -255,7 +255,7 @@ list(
 
   # Geography data preparation targets ----
 
-  # WGS84 geography data
+  # # WGS84 map geometry
   tar_target(
     name = wgs84_geography,
     command = prepare_geography_wgs84(
@@ -264,7 +264,7 @@ list(
     )
   ),
 
-  # Polar projection geography data
+  # # Polar projection map geometry
   tar_target(
     name = polar_geography,
     command = prepare_geography_polar(
@@ -276,7 +276,7 @@ list(
 
   # Map creation  ----
 
-  # WGS84 map
+  # # WGS84 map
   tar_target(
     name = wgs84_map,
     command = create_study_area_map_wgs84(
@@ -287,7 +287,7 @@ list(
     )
   ),
 
-  # Polar projection map
+  # # Polar projection map
   tar_target(
     name = polar_map,
     command = create_study_area_map_polar(
@@ -316,8 +316,15 @@ list(
       value_column = "MEASURED_VALUE_STANDARD",
       unit_column = "MEASURED_UNIT_STANDARD"
     )
+  ),
+  # # Toxicity/safety threshholds!
+  # TODO: We can add GeoTraces data here, although it may be too precise for our use:
+  # https://geotraces.webodv.awi.de/IDP2021_v2%3EGEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v2/service/DataExtraction
+  # In general, the our big study area and many study compartments mean there's loads of values we can use here. Self-restrain is probably wise.
+  tar_target(
+    name = copper_toxicity_thresholds,
+    command = generate_copper_thresholds()
   )
-  # TODO: Toxicity threshholds!
 
   # TODO: Imputation of missing values. What's best practice?
   # Ask KET/Chemists
@@ -325,4 +332,8 @@ list(
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different
   # do we need to do some sort of multi-factorial doodah
+
+  # TODO: We should also do something with MEASURED_N vs actual replication. Hmm
+
+  # TODO: And the piece de registance -- the network digram
 )
