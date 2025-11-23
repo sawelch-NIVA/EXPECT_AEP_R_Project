@@ -5,7 +5,6 @@ library(stringr)
 library(janitor)
 library(tidyr)
 library(ggplot2)
-library(hrbrthemes)
 library(lubridate)
 
 
@@ -194,7 +193,6 @@ ggplot(
   ) +
   scale_x_continuous(breaks = seq(1985, 2025, by = 5), limits = c(1985, 2025)) +
   scale_fill_hue(name = "Reporting Source") +
-  theme_ipsum() +
   labs(
     x = "Year",
     y = "reported emissions (mg)",

@@ -31,7 +31,7 @@ marine_colors <- c(
 #' Colors for highlighted vs non-highlighted countries
 #'
 #' @export
-country_colors <- c(
+country_colours <- c(
   highlight = "#5c887b",
   default = "#e3d7bf"
 )

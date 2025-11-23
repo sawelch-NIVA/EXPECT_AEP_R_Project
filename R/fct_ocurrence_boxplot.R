@@ -35,16 +35,21 @@ make_measurement_boxplot <- function(
   date_column = "SAMPLING_DATE",
   show_points = TRUE
 ) {
-  p <- ggplot(
+  plot <- ggplot(
     data = data,
-    mapping = aes(x = .data[[value_column]], y = .data[[date_column]]) # TODO: How do we stop NA being added as a facet here?
+    mapping = aes(x = .data[[date_column]], y = .data[[value_column]]) # TODO: How do we stop NA being added as a facet here?
   ) +
     geom_boxplot() +
-    facet_wrap(facets = vars(.data[[unit_column]]))
+    facet_wrap(
+      facets = vars(.data[[unit_column]]),
+      drop = TRUE,
+      ncol = 1,
+      scales = "free_y"
+    )
 
   if (show_points) {
-    p <- p + geom_point()
+    plot <- plot + geom_point()
   }
 
-  p
+  plot
 }

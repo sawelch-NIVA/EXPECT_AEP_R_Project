@@ -27,7 +27,7 @@ vm_sites <- readxl::read_excel(
   janitor::remove_empty(which = "cols") |>
   dplyr::select(
     !contains(c("Not relevant")),
-    !AREA,
+    !OCEAN_IHO,
     !ENTERED_BY,
     !ENTERED_DATE
   )

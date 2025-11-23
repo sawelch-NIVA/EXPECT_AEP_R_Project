@@ -1,4 +1,4 @@
-﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY","AREA","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
+﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY_ISO","OCEAN_IHO","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
 "SorfjordStarfish2000_S1","Station S1 - Head of fjord near Odda","Coastal, fjord","Water benthos","WGS 84",60.079,6.53,"Norway","Not reported",-16,"m","Sam Welch","2025-10-30","Upstream of studied titanium, iron & zinc smelters."
 "SorfjordStarfish2000_S2","Station S2 - Apold","Coastal, fjord","Water benthos","WGS 84",60.151,6.546,"Norway","Not reported",-13,"m","Sam Welch","2025-10-30","Downstream of studied titanium, iron & zinc smelters."
 "SorfjordStarfish2000_S3","Station S3 - Hovland","Coastal, fjord","Water benthos","WGS 84",60.236,6.615,"Norway","Not reported",-13,"m","Sam Welch","2025-10-30","Further downstream of studied titanium, iron & zinc smelters."

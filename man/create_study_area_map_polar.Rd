@@ -12,7 +12,8 @@ create_study_area_map_polar(
   background_color = background_colors["polar"],
   crs = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0",
   xlim = c(-9e+06, 9e+06),
-  ylim = c(-5e+06, 3e+06)
+  ylim = c(-5e+06, 3e+06),
+  suppress_warnings = TRUE
 )
 }
 \arguments{

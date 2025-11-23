@@ -4,10 +4,10 @@
 \alias{fread_all_module_files}
 \title{Read all files for a given module}
 \usage{
-fread_all_module_files(module_name, format_initialiser)
+fread_all_module_files(file_paths, format_initialiser)
 }
 \arguments{
-\item{module_name}{Character string, name of module (e.g., "Campaign")}
+\item{file_paths}{A tibble/df of file paths supplied by get_literature_csv_tibble}
 
 \item{format_initialiser}{Function that returns expected tibble structure}
 }

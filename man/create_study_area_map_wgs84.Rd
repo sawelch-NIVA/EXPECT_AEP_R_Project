@@ -10,7 +10,8 @@ create_study_area_map_wgs84(
   arctic_circle_sf,
   graticule_sf = NULL,
   background_color = background_colors["wgs84"],
-  bbox = NULL
+  bbox = get_study_area_bbox(),
+  suppress_warnings = TRUE
 )
 }
 \arguments{

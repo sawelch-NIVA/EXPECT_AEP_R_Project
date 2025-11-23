@@ -81,8 +81,7 @@ tar_source()
 
 # Replace the target list below with your own:
 list(
-  # Literature data reading targets ----
-  # File-watching targets for each module
+  # # Create one target for the CSV files in /unzipped associated with each module
   tar_target(
     name = campaign_files,
     command = get_literature_csv_paths(module = "Campaign"),
@@ -136,7 +135,9 @@ list(
   #   format = "file"
   # ),
 
-  # Data reading targets for each module
+  # # Read in the data for each module, and rbind across studies it so we have a single table per module
+  # We use initialise_*_tibble as part of the reading process to check things are formatted how they should be
+  # (It (mostly) works, see SAMPLING_DATE below)
   tar_target(
     name = campaign_data,
     command = fread_all_module_files(campaign_files, initialise_campaign_tibble)
@@ -192,20 +193,23 @@ list(
   #   command = fread_all_module_files(creed_scores_files, initialise_creed_scores_tibble)
   # ),
 
-  # Join and save literature data ----
+  # # Join and save literature data into a single big table ----
   tar_target(
     name = literature_joined,
     command = join_all_literature_modules(
       measurements_data = measurements_data,
       sites_data = sites_data,
       reference_data = reference_data,
+      biota_data = biota_data,
+      # we ignore campaign_data for now as a) we don't need it and b) I forgot to set up the foreign key properly
       # campaign_data = campaign_data,
       parameters_data = parameters_data,
       methods_data = methods_data
     )
   ),
 
-  # Create a megatable by merging measurements, sites, references, campaign, methods
+  # # Remove any columns that aren't useful to us. Standardise all columns with names containing DATE to IDate type
+  # Currently columns_to_drop is empty, so we don't drop anything...
   tar_target(
     name = literature_clean,
     command = {
@@ -218,35 +222,12 @@ list(
     }
   ),
 
-  # Save the resulting file as a parquet
+  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios
   tar_target(
-    name = save_literature_pqt,
-    command = save_literature_parquet(
-      data = literature_clean,
-      output_path = "data/clean",
-      filename = "literature_data.parquet"
-    ),
-    format = "file"
-  ),
-
-  # Load the resulting file
-  # Why this level of redundancy? Because with targets, it means we can avoid constantly reloading CSVs unless they've actually changed
-  tar_target(
-    name = load_literature_pqt,
-    command = load_literature_parquet(
-      input_path = "data/clean",
-      filename = "literature_data.parquet"
-    )
-  ),
-
-  # TODO: Ought to fix SAMPLING_DATE and YEAR too, which for some reason are chr and int
-  # Probably clean data, /then/ save.
-  # Standardise reported units
-  tar_target(
-    name = clean_literature_units,
+    name = literature_clean_standardised,
     command = {
       standardise_measured_units(
-        load_literature_pqt,
+        literature_clean,
         value_column = "MEASURED_VALUE",
         unit_column = "MEASURED_UNIT"
       ) |>
@@ -261,9 +242,34 @@ list(
     }
   ),
 
+  # # Save our big clean table as a parquet
+  tar_target(
+    name = save_literature_pqt,
+    command = save_literature_parquet(
+      data = literature_clean_standardised,
+      output_path = "data/clean",
+      filename = "literature_data.parquet"
+    ),
+    format = "file"
+  ),
+
+  # # Load our big clean table as a parquet. load_literature_pqt will be the target for most of our future analyses.
+  # Why this level of redundancy? Because with targets, it means we can avoid constantly reloading CSVs unless they've actually changed
+  # TODO: Actually maybe this is a stupid idea. I'll keep it in mind.
+  tar_target(
+    name = load_literature_pqt,
+    command = {
+      save_literature_pqt # add a dependency on save_literature_pqt even though we don't directly read it
+      load_literature_parquet(
+        input_path = "data/clean",
+        filename = "literature_data.parquet"
+      )
+    }
+  ),
+
   # Geography data preparation targets ----
 
-  # # WGS84 map geometry
+  # # Set up WGS84 map shapefiles (oceans, countries), and add annotations
   tar_target(
     name = wgs84_geography,
     command = prepare_geography_wgs84(
@@ -272,7 +278,7 @@ list(
     )
   ),
 
-  # # Polar projection map geometry
+  # # Set up polar projection map shapefiles (oceans, countries), and add annotations
   tar_target(
     name = polar_geography,
     command = prepare_geography_polar(
@@ -284,43 +290,47 @@ list(
 
   # Map creation  ----
 
-  # # WGS84 map
+  # # Create a basic WGS84 map of the study area. Currently shows pretty much the whole Northern Hemisphere.
+  # It's pretty ugly.
   tar_target(
     name = wgs84_map,
     command = create_study_area_map_wgs84(
       ocean_sf = wgs84_geography$marine_polys,
       country_sf = wgs84_geography$countries,
       arctic_circle_sf = wgs84_geography$arctic_circle,
-      graticule_sf = wgs84_geography$graticule
+      graticule_sf = wgs84_geography$graticule,
+      suppress_warnings = TRUE
     )
   ),
 
-  # # Polar projection map
+  # # Create a basic Polar projectopm map of the study area.
+  # It's also pretty ugly.
   tar_target(
     name = polar_map,
     command = create_study_area_map_polar(
       ocean_sf = polar_geography$marine_polys,
       country_sf = polar_geography$countries,
       arctic_circle_sf = polar_geography$arctic_circle,
-      graticule_sf = polar_geography$graticule
+      graticule_sf = polar_geography$graticule,
+      suppress_warnings = TRUE
     )
   ),
 
   # TODO: The bounding box on this is pretty bad, because pretty much all our data points so far are actually in the Norwegian/Greenland sea. What do?
-  # Map literature data points
+  # # Map the data points from load_literature_pqt onto wgs84_map
   tar_target(
     name = wgs84_literature_map,
     command = map_literature_data_wgs84(
       wgs84_map = wgs84_map,
-      literature_data = literature_clean
+      literature_data = load_literature_pqt
     )
   ),
   # TODO: Just make some big boxplots for each unit type
-  # Boxplot using standardised units
+  # # Make a very basic boxplot of measured values by year
   tar_target(
-    name = measurement_by_year,
+    name = measurement_by_year_boxplot,
     command = make_measurement_boxplot(
-      data = clean_literature_units,
+      data = load_literature_pqt,
       value_column = "MEASURED_VALUE_STANDARD",
       unit_column = "MEASURED_UNIT_STANDARD"
     )

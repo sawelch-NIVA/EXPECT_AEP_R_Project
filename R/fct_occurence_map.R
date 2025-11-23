@@ -35,7 +35,9 @@ map_literature_data_wgs84 <- function(
   wgs84_map +
     geom_sf(
       data = data_sf,
-      fill = point_color
+      color = "black",
+      size = 3,
+      aes(fill = REFERENCE_ID),
     ) +
     coord_sf(
       xlim = c(
@@ -46,5 +48,8 @@ map_literature_data_wgs84 <- function(
         get_study_area_bbox()[[2]],
         get_study_area_bbox()[[4]]
       )
-    )
+    ) |>
+      # don't tell us you're adding a new CRS, or that names are outside the scale range, or that points may be (slightly) misaligned
+      suppressMessages() |>
+      suppressWarnings()
 }

@@ -1,67 +1,71 @@
 # Stuff for testing and half-complete code we can't put in /R or it'll get sourced
 
 # Load required libraries ----
-library(STOPeData)
-library(sf)
-library(arrow)
-library(tidyverse)
-library(sfhelper)
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(mapproj)
-library(ggspatial)
-library(shadowtext)
-library(ggrepel)
-library(rlang)
-library(data.table)
-library(dtplyr)
-library(leaflet)
-library(janitor)
-library(shiny)
-library(readxl)
-library(purrr)
-library(qs2)
-library(units)
-library(targets)
-library(glue)
-library(rlang)
+load_all_requirements <- function() {
+  sapply(
+    X = c(
+      "STOPeData",
+      "sf",
+      "arrow",
+      "tidyverse",
+      "sfhelper",
+      "rnaturalearth",
+      "rnaturalearthdata",
+      "mapproj",
+      "ggspatial",
+      "shadowtext",
+      "ggrepel",
+      "rlang",
+      "data.table",
+      "dtplyr",
+      "leaflet",
+      "janitor",
+      "shiny",
+      "readxl",
+      "purrr",
+      "qs2",
+      "units",
+      "targets",
+      "glue",
+      "ggraph",
+      "tidygraph",
+      "esquisse"
+    ),
+    FUN = library,
+    character.only = TRUE
+  )
 
-`%notin%` <- negate(`%in%`)
-devtools::load_all()
+  `%notin%` <- purrr:::negate(`%in%`)
+  devtools::load_all()
+
+  requirements_loaded <<- TRUE
+}
+
+load_all_requirements()
 
 roxygen2::roxygenise()
 
-# TODO: Run the pipeline with these two lines
-source("_targets.R")
-tar_make()
+# # Run the pipeline with these two lines
+{
+  source("_targets.R")
+  tar_make()
+}
 
-measurements_data <- tar_read("measurements_data")
-sites_data <- tar_read("sites_data")
-reference_data <- tar_read("reference_data")
-campaign_data <- tar_read("campaign_data")
-parameters_data <- tar_read("parameters_data")
-methods_data <- tar_read("methods_data")
+# get constitutent tables
+biota_data <- tar_read(name = biota_data) |>
+  dplyr::filter(
+    SAMPLE_ID ==
+      "GreenlandSeals1985_GS1985-Copper-BiotaAquatic-1985-01-01-Rhooded kidney"
+  )
 
-result <- measurements_data |>
-  left_join(sites_data, by = "SITE_CODE") |>
-  left_join(reference_data, by = "REFERENCE_ID") |>
-  left_join(parameters_data, by = "PARAMETER_NAME")
+measurements_data <- tar_read(name = measurements_data)
+sites_data <- tar_read(name = sites_data)
 
-#
-test_refs <- fread_all_module_files(
-  module = "Samples",
-  format_initialiser = initialise_samples_tibble
-)
+# get the parquet data for testing
+main_table <- arrow::read_parquet("data/clean/literature_data.parquet")
+
 
 # References data types bug
-filepath = get_literature_csv_list(module = "Reference")[[1, 1]]
-module_name = "Reference"
-
-
-biiiig_table <- arrow::read_parquet("data/clean/literature_data.parquet")
-
-ref_refs <- reference_data |> pull(REFERENCE_ID)
-meas_refs <- measurements_data |> pull(REFERENCE_ID)
 
 ## Test Maps ----
 # Prepare all data for WGS84 map
@@ -86,38 +90,6 @@ polar_map <- create_study_area_map_polar(
   graticule_sf = polar_geo$graticule
 )
 
-### Units ---
-
-test_units <- biiiig_table |>
-  select(MEASURED_UNIT) |>
-  distinct()
-
-
-# ok, we can't do mixed units in one table
-test_units |>
-  mutate(
-    MEASURED_VALUE_UNIT = set_units(MEASURED_VALUE, !!unit_map[[MEASURED_UNIT]])
-  )
-
-# what do our units actually look like?
-biiiig_table |> select(MEASURED_UNIT) |> distinct()
-
-# and post-standardisation
-test <- standardise_measured_units(biiiig_table) |>
-  slice_sample(n = 10) |>
-  select(
-    SITE_CODE,
-    MEASURED_VALUE,
-    MEASURED_UNIT,
-    MEASURED_VALUE_STANDARD,
-    MEASURED_UNIT_STANDARD
-  )
-
-# from a sample of 10 it looks fine, although we have lost some precision in places
-
-biiiig_table |>
-  group_by(MEASURED_UNIT) |>
-  reframe(MEASURED_UNIT, count = count())
 
 # map with data points
 
@@ -146,11 +118,11 @@ wgs84_map +
 
 # Messy Dates
 
-dates <- biiiig_table |>
+dates <- main_table |>
   group_by(SAMPLING_DATE) |>
   reframe(count = n()) |>
   arrange(desc(count))
 dates
 
 # I guess we don't have a lot of dates in here. Still, looks fine... to me.
-biiiig_table |> standardise_IDate_all() |> select(contains("DATE"))
+main_table |> standardise_IDate_all() |> select(contains("DATE"))

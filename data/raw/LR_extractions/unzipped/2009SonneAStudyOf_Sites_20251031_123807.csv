@@ -1,3 +1,3 @@
-﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY","AREA","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
+﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY_ISO","OCEAN_IHO","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
 "ArcticSeals1999_Godhavn","Central West Greenland (Godhavn)","Coastal, fjord","Not relevant","WGS 84",69,-54,"Greenland","Greenland",0,"m","Sam Welch","2025-10-31","Four ringed seals sampled from this location"
 "ArcticSeals1999_Barents","Barents Sea around Svalbard","Ocean, sea, territorial waters","Water column pelagic zone","WGS 84",78,21,"Norway","Norway",0,"m","Sam Welch","2025-10-31","Sampling coordinates ranged 76-80°N, 10-32°E. Five harp and five hooded seals sampled from this area"

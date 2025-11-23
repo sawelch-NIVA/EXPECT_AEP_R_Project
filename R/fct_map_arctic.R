@@ -3,7 +3,8 @@
 #' Add shadow text to sf plots
 #'
 #' Custom geom for adding text with shadow/outline to sf plots, useful for
-#' improving label visibility over complex backgrounds
+#' improving label visibility over complex backgrounds. Extends GuangchuangYu's
+#' https://github.com/GuangchuangYu/shadowtext to sf geometry
 #'
 #' @param mapping Set of aesthetic mappings created by aes()
 #' @param data The data to be displayed
@@ -96,7 +97,8 @@ create_study_area_map_wgs84 <- function(
   arctic_circle_sf,
   graticule_sf = NULL,
   background_color = background_colors["wgs84"],
-  bbox = get_study_area_bbox()
+  bbox = get_study_area_bbox(),
+  suppress_warnings = TRUE
 ) {
   # if (!is.null(bbox)) {
   #   ocean_sf |> st_crop(ocean_sf, bbox)
@@ -121,8 +123,8 @@ create_study_area_map_wgs84 <- function(
       aes(
         fill = ifelse(
           highlight_name,
-          country_colors["highlight"],
-          country_colors["default"]
+          country_colours["highlight"],
+          country_colours["default"]
         )
       ),
       color = "black",
@@ -191,7 +193,11 @@ create_study_area_map_wgs84 <- function(
       )
   }
 
-  return(map)
+  if (isTRUE(suppress_warnings)) {
+    return(map) |> suppressWarnings()
+  } else {
+    return(map)
+  }
 }
 
 #' Create Arctic study area base map (North Polar Stereographic projection)
@@ -225,7 +231,8 @@ create_study_area_map_polar <- function(
   background_color = background_colors["polar"],
   crs = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0",
   xlim = c(-9000000, 9000000),
-  ylim = c(-5000000, 3000000)
+  ylim = c(-5000000, 3000000),
+  suppress_warnings = TRUE
 ) {
   map <- ggplot() +
     # Ocean polygons with custom colors
@@ -241,8 +248,8 @@ create_study_area_map_polar <- function(
       aes(
         fill = ifelse(
           highlight_name,
-          country_colors["highlight"],
-          country_colors["default"]
+          country_colours["highlight"],
+          country_colours["default"]
         )
       ),
       color = "black",
@@ -305,5 +312,9 @@ create_study_area_map_polar <- function(
     expand = FALSE
   )
 
-  return(map)
+  if (isTRUE(suppress_warnings)) {
+    return(map) |> suppressWarnings()
+  } else {
+    return(map)
+  }
 }

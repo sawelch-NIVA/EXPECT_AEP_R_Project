@@ -19,6 +19,7 @@ join_all_literature_modules <- function(
   measurements_data,
   sites_data,
   reference_data,
+  biota_data,
   # campaign_data,
   parameters_data,
   methods_data
@@ -32,10 +33,21 @@ join_all_literature_modules <- function(
     select(YEAR, REFERENCE_ID, TITLE, DATA_SOURCE)
   sites_data <- sites_data |>
     select(-SITE_COORDINATE_SYSTEM, -ENTERED_DATE, -ENTERED_BY)
+  biota_data <- biota_data |>
+    select(
+      SAMPLE_ID,
+      SUBSAMPLE,
+      SPECIES_GROUP,
+      SAMPLE_SPECIES,
+      SAMPLE_TISSUE,
+      SAMPLE_SPECIES_LIFESTAGE,
+      SAMPLE_SPECIES_GENDER
+    )
 
   result <- measurements_data |>
     left_join(sites_data, by = "SITE_CODE") |>
     left_join(reference_data, by = "REFERENCE_ID") |>
+    left_join(biota_data, by = c("SAMPLE_ID", "SUBSAMPLE")) |>
     # fixme: temporarily disabled CAMPAIGN_NAME_SHORT, as we don't have the foreign key and don't actually need it
     # left_join(campaign_data, by = "CAMPAIGN_NAME_SHORT") |>
     left_join(parameters_data, by = "PARAMETER_NAME")

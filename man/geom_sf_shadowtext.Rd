@@ -52,5 +52,6 @@ A ggplot2 layer
 }
 \description{
 Custom geom for adding text with shadow/outline to sf plots, useful for
-improving label visibility over complex backgrounds
+improving label visibility over complex backgrounds. Extends GuangchuangYu's
+https://github.com/GuangchuangYu/shadowtext to sf geometry
 }

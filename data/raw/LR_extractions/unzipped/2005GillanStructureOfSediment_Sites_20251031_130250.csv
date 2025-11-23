@@ -1,4 +1,4 @@
-﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY","AREA","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
+﻿"SITE_CODE","SITE_NAME","SITE_GEOGRAPHIC_FEATURE","SITE_GEOGRAPHIC_FEATURE_SUB","SITE_COORDINATE_SYSTEM","LATITUDE","LONGITUDE","COUNTRY_ISO","OCEAN_IHO","ALTITUDE_VALUE","ALTITUDE_UNIT","ENTERED_BY","ENTERED_DATE","SITE_COMMENT"
 "SorfjordHM2003_S1","Most contaminated site near zinc smelter","Coastal, fjord","Other","WGS 84",60.0798,6.5302,"Norway","Norway",0,"m","Sam Welch","2025-10-31","Located 100 m away from zinc smelter, most heavily contaminated site, depth 15 m, muddy sediments"
 "SorfjordHM2003_S2","Site in front of titanium smelter","Coastal, fjord","Other","WGS 84",60.1504,6.546,"Norway","Norway",0,"m","Sam Welch","2025-10-31","Located in front of titanium smelter, depth 15 m, muddy sediments"
 "SorfjordHM2003_S3","Site 12 km north of S2","Coastal, fjord","Other","WGS 84",60.2978,6.604,"Norway","Norway",0,"m","Sam Welch","2025-10-31","Located 12 km further north from S2, depth 15 m, composed of fine sand"
