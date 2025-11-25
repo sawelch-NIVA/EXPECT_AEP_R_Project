@@ -29,3 +29,71 @@ ggplot(airquality, aes(Temp, Ozone)) +
   geom_point() +
   geom_smooth(method = "loess")
 ```
+
+
+
+
+```{r}
+#| label: ridgeplot
+library(tidyverse)
+pak::pak("ggridges")
+library(ggridges)
+
+# Example data ----
+## Distribution parameters ----
+dist_params <- tibble(
+  species = c("Species A", "Species B", "Species C"),
+  mean = c(45, 55, 50),
+  sd = c(8, 12, 10),
+  n = c(100, 150, 120)
+)
+
+## Thresholds ----
+thresholds <- tibble(
+  value = c(30, 45, 65, 80)
+)
+
+# Generate density data ----
+## Create x values and calculate densities ----
+x_range <- seq(
+  from = min(dist_params$mean - 4 * dist_params$sd),
+  to = max(dist_params$mean + 4 * dist_params$sd),
+  length.out = 1001
+)
+
+density_data <- dist_params |>
+  rowwise() |>
+  reframe(
+    species = species,
+    n = n, # keep n for labeling
+    x = x_range,
+    density = dnorm(x_range, mean = mean, sd = sd)
+  )
+
+# Create labels with sample size ----
+species_labels <- dist_params |>
+  mutate(label = paste0(species, " (n=", n, ")")) |>
+  select(species, label) |>
+  deframe()
+
+# Visualization ----
+## Ridgeline density plot with thresholds ----
+ggplot(density_data, aes(x = x, y = species, height = density)) +
+  geom_ridgeline(fill = "lightblue", alpha = 0.7, scale = 10) +
+  # Add vertical lines for thresholds
+  geom_vline(
+    data = thresholds,
+    aes(xintercept = value),
+    linetype = "dashed",
+    color = "red",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  scale_y_discrete(labels = species_labels) +
+  labs(
+    x = "Value",
+    y = ""
+  ) +
+  theme_ridges()
+
+```
