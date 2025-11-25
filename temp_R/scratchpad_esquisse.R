@@ -3,7 +3,7 @@ if (!exists("requirements_loaded")) {
   load_all_requirements()
 }
 
-esquisse::esquisser(data = main_table)
+esquisse::esquisser(data = generate_copper_thresholds())
 
 # Shitty boxplot
 ggplot(main_table) +

@@ -9,7 +9,7 @@
 #'   Default is "MEASURED_VALUE"
 #' @param unit_column Character string. Name of column containing measurement units.
 #'   Default is "MEASURED_UNIT"
-#' @param date_column Character string. Name of column containing sampling dates.
+#' @param x_column Character string. Name of column containing sampling dates.
 #'   Default is "SAMPLING_DATE"
 #' @param show_points Logical. Whether to overlay individual points on boxplots.
 #'   Default is TRUE
@@ -32,12 +32,12 @@ make_measurement_boxplot <- function(
   data,
   value_column = "MEASURED_VALUE",
   unit_column = "MEASURED_UNIT",
-  date_column = "SAMPLING_DATE",
+  x_column = "ENVIRON_COMPARTMENT_SUB",
   show_points = TRUE
 ) {
   plot <- ggplot(
-    data = data,
-    mapping = aes(x = .data[[date_column]], y = .data[[value_column]]) # TODO: How do we stop NA being added as a facet here?
+    data = data |> filter(!is.na(MEASURED_UNIT)),
+    mapping = aes(x = .data[[x_column]], y = .data[[value_column]]) # TODO: How do we stop NA being added as a facet here?
   ) +
     geom_boxplot() +
     facet_wrap(

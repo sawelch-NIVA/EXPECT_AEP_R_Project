@@ -93,10 +93,11 @@ leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = data_sf,
-    popup = ~SITE_CODE,
+    popup = ~REFERENCE_ID,
     group = "Samples",
-    clusterOptions = TRUE
-  ) %>%
+    clusterOptions = markerClusterOptions()
+  ) |>
+  addLabelOnlyMarkers(data = data_sf, label = ~SITE_CODE) |>
   addLayersControl(
     overlayGroups = c("Oceans", "Countries", "Samples"),
     options = layersControlOptions(collapsed = FALSE)

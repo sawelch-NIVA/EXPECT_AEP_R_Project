@@ -8,7 +8,7 @@ make_measurement_boxplot(
   data,
   value_column = "MEASURED_VALUE",
   unit_column = "MEASURED_UNIT",
-  date_column = "SAMPLING_DATE",
+  x_column = "ENVIRON_COMPARTMENT_SUB",
   show_points = TRUE
 )
 }
@@ -21,7 +21,7 @@ Default is "MEASURED_VALUE"}
 \item{unit_column}{Character string. Name of column containing measurement units.
 Default is "MEASURED_UNIT"}
 
-\item{date_column}{Character string. Name of column containing sampling dates.
+\item{x_column}{Character string. Name of column containing sampling dates.
 Default is "SAMPLING_DATE"}
 
 \item{show_points}{Logical. Whether to overlay individual points on boxplots.

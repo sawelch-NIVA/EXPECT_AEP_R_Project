@@ -332,7 +332,8 @@ list(
     command = make_measurement_boxplot(
       data = load_literature_pqt,
       value_column = "MEASURED_VALUE_STANDARD",
-      unit_column = "MEASURED_UNIT_STANDARD"
+      unit_column = "MEASURED_UNIT_STANDARD",
+      x_column = "ENVIRON_COMPARTMENT_SUB",
     )
   ),
   # # Toxicity/safety threshholds!

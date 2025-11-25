@@ -8,6 +8,7 @@ join_all_literature_modules(
   measurements_data,
   sites_data,
   reference_data,
+  biota_data,
   parameters_data,
   methods_data
 )
