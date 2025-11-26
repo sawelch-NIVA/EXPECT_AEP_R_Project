@@ -39,7 +39,9 @@ tar_option_set(
     "shadowtext",
     "ggrepel",
     "dplyr",
-    "dtplyr"
+    "dtplyr",
+    "forcats",
+    "viridis"
   ),
   format = "qs" # Optionally set the default storage format. qs is fast.
   #
@@ -201,8 +203,7 @@ list(
       sites_data = sites_data,
       reference_data = reference_data,
       biota_data = biota_data,
-      # we ignore campaign_data for now as a) we don't need it and b) I forgot to set up the foreign key properly
-      # campaign_data = campaign_data,
+      campaign_data = campaign_data,
       parameters_data = parameters_data,
       methods_data = methods_data
     )
@@ -265,6 +266,36 @@ list(
         filename = "literature_data.parquet"
       )
     }
+  ),
+
+  # Heatmaps of literature
+  tar_target(
+    name = plot_paper_subcompartments,
+    command = plot_reference_compartment_heatmap(
+      data = load_literature_pqt,
+      compartment_order = NULL,
+      x_var = "ENVIRON_COMPARTMENT_SUB",
+      y_var = "REFERENCE_ID",
+      year_var = "YEAR",
+      fill_label = "Sample Size (n)",
+      x_label = "Environmental Sub-Compartment",
+      text_threshold = "mean",
+      rotate_x = 45
+    )
+  ),
+
+  tar_target(
+    name = plot_paper_species,
+    command = plot_reference_species_heatmap(
+      data = load_literature_pqt,
+      x_var = "SAMPLE_SPECIES",
+      y_var = "REFERENCE_ID",
+      year_var = "YEAR",
+      fill_label = "Sample Size (n)",
+      x_label = "Sampled Species",
+      text_threshold = "mean",
+      rotate_x = 45
+    )
   ),
 
   # Geography data preparation targets ----

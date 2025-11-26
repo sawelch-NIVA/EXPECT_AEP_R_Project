@@ -1,10 +1,19 @@
 # Stuff for testing and half-complete code we can't put in /R or it'll get sourced
 
 # Load required libraries ----
-load_all_requirements <- function() {
+load_all_requirements <- function(skip_stopedata_update = FALSE) {
+  if (skip_stopedata_update) {
+    tryCatch(
+      install_local("C:/Users/SAW/Documents/STOPeData_0.0.0.9006.tar.gz"),
+      error = function(e) {
+        "This probably isn't working because STOPeData_0.0.0.9006.tar.gz isn't detected. 
+      And it won't work unless you're me, because I hardcoded the file path."
+      }
+    )
+  }
   sapply(
     X = c(
-      "STOPeData",
+      "STOPeData", # make sure this is up to date (i.e. ask Sam. if you are Sam, ask yourself.)
       "sf",
       "arrow",
       "tidyverse",
@@ -29,7 +38,9 @@ load_all_requirements <- function() {
       "glue",
       "ggraph",
       "tidygraph",
-      "esquisse"
+      "esquisse",
+      "forcats",
+      "viridis"
     ),
     FUN = library,
     character.only = TRUE
@@ -38,6 +49,8 @@ load_all_requirements <- function() {
   `%notin%` <- purrr:::negate(`%in%`)
   devtools::load_all()
 
+  # load data and set status in global environment
+  main_table <<- arrow::read_parquet("data/clean/literature_data.parquet")
   requirements_loaded <<- TRUE
 }
 

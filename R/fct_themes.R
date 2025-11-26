@@ -95,3 +95,8 @@ theme_arctic_map <- function(
     ...
   )
 }
+
+# Single source of truth for theming. Will adjust as needed.
+theme_aep_plots <- function() {
+  theme_minimal()
+}

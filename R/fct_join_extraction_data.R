@@ -20,7 +20,7 @@ join_all_literature_modules <- function(
   sites_data,
   reference_data,
   biota_data,
-  # campaign_data,
+  campaign_data,
   parameters_data,
   methods_data
 ) {
@@ -48,8 +48,7 @@ join_all_literature_modules <- function(
     left_join(sites_data, by = "SITE_CODE") |>
     left_join(reference_data, by = "REFERENCE_ID") |>
     left_join(biota_data, by = c("SAMPLE_ID", "SUBSAMPLE")) |>
-    # fixme: temporarily disabled CAMPAIGN_NAME_SHORT, as we don't have the foreign key and don't actually need it
-    # left_join(campaign_data, by = "CAMPAIGN_NAME_SHORT") |>
+    left_join(campaign_data, by = "CAMPAIGN_NAME_SHORT") |>
     left_join(parameters_data, by = "PARAMETER_NAME")
 
   # this is, frankly, bad, but it allows us to join out methods to measurements in a way that makes analysis easier

@@ -4,28 +4,160 @@ author: "Sam Welch"
 date: "2025.11.25"
 format: 
   html:
+    page-layout: full
     code-fold: true
 ---
 
 ```{r}
 #| label: targets-setup
 #| warning: false
+#| message: false
 source("_targets.R")
 tar_make()
+# we still need to load all the other packages again so we can use them here
+load_all_requirements <- function(skip_stopedata_update = FALSE) {
+  if (skip_stopedata_update) {
+    tryCatch(
+      install_local("C:/Users/SAW/Documents/STOPeData_0.0.0.9006.tar.gz"),
+      error = function(e) {
+        "This probably isn't working because STOPeData_0.0.0.9006.tar.gz isn't detected. 
+      And it won't work unless you're me, because I hardcoded the file path."
+      }
+    )
+  }
+  sapply(
+    X = c(
+      "STOPeData", # make sure this is up to date (i.e. ask Sam. if you are Sam, ask yourself.)
+      "sf",
+      "arrow",
+      "tidyverse",
+      "sfhelper",
+      "rnaturalearth",
+      "rnaturalearthdata",
+      "mapproj",
+      "ggspatial",
+      "shadowtext",
+      "ggrepel",
+      "rlang",
+      "data.table",
+      "dtplyr",
+      "leaflet",
+      "janitor",
+      "shiny",
+      "readxl",
+      "purrr",
+      "qs2",
+      "units",
+      "targets",
+      "glue",
+      "ggraph",
+      "tidygraph",
+      "esquisse",
+      "forcats",
+      "viridis",
+      "DT"
+    ),
+    FUN = library,
+    character.only = TRUE
+  )
+
+  `%notin%` <- purrr:::negate(`%in%`)
+  devtools::load_all()
+
+  # load data and set status in global environment
+  main_table <<- arrow::read_parquet("data/clean/literature_data.parquet")
+  requirements_loaded <<- TRUE
+}
+load_all_requirements()
+```
+
+## Dataset Preview
+
+Give a vague preview of the dataset
+
+```{r}
+#| label: fig-dataset
+#| fig-cap: "Temperature and ozone level."
+#| warning: false
+
 ```
 
 ## Papers Analysed
 
-@fig-airquality further explores the impact of temperature on ozone level.
+Quick summary of papers and what they contain
 
 ```{r}
-#| label: fig-airquality
-#| fig-cap: "Temperature and ozone level."
+#| label: table_paper_summaries
 #| warning: false
+tar_read(load_literature_pqt) |>
+  dplyr::left_join(tar_read(reference_data)) |>
+  dplyr::left_join(tar_read(campaign_data)) |>
+  dplyr::group_by(
+    TITLE,
+    YEAR,
+    AUTHOR,
+    CAMPAIGN_COMMENT
+  ) |>
+  dplyr::reframe(SUM_N = sum(MEASURED_N)) |>
+  datatable()
 
-library(ggplot2)
+```
 
-ggplot(airquality, aes(Temp, Ozone)) +
-  geom_point() +
-  geom_smooth(method = "loess")
+@fig_paper_subcompartments explores paper quantity and analysed compartments..
+
+```{r}
+#| label: fig_paper_subcompartments
+#| fig-cap: "Number of environmental sub-compartments sampled per paper."
+#| warning: false
+tar_read(plot_paper_subcompartments)
+```
+
+```{r}
+#| label: fig_paper_species
+#| fig-cap: "Number of environmental sub-compartments sampled per paper."
+#| warning: false
+tar_read(plot_paper_species)
+```
+
+
+## Sampling Sites/Map
+
+```{r}
+#| label: fig_paper_species
+#| fig-cap: "Number of environmental sub-compartments sampled per paper."
+#| warning: false
+tar_read(wgs84_literature_map)
+```
+
+## Breakdown by environmental compartment
+We're most interested in qualifying the concentrations in each compartment, so this is probably the right place to start. How do we plot 
+
+### Freshwater
+
+```{r}
+#| label: freshwater_distributions
+#| fig-cap: "Number of environmental sub-compartments sampled per paper."
+#| warning: false
+main_table |> filter(ENVIRON_COMPARTMENT == "Aquatic") |> esquisse::esquisser()
+
+ggplot(
+  `filter(main_table,
+    ENVIRON_COMPARTMENT == "Aquatic")`
+) +
+  aes(
+    x = SITE_CODE,
+    y = MEASURED_VALUE_STANDARD,
+    fill = ENVIRON_COMPARTMENT_SUB
+  ) +
+  geom_function(fun = dnorm) +
+  scale_fill_hue(direction = 1) +
+  scale_y_continuous(trans = "log10") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90L)) +
+  facet_wrap(vars(REFERENCE_ID), scales = "free_x", nrow = 1L)
+
+
+ggplot() +
+  stat_function(fun = ~ dnorm(.x, 34, 4.5), geom = "area") +
+  xlim(c(20, 48))
 ```
