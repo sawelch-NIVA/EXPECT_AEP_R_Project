@@ -24,11 +24,8 @@ compartments_data|stem|ec73f3cf06c6aa28|e32fbf84e577734f|ee3bc38a568fae77|583565
 methods_data|stem|474ecb5551ce61e6|3fcae5fcedce1fe6|10c1c335532a8bc1|1102911628||t20417.5158165987s|s8061b|8061|qs|local|vector|||0.156||
 literature_joined|stem|f790987618dd8c08|3ced6562aa649b16|cba4db393c516319|-1662473634||t20417.515818008s|s15999b|15999|qs|local|vector|||0.078||
 literature_clean|stem|120af1b89a9edb43|29b0fa3109f95a63|6851b95cdc507744|383615012||t20417.5158188064s|s15797b|15797|qs|local|vector|||0.031||
-literature_clean_standardised|stem|e34404125999b97a|e0f6e84676105837|6b0aeb203f3f031c|-1715007984||t20417.515819548s|s16450b|16450|qs|local|vector|||0.031||
-save_literature_pqt|stem|08d5f59e833de599|b118dd33b770cb7b|de1ea168b2d9edec|1810594247||t0s|s0b|0|file|local|vector|||0.078||
 load_literature_pqt|stem|07be8a212778d902|d3f2936c6f3b53ec|251e81e0fac9f02a|1764712921||t20417.5158215245s|s16798b|16798|qs|local|vector|||0.031||
 measurement_by_year_boxplot|stem|680243d70fc9fd1e|7903348578c1eb4b|ad17dfafc62e7ea7|-1209761163||t20417.5158222287s|s208500b|208500|qs|local|vector|||0.016||
-plot_paper_subcompartments|stem|d987a4b662812e6b|fc038fa45e910714|6cb3db09d2f4cb0f|-405200663||t20417.5158419166s|s239768b|239768|qs|local|vector|||0.125||
 wgs84_literature_map|stem|9131c867b300a435|769837398fed5633|1db351e9822628c9|-425591411||t20417.5683936963s|s61789362b|61789362|qs|local|vector|||0.094||
 ocean_colors|object|895978c666ba7c58
 load_literature_parquet|function|23e724ad0da47991
@@ -49,7 +46,7 @@ get_study_area_bbox|function|2b389dff77260f22
 process_countries_wgs84|function|6089318beee3dabe
 transform_countries_to_polar|function|69d83d8ab97de05c
 transform_marine_to_polar|function|6a7d5025af917da8
-standardise_measured_units|function|2a4ddda78d3583a1
+standardise_measured_units|function|91a541b120e87338
 create_arctic_circle|function|94c7954b3ce96762
 create_graticule|function|c70a5b1f18f50aff
 fread_module_csv|function|4c1d3dd9c2b2e647
@@ -59,8 +56,8 @@ marine_colors|object|7b3a2b11c99c18d9
 ne_get|function|fd28a17c4aae9dfe
 clean_joined_columns|function|cc7756f4c945b315
 annotate_oceans_for_display|function|d60f3efd22075441
-plot_reference_compartment_heatmap|function|56f152ab305b989f
-plot_reference_species_heatmap|function|804cee49c9544d7c
+plot_reference_compartment_heatmap|function|fb01e16103c35eb7
+plot_reference_species_heatmap|function|473078de7b48f1ac
 standardise_IDate_all|function|5703aa5a971fd14f
 theme_arctic_map|function|4e60c94dcaf242d9
 read_and_process_countries|function|fda2f44d8673051c
@@ -73,4 +70,7 @@ create_study_area_map_polar|function|1a75beb49f1eaa5e
 create_study_area_map_wgs84|function|7d7c8c90fe8bc736
 prepare_geography_wgs84|function|b73367f9f12d334d
 prepare_geography_polar|function|162fa3e17835c328
-plot_paper_species|stem|d7d6dc5b52934fd7|9d5232689ea17c01|92f33022b7e52737|-2124322831||t20417.5794616806s|s262002b|262002|qs|local|vector|||0.468||
+literature_clean_standardised|stem|3a54dd4cf549e762|ff1cca25e440dc14|6ed415de2aede11a|-1715007984||t20418.3343509708s|s17127b|17127|qs|local|vector|||0.078||
+save_literature_pqt|stem|08d5f59e833de599|b118dd33b770cb7b|9aa901578656bea0|1810594247||t0s|s0b|0|file|local|vector|||0.047||
+plot_paper_subcompartments|stem|35cff52ea8aeaa55|fc038fa45e910714|9c5f4d58cbada5e9|-405200663||t20418.334355136s|s243479b|243479|qs|local|vector|||0.157||
+plot_paper_species|stem|e605a0b678bb5087|9d5232689ea17c01|78c081a001c0168c|-2124322831||t20418.3343569636s|s262090b|262090|qs|local|vector|||0.063||

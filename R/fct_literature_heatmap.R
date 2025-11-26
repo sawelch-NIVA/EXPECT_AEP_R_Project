@@ -93,7 +93,8 @@ plot_reference_compartment_heatmap <- function(
     theme_aep_plots() +
     theme(
       axis.text.x = element_text(angle = rotate_x, hjust = 1),
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(),
+      legend.position = "none"
     ) +
     labs(x = x_label)
 }
@@ -148,7 +149,8 @@ plot_reference_species_heatmap <- function(
     theme_aep_plots() +
     theme(
       axis.text.x = element_text(angle = rotate_x, hjust = 1),
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(),
+      legend.position = "none"
     ) +
     labs(x = x_label) +
     facet_wrap(

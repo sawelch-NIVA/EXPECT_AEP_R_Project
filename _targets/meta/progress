@@ -24,11 +24,14 @@ samples_data|stem|samples_data|0|skipped
 methods_data|stem|methods_data|0|skipped
 literature_joined|stem|literature_joined|0|skipped
 literature_clean|stem|literature_clean|0|skipped
-literature_clean_standardised|stem|literature_clean_standardised|0|skipped
-save_literature_pqt|stem|save_literature_pqt|0|skipped
+literature_clean_standardised|stem|literature_clean_standardised|0|dispatched
+literature_clean_standardised|stem|literature_clean_standardised|0|completed
+save_literature_pqt|stem|save_literature_pqt|0|dispatched
+save_literature_pqt|stem|save_literature_pqt|0|completed
 load_literature_pqt|stem|load_literature_pqt|0|skipped
 measurement_by_year_boxplot|stem|measurement_by_year_boxplot|0|skipped
-plot_paper_subcompartments|stem|plot_paper_subcompartments|0|skipped
+plot_paper_subcompartments|stem|plot_paper_subcompartments|0|dispatched
+plot_paper_subcompartments|stem|plot_paper_subcompartments|0|completed
 plot_paper_species|stem|plot_paper_species|0|dispatched
 plot_paper_species|stem|plot_paper_species|0|completed
 wgs84_literature_map|stem|wgs84_literature_map|0|skipped

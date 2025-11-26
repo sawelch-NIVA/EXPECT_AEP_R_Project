@@ -2,69 +2,112 @@
 #'
 #' Converts measurement values to standard units (mg/kg for dry/wet weight,
 #' mg/L for concentration). Handles both Greek mu (μ) and micro sign (µ)
-#' in microgram units. Skip row if the value is NA.
+#' in microgram units. Can convert multiple value columns that share the same
+#' unit column.
 #'
 #' @param data A tibble or data frame containing measurement data
-#' @param value_column Character string. Name of column containing measurement values.
-#'   Default is "MEASURED_VALUE"
+#' @param value_columns Character vector. Names of columns containing measurement
+#'   values (e.g., c("MEASURED_VALUE", "MEASURED_UPPER", "MEASURED_LOWER")).
+#'   Default is NULL (no value conversion). If NULL, only unit standardisation occurs.
 #' @param unit_column Character string. Name of column containing measurement units.
-#'   Default is "MEASURED_UNIT"
+#'   Default is NULL (no unit standardisation). If NULL, only value conversion occurs.
 #'
-#' @return The input data with two new columns added:
-#'   - `{unit_column}_STANDARD`: Standardised unit (mg/kg (dry), mg/kg (wet), or mg/L)
-#'   - `{value_column}_STANDARD`: Converted measurement value in standard units
+#' @return The input data with new columns added depending on arguments:
+#'   - If `unit_column` provided: `{unit_column}_STANDARD` with standardised units
+#'   - If `value_columns` provided: `{value_column}_STANDARD` for each value column
 #'
 #' @examples
 #' \dontrun{
-#' data |>
-#'   standardise_measured_units()
-#'
+#' # Convert both units and multiple value columns
 #' data |>
 #'   standardise_measured_units(
-#'     value_column = "concentration",
-#'     unit_column = "units"
+#'     value_columns = c("MEASURED_VALUE", "MEASURED_UPPER", "MEASURED_LOWER"),
+#'     unit_column = "MEASURED_UNIT"
+#'   )
+#'
+#' # Only standardise units
+#' data |>
+#'   standardise_measured_units(unit_column = "MEASURED_UNIT")
+#'
+#' # Convert single value column
+#' data |>
+#'   standardise_measured_units(
+#'     value_columns = "MEASURED_VALUE",
+#'     unit_column = "MEASURED_UNIT"
 #'   )
 #' }
 #'
 #' @export
 standardise_measured_units <- function(
   data,
-  value_column = "MEASURED_VALUE",
-  unit_column = "MEASURED_UNIT"
+  value_columns = NULL,
+  unit_column = NULL
 ) {
-  stopifnot(value_column %in% names(data), unit_column %in% names(data))
+  # Check that at least one argument is provided ----
+  if (is.null(value_columns) && is.null(unit_column)) {
+    stop("At least one of 'value_columns' or 'unit_column' must be specified")
+  }
 
-  # Create new column names
-  unit_standard_col <- paste0(unit_column, "_STANDARD")
-  value_standard_col <- paste0(value_column, "_STANDARD")
-
-  data |>
-    mutate(
-      # FIXME: Needs to be extended to handle a wider range of SI prefixes
-      # Standard units: mg/kg (dry), mg/kg (wet), mg/L
-      !!unit_standard_col := case_when(
-        str_detect(.data[[unit_column]], "dry") ~ "mg/kg (dry)",
-        str_detect(.data[[unit_column]], "wet") ~ "mg/kg (wet)",
-        str_detect(.data[[unit_column]], "L") ~ "mg/L",
-        TRUE ~ NA_character_
-      ),
-
-      # Conversion factors
-      !!value_standard_col := case_when(
-        # Already in mg/kg or mg/L - no conversion
-        .data[[unit_column]] %in%
-          c("mg/kg (dry)", "mg/kg (wet)", "mg/L") ~ .data[[value_column]],
-
-        # μg or µg to mg (divide by 1000)
-        str_detect(.data[[unit_column]], "μg|µg") ~ .data[[value_column]] /
-          1000,
-
-        # Empty or missing units
-        .data[[unit_column]] == "" | is.na(.data[[unit_column]]) ~ NA_real_,
-
-        TRUE ~ NA_real_
+  # Check that specified columns exist ----
+  if (!is.null(value_columns)) {
+    missing_cols <- setdiff(value_columns, names(data))
+    if (length(missing_cols) > 0) {
+      stop(
+        "Column(s) not found in data: ",
+        paste(missing_cols, collapse = ", ")
       )
-    )
+    }
+  }
+  if (!is.null(unit_column) && !unit_column %in% names(data)) {
+    stop("Column '", unit_column, "' not found in data")
+  }
+
+  # Standardise units if unit_column provided ----
+  if (!is.null(unit_column)) {
+    unit_standard_col <- paste0(unit_column, "_STANDARD")
+    data <- data |>
+      mutate(
+        # FIXME: Needs to be extended to handle a wider range of SI prefixes
+        # Standard units: mg/kg (dry), mg/kg (wet), mg/L
+        !!unit_standard_col := case_when(
+          str_detect(.data[[unit_column]], "dry") ~ "mg/kg (dry)",
+          str_detect(.data[[unit_column]], "wet") ~ "mg/kg (wet)",
+          str_detect(.data[[unit_column]], "L") ~ "mg/L",
+          TRUE ~ NA_character_
+        )
+      )
+  }
+
+  # Convert values if value_columns provided ----
+  if (!is.null(value_columns)) {
+    # Need unit_column for conversion logic
+    if (is.null(unit_column)) {
+      stop("'unit_column' must be specified when converting values")
+    }
+
+    # Convert each value column
+    for (value_col in value_columns) {
+      value_standard_col <- paste0(value_col, "_STANDARD")
+
+      data <- data |>
+        mutate(
+          # Conversion factors
+          !!value_standard_col := case_when(
+            # Already in mg/kg or mg/L - no conversion
+            .data[[unit_column]] %in%
+              c("mg/kg (dry)", "mg/kg (wet)", "mg/L") ~ .data[[value_col]],
+            # μg or µg to mg (divide by 1000)
+            str_detect(.data[[unit_column]], "μg|µg") ~ .data[[value_col]] /
+              1000,
+            # Empty or missing units
+            .data[[unit_column]] == "" | is.na(.data[[unit_column]]) ~ NA_real_,
+            TRUE ~ NA_real_
+          )
+        )
+    }
+  }
+
+  data
 }
 
 #' Standardise a date column to IDate format

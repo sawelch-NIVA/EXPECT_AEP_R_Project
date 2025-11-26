@@ -1,267 +1,204 @@
-# # Standardized function to create density plots
-# create_density_plot <- function(data, site_type = NULL) {
-#   # Filter data if site_type is provided
-#   if (!is.null(site_type)) {
-#     data <- data %>% filter(SITE_GEOGRAPHIC_FEATURE == site_type)
-#   }
+#' Create Ridge Plot for Copper Measurements
+#'
+#' @param data Filtered measurement data
+#' @param compartment Environmental compartment to plot
+#' @param sub_compartments Character vector of sub-compartments to include
+#' @param thresholds Threshold data (from generate_copper_thresholds())
+#' @param max_threshold Maximum threshold value to display
+#' @param n_points Number of points for density calculation
+#'
+#' @importFrom dplyr filter mutate uncount
+#' @importFrom ggplot2 ggplot aes geom_vline labs facet_wrap
+#' @importFrom ggridges geom_ridgeline theme_ridges
+#' @importFrom stats dnorm
+#'
+#' @export
+plot_copper_ridges <- function(
+  data,
+  compartment,
+  sub_compartments = NULL,
+  thresholds,
+  max_threshold = 1,
+  n_points = 100
+) {
+  # Filter data for compartment
+  plot_data <- data |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      UNCERTAINTY_TYPE == "Standard Deviation",
+      !is.na(MEASURED_N),
+      MEASURED_UNIT_STANDARD == "mg/L"
+    ) |>
+    mutate(
+      SD_STANDARDISED = UNCERTAINTY_UPPER_STANDARD - MEASURED_VALUE_STANDARD
+    )
 
-#   # Create the plot with standardized settings
-#   output <- ggplot(
-#     data,
-#     aes(
-#       x = MEASURED_VALUE,
-#       y = reorder(tissue_with_n, MEASURED_VALUE, median),
-#       fill = final_group
-#     )
-#   ) +
-#     # geom_dotplot(
-#     #   dotsize = 0.01,
-#     #   stroke = 0,
-#     #   binwidth = 5,
-#     #   binpositions = "all"
-#     # ) +
-#     # Ridge density plot with semi-transparency
-#     stat_density_ridges(geom = "density_ridges_gradient", bandwidth = 0.15) +
+  # Filter for sub-compartments if specified
+  if (!is.null(sub_compartments)) {
+    plot_data <- plot_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
 
-#     # Log scale for concentrations with formatted labels
-#     scale_fill_brewer(palette = "Set3", name = "") +
-#     scale_x_log10(
-#       breaks = c(0.01, 0.1, 1, 10, 100, 1000, 10000, 100000),
-#       limits = c(0.01, 100000)
-#     ) +
-#     facet_nested_wrap(
-#       ~ short_name_ordered + tissue_with_n_ordered,
-#       dir = "h",
-#       strip.position = "right",
-#       scales = "free_y",
-#       # nest_line = element_line(linetype = 1),
-#       ncol = 1,
-#       shrink = TRUE
-#     ) +
-#     # Clear labeling
-#     labs(
-#       x = "Copper Concentration (mg/kg wet weight, log scale)",
-#       y = NULL
-#     ) +
-#     # Base theme
-#     ggridges::theme_ridges() +
-#     # Custom consistent theme
-#     consistent_theming_graph(base_size = 8) +
-#     theme(
-#       # Strip styling - keep original approach
-#       strip.text = element_text(hjust = 0.9, colour = "#505050"),
-#       strip.clip = "off",
+  # Generate density distributions
+  ridge_data <- plot_data |>
+    mutate(
+      low = MEASURED_VALUE_STANDARD - 3 * SD_STANDARDISED,
+      high = MEASURED_VALUE_STANDARD + 3 * SD_STANDARDISED
+    ) |>
+    uncount(n_points, .id = "row") |>
+    mutate(
+      x = (1 - row / n_points) * low + row / n_points * high,
+      density = dnorm(x, MEASURED_VALUE_STANDARD, SD_STANDARDISED)
+    )
 
-#       # Axis styling
-#       axis.title.x = element_text(size = 12, margin = margin(t = 10)),
-#       axis.text.x = element_text(size = 10),
+  # Filter thresholds
+  threshold_data <- thresholds |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      THRESHOLD_VALUE <= max_threshold
+    )
 
-#       # Legend styling
-#       legend.position = "bottom",
-#       legend.title = element_text(face = "bold"),
+  if (!is.null(sub_compartments)) {
+    threshold_data <- threshold_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
 
-#       # Grid styling
-#       panel.grid.major = element_blank(),
-#       panel.grid.minor = element_blank(),
+  # Create plot
+  p <- ggplot(ridge_data, aes(x = x, y = SAMPLE_ID, height = density)) +
+    geom_ridgeline(
+      aes(fill = ENVIRON_COMPARTMENT_SUB),
+      alpha = 0.7,
+      scale = 0.5
+    ) +
+    geom_vline(
+      data = threshold_data,
+      aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+      linetype = "dashed",
+      linewidth = 0.8,
+      alpha = 0.6
+    ) +
+    labs(
+      x = "Concentration (mg/L)",
+      y = "Sample ID"
+    ) +
+    theme_ridges() +
+    facet_wrap(
+      facets = vars(ENVIRON_COMPARTMENT_SUB),
+      ncol = 1,
+      scales = "free_y"
+    )
 
-#       # Add padding to avoid cut-off
-#       plot.margin = margin(t = 20, r = 20),
+  return(p)
+}
 
-#       # Clean background for both plots
-#       panel.background = element_blank(),
-#       strip.background = element_blank(),
-#       plot.background = element_blank(),
-#       panel.spacing.y = unit(-1, "lines"),
-#       panel.border = element_blank()
-#     )
+#' Create Boxplot for Copper Measurements from Summary Statistics
+#'
+#' @param data Filtered measurement data with summary statistics
+#' @param compartment Environmental compartment to plot
+#' @param sub_compartments Character vector of sub-compartments to include. Leave NULL to include all
+#' @param thresholds Threshold data
+#' @param max_threshold Maximum threshold value to display
+#'
+#' @importFrom dplyr filter mutate
+#' @importFrom ggplot2 ggplot aes stat_boxplot geom_vline labs facet_wrap
+#' @importFrom stats qnorm
+#'
+#' @export
+plot_copper_boxplots <- function(
+  data,
+  compartment,
+  sub_compartments = NULL,
+  thresholds,
+  max_threshold = 1
+) {
+  # Filter and prepare data
+  plot_data <- data |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      UNCERTAINTY_TYPE == "Standard Deviation",
+      !is.na(MEASURED_N),
+      MEASURED_UNIT_STANDARD == "mg/L"
+    ) |>
+    mutate(
+      SD_STANDARDISED = UNCERTAINTY_UPPER_STANDARD - MEASURED_VALUE_STANDARD,
+      # Calculate boxplot statistics from mean and SD assuming normal distribution
+      box_ymin = MEASURED_VALUE_STANDARD - 1.5 * 1.35 * SD_STANDARDISED, # ~whisker (Q1 - 1.5*IQR)
+      box_lower = MEASURED_VALUE_STANDARD - 0.675 * SD_STANDARDISED, # Q1
+      box_middle = MEASURED_VALUE_STANDARD, # median (= mean for normal)
+      box_upper = MEASURED_VALUE_STANDARD + 0.675 * SD_STANDARDISED, # Q3
+      box_ymax = MEASURED_VALUE_STANDARD + 1.5 * 1.35 * SD_STANDARDISED, # ~whisker (Q3 + 1.5*IQR)
+      # Create hover text
+      hover_text = paste0(
+        "Sample: ",
+        SAMPLE_ID,
+        "\n",
+        "Mean: ",
+        round(MEASURED_VALUE_STANDARD, 3),
+        " mg/L\n",
+        "SD: ",
+        round(SD_STANDARDISED, 3),
+        "\n",
+        "N: ",
+        MEASURED_N,
+        "\n"
+      )
+    )
 
-#   insertLayer(
-#     output,
-#     geom_vline(
-#       xintercept = c(0.01, 0.1, 1, 10, 100, 1000, 10000, 100000),
-#       color = "grey90",
-#       size = 0.5
-#     ),
-#     after = 1
-#   )
+  if (!is.null(sub_compartments)) {
+    plot_data <- plot_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
 
-#   return(output)
-# }
+  # Filter thresholds
+  threshold_data <- thresholds |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      THRESHOLD_VALUE <= max_threshold
+    )
 
-# insertLayer <- function(ggplot_object, after = 0, ...) {
-#   #  ggplot_object     : Plot object
-#   # after  : Position where to insert new layers, relative to existing layers
-#   #  ...   : additional layers, separated by commas (,) instead of plus sign (+)
+  if (!is.null(sub_compartments)) {
+    threshold_data <- threshold_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
 
-#   if (after < 0) after <- after + length(ggplot_object$layers)
+  # Create plot
+  p <- ggplot(
+    plot_data,
+    aes(
+      x = box_middle,
+      y = SAMPLE_ID,
+      text = hover_text
+    )
+  ) +
+    geom_boxplot(
+      aes(
+        xmin = box_ymin,
+        lower = box_lower,
+        middle = box_middle, # FIXME: why doesn't this work!?!?!?!
+        upper = box_upper,
+        xmax = box_ymax,
+        fill = ENVIRON_COMPARTMENT_SUB
+      ),
+      stat = "identity",
+      alpha = 0.7
+    ) +
+    geom_vline(
+      data = threshold_data,
+      aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+      linetype = "dashed",
+      linewidth = 0.8,
+      alpha = 0.6
+    ) +
+    labs(
+      x = "Concentration (mg/L)",
+      y = "Sample ID"
+    ) +
+    theme_minimal() +
+    facet_wrap(
+      facets = vars(ENVIRON_COMPARTMENT_SUB),
+      ncol = 1,
+      scales = "free_y"
+    )
 
-#   if (!length(ggplot_object$layers)) ggplot_object$layers <- list(...) else
-#     ggplot_object$layers <- append(ggplot_object$layers, list(...), after)
-
-#   return(ggplot_object)
-# }
-
-# # Data preparation steps (kept from original code)
-# copper_species_lookup <- read_csv("R/data/copper_species_lookup.csv")
-# biota_data <- copper_clean %>%
-#   filter(ENVIRON_COMPARTMENT == "Biota" & !is.na(SAMPLE_TISSUE)) |>
-#   dplyr::select(
-#     ENVIRON_COMPARTMENT_SUB,
-#     SAMPLE_SPECIES,
-#     SAMPLE_TISSUE,
-#     MEASURED_VALUE,
-#     SITE_GEOGRAPHIC_FEATURE
-#   ) |>
-#   # Standardize taxonomic notation in species names
-#   mutate(
-#     # Preserve original names
-#     original_species = SAMPLE_SPECIES,
-#     # Standardize taxonomy notation for joining
-#     clean_species = str_replace_all(
-#       SAMPLE_SPECIES,
-#       c(
-#         "\\(Klasse\\)" = " (Class)",
-#         "\\(Familie\\)" = " (Family)",
-#         "\\(Orden\\)" = " (Order)",
-#         "\\(Slekt\\)" = " (Genus)"
-#       )
-#     )
-#   ) |>
-#   left_join(trophic_fish_data, by = c("SAMPLE_SPECIES" = "Species"))
-
-# biota_classified <- biota_data %>%
-#   # Left join with our custom lookup table
-#   left_join(copper_species_lookup, by = c("SAMPLE_SPECIES")) %>%
-#   # Create fallback classification for species not in our lookup
-#   mutate(
-#     # Use species_group from lookup if available, otherwise apply fallback rules
-#     final_group = species_group,
-#     # Create a display name for the species
-#     display_name = case_when(
-#       # If we have an English name from lookup, use it with scientific name
-#       !is.na(Name_EN) ~ paste0(SAMPLE_SPECIES, " (", Name_EN, ")"),
-
-#       # Otherwise just use the scientific name
-#       TRUE ~ SAMPLE_SPECIES
-#     ),
-
-#     # Create a shorter display name for facets
-#     short_name = case_when(
-#       # If we have an English name, use that
-#       !is.na(Name_EN) ~ Name_EN,
-
-#       # Otherwise extract genus or use first part of name
-#       TRUE ~ sub("^([A-Za-z]+).*$", "\\1 sp.", SAMPLE_SPECIES)
-#     )
-#   )
-
-# species_tissue_data <- biota_classified %>%
-#   group_by(SAMPLE_SPECIES, SAMPLE_TISSUE) %>%
-#   filter(n() >= 5) %>% # Minimum 5 samples per species/tissue
-#   ungroup()
-
-# species_tissue_data <- species_tissue_data %>%
-#   mutate(
-#     # Ensure consistent ecological group ordering
-#     final_group = factor(
-#       final_group,
-#       levels = c(
-#         "Fish",
-#         "Molluscs",
-#         "Plants",
-#         "Worms",
-#         "Arthropods",
-#         "Benthic Organisms",
-#         "Other"
-#       )
-#     ),
-
-#     # Create combined species-tissue identifier for y-axis
-#     species_tissue = paste(short_name, "-", SAMPLE_TISSUE),
-
-#     # Create hierarchical label for faceting
-#     facet_label = paste(final_group, ":", short_name)
-#   )
-
-# # Calculate sample counts for each species-tissue combination
-# sample_counts <- species_tissue_data %>%
-#   group_by(species_tissue, final_group, SITE_GEOGRAPHIC_FEATURE, short_name) %>%
-#   mutate(
-#     SITE_GEOGRAPHIC_FEATURE = case_match(
-#       SITE_GEOGRAPHIC_FEATURE,
-#       "Coastal, fjord" ~ "SW",
-#       "Lake, pond, pool, reservoir" ~ "FW",
-#       "River, stream, canal" ~ "FW"
-#     )
-#   ) |>
-#   reframe(
-#     n_samples = n(),
-#     .groups = "drop",
-#     SAMPLE_TISSUE,
-#     SITE_GEOGRAPHIC_FEATURE,
-#     MEASURED_VALUE,
-#     MeanTrophicLevel,
-#     short_name
-#   ) %>%
-#   mutate(
-#     # Add sample count to display label
-#     tissue_with_n = paste0(SAMPLE_TISSUE, " (", n_samples, ")"),
-#     tissue_with_n_ordered = factor(
-#       tissue_with_n,
-#       levels = levels(reorder(
-#         tissue_with_n,
-#         MEASURED_VALUE,
-#         median,
-#         decreasing = TRUE
-#       ))
-#     ),
-#     # Fix: Create a short_name with trophic level first, then create the factor
-#     short_name_with_trophic = ifelse(
-#       is.na(MeanTrophicLevel),
-#       short_name,
-#       paste0(short_name, " (T=", MeanTrophicLevel, ")")
-#     ),
-#     short_name_ordered = factor(
-#       short_name_with_trophic,
-#       levels = levels(reorder(
-#         short_name_with_trophic,
-#         MEASURED_VALUE,
-#         median,
-#         decreasing = TRUE
-#       ))
-#     )
-#   ) |>
-#   mutate(
-#     tissue_with_n_ordered = case_when(
-#       str_detect(tissue_with_n_ordered, "Gill") ~
-#         str_replace(tissue_with_n_ordered, "Gill", "Gill [dry]"),
-#       TRUE ~ as.character(tissue_with_n_ordered)
-#     )
-#   )
-# # Create the freshwater and marine density plots
-# density_plot_fw <- create_density_plot(sample_counts, "FW") +
-#   coord_cartesian(ylim = c(0, 5), clip = "off")
-
-# density_plot_sw <- create_density_plot(sample_counts, "SW") +
-#   coord_cartesian(ylim = c(0, 5), clip = "off")
-
-# # Display plots
-# density_plot_fw
-# density_plot_sw
-
-# # Save plots
-# ggsave(
-#   "plots/plot_density_tissue_freshwater.png",
-#   plot = density_plot_fw,
-#   width = 10,
-#   height = 6,
-#   dpi = 300
-# )
-
-# ggsave(
-#   "plots/plot_density_tissue_marine.png",
-#   plot = density_plot_sw,
-#   width = 10,
-#   height = 6,
-#   dpi = 300
-# )
+  return(p)
+}

@@ -41,7 +41,8 @@ tar_option_set(
     "dplyr",
     "dtplyr",
     "forcats",
-    "viridis"
+    "viridis",
+    "ggridges"
   ),
   format = "qs" # Optionally set the default storage format. qs is fast.
   #
@@ -227,17 +228,21 @@ list(
   tar_target(
     name = literature_clean_standardised,
     command = {
-      standardise_measured_units(
-        literature_clean,
-        value_column = "MEASURED_VALUE",
-        unit_column = "MEASURED_UNIT"
-      ) |>
+      literature_clean |>
         standardise_measured_units(
-          value_column = "LOQ_VALUE",
+          value_columns = c(
+            "MEASURED_VALUE",
+            "UNCERTAINTY_UPPER",
+            "UNCERTAINTY_LOWER"
+          ),
+          unit_column = "MEASURED_UNIT"
+        ) |>
+        standardise_measured_units(
+          value_columns = "LOQ_VALUE",
           unit_column = "LOQ_UNIT"
         ) |>
         standardise_measured_units(
-          value_column = "LOD_VALUE",
+          value_columns = "LOD_VALUE",
           unit_column = "LOD_UNIT"
         )
     }

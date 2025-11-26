@@ -2,10 +2,13 @@
 title: "EXPECT Copper AEP"
 author: "Sam Welch"
 date: "2025.11.25"
+lightbox: true
 format: 
   html:
     page-layout: full
     code-fold: true
+    body-width: 900px
+    fig-format: svg
 ---
 
 ```{r}
@@ -55,7 +58,8 @@ load_all_requirements <- function(skip_stopedata_update = FALSE) {
       "esquisse",
       "forcats",
       "viridis",
-      "DT"
+      "DT",
+      "ggridges"
     ),
     FUN = library,
     character.only = TRUE
@@ -99,7 +103,7 @@ tar_read(load_literature_pqt) |>
     CAMPAIGN_COMMENT
   ) |>
   dplyr::reframe(SUM_N = sum(MEASURED_N)) |>
-  datatable()
+  datatable(options = list(pageLength = 5, lengthMenu = c(5, 10, 15, 20)))
 
 ```
 
@@ -123,7 +127,7 @@ tar_read(plot_paper_species)
 ## Sampling Sites/Map
 
 ```{r}
-#| label: fig_paper_species
+#| label: fig_map
 #| fig-cap: "Number of environmental sub-compartments sampled per paper."
 #| warning: false
 tar_read(wgs84_literature_map)
@@ -141,10 +145,8 @@ We're most interested in qualifying the concentrations in each compartment, so t
 
 library(ggplot2)
 
-ggplot(
-  `filter(main_table,
-    ENVIRON_COMPARTMENT == "Aquatic")`
-) +
+filter(main_table, ENVIRON_COMPARTMENT == "Aquatic") |>
+  ggplot() +
   aes(
     x = SITE_CODE,
     y = MEASURED_VALUE_STANDARD,
@@ -182,9 +184,8 @@ dist_params <- tibble(
 )
 
 ## Thresholds ----
-thresholds <- tibble(
-  value = c(30, 45, 65, 80)
-)
+thresholds <- generate_copper_thresholds() |>
+  filter(ENVIRON_COMPARTMENT == "Aquatic")
 
 # Generate density data ----
 ## Create x values and calculate densities ----
@@ -194,13 +195,22 @@ x_range <- seq(
   length.out = 1001
 )
 
-density_data <- dist_params |>
+aquatic_data <- main_table |>
+  filter(ENVIRON_COMPARTMENT == "Aquatic") |>
+  filter(UNCERTAINTY_TYPE == "Standard Deviation", !is.na(MEASURED_N)) |>
+  mutate(SD_STANDARDISED = UNCERTAINTY_UPPER_STANDARD - MEASURED_VALUE_STANDARD)
+
+aquatic_data_dists <- aquatic_data |>
   rowwise() |>
+  group_by(SAMPLE_ID) |>
   reframe(
-    species = species,
-    n = n, # keep n for labeling
+    n = MEASURED_N, # keep n for labeling
     x = x_range,
-    density = dnorm(x_range, mean = mean, sd = sd)
+    density = dnorm(
+      x_range,
+      mean = MEASURED_VALUE_STANDARD,
+      sd = SD_STANDARDISED
+    )
   )
 
 # Create labels with sample size ----
@@ -211,22 +221,70 @@ species_labels <- dist_params |>
 
 # Visualization ----
 ## Ridgeline density plot with thresholds ----
-ggplot(density_data, aes(x = x, y = species, height = density)) +
-  geom_ridgeline(fill = "lightblue", alpha = 0.7, scale = 10) +
+ggplot(aquatic_data_dists, aes(x = x, y = SAMPLE_ID, height = density)) +
+  geom_ridgeline(fill = "lightblue", alpha = 0.7, scale = 100) +
   # Add vertical lines for thresholds
   geom_vline(
-    data = thresholds,
-    aes(xintercept = value),
+    data = thresholds |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% vars(ENVIRON_COMPARTMENT_SUB)), # only use relevant thresholds
+    aes(xintercept = THRESHOLD_VALUE),
     linetype = "dashed",
     color = "red",
     linewidth = 0.8,
     alpha = 0.6
   ) +
-  scale_y_discrete(labels = species_labels) +
   labs(
     x = "Value",
     y = ""
   ) +
   theme_ridges()
+
+```
+
+```{r}
+# Create the expanded dataset using the Stack Overflow pattern
+aquatic_ridge_data <- aquatic_data |>
+  filter(MEASURED_UNIT_STANDARD == "mg/L") |>
+
+  mutate(
+    low = MEASURED_VALUE_STANDARD - 3 * SD_STANDARDISED,
+    high = MEASURED_VALUE_STANDARD + 3 * SD_STANDARDISED
+  ) |>
+  uncount(100, .id = "row") |>
+  mutate(
+    x = (1 - row / 100) * low + row / 100 * high,
+    density = dnorm(x, MEASURED_VALUE_STANDARD, SD_STANDARDISED)
+  )
+
+# Create the ridge plot
+ggplot(aquatic_ridge_data, aes(x = x, y = SAMPLE_ID, height = density)) +
+  geom_ridgeline(
+    aes(fill = ENVIRON_COMPARTMENT_SUB),
+    alpha = 0.7,
+    scale = 0.5
+  ) +
+  geom_vline(
+    data = thresholds |>
+      filter(
+        ENVIRON_COMPARTMENT_SUB %in% c("Freshwater", "Wastewater"),
+        THRESHOLD_VALUE <= 1
+      ), # only use relevant thresholds, not above 1 mg/L (purely because our data currently doesn't exceed that)
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Sample ID"
+  ) +
+  theme_ridges() +
+  facet_wrap(
+    facets = vars(ENVIRON_COMPARTMENT_SUB),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  )
+plotly::ggplotly()
 
 ```
