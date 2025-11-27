@@ -9,6 +9,7 @@ join_all_literature_modules(
   sites_data,
   reference_data,
   biota_data,
+  campaign_data,
   parameters_data,
   methods_data
 )
@@ -20,11 +21,11 @@ join_all_literature_modules(
 
 \item{reference_data}{Tibble, reference dimension table}
 
+\item{campaign_data}{Tibble, campaign dimension table}
+
 \item{parameters_data}{Tibble, parameters dimension table}
 
 \item{methods_data}{Tibble, methods dimension table (will be spread internally)}
-
-\item{campaign_data}{Tibble, campaign dimension table}
 }
 \value{
 A tibble with all tables joined to measurements

@@ -4,42 +4,49 @@
 \alias{standardise_measured_units}
 \title{Standardise measurement units and values}
 \usage{
-standardise_measured_units(
-  data,
-  value_column = "MEASURED_VALUE",
-  unit_column = "MEASURED_UNIT"
-)
+standardise_measured_units(data, value_columns = NULL, unit_column = NULL)
 }
 \arguments{
 \item{data}{A tibble or data frame containing measurement data}
 
-\item{value_column}{Character string. Name of column containing measurement values.
-Default is "MEASURED_VALUE"}
+\item{value_columns}{Character vector. Names of columns containing measurement
+values (e.g., c("MEASURED_VALUE", "MEASURED_UPPER", "MEASURED_LOWER")).
+Default is NULL (no value conversion). If NULL, only unit standardisation occurs.}
 
 \item{unit_column}{Character string. Name of column containing measurement units.
-Default is "MEASURED_UNIT"}
+Default is NULL (no unit standardisation). If NULL, only value conversion occurs.}
 }
 \value{
-The input data with two new columns added:
+The input data with new columns added depending on arguments:
 \itemize{
-\item \verb{\{unit_column\}_STANDARD}: Standardised unit (mg/kg (dry), mg/kg (wet), or mg/L)
-\item \verb{\{value_column\}_STANDARD}: Converted measurement value in standard units
+\item If \code{unit_column} provided: \verb{\{unit_column\}_STANDARD} with standardised units
+\item If \code{value_columns} provided: \verb{\{value_column\}_STANDARD} for each value column
 }
 }
 \description{
 Converts measurement values to standard units (mg/kg for dry/wet weight,
 mg/L for concentration). Handles both Greek mu (μ) and micro sign (µ)
-in microgram units. Skip row if the value is NA.
+in microgram units. Can convert multiple value columns that share the same
+unit column.
 }
 \examples{
 \dontrun{
-data |>
-  standardise_measured_units()
-
+# Convert both units and multiple value columns
 data |>
   standardise_measured_units(
-    value_column = "concentration",
-    unit_column = "units"
+    value_columns = c("MEASURED_VALUE", "MEASURED_UPPER", "MEASURED_LOWER"),
+    unit_column = "MEASURED_UNIT"
+  )
+
+# Only standardise units
+data |>
+  standardise_measured_units(unit_column = "MEASURED_UNIT")
+
+# Convert single value column
+data |>
+  standardise_measured_units(
+    value_columns = "MEASURED_VALUE",
+    unit_column = "MEASURED_UNIT"
   )
 }
 

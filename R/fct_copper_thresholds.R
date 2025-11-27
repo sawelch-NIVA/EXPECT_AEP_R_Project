@@ -12,6 +12,7 @@
 #'     \item REFERENCE_ID: Short identifier for the source
 #'     \item REFERENCE_TYPE: Type of reference document
 #'     \item TITLE: Full title of source document
+#'     \item TITLE_SHORT: Short description of threshold (max 40 characters)
 #'     \item DOCUMENT_NUMBER: Document identifier (e.g., M-608|2016)
 #'     \item YEAR: Year of publication (integer)
 #'     \item ACCESS_DATE: Date threshold was accessed/compiled
@@ -23,7 +24,7 @@
 #'     \item MEASURED_CATEGORY: Measurement category (External, Internal, Surface)
 #'     \item SAMPLE_SPECIES: Species name (for biota only)
 #'     \item SAMPLE_TISSUE: Tissue type (for biota only)
-#'     \item THRESHOLD_CLASS: Classification class the threshold applies to
+#'     \item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Moderate (III), Poor (IV), Very Poor (V))
 #'     \item THRESHOLD_VALUE: Numeric threshold value
 #'     \item MEASURED_UNIT: Unit of measurement with basis (e.g., mg/kg (wet), μg/L)
 #'     \item THRESHOLD_FRACTION: Fraction measured (dissolved, bioavailable, total, etc.)
@@ -39,6 +40,15 @@
 #'   \item ICES BAC for marine biota
 #' }
 #'
+#' Norwegian classification system uses five classes:
+#' \itemize{
+#'   \item Klasse I - Bakgrunn (Background)
+#'   \item Klasse II - God (Good)
+#'   \item Klasse III - Moderat (Moderate)
+#'   \item Klasse IV - Dårlig (Poor)
+#'   \item Klasse V - Svært dårlig (Very Poor)
+#' }
+#'
 #' @export
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_rows
@@ -48,6 +58,7 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "M-8022-2024",
     REFERENCE_TYPE = "Report",
     TITLE = "Contaminants in coastal waters 2023 / Miljøgifter i kystområdene 2023",
+    TITLE_SHORT = c("PROREF: Mussel", "PROREF: Cod liver"),
     DOCUMENT_NUMBER = "M-8022-2024",
     YEAR = 2025L,
     ACCESS_DATE = as.Date("2025-11-19"),
@@ -74,6 +85,13 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
     TITLE = "Grenseverdier for klassifisering av vann, sediment og biota",
+    TITLE_SHORT = c(
+      "M-608: Freshwater Background (I)",
+      "M-608: Freshwater Good (II)",
+      "M-608: Freshwater Moderate (III)",
+      "M-608: Freshwater Poor (IV)",
+      "M-608: Freshwater Very Poor (V)"
+    ),
     DOCUMENT_NUMBER = "M-608|2016",
     YEAR = 2016L,
     ACCESS_DATE = as.Date("2025-11-19"),
@@ -85,15 +103,22 @@ generate_copper_thresholds <- function() {
     MEASURED_CATEGORY = "External",
     SAMPLE_SPECIES = NA_character_,
     SAMPLE_TISSUE = NA_character_,
-    THRESHOLD_CLASS = c("I/II", "II/III", "III/IV", "IV/V"),
-    THRESHOLD_VALUE = c(0.3, 7.8, 15.6, NA_real_),
+    THRESHOLD_CLASS = c(
+      "Background (I)",
+      "Good (II)",
+      "Moderate (III)",
+      "Poor (IV)",
+      "Very Poor (V)"
+    ),
+    THRESHOLD_VALUE = c(0.15, 0.3, 7.8, 15.6, NA_real_),
     MEASURED_UNIT = "μg/L",
     THRESHOLD_FRACTION = "Dissolved",
     THRESHOLD_COMMENT = c(
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class I (Background: 0-0.3) and Class II (Good: 0.3-7.8)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class II (Good: 0.3-7.8) and Class III (Moderate: 7.8-15.6)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class III (Moderate: 7.8-15.6) and Class IV (Poor: >15.6)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class IV (Poor: >15.6) and Class V (Very Poor). Open-ended"
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.15)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-7.8)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class III (Moderate: 7.8-15.6)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: >15.6)",
+      "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor). Open-ended"
     )
   )
 
@@ -102,6 +127,12 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
     TITLE = "Grenseverdier for klassifisering av vann, sediment og biota",
+    TITLE_SHORT = c(
+      "M-608: Coastal Background (I)",
+      "M-608: Coastal Good - Moderate (II-III)",
+      "M-608: Coastal Poor (IV)"
+      # "M-608: Coastal Very Poor (V)"
+    ),
     DOCUMENT_NUMBER = "M-608|2016",
     YEAR = 2016L,
     ACCESS_DATE = as.Date("2025-11-19"),
@@ -113,15 +144,20 @@ generate_copper_thresholds <- function() {
     MEASURED_CATEGORY = "External",
     SAMPLE_SPECIES = NA_character_,
     SAMPLE_TISSUE = NA_character_,
-    THRESHOLD_CLASS = c("I/II", "II/III", "III/IV", "IV/V"),
-    THRESHOLD_VALUE = c(0.3, 2.6, 5.2, NA_real_),
+    THRESHOLD_CLASS = c(
+      "Background (I)",
+      "Good - Moderate (II-III)",
+      "Poor (IV)"
+      # "Very Poor (V)"
+    ),
+    THRESHOLD_VALUE = c(0.3, 2.6, 5.2),
     MEASURED_UNIT = "μg/L",
     THRESHOLD_FRACTION = "Dissolved",
     THRESHOLD_COMMENT = c(
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class I (Background: 0-0.3) and Class II (Good: 0.3-2.6)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class II (Good: 0.3-2.6) and Class III (Moderate: 2.6-5.2)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class III (Moderate: 2.6-5.2) and Class IV (Poor: >5.2)",
-      "Norwegian water classification. Revised 30.10.2020. Boundary between Class IV (Poor: >5.2) and Class V (Very Poor). Open-ended"
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.3)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-2.6)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 2.6 - 5.2)"
+      # "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor: >5.2)"
     )
   )
 
@@ -130,6 +166,13 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
     TITLE = "Grenseverdier for klassifisering av vann, sediment og biota",
+    TITLE_SHORT = c(
+      "M-608: Sediment Background (I)",
+      "M-608: Sediment Good (II)",
+      "M-608: Sediment Moderate (III)",
+      "M-608: Sediment Poor (IV)"
+      # "M-608: Sediment Very Poor (V)"
+    ),
     DOCUMENT_NUMBER = "M-608|2016",
     YEAR = 2016L,
     ACCESS_DATE = as.Date("2025-11-19"),
@@ -141,15 +184,22 @@ generate_copper_thresholds <- function() {
     MEASURED_CATEGORY = "External",
     SAMPLE_SPECIES = NA_character_,
     SAMPLE_TISSUE = NA_character_,
-    THRESHOLD_CLASS = c("I/II", "II/III", "III/IV", "IV/V"),
-    THRESHOLD_VALUE = c(20, 84, 147, NA_real_),
+    THRESHOLD_CLASS = c(
+      "Background (I)",
+      "Good (II)",
+      "Moderate (III)",
+      "Poor (IV)"
+      # "Very Poor (V)"
+    ),
+    THRESHOLD_VALUE = c(20, 20, 84, 147),
     MEASURED_UNIT = "mg/kg (dry)",
     THRESHOLD_FRACTION = "Total",
     THRESHOLD_COMMENT = c(
-      "Norwegian sediment classification. Revised 30.10.2020. Boundary between Class I (Background: 0-20) and Class II (Good: 20-84)",
-      "Norwegian sediment classification. Revised 30.10.2020. Boundary between Class II (Good: 20-84) and Class III (Moderate: 84-147)",
-      "Norwegian sediment classification. Revised 30.10.2020. Boundary between Class III (Moderate: 84-147) and Class IV (Poor: >147)",
-      "Norwegian sediment classification. Revised 30.10.2020. Boundary between Class IV (Poor: >147) and Class V (Very Poor). Open-ended"
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-20)",
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class II (Good: 20-84)",
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class III (Moderate: 84-147)",
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: >147)"
+      # "Norwegian sediment classification. Revised 30.10.2020. Class V (Very Poor). Open-ended"
     )
   )
 
@@ -158,6 +208,7 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "Peters2023",
     REFERENCE_TYPE = "Journal Article",
     TITLE = "Following the evidence and using the appropriate regulatory tools: A European-wide risk assessment of copper in freshwaters",
+    TITLE_SHORT = "EU EQS: Bioavailable Cu",
     DOCUMENT_NUMBER = NA_character_,
     YEAR = 2023L,
     ACCESS_DATE = as.Date("2025-11-19"),
@@ -181,6 +232,7 @@ generate_copper_thresholds <- function() {
     REFERENCE_ID = "ICES_BAC",
     REFERENCE_TYPE = "Database",
     TITLE = "ICES Assessment criteria for contaminants in biota",
+    TITLE_SHORT = c("ICES BAC: Mussels", "ICES BAC: Oysters"),
     DOCUMENT_NUMBER = NA_character_,
     YEAR = 2019L,
     ACCESS_DATE = as.Date("2025-11-19"),

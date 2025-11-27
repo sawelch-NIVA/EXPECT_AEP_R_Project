@@ -1,0 +1,303 @@
+---
+title: "EXPECT Copper AEP"
+author: "Sam Welch"
+date: "2025.11.25"
+lightbox: true
+format: 
+  html:
+    page-layout: full
+    code-fold: true
+    body-width: 900px
+    fig-format: svg
+---
+
+```{r}
+#| label: targets-setup
+#| warning: false
+#| output: false
+source("_targets.R")
+tar_make()
+# we still need to load all the other packages again so we can use them here
+load_all_requirements <- function(skip_stopedata_update = FALSE) {
+  if (skip_stopedata_update) {
+    tryCatch(
+      install_local("C:/Users/SAW/Documents/STOPeData_0.0.0.9006.tar.gz"),
+      error = function(e) {
+        "This probably isn't working because STOPeData_0.0.0.9006.tar.gz isn't detected. 
+      And it won't work unless you're me, because I hardcoded the file path."
+      }
+    )
+  }
+  sapply(
+    X = c(
+      "STOPeData", # make sure this is up to date (i.e. ask Sam. if you are Sam, ask yourself.)
+      "sf",
+      "arrow",
+      "tidyverse",
+      "sfhelper",
+      "rnaturalearth",
+      "rnaturalearthdata",
+      "mapproj",
+      "ggspatial",
+      "shadowtext",
+      "ggrepel",
+      "rlang",
+      "data.table",
+      "dtplyr",
+      "leaflet",
+      "janitor",
+      "shiny",
+      "readxl",
+      "purrr",
+      "qs2",
+      "units",
+      "targets",
+      "glue",
+      "ggraph",
+      "tidygraph",
+      "esquisse",
+      "forcats",
+      "viridis",
+      "DT",
+      "ggridges"
+    ),
+    FUN = library,
+    character.only = TRUE
+  )
+
+  `%notin%` <- purrr:::negate(`%in%`)
+  devtools::load_all()
+
+  # load data and set status in global environment
+  main_table <<- arrow::read_parquet("data/clean/literature_data.parquet")
+  requirements_loaded <<- TRUE
+}
+load_all_requirements()
+```
+
+## Dataset Overview
+
+ADD PROBABLE CONTAMINATION SOURCES TO EACH PAPER
+
+```{r}
+#| label: fig-dataset-overview
+#| fig-cap: "Overview of copper concentration measurements across all environmental compartments in the EXPECT dataset."
+#| warning: false
+
+# Add your preview plot here
+```
+
+## Literature Summary
+
+@tbl-paper-summaries provides a comprehensive summary of all papers included in this analysis, showing the number of measurements extracted from each study and their associated sampling campaigns.
+
+```{r}
+#| label: tbl-paper-summaries
+#| tbl-cap: "Summary of analysed papers showing publication details, associated campaigns, and number of copper measurements extracted from each study."
+#| warning: false
+tar_read(load_literature_pqt) |>
+  dplyr::left_join(tar_read(reference_data)) |>
+  dplyr::left_join(
+    tar_read(campaign_data) |> select(CAMPAIGN_NAME_SHORT, CAMPAIGN_COMMENT)
+  ) |>
+  dplyr::group_by(
+    TITLE,
+    YEAR,
+    AUTHOR,
+    CAMPAIGN_COMMENT
+  ) |>
+  dplyr::reframe(SUM_N = sum(MEASURED_N)) |>
+  datatable(options = list(pageLength = 5, lengthMenu = c(5, 10, 15, 20)))
+
+# what's going on with column classes?
+temp <- dplyr::bind_rows(
+  purrr::map_df(tar_read(load_literature_pqt), class),
+  purrr::map_df(tar_read(reference_data), class),
+  purrr::map_df(tar_read(campaign_data), class),
+  .id = "table"
+)
+```
+
+### Compartment Coverage
+
+@fig-paper-subcompartments shows the diversity of environmental sub-compartments sampled in each study. This provides insight into the comprehensiveness of different monitoring approaches and helps identify gaps in compartment coverage across the literature.
+
+```{r}
+#| label: fig-paper-subcompartments
+#| fig-cap: "Number of environmental sub-compartments sampled per paper. Each bar represents a unique publication, with height indicating the diversity of compartments (e.g., surface water, sediment, soil) analysed within that study."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 4
+tar_read(plot_paper_subcompartments)
+```
+
+### Species Coverage
+
+@fig-paper-species illustrates the taxonomic diversity captured across studies, highlighting which papers focused on biota measurements and the range of species groups investigated.
+
+```{r}
+#| label: fig-paper-species
+#| fig-cap: "Number of species groups analysed per paper. Studies with higher bars examined copper concentrations across a broader range of taxonomic groups (e.g., fish, invertebrates, plants)."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 4
+tar_read(plot_paper_species)
+```
+
+## Geographic Distribution of Sampling Sites
+
+@fig-sampling-map shows the spatial distribution of all sampling locations included in the analysis. This map helps visualise the geographic scope of copper monitoring in Arctic regions and identify areas with high or low sampling intensity.
+
+```{r}
+#| label: fig-sampling-map
+#| fig-cap: "Geographic distribution of sampling sites across the study area. Each point represents a unique sampling location where copper concentrations were measured. Point colours may indicate environmental compartment or campaign affiliation."
+#| warning: false
+tar_read(wgs84_literature_map)
+```
+
+## Copper Concentrations by Environmental Compartment
+
+The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means and standard deviations, with density distributions generated from normal distributions (n = 101) and overlaid with relevant regulatory thresholds where available.
+
+### Aquatic Compartment
+
+#### Water Column
+
+@fig-copper-ridges-aquatic-liquid shows the distribution of dissolved copper concentrations in the aquatic liquid phase across all sampling sites and campaigns.
+
+```{r}
+#| label: fig-copper-ridges-aquatic-liquid
+#| fig-cap: "Density distributions of copper concentrations in the aquatic compartment (liquid phase). Each ridge represents measurements from a specific site or campaign, allowing comparison of concentration ranges across locations. Vertical lines indicate relevant water quality thresholds."
+#| warning: false
+
+p <- tar_read(copper_ridge_plot_aquatic_liquid)
+plotly::ggplotly(p)
+```
+
+#### Sediment
+
+@fig-copper-ridges-aquatic-solid presents copper concentrations in aquatic sediments, which typically show higher and more variable concentrations than the water column due to accumulation processes.
+
+```{r}
+#| label: fig-copper-ridges-aquatic-solid
+#| fig-cap: "Density distributions of copper concentrations in aquatic sediments. Higher concentrations in sediments reflect the accumulation of copper from the water column and direct deposition. Vertical lines indicate sediment quality guidelines where available."
+#| warning: false
+
+p <- tar_read(copper_ridge_plot_aquatic_solid)
+plotly::ggplotly(p)
+```
+
+### Terrestrial Compartment
+
+@fig-copper-ridges-terrestrial shows copper concentrations in terrestrial matrices (primarily soils). Terrestrial copper levels are influenced by both atmospheric deposition and local sources such as mining activities or agricultural inputs.
+
+```{r}
+#| label: fig-copper-ridges-terrestrial
+#| fig-cap: "Density distributions of copper concentrations in terrestrial compartment (primarily soil samples). The distributions reflect both natural background levels and anthropogenic inputs from various sources including atmospheric deposition and local industrial activities."
+#| warning: false
+
+p <- tar_read(copper_ridge_plot_terrestrial)
+plotly::ggplotly(p)
+```
+
+### Biota
+
+@fig-copper-ridges-biota presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
+
+```{r}
+#| label: fig-copper-ridges-biota
+#| fig-cap: "Density distributions of copper concentrations in biota, separated by species group. Copper is an essential micronutrient, so baseline concentrations vary widely among taxa. High concentrations may indicate either regulatory adaptation or toxic exposure. Note: Distribution calculations require verification."
+#| warning: false
+
+p <- tar_read(copper_ridge_plot_biota) +
+  facet_wrap(facets = vars(SPECIES_GROUP), ncol = 1, scales = "free")
+plotly::ggplotly(p)
+```
+
+## Temporal Trends
+
+### Abiotic Compartments
+
+@fig-temporal-abiotic examines temporal trends in copper concentrations across abiotic environmental compartments. The current dataset has limited temporal coverage, but these trends may become more apparent as additional data from monitoring databases (e.g., Vannmiljø) are incorporated.
+
+```{r}
+#| label: fig-temporal-abiotic
+#| fig-cap: "Temporal trends in copper concentrations across abiotic environmental sub-compartments. Points represent mean values with error bars showing standard deviations. Limited temporal coverage currently restricts trend interpretation, but patterns may emerge with additional historical monitoring data."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 8
+
+p <- tar_read(load_literature_pqt) |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    UNCERTAINTY_TYPE == "Standard Deviation",
+    ENVIRON_COMPARTMENT != "Biota"
+  ) |>
+  group_by(ENVIRON_COMPARTMENT_SUB, SAMPLE_SPECIES) |>
+  ggplot(aes(
+    x = YEAR,
+    y = MEASURED_VALUE_STANDARD,
+    color = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  geom_errorbar(
+    aes(ymin = UNCERTAINTY_LOWER_STANDARD, ymax = UNCERTAINTY_UPPER_STANDARD),
+    width = .2,
+  ) +
+  facet_wrap(
+    facets = vars(ENVIRON_COMPARTMENT_SUB),
+    ncol = 1,
+    scales = "free_y"
+  ) +
+  labs(
+    x = "Year",
+    y = "Copper Concentration (standardised units)",
+    color = "Sub-compartment"
+  ) +
+  theme_minimal()
+
+plotly::ggplotly(p)
+```
+
+### Biota
+
+@fig-temporal-biota shows temporal patterns in biotic copper concentrations across species groups. Interpretation should consider both temporal changes in exposure and potential differences in species composition across sampling years.
+
+```{r}
+#| label: fig-temporal-biota
+#| fig-cap: "Temporal trends in copper body burdens across different species groups. Points are coloured by species to help distinguish measurement series. Error bars represent reported uncertainty ranges. Vertical facets separate species groups to account for baseline differences in copper accumulation patterns."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 8
+
+p <- tar_read(load_literature_pqt) |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    ENVIRON_COMPARTMENT == "Biota"
+  ) |>
+  ggplot(aes(
+    x = YEAR,
+    y = MEASURED_VALUE_STANDARD,
+    color = SAMPLE_SPECIES
+  )) +
+  geom_point() +
+  geom_errorbar(
+    aes(ymin = UNCERTAINTY_LOWER_STANDARD, ymax = UNCERTAINTY_UPPER_STANDARD),
+    width = .2,
+  ) +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    ncol = 1,
+    scales = "free_y"
+  ) +
+  labs(
+    x = "Year",
+    y = "Copper Concentration (standardised units)",
+    color = "Species"
+  ) +
+  theme_minimal()
+
+plotly::ggplotly(p)
+```
+```
+

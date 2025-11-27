@@ -143,51 +143,69 @@ list(
   # (It (mostly) works, see SAMPLING_DATE below)
   tar_target(
     name = campaign_data,
-    command = fread_all_module_files(campaign_files, initialise_campaign_tibble)
+    command = fread_all_module_files(
+      campaign_files,
+      initialise_campaign_tibble
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = samples_data,
-    command = fread_all_module_files(samples_files, initialise_samples_tibble)
+    command = fread_all_module_files(
+      samples_files,
+      initialise_samples_tibble
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = biota_data,
-    command = fread_all_module_files(biota_files, initialise_biota_tibble)
+    command = fread_all_module_files(biota_files, initialise_biota_tibble) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = compartments_data,
     command = fread_all_module_files(
       compartments_files,
       initialise_compartments_tibble
-    )
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = measurements_data,
     command = fread_all_module_files(
       measurements_files,
       initialise_measurements_tibble
-    )
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = methods_data,
-    command = fread_all_module_files(methods_files, initialise_methods_tibble)
+    command = fread_all_module_files(
+      methods_files,
+      initialise_methods_tibble
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = parameters_data,
     command = fread_all_module_files(
       parameters_files,
       initialise_parameters_tibble
-    )
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = reference_data,
     command = fread_all_module_files(
       reference_files,
       initialise_references_tibble
-    )
+    ) |>
+      standardise_IDate_all()
   ),
   tar_target(
     name = sites_data,
-    command = fread_all_module_files(sites_files, initialise_sites_tibble)
+    command = fread_all_module_files(sites_files, initialise_sites_tibble) |>
+      standardise_IDate_all()
   ),
 
   # FIXME: Enable once we have CREED data
@@ -249,15 +267,15 @@ list(
   ),
 
   # # Save our big clean table as a parquet
-  tar_target(
-    name = save_literature_pqt,
-    command = save_literature_parquet(
-      data = literature_clean_standardised,
-      output_path = "data/clean",
-      filename = "literature_data.parquet"
-    ),
-    format = "file"
-  ),
+  # tar_target(
+  #   name = save_literature_pqt,
+  #   command = save_literature_parquet(
+  #     data = literature_clean_standardised,
+  #     output_path = "data/clean",
+  #     filename = "literature_data.parquet"
+  #   ),
+  #   format = "file"
+  # ),
 
   # # Load our big clean table as a parquet. load_literature_pqt will be the target for most of our future analyses.
   # Why this level of redundancy? Because with targets, it means we can avoid constantly reloading CSVs unless they've actually changed
@@ -265,11 +283,11 @@ list(
   tar_target(
     name = load_literature_pqt,
     command = {
-      save_literature_pqt # add a dependency on save_literature_pqt even though we don't directly read it
-      load_literature_parquet(
-        input_path = "data/clean",
-        filename = "literature_data.parquet"
-      )
+      literature_clean_standardised # add a dependency on save_literature_pqt even though we don't directly read it
+      # load_literature_parquet(
+      #   input_path = "data/clean",
+      #   filename = "literature_data.parquet"
+      # )
     }
   ),
 
@@ -379,6 +397,53 @@ list(
   tar_target(
     name = copper_toxicity_thresholds,
     command = generate_copper_thresholds()
+  ),
+
+  # Ridge plots for copper measurements ----
+
+  tar_target(
+    copper_ridge_plot_aquatic_liquid,
+    plot_copper_ridges(
+      data = load_literature_pqt,
+      compartment = "Aquatic",
+      sub_compartments = c("Freshwater", "Wastewater"),
+      thresholds = copper_toxicity_thresholds,
+      max_threshold = 1,
+      n_points = 100
+    )
+  ),
+  tar_target(
+    copper_ridge_plot_aquatic_solid,
+    plot_copper_ridges(
+      data = load_literature_pqt,
+      compartment = "Aquatic",
+      sub_compartments = c("Sludge", "Aquatic Sediment"),
+      thresholds = copper_toxicity_thresholds,
+      max_threshold = 1,
+      n_points = 100,
+      scale_ridges = 1
+    )
+  ),
+  tar_target(
+    copper_ridge_plot_terrestrial,
+    plot_copper_ridges(
+      data = load_literature_pqt,
+      compartment = "Terrestrial",
+      thresholds = copper_toxicity_thresholds,
+      max_threshold = 1,
+      n_points = 100,
+      scale_ridges = 3
+    )
+  ),
+  tar_target(
+    copper_ridge_plot_biota,
+    plot_copper_ridges_species(
+      data = load_literature_pqt,
+      compartment = "Biota",
+      thresholds = copper_toxicity_thresholds,
+      max_threshold = 1,
+      n_points = 100
+    )
   )
 
   # TODO: Imputation of missing values. What's best practice?

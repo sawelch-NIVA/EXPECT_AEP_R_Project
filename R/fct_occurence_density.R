@@ -6,10 +6,12 @@
 #' @param thresholds Threshold data (from generate_copper_thresholds())
 #' @param max_threshold Maximum threshold value to display
 #' @param n_points Number of points for density calculation
+#' @param scale_ridges Scale parameter for ridgeline heights (default 0.05)
 #'
 #' @importFrom dplyr filter mutate uncount
-#' @importFrom ggplot2 ggplot aes geom_vline labs facet_wrap
+#' @importFrom ggplot2 ggplot aes geom_vline labs
 #' @importFrom ggridges geom_ridgeline theme_ridges
+#' @importFrom stringr str_wrap
 #' @importFrom stats dnorm
 #'
 #' @export
@@ -19,15 +21,15 @@ plot_copper_ridges <- function(
   sub_compartments = NULL,
   thresholds,
   max_threshold = 1,
-  n_points = 100
+  n_points = 100,
+  scale_ridges = 0.05
 ) {
-  # Filter data for compartment
+  # Filter data for compartment ----
   plot_data <- data |>
     filter(
       ENVIRON_COMPARTMENT == compartment,
       UNCERTAINTY_TYPE == "Standard Deviation",
-      !is.na(MEASURED_N),
-      MEASURED_UNIT_STANDARD == "mg/L"
+      !is.na(MEASURED_N)
     ) |>
     mutate(
       SD_STANDARDISED = UNCERTAINTY_UPPER_STANDARD - MEASURED_VALUE_STANDARD
@@ -39,7 +41,7 @@ plot_copper_ridges <- function(
       filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
   }
 
-  # Generate density distributions
+  # Generate density distributions ----
   ridge_data <- plot_data |>
     mutate(
       low = MEASURED_VALUE_STANDARD - 3 * SD_STANDARDISED,
@@ -48,10 +50,11 @@ plot_copper_ridges <- function(
     uncount(n_points, .id = "row") |>
     mutate(
       x = (1 - row / n_points) * low + row / n_points * high,
-      density = dnorm(x, MEASURED_VALUE_STANDARD, SD_STANDARDISED)
+      density = dnorm(x, MEASURED_VALUE_STANDARD, SD_STANDARDISED),
+      SAMPLE_ID = SAMPLE_ID |> str_wrap(width = 30, whitespace_only = FALSE)
     )
 
-  # Filter thresholds
+  # Filter thresholds ----
   threshold_data <- thresholds |>
     filter(
       ENVIRON_COMPARTMENT == compartment,
@@ -63,30 +66,123 @@ plot_copper_ridges <- function(
       filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
   }
 
-  # Create plot
+  # Create plot ----
   p <- ggplot(ridge_data, aes(x = x, y = SAMPLE_ID, height = density)) +
     geom_ridgeline(
       aes(fill = ENVIRON_COMPARTMENT_SUB),
       alpha = 0.7,
-      scale = 0.5
+      scale = scale_ridges
     ) +
     geom_vline(
       data = threshold_data,
-      aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+      aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
       linetype = "dashed",
       linewidth = 0.8,
       alpha = 0.6
     ) +
     labs(
       x = "Concentration (mg/L)",
-      y = "Sample ID"
+      y = "Sample ID",
+      fill = "Environmental Sub-Compartment",
+      color = "Quality Threshold"
     ) +
-    theme_ridges() +
-    facet_wrap(
-      facets = vars(ENVIRON_COMPARTMENT_SUB),
-      ncol = 1,
-      scales = "free_y"
+    theme_ridges()
+
+  return(p)
+}
+
+#' Create Ridge Plot for Copper Measurements by Species
+#'
+#' @param data Filtered measurement data
+#' @param compartment Environmental compartment to plot
+#' @param sub_compartments Character vector of sub-compartments to include
+#' @param thresholds Threshold data (from generate_copper_thresholds())
+#' @param max_threshold Maximum threshold value to display
+#' @param n_points Number of points for density calculation
+#' @param scale_ridges Scale parameter for ridgeline heights (default 0.05)
+#'
+#' @importFrom dplyr filter mutate uncount
+#' @importFrom ggplot2 ggplot aes geom_vline labs
+#' @importFrom ggridges geom_ridgeline theme_ridges
+#' @importFrom stringr str_wrap
+#' @importFrom stats dnorm
+#'
+#' @export
+plot_copper_ridges_species <- function(
+  data,
+  compartment,
+  sub_compartments = NULL,
+  thresholds,
+  max_threshold = 1,
+  n_points = 100,
+  scale_ridges = 0.05
+) {
+  # Filter data for compartment ----
+  plot_data <- data |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      UNCERTAINTY_TYPE == "Standard Deviation",
+      !is.na(MEASURED_N)
+    ) |>
+    mutate(
+      SD_STANDARDISED = UNCERTAINTY_UPPER_STANDARD - MEASURED_VALUE_STANDARD
     )
+
+  # Filter for sub-compartments if specified
+  if (!is.null(sub_compartments)) {
+    plot_data <- plot_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
+
+  # Generate density distributions ----
+  ridge_data <- plot_data |>
+    mutate(
+      low = MEASURED_VALUE_STANDARD - 3 * SD_STANDARDISED,
+      high = MEASURED_VALUE_STANDARD + 3 * SD_STANDARDISED
+    ) |>
+    uncount(n_points, .id = "row") |>
+    mutate(
+      x = (1 - row / n_points) * low + row / n_points * high,
+      density = dnorm(x, MEASURED_VALUE_STANDARD, SD_STANDARDISED),
+      SAMPLE_ID = SAMPLE_ID |> str_wrap(width = 30, whitespace_only = FALSE)
+    )
+
+  # Filter thresholds ----
+  threshold_data <- thresholds |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      THRESHOLD_VALUE <= max_threshold
+    )
+
+  if (!is.null(sub_compartments)) {
+    threshold_data <- threshold_data |>
+      filter(ENVIRON_COMPARTMENT_SUB %in% sub_compartments)
+  }
+
+  # Create plot ----
+  p <- ggplot(
+    ridge_data,
+    aes(x = x, y = SAMPLE_ID, height = density, group = MEASURED_UNIT_STANDARD)
+  ) +
+    geom_ridgeline(
+      aes(fill = SAMPLE_SPECIES),
+      alpha = 0.7,
+      scale = scale_ridges
+    ) +
+    geom_vline(
+      data = threshold_data,
+      aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
+      linetype = "dashed",
+      linewidth = 0.8,
+      alpha = 0.6
+    ) +
+    labs(
+      x = "Concentration (mg/L)",
+      y = "Sample ID",
+      fill = "Sample Species",
+      color = "Quality Threshold"
+    ) +
+    theme_ridges()
 
   return(p)
 }

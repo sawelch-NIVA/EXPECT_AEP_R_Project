@@ -51,7 +51,7 @@ plot_reference_compartment_heatmap <- function(
   plot_data <- data |>
     group_by(across(all_of(c(y_var, x_var)))) |>
     distinct() |>
-    reframe(count = sum(MEASURED_N)) |>
+    reframe(count = sum(MEASURED_N, na.rm = TRUE)) |>
     # Add factor levels for x-axis ordering
     mutate(
       {{ x_var }} := factor(
@@ -114,7 +114,7 @@ plot_reference_species_heatmap <- function(
   plot_data <- data |>
     group_by(across(all_of(c(y_var, x_var)))) |>
     distinct() |>
-    reframe(count = sum(MEASURED_N), SPECIES_GROUP) |>
+    reframe(count = sum(MEASURED_N, na.rm = TRUE), SPECIES_GROUP) |>
     # Join year data for y-axis ordering
     left_join(
       data |> distinct(across(all_of(c(y_var, year_var)))),

@@ -1,0 +1,29 @@
+product_type = 'connect_cloud'
+'$schema' = 'https://cdn.posit.co/publisher/schemas/posit-publishing-schema-v3.json'
+type = 'html'
+entrypoint = 'visualisation_quarto.html'
+source = 'visualisation_quarto.qmd'
+validate = true
+files = [
+  '/visualisation_quarto.html',
+  '/.posit/publish/EXPECT Copper AEP-PCLV.toml',
+  '/.posit/publish/deployments/deployment-L6UB.toml',
+  '/.gitignore',
+  '/.posit',
+  '/DESCRIPTION',
+  '/NAMESPACE',
+  '/R',
+  '/README.md',
+  '/_output',
+  '/_targets',
+  '/_targets.R',
+  '/biota_dietary_stuff.txt',
+  '/data',
+  '/images',
+  '/man',
+  '/temp_R',
+  '/test.rmarkdown',
+  '/test_files',
+  '/visualisation_quarto.qmd'
+]
+title = 'EXPECT Copper AEP'
