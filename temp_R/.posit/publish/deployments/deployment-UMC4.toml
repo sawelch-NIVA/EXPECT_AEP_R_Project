@@ -3,10 +3,39 @@
 server_type = 'connect_cloud'
 server_url = 'https://connect.posit.cloud'
 client_version = '1.27.0'
-created_at = '2025-11-27T11:20:38+01:00'
+created_at = ''
 dismissed_at = ''
-type = 'unknown'
+type = 'quarto-static'
 configuration_name = 'temp_R-R70B'
+id = '019ac4e0-6b13-dbf4-1693-2d9c72631a73'
+dashboard_url = 'https://connect.posit.cloud/sawelch-niva/content/019ac4e0-6b13-dbf4-1693-2d9c72631a73'
+direct_url = 'https://019ac4e0-6b13-dbf4-1693-2d9c72631a73.share.connect.posit.cloud'
+logs_url = 'https://connect.posit.cloud/sawelch-niva/content/019ac4e0-6b13-dbf4-1693-2d9c72631a73/history'
+deployed_at = '2025-11-27T11:34:07+01:00'
+bundle_id = '019ac4e0-6b19-29d6-f85c-4798e3f399fc'
+files = [
+  '.posit/publish/deployments/deployment-UMC4.toml',
+  '.posit/publish/temp_R-R70B.toml',
+  '_quarto.yml'
+]
 
 [connect_cloud]
 account_name = 'sawelch-niva'
+
+[deployment_error]
+code = 'unknown'
+message = 'Unable to find primary file: Unable to locate fct_distributions.R. Please update your code and republish.'
+operation = 'publish/deployContent'
+
+[configuration]
+product_type = 'connect_cloud'
+'$schema' = 'https://cdn.posit.co/publisher/schemas/posit-publishing-schema-v3.json'
+type = 'quarto-static'
+entrypoint = 'fct_distributions.R'
+validate = true
+files = [
+  '/_quarto.yml',
+  '/.posit/publish/temp_R-R70B.toml',
+  '/.posit/publish/deployments/deployment-UMC4.toml'
+]
+title = 'temp_R'

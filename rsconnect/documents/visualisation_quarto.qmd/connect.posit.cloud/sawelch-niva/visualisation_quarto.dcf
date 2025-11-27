@@ -1,0 +1,10 @@
+name: visualisation_quarto
+title:
+username: sawelch-niva
+account: sawelch-niva
+server: connect.posit.cloud
+hostUrl: https://api.connect.posit.cloud/v1
+appId: 019ac4e4-3172-68a9-dbe9-fa7457d88570
+bundleId:
+url:
+version: 1

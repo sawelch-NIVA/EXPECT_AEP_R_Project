@@ -24,6 +24,7 @@ files = [
   '/temp_R',
   '/test.rmarkdown',
   '/test_files',
-  '/visualisation_quarto.qmd'
+  '/visualisation_quarto.qmd',
+  '/visualisation_quarto_files'
 ]
 title = 'EXPECT Copper AEP'
