@@ -9,6 +9,7 @@ format:
     code-fold: true
     body-width: 900px
     fig-format: svg
+    toc: true
 ---
 
 ```{r}
@@ -79,12 +80,136 @@ load_all_requirements()
 
 ADD PROBABLE CONTAMINATION SOURCES TO EACH PAPER
 
+## Data Quality Overview {#sec-data-quality}
 ```{r}
 #| label: fig-dataset-overview
-#| fig-cap: "Overview of copper concentration measurements across all environmental compartments in the EXPECT dataset."
-#| warning: false
+#| echo: false
 
-# Add your preview plot here
+qc <- tar_read(data_quality_report)
+```
+```{r}
+#| label: quality-summary
+#| echo: false
+#| output: asis
+
+cat(format_quality_summary(qc))
+```
+
+### Missing Measurements
+
+Rows where measured value, LOQ, and LOD are all missing.
+
+Known issues:
+- 2025PelkonenEnvironmentalImpactOf does not report LOD/LOQ values in main paper or ESI.
+  
+```{r}
+#| label: tbl-missing-measurements
+#| echo: false
+
+if (nrow(qc$missing_measurements) > 0) {
+ DT::datatable(
+   qc$missing_measurements |> 
+     dplyr::select(-sample_ids),
+   options = list(pageLength = 10),
+   caption = "References with missing measurement data"
+ )
+} else {
+ cat("*No missing measurements found.*")
+}
+```
+
+### Missing Sample Size
+
+Rows where MEASURED_N is missing or zero.
+```{r}
+#| label: tbl-missing-n
+#| echo: false
+
+if (nrow(qc$missing_n) > 0) {
+ DT::datatable(
+   qc$missing_n |> 
+     dplyr::select(-sample_ids),
+   options = list(pageLength = 10),
+   caption = "References with missing sample size"
+ )
+} else {
+ cat("*No missing sample sizes found.*")
+}
+```
+
+### Missing Methods
+
+Rows missing any of: analytical protocol, extraction protocol, fractionation protocol, or sampling protocol.
+```{r}
+#| label: tbl-missing-methods
+#| echo: false
+
+if (nrow(qc$missing_methods) > 0) {
+ DT::datatable(
+   qc$missing_methods |> 
+     dplyr::select(-sample_ids),
+   options = list(pageLength = 10),
+   caption = "References with missing method information"
+ )
+} else {
+ cat("*No missing methods found.*")
+}
+```
+
+### Missing Uncertainty Type
+
+Rows where UNCERTAINTY_TYPE is NA (should be "Not reported" if unknown).
+```{r}
+#| label: tbl-missing-uncertainty
+#| echo: false
+
+if (nrow(qc$missing_uncertainty) > 0) {
+ DT::datatable(
+   qc$missing_uncertainty |> 
+     dplyr::select(-sample_ids),
+   options = list(pageLength = 10),
+   caption = "References with missing uncertainty type"
+ )
+} else {
+ cat("*No missing uncertainty types found.*")
+}
+```
+
+### Missing Site Data
+
+Sites missing coordinates, geographic features, country, or ocean information.
+```{r}
+#| label: tbl-missing-sites
+#| echo: false
+
+if (nrow(qc$missing_sites) > 0) {
+ DT::datatable(
+   qc$missing_sites,
+   options = list(pageLength = 10),
+   caption = "Sites with missing geographic data"
+ )
+} else {
+ cat("*No missing site data found.*")
+}
+```
+
+### Missing Biota Data
+
+Biota samples missing species, tissue, lifestage, gender, or species group.
+```{r}
+#| label: tbl-missing-biota
+#| echo: false
+
+if (nrow(qc$missing_biota) > 0) {
+ DT::datatable(
+   qc$missing_biota |> 
+     dplyr::select(-sample_ids),
+   options = list(pageLength = 10),
+   caption = "References with missing biota information"
+ )
+} else {
+ cat("*No missing biota data found.*")
+}
 ```
 
 ## Literature Summary
@@ -127,8 +252,9 @@ temp <- dplyr::bind_rows(
 #| fig-cap: "Number of environmental sub-compartments sampled per paper. Each bar represents a unique publication, with height indicating the diversity of compartments (e.g., surface water, sediment, soil) analysed within that study."
 #| warning: false
 #| fig-width: 10
-#| fig-height: 4
-tar_read(plot_paper_subcompartments)
+#| fig-height: 8
+p <- tar_read(plot_paper_subcompartments) + theme(legend.position="bottom")
+plotly::ggplotly(p)
 ```
 
 ### Species Coverage
@@ -140,8 +266,9 @@ tar_read(plot_paper_subcompartments)
 #| fig-cap: "Number of species groups analysed per paper. Studies with higher bars examined copper concentrations across a broader range of taxonomic groups (e.g., fish, invertebrates, plants)."
 #| warning: false
 #| fig-width: 10
-#| fig-height: 4
-tar_read(plot_paper_species)
+#| fig-height: 8
+p <- tar_read(plot_paper_species) + theme(legend.position="bottom")
+plotly::ggplotly(p)
 ```
 
 ## Geographic Distribution of Sampling Sites
@@ -302,54 +429,53 @@ plotly::ggplotly(p)
 
 # Network Diagram
 ```{r}
+#| echo: false
 # Network Diagram ----
-unique_compartments_and_sites <- main_table |>
-  select(
-    SITE_GEOGRAPHIC_FEATURE,
-    SITE_GEOGRAPHIC_FEATURE_SUB,
-    ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB
-  ) |>
-  distinct() |>
-  filter(if_all(everything(), ~ !is.na(.)))
+# unique_compartments_and_sites <- main_table |>
+#   select(
+#     SITE_GEOGRAPHIC_FEATURE,
+#     SITE_GEOGRAPHIC_FEATURE_SUB,
+#     ENVIRON_COMPARTMENT,
+#     ENVIRON_COMPARTMENT_SUB
+#   ) |>
+#   distinct() |>
+#   filter(if_all(everything(), ~ !is.na(.)))
 
-unique_compartments <- main_table |>
-  select(
-    ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB
-  ) |>
-  distinct() |>
-  filter(if_all(everything(), ~ !is.na(.)))
+# unique_compartments <- main_table |>
+#   select(
+#     ENVIRON_COMPARTMENT,
+#     ENVIRON_COMPARTMENT_SUB
+#   ) |>
+#   distinct() |>
+#   filter(if_all(everything(), ~ !is.na(.)))
 
-unique_compartments_and_species <- main_table |>
-  select(
-    ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB,
-    SAMPLE_SPECIES
-  ) |>
-  distinct() |>
-  filter(if_all(everything(), ~ !is.na(.)))
+# unique_compartments_and_species <- main_table |>
+#   select(
+#     ENVIRON_COMPARTMENT,
+#     ENVIRON_COMPARTMENT_SUB,
+#     SAMPLE_SPECIES
+#   ) |>
+#   distinct() |>
+#   filter(if_all(everything(), ~ !is.na(.)))
 
+# # Real COmpartments Graph ----
 
-# Real COmpartments Graph ----
+# # Create edge list (from -> to relationships)
+# # Method 1: Explicit binding ----
+# edges <- bind_rows(
+#   unique_compartments |>
+#     select(from = ENVIRON_COMPARTMENT, to = ENVIRON_COMPARTMENT_SUB)
+# ) |>
+#   distinct() |>
+#   filter(!is.na(from), !is.na(to), from != "Not relevant", to != "Not relevant")
 
-# Create edge list (from -> to relationships)
-# Method 1: Explicit binding ----
-edges <- bind_rows(
-  unique_compartments |>
-    select(from = ENVIRON_COMPARTMENT, to = ENVIRON_COMPARTMENT_SUB)
-) |>
-  distinct() |>
-  filter(!is.na(from), !is.na(to), from != "Not relevant", to != "Not relevant")
+# # Then plot
+# graph <- as_tbl_graph(edges)
 
-
-# Then plot
-graph <- as_tbl_graph(edges)
-
-ggraph(graph, layout = 'tree') +
-  geom_edge_link() +
-  geom_node_point(size = 3) +
-  geom_node_text(aes(label = name), hjust = 0, nudge_x = 0.1, size = 3) +
-  theme_void()
+# ggraph(graph, layout = 'tree') +
+#   geom_edge_link() +
+#   geom_node_point(size = 3) +
+#   geom_node_text(aes(label = name), hjust = 0, nudge_x = 0.1, size = 3) +
+#   theme_void()
 
 ```

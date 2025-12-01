@@ -1,26 +1,26 @@
-﻿"SITE_CODE","SITE_NAME","PARAMETER_NAME","PARAMETER_TYPE","ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","MEASURED_CATEGORY","SAMPLING_DATE","SUBSAMPLE","SAMPLE_ID"
-"CHINARE2008_NB22","Northern Bering Sea Station NB22","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_NB22-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_NB24","Northern Bering Sea Station NB24","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_NB24-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BR09","Northern Bering Sea Station BR09","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BR09-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BR14","Northern Bering Sea Station BR14","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BR14-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BS01","Northern Bering Sea Station BS01","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BS01-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BS05","Northern Bering Sea Station BS05","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BS05-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BS07","Northern Bering Sea Station BS07","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BS07-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_BS09","Northern Bering Sea Station BS09","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_BS09-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_C13","Chukchi Sea Station C13","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_C13-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_C15","Chukchi Sea Station C15","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_C15-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_C19","Chukchi Sea Station C19","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_C19-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_C23","Chukchi Sea Station C23","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_C23-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_C35","Chukchi Sea Station C35","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_C35-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_R07","Chukchi Sea Station R07","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_R07-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_R09","Chukchi Sea Station R09","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_R09-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_R11","Chukchi Sea Station R11","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_R11-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_B11","Chukchi Sea Station B11","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_B11-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_M07","Chukchi Sea Station M07","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_M07-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_P23","Chukchi Sea Station P23","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_P23-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_P31","Chukchi Sea Station P31","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_P31-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_R15","Chukchi Sea Station R15","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_R15-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_R17","Chukchi Sea Station R17","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_R17-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_S14","Chukchi Sea Station S14","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_S14-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_S23","Chukchi Sea Station S23","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_S23-Copper-AquaticSedim-2008-08-01-R 1"
-"CHINARE2008_B84A","Canada Basin Station B84A","Copper","Stressor","Aquatic","Aquatic Sediment","External Media","2008-08-01","1","CHINARE2008_B84A-Copper-AquaticSedim-2008-08-01-R 1"
+﻿SITE_CODE,SITE_NAME,PARAMETER_NAME,PARAMETER_TYPE,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,MEASURED_CATEGORY,SAMPLING_DATE,SUBSAMPLE,SAMPLE_ID
+CHINARE2008_NB22,Northern Bering Sea Station NB22,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_NB22-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_NB24,Northern Bering Sea Station NB24,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_NB24-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BR09,Northern Bering Sea Station BR09,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BR09-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BR14,Northern Bering Sea Station BR14,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BR14-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BS01,Northern Bering Sea Station BS01,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BS01-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BS05,Northern Bering Sea Station BS05,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BS05-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BS07,Northern Bering Sea Station BS07,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BS07-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_BS09,Northern Bering Sea Station BS09,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_BS09-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_C13,Chukchi Sea Station C13,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_C13-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_C15,Chukchi Sea Station C15,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_C15-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_C19,Chukchi Sea Station C19,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_C19-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_C23,Chukchi Sea Station C23,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_C23-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_C35,Chukchi Sea Station C35,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_C35-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_R07,Chukchi Sea Station R07,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_R07-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_R09,Chukchi Sea Station R09,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_R09-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_R11,Chukchi Sea Station R11,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_R11-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_B11,Chukchi Sea Station B11,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_B11-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_M07,Chukchi Sea Station M07,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_M07-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_P23,Chukchi Sea Station P23,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_P23-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_P31,Chukchi Sea Station P31,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_P31-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_R15,Chukchi Sea Station R15,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_R15-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_R17,Chukchi Sea Station R17,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_R17-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_S14,Chukchi Sea Station S14,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_S14-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_S23,Chukchi Sea Station S23,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_S23-Copper-AquaticSedim-2008-08-01-R 1
+CHINARE2008_B84A,Canada Basin Station B84A,Copper,Stressor,Aquatic,Aquatic Sediment,External Media,01/08/2008,1,CHINARE2008_B84A-Copper-AquaticSedim-2008-08-01-R 1

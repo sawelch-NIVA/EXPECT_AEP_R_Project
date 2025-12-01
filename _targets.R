@@ -291,6 +291,12 @@ list(
     }
   ),
 
+  # # Check for missing data. Write a report for the Quarto.
+  tar_target(
+    name = data_quality_report,
+    command = check_data_quality(load_literature_pqt)
+  ),
+
   # Heatmaps of literature
   tar_target(
     name = plot_paper_subcompartments,
