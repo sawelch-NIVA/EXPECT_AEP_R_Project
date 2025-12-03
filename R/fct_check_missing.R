@@ -1,16 +1,44 @@
-# fct_check_missing.R ----
-# Functions for checking data quality and identifying missing values
-# These functions are used by the data_quality_report target
-
 # Helper functions ----
 
-#' Check if a value is missing (NA or empty string)
+#' Check if a value is truly missing (NA, NULL, or empty string)
 #' @param x Vector to check
 #' @return Logical vector indicating missing values
 is_missing <- function(x) {
   is.na(x) | x == "" | is.null(x)
 }
 
+#' Check if a value is not reported
+#' @param x Vector to check
+#' @return Logical vector indicating "Not reported" values
+is_not_reported <- function(x) {
+  x == "Not Reported" | x == "Not reported"
+}
+
+#' Check if a value is not relevant
+#' @param x Vector to check
+#' @return Logical vector indicating "Not relevant" values
+is_not_relevant <- function(x) {
+  x == "Not Relevant" | x == "Not relevant"
+}
+
+#' Check if a value has any data quality issue (missing, not reported, or not relevant)
+#' @param x Vector to check
+#' @return Logical vector indicating any problematic values
+has_data_issue <- function(x) {
+  is_missing(x) | is_not_reported(x) | is_not_relevant(x)
+}
+
+#' Classify the type of data issue for a value
+#' @param x Vector to check
+#' @return Character vector with "Missing", "Not reported", "Not relevant", or NA (for valid data)
+classify_data_issue <- function(x) {
+  dplyr::case_when(
+    is_missing(x) ~ "Missing (NA, blank string, null)",
+    is_not_reported(x) ~ "Not reported",
+    is_not_relevant(x) ~ "Not relevant",
+    .default = NA_character_
+  )
+}
 
 # Main quality check function ----
 
@@ -64,12 +92,48 @@ check_data_quality <- function(data) {
       .groups = "drop"
     )
 
-  # 4. Missing uncertainty type (measurement-level categorical) ----
+  # 4. Missing or problematic uncertainty ----
+  # Check for missing uncertainty type AND problematic uncertainty bounds
+  # 4. Missing or problematic uncertainty ----
+  # Check for missing uncertainty type AND problematic uncertainty bounds
   missing_uncertainty <- data |>
-    dplyr::filter(is.na(UNCERTAINTY_TYPE)) |>
+    dplyr::filter(
+      has_data_issue(UNCERTAINTY_TYPE) |
+        is.na(UNCERTAINTY_UPPER_STANDARD) |
+        is.na(UNCERTAINTY_LOWER_STANDARD) |
+        UNCERTAINTY_UPPER_STANDARD == 0 |
+        UNCERTAINTY_LOWER_STANDARD == 0 |
+        # Check if bounds are flipped relative to measured value
+        (!is.na(MEASURED_VALUE_STANDARD) &
+          !is.na(UNCERTAINTY_UPPER_STANDARD) &
+          UNCERTAINTY_UPPER_STANDARD < MEASURED_VALUE_STANDARD) |
+        (!is.na(MEASURED_VALUE_STANDARD) &
+          !is.na(UNCERTAINTY_LOWER_STANDARD) &
+          UNCERTAINTY_LOWER_STANDARD > MEASURED_VALUE_STANDARD)
+    ) |>
     dplyr::group_by(REFERENCE_ID) |>
     dplyr::summarise(
       n_rows = dplyr::n(),
+      # Uncertainty type issues
+      type_missing = any(is_missing(UNCERTAINTY_TYPE)),
+      type_not_reported = any(is_not_reported(UNCERTAINTY_TYPE)),
+      type_not_relevant = any(is_not_relevant(UNCERTAINTY_TYPE)),
+      # Upper bound issues
+      upper_missing = any(is.na(UNCERTAINTY_UPPER_STANDARD)),
+      upper_zero = any(UNCERTAINTY_UPPER_STANDARD == 0, na.rm = TRUE),
+      upper_below_value = any(
+        !is.na(MEASURED_VALUE_STANDARD) &
+          !is.na(UNCERTAINTY_UPPER_STANDARD) &
+          UNCERTAINTY_UPPER_STANDARD < MEASURED_VALUE_STANDARD
+      ),
+      # Lower bound issues
+      lower_missing = any(is.na(UNCERTAINTY_LOWER_STANDARD)),
+      lower_zero = any(UNCERTAINTY_LOWER_STANDARD == 0, na.rm = TRUE),
+      lower_above_value = any(
+        !is.na(MEASURED_VALUE_STANDARD) &
+          !is.na(UNCERTAINTY_LOWER_STANDARD) &
+          UNCERTAINTY_LOWER_STANDARD > MEASURED_VALUE_STANDARD
+      ),
       sample_ids = list(SAMPLE_ID),
       .groups = "drop"
     )
@@ -122,6 +186,25 @@ check_data_quality <- function(data) {
       .groups = "drop"
     )
 
+  # 7. Encoding issues ----
+  # Check for replacement characters that indicate encoding problems
+  encoding_issues <- data |>
+    dplyr::mutate(
+      row_id = dplyr::row_number(),
+      # Check all character columns for encoding issues
+      has_encoding_issue = dplyr::if_any(
+        where(is.character),
+        ~ stringr::str_detect(.x, "\uFFFD|�|\\?{2,}") # Unicode replacement char, �, or multiple ?
+      )
+    ) |>
+    dplyr::filter(has_encoding_issue) |>
+    dplyr::group_by(REFERENCE_ID) |>
+    dplyr::summarise(
+      n_rows = dplyr::n(),
+      sample_ids = list(SAMPLE_ID),
+      .groups = "drop"
+    )
+
   # Summary counts ----
   summary_stats <- list(
     total_rows = nrow(data),
@@ -150,7 +233,11 @@ check_data_quality <- function(data) {
 
     # Biota
     n_refs_missing_biota = nrow(missing_biota),
-    n_rows_missing_biota = sum(missing_biota$n_rows)
+    n_rows_missing_biota = sum(missing_biota$n_rows),
+
+    # Encoding
+    n_refs_encoding_issues = nrow(encoding_issues),
+    n_rows_encoding_issues = sum(encoding_issues$n_rows)
   )
 
   # Return everything as a named list ----
@@ -161,32 +248,7 @@ check_data_quality <- function(data) {
     missing_methods = missing_methods,
     missing_uncertainty = missing_uncertainty,
     missing_sites = missing_sites,
-    missing_biota = missing_biota
-  )
-}
-
-
-# Formatting helpers for Quarto output ----
-
-#' Generate a text summary of data quality issues
-#'
-#' @param qc_report Output from check_data_quality()
-#' @return A character string with markdown-formatted summary
-format_quality_summary <- function(qc_report) {
-  s <- qc_report$summary
-
-  glue::glue(
-    "
-Dataset contains **{s$total_rows}** rows from **{s$total_references}** references across **{s$total_sites}** sites.
-
-**Issues identified:**
-
-- **Measurements**: {s$n_rows_missing_measurements} rows ({s$n_refs_missing_measurements} references) missing all measurement data (value, LOQ, and LOD)
-- **Sample size**: {s$n_rows_missing_n} rows ({s$n_refs_missing_n} references) missing or zero sample size
-- **Methods**: {s$n_rows_missing_methods} rows ({s$n_refs_missing_methods} references) missing method information
-- **Uncertainty**: {s$n_rows_missing_uncertainty} rows ({s$n_refs_missing_uncertainty} references) missing uncertainty type
-- **Site data**: {s$n_sites_missing_data} sites ({s$n_refs_missing_sites} references) missing location/geographic data
-- **Biota data**: {s$n_rows_missing_biota} rows ({s$n_refs_missing_biota} references) missing species/tissue information
-"
+    missing_biota = missing_biota,
+    encoding_issues = encoding_issues
   )
 }

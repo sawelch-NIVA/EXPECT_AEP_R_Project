@@ -42,7 +42,8 @@ tar_option_set(
     "dtplyr",
     "forcats",
     "viridis",
-    "ggridges"
+    "ggridges",
+    "plotly"
   ),
   format = "qs" # Optionally set the default storage format. qs is fast.
   #
@@ -242,7 +243,7 @@ list(
     }
   ),
 
-  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios
+  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios. Create a merged OCEAN/COUNTRY column.
   tar_target(
     name = literature_clean_standardised,
     command = {
@@ -262,6 +263,12 @@ list(
         standardise_measured_units(
           value_columns = "LOD_VALUE",
           unit_column = "LOD_UNIT"
+        ) |>
+        mutate(
+          OCEAN_COUNTRY = merge_country_ocean(
+            country = COUNTRY_ISO,
+            ocean = OCEAN_IHO
+          )
         )
     }
   ),
@@ -295,36 +302,6 @@ list(
   tar_target(
     name = data_quality_report,
     command = check_data_quality(load_literature_pqt)
-  ),
-
-  # Heatmaps of literature
-  tar_target(
-    name = plot_paper_subcompartments,
-    command = plot_reference_compartment_heatmap(
-      data = load_literature_pqt,
-      compartment_order = NULL,
-      x_var = "ENVIRON_COMPARTMENT_SUB",
-      y_var = "REFERENCE_ID",
-      year_var = "YEAR",
-      fill_label = "Sample Size (n)",
-      x_label = "Environmental Sub-Compartment",
-      text_threshold = "mean",
-      rotate_x = 45
-    )
-  ),
-
-  tar_target(
-    name = plot_paper_species,
-    command = plot_reference_species_heatmap(
-      data = load_literature_pqt,
-      x_var = "SAMPLE_SPECIES",
-      y_var = "REFERENCE_ID",
-      year_var = "YEAR",
-      fill_label = "Sample Size (n)",
-      x_label = "Sampled Species",
-      text_threshold = "mean",
-      rotate_x = 45
-    )
   ),
 
   # Geography data preparation targets ----
@@ -376,26 +353,6 @@ list(
     )
   ),
 
-  # TODO: The bounding box on this is pretty bad, because pretty much all our data points so far are actually in the Norwegian/Greenland sea. What do?
-  # # Map the data points from load_literature_pqt onto wgs84_map
-  tar_target(
-    name = wgs84_literature_map,
-    command = map_literature_data_wgs84(
-      wgs84_map = wgs84_map,
-      literature_data = load_literature_pqt
-    )
-  ),
-  # TODO: Just make some big boxplots for each unit type
-  # # Make a very basic boxplot of measured values by year
-  tar_target(
-    name = measurement_by_year_boxplot,
-    command = make_measurement_boxplot(
-      data = load_literature_pqt,
-      value_column = "MEASURED_VALUE_STANDARD",
-      unit_column = "MEASURED_UNIT_STANDARD",
-      x_column = "ENVIRON_COMPARTMENT_SUB",
-    )
-  ),
   # # Toxicity/safety threshholds!
   # TODO: We can add GeoTraces data here, although it may be too precise for our use:
   # https://geotraces.webodv.awi.de/IDP2021_v2%3EGEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v2/service/DataExtraction
@@ -403,53 +360,6 @@ list(
   tar_target(
     name = copper_toxicity_thresholds,
     command = generate_copper_thresholds()
-  ),
-
-  # Ridge plots for copper measurements ----
-
-  tar_target(
-    copper_ridge_plot_aquatic_liquid,
-    plot_copper_ridges(
-      data = load_literature_pqt,
-      compartment = "Aquatic",
-      sub_compartments = c("Freshwater", "Wastewater"),
-      thresholds = copper_toxicity_thresholds,
-      max_threshold = 1,
-      n_points = 100
-    )
-  ),
-  tar_target(
-    copper_ridge_plot_aquatic_solid,
-    plot_copper_ridges(
-      data = load_literature_pqt,
-      compartment = "Aquatic",
-      sub_compartments = c("Sludge", "Aquatic Sediment"),
-      thresholds = copper_toxicity_thresholds,
-      max_threshold = 1,
-      n_points = 100,
-      scale_ridges = 1
-    )
-  ),
-  tar_target(
-    copper_ridge_plot_terrestrial,
-    plot_copper_ridges(
-      data = load_literature_pqt,
-      compartment = "Terrestrial",
-      thresholds = copper_toxicity_thresholds,
-      max_threshold = 1,
-      n_points = 100,
-      scale_ridges = 3
-    )
-  ),
-  tar_target(
-    copper_ridge_plot_biota,
-    plot_copper_ridges_species(
-      data = load_literature_pqt,
-      compartment = "Biota",
-      thresholds = copper_toxicity_thresholds,
-      max_threshold = 1,
-      n_points = 100
-    )
   )
 
   # TODO: Imputation of missing values. What's best practice?

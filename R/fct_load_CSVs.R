@@ -86,13 +86,11 @@ fread_module_csv <- function(filepath, format_initialiser) {
   # Read with explicit specifications
   result <- fread(
     input = filepath,
-    select = expected_names, # sets column order to expected (and, for better and worse, drops unexpected columns)
-    colClasses = expected_classes # this generally works but can raise issues downstream
-    # because IDate ~= Date here, but not when we call reduce() in fread_all_module_files()
+    select = expected_names,
+    colClasses = expected_classes,
+    encoding = "UTF-8" # Force UTF-8 encoding
   ) |>
     as_tibble() |>
-    # Convert IDate columns back to standard Date for compatibility
-    # Probably less efficient, definitely less work.
     mutate(across(where(\(x) inherits(x, "IDate")), as.Date))
 
   return(result)

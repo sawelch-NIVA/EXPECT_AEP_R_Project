@@ -5,19 +5,97 @@ date: "2025.11.25"
 lightbox: true
 format: 
   html:
+    grid: 
+      body-width: 1500px
+      sidebar-width: 0px
     page-layout: full
     code-fold: true
-    body-width: 900px
+    max-width: 4500px
     fig-format: svg
     toc: true
+execute:
+  debug: true
+preview: 
+  port: 4200
 ---
+
+Port property doesn't work...
 
 ```{r}
 #| label: targets-setup
 #| warning: false
 #| output: false
 source("_targets.R")
-tar_make()
+if (length(tar_outdated()) != 0) {
+  tar_make()
+}
+
+# load in any data we need from the targets workflow
+literature_merged_data <- tar_read(load_literature_pqt)
+literature_reference_data <- tar_read(reference_data)
+literature_campaign_data <- tar_read(campaign_data)
+literature_sites_data <- tar_read(sites_data)
+literature_qc <- tar_read(data_quality_report)
+wgs84_geo <- tar_read(wgs84_geography)
+
+copper_toxicity_thresholds <- tar_read(copper_toxicity_thresholds)
+# Define threshold colors based on the report ----
+threshold_colours <- c(
+  "Background (I)" = "#0070C0", # Blue
+  "Good (II)" = "#00B050", # Green
+  "Moderate (III)" = "#FFC000", # Yellow
+  "Poor (IV)" = "#FF6600", # Orange
+  "Very Poor (V)" = "#FF0000" # Red
+)
+
+compartment_colours <- c(
+  # Aquatic ----
+  "Freshwater" = "#4A90E2", # clear blue
+  "Marine/Salt Water" = "#1E5A8E", # deep ocean blue
+  "Brackish/Transitional Water" = "#6BA5C8", # mid-blue (between fresh/marine)
+  "Groundwater" = "#2C5F7B", # darker, subdued blue
+  "Wastewater" = "#8B7355", # murky brown
+  "Liquid Growth Medium" = "#9FD8CB", # pale greenish-blue
+  "Rainwater" = "#B3D9FF", # light sky blue
+  "Stormwater" = "#607D8B", # grey-blue
+  "Leachate" = "#6B5344", # dark muddy brown
+  "Aquatic Sediment" = "#EBCF1B", # your existing yellow
+  "Porewater" = "#7FA0B8", # muted blue-grey
+  "Sludge" = "#67AB33", # your existing green
+
+  # Atmospheric ----
+  "Indoor Air" = "#E8F4F8", # very pale blue-grey
+  "Outdoor Air" = "#87CEEB", # sky blue
+
+  # Terrestrial ----
+  "Terrestrial Biological Residue" = "#8B6F47", # organic brown
+  "Soil H Horizon (Peat)" = "#3E2723", # very dark brown
+  "Soil O Horizon (Organic)" = "#5D4037", # dark organic brown
+  "Soil A Horizon (Topsoil)" = "#795548", # medium brown
+  "Soil E Horizon (Mineral)" = "#A1887F", # light greyish-brown
+  "Soil S Horizon (Mineral)" = "#BCAAA4", # pale brown-grey
+  "Soil C Horizon (Parent Material)" = "#D7CCC8", # very pale brown
+  "Soil R Horizon (Bedrock)" = "#9E9E9E", # grey
+
+  # Biota ----
+  "Biota, Terrestrial" = "#558B2F", # forest green
+  "Biota, Aquatic" = "#00695C", # teal
+  "Biota, Atmospheric" = "#B39DDB", # light purple (birds/insects)
+  "Biota, Other" = "#9C27B0" # distinct purple
+)
+
+# Helper function for sample sizes
+calculate_sample_sizes <- function(data) {
+  data |>
+    group_by(
+      REFERENCE_ID,
+      OCEAN_COUNTRY,
+      SITE_GEOGRAPHIC_FEATURE,
+      ENVIRON_COMPARTMENT_SUB
+    ) |>
+    summarise(total_n = sum(MEASURED_N, na.rm = TRUE), .groups = "drop")
+}
+
 # we still need to load all the other packages again so we can use them here
 load_all_requirements <- function(skip_stopedata_update = FALSE) {
   if (skip_stopedata_update) {
@@ -59,6 +137,7 @@ load_all_requirements <- function(skip_stopedata_update = FALSE) {
       "esquisse",
       "forcats",
       "viridis",
+      "plotly",
       "DT",
       "ggridges"
     ),
@@ -73,144 +152,298 @@ load_all_requirements <- function(skip_stopedata_update = FALSE) {
   main_table <<- arrow::read_parquet("data/clean/literature_data.parquet")
   requirements_loaded <<- TRUE
 }
-load_all_requirements()
+# load_all_requirements()
+
+library(STOPeData)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+library(viridis)
+library(stringr)
+library(ggridges)
+library(ggh4x)
 ```
 
 ## Dataset Overview
 
-ADD PROBABLE CONTAMINATION SOURCES TO EACH PAPER
+### To Do
+
+-   [ ] ADD PROBABLE CONTAMINATION SOURCES TO EACH PAPER
+-   [ ] Make sure we handle missing characters properly
+-   \[ \] Why are upper and lower uncertainty values flipped?
 
 ## Data Quality Overview {#sec-data-quality}
-```{r}
-#| label: fig-dataset-overview
-#| echo: false
 
-qc <- tar_read(data_quality_report)
-```
 ```{r}
 #| label: quality-summary
 #| echo: false
 #| output: asis
 
-cat(format_quality_summary(qc))
+#' Generate a text summary of data quality issues
+#'
+#' @param qc_report Output from check_data_quality()
+#' @return A character string with markdown-formatted summary
+format_quality_summary <- function(qc_report) {
+  s <- qc_report$summary
+
+  glue::glue(
+    "
+Dataset contains **{s$total_rows}** rows from **{s$total_references}** references across **{s$total_sites}** sites.
+
+**Issues identified:**
+
+- **Measurements**: {s$n_rows_missing_measurements} rows ({s$n_refs_missing_measurements} references) missing all measurement data (value, LOQ, and LOD)
+- **Sample size**: {s$n_rows_missing_n} rows ({s$n_refs_missing_n} references) missing or zero sample size
+- **Methods**: {s$n_rows_missing_methods} rows ({s$n_refs_missing_methods} references) missing method information
+- **Uncertainty**: {s$n_rows_missing_uncertainty} rows ({s$n_refs_missing_uncertainty} references) missing uncertainty type
+- **Site data**: {s$n_sites_missing_data} sites ({s$n_refs_missing_sites} references) missing location/geographic data
+- **Biota data**: {s$n_rows_missing_biota} rows ({s$n_refs_missing_biota} references) missing species/tissue information
+"
+  )
+}
+
+cat(format_quality_summary(literature_qc))
 ```
+
+::: {.callout-note collapse="true"}
+## Missing Data
 
 ### Missing Measurements
 
 Rows where measured value, LOQ, and LOD are all missing.
 
 Known issues:
-- 2025PelkonenEnvironmentalImpactOf does not report LOD/LOQ values in main paper or ESI.
-  
+
+-   2025PelkonenEnvironmentalImpactOf does not report LOD/LOQ values in main paper or ESI.
+
 ```{r}
-#| label: tbl-missing-measurements
+#| label: missing-measurements
 #| echo: false
 
-if (nrow(qc$missing_measurements) > 0) {
- DT::datatable(
-   qc$missing_measurements |> 
-     dplyr::select(-sample_ids),
-   options = list(pageLength = 10),
-   caption = "References with missing measurement data"
- )
+if (nrow(literature_qc$missing_measurements) > 0) {
+  DT::datatable(
+    literature_qc$missing_measurements |>
+      dplyr::select(-sample_ids),
+    options = list(pageLength = 10),
+    caption = "References with missing measurement data"
+  )
 } else {
- cat("*No missing measurements found.*")
+  cat("*No missing measurements found.*")
 }
 ```
 
 ### Missing Sample Size
 
 Rows where MEASURED_N is missing or zero.
+
 ```{r}
-#| label: tbl-missing-n
+#| label: missing-n
 #| echo: false
 
-if (nrow(qc$missing_n) > 0) {
- DT::datatable(
-   qc$missing_n |> 
-     dplyr::select(-sample_ids),
-   options = list(pageLength = 10),
-   caption = "References with missing sample size"
- )
+if (nrow(literature_qc$missing_n) > 0) {
+  DT::datatable(
+    literature_qc$missing_n |>
+      dplyr::select(-sample_ids),
+    options = list(pageLength = 10),
+    caption = "References with missing sample size"
+  )
 } else {
- cat("*No missing sample sizes found.*")
+  cat("*No missing sample sizes found.*")
 }
 ```
 
 ### Missing Methods
 
 Rows missing any of: analytical protocol, extraction protocol, fractionation protocol, or sampling protocol.
+
 ```{r}
-#| label: tbl-missing-methods
+#| label: missing-methods
 #| echo: false
 
-if (nrow(qc$missing_methods) > 0) {
- DT::datatable(
-   qc$missing_methods |> 
-     dplyr::select(-sample_ids),
-   options = list(pageLength = 10),
-   caption = "References with missing method information"
- )
+#| label: missing-methods
+#| echo: false
+
+if (nrow(literature_qc$missing_methods) > 0) {
+  display_df <- literature_qc$missing_methods |>
+    dplyr::mutate(
+      analytical_issue = dplyr::case_when(
+        missing_analytical ~ "Missing",
+        .default = NA_character_
+      ),
+      extraction_issue = dplyr::case_when(
+        missing_extraction ~ "Missing",
+        .default = NA_character_
+      ),
+      fractionation_issue = dplyr::case_when(
+        missing_fractionation ~ "Missing",
+        .default = NA_character_
+      ),
+      sampling_issue = dplyr::case_when(
+        missing_sampling ~ "Missing",
+        .default = NA_character_
+      )
+    ) |>
+    dplyr::select(
+      REFERENCE_ID,
+      n_rows,
+      analytical_issue,
+      extraction_issue,
+      fractionation_issue,
+      sampling_issue
+    )
+
+  DT::datatable(
+    display_df,
+    options = list(pageLength = 10),
+    caption = "References with missing method information"
+  )
 } else {
- cat("*No missing methods found.*")
+  cat("*No missing methods found.*")
 }
 ```
 
-### Missing Uncertainty Type
+### Missing Uncertainty
 
-Rows where UNCERTAINTY_TYPE is NA (should be "Not reported" if unknown).
+Rows where UNCERTAINTY_TYPE or UNCERTAINTY\_\*\_STANDARD are missing.
+
 ```{r}
-#| label: tbl-missing-uncertainty
+#| label: missing-uncertainty
 #| echo: false
 
-if (nrow(qc$missing_uncertainty) > 0) {
- DT::datatable(
-   qc$missing_uncertainty |> 
-     dplyr::select(-sample_ids),
-   options = list(pageLength = 10),
-   caption = "References with missing uncertainty type"
- )
+if (nrow(literature_qc$missing_uncertainty) > 0) {
+  display_df <- literature_qc$missing_uncertainty |>
+    dplyr::mutate(
+      uncertainty_type_issue = dplyr::case_when(
+        type_missing ~ "Missing",
+        type_not_reported ~ "Not reported",
+        type_not_relevant ~ "Not relevant",
+        .default = NA_character_
+      ),
+      upper_bound_issue = dplyr::case_when(
+        upper_missing ~ "Missing",
+        upper_zero ~ "Zero",
+        upper_below_value ~ "< Average",
+        .default = NA_character_
+      ),
+      lower_bound_issue = dplyr::case_when(
+        lower_missing ~ "Missing",
+        lower_zero ~ "Zero",
+        lower_above_value ~ "> Average",
+        .default = NA_character_
+      )
+    ) |>
+    dplyr::select(
+      REFERENCE_ID,
+      n_rows,
+      uncertainty_type_issue,
+      upper_bound_issue,
+      lower_bound_issue
+    )
+
+  DT::datatable(
+    display_df,
+    options = list(pageLength = 10),
+    caption = "References with missing or problematic uncertainty"
+  )
 } else {
- cat("*No missing uncertainty types found.*")
+  cat("*No uncertainty issues found.*")
 }
+
+
+# tar_read(measurements_data) |>
+#   filter(str_detect(REFERENCE_ID, "Olsvik")) |>
+#   select(
+#     MEASURED_VALUE,
+#     UNCERTAINTY_UPPER,
+#     UNCERTAINTY_LOWER,
+#     MEASURED_UNIT,
+#     SAMPLE_ID
+#   ) |>
+#   view()
+
+# tar_read(literature_joined) |>
+#   filter(str_detect(REFERENCE_ID, "Olsvik")) |>
+#   select(
+#     MEASURED_VALUE,
+#     UNCERTAINTY_UPPER,
+#     UNCERTAINTY_LOWER,
+#     MEASURED_UNIT,
+#     SAMPLE_ID
+#   ) |>
+#   view()
+
+# tar_read(literature_clean) |>
+#   filter(str_detect(REFERENCE_ID, "Olsvik")) |>
+#   select(
+#     MEASURED_VALUE,
+#     UNCERTAINTY_UPPER,
+#     UNCERTAINTY_LOWER,
+#     MEASURED_UNIT,
+#     SAMPLE_ID
+#   ) |>
+#   view()
+
+# tar_read(literature_clean) |>
+#   filter(str_detect(REFERENCE_ID, "Olsvik")) |>
+#   select(
+#     MEASURED_VALUE,
+#     UNCERTAINTY_UPPER,
+#     UNCERTAINTY_LOWER,
+#     MEASURED_UNIT,
+#     SAMPLE_ID
+#   ) |>
+#   standardise_measured_units(
+#     value_columns = c(
+#       "MEASURED_VALUE",
+#       "UNCERTAINTY_UPPER",
+#       "UNCERTAINTY_LOWER"
+#     ),
+#     unit_column = "MEASURED_UNIT"
+#   ) |>
+#   view()
 ```
 
 ### Missing Site Data
 
 Sites missing coordinates, geographic features, country, or ocean information.
+
 ```{r}
-#| label: tbl-missing-sites
+#| label: missing-sites
 #| echo: false
 
-if (nrow(qc$missing_sites) > 0) {
- DT::datatable(
-   qc$missing_sites,
-   options = list(pageLength = 10),
-   caption = "Sites with missing geographic data"
- )
+if (nrow(literature_qc$missing_sites) > 0) {
+  DT::datatable(
+    literature_qc$missing_sites,
+    options = list(pageLength = 10),
+    caption = "Sites with missing geographic data"
+  )
 } else {
- cat("*No missing site data found.*")
+  cat("*No missing site data found.*")
 }
 ```
 
 ### Missing Biota Data
 
 Biota samples missing species, tissue, lifestage, gender, or species group.
+
 ```{r}
-#| label: tbl-missing-biota
+#| label: missing-biota
 #| echo: false
 
-if (nrow(qc$missing_biota) > 0) {
- DT::datatable(
-   qc$missing_biota |> 
-     dplyr::select(-sample_ids),
-   options = list(pageLength = 10),
-   caption = "References with missing biota information"
- )
+if (nrow(literature_qc$missing_biota) > 0) {
+  DT::datatable(
+    literature_qc$missing_biota |>
+      dplyr::select(-sample_ids),
+    options = list(pageLength = 10),
+    caption = "References with missing biota information"
+  )
 } else {
- cat("*No missing biota data found.*")
+  cat("*No missing biota data found.*")
 }
 ```
+:::
 
 ## Literature Summary
 
@@ -220,10 +453,10 @@ if (nrow(qc$missing_biota) > 0) {
 #| label: tbl-paper-summaries
 #| tbl-cap: "Summary of analysed papers showing publication details, associated campaigns, and number of copper measurements extracted from each study."
 #| warning: false
-tar_read(load_literature_pqt) |>
-  dplyr::left_join(tar_read(reference_data)) |>
+literature_merged_data |>
+  dplyr::left_join(literature_reference_data) |>
   dplyr::left_join(
-    tar_read(campaign_data) |> select(CAMPAIGN_NAME_SHORT, CAMPAIGN_COMMENT)
+    literature_campaign_data |> select(CAMPAIGN_NAME_SHORT, CAMPAIGN_COMMENT)
   ) |>
   dplyr::group_by(
     TITLE,
@@ -233,14 +466,6 @@ tar_read(load_literature_pqt) |>
   ) |>
   dplyr::reframe(SUM_N = sum(MEASURED_N)) |>
   datatable(options = list(pageLength = 5, lengthMenu = c(5, 10, 15, 20)))
-
-# what's going on with column classes?
-temp <- dplyr::bind_rows(
-  purrr::map_df(tar_read(load_literature_pqt), class),
-  purrr::map_df(tar_read(reference_data), class),
-  purrr::map_df(tar_read(campaign_data), class),
-  .id = "table"
-)
 ```
 
 ### Compartment Coverage
@@ -253,8 +478,18 @@ temp <- dplyr::bind_rows(
 #| warning: false
 #| fig-width: 10
 #| fig-height: 8
-p <- tar_read(plot_paper_subcompartments) + theme(legend.position="bottom")
-plotly::ggplotly(p)
+plot_reference_compartment_heatmap(
+  data = literature_merged_data,
+  compartment_order = NULL,
+  x_var = "ENVIRON_COMPARTMENT_SUB",
+  y_var = "REFERENCE_ID",
+  year_var = "YEAR",
+  fill_label = "Sample Size (n)",
+  x_label = "Environmental Sub-Compartment",
+  text_threshold = "mean",
+  rotate_x = 45
+)
+
 ```
 
 ### Species Coverage
@@ -267,8 +502,16 @@ plotly::ggplotly(p)
 #| warning: false
 #| fig-width: 10
 #| fig-height: 8
-p <- tar_read(plot_paper_species) + theme(legend.position="bottom")
-plotly::ggplotly(p)
+plot_reference_species_heatmap(
+  data = literature_merged_data,
+  x_var = "SAMPLE_SPECIES",
+  y_var = "REFERENCE_ID",
+  year_var = "YEAR",
+  fill_label = "Sample Size (n)",
+  x_label = "Sampled Species",
+  text_threshold = "mean",
+  rotate_x = 70
+)
 ```
 
 ## Geographic Distribution of Sampling Sites
@@ -279,66 +522,455 @@ plotly::ggplotly(p)
 #| label: fig-sampling-map
 #| fig-cap: "Geographic distribution of sampling sites across the study area. Each point represents a unique sampling location where copper concentrations were measured. Point colours may indicate environmental compartment or campaign affiliation."
 #| warning: false
-tar_read(wgs84_literature_map)
+
+library(leaflet)
+library(sf)
+
+data_sf <- literature_merged_data |>
+  dplyr::filter(!is.na(LATITUDE)) |>
+  dplyr::filter(!is.na(LONGITUDE)) |> # we shouldn't have anything without these values... but we do. oops.
+  sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("WGS84"))
+
+
+leaflet() |>
+  addTiles() |>
+  addPolygons(
+    data = wgs84_geo$marine_polys |> filter(highlight_name),
+    fillColor = ~ ifelse(
+      highlight_name == TRUE,
+      marine_colors[["default"]],
+      marine_colors[["highlight"]]
+    ),
+    fillOpacity = ~ ifelse(
+      highlight_name == TRUE,
+      0.5,
+      0
+    ),
+    color = "black",
+    weight = 1,
+    popup = ~name,
+    group = "Oceans"
+  ) |>
+  addPolygons(
+    data = wgs84_geo$countries |> filter(highlight_name),
+    fillColor = ~ ifelse(
+      highlight_name == TRUE,
+      country_colours[["default"]],
+      country_colours[["highlight"]]
+    ),
+    fillOpacity = ~ ifelse(
+      highlight_name == TRUE,
+      0.5,
+      0
+    ),
+    weight = 1,
+    color = "black",
+    popup = ~name,
+    group = "Countries"
+  ) |>
+  addCircleMarkers(
+    data = data_sf,
+    popup = ~REFERENCE_ID,
+    group = "Samples",
+    clusterOptions = markerClusterOptions()
+  ) |>
+  addLabelOnlyMarkers(data = data_sf, label = ~SITE_CODE) |>
+  addLayersControl(
+    overlayGroups = c("Oceans", "Countries", "Samples"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
 ```
 
 ## Copper Concentrations by Environmental Compartment
 
-The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means and standard deviations, with density distributions generated from normal distributions (n = 101) and overlaid with relevant regulatory thresholds where available.
+The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means uncertainty bounds (SD, range, 95% CI, etc.) and overlaid with relevant regulatory thresholds where available.
 
-### Aquatic Compartment
-
-#### Water Column
-
-@fig-copper-ridges-aquatic-liquid shows the distribution of dissolved copper concentrations in the aquatic liquid phase across all sampling sites and campaigns.
+### Aquatic Compartment - Liquid Phase
 
 ```{r}
-#| label: fig-copper-ridges-aquatic-liquid
-#| fig-cap: "Density distributions of copper concentrations in the aquatic compartment (liquid phase). Each ridge represents measurements from a specific site or campaign, allowing comparison of concentration ranges across locations. Vertical lines indicate relevant water quality thresholds."
-#| warning: false
+#| label: fig-boxplot-aquatic-liquid
+#| fig-cap: "Copper concentrations in water column samples by reference"
+#| fig-width: 10
 
-p <- tar_read(copper_ridge_plot_aquatic_liquid)
-plotly::ggplotly(p)
+# Calculate sample sizes
+sample_sizes_water <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT == "Aquatic" & !(ENVIRON_COMPARTMENT_SUB %in% c("Sludge", "Aquatic Sediment"))
+  ) |>
+  calculate_sample_sizes()
+
+# Create plot
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT == "Aquatic" & !(ENVIRON_COMPARTMENT_SUB %in% c("Sludge", "Aquatic Sediment"))
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # 95% Confidence Intervals
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  # Standard Deviation (mean ± SD)
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  # Quartiles (Q1-Q3)
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  # Points for no uncertainty
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  # Sample size labels
+  geom_text(
+    data = sample_sizes_water,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -1, vjust = -1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  # Thresholds (colored by class)
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps)
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  scale_color_manual(
+    values = c(threshold_colours, compartment_colours),
+    breaks = c(names(compartment_colours), names(threshold_colours))
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Reference",
+    colour = "Sub-compartment / Threshold Class"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical"
+  ) +
+  guides(
+    colour = guide_legend(nrow = 2, byrow = TRUE)
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  )
 ```
 
-#### Sediment
+### Aquatic Compartment - Solid Phase
 
-@fig-copper-ridges-aquatic-solid presents copper concentrations in aquatic sediments, which typically show higher and more variable concentrations than the water column due to accumulation processes.
+@fig-boxplot-aquatic-solid presents copper concentrations in aquatic sediments.
+
 
 ```{r}
-#| label: fig-copper-ridges-aquatic-solid
-#| fig-cap: "Density distributions of copper concentrations in aquatic sediments. Higher concentrations in sediments reflect the accumulation of copper from the water column and direct deposition. Vertical lines indicate sediment quality guidelines where available."
+#| label: fig-boxplot-aquatic-solid
+#| fig-cap: "Individual measurements (points) or summary statistics (point-and-line = standard deviation, crossbar box = confidence intervals) of total copper concentrations in solid phase samples from aquatic compartments (sediment, treatment sludge). Relevant copper quality thresholds (Norwegian Sediment quality) are overlaid as dashed lines. "
 #| warning: false
+#| fig-width: 10
 
-p <- tar_read(copper_ridge_plot_aquatic_solid)
-plotly::ggplotly(p)
+# Calculate sample sizes ----
+sample_sizes_solid <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% c("Sludge", "Aquatic Sediment")
+  ) |>
+  calculate_sample_sizes()
+
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% c("Sludge", "Aquatic Sediment")
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # 95% Confidence Intervals
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  # Standard Deviation (mean ± SD)
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  # Quartiles (Q1-Q3)
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  # Points for no uncertainty
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  # Sample size labels
+  geom_text(
+    data = sample_sizes_solid,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -0.1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  # Thresholds (colored by class)
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps)
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  scale_color_manual(
+    values = c(
+      threshold_colours,
+      compartment_colours
+    ),
+    breaks = c("Sludge", "Aquatic Sediment", names(threshold_colours))
+  ) +
+  theme_aep_plots() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical" # Stack legends vertically
+  ) +
+      labs(
+    x = "Concentration (mg/L (dry))", # todo: is this true?
+    y = "Reference",
+    colour = "Sub-compartment / Threshold Class"
+  ) +
+  guides(
+    colour = guide_legend(nrow = 2, byrow = TRUE) # Wrap legend into 2 rows
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  )
+
 ```
 
 ### Terrestrial Compartment
 
-@fig-copper-ridges-terrestrial shows copper concentrations in terrestrial matrices (primarily soils). Terrestrial copper levels are influenced by both atmospheric deposition and local sources such as mining activities or agricultural inputs.
+@fig-boxplot-terrestrial shows copper concentrations in terrestrial matrices (soils). 
+
 
 ```{r}
-#| label: fig-copper-ridges-terrestrial
-#| fig-cap: "Density distributions of copper concentrations in terrestrial compartment (primarily soil samples). The distributions reflect both natural background levels and anthropogenic inputs from various sources including atmospheric deposition and local industrial activities."
-#| warning: false
+#| label: fig-boxplot-terrestrial
+#| fig-width: 10
 
-p <- tar_read(copper_ridge_plot_terrestrial)
-plotly::ggplotly(p)
+
+# Calculate sample sizes ----
+sample_sizes_terrestrial <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT == "Terrestrial"
+  ) |>
+  calculate_sample_sizes()
+
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT == "Terrestrial"
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # 95% Confidence Intervals
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  # Standard Deviation (mean ± SD)
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  # Quartiles (Q1-Q3)
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  # Points for no uncertainty
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  # Sample size labels
+  geom_text(
+    data = sample_sizes_terrestrial,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -0.1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  # Thresholds (colored by class)
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps)
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  scale_color_manual(
+    values = c(
+      compartment_colours,
+      compartment_colours
+    ),
+    breaks = c(names(compartment_colours), names(threshold_colours))
+  ) +
+  theme_aep_plots() +
+        labs(
+    x = "Concentration (mg/L (wet))", # todo: is this true?
+    y = "Reference",
+    colour = "Sub-compartment / Threshold Class"
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical" # Stack legends vertically
+  ) +
+  guides(
+    colour = guide_legend(nrow = 2, byrow = TRUE) # Wrap legend into 2 rows
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  )
+
 ```
 
-### Biota
+### Biota Compartment
 
-@fig-copper-ridges-biota presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
+@fig-points-biota presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
 
 ```{r}
-#| label: fig-copper-ridges-biota
+#| label: fig-points-biota
 #| fig-cap: "Density distributions of copper concentrations in biota, separated by species group. Copper is an essential micronutrient, so baseline concentrations vary widely among taxa. High concentrations may indicate either regulatory adaptation or toxic exposure. Note: Distribution calculations require verification."
 #| warning: false
+#| fig-width: 10
 
-p <- tar_read(copper_ridge_plot_biota) +
-  facet_wrap(facets = vars(SPECIES_GROUP), ncol = 1, scales = "free")
-plotly::ggplotly(p)
+
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT == "Biota"
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = SAMPLE_SPECIES,
+    colour = SPECIES_GROUP
+  )) +
+  geom_pointrange(aes(
+    xmin = UNCERTAINTY_UPPER_STANDARD,
+    xmax = UNCERTAINTY_UPPER_STANDARD
+  )) +
+  facet_wrap(
+    facet = vars(OCEAN_COUNTRY),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  )
+
 ```
 
 ## Temporal Trends
@@ -352,9 +984,9 @@ plotly::ggplotly(p)
 #| fig-cap: "Temporal trends in copper concentrations across abiotic environmental sub-compartments. Points represent mean values with error bars showing standard deviations. Limited temporal coverage currently restricts trend interpretation, but patterns may emerge with additional historical monitoring data."
 #| warning: false
 #| fig-width: 10
-#| fig-height: 8
+#| fig-height: 12
 
-p <- tar_read(load_literature_pqt) |>
+p <- literature_merged_data |>
   filter(
     !is.na(MEASURED_UNIT_STANDARD),
     UNCERTAINTY_TYPE == "Standard Deviation",
@@ -395,9 +1027,9 @@ plotly::ggplotly(p)
 #| fig-cap: "Temporal trends in copper body burdens across different species groups. Points are coloured by species to help distinguish measurement series. Error bars represent reported uncertainty ranges. Vertical facets separate species groups to account for baseline differences in copper accumulation patterns."
 #| warning: false
 #| fig-width: 10
-#| fig-height: 8
+#| fig-height: 12
 
-p <- tar_read(load_literature_pqt) |>
+p <- literature_merged_data |>
   filter(
     !is.na(MEASURED_UNIT_STANDARD),
     ENVIRON_COMPARTMENT == "Biota"
@@ -428,54 +1060,96 @@ plotly::ggplotly(p)
 ```
 
 # Network Diagram
+
 ```{r}
 #| echo: false
 # Network Diagram ----
-# unique_compartments_and_sites <- main_table |>
-#   select(
-#     SITE_GEOGRAPHIC_FEATURE,
-#     SITE_GEOGRAPHIC_FEATURE_SUB,
-#     ENVIRON_COMPARTMENT,
-#     ENVIRON_COMPARTMENT_SUB
-#   ) |>
-#   distinct() |>
-#   filter(if_all(everything(), ~ !is.na(.)))
+unique_compartments_and_sites <- literature_merged_data |>
+  select(
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB
+  ) |>
+  distinct() |>
+  filter(if_all(everything(), ~ !is.na(.)))
 
-# unique_compartments <- main_table |>
-#   select(
-#     ENVIRON_COMPARTMENT,
-#     ENVIRON_COMPARTMENT_SUB
-#   ) |>
-#   distinct() |>
-#   filter(if_all(everything(), ~ !is.na(.)))
 
-# unique_compartments_and_species <- main_table |>
-#   select(
-#     ENVIRON_COMPARTMENT,
-#     ENVIRON_COMPARTMENT_SUB,
-#     SAMPLE_SPECIES
-#   ) |>
-#   distinct() |>
-#   filter(if_all(everything(), ~ !is.na(.)))
+# TODO: This is very speculative and just generated by AI. I haven't yet reviewed it to see what's missing.
+# Copper flow network edges ----
+copper_flow_edges <- tribble(
+  ~from, ~to, ~flow_type, ~plausibility, ~magnitude, ~evidence_quality, ~description,
+  
+  # Atmospheric deposition to surface waters ----
+  "Atmospheric", "Freshwater", "deposition", 0.95, "medium", "high", "Wet and dry deposition from atmospheric particulates",
+  "Atmospheric", "Brackish/Transitional Water", "deposition", 0.95, "medium", "high", "Wet and dry deposition to coastal/estuarine waters",
+  "Atmospheric", "Aquatic Sediment", "deposition", 0.90, "low", "medium", "Direct deposition to exposed sediments",
+  "Atmospheric", "Soil O Horizon (Organic)", "deposition", 0.95, "medium", "high", "Atmospheric deposition to terrestrial surfaces",
+  
+  # Terrestrial to aquatic flows ----
+  "Soil O Horizon (Organic)", "Freshwater", "runoff", 0.95, "high", "high", "Surface runoff and leaching from soils",
+  "Soil O Horizon (Organic)", "Groundwater", "percolation", 0.85, "medium", "medium", "Downward migration through soil profile",
+  "Biota, Terrestrial", "Soil O Horizon (Organic)", "excretion_decomposition", 0.90, "low", "medium", "Excretion and decomposition of terrestrial organisms",
+  
+  # Groundwater to surface water ----
+  "Groundwater", "Freshwater", "baseflow", 0.90, "medium", "high", "Groundwater discharge to streams/rivers",
+  "Groundwater", "Brackish/Transitional Water", "discharge", 0.75, "low", "medium", "Submarine groundwater discharge to coastal waters",
+  
+  # Freshwater flows ----
+  "Freshwater", "Brackish/Transitional Water", "advection", 0.95, "high", "high", "River discharge to estuaries",
+  "Freshwater", "Aquatic Sediment", "sedimentation", 0.95, "high", "high", "Particulate settling from water column",
+  "Freshwater", "Biota, Aquatic", "uptake", 0.95, "medium", "high", "Bioaccumulation by freshwater organisms",
+  
+  # Brackish/transitional water flows ----
+  "Brackish/Transitional Water", "Aquatic Sediment", "sedimentation", 0.95, "high", "high", "Particulate settling in estuarine environments",
+  "Brackish/Transitional Water", "Biota, Aquatic", "uptake", 0.95, "medium", "high", "Bioaccumulation by estuarine/coastal organisms",
+  
+  # Sediment processes ----
+  "Aquatic Sediment", "Freshwater", "resuspension", 0.85, "medium", "high", "Sediment resuspension and porewater release",
+  "Aquatic Sediment", "Brackish/Transitional Water", "resuspension", 0.85, "medium", "high", "Sediment resuspension in coastal/estuarine areas",
+  "Aquatic Sediment", "Biota, Aquatic", "uptake", 0.90, "low", "medium", "Benthic organism uptake from sediments",
+  "Aquatic Sediment", "Groundwater", "diagenesis", 0.70, "low", "low", "Deep burial and diagenetic processes",
+  
+  # Biota cycling ----
+  "Biota, Aquatic", "Aquatic Sediment", "excretion_decomposition", 0.95, "medium", "high", "Fecal pellets, mortality, decomposition",
+  "Biota, Aquatic", "Freshwater", "excretion", 0.90, "low", "medium", "Dissolved excretion by aquatic organisms",
+  "Biota, Aquatic", "Brackish/Transitional Water", "excretion", 0.90, "low", "medium", "Dissolved excretion in coastal waters",
+  "Biota, Aquatic", "Biota, Terrestrial", "trophic_transfer", 0.80, "low", "medium", "Predation by terrestrial organisms (e.g., birds, mammals)",
+  
+  # Wastewater flows ----
+  "Wastewater", "Freshwater", "discharge", 0.90, "high", "high", "Treated or untreated wastewater discharge",
+  "Wastewater", "Brackish/Transitional Water", "discharge", 0.80, "medium", "medium", "Coastal wastewater discharge",
+  "Wastewater", "Sludge", "treatment", 0.95, "high", "high", "Copper partitioning to sludge during treatment",
+  
+  # Sludge applications ----
+  "Sludge", "Soil O Horizon (Organic)", "application", 0.85, "medium", "medium", "Agricultural application of biosolids",
+  "Sludge", "Freshwater", "discharge", 0.60, "low", "low", "Illegal or emergency discharge (historical)",
+  
+  # Terrestrial-atmospheric ----
+  "Soil O Horizon (Organic)", "Atmospheric", "resuspension", 0.70, "low", "low", "Wind erosion and dust generation",
+  "Biota, Terrestrial", "Atmospheric", "volatilization", 0.40, "negligible", "low", "Unlikely for copper but included for completeness"
+)
 
-# # Real COmpartments Graph ----
+# Add reverse flow indicators for bidirectional processes if needed ----
+# (Currently all flows are unidirectional as specified)
 
-# # Create edge list (from -> to relationships)
-# # Method 1: Explicit binding ----
-# edges <- bind_rows(
-#   unique_compartments |>
-#     select(from = ENVIRON_COMPARTMENT, to = ENVIRON_COMPARTMENT_SUB)
-# ) |>
-#   distinct() |>
-#   filter(!is.na(from), !is.na(to), from != "Not relevant", to != "Not relevant")
+# Summary statistics ----
+copper_flow_edges |>
+  count(flow_type, sort = TRUE)
 
-# # Then plot
-# graph <- as_tbl_graph(edges)
+copper_flow_edges |>
+  count(magnitude)
 
-# ggraph(graph, layout = 'tree') +
-#   geom_edge_link() +
-#   geom_node_point(size = 3) +
-#   geom_node_text(aes(label = name), hjust = 0, nudge_x = 0.1, size = 3) +
-#   theme_void()
+# Then plot
+graph <- as_tbl_graph(copper_flow_edges)
+
+ggraph(graph, layout = "kk") +
+  geom_edge_link(aes(label = flow_type, edge_width = plausibility, colour = as_factor(magnitude)),
+                arrow = arrow(length = unit(4, 'mm')), 
+                start_cap = circle(3, 'mm'),
+                end_cap = circle(3, 'mm')) +
+  geom_node_point(size = 10, aes(colour = name)) +
+  geom_node_text(aes(label = name), hjust = 0, nudge_x = 0.1, size = 3) +
+  theme_void()
 
 ```

@@ -1,3 +1,12 @@
+# merge geographic columns
+merge_country_ocean <- function(country, ocean) {
+  merged <- case_when(
+    has_data_issue(country) ~ ocean,
+    has_data_issue(ocean) ~ country,
+    TRUE ~ ocean # oceans are bigger and get priority
+  )
+}
+
 #' Create map with literature data points
 #'
 #' Plots literature data points on the WGS84 study area map. Filters out

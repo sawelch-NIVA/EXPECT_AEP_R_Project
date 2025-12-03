@@ -110,7 +110,7 @@ plot_copper_ridges <- function(
 #' @export
 plot_copper_ridges_species <- function(
   data,
-  compartment,
+  compartment = "Biota",
   sub_compartments = NULL,
   thresholds,
   max_threshold = 1,
