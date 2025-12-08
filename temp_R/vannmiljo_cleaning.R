@@ -1,8 +1,10 @@
+getwd()
+
 # read env con
-vm_env_con <- readxl::read_excel(
-  path = "data/raw/vannmiljo/complete_dataset_20250226_1807.xlsx",
+Vm_2025_Q1 <- readxl::read_excel(
+  path = "data/raw/vannmiljo/Vm_Output_Data_Q1_2025.xlsx",
   sheet = 1,
-  guess_max = 100,
+  guess_max = 10000,
   # n_max = 100
 ) |>
   # remove columns that don't contain useful info

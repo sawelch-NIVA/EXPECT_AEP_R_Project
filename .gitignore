@@ -1,7 +1,9 @@
 .Rproj.user
 .Rhistory
 .RData
+.rdx
 .Ruserdata
 data/*
 /.quarto/
 **/*.quarto_ipynb
+visualisation_quarto_cache/*

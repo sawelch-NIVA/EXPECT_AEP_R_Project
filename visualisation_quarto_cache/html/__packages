@@ -11,3 +11,9 @@ viridisLite
 viridis
 stringr
 ggridges
+ggh4x
+tidygraph
+ggiraph
+leaflet
+sf
+ggraph

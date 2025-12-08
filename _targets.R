@@ -269,6 +269,15 @@ list(
             country = COUNTRY_ISO,
             ocean = OCEAN_IHO
           )
+        ) |>
+        impute_below_limits(
+          measured_col = "MEASURED_VALUE_STANDARD",
+          lod_col = "LOD_VALUE_STANDARD",
+          loq_col = "LOQ_VALUE_STANDARD",
+          impute_fn = function(x) {
+            x / sqrt(2) # very basic, rather bad imputation
+          },
+          output_col = "MEASURED_OR_IMPUTED_VALUE_STANDARD"
         )
     }
   ),
