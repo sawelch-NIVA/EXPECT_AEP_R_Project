@@ -7,3 +7,4 @@ data/*
 /.quarto/
 **/*.quarto_ipynb
 visualisation_quarto_cache/*
+/_targets/*
