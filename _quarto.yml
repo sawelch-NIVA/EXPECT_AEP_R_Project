@@ -1,10 +1,5 @@
 project:
-  type: website
   title: "EXPECT Copper AEP"
   execute-dir: project
-
-website:
-  navbar:
-    search: true
 
 format: html

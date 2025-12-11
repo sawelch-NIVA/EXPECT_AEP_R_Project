@@ -15,8 +15,15 @@ format:
     toc: true
 execute:
   debug: true
-preview: 
-  port: 4200
+include-in-header:
+  - text: |
+      <style>
+      /* "Hide" TOC sidebar when card is in full-screen mode */
+      .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
+      body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
+        z-index: 0 !important;
+      }
+      </style>
 ---
 
 ```{r}
@@ -1149,7 +1156,7 @@ literature_merged_data |>
   ) +
       coord_cartesian(
     xlim = range(
-      literature_merged_data$MEASURED_OR_IMPUTED_VALUE_STANDARD[
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
         literature_merged_data$ENVIRON_COMPARTMENT_SUB == "Freshwater"
       ],
       na.rm = TRUE
@@ -1293,7 +1300,7 @@ literature_merged_data |>
   ) +
       coord_cartesian(
     xlim = range(
-      literature_merged_data$MEASURED_OR_IMPUTED_VALUE_STANDARD[
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
         literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
       ],
       na.rm = TRUE
@@ -1437,7 +1444,7 @@ literature_merged_data |>
   ) +
       coord_cartesian(
     xlim = range(
-      literature_merged_data$MEASURED_OR_IMPUTED_VALUE_STANDARD[
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
         literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
       ],
       na.rm = TRUE
@@ -1582,7 +1589,7 @@ literature_merged_data |>
   ) +
       coord_cartesian(
     xlim = range(
-      literature_merged_data$MEASURED_OR_IMPUTED_VALUE_STANDARD[
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
         literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
       ],
       na.rm = TRUE
