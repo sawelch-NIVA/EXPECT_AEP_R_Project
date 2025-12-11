@@ -42,6 +42,8 @@ library(leaflet)
 library(sf)
 library(shiny)
 library(dplyr)
+library(bslib)
+library(ggtext)
 
 source("_targets.R")
 tar_make()
@@ -54,6 +56,10 @@ literature_campaign_data <- tar_read(campaign_data)
 literature_sites_data <- tar_read(sites_data)
 literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
+
+species_names <- arrow::read_parquet("data/clean/ecotox_2025_06_12_species.parquet")
+species_lookup <- species_names |>
+  with(setNames(common_name, latin_name))
 
 copper_toxicity_thresholds <- tar_read(copper_toxicity_thresholds)
 # Define threshold colors based on the report ----
@@ -122,13 +128,13 @@ calculate_sample_sizes <- function(data) {
 
 -   [ ] Add probable contamination sources to each paper
 -   [ ] Make sure we handle missing characters properly
--   [x] Why are upper and lower uncertainty values flipped?
 -   [ ] Reach out to Dag or Jens to ask if MD have any copper emissions data
 -   [ ] Talk to Marianne from reference group (or anyone else on the reference group)
 -   [ ] Get more data in 
 -   [ ] Make network diagram visualise uncertainty, etc.
 -   [ ] Functional and risk assessment trophic levels may not be perfectly aligned 
     -   [ ] might be better off using ERA grouping - talk to Li about it
+-   [ ] Fix icon colouration in map
 
 ## Data Quality Overview {#sec-data-quality}
 
@@ -466,7 +472,7 @@ ggplot(
   scale_color_identity() +
   theme_aep_plots() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(angle = 90, hjust = 1),
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
@@ -496,15 +502,25 @@ plot_data <- literature_merged_data |>
   ) |>
   filter(!is.na(SAMPLE_SPECIES)) |>  distinct()
 
+# Create formatted labels
+plot_data <- plot_data |>
+  mutate(
+    formatted_species = glue::glue(
+      "**{species_lookup[SAMPLE_SPECIES]}**<br>*({SAMPLE_SPECIES})*"
+    )
+  )
+
+
 # Calculate text color threshold ----
 threshold_value <- 2000 # set manually, as the 2050 mussels tend to overwhelm the others
 
 # Create plot ----
+
 ggplot(
   plot_data,
   aes(
-    y = REFERENCE_ID,
-    x = SAMPLE_SPECIES,
+    y = REFERENCE_ID,  # Use the formatted label
+    x = formatted_species,
     fill = count
   )
 ) +
@@ -515,9 +531,9 @@ ggplot(
   )) +
   scale_fill_viridis(name = "Sample Size (n)") +
   scale_color_identity() +
-  theme_aep_plots() +
+  # theme_aep_plots() + # breaks markdown
   theme(
-    axis.text.x = element_text(angle = 70, hjust = 1),
+    axis.text.x = element_markdown(angle = 90, hjust = 1),  # Enable markdown rendering
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
@@ -538,11 +554,6 @@ ggplot(
 #| label: fig-sampling-map
 #| warning: false
 
-# Setup ----
-library(leaflet)
-library(sf)
-library(dplyr)
-
 # Turn off spherical geometry ----
 sf::sf_use_s2(FALSE)
 
@@ -555,6 +566,22 @@ data_sf <- literature_merged_data |>
   ) |>
   st_as_sf(
     coords = c("LONGITUDE", "LATITUDE"),
+    crs = st_crs("WGS84"),
+    remove = FALSE)
+
+  # Prepare apple data ----
+  number_of_sites <- nrow(municipality_centroids())
+  sales_data_split <- copper_oxide_sales() |> mutate(amount_kg = amount_kg / number_of_sites,
+  average_kg = average_kg / number_of_sites)
+
+  apple_data <- cross_join(municipality_centroids(), sales_data_split) |>
+  group_by(name, x, y) |>
+  summarise(
+    avg_copper_kg = mean(amount_kg, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  st_as_sf(
+    coords = c("x", "y"),
     crs = st_crs("WGS84"),
     remove = FALSE
   )
@@ -660,44 +687,6 @@ study_lines_sf <- study_lines |>
   select(-coords) |>
   st_sf(crs = st_crs("WGS84"))
 
-# Add mine tailings with coordinates ----
-mine_tailings_coords <- tribble(
-  ~MINE_NAME                                            , ~SITE_NAME                                 , ~ORE_TYPE                        , ~ACTIVE_2013 , ~KEY_DETAILS                                                 , ~SOURCE                   , ~LATITUDE , ~LONGITUDE , ~CONFIDENCE ,
-  "AS Sydvaranger"                                      , "Langfjorden, Finnmark"                    , "Iron ore"                       , FALSE        , "Slambanken. Terminated 1976"                                , "Kvassnes & Iversen 2013" , 69.650    , 29.700     ,           3 ,
-  "AS Sydvaranger and Sydvaranger Gruve AS"             , "Bøkfjorden, Finnmark"                    , "Iron ore"                       , TRUE         , "Permit: 4M tonnes/yr; 2.6M discharged 2012"                 , "Kvassnes & Iversen 2013" , 69.720    , 30.040     ,           4 ,
-  "Sibelco Nordic, division Stjernøya"                 , "Stjernsundet, Finnmark"                   , "Nepheline syenite with biotite" , TRUE         , "Permit: 300k tonnes/yr; 216k discharged 2012"               , "Kvassnes & Iversen 2013" , 70.267    , 22.612     ,           5 ,
-  "Altens Kobberverk"                                   , "Kåfjord, Finnmark"                       , "Sulfide ore"                    , FALSE        , "Terminated 1909"                                            , "Kvassnes & Iversen 2013" , 69.935    , 23.045     ,           4 ,
-  "Folldal Verk"                                        , "Repparfjorden, Finnmark"                  , "Copper sulfides in carbonate"   , FALSE        , "~1M tonnes over 7 years. Terminated 1964"                   , "Kvassnes & Iversen 2013" , 70.509    , 24.151     ,           5 ,
-  "Bjørkåsen Gruver Nikkel og Olivin"                 , "Ballangsfjorden, Nordland"                , "Copper sulfide with quartz"     , FALSE        , "Ballangsleira"                                              , "Kvassnes & Iversen 2013" , 68.348    , 16.900     ,           3 ,
-  "Nikkel og Olivin"                                    , "Ballangsfjorden, Nordland (Forneset)"     , "Nickel sulfide with olivine"    , TRUE         , "Deposit at Forneset"                                        , "Kvassnes & Iversen 2013" , 68.370    , 16.830     ,           3 ,
-  "Skaland Graphite AS"                                 , "Bergsfjorden, Troms"                      , "Graphite ore"                   , FALSE        , "Permit: 40k tonnes/yr; 21k discharged 2012"                 , "Kvassnes & Iversen 2013" , 69.445    , 17.130     ,           4 ,
-  "Senjens Nikkelverk i Hamn"                           , "Bergsfjorden, Troms"                      , "Nickel ore"                     , FALSE        , "1872-1886"                                                  , "Kvassnes & Iversen 2013" , 69.416    , 17.166     ,           4 ,
-  "Sulitjelma gruber"                                   , "Fauskevika, Nordland"                     , "Sulfide ore"                    , FALSE        , "Terminated 1991"                                            , "Kvassnes & Iversen 2013" , 67.132    , 16.050     ,           3 ,
-  "Rana Gruber"                                         , "Ranfjorden, Nordland"                     , "Iron ore with carbonate"        , TRUE         , "Permit: 1.25M-2.5M tonnes/yr; 2.08M discharged 2012"        , "Kvassnes & Iversen 2013" , 66.310    , 14.140     ,           4 ,
-  "Mofjellet Gruber"                                    , "Ranfjorden, Nordland"                     , "Sulfide ore"                    , FALSE        , "Terminated 1987"                                            , "Kvassnes & Iversen 2013" , 66.330    , 14.250     ,           3 ,
-  "Bleikvassli gruber"                                  , "Ranfjorden, Nordland"                     , "Sulfide ore with Pb, Cu, Zn"    , FALSE        , "Terminated 1997"                                            , "Kvassnes & Iversen 2013" , 65.860    , 14.115     ,           3 ,
-  "Båsmoen gruver"                                     , "Ranfjorden, Nordland"                     , "Sulfide ore"                    , FALSE        , "Terminated 1937"                                            , "Kvassnes & Iversen 2013" , 66.340    , 14.040     ,           3 ,
-  "The Quartz Corp AS (former: Norwegian Crystallites)" , "Tysfjord, Nordland"                       , "Quartz"                         , TRUE         , "Permit: 30k tonnes/yr (70% may be tailings)"                , "Kvassnes & Iversen 2013" , 68.040    , 16.040     ,           4 ,
-  "Norcem AS Kjøpsvik"                                 , "Tysfjord, Nordland"                       , "Calcium carbonate"              , TRUE         , "Reduced from ~10k to 3k tonnes/yr in 2012"                  , "Kvassnes & Iversen 2013" , 68.082    , 16.265     ,           4 ,
-  "Kongsmoen"                                           , "Kongsmoen at Follafjorden, N-Trøndelag"  , "Copper sulfides"                , FALSE        , "Waste from docks"                                           , "Kvassnes & Iversen 2013" , 64.886    , 12.460     ,           3 ,
-  "Verdalskalk AS"                                      , "Trondheimsfjorden, N-Trøndelag"          , "Calcium carbonate"              , FALSE        , "Small. Terminated 2009"                                     , "Kvassnes & Iversen 2013" , 63.793    , 11.482     ,           4 ,
-  "Hokstad Kisgruber"                                   , "Ytterøya at Levanger, N-Trøndelag"      , "Sulfide ore"                    , FALSE        , "Terminated ca. 1918"                                        , "Kvassnes & Iversen 2013" , 63.802    , 11.144     ,           3 ,
-  "Fosdalens Bergverk / Nye Fosdalen Bergvrk"           , "Beitstafjorden, N-Trøndelag"             , "Iron ore"                       , FALSE        , "Terminated 1997"                                            , "Kvassnes & Iversen 2013" , 64.080    , 11.300     ,           3 ,
-  "Killingdal Grubeselskap"                             , "Ilsvika in Trondheimsfjord, S-Trøndelag" , "Copper sulfide ore"             , FALSE        , "Mining 1674-1986"                                           , "Kvassnes & Iversen 2013" , 63.450    , 10.350     ,           4 ,
-  "Meråker Gruber (N-Trøndelag)"                      , "Hommelvika, S-Trøndelag"                 , "Copper sulfide ore"             , FALSE        , "Waste from docks"                                           , "Kvassnes & Iversen 2013" , 63.421    , 10.806     ,           4 ,
-  "Hustadmarmor AS"                                     , "Frænfjorden, Møre og Romsdal"           , "Calcium carbonate"              , TRUE         , "Permit: acceptable conditions; 327k tonnes discharged 2012" , "Kvassnes & Iversen 2013" , 62.833    ,  7.080     ,           4 ,
-  "AS Olivin"                                           , "Åheimsfjorden, Møre og Romsdal"         , "Olivine"                        , FALSE        , "Plans for fjord deposit in 1977; exact data missing"        , "Kvassnes & Iversen 2013" , 62.080    ,  5.835     ,           3 ,
-  "Svanøy Gruve"                                       , "Førdefjorden, Sogn og Fjordane"          , "Copper sulfide"                 , FALSE        , "Waste from docks"                                           , "Kvassnes & Iversen 2013" , 61.355    ,  5.075     ,           3 ,
-  "Hosanger Nikkelverk"                                 , "Lonevågen at Osterøy, Hordaland"        , "Sulfide ore with nickel"        , FALSE        , "Waste from docks"                                           , "Kvassnes & Iversen 2013" , 60.540    ,  5.460     ,           3 ,
-  "Stordø kisgruber"                                   , "Sagvågen, Hordaland"                     , "Sulfide ore"                    , FALSE        , "Mining 1908-1968; waste from docks"                         , "Kvassnes & Iversen 2013" , 59.778    ,  5.370     ,           3 ,
-  "Goldmines at Bømlo"                                 , "Lyklingfjorden, Hordaland"                , "Sulfide ore"                    , FALSE        , "Waste into sea"                                             , "Kvassnes & Iversen 2013" , 59.695    ,  5.165     ,           3 ,
-  "Gravdal Kisgruve"                                    , "Hardangerfjorden, Hordaland"              , "Sulfide ore"                    , FALSE        , "Mining 1864-1964; waste from docks"                         , "Kvassnes & Iversen 2013" , 60.085    ,  6.050     ,           2 ,
-  "Varaldsøy Vigsnes Kobberwerk"                       , "Hardangerfjorden, Hordaland"              , "Sulfide ore, copper rich"       , FALSE        , "Waste from docks"                                           , "Kvassnes & Iversen 2013" , 60.085    ,  5.985     ,           3 ,
-  "Titania AS"                                          , "Vigsnesbukta/Føynfjorden, Rogaland"      , "Ilmenite ore"                   , FALSE        , "Depositing 1964-1984"                                       , "Kvassnes & Iversen 2013" , 58.325    ,  6.355     ,           4 ,
-  "Titania AS"                                          , "Jøssingfjorden, Rogaland"                , "Ilmenite ore"                   , FALSE        , "Deposit 1984-1994"                                          , "Kvassnes & Iversen 2013" , 58.317    ,  6.340     ,           4 ,
-  "Titania AS"                                          , "Dyngadjupet, Rogaland"                    , "Ilmenite ore"                   , FALSE        , "Deposit 1984-1994"                                          , "Kvassnes & Iversen 2013" , 58.300    ,  6.290     ,           3
-)
-
 # Create map ----
 map <- leaflet() |>
   addProviderTiles(providers$CartoDB.Positron) |>
@@ -782,7 +771,7 @@ map <- leaflet() |>
 
   # Add mine tailings markers ----
   addMarkers(
-    data = mine_tailings_coords,
+    data = mine_tailings_coords(),
     lng = ~LONGITUDE,
     lat = ~LATITUDE,
     icon = list(
@@ -810,6 +799,48 @@ map <- leaflet() |>
       "/5"
     ),
     group = "Mine Tailings"
+  ) |> 
+
+  # apple markers... for apples
+  addMarkers(
+    data = apple_data,
+    lng = ~x,
+    lat = ~y,
+    icon = list(
+      iconUrl = "https://www.svgrepo.com/show/42619/apple-fruit.svg",
+      iconSize = c(15, 15)
+    ),
+    popup = ~ paste0(
+      "<b>Municipality:</b> ",
+      name,
+      "<br>",
+      "<b>Average Copper Applied:</b> ",
+      round(avg_copper_kg, 1),
+      " kg/year",
+      "<br>",
+      "<b>Period:</b> 2020-2024"
+    ),
+    group = "Apple Production"
+  ) |> 
+
+  # add case study sites
+    addCircles(
+      data = expect_case_studies(),
+    lng = ~lon,
+    lat = ~lat,
+    radius = 100000,  # 100km radius
+    color = "hotpink",
+    fillColor = "hotpink",
+    fillOpacity = 0.3,
+    opacity = 0.6,
+    weight = 2,
+    popup = ~paste0(
+      "<strong>", site_name, "</strong><br/>",
+      "<em>Lat: ", lat, ", Lon: ", lon, "</em><br/><br/>",
+      summary
+    ),
+    group =       "Potential Case Studies"
+
   )
 
 # Add layers for each main compartment ----
@@ -925,8 +956,10 @@ map <- map |>
       "Geography",
       "Study Connections",
       "Mine Tailings",
+      "Apple Production",
       "Samples",
-      "Site Labels"
+      "Site Labels",
+      "Potential Case Studies"
     ),
     options = layersControlOptions(collapsed = FALSE)
   ) |>
@@ -949,7 +982,7 @@ map <- map |>
   )
 
 # Display map ----
-map
+map |> bslib::card(full_screen = TRUE)
 ```
 
 
@@ -1548,4 +1581,58 @@ ggraph(graph, layout = "tree") +
   scale_fill_manual(values = compartment_colours) +
   theme_void() +
   theme(legend.position = "none")
+```
+
+# Appendices
+
+## Appendix 1: Copper Sources Data
+
+### Submarine Tailing Disposal in/off Norway
+
+Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates estimated by LLM, confidence self-reported by LLM.
+
+```{r}
+#| label: tbl-std-data
+mine_tailings_coords() |> DT::datatable()
+
+```
+
+### Apple Production Areas in Norway
+
+According to https://static02.nmbu.no/mina/studier/moppgaver/2018-Paulsen.pdf, 7 municipalities represent the main fruit districts in Norway. We also have sales of copper oxide for 2020-24 from https://mattilsynet-xp7prod.enonic.cloud/_/attachment/inline/8311cd70-8877-4712-98cc-f7bc1dba46ac:0f491609e72f1d5f0dca5ad1030a4b979e8b4695/Omsetningsstatistikk%20for%20plantevernmidler%202020%20-%202024%20med%20uthevinger.pdf (table 2a, p4, thanks to Roger Holten). 
+
+```{r}
+#| label: tbl-apple-emissions
+number_of_sites <- nrow(municipality_centroids())
+sales_data_split <- copper_oxide_sales() |> mutate(amount_kg = amount_kg / number_of_sites,
+average_kg = average_kg / number_of_sites)
+
+cross_join(municipality_centroids(), sales_data_split) |> 
+   DT::datatable()
+
+```
+
+
+Although not explicitly stated, we assume that:
+
+- Copper products used as fungicides are exclusively applied in these areas and enter the environment via soil and freshwater
+- Apple farmers use the arthimetic mean of sold copper oxide for 2020 - 2024 every year. all applied copper oxide enters the environment.
+- The total used copper is split equally between the "main fruit districts" named in Paulsen (2018). 
+
+### Manufacturing Emissions of Copper in Norway
+
+Taken from https://www.norskeutslipp.no/no/Komponenter/Utslipp/Kobber/?ComponentType=utslipp&ComponentPageID=73&SectorID=600, which includes self-reported copper emissions by land-based Norwegian industries for 1985-2024. Date is *very* spotty and incomplete, but it allows us to highlight fylke with higher emissions. Map to follow.
+
+We assume:
+
+- Reported concentrations are fully correct
+- Everything ends up in the environment.
+
+
+```{r}
+#| label: fig-industrial-emissions
+
+source("temp_R/scratchpad_norske_utslippe.R")
+
+top_municipalities_plot
 ```

@@ -906,9 +906,10 @@
 <path fill="none" stroke-width="1.066978" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(92.156863%, 92.156863%, 92.156863%)" stroke-opacity="1" stroke-miterlimit="10" d="M 577.472656 262.550781 L 577.472656 228.941406 "/>
 </g>
 <g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
-<use xlink:href="#glyph-0-0" x="198.8125" y="238.636719"/>
-<use xlink:href="#glyph-0-1" x="203.55972" y="238.636719"/>
-<use xlink:href="#glyph-0-7" x="208.54451" y="238.636719"/>
+<use xlink:href="#glyph-0-0" x="203.558594" y="238.636719"/>
+<use xlink:href="#glyph-0-1" x="208.305814" y="238.636719"/>
+<use xlink:href="#glyph-0-5" x="213.290603" y="238.636719"/>
+<use xlink:href="#glyph-0-5" x="218.037823" y="238.636719"/>
 </g>
 <g clip-path="url(#clip-69)">
 <path fill="none" stroke-width="1.707165" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(0%, 43.921569%, 75.294118%)" stroke-opacity="0.6" stroke-dasharray="6.828661 6.828661" stroke-miterlimit="10" d="M 204.210938 262.550781 L 204.210938 228.941406 "/>
