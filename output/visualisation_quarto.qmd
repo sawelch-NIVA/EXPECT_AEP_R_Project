@@ -135,11 +135,17 @@ calculate_sample_sizes <- function(data) {
 -   [ ] Make sure we handle missing characters properly
 -   [ ] Reach out to Dag or Jens to ask if MD have any copper emissions data
 -   [ ] Talk to Marianne from reference group (or anyone else on the reference group)
--   [ ] Get more data in 
+-   [ ] Get more data in
 -   [ ] Make network diagram visualise uncertainty, etc.
--   [ ] Functional and risk assessment trophic levels may not be perfectly aligned 
+-   [ ] Functional and risk assessment trophic levels may not be perfectly aligned
     -   [ ] might be better off using ERA grouping - talk to Li about it
 -   [ ] Fix icon colouration in map
+-   [ ] Flag papers with transfer data (again)
+-   [ ] Add CREED stuff
+-   [ ] Add missing species names
+-   [ ] Get some salinity & DOC (or at least water darkness) datasets
+-   [ ] Find a good way to add sea ice to map
+-   [ ] Find a good aquaculture zone and mining waste zone and characterise the sources well
 
 ## Data Quality Overview {#sec-data-quality}
 
@@ -990,7 +996,6 @@ map <- map |>
 bslib::card(full_screen = TRUE, map, style = "text-align: left; z-index: 999999;") # yes, of course, that makes perfect sense
 ```
 
-
 ## Copper Concentrations by Environmental Compartment
 
 Get a basic overview of the orders of magnitude for different sub-compartments (@fig-basic-subcompartments), so we can plot them on scales that make sense. Note that I haven't included uncertainty or sample sizes.
@@ -1167,7 +1172,7 @@ literature_merged_data |>
 
 #### Salt and Transitional Water
 
-@fig-boxplot-saltwater 
+@fig-boxplot-saltwater
 
 ```{r}
 #| label: fig-boxplot-saltwater
@@ -1455,8 +1460,7 @@ literature_merged_data |>
 
 ### Terrestrial Compartment
 
-Currently, data on copper in the terrestrial compartment is limited to one study (@fig-boxplot-terrestrial). 
-
+Currently, data on copper in the terrestrial compartment is limited to one study (@fig-boxplot-terrestrial).
 
 ```{r}
 #| label: fig-boxplot-terrestrial
@@ -1609,6 +1613,7 @@ literature_merged_data |>
 #| fig-cap: "Density distributions of copper concentrations in biota, separated by species group. Copper is an essential micronutrient, so baseline concentrations vary widely among taxa. High concentrations may indicate either regulatory adaptation or toxic exposure. Note: Distribution calculations require verification."
 #| warning: false
 #| fig-width: 10
+#| fig-height: 10
 
 
 literature_merged_data |>
@@ -1813,7 +1818,6 @@ graph <- as_tbl_graph(copper_flow_edges)
 
 ```
 
-
 ```{r}
 #| warning: false
 #| width: 20
@@ -1848,7 +1852,7 @@ mine_tailings_coords() |> DT::datatable()
 
 ### Apple Production Areas in Norway
 
-According to https://static02.nmbu.no/mina/studier/moppgaver/2018-Paulsen.pdf, 7 municipalities represent the main fruit districts in Norway. We also have sales of copper oxide for 2020-24 from https://mattilsynet-xp7prod.enonic.cloud/_/attachment/inline/8311cd70-8877-4712-98cc-f7bc1dba46ac:0f491609e72f1d5f0dca5ad1030a4b979e8b4695/Omsetningsstatistikk%20for%20plantevernmidler%202020%20-%202024%20med%20uthevinger.pdf (table 2a, p4, thanks to Roger Holten). 
+According to https://static02.nmbu.no/mina/studier/moppgaver/2018-Paulsen.pdf, 7 municipalities represent the main fruit districts in Norway. We also have sales of copper oxide for 2020-24 from https://mattilsynet-xp7prod.enonic.cloud/\_/attachment/inline/8311cd70-8877-4712-98cc-f7bc1dba46ac:0f491609e72f1d5f0dca5ad1030a4b979e8b4695/Omsetningsstatistikk%20for%20plantevernmidler%202020%20-%202024%20med%20uthevinger.pdf (table 2a, p4, thanks to Roger Holten).
 
 ```{r}
 #| label: tbl-apple-emissions
@@ -1861,12 +1865,11 @@ cross_join(municipality_centroids(), sales_data_split) |>
 
 ```
 
-
 Although not explicitly stated, we assume that:
 
-- Copper products used as fungicides are exclusively applied in these areas and enter the environment via soil and freshwater
-- Apple farmers use the arthimetic mean of sold copper oxide for 2020 - 2024 every year. all applied copper oxide enters the environment.
-- The total used copper is split equally between the "main fruit districts" named in Paulsen (2018). 
+-   Copper products used as fungicides are exclusively applied in these areas and enter the environment via soil and freshwater
+-   Apple farmers use the arthimetic mean of sold copper oxide for 2020 - 2024 every year. all applied copper oxide enters the environment.
+-   The total used copper is split equally between the "main fruit districts" named in Paulsen (2018).
 
 ### Manufacturing Emissions of Copper in Norway
 
@@ -1874,9 +1877,8 @@ Taken from https://www.norskeutslipp.no/no/Komponenter/Utslipp/Kobber/?Component
 
 We assume:
 
-- Reported concentrations are fully correct
-- Everything ends up in the environment.
-
+-   Reported concentrations are fully correct
+-   Everything ends up in the environment.
 
 ```{r}
 #| label: fig-industrial-emissions
