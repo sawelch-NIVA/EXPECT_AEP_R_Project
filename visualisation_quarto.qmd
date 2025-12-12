@@ -13,18 +13,17 @@ format:
     max-width: 4500px
     fig-format: svg
     toc: true
-execute:
-  debug: true
-include-in-header:
-  - text: |
+---
+
+<!-- include-in-header:
+  - text
       <style>
       /* "Hide" TOC sidebar when card is in full-screen mode */
       .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
       body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
         z-index: 0 !important;
       }
-      </style>
----
+      </style> -->
 
 ```{r}
 #| label: targets-setup
@@ -501,6 +500,43 @@ ggplot(
 #| fig-width: 16
 #| fig-height: 8
 
+# add species common names missing from ECOTOX data
+new_species <- c(
+  "Phoca vitulina" = "Harbor Seal",
+  "Calanus finmarchicus" = "Copepod",
+  "Calanus glacialis" = "Arctic Copepod",
+  "Calanus hyperboreus" = "Copepod",
+  "Conchoecia borealis" = "Ostracod",
+  "Euchaeta barbata" = "Copepod",
+  "Euchaeta glacialis" = "Arctic Copepod",
+  "Euchaeta norvegica" = "Copepod",
+  "Eukrohnia hamata" = "Arrow Worm",
+  "Hymenodora glacialis" = "Arctic Shrimp",
+  "Meganyctiphanes norvegica" = "Northern Krill",
+  "Metridia longa" = "Copepod",
+  "Themisto abyssorum" = "Amphipod",
+  "Themisto libellula" = "Amphipod",
+  "Thysanoessa inermis" = "Arctic Krill",
+  "Astarte borealis" = "Northern Astarte",
+  "Mya arenaria" = "Soft-shell Clam",
+  "Cystophora cristata" = "Hooded Seal",
+  "Pagophilus groenlandicus" = "Harp Seal",
+  "Salmo trutta" = "Brown Trout",
+  "Arenicola marina" = "Lugworm",
+  "Gammarus oceanicus" = "Amphipod",
+  "Littorina rudis" = "Rough Periwinkle",
+  "Mytilus edulis" = "Blue Mussel",
+  "Nucella lapillus" = "Dog Whelk",
+  "Phoca groenlandica" = "Harp Seal",
+  "Ursus maritimus" = "Polar Bear",
+  "Rissa tridactyla" = "Black-legged Kittiwake",
+  "Alitta virens" = "King Ragworm",
+  "Reinhardtius hippoglossoides" = "Greenland Halibut"
+)
+
+# Extend species_lookup
+species_lookup <- c(species_lookup, new_species)
+
 # Prepare data for plotting ----
 plot_data <- literature_merged_data |>
   group_by(REFERENCE_ID, SAMPLE_SPECIES) |>
@@ -511,7 +547,8 @@ plot_data <- literature_merged_data |>
     literature_merged_data |> distinct(REFERENCE_ID, YEAR),
     by = "REFERENCE_ID"
   ) |>
-  filter(!is.na(SAMPLE_SPECIES)) |>  distinct()
+  filter(!is.na(SAMPLE_SPECIES)) |>
+  distinct()
 
 # Create formatted labels
 plot_data <- plot_data |>
@@ -530,7 +567,7 @@ threshold_value <- 2000 # set manually, as the 2050 mussels tend to overwhelm th
 ggplot(
   plot_data,
   aes(
-    y = REFERENCE_ID,  # Use the formatted label
+    y = REFERENCE_ID, # Use the formatted label
     x = formatted_species,
     fill = count
   )
@@ -542,13 +579,16 @@ ggplot(
   )) +
   scale_fill_viridis(name = "Sample Size (n)") +
   scale_color_identity() +
-  # theme_aep_plots() + # breaks markdown
+
+  theme_aep_plots() + # breaks markdown
   theme(
-    axis.text.x = element_markdown(angle = 90, hjust = 1),  # Enable markdown rendering
+    # we have to specify axis.text.x.bottom or it doesn't work with theme_minimal()
+    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5), # Enable markdown rendering
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
   labs(x = "Sampled Species") +
+
   facet_wrap(
     facets = vars(SPECIES_GROUP),
     space = "free_x",
@@ -1615,7 +1655,6 @@ literature_merged_data |>
 #| fig-width: 10
 #| fig-height: 10
 
-
 literature_merged_data |>
   filter(
     ENVIRON_COMPARTMENT == "Biota"
@@ -1634,7 +1673,7 @@ literature_merged_data |>
     ncol = 1,
     scales = "free_y",
     space = "free_y"
-  )
+  ) |> theme_minimal()
 
 ```
 
@@ -1729,7 +1768,7 @@ plotly::ggplotly(p)
 ```{r}
 #| echo: false
 # Network Diagram ----
-#| fig-width: 10
+#| fig-width: 16
 #| fig-height: 12
 
 unique_compartments_and_sites <- literature_merged_data |>
@@ -1827,10 +1866,10 @@ ggraph(graph, layout = "tree") +
   check_overlap = TRUE,
   angle_calc = "along",
                   arrow = arrow(length = unit(4, 'mm')), 
-                start_cap = circle(15, 'mm'),
-                end_cap = circle(15, 'mm')) +
-  geom_node_point(size = 40, aes(colour = name))+
-  geom_node_text(aes(label = str_wrap(name, 10)), size = 5,) +
+                start_cap = circle(10, 'mm'),
+                end_cap = circle(10, 'mm')) +
+  geom_node_point(size = 20, aes(colour = name))+
+  geom_node_text(aes(label = str_wrap(name, 10)), size = 3,) +
   scale_fill_manual(values = compartment_colours) +
   theme_void() +
   theme(legend.position = "none")
@@ -1888,3 +1927,4 @@ source("temp_R/scratchpad_norske_utslippe.R")
 
 top_municipalities_plot
 ```
+

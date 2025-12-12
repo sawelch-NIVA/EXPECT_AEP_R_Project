@@ -1,9 +1,0 @@
-project:
-  output-dir: _output
-  execute-dir: project
-
-execute:
-  cache: true
-
-toc: true
-number-sections: true

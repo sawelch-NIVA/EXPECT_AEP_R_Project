@@ -28,8 +28,6 @@ tribble_code <- tribble_construct(colnames)
 
 # Function to convert tibble to tribble code ----
 to_tribble <- function(df) {
-  library(glue)
-
   # Header line with column names
   header <- glue("  ~{names(df)}", .sep = ", ")
 
