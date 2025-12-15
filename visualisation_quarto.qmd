@@ -3,9 +3,9 @@ title: "EXPECT Copper AEP"
 author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
-format: 
+format:
   html:
-    grid: 
+    grid:
       body-width: 1500px
       sidebar-width: 0px
     page-layout: full
@@ -52,8 +52,10 @@ library(data.table)
 
 source("_targets.R")
 tar_make()
+```
 
-
+```{r}
+#| label: load-data
 # load in any data we need from the targets workflow
 literature_merged_data <- tar_read(load_literature_pqt)
 literature_reference_data <- tar_read(reference_data)
@@ -65,31 +67,45 @@ wgs84_geo <- tar_read(wgs84_geography)
 # vm data isn't in targets yet, but I want to pull it in and see what happens
 # this is all terrible code
 vm_measurements_2025 <- fread("data/clean/Vm_Unzipped/measurements.csv")
-vm_campaign_2025 <- fread("data/clean/Vm_Unzipped/campaign.csv")
-vm_sites_2025 <- fread("data/clean/Vm_Unzipped/sites.csv")
+vm_campaign_2025 <- fread("data/clean/Vm_Unzipped/campaign.csv") |> select(-ENTERED_BY, -ENTERED_DATE)
+vm_sites_2025 <- fread("data/clean/Vm_Unzipped/sites.csv") |> select(-ENTERED_BY, -ENTERED_DATE)
 vm_reference_2025 <- fread("data/clean/Vm_Unzipped/reference.csv")
 
-vm_merged_data <- vm_measurements_2025 |> left_join(vm_campaign_2025, by = "CAMPAIGN_NAME_SHORT") 
+vm_merged_data <- vm_measurements_2025 |> left_join(vm_campaign_2025, by = "CAMPAIGN_NAME_SHORT")
 vm_merged_data <- vm_merged_data |> left_join(vm_sites_2025, "SITE_CODE")
-vm_merged_data <- vm_merged_data |> left_join(vm_reference_2025, "REFERENCE_ID") |>  mutate(SUBSAMPLE = as.character(SUBSAMPLE), 
-SAMPLING_PROTOCOL = as.character(SAMPLING_PROTOCOL), 
-ANALYTICAL_PROTOCOL = as.character(ANALYTICAL_PROTOCOL), 
-FRACTIONATION_PROTOCOL = as.character(FRACTIONATION_PROTOCOL), 
+vm_merged_data <- vm_merged_data |> left_join(vm_reference_2025, "REFERENCE_ID") |>  mutate(SUBSAMPLE = as.character(SUBSAMPLE),
+SAMPLING_PROTOCOL = as.character(SAMPLING_PROTOCOL),
+ANALYTICAL_PROTOCOL = as.character(ANALYTICAL_PROTOCOL),
+FRACTIONATION_PROTOCOL = as.character(FRACTIONATION_PROTOCOL),
 EXTRACTION_PROTOCOL = as.character(EXTRACTION_PROTOCOL))
 
 # more date format woes. fread is now reading as dttm instead of IDATE?
 vm_merged_data[, SAMPLING_DATE := as.IDate(SAMPLING_DATE)]
 
-# Fuck it
-vm_merged_data <- vm_merged_data |> mutate(SAMPLING_DATE = as.IDate("2025-01-01"))
+# Fuck it. Ok, this worked. So it was another date and I was assuming SAMPLING_DATE. Hmm.
+vm_merged_data <- vm_merged_data |>
+  mutate(across(
+    contains("DATE"),
+    ~ as.IDate(.x)
+  ))
 # for fuck's sake
+sapply(literature_merged_data, class)
+sapply(vm_merged_data, class)
 
-# I give up. 
-data <- literature_merged_data |> bind_rows(vm_merged_data)
+# I give up.
+literature_merged_data <- literature_merged_data |> bind_rows(vm_merged_data)
+# Error in `as.Date.default()`:
+# ! do not know how to convert 'e' to class “Date”
+# This is completely uninformative..
 
 species_names <- arrow::read_parquet("data/clean/ecotox_2025_06_12_species.parquet")
 species_lookup <- species_names |>
   with(setNames(common_name, latin_name))
+
+```
+
+```{r}
+#| label: themes-and-helpers
 
 copper_toxicity_thresholds <- tar_read(copper_toxicity_thresholds)
 # Define threshold colors based on the report ----
@@ -876,7 +892,7 @@ map <- leaflet() |>
       "/5"
     ),
     group = "Mine Tailings"
-  ) |> 
+  ) |>
 
   # apple markers... for apples
   addMarkers(
@@ -898,7 +914,7 @@ map <- leaflet() |>
       "<b>Period:</b> 2020-2024"
     ),
     group = "Apple Production"
-  ) |> 
+  ) |>
 
   # add case study sites
     addCircles(
@@ -1069,13 +1085,13 @@ Get a basic overview of the orders of magnitude for different sub-compartments (
 ```{r}
 #| label: fig-basic-subcompartments
 
-literature_merged_data |> 
-  filter(!is.na(MEASURED_UNIT_STANDARD)) |> 
+literature_merged_data |>
+  filter(!is.na(MEASURED_UNIT_STANDARD)) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD, y = ENVIRON_COMPARTMENT_SUB, color = ENVIRON_COMPARTMENT_SUB)) +
   geom_point() +
-  facet_nested(rows = vars(ENVIRON_COMPARTMENT, MEASURED_UNIT_STANDARD), 
-  scales = "free_y", 
-  space = "free_y", 
+  facet_nested(rows = vars(ENVIRON_COMPARTMENT, MEASURED_UNIT_STANDARD),
+  scales = "free_y",
+  space = "free_y",
   nest_line = element_line()
   ) +
   theme_minimal() +
@@ -1085,7 +1101,7 @@ literature_merged_data |>
   ) +
     theme(legend.position = "none") +
     labs(x = "", y = "")
-   
+
 ```
 
 The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means uncertainty bounds (SD, range, 95% CI, etc.) and overlaid with relevant regulatory thresholds where available.
@@ -1233,7 +1249,7 @@ literature_merged_data |>
       na.rm = TRUE
     ) |> round(),
     clip = "off"  # allows threshold labels to extend beyond plot area if needed
-  ) 
+  )
 ```
 
 #### Salt and Transitional Water
@@ -1377,7 +1393,7 @@ literature_merged_data |>
       na.rm = TRUE
     ) |> round(),
     clip = "off"  # allows threshold labels to extend beyond plot area if needed
-  ) 
+  )
 ```
 
 #### Aquatic Sediment
@@ -1521,7 +1537,7 @@ literature_merged_data |>
       na.rm = TRUE
     ) |> round(),
     clip = "off"  # allows threshold labels to extend beyond plot area if needed
-  ) 
+  )
 ```
 
 ### Terrestrial Compartment
@@ -1665,7 +1681,7 @@ literature_merged_data |>
       na.rm = TRUE
     ) |> round(),
     clip = "off"  # allows threshold labels to extend beyond plot area if needed
-  ) 
+  )
 ```
 
 ### Biota Compartment
@@ -1680,26 +1696,28 @@ literature_merged_data |>
 #| warning: false
 #| fig-width: 10
 #| fig-height: 10
+#| include: false
 
-literature_merged_data |>
-  filter(
-    ENVIRON_COMPARTMENT == "Biota"
-  ) |>
-  ggplot(aes(
-    x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
-    y = SAMPLE_SPECIES,
-    colour = SPECIES_GROUP
-  )) +
-  geom_pointrange(aes(
-    xmin = UNCERTAINTY_UPPER_STANDARD,
-    xmax = UNCERTAINTY_UPPER_STANDARD
-  )) +
-  facet_wrap(
-    facet = vars(OCEAN_COUNTRY),
-    ncol = 1,
-    scales = "free_y",
-    space = "free_y"
-  ) |> theme_minimal()
+# TODO: Fix pls
+# literature_merged_data |>
+#   filter(
+#     ENVIRON_COMPARTMENT == "Biota"
+#   ) |>
+#   ggplot(aes(
+#     x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+#     y = SAMPLE_SPECIES,
+#     colour = SPECIES_GROUP
+#   )) +
+#   geom_pointrange(aes(
+#     xmin = UNCERTAINTY_UPPER_STANDARD,
+#     xmax = UNCERTAINTY_UPPER_STANDARD
+#   )) +
+#   facet_wrap(
+#     facet = vars(OCEAN_COUNTRY),
+#     ncol = 1,
+#     scales = "free_y",
+#     space = "free_y"
+#   ) |> theme_minimal()
 
 ```
 
@@ -1806,9 +1824,9 @@ unique_compartments_and_sites <- literature_merged_data |>
     MEASURED_N
   ) |>
   distinct() |>
-  filter(if_all(everything(), ~ !is.na(.))) |> 
-  group_by(SITE_GEOGRAPHIC_FEATURE, SITE_GEOGRAPHIC_FEATURE_SUB, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |> 
-  reframe(sum_n = sum(MEASURED_N)) |> 
+  filter(if_all(everything(), ~ !is.na(.))) |>
+  group_by(SITE_GEOGRAPHIC_FEATURE, SITE_GEOGRAPHIC_FEATURE_SUB, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
+  reframe(sum_n = sum(MEASURED_N)) |>
   mutate(compartment_name_n = glue::glue("{ENVIRON_COMPARTMENT_SUB}\n{sum_n}"))
 
 
@@ -1816,52 +1834,52 @@ unique_compartments_and_sites <- literature_merged_data |>
 # Copper flow network edges ----
 copper_flow_edges <- tribble(
   ~from, ~to, ~flow_type, ~plausibility, ~magnitude, ~evidence_quality, ~description,
-  
+
   # Atmospheric deposition to surface waters ----
   "Atmospheric", "Freshwater", "deposition", 0.95, "medium", "high", "Wet and dry deposition from atmospheric particulates",
   "Atmospheric", "Brackish/Transitional Water", "deposition", 0.95, "medium", "high", "Wet and dry deposition to coastal/estuarine waters",
   "Atmospheric", "Aquatic Sediment", "deposition", 0.90, "low", "medium", "Direct deposition to exposed sediments",
   "Atmospheric", "Soil O Horizon (Organic)", "deposition", 0.95, "medium", "high", "Atmospheric deposition to terrestrial surfaces",
-  
+
   # Terrestrial to aquatic flows ----
   "Soil O Horizon (Organic)", "Freshwater", "runoff", 0.95, "high", "high", "Surface runoff and leaching from soils",
   "Soil O Horizon (Organic)", "Groundwater", "percolation", 0.85, "medium", "medium", "Downward migration through soil profile",
   "Biota, Terrestrial", "Soil O Horizon (Organic)", "excretion_decomposition", 0.90, "low", "medium", "Excretion and decomposition of terrestrial organisms",
-  
+
   # Groundwater to surface water ----
   "Groundwater", "Freshwater", "baseflow", 0.90, "medium", "high", "Groundwater discharge to streams/rivers",
   "Groundwater", "Brackish/Transitional Water", "discharge", 0.75, "low", "medium", "Submarine groundwater discharge to coastal waters",
-  
+
   # Freshwater flows ----
   "Freshwater", "Brackish/Transitional Water", "advection", 0.95, "high", "high", "River discharge to estuaries",
   "Freshwater", "Aquatic Sediment", "sedimentation", 0.95, "high", "high", "Particulate settling from water column",
   "Freshwater", "Biota, Aquatic", "uptake", 0.95, "medium", "high", "Bioaccumulation by freshwater organisms",
-  
+
   # Brackish/transitional water flows ----
   "Brackish/Transitional Water", "Aquatic Sediment", "sedimentation", 0.95, "high", "high", "Particulate settling in estuarine environments",
   "Brackish/Transitional Water", "Biota, Aquatic", "uptake", 0.95, "medium", "high", "Bioaccumulation by estuarine/coastal organisms",
-  
+
   # Sediment processes ----
   "Aquatic Sediment", "Freshwater", "resuspension", 0.85, "medium", "high", "Sediment resuspension and porewater release",
   "Aquatic Sediment", "Brackish/Transitional Water", "resuspension", 0.85, "medium", "high", "Sediment resuspension in coastal/estuarine areas",
   "Aquatic Sediment", "Biota, Aquatic", "uptake", 0.90, "low", "medium", "Benthic organism uptake from sediments",
   "Aquatic Sediment", "Groundwater", "diagenesis", 0.70, "low", "low", "Deep burial and diagenetic processes",
-  
+
   # Biota cycling ----
   "Biota, Aquatic", "Aquatic Sediment", "excretion_decomposition", 0.95, "medium", "high", "Fecal pellets, mortality, decomposition",
   "Biota, Aquatic", "Freshwater", "excretion", 0.90, "low", "medium", "Dissolved excretion by aquatic organisms",
   "Biota, Aquatic", "Brackish/Transitional Water", "excretion", 0.90, "low", "medium", "Dissolved excretion in coastal waters",
   "Biota, Aquatic", "Biota, Terrestrial", "trophic_transfer", 0.80, "low", "medium", "Predation by terrestrial organisms (e.g., birds, mammals)",
-  
+
   # Wastewater flows ----
   "Wastewater", "Freshwater", "discharge", 0.90, "high", "high", "Treated or untreated wastewater discharge",
   "Wastewater", "Brackish/Transitional Water", "discharge", 0.80, "medium", "medium", "Coastal wastewater discharge",
   "Wastewater", "Sludge", "treatment", 0.95, "high", "high", "Copper partitioning to sludge during treatment",
-  
+
   # Sludge applications ----
   "Sludge", "Soil O Horizon (Organic)", "application", 0.85, "medium", "medium", "Agricultural application of biosolids",
   "Sludge", "Freshwater", "discharge", 0.60, "low", "low", "Illegal or emergency discharge (historical)",
-  
+
   # Terrestrial-atmospheric ----
   "Soil O Horizon (Organic)", "Atmospheric", "resuspension", 0.70, "low", "low", "Wind erosion and dust generation",
   "Biota, Terrestrial", "Atmospheric", "volatilization", 0.40, "negligible", "low", "Unlikely for copper but included for completeness"
@@ -1891,7 +1909,7 @@ ggraph(graph, layout = "tree") +
   strength = 0.8,
   check_overlap = TRUE,
   angle_calc = "along",
-                  arrow = arrow(length = unit(4, 'mm')), 
+                  arrow = arrow(length = unit(4, 'mm')),
                 start_cap = circle(10, 'mm'),
                 end_cap = circle(10, 'mm')) +
   geom_node_point(size = 20, aes(colour = name))+
@@ -1937,7 +1955,7 @@ number_of_sites <- nrow(municipality_centroids())
 sales_data_split <- copper_oxide_sales() |> mutate(amount_kg = amount_kg / number_of_sites,
 average_kg = average_kg / number_of_sites)
 
-cross_join(municipality_centroids(), sales_data_split) |> 
+cross_join(municipality_centroids(), sales_data_split) |>
    DT::datatable()
 
 ```
