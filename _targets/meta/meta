@@ -63,7 +63,7 @@ plot_copper_boxplots|function|9ec9673a8f37f7fc
 join_all_literature_modules|function|5e0cd363f392f035
 marine_colors|object|7b3a2b11c99c18d9
 generate_copper_thresholds|function|378dfaba4435d766
-copper_oxide_sales|function|f2e9b1aae5286596
+copper_oxide_sales|function|c696b7f566385d60
 save_literature_parquet|function|3b8e9e863b978a0b
 st_line_split|function|a7e084999681f4c0
 theme_arctic_map|function|4e60c94dcaf242d9

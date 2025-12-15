@@ -61,35 +61,10 @@ to_tribble <- function(df) {
 
 to_tribble(colnames)
 
-tribble(
-  ~Vm_Variable            , ~eData_Variable , Transformation                              ,
-  "Registrerings_id"      , # just keep in comments?
-  "Vannlok_kode"          , "SITE_CODE"     , str_glue("Vm_{Vannlokalitet_kode")          , # important. I don't see any site coords here so I guess that's a different table
-  "Aktivitet_id"          , "CAMPAIGN"      , str_glue("Vm_{YEAR}_{Aktivitet_id}")        , # important
-  "Oppdragsgiver"         , # not very important, send to comments
-  "Oppdragstaker"         , # not very important, send to comments
-  "Parameter_id"          , # very important but currenly only going to be 1 of two substances. requires lookup
-  "Medium_id"             , "Many"          , # complicated, important, must be mapped against multiple lookups in multiple tables
-  "LatinskNavn_id"        , "Not retained"  , NA                                          ,
-  "VitenskapligNavn"      , "SPECIES_NAME"  , NA                                          , # biig lookup but easy to do
-  "Provetakmetode_id"     , # important, lookup + translation
-  "Analysemetode_id"      , # important, lookup + translation
-  "Tid_provetak"          , "SAMPLING_DATE" , ymd_hms(Tid_provetak) |> format("%Y.%m.%d") , # imoprtant, but date conversions are easy
-  "Ovre_dyp"              , # moderate important, needs to be averaged w/ nedre deep
-  "Nedre_dyp"             , # see above
-  "DybdeEnhet"            , # see above
-  "Filtrert_Prove"        , # important, needs to go into FRACTIONATION_PROTOCOL, possibly with expert intepretation
-  "UnntasKlassifisering"  , # probasbly not important?
-  "Operator"              , # important, needs to be lookuped into our own stuff for and spread across value/LOQ/LOD columns
-  "Verdi"                 , # important.
-  "Enhet_id"              , # important, will need to lookup units and standardise
-  "Provenr"               , # retain in comments or even just add a new column
-  "Deteksjonsgrense"      , # important, units must be standardised
-  "Kvantifiseringsgrense" , "LOQ_VALUE"     , "Unit Standardisation"                      , # important, units must be standardised
-  "Opprinnelse"           , # probably worth keeping?
-  "Ant_verdier"           , # becomes sample_n?
-  "Kommentar"             , # retain as comment?
-  "Arkiv_id"              , # retain as comment?
-  "ID_lokal"              , # no ideas
-  "Produktbeskrivelse" # I think this is empty always?
-)
+
+# ---
+# Medium ID
+# We can guess lots - but not all - columns from here
+
+vm_copper_mediums <- vm_copper_2025 |>
+  left_join(vm_medium_id_lookup, by = c(Medium_id = "MediumID"))

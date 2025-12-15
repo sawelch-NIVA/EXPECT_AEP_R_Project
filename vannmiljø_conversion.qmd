@@ -1,0 +1,1144 @@
+---
+format: 
+  html:
+    toc: true
+
+---
+
+# Setup 
+## Libraries 
+```{r}
+#| label: setup-packages
+#| echo: false
+#| warning: false
+
+library(data.table)
+library(readxl)
+library(summarytools)
+library(datapasta)
+library(glue)
+library(tidyverse)
+library(STOPeData)
+library(sf)
+library(DT)
+```
+
+# Data Sources 
+## File Inventory 
+```{r}
+#| label: data-sources-file-inventory
+
+files <- list.files("data/raw/vannmiljo", full.names = TRUE)
+
+file_info <- data.table(
+  file = basename(files),
+  full_path = files
+)[,
+  n_rows := sapply(full_path, function(f) {
+    tryCatch(
+      nrow(fread(f)),
+      error = function(e) NA_integer_
+    )
+  })
+][, .(file, n_rows)]
+
+datatable(file_info)
+```
+
+# Data Inspection 
+## Measurements Data 
+### Load Measurements 
+```{r}
+#| label: data-inspection-measurements-load
+
+# Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns, etc.
+# FIXME: I have a sneaking suspicion that we actually got the data for a lot more than 2025
+# Search for Kobber & Kobberpyrition
+# 138615 hits
+if (!exists("vm_copper_2025")) {
+  # let's not run this more often than we have to, it's very slow
+  vm_copper_2025 <- readxl::read_excel(
+    path = "data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx",
+    sheet = 1,
+    guess_max = 138615 # avoid warnings (because read_excel will automatically convert columns to logical if they have a lot of NAs)
+  )
+}
+
+# little bit of data inspection
+dfSummary(vm_copper_2025) # where have you been my whole life.
+```
+
+### Helper Functions 
+```{r}
+#| label: data-inspection-measurements-helper-tribble
+
+# Function to convert tibble to tribble code
+to_tribble <- function(df) {
+  # Header line with column names
+  header <- glue("  ~{names(df)}", .sep = ", ")
+
+  # Format each value (add quotes for characters)
+  format_val <- function(x) {
+    if (is.character(x)) {
+      glue('"{x}"')
+    } else if (is.na(x)) {
+      "NA"
+    } else {
+      as.character(x)
+    }
+  }
+
+  # Build each row
+  rows <- apply(df, 1, function(row) {
+    vals <- sapply(row, format_val)
+    glue("  {vals}", .sep = ", ")
+  })
+
+  # Combine everything
+  glue(
+    "tribble(
+{header},
+{paste(rows, collapse = ',\n')}
+)"
+  )
+}
+```
+
+### Variable Mapping 
+```{r}
+#| label: data-inspection-measurements-variable-mapping
+
+tribble(
+  ~Vm_Variable            , ~eData_Variable , ~Transformation        ,
+  "Registrerings_id"      , # just keep in comments?
+  "Vannlok_kode"          , "SITE_CODE"     , NA                     , # important. I don't see any site coords here so I guess that's a different table
+  "Aktivitet_id"          , "CAMPAIGN"      , NA                     , # important
+  "Oppdragsgiver"         , # not very important, send to comments
+  "Oppdragstaker"         , # not very important, send to comments
+  "Parameter_id"          , # very important but currenly only going to be 1 of two substances. requires lookup
+  "Medium_id"             , "Many"          , # complicated, important, must be mapped against multiple lookups in multiple tables
+  "LatinskNavn_id"        , "Not retained"  , NA                     ,
+  "VitenskapligNavn"      , "SPECIES_NAME"  , NA                     , # biig lookup but easy to do
+  "Provetakmetode_id"     , # important, lookup + translation
+  "Analysemetode_id"      , # important, lookup + translation
+  "Tid_provetak"          , "SAMPLING_DATE" , NA                     , # imoprtant, but date conversions are easy
+  "Ovre_dyp"              , # moderate important, needs to be averaged w/ nedre deep
+  "Nedre_dyp"             , # see above
+  "DybdeEnhet"            , # see above
+  "Filtrert_Prove"        , # important, needs to go into FRACTIONATION_PROTOCOL, possibly with expert intepretation
+  "UnntasKlassifisering"  , # probasbly not important?
+  "Operator"              , # important, needs to be lookuped into our own stuff for and spread across value/LOQ/LOD columns
+  "Verdi"                 , # important.
+  "Enhet_id"              , # important, will need to lookup units and standardise
+  "Provenr"               , # retain in comments or even just add a new column
+  "Deteksjonsgrense"      , # important, units must be standardised
+  "Kvantifiseringsgrense" , "LOQ_VALUE"     , "Unit Standardisation" , # important, units must be standardised
+  "Opprinnelse"           , # probably worth keeping?
+  "Ant_verdier"           , # becomes sample_n?
+  "Kommentar"             , # retain as comment?
+  "Arkiv_id"              , # retain as comment?
+  "ID_lokal"              , # no ideas
+  "Produktbeskrivelse" # I think this is empty always?
+)
+```
+
+### Categorical Summary Helper 
+```{r}
+#| label: data-inspection-measurements-helper-categorical-summary
+
+get_categorical_summary <- function(dt, max_unique = 50) {
+  # Convert to data.table if not already
+  if (!is.data.table(dt)) {
+    dt <- as.data.table(dt)
+  }
+
+  results <- list()
+
+  for (col_name in names(dt)) {
+    col_data <- dt[[col_name]]
+    n_unique <- uniqueN(col_data, na.rm = FALSE)
+
+    # Consider categorical if: character, factor, or numeric/integer with <= max_unique values
+    is_categorical <- is.character(col_data) ||
+      is.factor(col_data) ||
+      (is.numeric(col_data) && n_unique <= max_unique)
+
+    if (is_categorical && n_unique > 0 && n_unique <= max_unique) {
+      # Get counts
+      counts <- dt[, .N, by = col_name][order(-N)]
+      setnames(counts, col_name, "value")
+
+      # Convert to tribble format
+      cat("\n## ", col_name, " (", n_unique, " unique values)\n\n", sep = "")
+
+      # Build tribble
+      cat("tribble(\n")
+      cat("  ~value, ~n,\n")
+
+      for (i in 1:nrow(counts)) {
+        val <- counts$value[i]
+        n <- counts$N[i]
+
+        # Format value
+        if (is.na(val)) {
+          val_str <- "NA"
+        } else if (is.character(val)) {
+          val_str <- paste0('"', val, '"')
+        } else {
+          val_str <- as.character(val)
+        }
+
+        ending <- ifelse(i == nrow(counts), "\n", ",\n")
+        cat("  ", val_str, ", ", n, ending, sep = "")
+      }
+
+      cat(")\n")
+
+      results[[col_name]] <- counts
+    }
+  }
+
+  invisible(results)
+}
+```
+
+### Categorical Variables Analysis 
+```{r}
+#| label: data-inspection-measurements-categoricals
+
+# Use it:
+get_categorical_summary(vm_copper_2025, max_unique = 50)
+```
+
+## Sites Data 
+### Extract Site Codes 
+```{r}
+#| label: data-inspection-sites-extract-codes
+
+# This is a massive pain, because vm_copper_2025$Vannlok_kode |> unique() |> writeClipboard() returns ~ 30k entries, and Vm doesn't support
+# downloading data for that many sites... but it doesn't tell you how many it does support, it just fails in a while.
+# so we take
+vm_copper_2025$Vannlok_kode |> unique() |> writeClipboard()
+# we Ctrl + H /n with `, `
+# then we split it into 3? chunks and download them as individual excel files
+```
+
+### Load Sites 
+```{r}
+#| label: data-inspection-sites-load
+
+vm_copper_sites_2025 <- read_excel(
+  "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx",
+  guess_max = 10000
+) |>
+  add_row(read_excel(
+    "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx",
+    guess_max = 10000
+  )) |>
+  add_row(read_excel(
+    "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx",
+    guess_max = 10000
+  ))
+```
+
+### Sites Categorical Analysis 
+```{r}
+#| label: data-inspection-sites-categoricals
+
+get_categorical_summary(vm_copper_sites_2025)
+```
+
+### Join Sites and Measurements 
+```{r}
+#| label: data-inspection-sites-join-measurements
+
+# We need to join sites data to measurements before we can split
+vm_sites_and_measurements_2025 <- vm_copper_2025 |>
+  left_join(
+    vm_copper_sites_2025,
+    by = c("Vannlok_kode" = "Vannlokalitetskode")
+  )
+
+# We can guess lots - but not all - columns from here
+vm_medium_id_lookup <- read_csv("data/clean/Vm_medium_lookup_matrix_filled.csv")
+```
+
+### Lookups
+
+#### MediumID
+
+This is one of the most frustrating variables in Vannmiljø, because it has loads of poorly named variables that correspond to lots of different actual semantic things. We have to map to up to 8 columns across 2-4 tables.
+
+```{r}
+#| label: medium-id-lookup
+vm_medium_id_lookup |> datatable()
+```
+
+#### Vannkategori
+
+##### Investigate Vannkategori S 
+```{r}
+#| label: data-inspection-sites-investigate-kategori-s
+
+# what's the deal with Vannkategori == "S"?
+what_is_s <- vm_sites_and_measurements_2025 |>
+  filter(Vannkategori == "S") |>
+  left_join(vm_medium_id_lookup, by = c(Medium_id = "MediumID")) |>
+  select(Name, Description) |>
+  distinct() |>
+  DT::datatable()
+```
+
+S is drainage, but a variety of actual compartments/sites/matrices.
+
+##### Investigate Vannkategori O 
+```{r}
+#| label: data-inspection-sites-investigate-kategori-o
+
+# what's the deal with Vannkategori == "O"?
+what_is_o <- vm_sites_and_measurements_2025 |>
+  filter(Vannkategori == "O") |>
+  left_join(vm_medium_id_lookup, by = c(Medium_id = "MediumID")) |>
+  select(Name, Description) |>
+  distinct() |>
+  DT::datatable()
+```
+
+O is ocean. 
+
+Now that we've solved this mystery, we can make a lookup for Vannkategory. Asterisks mark stuff I'm not sure about, if you're curious.
+
+```{r}
+#| label: vannkategory-lookup
+
+vm_vannkategory_lookup <- read_csv("data/clean/vm_sites_codes_lookup.csv")
+vm_vannkategory_lookup |> datatable()
+```
+
+#### Methods
+
+Methods is going to be a tricky one - we're a lot more detailed about methods than we were previously, but Vm tends to report one reference per Analyse/Prøvetakingsmetode (+ Filtrert vs Ufiltrert samples). Converting from their format to ours - especially without doing a whole load of reading Norwegian Standards documents is going to be tricky.
+
+Let's start with the available method codes from Vm (https://vannmiljokoder.miljodirektoratet.no/samplingMethod?q, https://vannmiljokoder.miljodirektoratet.no/analysisMethod) filtered to whatever's relevant to us.
+
+There is a lot of "UKJENT" in there. Good thing we're not trying to run the environmental policy of a whole country using this data.
+
+```{r}
+#| label: load-vm-methods
+vm_sites_and_measurements_2025 |>
+  group_by(Analysemetode_id, Provetakmetode_id) |>
+  reframe(count = n()) |>
+  arrange(desc(count)) |>
+  datatable()
+
+
+vm_analysis_codes <- read_excel(
+  "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
+)
+vm_sampling_codes <- read_excel(
+  "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+)
+
+
+```
+
+9 actual analysis methods, one of which is unknown and the rest are very explicit about what they use. lovely.
+
+```{r}
+#| label: vm_analysis_methods
+vm_analysis_codes_filtered <- vm_analysis_codes |>
+  filter(AnalysisMethodID %in% vm_sites_and_measurements_2025$Analysemetode_id)
+
+vm_analysis_codes_filtered |> datatable()
+```
+
+Now sampling.
+
+```{r}
+#| label: vm_sampling_methods
+vm_sampling_codes_filtered <- vm_sampling_codes |>
+  filter(SamplingMethodID %in% vm_sites_and_measurements_2025$Provetakmetode_id)
+
+vm_sampling_codes_filtered |> datatable()
+```
+
+29 sampling methods. But I bet most of them aren't relevant to freshwater. 
+
+```{r}
+#| label: vm_sampling_freshwater
+
+vm_sampling_codes_filtered_fw <- vm_sampling_codes_filtered |>
+  filter(str_detect(Name, "erskvann") & !str_detect(Name, "sediment")) # highly precise regex
+
+vm_sampling_codes_filtered_fw |>
+  datatable()
+```
+
+Ok, 5 methods. Most of which are probably bucket-on-a-stick or bucket-on-a-rope. We'll come back to them later.
+
+```{r}
+#| label: merge-method_codes
+
+vm_method_codes <- vm_sampling_codes_filtered_fw |>
+  bind_rows(vm_analysis_codes_filtered) |>
+  mutate(
+    ID = case_when(
+      !is.na(AnalysisMethodID) ~ AnalysisMethodID,
+      !is.na(SamplingMethodID) ~ SamplingMethodID,
+      .default = NA_character_
+    ),
+    Category = case_when(
+      !is.na(AnalysisMethodID) ~ "Analysis",
+      !is.na(SamplingMethodID) ~ "Sampling",
+      .default = NA_character_
+    ),
+    .keep = "unused"
+  )
+```
+
+We came back to them now. Basically I just asked Claude to do its best.
+
+```{r}
+#| label: vm_methods_eData
+
+vm_methods_eData <- read_csv(
+  file = "data/clean/vm_methods_lookup_filled.csv"
+) |>
+  group_by(PROTOCOL_CATEGORY) |>
+  mutate(
+    CAMPAIGN_NAME = "Vannmiljø Copper Monitoring 2025",
+    PROTOCOL_ID = glue(
+      "{substr(PROTOCOL_CATEGORY, 1, 1)}{PROTOCOL_ID}-Vm2025" # FIXME: Wrong numbers
+    )
+  )
+
+vm_methods_eData |> datatable()
+```
+
+To be honest, it's pretty bad. But I think I can live with that, for the time being.
+
+
+### Big Ugly Merged Table
+
+In any case, we can start merging everything together into a big ugly table. It feels wrong doing this before actually working out the fine details of how we resolve conflicts or missing coverage with the lookups, but if we do that first we risk wasting time on conflicts that don't actually occur in the data.
+
+```{r}
+#| label: join-all-lookups
+vm_lookups_merged <- vm_sites_and_measurements_2025 |>
+  left_join(
+    vm_medium_id_lookup |>
+      rename(
+        ENVIRON_COMPARTMENT_medium = ENVIRON_COMPARTMENT,
+        ENVIRON_COMPARTMENT_SUB_medium = ENVIRON_COMPARTMENT_SUB,
+        SPECIES_GROUP_medium = SPECIES_GROUP,
+        SAMPLE_SPECIES_medium = SAMPLE_SPECIES,
+        SPECIES_GENDER_medium = SPECIES_GENDER,
+        SAMPLE_TISSUE_medium = SAMPLE_TISSUE,
+        SITE_GEOGRAPHIC_FEATURE_medium = SITE_GEOGRAPHIC_FEATURE,
+        SITE_GEOGRAPHIC_FEATURE_SUB_medium = SITE_GEOGRAPHIC_FEATURE_SUB
+      ),
+    by = c(Medium_id = "MediumID")
+  ) |>
+  left_join(
+    vm_vannkategory_lookup |>
+      rename(
+        ENVIRON_COMPARTMENT_water_category = ENVIRON_COMPARTMENT,
+        ENVIRON_COMPARTMENT_SUB_water_category = ENVIRON_COMPARTMENT_SUB,
+        SITE_GEOGRAPHIC_FEATURE_water_category = SITE_GEOGRAPHIC_FEATURE,
+        SITE_GEOGRAPHIC_FEATURE_SUB_water_category = SITE_GEOGRAPHIC_FEATURE_SUB
+      ),
+    by = c(Vannkategori = "VannkategoriID")
+  )
+
+```
+
+Well, that sure is a big dataset. The question now is - how do we detect conflicts and missing data?
+
+Easiest is probably to check for any row where any of the... let's start with environmental compartments - are empty?
+
+```{r}
+#| label: environ_compartments_missing
+
+vm_lookups_merged |>
+  group_by(ENVIRON_COMPARTMENT_water_category, ENVIRON_COMPARTMENT_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      ENVIRON_COMPARTMENT_water_category !=
+        ENVIRON_COMPARTMENT_medium ~ "Conflict",
+      ENVIRON_COMPARTMENT_water_category %in%
+        c("Not reported", "", NA) &
+        ENVIRON_COMPARTMENT_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+These don't all agree, but at least there's nothing missing?
+
+Let's do the same exercise for everything else.
+
+ENVIRON_COMPARTMENT_SUB
+
+```{r}
+#| label: environ_compartments_sub_missing
+vm_lookups_merged |>
+  group_by(
+    ENVIRON_COMPARTMENT_SUB_water_category,
+    ENVIRON_COMPARTMENT_SUB_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      ENVIRON_COMPARTMENT_SUB_water_category !=
+        ENVIRON_COMPARTMENT_SUB_medium ~ "Conflict",
+      ENVIRON_COMPARTMENT_SUB_water_category %in%
+        c("Not reported", "", NA) &
+        ENVIRON_COMPARTMENT_SUB_medium %in%
+          c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+SITE_GEOGRAPHIC_FEATURE
+
+```{r}
+#| label: site_geographic_feature_missing
+vm_lookups_merged |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE_water_category,
+    SITE_GEOGRAPHIC_FEATURE_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SITE_GEOGRAPHIC_FEATURE_water_category !=
+        SITE_GEOGRAPHIC_FEATURE_medium ~ "Conflict",
+      SITE_GEOGRAPHIC_FEATURE_water_category %in%
+        c("Not reported", "", NA) &
+        SITE_GEOGRAPHIC_FEATURE_medium %in%
+          c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+SITE_GEOGRAPHIC_FEATURE_SUB
+
+```{r}
+#| label: site_geographic_feature_sub_missing
+vm_lookups_merged |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE_SUB_water_category,
+    SITE_GEOGRAPHIC_FEATURE_SUB_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SITE_GEOGRAPHIC_FEATURE_SUB_water_category !=
+        SITE_GEOGRAPHIC_FEATURE_SUB_medium ~ "Conflict",
+      SITE_GEOGRAPHIC_FEATURE_SUB_water_category %in%
+        c("Not reported", "", NA) &
+        SITE_GEOGRAPHIC_FEATURE_SUB_medium %in%
+          c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+We're generally less worried about species stuff.
+
+```{r}
+#| label: species-group-missing
+
+vm_lookups_merged |>
+  group_by(SPECIES_GROUP_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SPECIES_GROUP_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+
+```{r}
+#| label: sample-species-missing
+
+vm_lookups_merged |>
+  group_by(SAMPLE_SPECIES_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SAMPLE_SPECIES_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+```{r}
+#| label: species-gender-missing
+
+vm_lookups_merged |>
+  group_by(SPECIES_GENDER_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SPECIES_GENDER_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+```{r}
+#| label: sample-tissue-missing
+
+vm_lookups_merged |>
+  group_by(SAMPLE_TISSUE_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SAMPLE_TISSUE_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count)) |>
+  datatable()
+```
+
+#### Conclusions
+
+This is a whole load of messy data and I am a lazy, lazy man. It seems like the easiest approach for now is just to take the least problematic data. We can come back to it later and fix the many, many edge cases if we have time.
+
+I'm going to define "least problematic data" as just unambigiously freshwater stuff for now. Also no polygons, no biota.
+
+```{r}
+#| label: filter-to-freshwater
+
+vm_freshwater <- vm_lookups_merged |>
+  filter(
+    ENVIRON_COMPARTMENT_water_category == "Aquatic" &
+      ENVIRON_COMPARTMENT_medium == "Aquatic",
+    ENVIRON_COMPARTMENT_SUB_water_category == "Freshwater" &
+      ENVIRON_COMPARTMENT_SUB_medium == "Freshwater",
+    Objekttype == "point",
+    LatinskNavn_id == 0
+  ) |>
+  filter(Vannlokalitetsnavn != "Svalbard, ENSB-Kilde 2") # exclude our one svalbard site so I don't have to make a case_when
+
+# also figure out whatever the hell is going on with dates
+vm_freshwater <- vm_freshwater |>
+  mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
+  filter(SAMPLING_DATE >= "2025-01-01")
+
+glimpse(vm_freshwater)
+```
+
+Still a big-ass (am I allowed to say that) dataset. ~80k rows, ~57% of the total data. Something to get started with. I see now that some of the sites are in Svalbard. I think we'll get rid of those too.
+
+Turns out it's literally one site, so...
+
+
+
+# Creating eData Tables 
+We do bottom-up and top-down, and just hope they meet somewhere in the middle. In any case, some tables are easy.
+
+## Campaign Table 
+
+```{r}
+#| label: edata-campaign-create
+
+# Create campaign tibble
+vm_campaign_2025 <- initialise_campaign_tibble() |>
+  add_row(
+    CAMPAIGN_NAME_SHORT = "Vm_2025",
+    CAMPAIGN_NAME = "Vannmiljø Copper Monitoring 2025",
+    CAMPAIGN_START_DATE = as.Date("2025-01-01"),
+    CAMPAIGN_END_DATE = as.Date("2025-12-05"),
+    RELIABILITY_SCORE = NA_character_,
+    RELIABILITY_EVAL_SYS = NA_character_,
+    CONFIDENTIALITY_EXPIRY_DATE = as.Date(NA),
+    ORGANISATION = "Miljødirektoratet",
+    ENTERED_BY = "Sam Welch", # or replace with your email
+    ENTERED_DATE = as.Date(Sys.Date()),
+    CAMPAIGN_COMMENT = "Copper and copper pyrithione measurements from Vannmiljø database covering all Norwegian municipalities and media types"
+  )
+```
+
+## Reference Table 
+```{r}
+#| label: edata-reference-create
+
+# Create reference tibble
+vm_reference_2025 <- initialise_references_tibble() |>
+  add_row(
+    REFERENCE_ID = "VannmiljøCopper2025",
+    REFERENCE_TYPE = "Database",
+    DATA_SOURCE = "Vannmiljø",
+    AUTHOR = "Miljødirektoratet",
+    TITLE = "Vannmiljø Database - Copper and Copper Pyrithione Data",
+    YEAR = 2025L,
+    ACCESS_DATE = as.Date("2025-12-05"),
+    PERIODICAL_JOURNAL = NA_character_,
+    VOLUME = NA_integer_,
+    ISSUE = NA_integer_,
+    PUBLISHER = NA_character_,
+    INSTITUTION = "Miljødirektoratet",
+    DOI = NA_character_,
+    URL = "https://www.vannmiljo.no/",
+    ISBN_ISSN = NA_character_,
+    EDITION = NA_character_,
+    DOCUMENT_NUMBER = NA_character_,
+    REF_COMMENT = "Downloaded 2025-12-05, data for 2025-01-01 to 2025-12-05, all kommune, all media, all campaigns. Search for Kobber & Kobberpyrition. 138615 hits."
+  )
+```
+
+## Parameters
+
+There's no copper pyrithone reported for 2025, so this is easy too.
+
+```{r}
+#| label: create-parameter-table
+
+vm_parameters_2025 <- initialise_parameters_tibble() |>
+  add_row(tibble(
+    PARAMETER_TYPE = NA_character_,
+    PARAMETER_TYPE_SUB = NA_character_,
+    MEASURED_TYPE = character(),
+    PARAMETER_NAME = "Copper", # Primary Key
+    PARAMETER_NAME_SUB = NA_character_,
+    INCHIKEY_SD = NA_character_,
+    PUBCHEM_CID = NA_integer_,
+    CAS_RN = NA_character_,
+    ENTERED_BY = "Sam Welch from Vannmiljø",
+    PARAMETER_COMMENT = NA_character_
+  ))
+```
+
+## Sites
+
+Likely to be quite complicated. Working with the freshwater data here.
+
+
+```{r}
+#| label: create-sites-table
+
+vm_freshwater_sites <- vm_freshwater |>
+  select(
+    Vannlok_kode,
+    Vannlokalitetsnavn,
+    Beskrivelse,
+    "UTM33 Ost (X)",
+    "UTM33 Nord (Y)",
+    "Knytt til påvirkning",
+    SITE_GEOGRAPHIC_FEATURE_medium,
+    SITE_GEOGRAPHIC_FEATURE_water_category,
+    SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+    SITE_GEOGRAPHIC_FEATURE_SUB_water_category
+  ) |>
+  distinct() |>
+  # clean up emission source
+  mutate(
+    Emission_Source = case_match(
+      `Knytt til påvirkning`,
+      c("Industri", "INDUSTRI") ~ "Industrial",
+      c("Akvakultur", "AKVAKULTUR") ~ "Aquaculture",
+      .default = NA_character_
+    )
+  )
+
+glimpse(vm_freshwater_sites)
+```
+
+Almost 7000 rows... Much more manageable. 
+
+```{r}
+#| label: format-sites-table
+vm_fw_sites_2025 <- vm_freshwater_sites |>
+  mutate(
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
+    SITE_GEOGRAPHIC_FEATURE = SITE_GEOGRAPHIC_FEATURE_water_category,
+    SITE_GEOGRAPHIC_FEATURE_SUB = SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+    COUNTRY_ISO = "Norway",
+    OCEAN_IHO = "Not relevant",
+    ENTERED_BY = "Sam Welch (Vm Conversion)",
+    ENTERED_DATE = today() |> as.character(), # TODO: THis is stupid
+    ALTITUDE_VALUE = 0, # altitude isn't very relevant to us
+    ALTITUDE_UNIT = "m",
+    # only include Beskrivelse/Emission_Source when they exist
+    SITE_COMMENT = case_when(
+      !is.na(Beskrivelse) &
+        Beskrivelse != "" &
+        !is.na(Emission_Source) &
+        Emission_Source != "" ~
+        glue(
+          "Vm Original Comment: {Beskrivelse}. Vm Emission Source: {Emission_Source}"
+        ),
+      !is.na(Beskrivelse) & Beskrivelse != "" ~
+        glue("Vm Original Comment: {Beskrivelse}"),
+      !is.na(Emission_Source) & Emission_Source != "" ~
+        glue("Vm Emission Source: {Emission_Source}"),
+      .default = NA_character_
+    )
+  )
+```
+
+That's the easy part, now for coordinates!
+
+```{r}
+#| label: reproject-site-coordinates
+temp_sfc <- vm_fw_sites_2025 |>
+  st_as_sf(coords = c("UTM33 Ost (X)", "UTM33 Nord (Y)"))
+
+# Set the coordinate reference system of the input data to UTM33 (25833)
+st_crs(temp_sfc) <- 25833
+# transform to WGS84 (4326)
+temp_sfc <- st_transform(temp_sfc, 4326)
+# this has to be a seperate step or it'll pull the wrong (UTM33) coordinates
+temp_sfc <- temp_sfc %>%
+  mutate(
+    SITE_CODE,
+    LATITUDE = st_coordinates(temp_sfc)[, 2],
+    LONGITUDE = st_coordinates(temp_sfc)[, 1],
+    SITE_COORDINATE_SYSTEM = "WGS84"
+  )
+
+world_map <- map_data("world")
+sanity_map <- ggplot(map_data("world")) +
+  geom_map(
+    data = world_map,
+    map = world_map,
+    aes(long, lat, map_id = region)
+  ) +
+  geom_sf(
+    data = temp_sfc,
+    colour = "red"
+  )
+
+sanity_map
+
+eData_fw_sites_2025 <- vm_fw_sites_2025 |>
+  left_join(
+    temp_sfc |> select(SITE_CODE, LATITUDE, LONGITUDE, SITE_COORDINATE_SYSTEM),
+    by = "SITE_CODE"
+  ) |>
+  select(
+    SITE_CODE,
+    SITE_NAME,
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    LATITUDE,
+    LONGITUDE,
+    SITE_COORDINATE_SYSTEM,
+    COUNTRY_ISO,
+    OCEAN_IHO,
+    ENTERED_BY,
+    ENTERED_DATE,
+    SITE_COMMENT
+  )
+
+# Does it join?
+initialise_sites_tibble() |> add_row(eData_fw_sites_2025)
+```
+
+Our (freshwater) sites are indeed in Norway, and not, say, off the East coast of central Africa. An unqualified success!
+
+## Samples
+
+Since this is just a constituent of measurements, I think we can skip it.
+
+! I think I'm wrong, actually. Will come back to later.
+
+## Biota
+
+Probably likewise? In any case it requires samples, so hard to do one without the other.
+
+## Compartments
+
+As above. 
+
+## Methods
+
+Ok, methods. Rules are simple. For now, we ignore fractionation and extraction methods and just assume total. If it's filtered, we assume that means 0.45 µm.
+
+
+```{r}
+#| label: create_methods_table
+vm_methods_eData
+```
+
+Actually we're gonna do measurements first and come back to this.
+
+## Measurements
+
+The Big Wahoonie. At least for freshwater.
+
+Let's make some helper functions:
+
+```{r}
+#| label: measurements_helper_functions
+
+vm_convert_operator <- function(col) {
+  case_match(
+    col,
+    "=" ~ "",
+    "<" ~ "< LOQ",
+    ">" ~ "What is going on here. Why higher than?",
+    "ND" ~ "< LODS"
+  )
+}
+```
+
+```{r}
+#| label: create_measurements_table
+
+# all freshwater values are reported as EnhetID = 8, which is... µg/L.
+vm_freshwater_measurements_2025 <- vm_freshwater |>
+  mutate(
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    PARAMETER_NAME = "Copper",
+    SAMPLING_DATE = as.character(SAMPLING_DATE),
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_medium,
+    SUBSAMPLE = "1",
+    MEASURED_FLAG = vm_convert_operator(Operator),
+    MEASURED_VALUE = Verdi, # assuming all values are for freshwater 2025
+    UNCERTAINTY_TYPE = "Not reported",
+    UNCERTAINTY_UPPER = NA_real_,
+    UNCERTAINTY_LOWER = NA_real_,
+    MEASURED_UNIT = "µg/L",
+    MEASURED_N = 1,
+    LOQ_VALUE = Kvantifiseringsgrense,
+    LOQ_UNIT = "µg/L",
+    LOD_VALUE = Deteksjonsgrense,
+    LOD_UNIT = "µg/L",
+    SAMPLING_PROTOCOL = "1", # Foreign key
+    EXTRACTION_PROTOCOL = "2", # Foreign key
+    FRACTIONATION_PROTOCOL = "3", # Foreign key
+    ANALYTICAL_PROTOCOL = "4", # Foreign key
+    REFERENCE_ID = "VannmiljøCopper2025",
+    SAMPLE_ID = "Fake ID",
+    CAMPAIGN_NAME_SHORT = "Vm_2025",
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_medium,
+    PARAMETER_TYPE = "Stressor",
+    MEASURED_TYPE = "Concentration",
+    MEASUREMENT_COMMENT = Kommentar, # needs to be glued,
+    .keep = "none"
+  )
+
+initialise_measurements_tibble() |>
+  add_row(vm_freshwater_measurements_2025)
+```
+
+So we have something. We notably haven't got protocols/methods sorted yet, but it's a start.
+
+# Export
+
+Lots of this is copied across from STOPeData::mod_export.R. But not in a neat way. Anyway, the goal is to end up with a zip as the output, more or less the same as our paper extractions.
+
+```{r}
+#| label: export-data-zip
+
+# Export Functions (Non-Shiny) ----
+# Functions for exporting campaign data as ZIP containing multiple CSVs
+
+#' Export multiple datasets as ZIP of CSV files ----
+#'
+#' @param dataset_list Named list of tibbles/data.frames to export
+#'   Names should match the expected output CSV names (e.g., "sites", "samples")
+#' @param campaign_name Campaign identifier for the ZIP filename
+#' @param output_path Path where ZIP file should be saved (optional)
+#' @param file_mapping Named vector mapping dataset names to CSV filenames
+#'   If NULL, uses default mapping from get_csv_filename()
+#'
+#' @return Path to created ZIP file (invisibly)
+#' @export
+export_campaign_zip <- function(
+  dataset_list,
+  campaign_name = "Unknown_Campaign",
+  output_path = NULL,
+  file_mapping = NULL
+) {
+  # Validate inputs ----
+  if (!is.list(dataset_list) || length(dataset_list) == 0) {
+    stop("dataset_list must be a non-empty named list")
+  }
+
+  if (is.null(names(dataset_list)) || any(names(dataset_list) == "")) {
+    stop("dataset_list must have names for all elements")
+  }
+
+  # Filter to non-empty datasets ----
+  non_empty_datasets <- Filter(
+    function(df) {
+      !is.null(df) && is.data.frame(df) && nrow(df) > 0
+    },
+    dataset_list
+  )
+
+  if (length(non_empty_datasets) == 0) {
+    stop("No non-empty datasets to export")
+  }
+
+  message(glue::glue(
+    "Preparing to export {length(non_empty_datasets)} datasets"
+  ))
+
+  # Generate output filename ----
+  timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+  campaign <- gsub("[^A-Za-z0-9_]", "_", campaign_name)
+  zip_filename <- glue::glue("{campaign}_{timestamp}.zip")
+
+  if (is.null(output_path)) {
+    output_path <- file.path(getwd(), zip_filename)
+  }
+
+  # Create temporary directory for CSV files ----
+  temp_dir <- tempfile("campaign_export_")
+  dir.create(temp_dir, showWarnings = FALSE)
+
+  # Write each dataset as CSV ----
+  csv_files <- character(length(non_empty_datasets))
+
+  for (i in seq_along(non_empty_datasets)) {
+    dataset_name <- names(non_empty_datasets)[i]
+    data <- non_empty_datasets[[dataset_name]]
+
+    # Determine CSV filename
+    if (!is.null(file_mapping) && dataset_name %in% names(file_mapping)) {
+      csv_name <- file_mapping[[dataset_name]]
+    } else {
+      csv_name <- get_csv_filename(dataset_name)
+    }
+
+    csv_path <- file.path(temp_dir, csv_name)
+
+    message(glue::glue(
+      "  Writing {csv_name}: {nrow(data)} rows × {ncol(data)} cols"
+    ))
+
+    # Write CSV
+    readr::write_excel_csv(data, file = csv_path, na = "")
+
+    csv_files[i] <- csv_path
+  }
+
+  # Create ZIP file ----
+  message(glue::glue("Creating ZIP: {basename(output_path)}"))
+
+  # Change to temp directory so ZIP contains just the CSV filenames
+  old_wd <- getwd()
+  setwd(temp_dir)
+
+  zip::zip(
+    zipfile = output_path,
+    files = basename(csv_files),
+    mode = "cherry-pick"
+  )
+
+  setwd(old_wd)
+
+  # Cleanup ----
+  unlink(temp_dir, recursive = TRUE)
+
+  message(glue::glue(
+    "Successfully exported {length(csv_files)} files to {output_path}"
+  ))
+
+  invisible(output_path)
+}
+
+
+#' Get standardized CSV filename for a dataset ----
+#'
+#' @param dataset_name Internal dataset name (e.g., "sitesData", "samplesData")
+#'
+#' @return Standardized CSV filename
+#' @export
+get_csv_filename <- function(dataset_name) {
+  # Default mapping from internal names to CSV filenames
+  filename_map <- c(
+    sitesData = "sites.csv", # TODO: Why is it not using the proper names?
+    parametersData = "parameters.csv",
+    compartmentsData = "compartments.csv",
+    referenceData = "reference.csv",
+    campaignData = "campaign.csv",
+    methodsData = "methods.csv",
+    samplesData = "samples.csv",
+    biotaData = "biota.csv",
+    measurementsData = "measurements.csv"
+  )
+
+  if (dataset_name %in% names(filename_map)) {
+    return(filename_map[[dataset_name]])
+  } else {
+    # Fallback: convert camelCase to lowercase with .csv
+    base_name <- tolower(gsub("Data$", "", dataset_name))
+    return(paste0(base_name, ".csv"))
+  }
+}
+
+
+#' Create campaign metadata summary ----
+#'
+#' @param dataset_list Named list of datasets
+#' @param campaign_name Campaign name
+#'
+#' @return Tibble with metadata summary
+#' @export
+create_export_summary <- function(dataset_list, campaign_name = NULL) {
+  summary_rows <- lapply(names(dataset_list), function(name) {
+    data <- dataset_list[[name]]
+    tibble::tibble(
+      dataset = name,
+      csv_filename = get_csv_filename(name),
+      n_rows = nrow(data),
+      n_cols = ncol(data),
+      has_data = nrow(data) > 0
+    )
+  })
+
+  summary <- dplyr::bind_rows(summary_rows)
+
+  if (!is.null(campaign_name)) {
+    summary <- dplyr::mutate(summary, campaign = campaign_name, .before = 1)
+  }
+
+  summary
+}
+```
+
+
+
+```{r}
+#| label: export
+my_datasets <- list(
+  sitesData = eData_fw_sites_2025,
+  campaignData = vm_campaign_2025,
+  referenceData = vm_reference_2025,
+  parametersData = vm_parameters_2025,
+  measurementsData = vm_freshwater_measurements_2025
+)
+
+# todo: this really sucks
+export_campaign_zip(
+  dataset_list = my_datasets,
+  campaign_name = "VmCopper2025",
+)
+```

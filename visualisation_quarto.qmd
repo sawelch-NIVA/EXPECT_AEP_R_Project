@@ -48,6 +48,7 @@ library(shiny)
 library(dplyr)
 library(bslib)
 library(ggtext)
+library(data.table)
 
 source("_targets.R")
 tar_make()
@@ -60,6 +61,31 @@ literature_campaign_data <- tar_read(campaign_data)
 literature_sites_data <- tar_read(sites_data)
 literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
+
+# vm data isn't in targets yet, but I want to pull it in and see what happens
+# this is all terrible code
+vm_measurements_2025 <- fread("data/clean/Vm_Unzipped/measurements.csv")
+vm_campaign_2025 <- fread("data/clean/Vm_Unzipped/campaign.csv")
+vm_sites_2025 <- fread("data/clean/Vm_Unzipped/sites.csv")
+vm_reference_2025 <- fread("data/clean/Vm_Unzipped/reference.csv")
+
+vm_merged_data <- vm_measurements_2025 |> left_join(vm_campaign_2025, by = "CAMPAIGN_NAME_SHORT") 
+vm_merged_data <- vm_merged_data |> left_join(vm_sites_2025, "SITE_CODE")
+vm_merged_data <- vm_merged_data |> left_join(vm_reference_2025, "REFERENCE_ID") |>  mutate(SUBSAMPLE = as.character(SUBSAMPLE), 
+SAMPLING_PROTOCOL = as.character(SAMPLING_PROTOCOL), 
+ANALYTICAL_PROTOCOL = as.character(ANALYTICAL_PROTOCOL), 
+FRACTIONATION_PROTOCOL = as.character(FRACTIONATION_PROTOCOL), 
+EXTRACTION_PROTOCOL = as.character(EXTRACTION_PROTOCOL))
+
+# more date format woes. fread is now reading as dttm instead of IDATE?
+vm_merged_data[, SAMPLING_DATE := as.IDate(SAMPLING_DATE)]
+
+# Fuck it
+vm_merged_data <- vm_merged_data |> mutate(SAMPLING_DATE = as.IDate("2025-01-01"))
+# for fuck's sake
+
+# I give up. 
+data <- literature_merged_data |> bind_rows(vm_merged_data)
 
 species_names <- arrow::read_parquet("data/clean/ecotox_2025_06_12_species.parquet")
 species_lookup <- species_names |>
