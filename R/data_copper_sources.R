@@ -64,6 +64,18 @@ mine_tailings_coords <- function() {
 }
 
 
+# N.B: Re Ronny Berdinsen, Mattilsynet (2025.12.15)
+
+# Hei
+
+# Tallene ble korrigerte pga en feilrapportering i 2022. Riktige tall er:
+
+# -	2022: 4332 liter (9482liter - 5150 liter)
+# -	2023: 2400 liter
+
+# Merk også at statistikken ikke viser plantevernmidler brukt pr år, men importert mengde. Det er ikke gitt at det som er importert i
+# eksempelvis 2022 er brukt av bonden samme år.
+
 #' Copper oxide measurements by year
 #'
 #' Returns a tibble containing annual copper oxide measurements in kilograms
@@ -73,7 +85,7 @@ mine_tailings_coords <- function() {
 #' \describe{
 #'   \item{year}{Year of measurement (2020-2024)}
 #'   \item{amount_kg}{Amount of copper oxide in kilograms}
-#'   \item{average}{Average amount across all years (3789 kg)}
+#'   \item{average}{Average amount across all years (4051 kg)}
 #' }
 #'
 #' @importFrom tibble tribble
@@ -85,11 +97,11 @@ mine_tailings_coords <- function() {
 copper_oxide_sales <- function() {
   tribble(
     ~year , ~amount_kg , ~average_kg ,
-     2020 ,  4051      ,        3789 ,
-     2021 ,  4594      ,        3789 ,
-     2022 ,  9482      ,        3789 ,
-     2023 , -2370.5    ,        3789 ,
-     2024 ,  3189      ,        3789
+     2020 ,       4051 ,        4051 ,
+     2021 ,       4594 ,        4051 ,
+     2022 ,       4332 ,        4051 ,
+     2023 ,       2400 ,        4051 ,
+     2024 ,       3189 ,        4051
   )
 }
 
