@@ -1,11 +1,33 @@
 ---
-format: 
+title: "Vannmiljø Data - Conversion to eData"
+author: "Sam Welch"
+date: "2025.12.16"
+lightbox: true
+format:
   html:
+    grid:
+      body-width: 1500px
+      sidebar-width: 0px
+    page-layout: full
+    code-fold: true
+    max-width: 4500px
+    fig-format: svg
     toc: true
 ---
 
 # Setup
+
+# To Do:
+
+- [ ] Expand compartments from just aquatic/freshwater
+- [ ] Investigate some very strange detection and quantification limits
+- [ ] Add probable contamination source
+- [ ] More sanity checking of extracted values
+- [ ] Move boring code to targets
+
+
 ## Libraries
+We load a bunch of redundant libraries here compared to the visualisation quarto. 
 ```{r}
 #| label: setup-libraries
 #| echo: false
@@ -24,11 +46,17 @@ library(STOPeData)
 library(eDataDRF)
 library(sf)
 library(DT)
+library(readr)
 ```
 
 ## Configuration
+
+See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters of this extraction from Vannmiljø.
+
 ```{r}
 #| label: setup-configuration
+#| echo: false
+#| warning: false
 
 config <- list(
   # File paths
@@ -46,113 +74,42 @@ config <- list(
 
   # Filter criteria
   filters = list(
-    date_start = as.Date("2025-01-01"),
+    date_start = as.Date("2010-01-01"),
     date_end = as.Date("2025-12-05"),
     exclude_sites = "Svalbard, ENSB-Kilde 2"
   ),
 
   # Campaign metadata
   metadata = list(
-    campaign_name = "Vannmiljø Copper Monitoring 2025",
-    campaign_short = "Vm_2025",
-    reference_id = "VannmiljøCopper2025",
+    campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
+    campaign_short = "Vm_2010_2025",
+    reference_id = "VannmiljøCopper2010-2025",
     entered_by = "Sam Welch",
     organisation = "Miljødirektoratet"
   )
 )
+
+```
+
+```{r}
+#| label: tbl-config-filters
+#| echo: false
+
+config$filters |> as_tibble() |> knitr::kable()
+```
+
+```{r}
+#| label: tbl-config-metadata
+#| echo: false
+
+config$metadata |> as_tibble() |> knitr::kable()
 ```
 
 ## Helper Functions
+
+
 ```{r}
 #| label: setup-helper-functions
-
-# Convert tibble to tribble code
-to_tribble <- function(df) {
-  # Header line with column names
-  header <- glue("  ~{names(df)}", .sep = ", ")
-
-  # Format each value (add quotes for characters)
-  format_val <- function(x) {
-    if (is.character(x)) {
-      glue('"{x}"')
-    } else if (is.na(x)) {
-      "NA"
-    } else {
-      as.character(x)
-    }
-  }
-
-  # Build each row
-  rows <- apply(df, 1, function(row) {
-    vals <- sapply(row, format_val)
-    glue("  {vals}", .sep = ", ")
-  })
-
-  # Combine everything
-  glue(
-    "tribble(
-{header},
-{paste(rows, collapse = ',\n')}
-)"
-  )
-}
-
-# Get categorical summary of data.table columns
-get_categorical_summary <- function(dt, max_unique = 50) {
-  # Convert to data.table if not already
-  if (!is.data.table(dt)) {
-    dt <- as.data.table(dt)
-  }
-
-  results <- list()
-
-  for (col_name in names(dt)) {
-    col_data <- dt[[col_name]]
-    n_unique <- uniqueN(col_data, na.rm = FALSE)
-
-    # Consider categorical if: character, factor, or numeric/integer with <= max_unique values
-    is_categorical <- is.character(col_data) ||
-      is.factor(col_data) ||
-      (is.numeric(col_data) && n_unique <= max_unique)
-
-    if (is_categorical && n_unique > 0 && n_unique <= max_unique) {
-      # Get counts
-      counts <- dt[, .N, by = col_name][order(-N)]
-      setnames(counts, col_name, "value")
-
-      # Convert to tribble format
-      cat("\n## ", col_name, " (", n_unique, " unique values)\n\n", sep = "")
-
-      # Build tribble
-      cat("tribble(\n")
-      cat("  ~value, ~n,\n")
-
-      for (i in 1:nrow(counts)) {
-        val <- counts$value[i]
-        n <- counts$N[i]
-
-        # Format value
-        if (is.na(val)) {
-          val_str <- "NA"
-        } else if (is.character(val)) {
-          val_str <- paste0('"', val, '"')
-        } else {
-          val_str <- as.character(val)
-        }
-
-        ending <- ifelse(i == nrow(counts), "\n", ",\n")
-        cat("  ", val_str, ", ", n, ending, sep = "")
-      }
-
-      cat(")\n")
-
-      results[[col_name]] <- counts
-    }
-  }
-
-  invisible(results)
-}
-
 # Convert Vannmiljø operator codes to eData flags
 vm_convert_operator <- function(col) {
   case_match(
@@ -167,8 +124,14 @@ vm_convert_operator <- function(col) {
 
 # Load Raw Data
 ## Measurements Data
+
+Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
+Search for Kobber & Kobberpyrition: 138615 hits
+NOTE: Data may extend beyond 2025 date range despite request parameters
+
 ```{r}
 #| label: load-raw-measurements
+#| echo: false
 
 # Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
 # Search for Kobber & Kobberpyrition: 138615 hits
@@ -196,15 +159,17 @@ print(
 ```
 
 ## Sites Data
+
+NOTE: Vannmiljø export limit requires splitting site codes into multiple files
+Procedure:
+1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
+2. Replace newlines with commas: Ctrl+H find "\n" replace with ", "
+3. Split into chunks (Vannmiljø fails silently above unknown threshold)
+4. Download as separate Excel files
+
 ```{r}
 #| label: load-raw-sites
-
-# NOTE: Vannmiljø export limit requires splitting site codes into multiple files
-# Procedure:
-# 1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
-# 2. Replace newlines with commas: Ctrl+H find "\n" replace with ", "
-# 3. Split into chunks (Vannmiljø fails silently above unknown threshold)
-# 4. Download as separate Excel files
+#| echo: false
 
 vm_raw_sites <- read_excel(
   config$files$vm_sites_1,
@@ -223,8 +188,11 @@ message(glue("Loaded {nrow(vm_raw_sites)} site records"))
 ```
 
 ## Lookup Tables
+This part is very messy - we generated a bunch of lookup tables (semi-reproducibly) and filled them by hand/with Claude. I don't have a lot of confidence in any of them.
+
 ```{r}
 #| label: load-lookups
+#| echo: false
 
 # Medium ID lookup
 # Maps Vannmiljø Medium_id to eData compartment/species/tissue fields
@@ -279,8 +247,11 @@ message("Loaded all lookup tables")
 
 # Data Processing
 ## Merge Datasets
+We join sites and measurements by `"Vannlok_kode" = "Vannlokalitetskode"`, then our compartment/etc. lookups.
+
 ```{r}
 #| label: processing-merge-datasets
+#| echo: false
 
 # Join sites to measurements
 vm_merged <- vm_raw_copper |>
@@ -306,25 +277,27 @@ message("Added lookup tables")
 ```
 
 ## Apply Filters
+As above, we filter data very heavily here, so we don't have to spend a lot of time on edge cases.
+
+Data Quality Filters
+Applied: 2025-12-16
+
+Included:
+- Freshwater only (ENVIRON_COMPARTMENT_SUB = "Freshwater")
+- Point sites only (no polygons)
+- No biota (LatinskNavn_id == 0)
+- Mainland Norway only (excluded Svalbard)
+- Dates: (see config)
+
+Excluded (~43% of data):
+- Marine/brackish water
+- Sediment samples
+- Biota samples
+- Svalbard sites (n=1)
+
 ```{r}
 #| label: processing-apply-filters
-
-# Data Quality Filters
-# Applied: 2025-12-16
-#
-# Included:
-# - Freshwater only (ENVIRON_COMPARTMENT_SUB = "Freshwater")
-# - Point sites only (no polygons)
-# - No biota (LatinskNavn_id == 0)
-# - Mainland Norway only (excluded Svalbard)
-# - Dates: 2025-01-01 to 2025-12-05
-#
-# Excluded (~43% of data):
-# - Marine/brackish water
-# - Sediment samples
-# - Biota samples
-# - Svalbard sites (n=1)
-# - Pre-2025 dates
+#| echo: false
 
 vm_filtered <- vm_merged |>
   # Add sampling date as Date type
@@ -351,6 +324,9 @@ message(glue(
 ```
 
 ## Quality Checks
+
+We check for conflicts between our two lookups here - because we look up compartments, sites, biota, etc. based on both site `Vannlokalkode` and measurments' `MediumID`, it's possible that we might end up with conflicts and/or cases where neither of these give us the relevant data and we have to guess from context. Right now we filter down to only freshwater cases, hence the fact that we don't get hits below.
+
 ```{r}
 #| label: processing-quality-checks
 
@@ -743,6 +719,9 @@ message(glue("Export complete: {export_path}"))
 
 
 ## Species Data Coverage
+
+None of these are very informative yet, because we don't filter down to stuff that's definitely biota first. 
+
 ```{r}
 #| label: eda-species-coverage
 

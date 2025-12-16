@@ -132,6 +132,40 @@ calculate_sample_sizes <- function(data) {
     summarise(total_n = sum(MEASURED_N, na.rm = TRUE), .groups = "drop")
 }
 
+# Create sub-compartment letter codes ----
+subcomp_codes <- c(
+  # Aquatic
+  "Freshwater" = "F",
+  "Marine/Salt Water" = "M",
+  "Brackish/Transitional Water" = "B",
+  "Groundwater" = "G",
+  "Wastewater" = "WW",
+  "Liquid Growth Medium" = "LGM",
+  "Rainwater" = "R",
+  "Stormwater" = "SW",
+  "Leachate" = "L",
+  "Aquatic Sediment" = "AS",
+  "Porewater" = "P",
+  "Sludge" = "Sl",
+  # Atmospheric
+  "Indoor Air" = "IA",
+  "Outdoor Air" = "OA",
+  # Terrestrial
+  "Terrestrial Biological Residue" = "TBR",
+  "Soil H Horizon (Peat)" = "H",
+  "Soil O Horizon (Organic)" = "O",
+  "Soil A Horizon (Topsoil)" = "A",
+  "Soil E Horizon (Mineral)" = "E",
+  "Soil S Horizon (Mineral)" = "S",
+  "Soil C Horizon (Parent Material)" = "C",
+  "Soil R Horizon (Bedrock)" = "R",
+  # Biota
+  "Biota, Terrestrial" = "BT",
+  "Biota, Aquatic" = "BA",
+  "Biota, Atmospheric" = "BAm",
+  "Biota, Other" = "BO"
+)
+
 
 ```
 
@@ -556,11 +590,8 @@ ggplot(
 
 ## Geographic Distribution of Sampling Sites
 
-@fig-sampling-map shows the spatial distribution of all sampling locations included in the analysis. This map helps visualise the geographic scope of copper monitoring in Arctic regions and identify areas with high or low sampling intensity.
-
 ```{r}
-#| label: fig-sampling-map
-#| warning: false
+#| label: prepare-map-data
 
 # Turn off spherical geometry ----
 sf::sf_use_s2(FALSE)
@@ -611,40 +642,6 @@ value_pal <- colorNumeric(
   na.color = "gray"
 )
 
-# Create sub-compartment letter codes ----
-subcomp_codes <- c(
-  # Aquatic
-  "Freshwater" = "F",
-  "Marine/Salt Water" = "M",
-  "Brackish/Transitional Water" = "B",
-  "Groundwater" = "G",
-  "Wastewater" = "WW",
-  "Liquid Growth Medium" = "LGM",
-  "Rainwater" = "R",
-  "Stormwater" = "SW",
-  "Leachate" = "L",
-  "Aquatic Sediment" = "AS",
-  "Porewater" = "P",
-  "Sludge" = "Sl",
-  # Atmospheric
-  "Indoor Air" = "IA",
-  "Outdoor Air" = "OA",
-  # Terrestrial
-  "Terrestrial Biological Residue" = "TBR",
-  "Soil H Horizon (Peat)" = "H",
-  "Soil O Horizon (Organic)" = "O",
-  "Soil A Horizon (Topsoil)" = "A",
-  "Soil E Horizon (Mineral)" = "E",
-  "Soil S Horizon (Mineral)" = "S",
-  "Soil C Horizon (Parent Material)" = "C",
-  "Soil R Horizon (Bedrock)" = "R",
-  # Biota
-  "Biota, Terrestrial" = "BT",
-  "Biota, Aquatic" = "BA",
-  "Biota, Atmospheric" = "BAm",
-  "Biota, Other" = "BO"
-)
-
 # Add codes to data ----
 data_sf <- data_sf |>
   mutate(
@@ -679,7 +676,7 @@ country_centroids <- wgs84_geo$countries |>
 study_lines <- data_sf |>
   st_drop_geometry() |>
   group_by(REFERENCE_ID) |>
-  filter(n() > 1) |>
+  filter(n() > 1, CAMPAIGN_NAME_SHORT != "Vm_2025") |> # simply too many sites in Vm_2025 for polylines to be practical
   summarise(
     coords = list(cbind(LONGITUDE, LATITUDE)),
     .groups = "drop"
@@ -694,6 +691,13 @@ study_lines_sf <- study_lines |>
   ungroup() |>
   select(-coords) |>
   st_sf(crs = st_crs("WGS84"))
+```
+
+@fig-sampling-map shows the spatial distribution of all sampling locations included in the analysis. This map helps visualise the geographic scope of copper monitoring in Arctic regions and identify areas with high or low sampling intensity.
+
+```{r}
+#| label: fig-sampling-map
+#| warning: false
 
 # Create map ----
 map <- leaflet() |>
@@ -1603,7 +1607,7 @@ literature_merged_data |>
 
 #### Aquatic Biota
 
-@fig-points-biota presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
+ presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
 
 ```{r}
 #| label: fig-points-biota
