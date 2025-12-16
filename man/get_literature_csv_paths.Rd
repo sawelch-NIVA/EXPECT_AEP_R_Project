@@ -5,7 +5,7 @@
 \title{Get literature CSV file paths}
 \usage{
 get_literature_csv_paths(
-  path = "data/raw/LR_extractions/unzipped",
+  path = "data/raw/eData/unzipped",
   format = ".csv",
   module = NULL
 )

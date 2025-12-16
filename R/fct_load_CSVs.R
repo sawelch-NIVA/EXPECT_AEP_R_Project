@@ -15,7 +15,7 @@
 #'
 #' @export
 get_literature_csv_paths <- function(
-  path = "data/raw/LR_extractions/unzipped",
+  path = "data/raw/eData/unzipped",
   format = ".csv",
   module = NULL
 ) {

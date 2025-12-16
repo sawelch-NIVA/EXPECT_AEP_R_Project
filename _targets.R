@@ -83,9 +83,9 @@ tar_option_set(
 tar_source()
 # tar_source("other_functions.R") # Source other scripts as needed.
 
-# Replace the target list below with your own:
 list(
-  # # Create one target for the CSV files in /unzipped associated with each module
+  # # Create one target for the CSV files in /unzipped associated with each module#
+  # TODO: This is no longer just literature, so we ought to change the name
   tar_target(
     name = campaign_files,
     command = get_literature_csv_paths(module = "Campaign"),
