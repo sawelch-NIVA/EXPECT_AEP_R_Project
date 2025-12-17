@@ -254,7 +254,8 @@ list(
             "UNCERTAINTY_UPPER",
             "UNCERTAINTY_LOWER"
           ),
-          unit_column = "MEASURED_UNIT"
+          unit_column = "MEASURED_UNIT",
+          remove_other = TRUE # I've used unit = "Other" to mark a few errant rows, so we remove them here.
         ) |>
         standardise_measured_units(
           value_columns = "LOQ_VALUE",

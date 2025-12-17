@@ -11,10 +11,13 @@
 #'   Default is NULL (no value conversion). If NULL, only unit standardisation occurs.
 #' @param unit_column Character string. Name of column containing measurement units.
 #'   Default is NULL (no unit standardisation). If NULL, only value conversion occurs.
+#' @param remove_other Logical. If TRUE, removes rows where the unit column
+#'   contains "Other". Default is FALSE.
 #'
 #' @return The input data with new columns added depending on arguments:
 #'   - If `unit_column` provided: `{unit_column}_STANDARD` with standardised units
 #'   - If `value_columns` provided: `{value_column}_STANDARD` for each value column
+#'   If `remove_other = TRUE`, rows with "Other" units are excluded.
 #'
 #' @examples
 #' \dontrun{
@@ -35,13 +38,21 @@
 #'     value_columns = "MEASURED_VALUE",
 #'     unit_column = "MEASURED_UNIT"
 #'   )
+#'
+#' # Remove rows marked with "Other" units
+#' data |>
+#'   standardise_measured_units(
+#'     unit_column = "MEASURED_UNIT",
+#'     remove_other = TRUE
+#'   )
 #' }
 #'
 #' @export
 standardise_measured_units <- function(
   data,
   value_columns = NULL,
-  unit_column = NULL
+  unit_column = NULL,
+  remove_other = FALSE
 ) {
   # Check that at least one argument is provided ----
   if (is.null(value_columns) && is.null(unit_column)) {
@@ -60,6 +71,11 @@ standardise_measured_units <- function(
   }
   if (!is.null(unit_column) && !unit_column %in% names(data)) {
     stop("Column '", unit_column, "' not found in data")
+  }
+
+  # Check remove_other requirements ----
+  if (remove_other && is.null(unit_column)) {
+    stop("'unit_column' must be specified when 'remove_other = TRUE'")
   }
 
   # Standardise units if unit_column provided ----
@@ -105,6 +121,12 @@ standardise_measured_units <- function(
           )
         )
     }
+  }
+
+  # Remove "Other" rows if requested ----
+  if (remove_other) {
+    data <- data |>
+      filter(is.na(.data[[unit_column]]) | .data[[unit_column]] != "Other")
   }
 
   data

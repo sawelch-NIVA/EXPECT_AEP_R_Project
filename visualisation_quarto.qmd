@@ -1730,7 +1730,7 @@ plotly::ggplotly(p)
 
 ```{r}
 #| echo: false
-# Network Diagram ----
+#| label: setup-network-diagram
 #| fig-width: 16
 #| fig-height: 12
 
@@ -1823,6 +1823,8 @@ graph <- as_tbl_graph(copper_flow_edges)
 ```{r}
 #| warning: false
 #| width: 20
+#| label: fig-network-diagram
+
 ggraph(graph, layout = "tree") +
     geom_edge_diagonal2(aes(label = flow_type) , colour = "darkgrey", label_colour = "black",
   strength = 0.8,
