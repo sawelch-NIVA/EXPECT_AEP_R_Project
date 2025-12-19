@@ -51,8 +51,10 @@ library(ggtext)
 library(data.table)
 library(eDataDRF)
 
-source("_targets.R")
-tar_make()
+library(here)
+library(targets)
+
+devtools::load_all()
 ```
 
 ```{r}

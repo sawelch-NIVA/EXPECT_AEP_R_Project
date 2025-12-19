@@ -1,5 +1,5 @@
 ---
-title: "EXPECT Copper AEP"
+title: "Notebook 04 - Sampling Map"
 author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
@@ -50,9 +50,10 @@ library(bslib)
 library(ggtext)
 library(data.table)
 library(eDataDRF)
+library(here)
+library(targets)
 
-source("_targets.R")
-tar_make()
+devtools::load_all()
 ```
 
 ```{r}

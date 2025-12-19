@@ -1,0 +1,805 @@
+---
+title: "Notebook 02 - Vannmiljo Conversion"
+author: "Sam Welch"
+date: "2025.12.16"
+lightbox: true
+format:
+  html:
+    grid:
+      body-width: 1500px
+      sidebar-width: 0px
+    page-layout: full
+    code-fold: true
+    max-width: 4500px
+    fig-format: svg
+    toc: true
+---
+
+# Setup
+
+# To Do:
+
+- [ ] Expand compartments from just aquatic/freshwater
+- [ ] Investigate some very strange detection and quantification limits
+- [ ] Add probable contamination source
+- [ ] More sanity checking of extracted values
+- [ ] Move boring code to targets
+- [ ] Fix export **again**.
+
+
+## Libraries
+
+```{r}
+#| label: setup-libraries
+#| echo: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(lubridate)
+library(readr)
+library(readxl)
+library(glue)
+library(ggplot2)
+library(sf)
+library(DT)
+library(summarytools)
+library(STOPeData)
+library(eDataDRF)
+library(here)
+
+here::i_am("README.md")
+```
+
+## Configuration
+
+See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters of this extraction from Vannmiljø.
+
+```{r}
+#| label: setup-configuration
+#| echo: false
+#| warning: false
+
+config <- list(
+  # File paths
+  files = list(
+    vm_copper = here("data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx"),
+    vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
+    vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
+    vm_sites_3 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx"),
+    lookup_medium = here("data/clean/Vm_medium_lookup_matrix_filled.csv"),
+    lookup_vannkategori = here("data/clean/vm_sites_codes_lookup.csv"),
+    lookup_methods = here("data/clean/vm_methods_lookup_filled.csv"),
+    methods_analysis = here(
+      "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
+    ),
+    methods_sampling = here(
+      "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+    )
+  ),
+
+  # Filter criteria
+  filters = list(
+    date_start = as.Date("2010-01-01"),
+    date_end = as.Date("2025-12-05"),
+    exclude_sites = "Svalbard, ENSB-Kilde 2"
+  ),
+
+  # Campaign metadata
+  metadata = list(
+    campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
+    campaign_short = "Vm_2010_2025",
+    reference_id = "VannmiljøCopper2010-2025",
+    entered_by = "Sam Welch",
+    organisation = "Miljødirektoratet"
+  )
+)
+
+```
+
+```{r}
+#| label: tbl-config-filters
+#| echo: false
+
+config$filters |> as_tibble() |> knitr::kable()
+```
+
+```{r}
+#| label: tbl-config-metadata
+#| echo: false
+
+config$metadata |> as_tibble() |> knitr::kable()
+```
+
+## Helper Functions
+
+
+```{r}
+#| label: setup-helper-functions
+# Convert Vannmiljø operator codes to eData flags
+vm_convert_operator <- function(col) {
+  case_match(
+    col,
+    "=" ~ "",
+    "<" ~ "< LOQ",
+    ">" ~ "What is going on here. Why higher than?",
+    "ND" ~ "< LOD"
+  )
+}
+```
+
+# Load Raw Data
+## Measurements Data
+
+Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
+Search for Kobber & Kobberpyrition: 138615 hits
+NOTE: Data may extend beyond 2025 date range despite request parameters
+
+```{r}
+#| label: load-raw-measurements
+#| echo: false
+
+# Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
+# Search for Kobber & Kobberpyrition: 138615 hits
+# NOTE: Data may extend beyond 2025 date range despite request parameters
+
+if (!exists("vm_raw_copper")) {
+  vm_raw_copper <- read_excel(
+    path = config$files$vm_copper,
+    sheet = 1,
+    guess_max = 138615 # Avoid automatic type conversion warnings
+  )
+  message(glue("Loaded {nrow(vm_raw_copper)} copper measurements"))
+}
+
+# Initial data inspection
+print(
+  dfSummary(
+    vm_raw_copper,
+    varnumbers = FALSE,
+    valid.col = FALSE,
+    graph.magnif = 0.82
+  ),
+  method = 'render'
+)
+```
+
+## Sites Data
+
+NOTE: Vannmiljø export limit requires splitting site codes into multiple files
+Procedure:
+1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
+2. Replace newlines with commas: Ctrl+H find "\n" replace with ", "
+3. Split into chunks (Vannmiljø fails silently above unknown threshold)
+4. Download as separate Excel files
+
+```{r}
+#| label: load-raw-sites
+#| echo: false
+
+vm_raw_sites <- read_excel(
+  config$files$vm_sites_1,
+  guess_max = 10000
+) |>
+  add_row(read_excel(
+    config$files$vm_sites_2,
+    guess_max = 10000
+  )) |>
+  add_row(read_excel(
+    config$files$vm_sites_3,
+    guess_max = 10000
+  ))
+
+message(glue("Loaded {nrow(vm_raw_sites)} site records"))
+```
+
+## Lookup Tables
+This part is very messy - we generated a bunch of lookup tables (semi-reproducibly) and filled them by hand/with Claude. I don't have a lot of confidence in any of them.
+
+```{r}
+#| label: load-lookups
+#| echo: false
+
+# Medium ID lookup
+# Maps Vannmiljø Medium_id to eData compartment/species/tissue fields
+vm_lookup_medium_raw <- read_csv(config$files$lookup_medium)
+
+vm_lookup_medium <- vm_lookup_medium_raw |>
+  rename_with(
+    ~ paste0(., "_medium"),
+    c(
+      ENVIRON_COMPARTMENT,
+      ENVIRON_COMPARTMENT_SUB,
+      SPECIES_GROUP,
+      SAMPLE_SPECIES,
+      SPECIES_GENDER,
+      SAMPLE_TISSUE,
+      SITE_GEOGRAPHIC_FEATURE,
+      SITE_GEOGRAPHIC_FEATURE_SUB
+    )
+  )
+
+# Vannkategori lookup
+# Maps Vannmiljø Vannkategori codes to eData site/compartment fields
+vm_lookup_vannkategori_raw <- read_csv(config$files$lookup_vannkategori)
+
+vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
+  rename_with(
+    ~ paste0(., "_vkat"),
+    c(
+      ENVIRON_COMPARTMENT,
+      ENVIRON_COMPARTMENT_SUB,
+      SITE_GEOGRAPHIC_FEATURE,
+      SITE_GEOGRAPHIC_FEATURE_SUB
+    )
+  )
+
+# Methods lookup
+vm_lookup_analysis <- read_excel(config$files$methods_analysis)
+vm_lookup_sampling <- read_excel(config$files$methods_sampling)
+vm_lookup_methods <- read_csv(config$files$lookup_methods) |>
+  mutate(
+    CAMPAIGN_NAME = config$metadata$campaign_short,
+    PROTOCOL_ID = generate_protocol_id(
+      PROTOCOL_CATEGORY,
+      PROTOCOL_NAME,
+      1, # FIXME: We don't have unique numbers for this rn.
+      config$metadata$campaign_short
+    )
+  )
+
+message("Loaded all lookup tables")
+```
+
+# Data Processing
+## Merge Datasets
+We join sites and measurements by `"Vannlok_kode" = "Vannlokalitetskode"`, then our compartment/etc. lookups.
+
+```{r}
+#| label: processing-merge-datasets
+#| echo: false
+
+# Join sites to measurements
+vm_merged <- vm_raw_copper |>
+  left_join(
+    vm_raw_sites,
+    by = c("Vannlok_kode" = "Vannlokalitetskode")
+  )
+
+message(glue("Merged sites: {nrow(vm_merged)} rows"))
+
+# Add lookup tables
+vm_merged <- vm_merged |>
+  left_join(
+    vm_lookup_medium,
+    by = c(Medium_id = "MediumID")
+  ) |>
+  left_join(
+    vm_lookup_vannkategori,
+    by = c(Vannkategori = "VannkategoriID")
+  )
+
+message("Added lookup tables")
+```
+
+## Apply Filters
+As above, we filter data very heavily here, so we don't have to spend a lot of time on edge cases.
+
+Data Quality Filters
+Applied: 2025-12-16
+
+Included:
+- Freshwater only (ENVIRON_COMPARTMENT_SUB = "Freshwater")
+- Point sites only (no polygons)
+- No biota (LatinskNavn_id == 0)
+- Mainland Norway only (excluded Svalbard)
+- Dates: (see config)
+
+Excluded (~43% of data):
+- Marine/brackish water
+- Sediment samples
+- Biota samples
+- Svalbard sites (n=1)
+
+```{r}
+#| label: processing-apply-filters
+#| echo: false
+
+vm_filtered <- vm_merged |>
+  # Add sampling date as Date type
+  mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
+  # Apply compartment filters
+  filter(
+    ENVIRON_COMPARTMENT_vkat == "Aquatic",
+    ENVIRON_COMPARTMENT_medium == "Aquatic",
+    ENVIRON_COMPARTMENT_SUB_vkat == "Freshwater",
+    ENVIRON_COMPARTMENT_SUB_medium == "Freshwater"
+  ) |>
+  # Apply site type filters
+  filter(
+    Objekttype == "point",
+    LatinskNavn_id == 0,
+    Vannlokalitetsnavn != config$filters$exclude_sites
+  ) |>
+  # Apply date filter
+  filter(SAMPLING_DATE >= config$filters$date_start)
+
+message(glue(
+  "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
+))
+```
+
+## Quality Checks
+
+We check for conflicts between our two lookups here - because we look up compartments, sites, biota, etc. based on both site `Vannlokalkode` and measurments' `MediumID`, it's possible that we might end up with conflicts and/or cases where neither of these give us the relevant data and we have to guess from context. Right now we filter down to only freshwater cases, hence the fact that we don't get hits below.
+
+```{r}
+#| label: processing-quality-checks
+
+# Check for conflicts between lookup sources
+conflict_check <- vm_filtered |>
+  group_by(
+    ENVIRON_COMPARTMENT_vkat,
+    ENVIRON_COMPARTMENT_medium,
+    ENVIRON_COMPARTMENT_SUB_vkat,
+    ENVIRON_COMPARTMENT_SUB_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    compartment_conflict = ENVIRON_COMPARTMENT_vkat !=
+      ENVIRON_COMPARTMENT_medium,
+    subcompartment_conflict = ENVIRON_COMPARTMENT_SUB_vkat !=
+      ENVIRON_COMPARTMENT_SUB_medium
+  )
+
+if (
+  any(conflict_check$compartment_conflict) ||
+    any(conflict_check$subcompartment_conflict)
+) {
+  warning("Conflicts detected between vannkategori and medium lookups")
+  print(
+    conflict_check |> filter(compartment_conflict | subcompartment_conflict)
+  )
+}
+
+# Check geographic feature consistency
+geo_check <- vm_filtered |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE_vkat,
+    SITE_GEOGRAPHIC_FEATURE_medium,
+    SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
+    SITE_GEOGRAPHIC_FEATURE_SUB_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    geo_conflict = SITE_GEOGRAPHIC_FEATURE_vkat !=
+      SITE_GEOGRAPHIC_FEATURE_medium,
+    geo_sub_conflict = SITE_GEOGRAPHIC_FEATURE_SUB_vkat !=
+      SITE_GEOGRAPHIC_FEATURE_SUB_medium
+  )
+
+message(glue(
+  "Geographic feature conflicts: {sum(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)}"
+))
+```
+
+# Create eData Tables
+## Campaign
+```{r}
+#| label: edata-campaign
+
+edata_campaign <- initialise_campaign_tibble() |>
+  add_row(
+    CAMPAIGN_NAME_SHORT = config$metadata$campaign_short,
+    CAMPAIGN_NAME = config$metadata$campaign_name,
+    CAMPAIGN_START_DATE = config$filters$date_start,
+    CAMPAIGN_END_DATE = config$filters$date_end,
+    RELIABILITY_SCORE = NA_character_,
+    RELIABILITY_EVAL_SYS = NA_character_,
+    CONFIDENTIALITY_EXPIRY_DATE = as.Date(NA),
+    ORGANISATION = config$metadata$organisation,
+    ENTERED_BY = config$metadata$entered_by,
+    ENTERED_DATE = as.Date(Sys.Date()),
+    CAMPAIGN_COMMENT = "Copper and copper pyrithione measurements from Vannmiljø database covering all Norwegian municipalities and media types"
+  )
+
+message("Created campaign table")
+```
+
+## Reference
+```{r}
+#| label: edata-reference
+
+edata_reference <- initialise_references_tibble() |>
+  add_row(
+    REFERENCE_ID = config$metadata$reference_id,
+    REFERENCE_TYPE = "Database",
+    DATA_SOURCE = "Vannmiljø",
+    AUTHOR = config$metadata$organisation,
+    TITLE = "Vannmiljø Database - Copper and Copper Pyrithione Data",
+    YEAR = 2025L,
+    ACCESS_DATE = config$filters$date_end,
+    PERIODICAL_JOURNAL = NA_character_,
+    VOLUME = NA_integer_,
+    ISSUE = NA_integer_,
+    PUBLISHER = NA_character_,
+    INSTITUTION = config$metadata$organisation,
+    DOI = NA_character_,
+    URL = "https://www.vannmiljo.no/",
+    ISBN_ISSN = NA_character_,
+    EDITION = NA_character_,
+    DOCUMENT_NUMBER = NA_character_,
+    REF_COMMENT = glue(
+      "Downloaded {config$filters$date_end}, data for {config$filters$date_start} to {config$filters$date_end}, ",
+      "all kommune, all media, all campaigns. Search for Kobber & Kobberpyrition. 138615 hits."
+    )
+  )
+
+message("Created reference table")
+```
+
+## Parameters
+```{r}
+#| label: edata-parameters
+
+# No copper pyrithione reported for 2025, only copper
+edata_parameters <- initialise_parameters_tibble() |>
+  add_row(
+    PARAMETER_TYPE = NA_character_,
+    PARAMETER_TYPE_SUB = NA_character_,
+    MEASURED_TYPE = NA_character_,
+    PARAMETER_NAME = "Copper",
+    PARAMETER_NAME_SUB = NA_character_,
+    INCHIKEY_SD = NA_character_,
+    PUBCHEM_CID = NA_integer_,
+    CAS_RN = NA_character_,
+    ENTERED_BY = glue("{config$metadata$entered_by} from Vannmiljø"),
+    PARAMETER_COMMENT = NA_character_
+  )
+
+message("Created parameters table")
+```
+
+## Sites
+```{r}
+#| label: edata-sites
+
+# Extract unique sites with relevant metadata
+vm_sites_unique <- vm_filtered |>
+  select(
+    Vannlok_kode,
+    Vannlokalitetsnavn,
+    Beskrivelse,
+    `UTM33 Ost (X)`,
+    `UTM33 Nord (Y)`,
+    `Knytt til påvirkning`,
+    SITE_GEOGRAPHIC_FEATURE_medium,
+    SITE_GEOGRAPHIC_FEATURE_vkat,
+    SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+    SITE_GEOGRAPHIC_FEATURE_SUB_vkat
+  ) |>
+  distinct() |>
+  # Clean up emission source
+  mutate(
+    Emission_Source = case_match(
+      `Knytt til påvirkning`,
+      c("Industri", "INDUSTRI") ~ "Industrial",
+      c("Akvakultur", "AKVAKULTUR") ~ "Aquaculture",
+      .default = NA_character_
+    )
+  )
+
+message(glue("Extracted {nrow(vm_sites_unique)} unique sites"))
+
+# Format to eData structure
+edata_sites_temp <- vm_sites_unique |>
+  mutate(
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
+    SITE_GEOGRAPHIC_FEATURE = SITE_GEOGRAPHIC_FEATURE_vkat,
+    SITE_GEOGRAPHIC_FEATURE_SUB = SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+    COUNTRY_ISO = "Norway",
+    OCEAN_IHO = "Not relevant",
+    ENTERED_BY = glue("{config$metadata$entered_by} (Vm Conversion)"),
+    ENTERED_DATE = as.character(today()),
+    ALTITUDE_VALUE = 0, # Altitude not relevant for water monitoring
+    ALTITUDE_UNIT = "m",
+    # Combine description and emission source where available
+    SITE_COMMENT = case_when(
+      !is.na(Beskrivelse) &
+        Beskrivelse != "" &
+        !is.na(Emission_Source) &
+        Emission_Source != "" ~
+        glue(
+          "Vm Original Comment: {Beskrivelse}. Vm Emission Source: {Emission_Source}"
+        ),
+      !is.na(Beskrivelse) & Beskrivelse != "" ~
+        glue("Vm Original Comment: {Beskrivelse}"),
+      !is.na(Emission_Source) & Emission_Source != "" ~
+        glue("Vm Emission Source: {Emission_Source}"),
+      .default = NA_character_
+    )
+  )
+
+# Reproject coordinates from UTM33 to WGS84
+sites_sf <- edata_sites_temp |>
+  st_as_sf(coords = c("UTM33 Ost (X)", "UTM33 Nord (Y)"), crs = 25833) |>
+  st_transform(4326) |>
+  mutate(
+    LATITUDE = st_coordinates(geometry)[, 2],
+    LONGITUDE = st_coordinates(geometry)[, 1],
+    SITE_COORDINATE_SYSTEM = "WGS84"
+  )
+
+# Sanity check: plot sites on map
+world_map <- map_data("world")
+sanity_map <- ggplot(world_map) +
+  geom_map(
+    data = world_map,
+    map = world_map,
+    aes(long, lat, map_id = region)
+  ) +
+  geom_sf(data = sites_sf, colour = "red", size = 0.5) +
+  coord_sf(xlim = c(4, 32), ylim = c(58, 72)) +
+  labs(title = "Vannmiljø Freshwater Sites 2025")
+
+print(sanity_map) |> suppressWarnings()
+
+# Finalize sites table
+edata_sites <- edata_sites_temp |>
+  left_join(
+    sites_sf |>
+      st_drop_geometry() |>
+      select(SITE_CODE, LATITUDE, LONGITUDE, SITE_COORDINATE_SYSTEM),
+    by = "SITE_CODE"
+  ) |>
+  select(
+    SITE_CODE,
+    SITE_NAME,
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    LATITUDE,
+    LONGITUDE,
+    SITE_COORDINATE_SYSTEM,
+    COUNTRY_ISO,
+    OCEAN_IHO,
+    ENTERED_BY,
+    ENTERED_DATE,
+    SITE_COMMENT
+  )
+
+# Validate against eData schema
+initialise_sites_tibble() |> add_row(edata_sites)
+
+message(glue("Created sites table: {nrow(edata_sites)} sites"))
+```
+
+## Methods
+```{r}
+#| label: edata-methods
+
+# Methods Mapping
+# NOTE: Methods mapping simplified for initial conversion
+# Current approach:
+# - Simple 1:1 mapping from Vannmiljø codes
+# - Filtered = assumed 0.45 µm
+# - Total concentration only (no fractionation detail)
+#
+# Known limitations:
+# - "UKJENT" (Unknown) methods not properly handled
+# - Fractionation protocol oversimplified
+# - Extraction protocols not captured
+# - Some method details may be in Norwegian standards not reviewed
+
+# Filter methods to those actually used in freshwater data
+vm_methods_used_analysis <- vm_lookup_analysis |>
+  filter(AnalysisMethodID %in% vm_filtered$Analysemetode_id)
+
+vm_methods_used_sampling <- vm_lookup_sampling |>
+  filter(
+    SamplingMethodID %in% vm_filtered$Provetakmetode_id,
+    str_detect(Name, "erskvann"), # Freshwater only
+    !str_detect(Name, "sediment") # Exclude sediment
+  )
+
+# Merge and categorize
+edata_methods <- vm_methods_used_sampling #
+# TODO: Renable methods.
+# bind_rows(vm_methods_used_analysis) |>
+# mutate(
+#   ID = case_when(
+#     !is.na(AnalysisMethodID) ~ AnalysisMethodID,
+#     !is.na(SamplingMethodID) ~ SamplingMethodID,
+#     .default = NA_character_
+#   ),
+#   Category = case_when(
+#     !is.na(AnalysisMethodID) ~ "Analysis",
+#     !is.na(SamplingMethodID) ~ "Sampling",
+#     .default = NA_character_
+#   ),
+#   .keep = "unused"
+# ) |>
+# # Join with eData mapping
+# left_join(
+#   vm_lookup_methods,
+#   by = c("PROTOCOL_ID", "Category")
+# ) |>
+# group_by(PROTOCOL_CATEGORY) |>
+# mutate(
+#   CAMPAIGN_NAME = config$metadata$campaign_name,
+#   PROTOCOL_ID = glue("{substr(PROTOCOL_CATEGORY, 1, 1)}{row_number()}-Vm2025")
+# ) |>
+# ungroup()
+
+message(glue("Created methods table: {nrow(edata_methods)} protocols"))
+```
+
+## Measurements
+```{r}
+#| label: edata-measurements
+
+# Create measurements table
+# NOTE: All freshwater values reported as EnhetID = 8 (µg/L)
+
+edata_measurements <- vm_filtered |>
+  mutate(
+    # Core identifiers
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    PARAMETER_NAME = "Copper",
+    SAMPLING_DATE = as.character(SAMPLING_DATE),
+    CAMPAIGN_NAME_SHORT = config$metadata$campaign_short,
+    REFERENCE_ID = config$metadata$reference_id,
+
+    # Compartment information
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_medium,
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_medium,
+
+    # Parameter classification
+    PARAMETER_TYPE = "Stressor",
+    MEASURED_TYPE = "Concentration",
+
+    # Sample information
+    SUBSAMPLE = "1",
+    SAMPLE_ID = "Fake ID", # FIXME: Needs proper sample ID generation
+
+    # Measurement values
+    MEASURED_FLAG = vm_convert_operator(Operator),
+    MEASURED_VALUE = Verdi,
+    MEASURED_UNIT = "µg/L",
+    MEASURED_N = 1,
+
+    # Uncertainty (not reported in Vannmiljø)
+    UNCERTAINTY_TYPE = "Not reported",
+    UNCERTAINTY_UPPER = NA_real_,
+    UNCERTAINTY_LOWER = NA_real_,
+
+    # Detection limits
+    LOQ_VALUE = Kvantifiseringsgrense,
+    LOQ_UNIT = "µg/L",
+    LOD_VALUE = Deteksjonsgrense,
+    LOD_UNIT = "µg/L",
+
+    # Protocol references (FIXME: Need proper protocol ID mapping)
+    SAMPLING_PROTOCOL = "1",
+    EXTRACTION_PROTOCOL = "2",
+    FRACTIONATION_PROTOCOL = "3",
+    ANALYTICAL_PROTOCOL = "4",
+
+    # Comments
+    MEASUREMENT_COMMENT = Kommentar,
+
+    .keep = "none"
+  )
+
+# Validate against eData schema
+initialise_measurements_tibble() |> add_row(edata_measurements)
+
+message(glue(
+  "Created measurements table: {nrow(edata_measurements)} measurements"
+))
+```
+
+# Export
+
+## Create Export
+```{r}
+#| label: export-create-zip
+
+# Assemble datasets for export
+export_datasets <- list(
+  edata_sites = edata_sites,
+  edata_campaign = edata_campaign,
+  edata_reference = edata_reference,
+  edata_parameters = edata_parameters,
+  edata_measurements = edata_measurements
+)
+
+# Export as ZIP
+# TODO: Disabled
+# if (
+#   !file.exists(here(
+#     "data",
+#     "raw",
+#     "eData",
+#     paste0(config$metadata$campaign_short, ".zip")
+#   ))
+# ) {
+#   export_path <- export_campaign_zip(
+#     dataset_list = export_datasets,
+#     campaign_name = config$metadata$campaign_short,
+#     output_path = here("data", "raw", "eData")
+#   )
+#   message(glue("Export complete: {export_path}"))
+# } else {
+#   message("Export file already exists, skipping")
+# }
+
+# message(glue("Export complete: {export_path}"))
+```
+
+
+## Species Data Coverage
+
+None of these are very informative yet, because we don't filter down to stuff that's definitely biota first. 
+
+```{r}
+#| label: eda-species-coverage
+
+# Species group coverage
+species_group_coverage <- vm_merged |>
+  group_by(SPECIES_GROUP_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SPECIES_GROUP_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count))
+
+datatable(species_group_coverage, caption = "Species Group Coverage")
+
+# Sample species coverage
+sample_species_coverage <- vm_merged |>
+  group_by(SAMPLE_SPECIES_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SAMPLE_SPECIES_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count))
+
+datatable(sample_species_coverage, caption = "Sample Species Coverage")
+
+# Species gender coverage
+species_gender_coverage <- vm_merged |>
+  group_by(SPECIES_GENDER_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SPECIES_GENDER_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count))
+
+datatable(species_gender_coverage, caption = "Species Gender Coverage")
+
+# Sample tissue coverage
+sample_tissue_coverage <- vm_merged |>
+  group_by(SAMPLE_TISSUE_medium) |>
+  reframe(count = n()) |>
+  mutate(
+    flag = case_when(
+      SAMPLE_TISSUE_medium %in% c("Not reported", "", NA) ~ "Missing",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count))
+
+datatable(sample_tissue_coverage, caption = "Sample Tissue Coverage")
+```

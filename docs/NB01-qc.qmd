@@ -51,7 +51,7 @@ species_lookup <- species_names |>
 
 ```{r}
 #| label: quality-summary
-#| echo: false
+#| echo: true
 #| output: asis
 
 #' Generate a text summary of data quality issues
@@ -264,4 +264,3 @@ if (nrow(literature_qc$missing_biota) > 0) {
   cat("*No missing biota data found.*")
 }
 ```
-

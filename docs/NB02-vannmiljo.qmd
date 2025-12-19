@@ -24,6 +24,7 @@ format:
 - [ ] Add probable contamination source
 - [ ] More sanity checking of extracted values
 - [ ] Move boring code to targets
+- [ ] Fix export **again**.
 
 
 ## Libraries
@@ -544,7 +545,7 @@ sanity_map <- ggplot(world_map) +
   coord_sf(xlim = c(4, 32), ylim = c(58, 72)) +
   labs(title = "Vannmiljø Freshwater Sites 2025")
 
-print(sanity_map)
+print(sanity_map) |> suppressWarnings()
 
 # Finalize sites table
 edata_sites <- edata_sites_temp |>
@@ -716,13 +717,26 @@ export_datasets <- list(
 )
 
 # Export as ZIP
-export_path <- export_campaign_zip(
-  dataset_list = export_datasets,
-  campaign_name = config$metadata$campaign_short,
-  output_path = here("data", "raw", "eData")
-)
+# TODO: Disabled
+# if (
+#   !file.exists(here(
+#     "data",
+#     "raw",
+#     "eData",
+#     paste0(config$metadata$campaign_short, ".zip")
+#   ))
+# ) {
+#   export_path <- export_campaign_zip(
+#     dataset_list = export_datasets,
+#     campaign_name = config$metadata$campaign_short,
+#     output_path = here("data", "raw", "eData")
+#   )
+#   message(glue("Export complete: {export_path}"))
+# } else {
+#   message("Export file already exists, skipping")
+# }
 
-message(glue("Export complete: {export_path}"))
+# message(glue("Export complete: {export_path}"))
 ```
 
 

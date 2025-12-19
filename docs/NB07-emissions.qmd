@@ -29,10 +29,11 @@ Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates 
 ```{r}
 #| label: tbl-std-data
 
-devtools::load_all() # could
+devtools::load_all()
 library(tibble)
 library(dplyr)
 library(ggplot2)
+library(here)
 mine_tailings_coords() |> DT::datatable()
 
 ```
@@ -84,9 +85,9 @@ We assume:
 
 ```{r}
 #| label: fig-industrial-emissions
-#| wifth: 16
+#| fig-width: 16
 
-source("temp_R/scratchpad_norske_utslippe.R")
+source(here("temp_R/scratchpad_norske_utslippe.R"))
 
 top_municipalities_plot
 ```

@@ -1,0 +1,970 @@
+---
+title: "Notebook 03 - Exploration"
+author: "Sam Welch"
+date: "2025.11.25"
+lightbox: true
+format:
+  html:
+    grid:
+      body-width: 1500px
+      sidebar-width: 0px
+    page-layout: full
+    code-fold: true
+    max-width: 4500px
+    fig-format: svg
+    toc: true
+---
+
+```{=html}
+<!-- include-in-header:
+  - text
+      <style>
+      /* "Hide" TOC sidebar when card is in full-screen mode */
+      .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
+      body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
+        z-index: 0 !important;
+      }
+      </style> -->
+```
+
+```{r}
+#| label: targets-setup
+#| warning: false
+#| output: false
+library(STOPeData)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+library(viridis)
+library(stringr)
+library(ggridges)
+library(ggh4x)
+library(tidygraph)
+library(ggraph)
+library(ggiraph)
+library(leaflet)
+library(sf)
+library(shiny)
+library(dplyr)
+library(bslib)
+library(ggtext)
+library(data.table)
+library(eDataDRF)
+library(here)
+library(targets)
+
+devtools::load_all()
+```
+
+```{r}
+#| label: load-data
+# load in any data we need from the targets workflow
+
+literature_merged_data <- tar_read(load_literature_pqt)
+literature_reference_data <- tar_read(reference_data)
+literature_campaign_data <- tar_read(campaign_data)
+literature_sites_data <- tar_read(sites_data)
+literature_qc <- tar_read(data_quality_report)
+wgs84_geo <- tar_read(wgs84_geography)
+
+species_names <- eDataDRF::species_names_vocabulary()
+species_lookup <- species_names |>
+  with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
+
+```
+
+```{r}
+#| label: themes-and-helpers
+
+copper_toxicity_thresholds <- tar_read(copper_toxicity_thresholds)
+# Define threshold colors based on the report ----
+threshold_colours <- c(
+  "Background (I)" = "#0070C0", # Blue
+  "Good (II)" = "#00B050", # Green
+  "Moderate (III)" = "#FFC000", # Yellow
+  "Poor (IV)" = "#FF6600", # Orange
+  "Very Poor (V)" = "#FF0000" # Red
+)
+
+compartment_colours <- c(
+  # Aquatic ----
+  "Freshwater" = "#4A90E2", # clear blue
+  "Marine/Salt Water" = "#1E5A8E", # deep ocean blue
+  "Brackish/Transitional Water" = "#6BA5C8", # mid-blue (between fresh/marine)
+  "Groundwater" = "#2C5F7B", # darker, subdued blue
+  "Wastewater" = "#8B7355", # murky brown
+  "Liquid Growth Medium" = "#9FD8CB", # pale greenish-blue
+  "Rainwater" = "#B3D9FF", # light sky blue
+  "Stormwater" = "#607D8B", # grey-blue
+  "Leachate" = "#6B5344", # dark muddy brown
+  "Aquatic Sediment" = "#EBCF1B", # your existing yellow
+  "Porewater" = "#7FA0B8", # muted blue-grey
+  "Sludge" = "#67AB33", # your existing green
+
+  # Atmospheric ----
+  "Indoor Air" = "#E8F4F8", # very pale blue-grey
+  "Outdoor Air" = "#87CEEB", # sky blue
+
+  # Terrestrial ----
+  "Terrestrial Biological Residue" = "#8B6F47", # organic brown
+  "Soil H Horizon (Peat)" = "#3E2723", # very dark brown
+  "Soil O Horizon (Organic)" = "#5D4037", # dark organic brown
+  "Soil A Horizon (Topsoil)" = "#795548", # medium brown
+  "Soil E Horizon (Mineral)" = "#A1887F", # light greyish-brown
+  "Soil S Horizon (Mineral)" = "#BCAAA4", # pale brown-grey
+  "Soil C Horizon (Parent Material)" = "#D7CCC8", # very pale brown
+  "Soil R Horizon (Bedrock)" = "#9E9E9E", # grey
+
+  # Biota ----
+  "Biota, Terrestrial" = "#558B2F", # forest green
+  "Biota, Aquatic" = "#00695C", # teal
+  "Biota, Atmospheric" = "#B39DDB", # light purple (birds/insects)
+  "Biota, Other" = "#9C27B0" # distinct purple
+)
+
+# Helper function for sample sizes
+calculate_sample_sizes <- function(data) {
+  data |>
+    group_by(
+      REFERENCE_ID,
+      OCEAN_COUNTRY,
+      SITE_GEOGRAPHIC_FEATURE,
+      ENVIRON_COMPARTMENT_SUB
+    ) |>
+    summarise(total_n = sum(MEASURED_N, na.rm = TRUE), .groups = "drop")
+}
+
+# Create sub-compartment letter codes ----
+subcomp_codes <- c(
+  # Aquatic
+  "Freshwater" = "F",
+  "Marine/Salt Water" = "M",
+  "Brackish/Transitional Water" = "B",
+  "Groundwater" = "G",
+  "Wastewater" = "WW",
+  "Liquid Growth Medium" = "LGM",
+  "Rainwater" = "R",
+  "Stormwater" = "SW",
+  "Leachate" = "L",
+  "Aquatic Sediment" = "AS",
+  "Porewater" = "P",
+  "Sludge" = "Sl",
+  # Atmospheric
+  "Indoor Air" = "IA",
+  "Outdoor Air" = "OA",
+  # Terrestrial
+  "Terrestrial Biological Residue" = "TBR",
+  "Soil H Horizon (Peat)" = "H",
+  "Soil O Horizon (Organic)" = "O",
+  "Soil A Horizon (Topsoil)" = "A",
+  "Soil E Horizon (Mineral)" = "E",
+  "Soil S Horizon (Mineral)" = "S",
+  "Soil C Horizon (Parent Material)" = "C",
+  "Soil R Horizon (Bedrock)" = "R",
+  # Biota
+  "Biota, Terrestrial" = "BT",
+  "Biota, Aquatic" = "BA",
+  "Biota, Atmospheric" = "BAm",
+  "Biota, Other" = "BO"
+)
+
+
+```
+
+## Dataset Overview
+
+### To Do
+
+-   [ ] Add probable contamination sources to each paper
+-   [ ] Make sure we handle missing characters properly
+-   [ ] Reach out to Dag or Jens to ask if MD have any copper emissions data
+-   [ ] Talk to Marianne from reference group (or anyone else on the reference group)
+-   [ ] Get more data in
+-   [ ] Make network diagram visualise uncertainty, etc.
+-   [ ] Functional and risk assessment trophic levels may not be perfectly aligned
+    -   [ ] might be better off using ERA grouping - talk to Li about it
+-   [ ] Fix icon colouration in map
+-   [ ] Flag papers with transfer data (again)
+-   [ ] Add CREED stuff
+-   [ ] Add missing species names
+-   [ ] Get some salinity & DOC (or at least water darkness) datasets
+-   [ ] Find a good way to add sea ice to map
+-   [ ] Find a good aquaculture zone and mining waste zone and characterise the sources well
+
+## Copper Concentrations by Environmental Compartment
+
+Get a basic overview of the orders of magnitude for different sub-compartments (@fig-basic-subcompartments), so we can plot them on scales that make sense. Note that I haven't included uncertainty or sample sizes.
+
+```{r}
+#| label: fig-basic-subcompartments
+
+literature_merged_data |>
+  filter(!is.na(MEASURED_UNIT_STANDARD)) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = ENVIRON_COMPARTMENT_SUB,
+    color = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  facet_nested(
+    rows = vars(ENVIRON_COMPARTMENT, MEASURED_UNIT_STANDARD),
+    scales = "free_y",
+    space = "free_y",
+    nest_line = element_line()
+  ) +
+  theme_minimal() +
+  scale_color_manual(
+    values = compartment_colours,
+    breaks = names(compartment_colours)
+  ) +
+  theme(legend.position = "none") +
+  labs(x = "", y = "")
+
+```
+
+The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means uncertainty bounds (SD, range, 95% CI, etc.) and overlaid with relevant regulatory thresholds where available.
+
+### Aquatic Compartment
+
+#### Freshwater
+
+@fig-boxplot-freshwater shows we have a fair amount of data for water. It's not strictly useful to include saltwater, freshwater and inbetween on here, so I think it makes sense to split it - but it won't make a massive difference to the final product.
+
+Some of these units raise some big questions. Why is brackish/transitional using dry? And why are there some aquatic biota using mg/L?
+
+```{r}
+#| label: fig-boxplot-freshwater
+#| fig-cap: "Copper concentrations in water column samples by reference"
+#| fig-width: 10
+# Calculate sample sizes
+sample_sizes_water <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB == "Freshwater",
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  calculate_sample_sizes()
+
+# Get first facet for labels
+first_facet <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB == "Freshwater",
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  distinct(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE) |>
+  slice(1)
+
+# Create plot
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB == "Freshwater",
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  ggplot(aes(
+    x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # ... (all your other geoms remain the same) ...
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  geom_text(
+    data = sample_sizes_water,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -1,
+    vjust = -1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(
+          ENVIRON_COMPARTMENT_SUB %in% sub_comps,
+          THRESHOLD_TYPE == "Classification boundary"
+        )
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  # Threshold labels - only in first facet
+  geom_text(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps) |>
+        cross_join(first_facet)
+    },
+    aes(
+      x = THRESHOLD_VALUE,
+      y = Inf,
+      label = THRESHOLD_CLASS,
+      color = THRESHOLD_CLASS
+    ),
+    vjust = 1.5,
+    angle = 90,
+    hjust = 1,
+    size = 3,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(
+    values = c(threshold_colours, compartment_colours),
+    breaks = names(compartment_colours)
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Reference",
+    colour = "Sub-compartment"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical"
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  ) +
+  coord_cartesian(
+    xlim = range(
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
+        literature_merged_data$ENVIRON_COMPARTMENT_SUB == "Freshwater"
+      ],
+      na.rm = TRUE
+    ) |>
+      round(),
+    clip = "off" # allows threshold labels to extend beyond plot area if needed
+  )
+```
+
+#### Salt and Transitional Water
+
+@fig-boxplot-saltwater
+
+```{r}
+#| label: fig-boxplot-saltwater
+#| fig-cap: "Copper concentrations in water column samples by reference"
+#| fig-width: 10
+# Calculate sample sizes
+chosen_compartments <- c("Marine/Salt Water", "Brackish/Transitional Water")
+
+sample_sizes_water <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  calculate_sample_sizes()
+
+# Get first facet for labels
+first_facet <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  distinct(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE) |>
+  slice(1)
+
+# Create plot
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  ggplot(aes(
+    x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # ... (all your other geoms remain the same) ...
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  geom_text(
+    data = sample_sizes_water,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -1,
+    vjust = -1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(
+          ENVIRON_COMPARTMENT_SUB %in% sub_comps,
+          THRESHOLD_TYPE == "Classification boundary"
+        )
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  # Threshold labels - only in first facet
+  geom_text(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps) |>
+        cross_join(first_facet)
+    },
+    aes(
+      x = THRESHOLD_VALUE,
+      y = Inf,
+      label = THRESHOLD_CLASS,
+      color = THRESHOLD_CLASS
+    ),
+    vjust = 1.5,
+    angle = 90,
+    hjust = 1,
+    size = 3,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(
+    values = c(threshold_colours, compartment_colours),
+    breaks = names(compartment_colours)
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Reference",
+    colour = "Sub-compartment"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical"
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  ) +
+  coord_cartesian(
+    xlim = range(
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
+        literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
+      ],
+      na.rm = TRUE
+    ) |>
+      round(),
+    clip = "off" # allows threshold labels to extend beyond plot area if needed
+  )
+```
+
+#### Aquatic Sediment
+
+@fig-boxplot-sediment
+
+```{r}
+#| label: fig-boxplot-sediment
+#| fig-cap: "Copper concentrations in aquatic sediment samples by reference"
+#| fig-width: 10
+# Calculate sample sizes
+chosen_compartments <- c("Aquatic Sediment")
+
+sample_sizes_water <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  calculate_sample_sizes()
+
+# Get first facet for labels
+first_facet <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  distinct(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE) |>
+  slice(1)
+
+# Create plot
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  ggplot(aes(
+    x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # ... (all your other geoms remain the same) ...
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  geom_text(
+    data = sample_sizes_water,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -1,
+    vjust = -1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(
+          ENVIRON_COMPARTMENT_SUB %in% sub_comps,
+          THRESHOLD_TYPE == "Classification boundary"
+        )
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  # Threshold labels - only in first facet
+  geom_text(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps) |>
+        cross_join(first_facet)
+    },
+    aes(
+      x = THRESHOLD_VALUE,
+      y = Inf,
+      label = THRESHOLD_CLASS,
+      color = THRESHOLD_CLASS
+    ),
+    vjust = 1.5,
+    angle = 90,
+    hjust = 1,
+    size = 3,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(
+    values = c(threshold_colours, compartment_colours),
+    breaks = names(compartment_colours)
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Reference",
+    colour = "Sub-compartment"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical"
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  ) +
+  coord_cartesian(
+    xlim = range(
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
+        literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
+      ],
+      na.rm = TRUE
+    ) |>
+      round(),
+    clip = "off" # allows threshold labels to extend beyond plot area if needed
+  )
+```
+
+### Terrestrial Compartment
+
+Currently, data on copper in the terrestrial compartment is limited to one study (@fig-boxplot-terrestrial).
+
+```{r}
+#| label: fig-boxplot-terrestrial
+#| fig-cap: "Copper concentrations in terrestrial samples by reference"
+#| fig-width: 10
+# Calculate sample sizes
+chosen_compartments <- c("Soil O Horizon (Organic)")
+
+sample_sizes_water <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  calculate_sample_sizes()
+
+# Get first facet for labels
+first_facet <- literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  distinct(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE) |>
+  slice(1)
+
+# Create plot
+literature_merged_data |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB %in% chosen_compartments,
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  ggplot(aes(
+    x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    y = REFERENCE_ID,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  # ... (all your other geoms remain the same) ...
+  geom_crossbar(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "95% Confidence Interval"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    )
+  ) +
+  geom_linerange(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    linewidth = 0.8
+  ) +
+  geom_point(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "Standard Deviation"),
+    size = 2
+  ) +
+  geom_boxplot(
+    data = \(x) filter(x, UNCERTAINTY_TYPE == "1st-3rd Quartile"),
+    aes(
+      xmin = UNCERTAINTY_LOWER_STANDARD,
+      lower = UNCERTAINTY_LOWER_STANDARD,
+      middle = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+      upper = UNCERTAINTY_UPPER_STANDARD,
+      xmax = UNCERTAINTY_UPPER_STANDARD
+    ),
+    stat = "identity"
+  ) +
+  geom_point(
+    alpha = 0.5,
+    data = \(x) {
+      filter(
+        x,
+        is_not_reported(UNCERTAINTY_TYPE) | is_not_relevant(UNCERTAINTY_TYPE)
+      )
+    }
+  ) +
+  geom_text(
+    data = sample_sizes_water,
+    aes(x = -Inf, y = REFERENCE_ID, label = paste0("n=", total_n)),
+    hjust = -1,
+    vjust = -1,
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  geom_vline(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(
+          ENVIRON_COMPARTMENT_SUB %in% sub_comps,
+          THRESHOLD_TYPE == "Classification boundary"
+        )
+    },
+    aes(xintercept = THRESHOLD_VALUE, color = THRESHOLD_CLASS),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  # Threshold labels - only in first facet
+  geom_text(
+    data = \(x) {
+      sub_comps <- unique(x$ENVIRON_COMPARTMENT_SUB)
+      copper_toxicity_thresholds |>
+        filter(ENVIRON_COMPARTMENT_SUB %in% sub_comps) |>
+        cross_join(first_facet)
+    },
+    aes(
+      x = THRESHOLD_VALUE,
+      y = Inf,
+      label = THRESHOLD_CLASS,
+      color = THRESHOLD_CLASS
+    ),
+    vjust = 1.5,
+    angle = 90,
+    hjust = 1,
+    size = 3,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(
+    values = c(threshold_colours, compartment_colours),
+    breaks = names(compartment_colours)
+  ) +
+  labs(
+    x = "Concentration (mg/L)",
+    y = "Reference",
+    colour = "Sub-compartment"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical"
+  ) +
+  facet_nested(
+    rows = vars(OCEAN_COUNTRY, SITE_GEOGRAPHIC_FEATURE),
+    scales = "free_y",
+    space = "free_y",
+    shrink = TRUE,
+    labeller = label_wrap_gen(width = 15),
+    nest_line = element_line()
+  ) +
+  coord_cartesian(
+    xlim = range(
+      literature_merged_data$UNCERTAINTY_UPPER_STANDARD[
+        literature_merged_data$ENVIRON_COMPARTMENT_SUB %in% chosen_compartments
+      ],
+      na.rm = TRUE
+    ) |>
+      round(),
+    clip = "off" # allows threshold labels to extend beyond plot area if needed
+  )
+```
+
+### Biota Compartment
+
+#### Aquatic Biota
+
+presents copper body burdens across different species groups. Note: There appear to be issues with the distribution calculations for biota that require further investigation.
+
+```{r}
+#| label: fig-points-biota
+#| fig-cap: "Density distributions of copper concentrations in biota, separated by species group. Copper is an essential micronutrient, so baseline concentrations vary widely among taxa. High concentrations may indicate either regulatory adaptation or toxic exposure. Note: Distribution calculations require verification."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 10
+#| include: false
+
+# TODO: Fix pls
+# literature_merged_data |>
+#   filter(
+#     ENVIRON_COMPARTMENT == "Biota"
+#   ) |>
+#   ggplot(aes(
+#     x = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+#     y = SAMPLE_SPECIES,
+#     colour = SPECIES_GROUP
+#   )) +
+#   geom_pointrange(aes(
+#     xmin = UNCERTAINTY_UPPER_STANDARD,
+#     xmax = UNCERTAINTY_UPPER_STANDARD
+#   )) +
+#   facet_wrap(
+#     facet = vars(OCEAN_COUNTRY),
+#     ncol = 1,
+#     scales = "free_y",
+#     space = "free_y"
+#   ) |> theme_minimal()
+
+```
+
+## Temporal Trends
+
+### Abiotic Compartments
+
+@fig-temporal-abiotic examines temporal trends in copper concentrations across abiotic environmental compartments. The current dataset has limited temporal coverage, but these trends may become more apparent as additional data from monitoring databases (e.g., Vannmiljø) are incorporated.
+
+```{r}
+#| label: fig-temporal-abiotic
+#| fig-cap: "Temporal trends in copper concentrations across abiotic environmental sub-compartments. Points represent mean values with error bars showing standard deviations. Limited temporal coverage currently restricts trend interpretation, but patterns may emerge with additional historical monitoring data."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 12
+
+p <- literature_merged_data |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    UNCERTAINTY_TYPE == "Standard Deviation",
+    ENVIRON_COMPARTMENT != "Biota"
+  ) |>
+  group_by(ENVIRON_COMPARTMENT_SUB, SAMPLE_SPECIES) |>
+  ggplot(aes(
+    x = YEAR,
+    y = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    color = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  geom_errorbar(
+    aes(ymin = UNCERTAINTY_LOWER_STANDARD, ymax = UNCERTAINTY_UPPER_STANDARD),
+    width = .2,
+  ) +
+  facet_wrap(
+    facets = vars(ENVIRON_COMPARTMENT_SUB),
+    ncol = 1,
+    scales = "free_y"
+  ) +
+  labs(
+    x = "Year",
+    y = "Copper Concentration (standardised units)",
+    color = "Sub-compartment"
+  ) +
+  theme_minimal()
+
+plotly::ggplotly(p)
+```
+
+### Biota
+
+@fig-temporal-biota shows temporal patterns in biotic copper concentrations across species groups. Interpretation should consider both temporal changes in exposure and potential differences in species composition across sampling years.
+
+```{r}
+#| label: fig-temporal-biota
+#| fig-cap: "Temporal trends in copper body burdens across different species groups. Points are coloured by species to help distinguish measurement series. Error bars represent reported uncertainty ranges. Vertical facets separate species groups to account for baseline differences in copper accumulation patterns."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 12
+
+p <- literature_merged_data |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    ENVIRON_COMPARTMENT == "Biota"
+  ) |>
+  ggplot(aes(
+    x = YEAR,
+    y = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    color = SAMPLE_SPECIES
+  )) +
+  geom_point() +
+  geom_errorbar(
+    aes(ymin = UNCERTAINTY_LOWER_STANDARD, ymax = UNCERTAINTY_UPPER_STANDARD),
+    width = .2,
+  ) +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    ncol = 1,
+    scales = "free_y"
+  ) +
+  labs(
+    x = "Year",
+    y = "Copper Concentration (standardised units)",
+    color = "Species"
+  ) +
+  theme_minimal()
+
+plotly::ggplotly(p)
+```
+
+#
