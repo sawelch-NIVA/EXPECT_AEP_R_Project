@@ -17,7 +17,7 @@ number-sections: true
 
 # Materials and Methods
 
-See Notebook 03 for the most relelvant stuff.
+See Notebook 03 for the most relevant stuff. Although the notebooks can't find their own images at the moment, which is ridiculous.
 
 # Results
 

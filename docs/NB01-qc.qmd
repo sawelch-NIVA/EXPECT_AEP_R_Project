@@ -5,34 +5,42 @@ date: "2025.11.25"
 lightbox: true
 format:
   html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
     code-fold: true
-    max-width: 4500px
-    fig-format: svg
+    fig-format: png
     toc: true
+execute:
+  engine: knitr
 ---
 
-```{r}
+```{r, include=FALSE}
 #| label: setup
+#| include: false
+#| echo: false
 #| warning: false
 #| message: false
-#| echo: false
-library(STOPeData)
-library(DT)
-library(dplyr)
-library(eDataDRF)
-library(targets)
-library(here)
+#| output: false
+#| results: hide
+
+suppressMessages(
+  {
+    print(Sys.time())
+    library(STOPeData)
+    library(DT)
+    library(dplyr)
+    library(eDataDRF)
+    library(targets)
+    library(here)
+    library(glue)
+
+    i_am("README.md")
+    tar_config_set(store = here("_targets"))
+  }
+)
 ```
 
 ```{r}
 #| label: load-data
 # load in any data we need from the targets workflow
-here::i_am("README.md")
-targets::tar_config_set(store = here("_targets"))
 
 literature_merged_data <- tar_read(load_literature_pqt)
 literature_reference_data <- tar_read(reference_data)
@@ -41,7 +49,7 @@ literature_sites_data <- tar_read(sites_data)
 literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
 
-species_names <- eDataDRF::species_names_vocabulary()
+species_names <- species_names_vocabulary()
 species_lookup <- species_names |>
   with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
 
@@ -52,7 +60,7 @@ species_lookup <- species_names |>
 ```{r}
 #| label: quality-summary
 #| echo: true
-#| output: asis
+#| results: asis
 
 #' Generate a text summary of data quality issues
 #'
@@ -61,7 +69,7 @@ species_lookup <- species_names |>
 format_quality_summary <- function(qc_report) {
   s <- qc_report$summary
 
-  glue::glue(
+  glue(
     "
 Dataset contains **{s$total_rows}** rows from **{s$total_references}** references across **{s$total_sites}** sites.
 
@@ -95,9 +103,9 @@ Known issues:
 #| echo: false
 
 if (nrow(literature_qc$missing_measurements) > 0) {
-  DT::datatable(
+  datatable(
     literature_qc$missing_measurements |>
-      dplyr::select(-sample_ids),
+      select(-sample_ids),
     options = list(pageLength = 10),
     caption = "References with missing measurement data"
   )
@@ -115,9 +123,9 @@ Rows where MEASURED_N is missing or zero.
 #| echo: false
 
 if (nrow(literature_qc$missing_n) > 0) {
-  DT::datatable(
+  datatable(
     literature_qc$missing_n |>
-      dplyr::select(-sample_ids),
+      select(-sample_ids),
     options = list(pageLength = 10),
     caption = "References with missing sample size"
   )
@@ -139,25 +147,25 @@ Rows missing any of: analytical protocol, extraction protocol, fractionation pro
 
 if (nrow(literature_qc$missing_methods) > 0) {
   display_df <- literature_qc$missing_methods |>
-    dplyr::mutate(
-      analytical_issue = dplyr::case_when(
+    mutate(
+      analytical_issue = case_when(
         missing_analytical ~ "Missing",
         .default = NA_character_
       ),
-      extraction_issue = dplyr::case_when(
+      extraction_issue = case_when(
         missing_extraction ~ "Missing",
         .default = NA_character_
       ),
-      fractionation_issue = dplyr::case_when(
+      fractionation_issue = case_when(
         missing_fractionation ~ "Missing",
         .default = NA_character_
       ),
-      sampling_issue = dplyr::case_when(
+      sampling_issue = case_when(
         missing_sampling ~ "Missing",
         .default = NA_character_
       )
     ) |>
-    dplyr::select(
+    select(
       REFERENCE_ID,
       n_rows,
       analytical_issue,
@@ -166,7 +174,7 @@ if (nrow(literature_qc$missing_methods) > 0) {
       sampling_issue
     )
 
-  DT::datatable(
+  datatable(
     display_df,
     options = list(pageLength = 10),
     caption = "References with missing method information"
@@ -186,27 +194,27 @@ Rows where UNCERTAINTY_TYPE or UNCERTAINTY\_\*\_STANDARD are missing.
 
 if (nrow(literature_qc$missing_uncertainty) > 0) {
   display_df <- literature_qc$missing_uncertainty |>
-    dplyr::mutate(
-      uncertainty_type_issue = dplyr::case_when(
+    mutate(
+      uncertainty_type_issue = case_when(
         type_missing ~ "Missing",
         type_not_reported ~ "Not reported",
         type_not_relevant ~ "Not relevant",
         .default = NA_character_
       ),
-      upper_bound_issue = dplyr::case_when(
+      upper_bound_issue = case_when(
         upper_missing ~ "Missing",
         upper_zero ~ "Zero",
         upper_below_value ~ "< Average",
         .default = NA_character_
       ),
-      lower_bound_issue = dplyr::case_when(
+      lower_bound_issue = case_when(
         lower_missing ~ "Missing",
         lower_zero ~ "Zero",
         lower_above_value ~ "> Average",
         .default = NA_character_
       )
     ) |>
-    dplyr::select(
+    select(
       REFERENCE_ID,
       n_rows,
       uncertainty_type_issue,
@@ -214,7 +222,7 @@ if (nrow(literature_qc$missing_uncertainty) > 0) {
       lower_bound_issue
     )
 
-  DT::datatable(
+  datatable(
     display_df,
     options = list(pageLength = 10),
     caption = "References with missing or problematic uncertainty"
@@ -234,7 +242,7 @@ Sites missing coordinates, geographic features, country, or ocean information.
 #| echo: false
 
 if (nrow(literature_qc$missing_sites) > 0) {
-  DT::datatable(
+  datatable(
     literature_qc$missing_sites,
     options = list(pageLength = 10),
     caption = "Sites with missing geographic data"
@@ -253,9 +261,9 @@ Biota samples missing species, tissue, lifestage, gender, or species group.
 #| echo: false
 
 if (nrow(literature_qc$missing_biota) > 0) {
-  DT::datatable(
+  datatable(
     literature_qc$missing_biota |>
-      dplyr::select(-sample_ids),
+      select(-sample_ids),
     options = list(pageLength = 10),
     caption = "References with missing biota information"
   )

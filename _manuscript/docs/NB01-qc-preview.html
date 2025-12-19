@@ -160,7 +160,7 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ac077c1e730dfeb5e42400639d17284e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7408278c863adcfdd30620e161469c3e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-4d7f0bce1131f3e5f9547cd857cfbfc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
      <script async="" src="https://hypothes.is/embed.js"></script>
 <script>
   window.document.addEventListener("DOMContentLoaded", function (_event) {
@@ -199,7 +199,7 @@
 
      <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-right">
+    <div class="quarto-title column-body">
       <h1 class="title">Notebook 01 - Quality Control</h1>
           </div>
 
@@ -207,7 +207,7 @@
     <div class="quarto-title-meta-container">
       <div class="quarto-title-meta-column-start">
         
-        <div class="quarto-title-meta column-page-right">
+        <div class="quarto-title-meta">
 
                 <div>
             <div class="quarto-title-meta-heading">Author</div>
@@ -234,164 +234,110 @@
 
     <div class="quarto-other-links-text-target">
     </div>  </div>
-</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-full toc-left">
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
 <div id="quarto-sidebar-toc-left" class="sidebar toc-left">
   <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
   <li><a href="#data-quality-overview" id="toc-data-quality-overview" class="nav-link active" data-scroll-target="#data-quality-overview">Data Quality Overview</a></li>
+  <li><a href="#missing-data" id="toc-missing-data" class="nav-link" data-scroll-target="#missing-data">Missing Data</a>
+  <ul class="collapse">
+  <li><a href="#missing-measurements" id="toc-missing-measurements" class="nav-link" data-scroll-target="#missing-measurements">Missing Measurements</a></li>
+  <li><a href="#missing-sample-size" id="toc-missing-sample-size" class="nav-link" data-scroll-target="#missing-sample-size">Missing Sample Size</a></li>
+  <li><a href="#missing-methods" id="toc-missing-methods" class="nav-link" data-scroll-target="#missing-methods">Missing Methods</a></li>
+  <li><a href="#missing-uncertainty" id="toc-missing-uncertainty" class="nav-link" data-scroll-target="#missing-uncertainty">Missing Uncertainty</a></li>
+  <li><a href="#missing-site-data" id="toc-missing-site-data" class="nav-link" data-scroll-target="#missing-site-data">Missing Site Data</a></li>
+  <li><a href="#missing-biota-data" id="toc-missing-biota-data" class="nav-link" data-scroll-target="#missing-biota-data">Missing Biota Data</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
 </div>
-<main class="content quarto-banner-title-block column-page-right" id="quarto-document-content">      
+<main class="content quarto-banner-title-block" id="quarto-document-content">      
 
        <div class="cell-container code-fold"><div class="cell-decorator"><pre>In [1]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(STOPeData)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DT)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="fu">Sys.time</span>())</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(STOPeData)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(DT)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(dplyr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(eDataDRF)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(targets)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(here)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(glue)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">i_am</span>(<span class="st">"README.md"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tar_config_set</span>(<span class="at">store =</span> <span class="fu">here</span>(<span class="st">"_targets"</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(eDataDRF)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'eDataDRF'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:STOPeData':
-
-    abbreviate_string, altitude_units_vocabulary,
-    analytical_protocols_vocabulary, areas_vocabulary,
-    coordinate_systems_vocabulary, countries_vocabulary,
-    dummy_parameters_vocabulary, environ_compartments_sub_vocabulary,
-    environ_compartments_vocabulary, extraction_protocols_vocabulary,
-    fractionation_protocols_vocabulary, gender_vocabulary,
-    generate_protocol_id, geographic_features_sub_vocabulary,
-    geographic_features_vocabulary, get_dataset_display_name,
-    initialise_biota_tibble, initialise_campaign_tibble,
-    initialise_compartments_tibble, initialise_CREED_data_tibble,
-    initialise_CREED_scores_tibble, initialise_measurements_tibble,
-    initialise_methods_tibble, initialise_parameters_tibble,
-    initialise_references_tibble, initialise_samples_tibble,
-    initialise_sites_tibble, lifestage_vocabulary,
-    measured_categories_vocabulary, measured_flags_vocabulary,
-    measured_types_vocabulary, parameter_types_sub_vocabulary,
-    parameter_types_vocabulary, parameter_unit_vocabulary,
-    protocol_categories_vocabulary, protocol_options_vocabulary,
-    reference_character_limits, sampling_protocols_vocabulary,
-    species_groups_vocabulary, species_names_vocabulary,
-    tissue_types_vocabulary, uncertainty_types_vocabulary</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>here() starts at C:/Users/SAW/Local Documents/EXPECT AEP/EXPECT_AEP_R_Project</code></pre>
-</div>
 </div></div>
 <div class="cell-container code-fold"><div class="cell-decorator"><pre>In [2]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load in any data we need from the targets workflow</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"README.md"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>here() starts at C:/Users/SAW/Local Documents/EXPECT AEP/EXPECT_AEP_R_Project</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_config_set</span>(<span class="at">store =</span> <span class="fu">here</span>(<span class="st">"_targets"</span>))</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>literature_merged_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(load_literature_pqt)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>literature_reference_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(reference_data)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>literature_campaign_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(campaign_data)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>literature_sites_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(sites_data)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>literature_qc <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(data_quality_report)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>wgs84_geo <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(wgs84_geography)</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>species_names <span class="ot">&lt;-</span> eDataDRF<span class="sc">::</span><span class="fu">species_names_vocabulary</span>()</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>species_lookup <span class="ot">&lt;-</span> species_names <span class="sc">|&gt;</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">setNames</span>(SPECIES_COMMON_NAME, SPECIES_NAME))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load in any data we need from the targets workflow</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>literature_merged_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(load_literature_pqt)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>literature_reference_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(reference_data)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>literature_campaign_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(campaign_data)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>literature_sites_data <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(sites_data)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>literature_qc <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(data_quality_report)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>wgs84_geo <span class="ot">&lt;-</span> <span class="fu">tar_read</span>(wgs84_geography)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>species_names <span class="ot">&lt;-</span> <span class="fu">species_names_vocabulary</span>()</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>species_lookup <span class="ot">&lt;-</span> species_names <span class="sc">|&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">setNames</span>(SPECIES_COMMON_NAME, SPECIES_NAME))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div></div>
 <section id="data-quality-overview" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality-overview">Data Quality Overview</h2>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [3]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' Generate a text summary of data quality issues</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param qc_report Output from check_data_quality()</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return A character string with markdown-formatted summary</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>format_quality_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(qc_report) {</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> qc_report<span class="sc">$</span>summary</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  glue<span class="sc">::</span><span class="fu">glue</span>(</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="st">Dataset contains **{s$total_rows}** rows from **{s$total_references}** references across **{s$total_sites}** sites.</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="st">**Issues identified:**</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="st">- **Measurements**: {s$n_rows_missing_measurements} rows ({s$n_refs_missing_measurements} references) missing all measurement data (value, LOQ, and LOD)</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="st">- **Sample size**: {s$n_rows_missing_n} rows ({s$n_refs_missing_n} references) missing or zero sample size</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="st">- **Methods**: {s$n_rows_missing_methods} rows ({s$n_refs_missing_methods} references) missing method information</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="st">- **Uncertainty**: {s$n_rows_missing_uncertainty} rows ({s$n_refs_missing_uncertainty} references) missing uncertainty type</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="st">- **Site data**: {s$n_sites_missing_data} sites ({s$n_refs_missing_sites} references) missing location/geographic data</span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="st">- **Biota data**: {s$n_rows_missing_biota} rows ({s$n_refs_missing_biota} references) missing species/tissue information</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">format_quality_summary</span>(literature_qc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' Generate a text summary of data quality issues</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param qc_report Output from check_data_quality()</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return A character string with markdown-formatted summary</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>format_quality_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(qc_report) {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> qc_report<span class="sc">$</span>summary</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glue</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">Dataset contains **{s$total_rows}** rows from **{s$total_references}** references across **{s$total_sites}** sites.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">**Issues identified:**</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">- **Measurements**: {s$n_rows_missing_measurements} rows ({s$n_refs_missing_measurements} references) missing all measurement data (value, LOQ, and LOD)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="st">- **Sample size**: {s$n_rows_missing_n} rows ({s$n_refs_missing_n} references) missing or zero sample size</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="st">- **Methods**: {s$n_rows_missing_methods} rows ({s$n_refs_missing_methods} references) missing method information</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="st">- **Uncertainty**: {s$n_rows_missing_uncertainty} rows ({s$n_refs_missing_uncertainty} references) missing uncertainty type</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="st">- **Site data**: {s$n_sites_missing_data} sites ({s$n_refs_missing_sites} references) missing location/geographic data</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="st">- **Biota data**: {s$n_rows_missing_biota} rows ({s$n_refs_missing_biota} references) missing species/tissue information</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">format_quality_summary</span>(literature_qc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Dataset contains **48972** rows from **32** references across **5142** sites.
-
-**Issues identified:**
-
-- **Measurements**: 52 rows (2 references) missing all measurement data (value, LOQ, and LOD)
-- **Sample size**: 49 rows (1 references) missing or zero sample size
-- **Methods**: 49 rows (1 references) missing method information
-- **Uncertainty**: 48842 rows (18 references) missing uncertainty type
-- **Site data**: 4 sites (2 references) missing location/geographic data
-- **Biota data**: 1 rows (1 references) missing species/tissue information</code></pre>
-</div>
-</div></div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Missing Data
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
+<p>Dataset contains <strong>48972</strong> rows from <strong>32</strong> references across <strong>5142</strong> sites.</p>
+<p><strong>Issues identified:</strong></p>
+<ul>
+<li><strong>Measurements</strong>: 52 rows (2 references) missing all measurement data (value, LOQ, and LOD)</li>
+<li><strong>Sample size</strong>: 49 rows (1 references) missing or zero sample size</li>
+<li><strong>Methods</strong>: 49 rows (1 references) missing method information</li>
+<li><strong>Uncertainty</strong>: 48842 rows (18 references) missing uncertainty type</li>
+<li><strong>Site data</strong>: 4 sites (2 references) missing location/geographic data</li>
+<li><strong>Biota data</strong>: 1 rows (1 references) missing species/tissue information</li>
+</ul>
+</section>
+<section id="missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="missing-data">Missing Data</h2>
 <section id="missing-measurements" class="level3">
 <h3 class="anchored" data-anchor-id="missing-measurements">Missing Measurements</h3>
 <p>Rows where measured value, LOQ, and LOD are all missing.</p>
@@ -399,205 +345,202 @@ Attaching package: 'eDataDRF'</code></pre>
 <ul>
 <li>2025PelkonenEnvironmentalImpactOf does not report LOD/LOQ values in main paper or ESI.</li>
 </ul>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [4]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [3]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_measurements) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_measurements <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing measurement data"</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing measurements found.*"</span>)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_measurements) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_measurements <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing measurement data"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing measurements found.*"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-fd29a1f19d0310898eb2" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-fd29a1f19d0310898eb2">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing measurement data<\/caption>","data":[["1","2"],["","2025PelkonenEnvironmentalImpactOf"],[49,3]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6d7cb3af2b1ec0caf08d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6d7cb3af2b1ec0caf08d">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing measurement data<\/caption>","data":[["1","2"],["","2025PelkonenEnvironmentalImpactOf"],[49,3]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
 <section id="missing-sample-size" class="level3">
 <h3 class="anchored" data-anchor-id="missing-sample-size">Missing Sample Size</h3>
 <p>Rows where MEASURED_N is missing or zero.</p>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [5]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [4]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_n) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_n <span class="sc">|&gt;</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing sample size"</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing sample sizes found.*"</span>)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_n) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_n <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing sample size"</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing sample sizes found.*"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-d9705cafc9ad44405d9a" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-d9705cafc9ad44405d9a">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing sample size<\/caption>","data":[["1"],[""],[49]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-a08e4f552929f86c8b97" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-a08e4f552929f86c8b97">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing sample size<\/caption>","data":[["1"],[""],[49]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
 <section id="missing-methods" class="level3">
 <h3 class="anchored" data-anchor-id="missing-methods">Missing Methods</h3>
 <p>Rows missing any of: analytical protocol, extraction protocol, fractionation protocol, or sampling protocol.</p>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [6]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [5]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_methods) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  display_df <span class="ot">&lt;-</span> literature_qc<span class="sc">$</span>missing_methods <span class="sc">|&gt;</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">analytical_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        missing_analytical <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">extraction_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        missing_extraction <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">fractionation_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        missing_fractionation <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">sampling_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        missing_sampling <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>      REFERENCE_ID,</span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>      n_rows,</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>      analytical_issue,</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>      extraction_issue,</span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>      fractionation_issue,</span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>      sampling_issue</span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    display_df,</span>
-<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing method information"</span></span>
-<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing methods found.*"</span>)</span>
-<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_methods) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  display_df <span class="ot">&lt;-</span> literature_qc<span class="sc">$</span>missing_methods <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">analytical_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        missing_analytical <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">extraction_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        missing_extraction <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">fractionation_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        missing_fractionation <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">sampling_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        missing_sampling <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      REFERENCE_ID,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      n_rows,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>      analytical_issue,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>      extraction_issue,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>      fractionation_issue,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>      sampling_issue</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    display_df,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing method information"</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing methods found.*"</span>)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-21d983b383c257fc9987" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-21d983b383c257fc9987">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing method information<\/caption>","data":[["1"],[""],[49],["Missing"],["Missing"],["Missing"],["Missing"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>analytical_issue<\/th>\n      <th>extraction_issue<\/th>\n      <th>fractionation_issue<\/th>\n      <th>sampling_issue<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"analytical_issue","targets":3},{"name":"extraction_issue","targets":4},{"name":"fractionation_issue","targets":5},{"name":"sampling_issue","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-4ab47bfdaa27256047ce" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-4ab47bfdaa27256047ce">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing method information<\/caption>","data":[["1"],[""],[49],["Missing"],["Missing"],["Missing"],["Missing"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>analytical_issue<\/th>\n      <th>extraction_issue<\/th>\n      <th>fractionation_issue<\/th>\n      <th>sampling_issue<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"analytical_issue","targets":3},{"name":"extraction_issue","targets":4},{"name":"fractionation_issue","targets":5},{"name":"sampling_issue","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
 <section id="missing-uncertainty" class="level3">
 <h3 class="anchored" data-anchor-id="missing-uncertainty">Missing Uncertainty</h3>
 <p>Rows where UNCERTAINTY_TYPE or UNCERTAINTY_*_STANDARD are missing.</p>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [7]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [6]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_uncertainty) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  display_df <span class="ot">&lt;-</span> literature_qc<span class="sc">$</span>missing_uncertainty <span class="sc">|&gt;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">uncertainty_type_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        type_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        type_not_reported <span class="sc">~</span> <span class="st">"Not reported"</span>,</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        type_not_relevant <span class="sc">~</span> <span class="st">"Not relevant"</span>,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">upper_bound_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        upper_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        upper_zero <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        upper_below_value <span class="sc">~</span> <span class="st">"&lt; Average"</span>,</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">lower_bound_issue =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        lower_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        lower_zero <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        lower_above_value <span class="sc">~</span> <span class="st">"&gt; Average"</span>,</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>      REFERENCE_ID,</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>      n_rows,</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>      uncertainty_type_issue,</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>      upper_bound_issue,</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>      lower_bound_issue</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    display_df,</span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing or problematic uncertainty"</span></span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No uncertainty issues found.*"</span>)</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_uncertainty) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  display_df <span class="ot">&lt;-</span> literature_qc<span class="sc">$</span>missing_uncertainty <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">uncertainty_type_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        type_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        type_not_reported <span class="sc">~</span> <span class="st">"Not reported"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        type_not_relevant <span class="sc">~</span> <span class="st">"Not relevant"</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">upper_bound_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        upper_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        upper_zero <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        upper_below_value <span class="sc">~</span> <span class="st">"&lt; Average"</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">lower_bound_issue =</span> <span class="fu">case_when</span>(</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        lower_missing <span class="sc">~</span> <span class="st">"Missing"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        lower_zero <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        lower_above_value <span class="sc">~</span> <span class="st">"&gt; Average"</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> <span class="cn">NA_character_</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      REFERENCE_ID,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>      n_rows,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>      uncertainty_type_issue,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>      upper_bound_issue,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      lower_bound_issue</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    display_df,</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing or problematic uncertainty"</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No uncertainty issues found.*"</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-dc03f011351ef1f30bcf" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-dc03f011351ef1f30bcf">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing or problematic uncertainty<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18"],["","2000JulshamnTraceElementLevels","2002HellandTransportAndSedimentation","2006ZaukeHeavyMetalsIn","2011CaiContentAndDistribution","2018ErvikToxicAndEssential","2019SchaanningBenthicCommunityStatus","2019SimonsenLabilityOfToxic","2019SndergaardGreenSeaUrchins","2021LehmannKonEffectsOfBiotransport","2022KohlerDistributionPatternOf","2022ParoliniTrendsAndPotential","2022PedersenImpactsOfClimate","2024HoffBiogeochemicalImpactOf","2024IglikowskaTraceMetalsIn","2025PelkonenEnvironmentalImpactOf","UnknownReference","VannmiljøCopper2010-2025"],[49,18,48,11,25,8,6,140,9,1,25,41,11,42,20,3,1,48384],["Missing","Not reported","Not relevant","Missing","Not relevant","Not relevant","Not relevant","Not reported","Not reported",null,"Not relevant","Not reported","Not reported","Not relevant","Not relevant","Not reported",null,"Not reported"],["Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing","Missing","Missing","Missing"],["Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing","Zero","Missing","Missing","Missing","Missing","Missing","Missing","Missing","Missing"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>uncertainty_type_issue<\/th>\n      <th>upper_bound_issue<\/th>\n      <th>lower_bound_issue<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"uncertainty_type_issue","targets":3},{"name":"upper_bound_issue","targets":4},{"name":"lower_bound_issue","targets":5}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6c2437b437ee7112cb7f" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6c2437b437ee7112cb7f">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing or problematic uncertainty<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18"],["","2000JulshamnTraceElementLevels","2002HellandTransportAndSedimentation","2006ZaukeHeavyMetalsIn","2011CaiContentAndDistribution","2018ErvikToxicAndEssential","2019SchaanningBenthicCommunityStatus","2019SimonsenLabilityOfToxic","2019SndergaardGreenSeaUrchins","2021LehmannKonEffectsOfBiotransport","2022KohlerDistributionPatternOf","2022ParoliniTrendsAndPotential","2022PedersenImpactsOfClimate","2024HoffBiogeochemicalImpactOf","2024IglikowskaTraceMetalsIn","2025PelkonenEnvironmentalImpactOf","UnknownReference","VannmiljøCopper2010-2025"],[49,18,48,11,25,8,6,140,9,1,25,41,11,42,20,3,1,48384],["Missing","Not reported","Not relevant","Missing","Not relevant","Not relevant","Not relevant","Not reported","Not reported",null,"Not relevant","Not reported","Not reported","Not relevant","Not relevant","Not reported",null,"Not reported"],["Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing","Missing","Missing","Missing"],["Missing","Missing","Missing",null,"Missing","Missing","Missing","Missing","Missing","Zero","Missing","Missing","Missing","Missing","Missing","Missing","Missing","Missing"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>uncertainty_type_issue<\/th>\n      <th>upper_bound_issue<\/th>\n      <th>lower_bound_issue<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"uncertainty_type_issue","targets":3},{"name":"upper_bound_issue","targets":4},{"name":"lower_bound_issue","targets":5}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
 <section id="missing-site-data" class="level3">
 <h3 class="anchored" data-anchor-id="missing-site-data">Missing Site Data</h3>
 <p>Sites missing coordinates, geographic features, country, or ocean information.</p>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [8]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [7]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_sites) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_sites,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Sites with missing geographic data"</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing site data found.*"</span>)</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_sites) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_sites,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Sites with missing geographic data"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing site data found.*"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-55404dee5516c6fd22b8" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-55404dee5516c6fd22b8">{"x":{"filter":"none","vertical":false,"caption":"<caption>Sites with missing geographic data<\/caption>","data":[["1","2","3","4"],["","2017RasmussenEffectsOfIndustrial","2017RasmussenEffectsOfIndustrial","2017RasmussenEffectsOfIndustrial"],["","seafoodprocessing_Atlantic_salmon","seafoodprocessing_Greenland_halibut","seafoodprocessing_Greenland_prawns"],[49,1,1,1],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>SITE_CODE<\/th>\n      <th>n_rows<\/th>\n      <th>missing_coords<\/th>\n      <th>missing_name<\/th>\n      <th>missing_feature<\/th>\n      <th>missing_feature_sub<\/th>\n      <th>missing_country<\/th>\n      <th>missing_ocean<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"SITE_CODE","targets":2},{"name":"n_rows","targets":3},{"name":"missing_coords","targets":4},{"name":"missing_name","targets":5},{"name":"missing_feature","targets":6},{"name":"missing_feature_sub","targets":7},{"name":"missing_country","targets":8},{"name":"missing_ocean","targets":9}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-b521aa379883a7a99d12" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-b521aa379883a7a99d12">{"x":{"filter":"none","vertical":false,"caption":"<caption>Sites with missing geographic data<\/caption>","data":[["1","2","3","4"],["","2017RasmussenEffectsOfIndustrial","2017RasmussenEffectsOfIndustrial","2017RasmussenEffectsOfIndustrial"],["","seafoodprocessing_Atlantic_salmon","seafoodprocessing_Greenland_halibut","seafoodprocessing_Greenland_prawns"],[49,1,1,1],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true],[true,true,true,true]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>SITE_CODE<\/th>\n      <th>n_rows<\/th>\n      <th>missing_coords<\/th>\n      <th>missing_name<\/th>\n      <th>missing_feature<\/th>\n      <th>missing_feature_sub<\/th>\n      <th>missing_country<\/th>\n      <th>missing_ocean<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"SITE_CODE","targets":2},{"name":"n_rows","targets":3},{"name":"missing_coords","targets":4},{"name":"missing_name","targets":5},{"name":"missing_feature","targets":6},{"name":"missing_feature_sub","targets":7},{"name":"missing_country","targets":8},{"name":"missing_ocean","targets":9}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
 <section id="missing-biota-data" class="level3">
 <h3 class="anchored" data-anchor-id="missing-biota-data">Missing Biota Data</h3>
 <p>Biota samples missing species, tissue, lifestage, gender, or species group.</p>
-<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [9]:</pre></div><div class="cell">
+<div class="cell-container code-fold"><div class="cell-decorator"><pre>In [8]:</pre></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_biota) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_biota <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing biota information"</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing biota data found.*"</span>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(literature_qc<span class="sc">$</span>missing_biota) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">datatable</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    literature_qc<span class="sc">$</span>missing_biota <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>sample_ids),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">10</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"References with missing biota information"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*No missing biota data found.*"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-8940ccb3a098ef8d28ad" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-8940ccb3a098ef8d28ad">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing biota information<\/caption>","data":[["1"],["2018ErvikToxicAndEssential"],[1],[true],[true],[true],[true],[true]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>missing_species<\/th>\n      <th>missing_tissue<\/th>\n      <th>missing_lifestage<\/th>\n      <th>missing_gender<\/th>\n      <th>missing_group<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"missing_species","targets":3},{"name":"missing_tissue","targets":4},{"name":"missing_lifestage","targets":5},{"name":"missing_gender","targets":6},{"name":"missing_group","targets":7}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-d573862646aa92d7d02a" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d573862646aa92d7d02a">{"x":{"filter":"none","vertical":false,"caption":"<caption>References with missing biota information<\/caption>","data":[["1"],["2018ErvikToxicAndEssential"],[1],[true],[true],[true],[true],[true]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>REFERENCE_ID<\/th>\n      <th>n_rows<\/th>\n      <th>missing_species<\/th>\n      <th>missing_tissue<\/th>\n      <th>missing_lifestage<\/th>\n      <th>missing_gender<\/th>\n      <th>missing_group<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"REFERENCE_ID","targets":1},{"name":"n_rows","targets":2},{"name":"missing_species","targets":3},{"name":"missing_tissue","targets":4},{"name":"missing_lifestage","targets":5},{"name":"missing_gender","targets":6},{"name":"missing_group","targets":7}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></div>
 </section>
-</div>
-</div>
-</div>
 </section>
      </main>
 <!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
