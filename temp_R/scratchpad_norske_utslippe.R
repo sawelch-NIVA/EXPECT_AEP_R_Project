@@ -3,9 +3,14 @@ library(dplyr)
 library(esquisse)
 
 copper_industrial_emissions <- read_excel(
-  "data/raw/norske_utslipp/norske_utslipp_copper_land_industries_individ.xlsx",
-  skip = 2 # Skips first 2 rows, starts reading from row 3
-) %>%
+  here::here(
+    "data",
+    "raw",
+    "norske_utslipp",
+    "norske_utslipp_copper_land_industries_individ.xlsx"
+  ),
+  skip = 2
+) |>
   rename(
     facility_name = Anleggsnavn,
     county = Fylke,

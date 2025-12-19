@@ -24,7 +24,6 @@ polar_map|stem|polar_map|0|skipped
 biota_data|stem|biota_data|0|skipped
 literature_joined|stem|literature_joined|0|skipped
 literature_clean|stem|literature_clean|0|skipped
-literature_clean_standardised|stem|literature_clean_standardised|0|dispatched
-literature_clean_standardised|stem|literature_clean_standardised|0|completed
+literature_clean_standardised|stem|literature_clean_standardised|0|skipped
 load_literature_pqt|stem|load_literature_pqt|0|skipped
 data_quality_report|stem|data_quality_report|0|skipped

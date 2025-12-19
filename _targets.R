@@ -7,6 +7,13 @@
 library(targets)
 library(tarchetypes) # better factories for watching many files
 library(crew) # parallel processing, faster execution?
+library(here)
+
+here::i_am("Readme.md")
+devtools::load_all(path = here::here())
+
+cat("_targets.R here() resolves to:", here::here(), "\n", file = stderr())
+cat("_targets.R wd:", getwd(), "\n", file = stderr())
 
 # Set target options:
 tar_option_set(

@@ -1,0 +1,28 @@
+---
+title: AEP Manuscript
+authors:
+  - name: Sam Welch
+    affiliation: Norwegian Institute for Water Research
+    roles: writing
+    corresponding: true
+bibliography: references.bib
+number-sections: true
+---
+
+# Introduction
+
+- Copper is an essential mineral, valuable resource, and occasional pollutant
+
+[@alveMonitoringStrategiesReestablishment2009] here's a paper citation, just to check that it works. And it does, but not in any of the supporting information.
+
+# Materials and Methods
+
+See Notebook 03 for the most relelvant stuff.
+
+# Results
+
+# Discussion
+
+# Conclusion
+
+# References
