@@ -36,10 +36,7 @@ suppressMessages(
     tar_config_set(store = here("_targets"))
   }
 )
-```
 
-```{r}
-#| label: load-data
 # load in any data we need from the targets workflow
 
 literature_merged_data <- tar_read(load_literature_pqt)
@@ -54,6 +51,7 @@ species_lookup <- species_names |>
   with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
 
 ```
+
 
 ## Data Quality Overview
 

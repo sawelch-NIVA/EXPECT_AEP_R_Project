@@ -1,10 +1,10 @@
 name: EXPECT_AEP_R_Project
-title:
+title: manuscript
 username: sawelch-niva
 account: sawelch-niva
 server: connect.posit.cloud
 hostUrl: https://api.connect.posit.cloud/v1
-appId: 019b0e58-e50f-fb30-0afd-76a3f522c43f
+appId: 019b36aa-5d57-e824-8e4a-b4135c4faefb
 bundleId:
-url: https://connect.posit.cloud/sawelch-niva/content/019b0e58-e50f-fb30-0afd-76a3f522c43f
+url: https://connect.posit.cloud/sawelch-niva/content/019b36aa-5d57-e824-8e4a-b4135c4faefb
 version: 1

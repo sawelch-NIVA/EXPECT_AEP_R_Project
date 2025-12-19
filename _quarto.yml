@@ -1,11 +1,15 @@
 project:
   type: manuscript
+  output-dir: _manuscript
 
 manuscript:
   article: index.qmd
 
 format:
   html:
+    code-fold: true
+    fig-format: svg
+    toc: true
     comments:
       hypothesis: true
   # docx: default
@@ -14,8 +18,7 @@ format:
   # (other formats)
   # pdf: default
 
-# execute:
-#   freeze: true
-
+execute:
+  freeze: true
 
 

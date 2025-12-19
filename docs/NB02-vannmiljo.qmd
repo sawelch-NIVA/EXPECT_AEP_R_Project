@@ -5,12 +5,7 @@ date: "2025.12.16"
 lightbox: true
 format:
   html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
     code-fold: true
-    max-width: 4500px
     fig-format: svg
     toc: true
 ---

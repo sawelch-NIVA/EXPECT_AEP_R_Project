@@ -5,12 +5,6 @@ date: "2025.11.25"
 lightbox: true
 format:
   html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
-    code-fold: true
-    max-width: 4500px
     fig-format: svg
     toc: true
 ---
@@ -192,6 +186,160 @@ subcomp_codes <- c(
 -   [ ] Get some salinity & DOC (or at least water darkness) datasets
 -   [ ] Find a good way to add sea ice to map
 -   [ ] Find a good aquaculture zone and mining waste zone and characterise the sources well
+
+
+### Compartment Coverage
+
+```{r}
+#| label: fig-paper-subcompartments
+#| fig-cap: "Number of environmental sub-compartments sampled per paper. Each bar represents a unique publication, with height indicating the diversity of compartments (e.g., surface water, sediment, soil) analysed within that study."
+#| warning: false
+#| fig-width: 10
+#| fig-height: 8
+
+# Prepare data for plotting ----
+plot_data <- literature_merged_data |>
+  group_by(REFERENCE_ID, ENVIRON_COMPARTMENT_SUB) |>
+  distinct() |>
+  reframe(count = sum(MEASURED_N, na.rm = TRUE)) |>
+  # Join year data for y-axis ordering
+  left_join(
+    literature_merged_data |> distinct(REFERENCE_ID, YEAR),
+    by = "REFERENCE_ID"
+  ) |>
+  filter(!is.na(ENVIRON_COMPARTMENT_SUB))
+
+# Calculate text color threshold ----
+threshold_value <- mean(plot_data$count, na.rm = TRUE)
+
+# Create plot ----
+ggplot(
+  plot_data,
+  aes(
+    y = REFERENCE_ID,
+    x = ENVIRON_COMPARTMENT_SUB,
+    fill = count
+  )
+) +
+  geom_tile() +
+  geom_text(aes(
+    label = count,
+    color = if_else(count > threshold_value, "black", "white")
+  )) +
+  scale_fill_viridis(name = "Sample Size (n)") +
+  scale_color_identity() +
+  theme_aep_plots() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(x = "Environmental Sub-Compartment")
+```
+
+
+### Species Coverage
+
+@fig-paper-species illustrates the taxonomic diversity captured across studies, highlighting which papers focused on biota measurements and the range of species groups investigated.
+
+```r
+#| label: fig-paper-species
+#| fig-cap: "Sample size per species per paper across the dataset."
+#| warning: false
+#| fig-width: 16
+#| fig-height: 8
+
+# add species common names missing from ECOTOX data
+new_species <- c(
+  "Phoca vitulina" = "Harbor Seal",
+  "Calanus finmarchicus" = "Copepod",
+  "Calanus glacialis" = "Arctic Copepod",
+  "Calanus hyperboreus" = "Copepod",
+  "Conchoecia borealis" = "Ostracod",
+  "Euchaeta barbata" = "Copepod",
+  "Euchaeta glacialis" = "Arctic Copepod",
+  "Euchaeta norvegica" = "Copepod",
+  "Eukrohnia hamata" = "Arrow Worm",
+  "Hymenodora glacialis" = "Arctic Shrimp",
+  "Meganyctiphanes norvegica" = "Northern Krill",
+  "Metridia longa" = "Copepod",
+  "Themisto abyssorum" = "Amphipod",
+  "Themisto libellula" = "Amphipod",
+  "Thysanoessa inermis" = "Arctic Krill",
+  "Astarte borealis" = "Northern Astarte",
+  "Mya arenaria" = "Soft-shell Clam",
+  "Cystophora cristata" = "Hooded Seal",
+  "Pagophilus groenlandicus" = "Harp Seal",
+  "Salmo trutta" = "Brown Trout",
+  "Arenicola marina" = "Lugworm",
+  "Gammarus oceanicus" = "Amphipod",
+  "Littorina rudis" = "Rough Periwinkle",
+  "Mytilus edulis" = "Blue Mussel",
+  "Nucella lapillus" = "Dog Whelk",
+  "Phoca groenlandica" = "Harp Seal",
+  "Ursus maritimus" = "Polar Bear",
+  "Rissa tridactyla" = "Black-legged Kittiwake",
+  "Alitta virens" = "King Ragworm",
+  "Reinhardtius hippoglossoides" = "Greenland Halibut"
+)
+
+# Extend species_lookup
+species_lookup <- c(species_lookup, new_species)
+
+# Prepare data for plotting ----
+plot_data <- literature_merged_data |>
+  group_by(REFERENCE_ID, SAMPLE_SPECIES) |>
+  distinct() |>
+  reframe(count = sum(MEASURED_N, na.rm = TRUE), SPECIES_GROUP) |>
+  # Join year data for y-axis ordering
+  left_join(
+    literature_merged_data |> distinct(REFERENCE_ID, YEAR),
+    by = "REFERENCE_ID"
+  ) |>
+  filter(!is.na(SAMPLE_SPECIES)) |>
+  distinct()
+
+# Create formatted labels
+plot_data <- plot_data |>
+  mutate(
+    formatted_species = glue::glue(
+      "**{species_lookup[SAMPLE_SPECIES]}**<br>*({SAMPLE_SPECIES})*"
+    )
+  )
+
+# Calculate text color threshold ----
+threshold_value <- 2000 # set manually, as the 2050 mussels tend to overwhelm the others
+
+# Create plot ----
+ggplot(
+  plot_data,
+  aes(
+    y = REFERENCE_ID,
+    x = formatted_species,
+    fill = count
+  )
+) +
+  geom_tile() +
+  geom_text(aes(
+    label = count,
+    color = if_else(count > threshold_value, "black", "white")
+  )) +
+  scale_fill_viridis(name = "Sample Size (n)") +
+  scale_color_identity() +
+  theme_aep_plots() +
+  theme(
+    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(x = "Sampled Species") +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    space = "free_x",
+    scales = "free_x",
+    nrow = 1
+  )
+```
 
 ## Copper Concentrations by Environmental Compartment
 

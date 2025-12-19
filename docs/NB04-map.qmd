@@ -3,16 +3,6 @@ title: "Notebook 04 - Sampling Map"
 author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
-format:
-  html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
-    code-fold: true
-    max-width: 4500px
-    fig-format: svg
-    toc: true
 ---
 
 <!-- include-in-header:
