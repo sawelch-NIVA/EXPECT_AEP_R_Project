@@ -80,7 +80,6 @@ Dataset contains **{s$total_rows}** rows from **{s$total_references}** reference
 cat(format_quality_summary(literature_qc))
 ```
 
-::: {.callout-note collapse="true"}
 ## Missing Data
 
 ### Missing Measurements

@@ -1,5 +1,5 @@
 ---
-title: "EXPECT Copper AEP"
+title: "Notebook 04 - Sampling Map"
 author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
@@ -30,27 +30,11 @@ format:
 #| warning: false
 #| output: false
 library(STOPeData)
-library(DT)
 library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(forcats)
-library(viridis)
-library(stringr)
-library(ggridges)
-library(ggh4x)
-library(tidygraph)
-library(ggraph)
-library(ggiraph)
 library(leaflet)
 library(sf)
-library(shiny)
-library(dplyr)
 library(bslib)
-library(ggtext)
-library(data.table)
 library(eDataDRF)
-library(here)
 library(targets)
 
 devtools::load_all()
@@ -174,6 +158,7 @@ subcomp_codes <- c(
 
 ```{r}
 #| label: prepare-map-data
+#| warning: false
 
 # Turn off spherical geometry ----
 sf::sf_use_s2(FALSE)
@@ -354,18 +339,18 @@ map <- leaflet() |>
   ) |>
 
   # Add study connection lines ----
-  addPolylines(
-    data = study_lines_sf,
-    color = "purple",
-    weight = 2,
-    opacity = 0.5,
-    dashArray = "5, 5",
-    label = ~ paste0("Study: ", REFERENCE_ID),
-    labelOptions = labelOptions(
-      style = list("font-weight" = "normal")
-    ),
-    group = "Study Connections"
-  ) |>
+  # addPolylines(
+  #   data = study_lines_sf,
+  #   color = "purple",
+  #   weight = 2,
+  #   opacity = 0.5,
+  #   dashArray = "5, 5",
+  #   label = ~ paste0("Study: ", REFERENCE_ID),
+  #   labelOptions = labelOptions(
+  #     style = list("font-weight" = "normal")
+  #   ),
+  #   group = "Study Connections"
+  # ) |>
 
   # Add mine tailings markers ----
   addMarkers(
@@ -516,18 +501,19 @@ for (comp in environ_compartments_vocabulary) {
         weight = 2,
         fillOpacity = 0.7,
         radius = 6,
-        label = ~SUBCOMP_CODE,
-        labelOptions = labelOptions(
-          noHide = TRUE,
-          direction = "center",
-          textOnly = TRUE,
-          style = list(
-            "color" = compartment_pal(comp),
-            "font-weight" = "normal",
-            "font-size" = "8px"
-          )
-        ),
+        # label = ~SUBCOMP_CODE,
+        # labelOptions = labelOptions(
+        #   noHide = TRUE,
+        #   direction = "center",
+        #   textOnly = TRUE,
+        #   style = list(
+        #     "color" = compartment_pal(comp),
+        #     "font-weight" = "normal",
+        #     "font-size" = "8px"
+        #   )
+        # ),
         popup = popup_html,
+        clusterOptions = markerClusterOptions(), # Helps with performance
         group = "Samples"
       )
   }
@@ -535,22 +521,22 @@ for (comp in environ_compartments_vocabulary) {
 
 # Add site labels as separate toggleable layer ----
 map <- map |>
-  addLabelOnlyMarkers(
-    data = data_sf,
-    label = ~SITE_CODE,
-    labelOptions = labelOptions(
-      noHide = FALSE,
-      direction = "top",
-      textOnly = TRUE,
-      style = list(
-        "color" = "black",
-        "font-size" = "9px",
-        "background" = "rgba(255, 255, 255, 0.7)",
-        "padding" = "2px"
-      )
-    ),
-    group = "Site Labels"
-  ) |>
+  # addLabelOnlyMarkers(
+  #   data = data_sf,
+  #   label = ~SITE_CODE,
+  #   labelOptions = labelOptions(
+  #     noHide = FALSE,
+  #     direction = "top",
+  #     textOnly = TRUE,
+  #     style = list(
+  #       "color" = "black",
+  #       "font-size" = "9px",
+  #       "background" = "rgba(43, 42, 42, 0.7)",
+  #       "padding" = "2px"
+  #     )
+  #   ),
+  #   group = "Site Labels"
+  # ) |>
 
   # Add layer controls ----
   addLayersControl(
