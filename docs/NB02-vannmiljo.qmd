@@ -1,5 +1,5 @@
 ---
-title: "Vannmiljø Data - Conversion to eData"
+title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: "2025.12.16"
 lightbox: true
@@ -27,26 +27,29 @@ format:
 
 
 ## Libraries
-We load a bunch of redundant libraries here compared to the visualisation quarto. 
+
 ```{r}
 #| label: setup-libraries
 #| echo: false
 #| warning: false
+#| message: false
 
-# pak::pak("NIVANorge/STOPeData")
-# pak::pak("sawelch-NIVA/eDataDRF")
-
-library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(lubridate)
+library(readr)
 library(readxl)
-library(summarytools)
-library(datapasta)
 library(glue)
-library(tidyverse)
-library(STOPeData)
-library(eDataDRF)
+library(ggplot2)
 library(sf)
 library(DT)
-library(readr)
+library(summarytools)
+library(STOPeData)
+library(eDataDRF)
+library(here)
+
+here::i_am("README.md")
 ```
 
 ## Configuration
@@ -61,15 +64,19 @@ See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters
 config <- list(
   # File paths
   files = list(
-    vm_copper = "data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx",
-    vm_sites_1 = "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx",
-    vm_sites_2 = "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx",
-    vm_sites_3 = "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx",
-    lookup_medium = "data/clean/Vm_medium_lookup_matrix_filled.csv",
-    lookup_vannkategori = "data/clean/vm_sites_codes_lookup.csv",
-    lookup_methods = "data/clean/vm_methods_lookup_filled.csv",
-    methods_analysis = "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx",
-    methods_sampling = "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+    vm_copper = here("data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx"),
+    vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
+    vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
+    vm_sites_3 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx"),
+    lookup_medium = here("data/clean/Vm_medium_lookup_matrix_filled.csv"),
+    lookup_vannkategori = here("data/clean/vm_sites_codes_lookup.csv"),
+    lookup_methods = here("data/clean/vm_methods_lookup_filled.csv"),
+    methods_analysis = here(
+      "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
+    ),
+    methods_sampling = here(
+      "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+    )
   ),
 
   # Filter criteria
@@ -711,7 +718,8 @@ export_datasets <- list(
 # Export as ZIP
 export_path <- export_campaign_zip(
   dataset_list = export_datasets,
-  campaign_name = config$metadata$campaign_short
+  campaign_name = config$metadata$campaign_short,
+  output_path = here("data", "raw", "eData")
 )
 
 message(glue("Export complete: {export_path}"))
