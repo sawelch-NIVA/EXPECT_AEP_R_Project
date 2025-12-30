@@ -2,8 +2,7 @@
 # Profile: Manuscript
 # We're not using this rn because it turns all the notebooks into Jupiter Notebooks, which is very annoying. 
 # But we're probably losing some functionality as a consequence. 
-profile:
-  name: manuscript
+
 
 project:
   type: manuscript

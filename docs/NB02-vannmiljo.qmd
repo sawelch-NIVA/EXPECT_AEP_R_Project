@@ -2,15 +2,9 @@
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: "2025.12.16"
-lightbox: true
-format:
-  html:
-    code-fold: true
-    fig-format: svg
-    toc: true
 ---
 
-# Setup
+This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
 
 # To Do:
 
@@ -22,11 +16,12 @@ format:
 - [ ] Fix export **again**.
 
 
-## Libraries
+# Libraries & Setup
+
+Import required packages and set working directory to project root.
 
 ```{r}
 #| label: setup-libraries
-#| echo: false
 #| warning: false
 #| message: false
 
@@ -44,8 +39,9 @@ library(summarytools)
 library(STOPeData)
 library(eDataDRF)
 library(here)
+library(knitr)
 
-here::i_am("README.md")
+i_am("README.md") |> suppressMessages()
 ```
 
 ## Configuration
@@ -54,7 +50,6 @@ See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters
 
 ```{r}
 #| label: setup-configuration
-#| echo: false
 #| warning: false
 
 config <- list(
@@ -79,7 +74,9 @@ config <- list(
   filters = list(
     date_start = as.Date("2010-01-01"),
     date_end = as.Date("2025-12-05"),
-    exclude_sites = "Svalbard, ENSB-Kilde 2"
+    exclude_sites = "Svalbard, ENSB-Kilde 2",
+    compartment = "Aquatic",
+    compartment_sub = "Freshwater"
   ),
 
   # Campaign metadata
@@ -96,20 +93,17 @@ config <- list(
 
 ```{r}
 #| label: tbl-config-filters
-#| echo: false
 
-config$filters |> as_tibble() |> knitr::kable()
+config$filters |> as_tibble() |> kable()
 ```
 
 ```{r}
 #| label: tbl-config-metadata
-#| echo: false
 
-config$metadata |> as_tibble() |> knitr::kable()
+config$metadata |> as_tibble() |> kable()
 ```
 
 ## Helper Functions
-
 
 ```{r}
 #| label: setup-helper-functions
@@ -129,12 +123,13 @@ vm_convert_operator <- function(col) {
 ## Measurements Data
 
 Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
+
 Search for Kobber & Kobberpyrition: 138615 hits
+
 NOTE: Data may extend beyond 2025 date range despite request parameters
 
 ```{r}
 #| label: load-raw-measurements
-#| echo: false
 
 # Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
 # Search for Kobber & Kobberpyrition: 138615 hits
@@ -146,7 +141,6 @@ if (!exists("vm_raw_copper")) {
     sheet = 1,
     guess_max = 138615 # Avoid automatic type conversion warnings
   )
-  message(glue("Loaded {nrow(vm_raw_copper)} copper measurements"))
 }
 
 # Initial data inspection
@@ -199,7 +193,11 @@ This part is very messy - we generated a bunch of lookup tables (semi-reproducib
 
 # Medium ID lookup
 # Maps Vannmiljø Medium_id to eData compartment/species/tissue fields
-vm_lookup_medium_raw <- read_csv(config$files$lookup_medium)
+vm_lookup_medium_raw <- read_csv(
+  config$files$lookup_medium,
+  guess_max = 1000000000, # this may not be the best idea in the world
+  show_col_types = FALSE # TODO: Come back to this
+)
 
 vm_lookup_medium <- vm_lookup_medium_raw |>
   rename_with(
@@ -218,7 +216,10 @@ vm_lookup_medium <- vm_lookup_medium_raw |>
 
 # Vannkategori lookup
 # Maps Vannmiljø Vannkategori codes to eData site/compartment fields
-vm_lookup_vannkategori_raw <- read_csv(config$files$lookup_vannkategori)
+vm_lookup_vannkategori_raw <- read_csv(
+  config$files$lookup_vannkategori,
+  show_col_types = FALSE
+)
 
 vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
   rename_with(
@@ -234,7 +235,10 @@ vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
 # Methods lookup
 vm_lookup_analysis <- read_excel(config$files$methods_analysis)
 vm_lookup_sampling <- read_excel(config$files$methods_sampling)
-vm_lookup_methods <- read_csv(config$files$lookup_methods) |>
+vm_lookup_methods <- read_csv(
+  config$files$lookup_methods,
+  show_col_types = FALSE
+) |>
   mutate(
     CAMPAIGN_NAME = config$metadata$campaign_short,
     PROTOCOL_ID = generate_protocol_id(
@@ -276,7 +280,7 @@ vm_merged <- vm_merged |>
     by = c(Vannkategori = "VannkategoriID")
   )
 
-message("Added lookup tables")
+message("Joined data to lookup tables")
 ```
 
 ## Apply Filters
@@ -286,6 +290,7 @@ Data Quality Filters
 Applied: 2025-12-16
 
 Included:
+
 - Freshwater only (ENVIRON_COMPARTMENT_SUB = "Freshwater")
 - Point sites only (no polygons)
 - No biota (LatinskNavn_id == 0)
@@ -293,6 +298,7 @@ Included:
 - Dates: (see config)
 
 Excluded (~43% of data):
+
 - Marine/brackish water
 - Sediment samples
 - Biota samples
@@ -307,10 +313,10 @@ vm_filtered <- vm_merged |>
   mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
   # Apply compartment filters
   filter(
-    ENVIRON_COMPARTMENT_vkat == "Aquatic",
-    ENVIRON_COMPARTMENT_medium == "Aquatic",
-    ENVIRON_COMPARTMENT_SUB_vkat == "Freshwater",
-    ENVIRON_COMPARTMENT_SUB_medium == "Freshwater"
+    ENVIRON_COMPARTMENT_vkat == config$filters$compartment,
+    ENVIRON_COMPARTMENT_medium == config$filters$compartment,
+    ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
+    ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub
   ) |>
   # Apply site type filters
   filter(
@@ -324,6 +330,67 @@ vm_filtered <- vm_merged |>
 message(glue(
   "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
 ))
+
+message(glue(
+  "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
+))
+```
+
+A sankey diagram would be better, but this will do for now.
+
+```{r}
+#| label: fig-filter-visualisation
+
+# Create filtering summary
+filter_flow <- tibble(
+  stage = c("Raw", "Compartments", "Point sites", "No biota", "Date range"),
+  records = c(
+    nrow(vm_merged),
+    vm_merged |>
+      filter(
+        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub
+      ) |>
+      nrow(),
+    vm_merged |>
+      filter(
+        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub,
+        Objekttype == "point"
+      ) |>
+      nrow(),
+    vm_merged |>
+      filter(
+        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub,
+        Objekttype == "point",
+        LatinskNavn_id == 0
+      ) |>
+      nrow(),
+    nrow(vm_filtered)
+  )
+) |>
+  mutate(
+    pct = round(100 * records / first(records), 1),
+    label = glue("{scales::comma(records)}\n({pct}%)")
+  )
+
+# Simple bar plot
+ggplot(filter_flow, aes(x = stage, y = records)) +
+  geom_col(aes(fill = stage)) +
+  geom_text(aes(label = label), vjust = -0.5, size = 3) +
+  scale_fill_discrete(name = "Filtering Stage") +
+  scale_x_discrete(limits = filter_flow$stage) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  labs(
+    title = "Data Retention Through Filtering Pipeline",
+    x = NULL,
+    y = "Number of Records"
+  ) +
+  theme_minimal()
 ```
 
 ## Quality Checks
@@ -528,19 +595,33 @@ sites_sf <- edata_sites_temp |>
     SITE_COORDINATE_SYSTEM = "WGS84"
   )
 
+sites_coords <- sites_sf |>
+  st_coordinates() |>
+  as.data.frame() |>
+  bind_cols(st_drop_geometry(sites_sf))
+
+
 # Sanity check: plot sites on map
 world_map <- map_data("world")
-sanity_map <- ggplot(world_map) +
-  geom_map(
+sanity_map <- ggplot() +
+  geom_polygon(
     data = world_map,
-    map = world_map,
-    aes(long, lat, map_id = region)
+    aes(x = long, y = lat, group = group),
+    fill = "lightgray",
+    colour = "white"
   ) +
-  geom_sf(data = sites_sf, colour = "red", size = 0.5) +
-  coord_sf(xlim = c(4, 32), ylim = c(58, 72)) +
-  labs(title = "Vannmiljø Freshwater Sites 2025")
+  geom_hex(
+    data = sites_coords,
+    aes(x = X, y = Y),
+    bins = 1000
+  ) +
+  scale_fill_viridis_c() +
+  labs(
+    title = "Vannmiljø Freshwater Sites 2025",
+    subtitle = "Binned into 1000 hexagons, coloured by number of sites in area, for faster rendering."
+  )
 
-print(sanity_map) |> suppressWarnings()
+print(sanity_map)
 
 # Finalize sites table
 edata_sites <- edata_sites_temp |>
@@ -566,7 +647,7 @@ edata_sites <- edata_sites_temp |>
   )
 
 # Validate against eData schema
-initialise_sites_tibble() |> add_row(edata_sites)
+edata_sites <- initialise_sites_tibble() |> add_row(edata_sites)
 
 message(glue("Created sites table: {nrow(edata_sites)} sites"))
 ```
@@ -689,7 +770,8 @@ edata_measurements <- vm_filtered |>
   )
 
 # Validate against eData schema
-initialise_measurements_tibble() |> add_row(edata_measurements)
+edata_measurements <- initialise_measurements_tibble() |>
+  add_row(edata_measurements)
 
 message(glue(
   "Created measurements table: {nrow(edata_measurements)} measurements"
@@ -699,6 +781,9 @@ message(glue(
 # Export
 
 ## Create Export
+
+We export the resulting data to a zip file in our 
+
 ```{r}
 #| label: export-create-zip
 
