@@ -2,17 +2,6 @@
 title: "Notebook 08 - Ecology and Biota"
 author: "Sam Welch"
 date: "2025.11.25"
-lightbox: true
-format:
-  html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
-    code-fold: true
-    max-width: 4500px
-    fig-format: svg
-    toc: true
 ---
 
 *A holding space for relevant data on biota diets and ADME*.

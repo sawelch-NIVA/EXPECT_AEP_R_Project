@@ -28,12 +28,11 @@ literature_clean_standardised|stem|3249f156f07772a5|1ee74fe5e8bd3135|336b99c5b4f
 load_literature_pqt|stem|3249f156f07772a5|6f70b17c7f9ba8a8|dccd2945eecb79b7|1764712921||t20452.4334718192s|s614901b|614901|qs|local|vector|||0||
 data_quality_report|stem|1946c77dc1492ada|8f82a5791cfeb42d|a7a7e4d9d371e4ba|-266296685||t20452.4686833175s|s1699b|1699|qs|local|vector|||1.375||
 nb01_qc|stem|bdab18fc9c7b06c3|e274810d64c0f081|e04a12f46dd04a89|1957503232|NB01-qc.md*docs/NB01-qc.qmd|t20452.4839399082s|s8622b|8622|file|local|vector|||2.297|Duplicated chunk option(s) 'echo', 'results' in both chunk header and pipe comments of the chunk 'quality-summary'.|
-nb08_ecology|stem|445274a89a52494f|5b40c981f3a240cb|2c530c1562a7fbd1|-1552856534|NB08-ecology.md*docs/NB08-ecology.qmd|t20452.4926324296s|s3156b|3156|file|local|vector|||4.141||
-nb07_emissions|stem|b9f4b56b81868ce1|afc720ac1018acc3|2c530c1562a7fbd1|817099056|NB07-emissions.md*docs/NB07-emissions.qmd|t20452.4926696982s|s8274b|8274|file|local|vector|||2.938||
-nb02_vannmiljo|stem|9991417f38fec595|fc3d48f3a614eb1a|2c530c1562a7fbd1|-1519751977|NB02-vannmiljo.md*docs/NB02-vannmiljo.qmd|t20452.4929262416s|s145892b|145892|file|local|vector|||21.968||
-nb04_map|stem|59df8dc58d1fdcff|8390b1e3db692322|9cb4ddf25d225b87|580353434|NB04-map.md*docs/NB04-map.qmd|t20452.493019514s|s14586023b|14586023|file|local|vector|||7.563||
-nb05_network|stem|596b5a183fd84011|4dc66aa592b42aec|9cb4ddf25d225b87|-1993768097|NB05-network.md*docs/NB05-network.qmd|t20452.4930564413s|s20416b|20416|file|local|vector|||2.515||
-nb03_visualisation|stem|3a1c9af77e2b5253|ddd6560b420e5a42|9cb4ddf25d225b87|577663534|NB03-visualisation.md*docs/NB03-visualisation.qmd|t20452.4932278051s|s64853b|64853|file|local|vector|||14.562||
+quarto_project|stem|dfbd6c69e2c9f294|596e17abf22f8728|9cb4ddf25d225b87|1666500063|_site*docs/NB01-qc.qmd*docs/NB02-vannmiljo.qmd*docs/NB03-visualisation.qmd*docs/NB04-map.qmd*docs/NB05-network.qmd*docs/NB07-emissions.qmd*docs/NB08-ecology.qmd*index.qmd*_quarto.yml|t20452.5411093035s|s69957424b|69957424|file|local|vector|||121.641||
+nb02_vannmiljo|stem|1a78c5cc49b465be|491162c0e086d82d|2c530c1562a7fbd1|-1519751977|_site/docs/NB02-vannmiljo.html*docs/NB02-vannmiljo.qmd|t20452.5462730773s|s251095b|251095|file|local|vector|||34.328||
+nb04_map|stem|d7a77459327ad090|077032e2e7d9587b|9cb4ddf25d225b87|580353434|_site/docs/NB04-map.html*docs/NB04-map.qmd|t20452.5537611089s|s14675452b|14675452|file|local|vector|||33.344||
+index|stem|093abc6ab9e88534|f0e2c6a71a463618|2c530c1562a7fbd1|554519753|_site/index.html*index.qmd*_quarto.yml|t20452.5631110658s|s33523b|33523|file|local|vector|||4.516||
+qc|stem|bd3e7cc77a7f3f22|55e7fb6f0b8bb6c8|e04a12f46dd04a89|-1396792835|_site/docs/NB01-qc.html*docs/NB01-qc.qmd|t20452.5655221782s|s48496b|48496|file|local|vector|||9.468||
 load_literature_parquet|function|23e724ad0da47991
 create_arctic_circle|function|94c7954b3ce96762
 transform_countries_to_polar|function|69d83d8ab97de05c
@@ -92,4 +91,7 @@ check_data_quality|function|1217786e2662edc0
 merge_country_ocean|function|83094db53c0453a9
 prepare_geography_wgs84|function|b73367f9f12d334d
 prepare_geography_polar|function|162fa3e17835c328
-quarto_project|stem|4d03292db5edbfdb|e94e95c19852579d|9cb4ddf25d225b87|1666500063|_manuscript*docs/NB01-qc.qmd*docs/NB02-vannmiljo.qmd*docs/NB03-visualisation.qmd*docs/NB04-map.qmd*docs/NB05-network.qmd*docs/NB07-emissions.qmd*docs/NB08-ecology.qmd*index.qmd*_quarto.yml|t20452.5142199141s|s130532851b|130532851|file|local|vector|||90||
+nb08_ecology|stem|8f3f681a70c80e5e|7e68584cdba708a1|2c530c1562a7fbd1|-1552856534|_site/docs/NB08-ecology.html*docs/NB08-ecology.qmd|t20452.5768203614s|s26155b|26155|file|local|vector|||5.766||
+nb07_emissions|stem|8d7f63879058c7f5|abb20062c217c7fb|2c530c1562a7fbd1|817099056|_site/docs/NB07-emissions.html*docs/NB07-emissions.qmd|t20452.5770473452s|s50545b|50545|file|local|vector|||18.657||
+nb03_visualisation|stem|3c5bd6fb0e07f747|f8a06986ccd77fc0|9cb4ddf25d225b87|577663534|_site/docs/NB03-visualisation.html*docs/NB03-visualisation.qmd|t20452.5775505365s|s363047b|363047|file|local|vector|||36.609||
+nb05_network|stem|dcaa0d8fcc508afd|c33656828fb925d3|9cb4ddf25d225b87|-1993768097|_site/docs/NB05-network.html*docs/NB05-network.qmd|t20452.5777121492s|s64732b|64732|file|local|vector|||13.047||

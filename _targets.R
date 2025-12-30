@@ -368,54 +368,62 @@ list(
     command = generate_copper_thresholds()
   ),
 
+  tar_quarto(
+    name = index,
+    path = "./index.qmd",
+    quiet = FALSE,
+    # watch quarto.yml so we rebuild the full quarto site output if it changes
+    extra_files = "_quarto.yml"
+  ),
+
   # Rerender QC notebook if needed
   tar_quarto(
-    name = quarto_project,
-    path = "./",
+    name = qc,
+    path = "./docs/NB01-qc.qmd",
+    quiet = FALSE
+  ),
+
+  # Vannmiljo notebook
+  tar_quarto(
+    name = nb02_vannmiljo,
+    path = "docs/NB02-vannmiljo.qmd",
+    quiet = FALSE
+  ),
+
+  # Visualisation notebook
+  tar_quarto(
+    name = nb03_visualisation,
+    path = "docs/NB03-visualisation.qmd",
+    quiet = FALSE
+  ),
+
+  # Map notebook
+  tar_quarto(
+    name = nb04_map,
+    path = "docs/NB04-map.qmd",
+    quiet = FALSE
+  ),
+
+  # Network notebook
+  tar_quarto(
+    name = nb05_network,
+    path = "docs/NB05-network.qmd",
+    quiet = FALSE
+  ),
+
+  # Emissions notebook
+  tar_quarto(
+    name = nb07_emissions,
+    path = "docs/NB07-emissions.qmd",
+    quiet = FALSE
+  ),
+
+  # Ecology notebook
+  tar_quarto(
+    name = nb08_ecology,
+    path = "docs/NB08-ecology.qmd",
     quiet = FALSE
   )
-
-  # # Vannmiljo notebook
-  # tar_knit(
-  #   name = nb02_vannmiljo,
-  #   path = "docs/NB02-vannmiljo.qmd",
-  #   quiet = FALSE
-  # ),
-
-  # # Visualisation notebook
-  # tar_knit(
-  #   name = nb03_visualisation,
-  #   path = "docs/NB03-visualisation.qmd",
-  #   quiet = FALSE
-  # ),
-
-  # # Map notebook
-  # tar_knit(
-  #   name = nb04_map,
-  #   path = "docs/NB04-map.qmd",
-  #   quiet = FALSE
-  # ),
-
-  # # Network notebook
-  # tar_knit(
-  #   name = nb05_network,
-  #   path = "docs/NB05-network.qmd",
-  #   quiet = FALSE
-  # ),
-
-  # # Emissions notebook
-  # tar_knit(
-  #   name = nb07_emissions,
-  #   path = "docs/NB07-emissions.qmd",
-  #   quiet = FALSE
-  # ),
-
-  # # Ecology notebook
-  # tar_knit(
-  #   name = nb08_ecology,
-  #   path = "docs/NB08-ecology.qmd",
-  #   quiet = FALSE
-  # )
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

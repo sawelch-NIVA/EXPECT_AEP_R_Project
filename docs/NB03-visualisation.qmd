@@ -2,11 +2,6 @@
 title: "Notebook 03 - Exploration"
 author: "Sam Welch"
 date: "2025.11.25"
-lightbox: true
-format:
-  html:
-    fig-format: svg
-    toc: true
 ---
 
 ```{=html}

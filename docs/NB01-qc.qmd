@@ -3,13 +3,6 @@ title: "Notebook 01 - Quality Control"
 author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
-format:
-  html:
-    code-fold: true
-    fig-format: png
-    toc: true
-execute:
-  engine: knitr
 ---
 
 Load libraries and data.
@@ -50,7 +43,7 @@ species_lookup <- species_names |>
 
 ## Data Quality Overview
 
-```{r, echo=true, results=asis}
+```{r}
 #| label: quality-summary
 #| echo: true
 #| results: asis
@@ -134,9 +127,6 @@ if (nrow(literature_qc$missing_n) > 0) {
 Rows missing any of: analytical protocol, extraction protocol, fractionation protocol, or sampling protocol.
 
 ```{r}
-#| label: missing-methods
-#| echo: false
-
 #| label: missing-methods
 #| echo: false
 

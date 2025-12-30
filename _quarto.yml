@@ -1,25 +1,45 @@
+# Default: Website
 project:
-  type: manuscript
-  output-dir: _manuscript
+  type: website
+  output-dir: _site
+  render:
+   - index.qmd
+   - docs/*.qmd
 
-manuscript:
-  article: index.qmd
+website:
+  title: "EXPECT Copper AEP"
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - href: index.qmd
+        text: "Article"
+      - Section: "Notebooks"
+      - href: docs/NB01-qc.qmd
+        text: "NB01 - Data QC"
+      - href: docs/NB02-vannmiljo.qmd
+        text: "NB02 - Vannmiljø"
+      - href: docs/NB03-visualisation.qmd
+        text: "NB03 - Visualisation"
+      - href: docs/NB04-map.qmd
+        text: "NB04 - Map"
+      - href: docs/NB05-network.qmd
+        text: "NB05 - Network Diagram"
+      - href: docs/NB07-emissions.qmd
+        text: "NB07 - Emissions & Sources"
+      - href: docs/NB08-ecology.qmd
+        text: "NB08 - Ecology"
 
 format:
   html:
     code-fold: true
     fig-format: svg
     toc: true
-    comments:
-      hypothesis: true
-  # docx: default
-  # jats: default
 
-  # (other formats)
-  # pdf: default
+comments:
+  hypothesis: true # this would enable comments... if it was a manuscript
 
 execute:
-  freeze: true
+  freeze: false
 
 engine: knitr
-
