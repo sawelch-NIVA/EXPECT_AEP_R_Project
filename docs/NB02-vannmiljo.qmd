@@ -9,6 +9,7 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 # To Do:
 
 - [ ] Expand compartments from just aquatic/freshwater
+  - [ ] Add samples and biota tables
 - [ ] Investigate some very strange detection and quantification limits
 - [ ] Add probable contamination source
 - [ ] More sanity checking of extracted values
@@ -40,6 +41,7 @@ library(eDataDRF)
 library(here)
 library(knitr)
 library(devtools)
+library(tibble)
 
 load_all()
 
@@ -71,7 +73,10 @@ config <- list(
     methods_sampling = here(
       "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
     ),
-    lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv")
+    lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv"),
+    lookup_units = here(
+      "data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx"
+    )
   ),
 
   # Filter criteria
@@ -79,8 +84,14 @@ config <- list(
     date_start = as.Date("2010-01-01"),
     date_end = as.Date("2025-12-05"),
     exclude_sites = "Svalbard, ENSB-Kilde 2",
-    compartment = "Aquatic",
-    compartment_sub = c("Freshwater", "Aquatic Sediment")
+    compartment = c("Aquatic", "Biota"),
+    compartment_sub = c(
+      "Freshwater",
+      "Aquatic Sediment",
+      "Marine/Salt Water",
+      "Brackish/Transitional Water",
+      "Biota, Aquatic"
+    )
   ),
 
   # Campaign metadata
@@ -98,13 +109,17 @@ config <- list(
 ```{r}
 #| label: tbl-config-filters
 
-config$filters |> as_tibble() |> kable()
+config$filters |>
+  enframe(name = "Parameter", value = "Value") |>
+  kable()
 ```
 
 ```{r}
 #| label: tbl-config-metadata
 
-config$metadata |> as_tibble() |> kable()
+config$metadata |>
+  enframe(name = "Parameter", value = "Value") |>
+  kable()
 ```
 
 ## Helper Functions
@@ -119,6 +134,16 @@ vm_convert_operator <- function(col) {
     "<" ~ "< LOQ",
     ">" ~ "What is going on here. Why higher than?",
     "ND" ~ "< LOD"
+  )
+}
+
+vm_convert_unit <- function(col) {
+  case_match(
+    col,
+    "µg/l" ~ "µg/L",
+    "mg/kg t.v." ~ "mg/kg (dry)",
+    "mg/kg v.v." ~ "mg/kg (wet)",
+    .default = "UNIT CONVERSION ERROR"
   )
 }
 ```
@@ -168,6 +193,7 @@ print(
 ## Sites Data
 
 NOTE: Vannmiljø export limit requires splitting site codes into multiple files
+
 Procedure:
 
 1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
@@ -197,6 +223,8 @@ message(glue("Loaded {nrow(vm_raw_sites)} site records"))
 
 ## Lookup Tables
 This part is very messy - we generated a bunch of lookup tables (semi-reproducibly) and filled them by hand/with Claude. I don't have a lot of confidence in any of them.
+
+Some of the lookups are actually direct from Vannmiljø though - they're the xlsx ones. They're also bad, but for different reasons!
 
 ```{r}
 #| label: load-lookups
@@ -259,7 +287,12 @@ vm_lookup_methods <- read_csv(
       config$metadata$campaign_short
     )
   )
-vm_lookup_campaigns <- read_csv(config$files$lookup_campaigns)
+vm_lookup_campaigns <- read_csv(
+  config$files$lookup_campaigns,
+  show_col_types = FALSE
+)
+
+vm_lookup_units <- read_excel(config$files$lookup_units)
 
 message("Loaded all lookup tables")
 ```
@@ -299,10 +332,14 @@ vm_merged <- vm_merged |>
   left_join(
     vm_lookup_campaigns,
     by = c(Aktivitet_id = "Aktivitet_id")
+  ) |>
+  left_join(
+    vm_lookup_units |> rename(Unit_Name = Name, Unit_Description = Description),
+    by = c(Enhet_id = "UnitID")
   )
 
 message(
-  "Joined data to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns"
+  "Joined data to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns, vm_lookup_units"
 )
 ```
 
@@ -343,8 +380,6 @@ vm_summary |>
 ```
 
 ```{r}
-#| label: fig-heatmap-campaign-medium
-
 # Create a summary of counts by the two variables
 vm_summary_medium <- vm_merged |>
   group_by(CAMPAIGN_DESCRIPTION_EN, MediumID_Name) |>
@@ -353,8 +388,21 @@ vm_summary_medium <- vm_merged |>
 # Calculate text color threshold
 threshold_value_medium <- mean(log10(vm_summary_medium$n_samples), na.rm = TRUE)
 
+# Calculate total samples per campaign for ordering
+campaign_order <- vm_summary_medium |>
+  group_by(CAMPAIGN_DESCRIPTION_EN) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(CAMPAIGN_DESCRIPTION_EN)
+
 # Basic heatmap with ggplot2
 vm_summary_medium |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN = factor(
+      CAMPAIGN_DESCRIPTION_EN,
+      levels = campaign_order
+    )
+  ) |>
   ggplot(aes(
     x = MediumID_Name,
     y = CAMPAIGN_DESCRIPTION_EN,
@@ -463,8 +511,10 @@ datatable(
 
 @tbl-sample-distribution shows the distribution of samples across Vannkategori and MediumID. This is what I'm using as a guide of where to spend my time. If I can capture 90% of the samples (before the other filtration steps) then I'll call it done.
 
+@fig-sample-distribution-biota is biota. Some of these are certainly irrelevant - e.g. *Felis catus*... but how to filter?
+
 ```{r}
-#| label: fig-heatmap-campaign-species
+#| label: fig-sample-distribution-biota
 
 # Create a summary of counts by the two variables (filter to non-NA species)
 vm_summary_species <- vm_merged |>
@@ -478,8 +528,29 @@ threshold_value_species <- mean(
   na.rm = TRUE
 )
 
+# Calculate total samples per campaign for ordering (y-axis)
+campaign_order_species <- vm_summary_species |>
+  group_by(CAMPAIGN_DESCRIPTION_EN) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(CAMPAIGN_DESCRIPTION_EN)
+
+# Calculate total samples per species for ordering (x-axis)
+species_order <- vm_summary_species |>
+  group_by(VitenskapligNavn) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(VitenskapligNavn)
+
 # Basic heatmap with ggplot2
 vm_summary_species |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN = factor(
+      CAMPAIGN_DESCRIPTION_EN,
+      levels = campaign_order_species
+    ),
+    VitenskapligNavn = factor(VitenskapligNavn, levels = species_order)
+  ) |>
   ggplot(aes(
     x = VitenskapligNavn,
     y = CAMPAIGN_DESCRIPTION_EN,
@@ -501,6 +572,47 @@ vm_summary_species |>
   scale_color_identity() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+```
+
+Finally, what about units @fig-heatmap-units-medium? Units are, I'm releieved to say, sensible.
+
+```{r}
+#| label: fig-heatmap-units-medium
+
+# Create a summary of counts by the two variables
+vm_summary_units_medium <- vm_merged |>
+  group_by(Unit_Name, MediumID_Name) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+# Calculate text color threshold
+threshold_value_units_medium <- mean(
+  log10(vm_summary_units_medium$n_samples),
+  na.rm = TRUE
+)
+
+# Basic heatmap with ggplot2
+vm_summary_units_medium |>
+  ggplot(aes(
+    x = MediumID_Name,
+    y = Unit_Name,
+    fill = n_samples
+  )) +
+  geom_tile() +
+  geom_text(
+    aes(
+      label = scales::comma(n_samples),
+      color = if_else(
+        log10(n_samples) > threshold_value_units_medium,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10") +
+  scale_color_identity() +
+  theme_minimal() +
+  coord_flip()
 ```
 
 ## Apply Filters
@@ -661,7 +773,7 @@ datatable(
 
 ```{r}
 resolve_compartment_conflicts <- function(df) {
-  df |>
+  df <- df |>
     mutate(
       ENVIRON_COMPARTMENT_SUB_resolved = case_when(
         # Explicit rule: Medium trumps Vkat for sediment
@@ -673,24 +785,26 @@ resolve_compartment_conflicts <- function(df) {
         # Rule 2: ...
         # Rule 3: ...
 
-        # Default: prefer one source consistently
-        !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) ~
-          ENVIRON_COMPARTMENT_SUB_medium,
-        !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) ~
-          ENVIRON_COMPARTMENT_SUB_vkat,
-
         .default = NA_character_
       )
     )
+  n_resolved <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+  message(glue("Resolved {n_resolved} conflicting rows."))
+
+  df
 }
+
+vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(vm_filtered)
 ```
+
+@tbl-geographic-conflicts also lists all combinations, which means it also lists things that actually aren't problems. Again, may need cleaning up.
 
 ```{r}
 #| label: tbl-geographic-conflicts
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for geographic features"
 
 # Check geographic feature consistency
-geo_check <- vm_filtered |>
+geo_check <- vm_compartment_conflicts_resolved |>
   group_by(
     SITE_GEOGRAPHIC_FEATURE_vkat,
     SITE_GEOGRAPHIC_FEATURE_medium,
@@ -732,7 +846,7 @@ datatable(
 )
 ```
 
-
+Since we haven't actually had any geographical conflicts flagged yet there's no need to write code to defuse them. But watch this space.
 
 # Create eData Tables
 ## Campaign
@@ -1011,7 +1125,8 @@ message(glue("Created methods table: {nrow(edata_methods)} protocols"))
 # Create measurements table
 # NOTE: All freshwater values reported as EnhetID = 8 (µg/L)
 
-edata_measurements <- vm_filtered |>
+# TODO: Update to use geo conflicts resolved thingy as appropriate
+edata_measurements <- vm_compartment_conflicts_resolved |>
   mutate(
     # Core identifiers
     SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
@@ -1035,8 +1150,8 @@ edata_measurements <- vm_filtered |>
     # Measurement values
     MEASURED_FLAG = vm_convert_operator(Operator),
     MEASURED_VALUE = Verdi,
-    MEASURED_UNIT = "µg/L",
-    MEASURED_N = 1,
+    MEASURED_UNIT = vm_convert_unit(Unit_Name),
+    MEASURED_N = Ant_verdier,
 
     # Uncertainty (not reported in Vannmiljø)
     UNCERTAINTY_TYPE = "Not reported",
@@ -1111,6 +1226,25 @@ export_datasets <- list(
 # message(glue("Export complete: {export_path}"))
 ```
 
+## Validate Export
+
+Do some quick checks to see if the data we're exporting looks like we expect it to.
+
+```{r}
+#| label: validate_export
+
+edata_measurements |> count(MEASURED_UNIT)
+# nuts
+count(vm_filtered, Unit_Name)
+# the old classic lower case l for Liter
+
+count(edata_measurements, SAMPLE_SPECIES)
+
+
+edata_measurements |>
+  ggplot(aes(x = MEASURED_VALUE, y = ENVIRON_COMPARTMENT)) +
+  geom_point()
+```
 
 ## Species Data Coverage
 
