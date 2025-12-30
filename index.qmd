@@ -11,7 +11,13 @@ number-sections: true
 
 # Introduction
 
-- Copper is an essential mineral, valuable resource, and occasional pollutant
+Copper is a vital resource in both biology and engineering due to its useful chemical and biological properties. Demand for copper is likely to grow significantly in coming decades due to demand in manufacturing and infrastructure [@schipperEstimatingGlobalCopper2018].
+
+Biota sensitivity to copper is highly variable and depends on diverse factors including water chemistry, availability of biological material, salinity, pH, and individual organism physiology, metabolism, and behaviour. In addition to its natural occurence, copper is emitted to the environment in a wide range of products and forms, which may be of greater or lesser relevance to the environment depending on their transport in the environment.
+
+The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. Although uptake has not yet matched that of the AOP, AEPs are a valuable tool for understanding complex patterns of exposure such as copper's. Properly integrated, AOPs and AEPs together can provide deep insight into the current and potential evolution of chemical risk.
+
+Norway's economically important Arctic region is likely to come under increased pressure in coming years. Demand for copper is likely to drive increased mining in mineral rich zones. Melting sea ice will increase the feasibility of cross-Arctic shipping [@smithNewTransArcticShipping2013], likely increasing exposure to copper from antifoulant paints, while a growing demand for aquaculture may also drive use of copper-based antifoulants. Terrestrial biocides, brake dust, and natural weathering will likely also continue to add to pollution. In addition, changes to ecology, nutrient cycling, organic material, and the overall stressor landscape are likely to add to the challenges faced by the wildlife of the Norwegian sea and the industries and people that rely on them.
 
 [@alveMonitoringStrategiesReestablishment2009] here's a paper citation, just to check that it works. And it does, but not in any of the supporting information.
 
