@@ -7,12 +7,13 @@
 library(targets)
 library(tarchetypes) # better factories for watching many files
 library(crew) # parallel processing, faster execution?
-library(here)
+library(here) # salvage something from the horrible mess that is quarto working directories
+library(devtools) # load all functions
 
-here::i_am("Readme.md")
-devtools::load_all(path = here::here())
+i_am("Readme.md") # set wd to project root
+load_all(path = here())
 
-cat("_targets.R here() resolves to:", here::here(), "\n", file = stderr())
+cat("_targets.R here() resolves to:", here(), "\n", file = stderr())
 cat("_targets.R wd:", getwd(), "\n", file = stderr())
 
 # Set target options:
@@ -250,7 +251,9 @@ list(
     }
   ),
 
-  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios. Create a merged OCEAN/COUNTRY column.
+  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios.
+  # Create a merged OCEAN/COUNTRY column.
+  # Impute values below LOQ or LOD with x / sqrt(2)
   tar_target(
     name = literature_clean_standardised,
     command = {
@@ -290,20 +293,6 @@ list(
     }
   ),
 
-  # # Save our big clean table as a parquet
-  # tar_target(
-  #   name = save_literature_pqt,
-  #   command = save_literature_parquet(
-  #     data = literature_clean_standardised,
-  #     output_path = "data/clean",
-  #     filename = "literature_data.parquet"
-  #   ),
-  #   format = "file"
-  # ),
-
-  # # Load our big clean table as a parquet. load_literature_pqt will be the target for most of our future analyses.
-  # Why this level of redundancy? Because with targets, it means we can avoid constantly reloading CSVs unless they've actually changed
-  # TODO: Actually maybe this is a stupid idea. I'll keep it in mind.
   tar_target(
     name = load_literature_pqt,
     command = {
@@ -377,10 +366,56 @@ list(
   tar_target(
     name = copper_toxicity_thresholds,
     command = generate_copper_thresholds()
+  ),
+
+  # Rerender QC notebook if needed
+  tar_quarto(
+    name = quarto_project,
+    path = "./",
+    quiet = FALSE
   )
 
-  # TODO: Imputation of missing values. What's best practice?
-  # Ask KET/Chemists
+  # # Vannmiljo notebook
+  # tar_knit(
+  #   name = nb02_vannmiljo,
+  #   path = "docs/NB02-vannmiljo.qmd",
+  #   quiet = FALSE
+  # ),
+
+  # # Visualisation notebook
+  # tar_knit(
+  #   name = nb03_visualisation,
+  #   path = "docs/NB03-visualisation.qmd",
+  #   quiet = FALSE
+  # ),
+
+  # # Map notebook
+  # tar_knit(
+  #   name = nb04_map,
+  #   path = "docs/NB04-map.qmd",
+  #   quiet = FALSE
+  # ),
+
+  # # Network notebook
+  # tar_knit(
+  #   name = nb05_network,
+  #   path = "docs/NB05-network.qmd",
+  #   quiet = FALSE
+  # ),
+
+  # # Emissions notebook
+  # tar_knit(
+  #   name = nb07_emissions,
+  #   path = "docs/NB07-emissions.qmd",
+  #   quiet = FALSE
+  # ),
+
+  # # Ecology notebook
+  # tar_knit(
+  #   name = nb08_ecology,
+  #   path = "docs/NB08-ecology.qmd",
+  #   quiet = FALSE
+  # )
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

@@ -12,14 +12,9 @@ execute:
   engine: knitr
 ---
 
+Load libraries and data.
+
 ```{r, include=FALSE}
-#| label: setup
-#| include: false
-#| echo: false
-#| warning: false
-#| message: false
-#| output: false
-#| results: hide
 
 suppressMessages(
   {
@@ -55,7 +50,7 @@ species_lookup <- species_names |>
 
 ## Data Quality Overview
 
-```{r}
+```{r, echo=true, results=asis}
 #| label: quality-summary
 #| echo: true
 #| results: asis
@@ -102,9 +97,10 @@ Known issues:
 
 if (nrow(literature_qc$missing_measurements) > 0) {
   datatable(
-    literature_qc$missing_measurements |>
-      select(-sample_ids),
+    literature_qc$missing_measurements,
+    # select(-sample_ids),
     options = list(pageLength = 10),
+    colnames = c("Source", "Timestamp", "Rows"),
     caption = "References with missing measurement data"
   )
 } else {
@@ -122,9 +118,10 @@ Rows where MEASURED_N is missing or zero.
 
 if (nrow(literature_qc$missing_n) > 0) {
   datatable(
-    literature_qc$missing_n |>
-      select(-sample_ids),
+    literature_qc$missing_n,
+    # select(-sample_ids),
     options = list(pageLength = 10),
+    colnames = c("Source", "Timestamp", "Rows"),
     caption = "References with missing sample size"
   )
 } else {
@@ -144,38 +141,13 @@ Rows missing any of: analytical protocol, extraction protocol, fractionation pro
 #| echo: false
 
 if (nrow(literature_qc$missing_methods) > 0) {
-  display_df <- literature_qc$missing_methods |>
-    mutate(
-      analytical_issue = case_when(
-        missing_analytical ~ "Missing",
-        .default = NA_character_
-      ),
-      extraction_issue = case_when(
-        missing_extraction ~ "Missing",
-        .default = NA_character_
-      ),
-      fractionation_issue = case_when(
-        missing_fractionation ~ "Missing",
-        .default = NA_character_
-      ),
-      sampling_issue = case_when(
-        missing_sampling ~ "Missing",
-        .default = NA_character_
-      )
-    ) |>
-    select(
-      REFERENCE_ID,
-      n_rows,
-      analytical_issue,
-      extraction_issue,
-      fractionation_issue,
-      sampling_issue
-    )
+  display_df <- literature_qc$missing_methods
 
   datatable(
     display_df,
     options = list(pageLength = 10),
-    caption = "References with missing method information"
+    caption = "References with missing method information",
+    colnames = c("Source", "Timestamp", "Rows", "Missing Protocols"),
   )
 } else {
   cat("*No missing methods found.*")
@@ -191,39 +163,13 @@ Rows where UNCERTAINTY_TYPE or UNCERTAINTY\_\*\_STANDARD are missing.
 #| echo: false
 
 if (nrow(literature_qc$missing_uncertainty) > 0) {
-  display_df <- literature_qc$missing_uncertainty |>
-    mutate(
-      uncertainty_type_issue = case_when(
-        type_missing ~ "Missing",
-        type_not_reported ~ "Not reported",
-        type_not_relevant ~ "Not relevant",
-        .default = NA_character_
-      ),
-      upper_bound_issue = case_when(
-        upper_missing ~ "Missing",
-        upper_zero ~ "Zero",
-        upper_below_value ~ "< Average",
-        .default = NA_character_
-      ),
-      lower_bound_issue = case_when(
-        lower_missing ~ "Missing",
-        lower_zero ~ "Zero",
-        lower_above_value ~ "> Average",
-        .default = NA_character_
-      )
-    ) |>
-    select(
-      REFERENCE_ID,
-      n_rows,
-      uncertainty_type_issue,
-      upper_bound_issue,
-      lower_bound_issue
-    )
+  display_df <- literature_qc$missing_uncertainty
 
   datatable(
     display_df,
     options = list(pageLength = 10),
-    caption = "References with missing or problematic uncertainty"
+    caption = "References with missing or problematic uncertainty",
+    colnames = c("Source", "Timestamp", "Rows", "Uncertainty Issues")
   )
 } else {
   cat("*No uncertainty issues found.*")
@@ -243,7 +189,14 @@ if (nrow(literature_qc$missing_sites) > 0) {
   datatable(
     literature_qc$missing_sites,
     options = list(pageLength = 10),
-    caption = "Sites with missing geographic data"
+    caption = "Sites with missing geographic data",
+    colnames = c(
+      "Source",
+      "Timestamp",
+      "Rows",
+      "SITE_CODE",
+      "Missing Variables"
+    )
   )
 } else {
   cat("*No missing site data found.*")
@@ -260,10 +213,17 @@ Biota samples missing species, tissue, lifestage, gender, or species group.
 
 if (nrow(literature_qc$missing_biota) > 0) {
   datatable(
-    literature_qc$missing_biota |>
-      select(-sample_ids),
+    literature_qc$missing_biota,
+    # select(-sample_ids),
     options = list(pageLength = 10),
-    caption = "References with missing biota information"
+    caption = "References with missing biota information",
+    colnames = c(
+      "Source",
+      "Timestamp",
+      "Rows",
+      "Missing Variables",
+      "SAMPLE_ID"
+    )
   )
 } else {
   cat("*No missing biota data found.*")

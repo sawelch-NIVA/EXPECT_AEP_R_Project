@@ -1,18 +1,22 @@
 #' Join all literature module tables
 #'
 #' Joins Sites, Reference, Campaign, Parameters, and Methods to the Measurements
-#' fact table using appropriate foreign keys
+#' fact table using appropriate foreign keys. Columns with duplicate names
+#' receive explicit suffixes indicating their source table.
 #'
 #' @param measurements_data Tibble, the main fact table
 #' @param sites_data Tibble, sites dimension table
 #' @param reference_data Tibble, reference dimension table
+#' @param biota_data Tibble, biota dimension table
 #' @param campaign_data Tibble, campaign dimension table
 #' @param parameters_data Tibble, parameters dimension table
 #' @param methods_data Tibble, methods dimension table (will be spread internally)
 #'
 #' @return A tibble with all tables joined to measurements
 #'
-#' @importFrom dplyr left_join
+#' @importFrom dplyr left_join select distinct filter mutate
+#' @importFrom stringr str_replace str_to_upper
+#' @importFrom purrr map
 #'
 #' @export
 join_all_literature_modules <- function(
@@ -25,6 +29,7 @@ join_all_literature_modules <- function(
   methods_data
 ) {
   # Spread methods table first
+
   # Join everything to measurements fact table
   # Joins are sloooow, so we might as well filter out some columns first
   # FIXME: In the "real thing" we won't be able to assume just copper, but for now we will
@@ -45,14 +50,34 @@ join_all_literature_modules <- function(
     )
 
   result <- measurements_data |>
-    left_join(sites_data, by = "SITE_CODE") |>
-    left_join(reference_data, by = "REFERENCE_ID") |>
-    left_join(biota_data, by = c("SAMPLE_ID", "SUBSAMPLE")) |>
-    left_join(campaign_data, by = "CAMPAIGN_NAME_SHORT") |>
-    left_join(parameters_data, by = "PARAMETER_NAME")
+    left_join(
+      sites_data,
+      by = "SITE_CODE",
+      suffix = c("_measurements", "_sites")
+    ) |>
+    left_join(
+      reference_data,
+      by = "REFERENCE_ID",
+      suffix = c("", "_reference")
+    ) |>
+    left_join(
+      biota_data,
+      by = c("SAMPLE_ID", "SUBSAMPLE"),
+      suffix = c("", "_biota")
+    ) |>
+    left_join(
+      campaign_data,
+      by = "CAMPAIGN_NAME_SHORT",
+      suffix = c("", "_campaign")
+    ) |>
+    left_join(
+      parameters_data,
+      by = "PARAMETER_NAME",
+      suffix = c("", "_parameters")
+    )
 
   # this is, frankly, bad, but it allows us to join out methods to measurements in a way that makes analysis easier
-  purrr::map(.x = protocol_categories_vocabulary(), .f = function(x) {
+  map(.x = protocol_categories_vocabulary(), .f = function(x) {
     category_name_snake <- str_replace(x, pattern = " ", replacement = "_") |>
       str_to_upper()
     type_name_snake <- str_replace(

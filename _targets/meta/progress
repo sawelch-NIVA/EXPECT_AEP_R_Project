@@ -27,3 +27,5 @@ literature_clean|stem|literature_clean|0|skipped
 literature_clean_standardised|stem|literature_clean_standardised|0|skipped
 load_literature_pqt|stem|load_literature_pqt|0|skipped
 data_quality_report|stem|data_quality_report|0|skipped
+quarto_project|stem|quarto_project|0|dispatched
+quarto_project|stem|quarto_project|0|completed

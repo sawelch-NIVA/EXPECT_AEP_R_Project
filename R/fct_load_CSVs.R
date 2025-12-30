@@ -99,14 +99,16 @@ fread_module_csv <- function(filepath, format_initialiser) {
 #' Read all files for a given module
 #'
 #' Generic function to read and combine all CSV files for a specified module
-#' using the appropriate format initialiser
+#' using the appropriate format initialiser. Appends source file name and
+#' read timestamp to each row.
 #'
 #' @param file_paths A tibble/df of file paths supplied by get_literature_csv_tibble
 #' @param format_initialiser Function that returns expected tibble structure
 #'
-#' @return A tibble with all module data combined
+#' @return A tibble with all module data combined, plus `source_file` and
+#'   `read_timestamp` columns
 #'
-#' @importFrom dplyr pull bind_rows
+#' @importFrom dplyr pull bind_rows mutate
 #' @importFrom purrr map reduce
 #'
 #' @export
@@ -115,11 +117,26 @@ fread_all_module_files <- function(file_paths, format_initialiser) {
     "No paths found matching module name." = length(file_paths) > 0
   )
 
+  # Capture read time once for the entire batch
+
+  read_time <- Sys.time()
+
   # Read each file and reduce by binding rows sequentially
   file_paths |>
-    purrr::map(\(x) {
+    map(\(x) {
       # message(sprintf("Reading: %s", x))
-      fread_module_csv(x, format_initialiser)
+      fread_module_csv(x, format_initialiser) |>
+        mutate(
+          source_file = basename(x),
+          read_timestamp = read_time
+        )
     }) |>
-    purrr::reduce(bind_rows, .init = format_initialiser())
+    reduce(
+      bind_rows,
+      .init = format_initialiser() |>
+        mutate(
+          source_file = character(),
+          read_timestamp = as.POSIXct(character())
+        )
+    )
 }

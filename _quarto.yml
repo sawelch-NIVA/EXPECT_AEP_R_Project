@@ -21,4 +21,5 @@ format:
 execute:
   freeze: true
 
+engine: knitr
 

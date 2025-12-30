@@ -39,65 +39,94 @@ classify_data_issue <- function(x) {
     .default = NA_character_
   )
 }
-
 # Main quality check function ----
 
 #' Generate a comprehensive data quality report
 #'
 #' @param data A tibble/data.frame of literature data (e.g., load_literature_pqt)
 #' @return A named list containing summary statistics and tibbles of problem rows
+#'
+#' @importFrom dplyr filter group_by summarise n n_distinct if_any row_number
+#' @importFrom dplyr mutate where select rowwise ungroup first any_of
+#' @importFrom stringr str_detect
+#'
 #' @export
 check_data_quality <- function(data) {
   # 1. Missing measurements ----
   # Only flag if ALL of measured value, LOQ, and LOD are missing
+
   missing_measurements <- data |>
-    dplyr::filter(
+    filter(
       is_missing(MEASURED_VALUE) &
         is_missing(LOQ_VALUE) &
         is_missing(LOD_VALUE)
     ) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
-      sample_ids = list(SAMPLE_ID),
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
+      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
     )
 
   # 2. Missing or zero sample size ----
+
   missing_n <- data |>
-    dplyr::filter(is_missing(MEASURED_N) | MEASURED_N == 0) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
-      sample_ids = list(SAMPLE_ID),
+    filter(is_missing(MEASURED_N) | MEASURED_N == 0) |>
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
+      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
     )
 
   # 3. Missing analytical methods ----
+
   missing_methods <- data |>
-    dplyr::filter(
+    filter(
       is_missing(ANALYTICAL_PROTOCOL) |
         is_missing(EXTRACTION_PROTOCOL) |
         is_missing(FRACTIONATION_PROTOCOL) |
         is_missing(SAMPLING_PROTOCOL)
     ) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
       missing_analytical = any(is_missing(ANALYTICAL_PROTOCOL)),
       missing_extraction = any(is_missing(EXTRACTION_PROTOCOL)),
       missing_fractionation = any(is_missing(FRACTIONATION_PROTOCOL)),
       missing_sampling = any(is_missing(SAMPLING_PROTOCOL)),
-      sample_ids = list(SAMPLE_ID),
+      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
+    ) |>
+    rowwise() |>
+    mutate(
+      missing_elements = paste(
+        c(
+          if (missing_analytical) "Analytical",
+          if (missing_extraction) "Extraction",
+          if (missing_fractionation) "Fractionation",
+          if (missing_sampling) "Sampling"
+        ),
+        collapse = ", "
+      )
+    ) |>
+    ungroup() |>
+    select(
+      source_file_measurements,
+      read_timestamp_measurements,
+      n_rows,
+      missing_elements,
+      # sample_ids
     )
 
   # 4. Missing or problematic uncertainty ----
   # Check for missing uncertainty type AND problematic uncertainty bounds
-  # 4. Missing or problematic uncertainty ----
-  # Check for missing uncertainty type AND problematic uncertainty bounds
+
   missing_uncertainty <- data |>
-    dplyr::filter(
+    filter(
       has_data_issue(UNCERTAINTY_TYPE) |
         is.na(UNCERTAINTY_UPPER_STANDARD) |
         is.na(UNCERTAINTY_LOWER_STANDARD) |
@@ -111,9 +140,10 @@ check_data_quality <- function(data) {
           !is.na(UNCERTAINTY_LOWER_STANDARD) &
           UNCERTAINTY_LOWER_STANDARD > MEASURED_VALUE_STANDARD)
     ) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
       # Uncertainty type issues
       type_missing = any(is_missing(UNCERTAINTY_TYPE)),
       type_not_reported = any(is_not_reported(UNCERTAINTY_TYPE)),
@@ -134,15 +164,41 @@ check_data_quality <- function(data) {
           !is.na(UNCERTAINTY_LOWER_STANDARD) &
           UNCERTAINTY_LOWER_STANDARD > MEASURED_VALUE_STANDARD
       ),
-      sample_ids = list(SAMPLE_ID),
+      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
+    ) |>
+    rowwise() |>
+    mutate(
+      missing_elements = paste(
+        c(
+          if (type_missing) "Type missing",
+          if (type_not_reported) "Type not reported",
+          if (type_not_relevant) "Type not relevant",
+          if (upper_missing) "Upper missing",
+          if (upper_zero) "Upper zero",
+          if (upper_below_value) "Upper below value",
+          if (lower_missing) "Lower missing",
+          if (lower_zero) "Lower zero",
+          if (lower_above_value) "Lower above value"
+        ),
+        collapse = ", "
+      )
+    ) |>
+    ungroup() |>
+    select(
+      source_file_measurements,
+      read_timestamp_measurements,
+      n_rows,
+      missing_elements,
+      # sample_ids
     )
 
   # 5. Missing site data ----
   # Categorical fields with NA (should be "Not reported" or "Not relevant")
   # Numeric coords that are NA (genuinely missing)
+
   missing_sites <- data |>
-    dplyr::filter(
+    filter(
       is_missing(LATITUDE) |
         is_missing(LONGITUDE) |
         is_missing(SITE_NAME) |
@@ -151,9 +207,10 @@ check_data_quality <- function(data) {
         is_missing(COUNTRY_ISO) |
         is_missing(OCEAN_IHO)
     ) |>
-    dplyr::group_by(REFERENCE_ID, SITE_CODE) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
+    group_by(SITE_CODE, source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
       missing_coords = any(is_missing(LATITUDE) | is_missing(LONGITUDE)),
       missing_name = any(is_missing(SITE_NAME)),
       missing_feature = any(is_missing(SITE_GEOGRAPHIC_FEATURE)),
@@ -161,22 +218,46 @@ check_data_quality <- function(data) {
       missing_country = any(is_missing(COUNTRY_ISO)),
       missing_ocean = any(is_missing(OCEAN_IHO)),
       .groups = "drop"
+    ) |>
+    rowwise() |>
+    mutate(
+      missing_elements = paste(
+        c(
+          if (missing_coords) "Coordinates",
+          if (missing_name) "Name",
+          if (missing_feature) "Feature",
+          if (missing_feature_sub) "Feature sub",
+          if (missing_country) "Country",
+          if (missing_ocean) "Ocean"
+        ),
+        collapse = ", "
+      )
+    ) |>
+    ungroup() |>
+    select(
+      source_file_measurements,
+      read_timestamp_measurements,
+      n_rows,
+      SITE_CODE,
+      missing_elements
     )
 
   # 6. Missing biota data ----
   # Only check for rows where ENVIRON_COMPARTMENT == "Biota"
+
   missing_biota <- data |>
-    dplyr::filter(ENVIRON_COMPARTMENT == "Biota") |>
-    dplyr::filter(
+    filter(ENVIRON_COMPARTMENT == "Biota") |>
+    filter(
       is.na(SAMPLE_SPECIES) |
         is.na(SAMPLE_TISSUE) |
         is.na(SAMPLE_SPECIES_LIFESTAGE) |
         is.na(SAMPLE_SPECIES_GENDER) |
         is.na(SPECIES_GROUP)
     ) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
       missing_species = any(is.na(SAMPLE_SPECIES)),
       missing_tissue = any(is.na(SAMPLE_TISSUE)),
       missing_lifestage = any(is.na(SAMPLE_SPECIES_LIFESTAGE)),
@@ -184,63 +265,96 @@ check_data_quality <- function(data) {
       missing_group = any(is.na(SPECIES_GROUP)),
       sample_ids = list(SAMPLE_ID),
       .groups = "drop"
+    ) |>
+    rowwise() |>
+    mutate(
+      missing_elements = paste(
+        c(
+          if (missing_species) "Species",
+          if (missing_tissue) "Tissue",
+          if (missing_lifestage) "Lifestage",
+          if (missing_gender) "Gender",
+          if (missing_group) "Group"
+        ),
+        collapse = ", "
+      )
+    ) |>
+    ungroup() |>
+    select(
+      source_file_measurements,
+      read_timestamp_measurements,
+      n_rows,
+      missing_elements,
+      sample_ids
     )
 
   # 7. Encoding issues ----
   # Check for replacement characters that indicate encoding problems
+
   encoding_issues <- data |>
-    dplyr::mutate(
-      row_id = dplyr::row_number(),
+    mutate(
+      row_id = row_number(),
       # Check all character columns for encoding issues
-      has_encoding_issue = dplyr::if_any(
+      has_encoding_issue = if_any(
         where(is.character),
-        ~ stringr::str_detect(.x, "\uFFFD|�|\\?{2,}") # Unicode replacement char, �, or multiple ?
+        ~ str_detect(.x, "\uFFFD|�|\\?{2,}")
       )
     ) |>
-    dplyr::filter(has_encoding_issue) |>
-    dplyr::group_by(REFERENCE_ID) |>
-    dplyr::summarise(
-      n_rows = dplyr::n(),
-      sample_ids = list(SAMPLE_ID),
+    filter(has_encoding_issue) |>
+    group_by(source_file_measurements) |>
+    summarise(
+      read_timestamp_measurements = first(read_timestamp_measurements),
+      n_rows = n(),
+      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
     )
 
   # Summary counts ----
+
   summary_stats <- list(
     total_rows = nrow(data),
-    total_references = dplyr::n_distinct(data$REFERENCE_ID),
-    total_sites = dplyr::n_distinct(data$SITE_CODE),
+    total_sites = n_distinct(data$SITE_CODE),
+    total_source_files = n_distinct(data$source_file_measurements),
 
     # Measurements
-    n_refs_missing_measurements = nrow(missing_measurements),
+    n_files_missing_measurements = n_distinct(
+      missing_measurements$source_file_measurements
+    ),
     n_rows_missing_measurements = sum(missing_measurements$n_rows),
 
     # Sample size
-    n_refs_missing_n = nrow(missing_n),
+    n_files_missing_n = n_distinct(missing_n$source_file_measurements),
     n_rows_missing_n = sum(missing_n$n_rows),
 
     # Methods
-    n_refs_missing_methods = nrow(missing_methods),
+    n_files_missing_methods = n_distinct(
+      missing_methods$source_file_measurements
+    ),
     n_rows_missing_methods = sum(missing_methods$n_rows),
 
     # Uncertainty
-    n_refs_missing_uncertainty = nrow(missing_uncertainty),
+    n_files_missing_uncertainty = n_distinct(
+      missing_uncertainty$source_file_measurements
+    ),
     n_rows_missing_uncertainty = sum(missing_uncertainty$n_rows),
 
     # Sites
-    n_refs_missing_sites = dplyr::n_distinct(missing_sites$REFERENCE_ID),
-    n_sites_missing_data = nrow(missing_sites),
+    n_files_missing_sites = n_distinct(missing_sites$source_file_measurements),
+    n_sites_missing_data = n_distinct(missing_sites$SITE_CODE),
 
     # Biota
-    n_refs_missing_biota = nrow(missing_biota),
+    n_files_missing_biota = n_distinct(missing_biota$source_file_measurements),
     n_rows_missing_biota = sum(missing_biota$n_rows),
 
     # Encoding
-    n_refs_encoding_issues = nrow(encoding_issues),
+    n_files_encoding_issues = n_distinct(
+      encoding_issues$source_file_measurements
+    ),
     n_rows_encoding_issues = sum(encoding_issues$n_rows)
   )
 
   # Return everything as a named list ----
+
   list(
     summary = summary_stats,
     missing_measurements = missing_measurements,

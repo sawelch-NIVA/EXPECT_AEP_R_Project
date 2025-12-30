@@ -5,15 +5,6 @@ date: "2025.11.25"
 lightbox: true
 ---
 
-<!-- include-in-header:
-  - text
-      <style>
-      /* "Hide" TOC sidebar when card is in full-screen mode */
-      .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
-      body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
-        z-index: 0 !important;
-      }
-      </style> -->
 
 ```{r}
 #| label: targets-setup
