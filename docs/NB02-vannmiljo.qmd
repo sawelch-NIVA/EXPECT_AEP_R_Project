@@ -15,7 +15,6 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 - [ ] Move boring code to targets
 - [ ] Fix export **again**.
 
-
 # Libraries & Setup
 
 Import required packages and set working directory to project root.
@@ -40,6 +39,9 @@ library(STOPeData)
 library(eDataDRF)
 library(here)
 library(knitr)
+library(devtools)
+
+load_all()
 
 i_am("README.md") |> suppressMessages()
 ```
@@ -55,6 +57,7 @@ See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters
 config <- list(
   # File paths
   files = list(
+    # TODO: Make imports more consistent and timestamp everything
     vm_copper = here("data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx"),
     vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
     vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
@@ -67,7 +70,8 @@ config <- list(
     ),
     methods_sampling = here(
       "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
-    )
+    ),
+    lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv")
   ),
 
   # Filter criteria
@@ -76,7 +80,7 @@ config <- list(
     date_end = as.Date("2025-12-05"),
     exclude_sites = "Svalbard, ENSB-Kilde 2",
     compartment = "Aquatic",
-    compartment_sub = "Freshwater"
+    compartment_sub = c("Freshwater", "Aquatic Sediment")
   ),
 
   # Campaign metadata
@@ -142,7 +146,11 @@ if (!exists("vm_raw_copper")) {
     guess_max = 138615 # Avoid automatic type conversion warnings
   )
 }
+```
 
+`summarytools::dfSummary()` generates an initial summary of the dataset here. It's not perfect but it's one line of code, and generally very helpful. 
+
+```{r}
 # Initial data inspection
 print(
   dfSummary(
@@ -155,10 +163,13 @@ print(
 )
 ```
 
+
+
 ## Sites Data
 
 NOTE: Vannmiljø export limit requires splitting site codes into multiple files
 Procedure:
+
 1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
 2. Replace newlines with commas: Ctrl+H find "\n" replace with ", "
 3. Split into chunks (Vannmiljø fails silently above unknown threshold)
@@ -248,6 +259,7 @@ vm_lookup_methods <- read_csv(
       config$metadata$campaign_short
     )
   )
+vm_lookup_campaigns <- read_csv(config$files$lookup_campaigns)
 
 message("Loaded all lookup tables")
 ```
@@ -272,15 +284,223 @@ message(glue("Merged sites: {nrow(vm_merged)} rows"))
 # Add lookup tables
 vm_merged <- vm_merged |>
   left_join(
-    vm_lookup_medium,
+    vm_lookup_medium |>
+      rename(MediumID_Name = Name, MediumID_Description = Description),
     by = c(Medium_id = "MediumID")
   ) |>
   left_join(
-    vm_lookup_vannkategori,
+    vm_lookup_vannkategori |>
+      rename(
+        Vannkategori_Name = Name,
+        Vannkategori_Description = Description
+      ),
     by = c(Vannkategori = "VannkategoriID")
+  ) |>
+  left_join(
+    vm_lookup_campaigns,
+    by = c(Aktivitet_id = "Aktivitet_id")
   )
 
-message("Joined data to lookup tables")
+message(
+  "Joined data to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns"
+)
+```
+
+## Initial Exploration
+
+We don't yet have an oversight over the distribution of site types, biota, tissue, and media in the dataset. This will inform what and where we filter.
+
+```{r}
+#| label: fig-heatmap-campaign-vannkategory
+
+# Create a summary of counts by the two variables
+vm_summary <- vm_merged |>
+  group_by(CAMPAIGN_DESCRIPTION_EN, Vannkategori_Description) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+# Calculate text color threshold
+threshold_value <- mean(log10(vm_summary$n_samples), na.rm = TRUE)
+
+# Basic heatmap with ggplot2
+vm_summary |>
+  ggplot(aes(
+    x = Vannkategori_Description,
+    y = CAMPAIGN_DESCRIPTION_EN,
+    fill = n_samples
+  )) +
+  geom_tile() +
+  geom_text(
+    aes(
+      label = scales::comma(n_samples),
+      color = if_else(log10(n_samples) > threshold_value, "black", "white")
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10") +
+  scale_color_identity() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+```
+
+```{r}
+#| label: fig-heatmap-campaign-medium
+
+# Create a summary of counts by the two variables
+vm_summary_medium <- vm_merged |>
+  group_by(CAMPAIGN_DESCRIPTION_EN, MediumID_Name) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+# Calculate text color threshold
+threshold_value_medium <- mean(log10(vm_summary_medium$n_samples), na.rm = TRUE)
+
+# Basic heatmap with ggplot2
+vm_summary_medium |>
+  ggplot(aes(
+    x = MediumID_Name,
+    y = CAMPAIGN_DESCRIPTION_EN,
+    fill = n_samples
+  )) +
+  geom_tile() +
+  geom_text(
+    aes(
+      label = scales::comma(n_samples),
+      color = if_else(
+        log10(n_samples) > threshold_value_medium,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10") +
+  scale_color_identity() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+```
+
+```{r}
+#| label: fig-heatmap-vannkategori-medium
+
+# Create a summary of counts by the two variables
+vm_summary_vkat_medium <- vm_merged |>
+  group_by(Vannkategori_Description, MediumID_Name) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+# Calculate text color threshold
+threshold_value_vkat_medium <- mean(
+  log10(vm_summary_vkat_medium$n_samples),
+  na.rm = TRUE
+)
+
+# Basic heatmap with ggplot2
+vm_summary_vkat_medium |>
+  ggplot(aes(
+    x = MediumID_Name,
+    y = Vannkategori_Description,
+    fill = n_samples
+  )) +
+  geom_tile() +
+  geom_text(
+    aes(
+      label = scales::comma(n_samples),
+      color = if_else(
+        log10(n_samples) > threshold_value_vkat_medium,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10") +
+  scale_color_identity() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+```
+
+```{r}
+#| label: tbl-sample-distribution
+#| tbl-cap: "Distribution of samples across water categories and media types"
+
+# Calculate sample distribution with cumulative percentages
+sample_distribution <- vm_summary_vkat_medium |>
+  arrange(desc(n_samples)) |>
+  mutate(
+    pct_of_total = 100 * n_samples / sum(n_samples),
+    cumulative_n = cumsum(n_samples),
+    cumulative_pct = 100 * cumulative_n / sum(n_samples)
+  ) |>
+  select(
+    Vannkategori_Description,
+    MediumID_Name,
+    n_samples,
+    pct_of_total,
+    cumulative_n,
+    cumulative_pct
+  )
+
+datatable(
+  sample_distribution,
+  colnames = c(
+    "Water Category",
+    "Medium",
+    "N Samples",
+    "% of Total",
+    "Cumulative N",
+    "Cumulative %"
+  ),
+  options = list(
+    pageLength = 10,
+    order = list(list(3, 'desc'))
+  )
+) |>
+  formatRound(columns = c("pct_of_total", "cumulative_pct"), digits = 1) |>
+  formatCurrency(
+    columns = c("n_samples", "cumulative_n"),
+    currency = "",
+    digits = 0
+  )
+```
+
+@tbl-sample-distribution shows the distribution of samples across Vannkategori and MediumID. This is what I'm using as a guide of where to spend my time. If I can capture 90% of the samples (before the other filtration steps) then I'll call it done.
+
+```{r}
+#| label: fig-heatmap-campaign-species
+
+# Create a summary of counts by the two variables (filter to non-NA species)
+vm_summary_species <- vm_merged |>
+  filter(!is.na(VitenskapligNavn), VitenskapligNavn != "Artsuavhengig") |>
+  group_by(CAMPAIGN_DESCRIPTION_EN, VitenskapligNavn) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+# Calculate text color threshold
+threshold_value_species <- mean(
+  log10(vm_summary_species$n_samples),
+  na.rm = TRUE
+)
+
+# Basic heatmap with ggplot2
+vm_summary_species |>
+  ggplot(aes(
+    x = VitenskapligNavn,
+    y = CAMPAIGN_DESCRIPTION_EN,
+    fill = n_samples
+  )) +
+  geom_tile() +
+  geom_text(
+    aes(
+      label = scales::comma(n_samples),
+      color = if_else(
+        log10(n_samples) > threshold_value_species,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10") +
+  scale_color_identity() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
 ```
 
 ## Apply Filters
@@ -297,7 +517,7 @@ Included:
 - Mainland Norway only (excluded Svalbard)
 - Dates: (see config)
 
-Excluded (~43% of data):
+Excluded:
 
 - Marine/brackish water
 - Sediment samples
@@ -313,10 +533,10 @@ vm_filtered <- vm_merged |>
   mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
   # Apply compartment filters
   filter(
-    ENVIRON_COMPARTMENT_vkat == config$filters$compartment,
-    ENVIRON_COMPARTMENT_medium == config$filters$compartment,
-    ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
-    ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub
+    ENVIRON_COMPARTMENT_vkat %in% config$filters$compartment,
+    ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
+    ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
+    ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
   ) |>
   # Apply site type filters
   filter(
@@ -331,12 +551,9 @@ message(glue(
   "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
 ))
 
-message(glue(
-  "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
-))
 ```
 
-A sankey diagram would be better, but this will do for now.
+A sankey diagram would be better, but @fig-filter-visualisation will do for now.
 
 ```{r}
 #| label: fig-filter-visualisation
@@ -348,21 +565,21 @@ filter_flow <- tibble(
     nrow(vm_merged),
     vm_merged |>
       filter(
-        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub
+        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
       ) |>
       nrow(),
     vm_merged |>
       filter(
-        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub,
         Objekttype == "point"
       ) |>
       nrow(),
     vm_merged |>
       filter(
-        ENVIRON_COMPARTMENT_SUB_vkat == config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium == config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub,
         Objekttype == "point",
         LatinskNavn_id == 0
       ) |>
@@ -398,7 +615,8 @@ ggplot(filter_flow, aes(x = stage, y = records)) +
 We check for conflicts between our two lookups here - because we look up compartments, sites, biota, etc. based on both site `Vannlokalkode` and measurments' `MediumID`, it's possible that we might end up with conflicts and/or cases where neither of these give us the relevant data and we have to guess from context. Right now we filter down to only freshwater cases, hence the fact that we don't get hits below.
 
 ```{r}
-#| label: processing-quality-checks
+#| label: tbl-compartment-conflicts
+#| tbl-cap: "Conflicts between vannkategori and medium lookups for environmental compartments"
 
 # Check for conflicts between lookup sources
 conflict_check <- vm_filtered |>
@@ -421,10 +639,55 @@ if (
     any(conflict_check$subcompartment_conflict)
 ) {
   warning("Conflicts detected between vannkategori and medium lookups")
-  print(
-    conflict_check |> filter(compartment_conflict | subcompartment_conflict)
-  )
 }
+
+datatable(
+  conflict_check,
+  colnames = c(
+    "Compartment (Vannkategory)",
+    "Compartment (MediumName)",
+    "Subcompartment (Vannkategory)",
+    "Subcompartment (MediumName)",
+    "Rows",
+    "Compartment Conflict",
+    "Subcompartment Conflict"
+  )
+)
+```
+
+@tbl-compartment-conflicts lists all combinations of compartments and subcompartments, and whether any conflict is detected between the two compartments. I feel a need to be explicit and reproducible about what trumps what where, so see below.
+
+- Subcompartment (Vkat) == Freshwater & Subcompartment (Medium) == Aquatic Sediment -> Aquatic Sediment
+
+```{r}
+resolve_compartment_conflicts <- function(df) {
+  df |>
+    mutate(
+      ENVIRON_COMPARTMENT_SUB_resolved = case_when(
+        # Explicit rule: Medium trumps Vkat for sediment
+        ENVIRON_COMPARTMENT_SUB_vkat == "Freshwater" &
+          ENVIRON_COMPARTMENT_SUB_medium == "Aquatic Sediment" ~
+          "Aquatic Sediment",
+
+        # Add more rules as you discover conflicts
+        # Rule 2: ...
+        # Rule 3: ...
+
+        # Default: prefer one source consistently
+        !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) ~
+          ENVIRON_COMPARTMENT_SUB_medium,
+        !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) ~
+          ENVIRON_COMPARTMENT_SUB_vkat,
+
+        .default = NA_character_
+      )
+    )
+}
+```
+
+```{r}
+#| label: tbl-geographic-conflicts
+#| tbl-cap: "Conflicts between vannkategori and medium lookups for geographic features"
 
 # Check geographic feature consistency
 geo_check <- vm_filtered |>
@@ -436,16 +699,40 @@ geo_check <- vm_filtered |>
   ) |>
   reframe(count = n()) |>
   mutate(
-    geo_conflict = SITE_GEOGRAPHIC_FEATURE_vkat !=
-      SITE_GEOGRAPHIC_FEATURE_medium,
-    geo_sub_conflict = SITE_GEOGRAPHIC_FEATURE_SUB_vkat !=
-      SITE_GEOGRAPHIC_FEATURE_SUB_medium
+    # Only flag as conflict if both values are present and different
+    geo_conflict = !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium) &
+      SITE_GEOGRAPHIC_FEATURE_vkat != "*" &
+      SITE_GEOGRAPHIC_FEATURE_medium != "*" &
+      SITE_GEOGRAPHIC_FEATURE_vkat != SITE_GEOGRAPHIC_FEATURE_medium,
+
+    geo_sub_conflict = !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat) &
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
+      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != "*" &
+      SITE_GEOGRAPHIC_FEATURE_SUB_medium != "*" &
+      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != SITE_GEOGRAPHIC_FEATURE_SUB_medium
   )
 
-message(glue(
-  "Geographic feature conflicts: {sum(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)}"
-))
+if (any(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)) {
+  warning(glue(
+    "Geographic feature conflicts: {sum(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)}"
+  ))
+}
+datatable(
+  geo_check,
+  colnames = c(
+    "Feature (Vannkategory)",
+    "Feature (MediumName)",
+    "Subfeature (Vannkategory)",
+    "Subfeature (MediumName)",
+    "Rows",
+    "Feature Conflict",
+    "Subfeature Conflict"
+  )
+)
 ```
+
+
 
 # Create eData Tables
 ## Campaign
@@ -600,29 +887,6 @@ sites_coords <- sites_sf |>
   as.data.frame() |>
   bind_cols(st_drop_geometry(sites_sf))
 
-
-# Sanity check: plot sites on map
-world_map <- map_data("world")
-sanity_map <- ggplot() +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "lightgray",
-    colour = "white"
-  ) +
-  geom_hex(
-    data = sites_coords,
-    aes(x = X, y = Y),
-    bins = 1000
-  ) +
-  scale_fill_viridis_c() +
-  labs(
-    title = "Vannmiljø Freshwater Sites 2025",
-    subtitle = "Binned into 1000 hexagons, coloured by number of sites in area, for faster rendering."
-  )
-
-print(sanity_map)
-
 # Finalize sites table
 edata_sites <- edata_sites_temp |>
   left_join(
@@ -650,6 +914,34 @@ edata_sites <- edata_sites_temp |>
 edata_sites <- initialise_sites_tibble() |> add_row(edata_sites)
 
 message(glue("Created sites table: {nrow(edata_sites)} sites"))
+```
+
+Visually inspecting transformed site distribution allows us to check that a) sites are roughly where they should be and b) the correct CRS transformation was used.
+
+```{r}
+#| label: fig-sanity-map
+
+# Sanity check: plot sites on map
+world_map <- map_data("world")
+sanity_map <- ggplot() +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "lightgray",
+    colour = "white"
+  ) +
+  geom_hex(
+    data = sites_coords,
+    aes(x = X, y = Y),
+    bins = 1000
+  ) +
+  scale_fill_viridis_c() +
+  labs(
+    title = "Vannmiljø Freshwater Sites 2025",
+    subtitle = "Binned into 1000 hexagons, coloured by number of sites in area, for faster rendering."
+  )
+
+print(sanity_map)
 ```
 
 ## Methods
