@@ -29,10 +29,6 @@ load_literature_pqt|stem|3249f156f07772a5|6f70b17c7f9ba8a8|dccd2945eecb79b7|1764
 data_quality_report|stem|1946c77dc1492ada|8f82a5791cfeb42d|a7a7e4d9d371e4ba|-266296685||t20452.4686833175s|s1699b|1699|qs|local|vector|||1.375||
 nb01_qc|stem|bdab18fc9c7b06c3|e274810d64c0f081|e04a12f46dd04a89|1957503232|NB01-qc.md*docs/NB01-qc.qmd|t20452.4839399082s|s8622b|8622|file|local|vector|||2.297|Duplicated chunk option(s) 'echo', 'results' in both chunk header and pipe comments of the chunk 'quality-summary'.|
 quarto_project|stem|dfbd6c69e2c9f294|596e17abf22f8728|9cb4ddf25d225b87|1666500063|_site*docs/NB01-qc.qmd*docs/NB02-vannmiljo.qmd*docs/NB03-visualisation.qmd*docs/NB04-map.qmd*docs/NB05-network.qmd*docs/NB07-emissions.qmd*docs/NB08-ecology.qmd*index.qmd*_quarto.yml|t20452.5411093035s|s69957424b|69957424|file|local|vector|||121.641||
-nb02_vannmiljo|stem|1a78c5cc49b465be|491162c0e086d82d|2c530c1562a7fbd1|-1519751977|_site/docs/NB02-vannmiljo.html*docs/NB02-vannmiljo.qmd|t20452.5462730773s|s251095b|251095|file|local|vector|||34.328||
-nb04_map|stem|d7a77459327ad090|077032e2e7d9587b|9cb4ddf25d225b87|580353434|_site/docs/NB04-map.html*docs/NB04-map.qmd|t20452.5537611089s|s14675452b|14675452|file|local|vector|||33.344||
-index|stem|093abc6ab9e88534|f0e2c6a71a463618|2c530c1562a7fbd1|554519753|_site/index.html*index.qmd*_quarto.yml|t20452.5631110658s|s33523b|33523|file|local|vector|||4.516||
-qc|stem|bd3e7cc77a7f3f22|55e7fb6f0b8bb6c8|e04a12f46dd04a89|-1396792835|_site/docs/NB01-qc.html*docs/NB01-qc.qmd|t20452.5655221782s|s48496b|48496|file|local|vector|||9.468||
 load_literature_parquet|function|23e724ad0da47991
 create_arctic_circle|function|94c7954b3ce96762
 transform_countries_to_polar|function|69d83d8ab97de05c
@@ -50,6 +46,7 @@ ocean_colors|object|895978c666ba7c58
 is_not_reported|function|f45bd520bc8c17f3
 is_not_relevant|function|f8bc809e100f9337
 clean_joined_columns|function|cc7756f4c945b315
+compartment_colours|object|8b267e4b8527cb20
 fread_module_csv|function|88cc64c5ea3befbf
 northern_hemisphere_bbox|function|df7cf8d82e268c1d
 graticule_color|object|ae5d01624a4bf6b0
@@ -66,12 +63,14 @@ process_countries_wgs84|function|6089318beee3dabe
 make_measurement_boxplot|function|b0b87d27da132e1b
 municipality_centroids|function|70cd8958dd37f8ec
 plot_copper_boxplots|function|9ec9673a8f37f7fc
+subcomp_codes|object|6055a0ed55fab7ac
 join_all_literature_modules|function|f9860d71cf872476
-marine_colors|object|7b3a2b11c99c18d9
-generate_copper_thresholds|function|378dfaba4435d766
 copper_oxide_sales|function|c696b7f566385d60
+generate_copper_thresholds|function|378dfaba4435d766
+marine_colors|object|7b3a2b11c99c18d9
 save_literature_parquet|function|3b8e9e863b978a0b
 st_line_split|function|a7e084999681f4c0
+threshold_colours|object|d045226a540209c6
 theme_arctic_map|function|4e60c94dcaf242d9
 plot_reference_compartment_heatmap|function|fcef6ded7bd72e64
 plot_reference_species_heatmap|function|11a5e65c17a6e9d7
@@ -91,7 +90,11 @@ check_data_quality|function|1217786e2662edc0
 merge_country_ocean|function|83094db53c0453a9
 prepare_geography_wgs84|function|b73367f9f12d334d
 prepare_geography_polar|function|162fa3e17835c328
-nb08_ecology|stem|8f3f681a70c80e5e|7e68584cdba708a1|2c530c1562a7fbd1|-1552856534|_site/docs/NB08-ecology.html*docs/NB08-ecology.qmd|t20452.5768203614s|s26155b|26155|file|local|vector|||5.766||
-nb07_emissions|stem|8d7f63879058c7f5|abb20062c217c7fb|2c530c1562a7fbd1|817099056|_site/docs/NB07-emissions.html*docs/NB07-emissions.qmd|t20452.5770473452s|s50545b|50545|file|local|vector|||18.657||
-nb03_visualisation|stem|3c5bd6fb0e07f747|f8a06986ccd77fc0|9cb4ddf25d225b87|577663534|_site/docs/NB03-visualisation.html*docs/NB03-visualisation.qmd|t20452.5775505365s|s363047b|363047|file|local|vector|||36.609||
-nb05_network|stem|dcaa0d8fcc508afd|c33656828fb925d3|9cb4ddf25d225b87|-1993768097|_site/docs/NB05-network.html*docs/NB05-network.qmd|t20452.5777121492s|s64732b|64732|file|local|vector|||13.047||
+index|stem|8fcaea80d5de4b0a|f0e2c6a71a463618|2c530c1562a7fbd1|554519753|_site/index.html*index.qmd*_quarto.yml|t20454.5710485591s|s33499b|33499|file|local|vector|||5.313||
+nb08_ecology|stem|cb27fe28ed6f6ea3|7e68584cdba708a1|2c530c1562a7fbd1|-1552856534|_site/docs/NB08-ecology.html*docs/NB08-ecology.qmd|t20454.5710997469s|s26141b|26141|file|local|vector|||4.297||
+nb07_emissions|stem|c85225a776179482|abb20062c217c7fb|2c530c1562a7fbd1|817099056|_site/docs/NB07-emissions.html*docs/NB07-emissions.qmd|t20454.5712750383s|s50517b|50517|file|local|vector|||14.921||
+nb02_vannmiljo|stem|0d8294f8d1bc76a1|491162c0e086d82d|2c530c1562a7fbd1|-1519751977|_site/docs/NB02-vannmiljo.html*docs/NB02-vannmiljo.qmd|t20454.5723285548s|s433444b|433444|file|local|vector|||90.938||
+qc|stem|63d64e6e676f979d|55e7fb6f0b8bb6c8|e04a12f46dd04a89|-1396792835|_site/docs/NB01-qc.html*docs/NB01-qc.qmd|t20454.5726064444s|s48471b|48471|file|local|vector|||11.109||
+nb04_map|stem|dfea5dc02aefdefa|077032e2e7d9587b|9cb4ddf25d225b87|580353434|_site/docs/NB04-map.html*docs/NB04-map.qmd|t20454.5730404603s|s14675438b|14675438|file|local|vector|||38.281||
+nb03_visualisation|stem|73244bcfdd946686|f8a06986ccd77fc0|9cb4ddf25d225b87|577663534|_site/docs/NB03-visualisation.html*docs/NB03-visualisation.qmd|t20454.5734009351s|s346206b|346206|file|local|vector|||29.609||
+nb05_network|stem|34ad40cd546be402|c33656828fb925d3|9cb4ddf25d225b87|-1993768097|_site/docs/NB05-network.html*docs/NB05-network.qmd|t20454.5736275234s|s64718b|64718|file|local|vector|||18.969||

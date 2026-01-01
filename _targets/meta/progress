@@ -1,5 +1,6 @@
 name|type|parent|branches|progress
-index|stem|index|0|skipped
+index|stem|index|0|dispatched
+index|stem|index|0|completed
 nb08_ecology|stem|nb08_ecology|0|dispatched
 nb08_ecology|stem|nb08_ecology|0|completed
 measurements_files|stem|measurements_files|0|skipped
@@ -16,7 +17,8 @@ wgs84_geography|stem|wgs84_geography|0|skipped
 samples_files|stem|samples_files|0|skipped
 copper_toxicity_thresholds|stem|copper_toxicity_thresholds|0|skipped
 methods_files|stem|methods_files|0|skipped
-nb02_vannmiljo|stem|nb02_vannmiljo|0|skipped
+nb02_vannmiljo|stem|nb02_vannmiljo|0|dispatched
+nb02_vannmiljo|stem|nb02_vannmiljo|0|completed
 measurements_data|stem|measurements_data|0|skipped
 compartments_data|stem|compartments_data|0|skipped
 campaign_data|stem|campaign_data|0|skipped
@@ -33,8 +35,10 @@ literature_clean|stem|literature_clean|0|skipped
 literature_clean_standardised|stem|literature_clean_standardised|0|skipped
 load_literature_pqt|stem|load_literature_pqt|0|skipped
 data_quality_report|stem|data_quality_report|0|skipped
-qc|stem|qc|0|skipped
-nb04_map|stem|nb04_map|0|skipped
+qc|stem|qc|0|dispatched
+qc|stem|qc|0|completed
+nb04_map|stem|nb04_map|0|dispatched
+nb04_map|stem|nb04_map|0|completed
 nb03_visualisation|stem|nb03_visualisation|0|dispatched
 nb03_visualisation|stem|nb03_visualisation|0|completed
 nb05_network|stem|nb05_network|0|dispatched

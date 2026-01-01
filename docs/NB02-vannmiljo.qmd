@@ -758,6 +758,8 @@ We check for conflicts between our two lookups here - because we look up compart
 
 - [ ] We have plenty of conflicts now! Hooray, and also... damn.
 
+Note: It's not necessarily a problem that something turns up as a conflict - we fix a lot of these in the next steps.
+
 ```{r}
 #| label: tbl-compartment-conflicts
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for environmental compartments"
@@ -775,26 +777,38 @@ conflict_check <- vm_filtered |>
     compartment_conflict = ENVIRON_COMPARTMENT_vkat !=
       ENVIRON_COMPARTMENT_medium,
     subcompartment_conflict = ENVIRON_COMPARTMENT_SUB_vkat !=
-      ENVIRON_COMPARTMENT_SUB_medium
-  )
+      ENVIRON_COMPARTMENT_SUB_medium,
+    Conflict = case_when(
+      compartment_conflict & subcompartment_conflict ~ "Main, Sub",
+      compartment_conflict ~ "Main",
+      subcompartment_conflict ~ "Sub",
+      .default = NA_character_
+    )
+  ) |>
+  filter(!is.na(Conflict)) |>
+  arrange(desc(count))
 
-if (
-  any(conflict_check$compartment_conflict) ||
-    any(conflict_check$subcompartment_conflict)
-) {
+if (nrow(conflict_check) > 0) {
   warning("Conflicts detected between vannkategori and medium lookups")
 }
 
 datatable(
-  conflict_check,
+  conflict_check |>
+    select(
+      ENVIRON_COMPARTMENT_vkat,
+      ENVIRON_COMPARTMENT_medium,
+      ENVIRON_COMPARTMENT_SUB_vkat,
+      ENVIRON_COMPARTMENT_SUB_medium,
+      count,
+      Conflict
+    ),
   colnames = c(
     "Compartment (Vannkategory)",
     "Compartment (MediumName)",
     "Subcompartment (Vannkategory)",
     "Subcompartment (MediumName)",
     "Rows",
-    "Compartment Conflict",
-    "Subcompartment Conflict"
+    "Conflict Type"
   )
 )
 ```
@@ -888,24 +902,41 @@ geo_check <- vm_compartment_conflicts_resolved |>
       !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
       SITE_GEOGRAPHIC_FEATURE_SUB_vkat != "*" &
       SITE_GEOGRAPHIC_FEATURE_SUB_medium != "*" &
-      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != SITE_GEOGRAPHIC_FEATURE_SUB_medium
-  )
+      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != SITE_GEOGRAPHIC_FEATURE_SUB_medium,
 
-if (any(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)) {
+    Conflict = case_when(
+      geo_conflict & geo_sub_conflict ~ "Main, Sub",
+      geo_conflict ~ "Main",
+      geo_sub_conflict ~ "Sub",
+      .default = NA_character_
+    )
+  ) |>
+  filter(!is.na(Conflict)) |>
+  arrange(desc(count))
+
+if (nrow(geo_check) > 0) {
   warning(glue(
-    "Geographic feature conflicts: {sum(geo_check$geo_conflict | geo_check$geo_sub_conflict, na.rm = TRUE)}"
+    "Geographic feature conflicts: {nrow(geo_check)} combinations"
   ))
 }
+
 datatable(
-  geo_check,
+  geo_check |>
+    select(
+      SITE_GEOGRAPHIC_FEATURE_vkat,
+      SITE_GEOGRAPHIC_FEATURE_medium,
+      SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
+      SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+      count,
+      Conflict
+    ),
   colnames = c(
     "Feature (Vannkategory)",
     "Feature (MediumName)",
     "Subfeature (Vannkategory)",
     "Subfeature (MediumName)",
     "Rows",
-    "Feature Conflict",
-    "Subfeature Conflict"
+    "Conflict Type"
   )
 )
 ```
@@ -1366,6 +1397,8 @@ We also need to convert tissue types (stored as MediumID in Vannmiljø) into our
 
 # Create tissue table
 
+# TODO: There are a lot more tissues to fix now!
+
 # TODO: Update to use geo conflicts resolved thingy as appropriate
 tissue_frequency <- count(edata_biota, MediumID_Name) |>
   arrange(desc(n)) |>
@@ -1549,30 +1582,36 @@ export_datasets <- list(
   edata_campaign = edata_campaign,
   edata_reference = edata_reference,
   edata_parameters = edata_parameters,
+  edata_samples = edata_samples,
+  edata_biota = edata_biota,
   edata_measurements = edata_measurements
 )
 
 # Export as ZIP
 # TODO: Disabled
-# if (
-#   !file.exists(here(
-#     "data",
-#     "raw",
-#     "eData",
-#     paste0(config$metadata$campaign_short, ".zip")
-#   ))
-# ) {
-#   export_path <- export_campaign_zip(
-#     dataset_list = export_datasets,
-#     campaign_name = config$metadata$campaign_short,
-#     output_path = here("data", "raw", "eData")
-#   )
-#   message(glue("Export complete: {export_path}"))
-# } else {
-#   message("Export file already exists, skipping")
-# }
+if (
+  !file.exists(here(
+    "data/raw/eData",
+    paste0(config$metadata$campaign_short, ".zip")
+  ))
+) {
+  timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
 
-# message(glue("Export complete: {export_path}"))
+  export_path <- export_campaign_zip(
+    dataset_list = export_datasets,
+    campaign_name = config$metadata$campaign_short,
+    output_path = here(
+      "data",
+      "raw",
+      "eData",
+      glue("{config$metadata$campaign_short}_{timestamp}.zip")
+    )
+  )
+  message(glue("Export complete: {export_path}"))
+} else {
+  message("Export file already exists, skipping")
+}
+
 ```
 
 ## Validate Export
