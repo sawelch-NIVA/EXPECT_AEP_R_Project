@@ -8,13 +8,13 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 
 # To Do:
 
-- [ ] Expand compartments from just aquatic/freshwater
-  - [ ] Add samples and biota tables
-- [ ] Investigate some very strange detection and quantification limits
-- [ ] Add probable contamination source
-- [ ] More sanity checking of extracted values
-- [ ] Move boring code to targets
-- [ ] Fix export **again**.
+-   [ ] Expand compartments from just aquatic/freshwater
+    -   [ ] Add samples and biota tables
+-   [ ] Investigate some very strange detection and quantification limits
+-   [ ] Add probable contamination source
+-   [ ] More sanity checking of extracted values
+-   [ ] Move boring code to targets
+-   [ ] Fix export **again**.
 
 # Libraries & Setup
 
@@ -76,7 +76,8 @@ config <- list(
     lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv"),
     lookup_units = here(
       "data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx"
-    )
+    ),
+    lookup_species = here("data/clean/Vm_species_lookup.csv") # not actually used rn
   ),
 
   # Filter criteria
@@ -149,6 +150,7 @@ vm_convert_unit <- function(col) {
 ```
 
 # Load Raw Data
+
 ## Measurements Data
 
 Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
@@ -173,10 +175,10 @@ if (!exists("vm_raw_copper")) {
 }
 ```
 
-`summarytools::dfSummary()` generates an initial summary of the dataset here. It's not perfect but it's one line of code, and generally very helpful. 
+`summarytools::dfSummary()` generates an initial summary of the dataset here. It's not perfect but it's one line of code, and generally very helpful.
 
 ```{r}
-# Initial data inspection
+#| label: Initial data inspection
 print(
   dfSummary(
     vm_raw_copper,
@@ -188,18 +190,16 @@ print(
 )
 ```
 
-
-
 ## Sites Data
 
 NOTE: Vannmiljø export limit requires splitting site codes into multiple files
 
 Procedure:
 
-1. Extract unique site codes: vm_raw_copper$Vannlok_kode |> unique() |> writeClipboard()
-2. Replace newlines with commas: Ctrl+H find "\n" replace with ", "
-3. Split into chunks (Vannmiljø fails silently above unknown threshold)
-4. Download as separate Excel files
+1.  Extract unique site codes: vm_raw_copper\$Vannlok_kode \|\> unique() \|\> writeClipboard()
+2.  Replace newlines with commas: Ctrl+H find "\n" replace with ", "
+3.  Split into chunks (Vannmiljø fails silently above unknown threshold)
+4.  Download as separate Excel files
 
 ```{r}
 #| label: load-raw-sites
@@ -222,6 +222,7 @@ message(glue("Loaded {nrow(vm_raw_sites)} site records"))
 ```
 
 ## Lookup Tables
+
 This part is very messy - we generated a bunch of lookup tables (semi-reproducibly) and filled them by hand/with Claude. I don't have a lot of confidence in any of them.
 
 Some of the lookups are actually direct from Vannmiljø though - they're the xlsx ones. They're also bad, but for different reasons!
@@ -294,11 +295,18 @@ vm_lookup_campaigns <- read_csv(
 
 vm_lookup_units <- read_excel(config$files$lookup_units)
 
-message("Loaded all lookup tables")
+vm_lookup_species <- read_csv(
+  config$files$lookup_species,
+  show_col_types = FALSE
+)
+
+message("Loaded 8 lookup tables")
 ```
 
 # Data Processing
+
 ## Merge Datasets
+
 We join sites and measurements by `"Vannlok_kode" = "Vannlokalitetskode"`, then our compartment/etc. lookups.
 
 ```{r}
@@ -380,6 +388,7 @@ vm_summary |>
 ```
 
 ```{r}
+#| label: fig-heatmap-medium-campaign
 # Create a summary of counts by the two variables
 vm_summary_medium <- vm_merged |>
   group_by(CAMPAIGN_DESCRIPTION_EN, MediumID_Name) |>
@@ -616,25 +625,20 @@ vm_summary_units_medium |>
 ```
 
 ## Apply Filters
+
 As above, we filter data very heavily here, so we don't have to spend a lot of time on edge cases.
 
-Data Quality Filters
-Applied: 2025-12-16
+Data Quality Filters Applied: 2025-12-16
 
 Included:
 
-- Freshwater only (ENVIRON_COMPARTMENT_SUB = "Freshwater")
-- Point sites only (no polygons)
-- No biota (LatinskNavn_id == 0)
-- Mainland Norway only (excluded Svalbard)
-- Dates: (see config)
+-   See config tables in \[Configuration\](##Configuration) for specifics
+-   Point sites only (no polygons)
+-   Mainland Norway only (excluded Svalbard)
 
 Excluded:
 
-- Marine/brackish water
-- Sediment samples
-- Biota samples
-- Svalbard sites (n=1)
+-   Svalbard sites (n=1)
 
 ```{r}
 #| label: processing-apply-filters
@@ -653,7 +657,6 @@ vm_filtered <- vm_merged |>
   # Apply site type filters
   filter(
     Objekttype == "point",
-    LatinskNavn_id == 0,
     Vannlokalitetsnavn != config$filters$exclude_sites
   ) |>
   # Apply date filter
@@ -769,32 +772,65 @@ datatable(
 
 @tbl-compartment-conflicts lists all combinations of compartments and subcompartments, and whether any conflict is detected between the two compartments. I feel a need to be explicit and reproducible about what trumps what where, so see below.
 
-- Subcompartment (Vkat) == Freshwater & Subcompartment (Medium) == Aquatic Sediment -> Aquatic Sediment
+-   Subcompartment (Vkat) == Freshwater & Subcompartment (Medium) == Aquatic Sediment -\> Aquatic Sediment
+-  If one column returns biota, we use that (even if it's a fish e.g. living in the sea...)
 
 ```{r}
+#| label: resolve-compartment-conflicts
+
+# use the below function to resolve specific conflicts
 resolve_compartment_conflicts <- function(df) {
   df <- df |>
     mutate(
+      ENVIRON_COMPARTMENT_resolved = case_when(
+        # Explicit rule: Biota trumps all
+        ENVIRON_COMPARTMENT_vkat == "Biota" |
+          ENVIRON_COMPARTMENT_medium == "Biota" ~ "Biota",
+
+        # No conflict, return NA
+        .default = NA_character_
+      ),
       ENVIRON_COMPARTMENT_SUB_resolved = case_when(
+        # Explicit rule: Biota trumps all
+        ENVIRON_COMPARTMENT_SUB_vkat == "Biota, Aquatic" |
+          ENVIRON_COMPARTMENT_SUB_medium == "Biota, Aquatic" ~ "Biota, Aquatic",
+
         # Explicit rule: Medium trumps Vkat for sediment
         ENVIRON_COMPARTMENT_SUB_vkat == "Freshwater" &
           ENVIRON_COMPARTMENT_SUB_medium == "Aquatic Sediment" ~
           "Aquatic Sediment",
 
-        # Add more rules as you discover conflicts
-        # Rule 2: ...
-        # Rule 3: ...
-
+        # No conflict, return NA
         .default = NA_character_
       )
     )
-  n_resolved <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
-  message(glue("Resolved {n_resolved} conflicting rows."))
+
+  n_resolved_sub <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+  n_resolved <- df |> tally(!is.na(ENVIRON_COMPARTMENT_resolved))
+
+  message(glue(
+    "Resolved {n_resolved} conflicting compartments and {n_resolved_sub} conflicting subcompartments."
+  ))
 
   df
 }
 
-vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(vm_filtered)
+# then merge everything to ENVIRON_COMPARTMENT_SUB. this is what we'll use going forwards
+vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(
+  vm_filtered
+) |>
+  mutate(
+    ENVIRON_COMPARTMENT_SUB = case_match(
+      ENVIRON_COMPARTMENT_SUB_resolved,
+      NA_character_ ~ ENVIRON_COMPARTMENT_SUB_resolved,
+      .default = ENVIRON_COMPARTMENT_SUB_medium
+    ),
+    ENVIRON_COMPARTMENT = case_match(
+      ENVIRON_COMPARTMENT_resolved,
+      NA_character_ ~ ENVIRON_COMPARTMENT_resolved,
+      .default = ENVIRON_COMPARTMENT_medium
+    )
+  )
 ```
 
 @tbl-geographic-conflicts also lists all combinations, which means it also lists things that actually aren't problems. Again, may need cleaning up.
@@ -848,8 +884,15 @@ datatable(
 
 Since we haven't actually had any geographical conflicts flagged yet there's no need to write code to defuse them. But watch this space.
 
+```{r}
+#| label: resolve-feature-conflicts
+
+```
+
 # Create eData Tables
+
 ## Campaign
+
 ```{r}
 #| label: edata-campaign
 
@@ -872,6 +915,7 @@ message("Created campaign table")
 ```
 
 ## Reference
+
 ```{r}
 #| label: edata-reference
 
@@ -904,6 +948,7 @@ message("Created reference table")
 ```
 
 ## Parameters
+
 ```{r}
 #| label: edata-parameters
 
@@ -926,6 +971,7 @@ message("Created parameters table")
 ```
 
 ## Sites
+
 ```{r}
 #| label: edata-sites
 
@@ -1059,6 +1105,7 @@ print(sanity_map)
 ```
 
 ## Methods
+
 ```{r}
 #| label: edata-methods
 
@@ -1118,34 +1165,307 @@ edata_methods <- vm_methods_used_sampling #
 message(glue("Created methods table: {nrow(edata_methods)} protocols"))
 ```
 
+## Samples
+
+In the eData workflow, we generate a samples table by combining sites, parameters, dates and compartments. This isn't how we work with Vannmiljø, but it's useful to have it anyway because we need it to generate the biota table - which stores species, tissue, etc. information.
+
+```{r}
+#| label: edata-samples
+
+# this function is copied from STOPeData::mod_samples_fct.R
+# I guess we forgot to export it. Good candidate to be moved to eDataDRF.
+# TODO: It's also quite slow, so we could probably make it better.
+#' Generate Sample ID with Components ----
+#' @param site_code Site code (vectorized)
+#' @param parameter_name Parameter name (vectorized)
+#' @param environ_compartment Environmental compartment (vectorized)
+#' @param environ_compartment_sub Environmental sub-compartment (vectorized)
+#' @param date Sampling date (vectorized)
+#' @param subsample subsample
+#' @importFrom stringr str_to_title str_remove_all
+#' @import eDataDRF
+#' @noRd
+generate_sample_id_with_components <- function(
+  site_code,
+  parameter_name,
+  environ_compartment,
+  environ_compartment_sub,
+  date,
+  subsample = 1
+) {
+  # Create abbreviated versions for ID (vectorized)
+  param_abbrev <- substr(gsub("[^A-Za-z0-9]", "", parameter_name), 1, 8)
+  comp_abbrev <- substr(
+    gsub("[^A-Za-z0-9]", "", environ_compartment_sub),
+    1,
+    12
+  )
+  date_abbrev <- gsub("-", "-", date)
+
+  base_id <- glue("{site_code}-{param_abbrev}-{comp_abbrev}-{date_abbrev}")
+
+  # Vectorized replicate
+  # Subsamples will generally be text, so let's abbreviate them a bit
+
+  subsample_suffix <- sapply(
+    subsample,
+    function(x) abbreviate_string(string = x, n_words = 3, case = "title")
+  )
+  paste0(base_id, "-R-", subsample_suffix)
+}
+
+
+# Create samples table
+
+# TODO: Update to use geo conflicts resolved thingy as appropriate
+edata_samples <- vm_compartment_conflicts_resolved |>
+  mutate(
+    # Core identifiers
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
+    PARAMETER_NAME = "Copper",
+    PARAMETER_TYPE = "Not reported",
+
+    # Compartment information
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB,
+    MEASURED_CATEGORY = NA_character_,
+
+    SAMPLING_DATE = as.character(SAMPLING_DATE),
+
+    # Sample information
+    SUBSAMPLE = "NA",
+    SAMPLE_ID = generate_sample_id_with_components(
+      SITE_CODE,
+      PARAMETER_NAME,
+      ENVIRON_COMPARTMENT,
+      ENVIRON_COMPARTMENT_SUB,
+      SAMPLING_DATE,
+      SUBSAMPLE
+    ),
+
+    .keep = "none"
+  )
+
+# Validate against eData schema
+edata_samples <- initialise_samples_tibble() |>
+  add_row(edata_samples)
+
+message(glue(
+  "Created samples table: {nrow(edata_samples)} samples"
+))
+```
+
+## Biota
+
+Biota stuff. Some genders are implicit from the tissue type reported (e.g. gonads), but I don't think I want to worry about that here. Our assumptions:
+
+- All species reported in Vannmiljø are correct
+- No attempt was made to infer gender or lifestage
+
+Nevertheless, we need to do a bit of extra work with scientific names, species groups, and tissue before proceeding. Currently:
+
+- Laksesmolt needs to be recoded as Juvenile Salmo salmar
+
+That's it.
+
+```{r}
+#| label: tbl-raw-biota
+
+# Create biota table
+
+# TODO: Update to use geo conflicts resolved thingy as appropriate
+edata_biota <- vm_compartment_conflicts_resolved |>
+  filter(ENVIRON_COMPARTMENT == "Biota")
+message(glue(
+  "{nrow(edata_biota)} biota samples found"
+))
+
+biota_frequency <- count(edata_biota, VitenskapligNavn) |>
+  arrange(desc(n)) |>
+  left_join(
+    select(vm_lookup_species, VitenskapligNavn, species_group),
+    by = "VitenskapligNavn"
+  ) |>
+  mutate(
+    SAMPLE_SPECIES = case_when(
+      VitenskapligNavn == "Laksesmolt" ~ "Salmo salar",
+      TRUE ~ VitenskapligNavn
+    ),
+    SAMPLE_SPECIES_LIFESTAGE = case_when(
+      VitenskapligNavn == "Laksesmolt" ~ "Juvenile",
+      TRUE ~ "Not reported"
+    )
+  )
+
+# Report data quality issues
+n_missing_species_group <- biota_frequency |>
+  filter(is.na(species_group)) |>
+  pull(n) |>
+  sum()
+
+
+message(glue(
+  "Biota data quality: {n_missing_species_group} samples with missing species group"
+))
+
+
+datatable(biota_frequency)
+
+# there's certainly a more elegant way to do this than twice
+edata_biota_merged <- edata_biota |>
+  left_join(
+    select(vm_lookup_species, VitenskapligNavn, species_group),
+    by = "VitenskapligNavn"
+  ) |>
+  mutate(
+    SAMPLE_SPECIES = case_when(
+      VitenskapligNavn == "Laksesmolt" ~ "Salmo salar",
+      TRUE ~ VitenskapligNavn
+    ),
+    SAMPLE_SPECIES_LIFESTAGE = case_when(
+      VitenskapligNavn == "Laksesmolt" ~ "Juvenile",
+      TRUE ~ "Not reported"
+    )
+  )
+```
+
+We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent. At time of writing there are only 3, which keeps life relatively easy.
+
+```{r}
+#| label: tbl-raw-tissue
+
+# Create tissue table
+
+# TODO: Update to use geo conflicts resolved thingy as appropriate
+tissue_frequency <- count(edata_biota, MediumID_Name) |>
+  arrange(desc(n)) |>
+  mutate(
+    SAMPLE_TISSUE = case_match(
+      MediumID_Name,
+      "Biota bløtdeler" ~ "Total soft tissues",
+      "Biota gjeller" ~ "Gills",
+      "Biota helkropp" ~ "Whole body",
+      .default = "Unknown Tissue"
+    )
+  )
+
+# Report data quality issues
+n_unknown_tissue <- tissue_frequency |>
+  filter(SAMPLE_TISSUE == "Unknown Tissue") |>
+  pull(n) |>
+  sum()
+
+message(glue(
+  "Biota data quality: {n_unknown_tissue} samples with unknown tissue type"
+))
+
+datatable(tissue_frequency)
+
+edata_biota_tissue_merged <- edata_biota_merged |>
+  mutate(
+    SAMPLE_TISSUE = case_match(
+      MediumID_Name,
+      "Biota bløtdeler" ~ "Total soft tissues",
+      "Biota gjeller" ~ "Gills",
+      "Biota helkropp" ~ "Whole body",
+      .default = "Unknown Tissue"
+    )
+  )
+
+```
+
+
+```{r}
+#| label: eData-biota
+
+vm_filtered
+
+vm_samples_biota_only <- edata_biota_tissue_merged |>
+  mutate(
+    # Core identifiers
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    # SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"), added later
+    PARAMETER_NAME = "Copper",
+    # PARAMETER_TYPE = "Not reported", added later
+
+    # Compartment information
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB,
+    MEASURED_CATEGORY = NA_character_,
+
+    SAMPLING_DATE = as.character(SAMPLING_DATE),
+
+    # Sample information
+    SUBSAMPLE = "NA",
+    SAMPLE_ID = generate_sample_id_with_components(
+      SITE_CODE,
+      PARAMETER_NAME,
+      ENVIRON_COMPARTMENT,
+      ENVIRON_COMPARTMENT_SUB,
+      SAMPLING_DATE,
+      SUBSAMPLE
+    ),
+
+    # biota stuff
+    SPECIES_GROUP = species_group,
+    SAMPLE_SPECIES,
+    SAMPLE_TISSUE,
+    SAMPLE_SPECIES_LIFESTAGE,
+    SAMPLE_SPECIES_GENDER = "Not reported",
+    BIOTA_COMMENT = "Raw species names from Vannmiljø. May be erroneous.",
+  )
+
+# Validate against eData schema
+edata_biota <- initialise_biota_tibble() |>
+  add_row(
+    vm_samples_biota_only |>
+      select(any_of(names(initialise_biota_tibble())))
+  )
+
+message(glue(
+  "Created biota table: {nrow(edata_biota)} rows"
+))
+```
+
+Once we've handled biota separately we can merge them with the rest of the samples to create the intermediate table used to create the measurements table. This is a slightly strange way of doing things, but it works.
+
+```{r}
+#| label: merge-biota-samples
+
+biota_samples_merged <- edata_samples |> bind_rows(vm_samples_biota_only)
+
+```
+
 ## Measurements
+
 ```{r}
 #| label: edata-measurements
 
 # Create measurements table
-# NOTE: All freshwater values reported as EnhetID = 8 (µg/L)
+# # NOTE: All freshwater values reported as EnhetID = 8 (µg/L)
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
-edata_measurements <- vm_compartment_conflicts_resolved |>
+edata_measurements <- biota_samples_merged |>
   mutate(
     # Core identifiers
-    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
-    PARAMETER_NAME = "Copper",
+    SITE_CODE,
+    PARAMETER_NAME,
     SAMPLING_DATE = as.character(SAMPLING_DATE),
     CAMPAIGN_NAME_SHORT = config$metadata$campaign_short,
     REFERENCE_ID = config$metadata$reference_id,
 
     # Compartment information
-    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_medium,
-    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_medium,
+    ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB,
 
     # Parameter classification
     PARAMETER_TYPE = "Stressor",
     MEASURED_TYPE = "Concentration",
 
     # Sample information
-    SUBSAMPLE = "1",
-    SAMPLE_ID = "Fake ID", # FIXME: Needs proper sample ID generation
+    SUBSAMPLE,
+    SAMPLE_ID,
 
     # Measurement values
     MEASURED_FLAG = vm_convert_operator(Operator),
@@ -1160,10 +1480,11 @@ edata_measurements <- vm_compartment_conflicts_resolved |>
 
     # Detection limits
     LOQ_VALUE = Kvantifiseringsgrense,
-    LOQ_UNIT = "µg/L",
+    LOQ_UNIT = "µg/L", # TODO: Fix LOQ units
     LOD_VALUE = Deteksjonsgrense,
-    LOD_UNIT = "µg/L",
+    LOD_UNIT = "µg/L", # TODO: Fix LOD units
 
+    # TODO: Fix methods reference
     # Protocol references (FIXME: Need proper protocol ID mapping)
     SAMPLING_PROTOCOL = "1",
     EXTRACTION_PROTOCOL = "2",
@@ -1189,7 +1510,7 @@ message(glue(
 
 ## Create Export
 
-We export the resulting data to a zip file in our 
+We export the resulting data to a zip file in our
 
 ```{r}
 #| label: export-create-zip
@@ -1248,7 +1569,7 @@ edata_measurements |>
 
 ## Species Data Coverage
 
-None of these are very informative yet, because we don't filter down to stuff that's definitely biota first. 
+None of these are very informative yet, because we don't filter down to stuff that's definitely biota first.
 
 ```{r}
 #| label: eda-species-coverage
