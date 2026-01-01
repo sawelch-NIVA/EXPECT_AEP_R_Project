@@ -4,8 +4,7 @@ author: "Sam Welch"
 date: "2025.11.25"
 lightbox: true
 ---
-
-Load libraries and data.
+Notebook 1 contains 
 
 ```{r, include=FALSE}
 

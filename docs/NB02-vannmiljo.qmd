@@ -7,12 +7,10 @@ date: "2025.12.16"
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
 
 # To Do:
-
--   [ ] Expand compartments from just aquatic/freshwater
-    -   [ ] Add samples and biota tables
 -   [ ] Investigate some very strange detection and quantification limits
 -   [ ] Add probable contamination source
 -   [ ] More sanity checking of extracted values
+-   [ ] @fig-vm-dotplot - what's going on here?
 -   [ ] Move boring code to targets
 -   [ ] Fix export **again**.
 
@@ -24,6 +22,8 @@ Import required packages and set working directory to project root.
 #| label: setup-libraries
 #| warning: false
 #| message: false
+
+knitr::opts_chunk$set(dev = "svglite") # otherwise some SVGs cause problems in firefox?
 
 library(dplyr)
 library(tidyr)
@@ -81,17 +81,19 @@ config <- list(
   ),
 
   # Filter criteria
+  # * is used as a wildcard in compartment lookups
   filters = list(
     date_start = as.Date("2010-01-01"),
     date_end = as.Date("2025-12-05"),
     exclude_sites = "Svalbard, ENSB-Kilde 2",
-    compartment = c("Aquatic", "Biota"),
+    compartment = c("Aquatic", "Biota", "*"),
     compartment_sub = c(
       "Freshwater",
       "Aquatic Sediment",
       "Marine/Salt Water",
       "Brackish/Transitional Water",
-      "Biota, Aquatic"
+      "Biota, Aquatic",
+      "*"
     )
   ),
 
@@ -583,7 +585,7 @@ vm_summary_species |>
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
 ```
 
-Finally, what about units @fig-heatmap-units-medium? Units are, I'm releieved to say, sensible.
+Finally, what about units @fig-heatmap-units-medium? Units are, I'm relieved to say, sensible.
 
 ```{r}
 #| label: fig-heatmap-units-medium
@@ -649,10 +651,12 @@ vm_filtered <- vm_merged |>
   mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
   # Apply compartment filters
   filter(
-    ENVIRON_COMPARTMENT_vkat %in% config$filters$compartment,
-    ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
-    ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
-    ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
+    ENVIRON_COMPARTMENT_vkat %in%
+      config$filters$compartment |
+      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
+    ENVIRON_COMPARTMENT_SUB_vkat %in%
+      config$filters$compartment_sub |
+      ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
   ) |>
   # Apply site type filters
   filter(
@@ -668,35 +672,56 @@ message(glue(
 
 ```
 
-A sankey diagram would be better, but @fig-filter-visualisation will do for now.
+Let's also take a look at what we're excluding (based on compartments)
+
+```{r}
+#| label: processing-excluded-data
+#| echo: false
+
+vm_excluded <- vm_merged |>
+  # Add sampling date as Date type
+  mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
+  # Apply compartment filters
+  filter(
+    !(ENVIRON_COMPARTMENT_vkat %in% config$filters$compartment),
+    !(ENVIRON_COMPARTMENT_medium %in% config$filters$compartment),
+    !(ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub),
+    !(ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub)
+  )
+
+count(vm_excluded, ENVIRON_COMPARTMENT_SUB_vkat)
+count(vm_excluded, ENVIRON_COMPARTMENT_medium)
+count(vm_merged, Objekttype)
+
+message(glue(
+  "Excluded: {nrow(vm_excluded)} rows ({round(100*nrow(vm_excluded)/nrow(vm_merged), 1)}% of merged data)"
+))
+
+```
+
+A Sankey diagram would be better, but @fig-filter-visualisation will do for now.
 
 ```{r}
 #| label: fig-filter-visualisation
 
 # Create filtering summary
 filter_flow <- tibble(
-  stage = c("Raw", "Compartments", "Point sites", "No biota", "Date range"),
+  stage = c("Raw", "Compartments", "Point sites", "Date range"),
   records = c(
     nrow(vm_merged),
     vm_merged |>
       filter(
-        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
+        ENVIRON_COMPARTMENT_SUB_vkat %in%
+          config$filters$compartment_sub |
+          ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
       ) |>
       nrow(),
     vm_merged |>
       filter(
-        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub,
+        ENVIRON_COMPARTMENT_SUB_vkat %in%
+          config$filters$compartment_sub |
+          ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub,
         Objekttype == "point"
-      ) |>
-      nrow(),
-    vm_merged |>
-      filter(
-        ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub,
-        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub,
-        Objekttype == "point",
-        LatinskNavn_id == 0
       ) |>
       nrow(),
     nrow(vm_filtered)
@@ -725,9 +750,13 @@ ggplot(filter_flow, aes(x = stage, y = records)) +
   theme_minimal()
 ```
 
+At time of writing, we've got 94% of compartment data, which is well above our goal of 90%.
+
 ## Quality Checks
 
 We check for conflicts between our two lookups here - because we look up compartments, sites, biota, etc. based on both site `Vannlokalkode` and measurments' `MediumID`, it's possible that we might end up with conflicts and/or cases where neither of these give us the relevant data and we have to guess from context. Right now we filter down to only freshwater cases, hence the fact that we don't get hits below.
+
+- [ ] We have plenty of conflicts now! Hooray, and also... damn.
 
 ```{r}
 #| label: tbl-compartment-conflicts
@@ -815,19 +844,18 @@ resolve_compartment_conflicts <- function(df) {
   df
 }
 
-# then merge everything to ENVIRON_COMPARTMENT_SUB. this is what we'll use going forwards
 vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(
   vm_filtered
 ) |>
   mutate(
-    ENVIRON_COMPARTMENT_SUB = case_match(
-      ENVIRON_COMPARTMENT_SUB_resolved,
-      NA_character_ ~ ENVIRON_COMPARTMENT_SUB_resolved,
+    ENVIRON_COMPARTMENT_SUB = case_when(
+      !is.na(
+        ENVIRON_COMPARTMENT_SUB_resolved
+      ) ~ ENVIRON_COMPARTMENT_SUB_resolved,
       .default = ENVIRON_COMPARTMENT_SUB_medium
     ),
-    ENVIRON_COMPARTMENT = case_match(
-      ENVIRON_COMPARTMENT_resolved,
-      NA_character_ ~ ENVIRON_COMPARTMENT_resolved,
+    ENVIRON_COMPARTMENT = case_when(
+      !is.na(ENVIRON_COMPARTMENT_resolved) ~ ENVIRON_COMPARTMENT_resolved,
       .default = ENVIRON_COMPARTMENT_medium
     )
   )
@@ -1083,7 +1111,7 @@ Visually inspecting transformed site distribution allows us to check that a) sit
 
 # Sanity check: plot sites on map
 world_map <- map_data("world")
-sanity_map <- ggplot() +
+ggplot() +
   geom_polygon(
     data = world_map,
     aes(x = long, y = lat, group = group),
@@ -1101,7 +1129,6 @@ sanity_map <- ggplot() +
     subtitle = "Binned into 1000 hexagons, coloured by number of sites in area, for faster rendering."
   )
 
-print(sanity_map)
 ```
 
 ## Methods
@@ -1218,7 +1245,7 @@ generate_sample_id_with_components <- function(
 # Create samples table
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
-edata_samples <- vm_compartment_conflicts_resolved |>
+edata_samples_wide <- vm_compartment_conflicts_resolved |>
   mutate(
     # Core identifiers
     SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
@@ -1242,14 +1269,16 @@ edata_samples <- vm_compartment_conflicts_resolved |>
       ENVIRON_COMPARTMENT_SUB,
       SAMPLING_DATE,
       SUBSAMPLE
-    ),
-
-    .keep = "none"
+    )
   )
 
 # Validate against eData schema
 edata_samples <- initialise_samples_tibble() |>
-  add_row(edata_samples)
+  add_row(
+    edata_samples_wide |>
+      select(any_of(names(initialise_samples_tibble())))
+  )
+
 
 message(glue(
   "Created samples table: {nrow(edata_samples)} samples"
@@ -1433,7 +1462,7 @@ Once we've handled biota separately we can merge them with the rest of the sampl
 ```{r}
 #| label: merge-biota-samples
 
-biota_samples_merged <- edata_samples |> bind_rows(vm_samples_biota_only)
+biota_samples_merged <- edata_samples_wide |> bind_rows(vm_samples_biota_only)
 
 ```
 
@@ -1443,7 +1472,6 @@ biota_samples_merged <- edata_samples |> bind_rows(vm_samples_biota_only)
 #| label: edata-measurements
 
 # Create measurements table
-# # NOTE: All freshwater values reported as EnhetID = 8 (µg/L)
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
 edata_measurements <- biota_samples_merged |>
@@ -1480,9 +1508,9 @@ edata_measurements <- biota_samples_merged |>
 
     # Detection limits
     LOQ_VALUE = Kvantifiseringsgrense,
-    LOQ_UNIT = "µg/L", # TODO: Fix LOQ units
+    LOQ_UNIT = vm_convert_unit(Unit_Name),
     LOD_VALUE = Deteksjonsgrense,
-    LOD_UNIT = "µg/L", # TODO: Fix LOD units
+    LOD_UNIT = vm_convert_unit(Unit_Name),
 
     # TODO: Fix methods reference
     # Protocol references (FIXME: Need proper protocol ID mapping)
@@ -1554,18 +1582,37 @@ Do some quick checks to see if the data we're exporting looks like we expect it 
 ```{r}
 #| label: validate_export
 
+# TODO: We need to expand this session massively without treading on the toes of the main analysis pathway. How?
+edata_measurements |> count(ENVIRON_COMPARTMENT)
+
+
 edata_measurements |> count(MEASURED_UNIT)
 # nuts
 count(vm_filtered, Unit_Name)
 # the old classic lower case l for Liter
+```
 
-count(edata_measurements, SAMPLE_SPECIES)
-
+```{r}
+#| label: fig-vm-dotplot
 
 edata_measurements |>
-  ggplot(aes(x = MEASURED_VALUE, y = ENVIRON_COMPARTMENT)) +
-  geom_point()
+  ggplot(
+    aes(
+      y = MEASURED_VALUE,
+      x = SAMPLING_DATE |> as.Date(),
+      colour = ENVIRON_COMPARTMENT_SUB
+    )
+  ) +
+  geom_point(shape = 1) +
+  facet_wrap(
+    facets = vars(MEASURED_UNIT),
+    nrow = 2,
+    ncol = 2,
+    scales = "free_y"
+  )
 ```
+
+@fig-vm-dotplot looks, frankly, very suspicious.
 
 ## Species Data Coverage
 
