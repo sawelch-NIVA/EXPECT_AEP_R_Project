@@ -10,9 +10,9 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 -   [ ] Investigate some very strange detection and quantification limits
 -   [ ] Add probable contamination source
 -   [ ] More sanity checking of extracted values
--   [ ] @fig-vm-dotplot - what's going on here?
 -   [ ] Move boring code to targets
--   [ ] Fix export **again**.
+## Optional Improvements
+-   [ ] Improve heatmaps using https://github.com/raivokolde/pheatmap
 
 # Libraries & Setup
 
@@ -194,7 +194,7 @@ print(
 
 ## Sites Data
 
-NOTE: Vannmiljø export limit requires splitting site codes into multiple files
+Vannmiljø export limit requires splitting site codes into multiple files
 
 Procedure:
 
@@ -359,126 +359,273 @@ We don't yet have an oversight over the distribution of site types, biota, tissu
 
 ```{r}
 #| label: fig-heatmap-campaign-vannkategory
+#| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and reported water category, all years"
+#| fig-width: 12
+#| fig-height: 10
+#| warning: false
 
 # Create a summary of counts by the two variables
 vm_summary <- vm_merged |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN = case_when(
+      is.na(CAMPAIGN_DESCRIPTION_EN) ~ "Other",
+      TRUE ~ CAMPAIGN_DESCRIPTION_EN
+    )
+  ) |>
   group_by(CAMPAIGN_DESCRIPTION_EN, Vannkategori_Description) |>
   summarise(n_samples = n(), .groups = "drop")
 
 # Calculate text color threshold
 threshold_value <- mean(log10(vm_summary$n_samples), na.rm = TRUE)
 
-# Basic heatmap with ggplot2
-vm_summary |>
-  ggplot(aes(
-    x = Vannkategori_Description,
-    y = CAMPAIGN_DESCRIPTION_EN,
-    fill = n_samples
-  )) +
-  geom_tile() +
-  geom_text(
-    aes(
-      label = scales::comma(n_samples),
-      color = if_else(log10(n_samples) > threshold_value, "black", "white")
-    ),
-    size = 3
-  ) +
-  scale_fill_viridis_c(trans = "log10") +
-  scale_color_identity() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
-```
-
-```{r}
-#| label: fig-heatmap-medium-campaign
-# Create a summary of counts by the two variables
-vm_summary_medium <- vm_merged |>
-  group_by(CAMPAIGN_DESCRIPTION_EN, MediumID_Name) |>
-  summarise(n_samples = n(), .groups = "drop")
-
-# Calculate text color threshold
-threshold_value_medium <- mean(log10(vm_summary_medium$n_samples), na.rm = TRUE)
-
-# Calculate total samples per campaign for ordering
-campaign_order <- vm_summary_medium |>
+# Calculate total samples per campaign for ordering (y-axis)
+campaign_order <- vm_summary |>
   group_by(CAMPAIGN_DESCRIPTION_EN) |>
   summarise(total = sum(n_samples)) |>
-  arrange(total) |>
+  arrange(total) |> # puts highest values at top
   pull(CAMPAIGN_DESCRIPTION_EN)
 
-# Basic heatmap with ggplot2
-vm_summary_medium |>
+# Calculate total samples per water category for ordering (x-axis)
+vannkategori_order <- vm_summary |>
+  group_by(Vannkategori_Description) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(desc(total)) |> # puts highest values on left
+  pull(Vannkategori_Description)
+
+# Wrap text, then create complete grid with all combinations
+vm_summary_complete <- vm_summary |>
   mutate(
-    CAMPAIGN_DESCRIPTION_EN = factor(
-      CAMPAIGN_DESCRIPTION_EN,
-      levels = campaign_order
-    )
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(CAMPAIGN_DESCRIPTION_EN, 30),
+    Vannkategori_Description_wrapped = str_wrap(Vannkategori_Description, 20)
   ) |>
+  complete(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order, 30),
+    Vannkategori_Description_wrapped = str_wrap(vannkategori_order, 20),
+    fill = list(n_samples = 0)
+  ) |>
+  mutate(
+    # Factor with wrapped levels in the correct order
+    CAMPAIGN_DESCRIPTION_EN_wrapped = factor(
+      CAMPAIGN_DESCRIPTION_EN_wrapped,
+      levels = str_wrap(campaign_order, 30)
+    ),
+    Vannkategori_Description_wrapped = factor(
+      Vannkategori_Description_wrapped,
+      levels = str_wrap(vannkategori_order, 20)
+    )
+  )
+
+vm_summary_complete |>
   ggplot(aes(
-    x = MediumID_Name,
-    y = CAMPAIGN_DESCRIPTION_EN,
+    x = Vannkategori_Description_wrapped,
+    y = CAMPAIGN_DESCRIPTION_EN_wrapped,
     fill = n_samples
   )) +
-  geom_tile() +
+  geom_tile(colour = "white", linewidth = 0.25) +
   geom_text(
     aes(
-      label = scales::comma(n_samples),
+      label = if_else(n_samples > 0, scales::comma(n_samples), ""),
       color = if_else(
-        log10(n_samples) > threshold_value_medium,
+        n_samples > 0 & log10(n_samples) > threshold_value,
         "black",
         "white"
       )
     ),
     size = 3
   ) +
-  scale_fill_viridis_c(trans = "log10") +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
   scale_color_identity() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(
+    x = "",
+    y = ""
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
+    axis.text.y = element_text(size = 7),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  )
 ```
+
+@fig-heatmap-campaign-vannkategory clearly shows the the majority of copper contamination river and lake data from Vannmiljø is monitoring of mine-affected river systems. In general, sites expected to be contaminated (from mining, aquaculture, or other industries) are very well represented in the dataset. This is not unexpected, but needs to be kept in mind when interpreting the results. 
+
+Rivers, lakes, and coastal waters are the majority of the dataset, which is appropriate for a primarily water-focused dataset.
+
+```{r}
+#| label: fig-heatmap-medium-campaign
+#| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and reported sampling medium, all years"
+#| fig-width: 12
+#| fig-height: 10
+#| warning: false
+
+# Create a summary of counts by the two variables
+vm_summary_medium <- vm_merged |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN = case_when(
+      is.na(CAMPAIGN_DESCRIPTION_EN) ~ "Other",
+      TRUE ~ CAMPAIGN_DESCRIPTION_EN
+    )
+  ) |>
+  group_by(CAMPAIGN_DESCRIPTION_EN, MediumID_Name) |>
+  summarise(n_samples = n(), .groups = "drop")
+
+threshold_value_medium <- mean(log10(vm_summary_medium$n_samples), na.rm = TRUE)
+
+campaign_order_medium <- vm_summary_medium |>
+  group_by(CAMPAIGN_DESCRIPTION_EN) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(CAMPAIGN_DESCRIPTION_EN)
+
+medium_order <- vm_summary_medium |>
+  group_by(MediumID_Name) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(desc(total)) |>
+  pull(MediumID_Name)
+
+vm_summary_medium_complete <- vm_summary_medium |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(CAMPAIGN_DESCRIPTION_EN, 30),
+    MediumID_Name_wrapped = str_wrap(MediumID_Name, 20)
+  ) |>
+  complete(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order_medium, 30),
+    MediumID_Name_wrapped = str_wrap(medium_order, 20),
+    fill = list(n_samples = 0)
+  ) |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = factor(
+      CAMPAIGN_DESCRIPTION_EN_wrapped,
+      levels = str_wrap(campaign_order_medium, 30)
+    ),
+    MediumID_Name_wrapped = factor(
+      MediumID_Name_wrapped,
+      levels = str_wrap(medium_order, 20)
+    )
+  )
+
+vm_summary_medium_complete |>
+  ggplot(aes(
+    x = MediumID_Name_wrapped,
+    y = CAMPAIGN_DESCRIPTION_EN_wrapped,
+    fill = n_samples
+  )) +
+  geom_tile(colour = "white", linewidth = 0.25) +
+  geom_text(
+    aes(
+      label = if_else(n_samples > 0, scales::comma(n_samples), ""),
+      color = if_else(
+        n_samples > 0 & log10(n_samples) > threshold_value_medium,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
+  ) +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
+  scale_color_identity() +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(x = "", y = "") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
+    axis.text.y = element_text(size = 7),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  )
+```
+
+We also check reported water category by sampling medium, for the sake of completeness (@fig-heatmap-vannkategori-medium). From my interpretation, there are some combinations that make little sense (e.g. water category = air, sampling medium = soil), However, these are a minority.
 
 ```{r}
 #| label: fig-heatmap-vannkategori-medium
+#| fig-cap: "Distribution of Vannmiljø copper samples by water category and reported sampling medium, all years"
+#| fig-width: 12
+#| warning: false
 
 # Create a summary of counts by the two variables
 vm_summary_vkat_medium <- vm_merged |>
   group_by(Vannkategori_Description, MediumID_Name) |>
   summarise(n_samples = n(), .groups = "drop")
 
-# Calculate text color threshold
 threshold_value_vkat_medium <- mean(
   log10(vm_summary_vkat_medium$n_samples),
   na.rm = TRUE
 )
 
-# Basic heatmap with ggplot2
-vm_summary_vkat_medium |>
+vannkategori_order_vkat <- vm_summary_vkat_medium |>
+  group_by(Vannkategori_Description) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(Vannkategori_Description)
+
+medium_order_vkat <- vm_summary_vkat_medium |>
+  group_by(MediumID_Name) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(desc(total)) |>
+  pull(MediumID_Name)
+
+vm_summary_vkat_medium_complete <- vm_summary_vkat_medium |>
+  mutate(
+    Vannkategori_Description_wrapped = str_wrap(Vannkategori_Description, 20),
+    MediumID_Name_wrapped = str_wrap(MediumID_Name, 20)
+  ) |>
+  complete(
+    Vannkategori_Description_wrapped = str_wrap(vannkategori_order_vkat, 20),
+    MediumID_Name_wrapped = str_wrap(medium_order_vkat, 20),
+    fill = list(n_samples = 0)
+  ) |>
+  mutate(
+    Vannkategori_Description_wrapped = factor(
+      Vannkategori_Description_wrapped,
+      levels = str_wrap(vannkategori_order_vkat, 20)
+    ),
+    MediumID_Name_wrapped = factor(
+      MediumID_Name_wrapped,
+      levels = str_wrap(medium_order_vkat, 20)
+    )
+  )
+
+vm_summary_vkat_medium_complete |>
   ggplot(aes(
-    x = MediumID_Name,
-    y = Vannkategori_Description,
+    x = MediumID_Name_wrapped,
+    y = Vannkategori_Description_wrapped,
     fill = n_samples
   )) +
-  geom_tile() +
+  geom_tile(colour = "white", linewidth = 0.25) +
   geom_text(
     aes(
-      label = scales::comma(n_samples),
+      label = if_else(n_samples > 0, scales::comma(n_samples), ""),
       color = if_else(
-        log10(n_samples) > threshold_value_vkat_medium,
+        n_samples > 0 & log10(n_samples) > threshold_value_vkat_medium,
         "black",
         "white"
       )
     ),
     size = 3
   ) +
-  scale_fill_viridis_c(trans = "log10") +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
   scale_color_identity() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(x = "", y = "") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
+    axis.text.y = element_text(size = 7),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  )
 ```
+
+@tbl-sample-distribution gives the cumulative proportion of samples corresponding to each combination of reported water category and medium. This allows us to make strategic decisions about which groups to prioritise conversion into our eData format. I have elected to use 90% as an arbitrary cut-off point - that is, once I have 90% coverage of water categories and sampling media (before date-based sampling), I will consider that sufficient data.
 
 ```{r}
 #| label: tbl-sample-distribution
-#| tbl-cap: "Distribution of samples across water categories and media types"
 
 # Calculate sample distribution with cumulative percentages
 sample_distribution <- vm_summary_vkat_medium |>
@@ -520,15 +667,23 @@ datatable(
   )
 ```
 
-@tbl-sample-distribution shows the distribution of samples across Vannkategori and MediumID. This is what I'm using as a guide of where to spend my time. If I can capture 90% of the samples (before the other filtration steps) then I'll call it done.
 
-@fig-sample-distribution-biota is biota. Some of these are certainly irrelevant - e.g. *Felis catus*... but how to filter?
+We also consider sample size of @fig-sample-distribution-biota by campaign. This includes many largely irrelevant (not-aquatic) species, but the vast majority are standard aquatic monitoring species (mussels, cod, edible crabs, etc.).
 
 ```{r}
 #| label: fig-sample-distribution-biota
+#| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
+#| fig-width: 12
+#| warning: false
 
 # Create a summary of counts by the two variables (filter to non-NA species)
 vm_summary_species <- vm_merged |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN = case_when(
+      is.na(CAMPAIGN_DESCRIPTION_EN) ~ "Other",
+      TRUE ~ CAMPAIGN_DESCRIPTION_EN
+    )
+  ) |>
   filter(!is.na(VitenskapligNavn), VitenskapligNavn != "Artsuavhengig") |>
   group_by(CAMPAIGN_DESCRIPTION_EN, VitenskapligNavn) |>
   summarise(n_samples = n(), .groups = "drop")
@@ -539,102 +694,205 @@ threshold_value_species <- mean(
   na.rm = TRUE
 )
 
-# Calculate total samples per campaign for ordering (y-axis)
-campaign_order_species <- vm_summary_species |>
+campaign_order_species_new <- vm_summary_species |>
   group_by(CAMPAIGN_DESCRIPTION_EN) |>
   summarise(total = sum(n_samples)) |>
   arrange(total) |>
   pull(CAMPAIGN_DESCRIPTION_EN)
 
-# Calculate total samples per species for ordering (x-axis)
-species_order <- vm_summary_species |>
+species_order_new <- vm_summary_species |>
   group_by(VitenskapligNavn) |>
   summarise(total = sum(n_samples)) |>
-  arrange(total) |>
+  arrange(desc(total)) |>
   pull(VitenskapligNavn)
 
-# Basic heatmap with ggplot2
-vm_summary_species |>
+vm_summary_species_complete <- vm_summary_species |>
   mutate(
-    CAMPAIGN_DESCRIPTION_EN = factor(
-      CAMPAIGN_DESCRIPTION_EN,
-      levels = campaign_order_species
-    ),
-    VitenskapligNavn = factor(VitenskapligNavn, levels = species_order)
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(CAMPAIGN_DESCRIPTION_EN, 30),
+    VitenskapligNavn_wrapped = str_wrap(VitenskapligNavn, 20)
   ) |>
+  complete(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order_species_new, 30),
+    VitenskapligNavn_wrapped = str_wrap(species_order_new, 20),
+    fill = list(n_samples = 0)
+  ) |>
+  mutate(
+    CAMPAIGN_DESCRIPTION_EN_wrapped = factor(
+      CAMPAIGN_DESCRIPTION_EN_wrapped,
+      levels = str_wrap(campaign_order_species_new, 30)
+    ),
+    VitenskapligNavn_wrapped = factor(
+      VitenskapligNavn_wrapped,
+      levels = str_wrap(species_order_new, 20)
+    )
+  )
+
+vm_summary_species_complete |>
   ggplot(aes(
-    x = VitenskapligNavn,
-    y = CAMPAIGN_DESCRIPTION_EN,
+    x = VitenskapligNavn_wrapped,
+    y = CAMPAIGN_DESCRIPTION_EN_wrapped,
     fill = n_samples
   )) +
-  geom_tile() +
+  geom_tile(colour = "white", linewidth = 0.25) +
   geom_text(
     aes(
-      label = scales::comma(n_samples),
+      label = if_else(n_samples > 0, scales::comma(n_samples), ""),
       color = if_else(
-        log10(n_samples) > threshold_value_species,
+        n_samples > 0 & log10(n_samples) > threshold_value_species,
         "black",
         "white"
       )
     ),
     size = 3
   ) +
-  scale_fill_viridis_c(trans = "log10") +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
   scale_color_identity() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7))
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(x = "", y = "") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
+    axis.text.y = element_text(size = 7),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  ) +
+  coord_flip()
+
 ```
 
-Finally, what about units @fig-heatmap-units-medium? Units are, I'm relieved to say, sensible.
+Finally, we check units by sampling medium @fig-heatmap-units-medium. We would expect mass/volume units to be used for water and air samples, and mass/mass (dry or wet) units to be used for biota, soil, sediment, and other largely solid matrices. Fortunately this is bourne out by the data. 
 
 ```{r}
 #| label: fig-heatmap-units-medium
+#| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
+#| fig-width: 12
+#| fig-height: 3
+#| warning: false
 
-# Create a summary of counts by the two variables
 vm_summary_units_medium <- vm_merged |>
   group_by(Unit_Name, MediumID_Name) |>
   summarise(n_samples = n(), .groups = "drop")
-
-# Calculate text color threshold
 threshold_value_units_medium <- mean(
   log10(vm_summary_units_medium$n_samples),
   na.rm = TRUE
 )
 
-# Basic heatmap with ggplot2
-vm_summary_units_medium |>
+unit_order <- vm_summary_units_medium |>
+  group_by(Unit_Name) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(total) |>
+  pull(Unit_Name)
+
+medium_order_units <- vm_summary_units_medium |>
+  group_by(MediumID_Name) |>
+  summarise(total = sum(n_samples)) |>
+  arrange(desc(total)) |>
+  pull(MediumID_Name)
+
+vm_summary_units_medium_complete <- vm_summary_units_medium |>
+  mutate(
+    Unit_Name_wrapped = str_wrap(Unit_Name, 20),
+    MediumID_Name_wrapped = str_wrap(MediumID_Name, 20)
+  ) |>
+  complete(
+    Unit_Name_wrapped = str_wrap(unit_order, 20),
+    MediumID_Name_wrapped = str_wrap(medium_order_units, 20),
+    fill = list(n_samples = 0)
+  ) |>
+  mutate(
+    Unit_Name_wrapped = factor(
+      Unit_Name_wrapped,
+      levels = str_wrap(unit_order, 20)
+    ),
+    MediumID_Name_wrapped = factor(
+      MediumID_Name_wrapped,
+      levels = str_wrap(medium_order_units, 20)
+    )
+  )
+
+
+vm_summary_units_medium_complete |>
   ggplot(aes(
-    x = MediumID_Name,
-    y = Unit_Name,
+    x = MediumID_Name_wrapped,
+    y = Unit_Name_wrapped,
     fill = n_samples
   )) +
-  geom_tile() +
+  geom_tile(colour = "white", linewidth = 0.25) +
   geom_text(
     aes(
-      label = scales::comma(n_samples),
+      label = if_else(n_samples > 0, scales::comma(n_samples), ""),
       color = if_else(
-        log10(n_samples) > threshold_value_units_medium,
+        n_samples > 0 & log10(n_samples) > threshold_value_units_medium,
         "black",
         "white"
       )
     ),
     size = 3
   ) +
-  scale_fill_viridis_c(trans = "log10") +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
   scale_color_identity() +
-  theme_minimal() +
-  coord_flip()
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(x = "", y = "") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
+    axis.text.y = element_text(size = 10),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none",
+  )
+
+```
+
+Let's check out methods (@tbl-methods-by-year).
+
+```{r}
+#| label: tbl-methods-by-year
+#| tbl-cap: "Methods Used each year"
+
+vm_summary_methods <- vm_merged |>
+  select(Tid_provetak, Provetakmetode_id, Analysemetode_id, Medium_id) |>
+  pivot_longer(
+    cols = c(Provetakmetode_id, Analysemetode_id),
+    names_to = "Method_Type",
+    values_to = "Method_Name"
+  ) |>
+  mutate(
+    Year = ymd_hms(Tid_provetak) |> year(),
+    Method_Type = case_match(
+      Method_Type,
+      "Provetakmetode_id" ~ "Sampling",
+      "Analysemetode_id" ~ "Analysis"
+    ),
+    Base_Method = str_extract(
+      Method_Name,
+      pattern = "([A-Z\\-]* [0-9]{4,5}?(-[0-9]))"
+    )
+  ) |>
+  group_by(Method_Name) |>
+  reframe(
+    Rows = n(),
+    Method_Type = paste(Method_Type),
+    Last_Year_Used = last(Year),
+    Base_Method
+  ) |>
+  distinct() |>
+  arrange(desc(Rows))
+
+datatable(vm_summary_methods)
+
+
+vm_lookup_analysis
 ```
 
 ## Apply Filters
 
-As above, we filter data very heavily here, so we don't have to spend a lot of time on edge cases.
-
-Data Quality Filters Applied: 2025-12-16
+As discussed above, to avoid spending excessive time on low-incidence edge cases we filter the data at this stage to the most relevant compartments and dates. The results of this summarisation are calculated below.
 
 Included:
 
--   See config tables in \[Configuration\](##Configuration) for specifics
+-   See config tables in [Configuration](##Configuration) for specifics
 -   Point sites only (no polygons)
 -   Mainland Norway only (excluded Svalbard)
 
@@ -667,42 +925,160 @@ vm_filtered <- vm_merged |>
   filter(SAMPLING_DATE >= config$filters$date_start)
 
 message(glue(
-  "After filtering: {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
+  "Filtered from {nrow(vm_merged)} to {nrow(vm_filtered)} rows ({round(100*nrow(vm_filtered)/nrow(vm_merged), 1)}% of merged data)"
 ))
 
 ```
 
-Let's also take a look at what we're excluding (based on compartments)
+For completeness, we also report on excluded groups (@tbl-processing-excluded-data)
+
+- [ ] Table HTML is broken here.
 
 ```{r}
-#| label: processing-excluded-data
-#| echo: false
+#| label: tbl-processing-excluded-data
+#| tbl-cap: "Summary of excluded data by filter criterion"
 
-vm_excluded <- vm_merged |>
-  # Add sampling date as Date type
-  mutate(SAMPLING_DATE = as.Date(Tid_provetak)) |>
-  # Apply compartment filters
+# Track exclusions step by step
+exclusion_summary <- tibble(
+  Filter = character(),
+  Rows_Excluded = integer(),
+  Rows_Remaining = integer(),
+  Excluded_Values = character()
+)
+
+# Start with merged data
+current_data <- vm_merged |>
+  mutate(SAMPLING_DATE = as.Date(Tid_provetak))
+
+initial_count <- nrow(current_data)
+
+# Step 1: Compartment filters
+excluded_compartments <- current_data |>
   filter(
-    !(ENVIRON_COMPARTMENT_vkat %in% config$filters$compartment),
-    !(ENVIRON_COMPARTMENT_medium %in% config$filters$compartment),
-    !(ENVIRON_COMPARTMENT_SUB_vkat %in% config$filters$compartment_sub),
-    !(ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub)
+    !(ENVIRON_COMPARTMENT_vkat %in%
+      config$filters$compartment |
+      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment) |
+      !(ENVIRON_COMPARTMENT_SUB_vkat %in%
+        config$filters$compartment_sub |
+        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub)
+  ) |>
+  group_by(ENVIRON_COMPARTMENT_SUB_vkat, ENVIRON_COMPARTMENT_SUB_medium) |>
+  reframe(n = n()) |>
+  mutate(
+    label = glue(
+      "{ENVIRON_COMPARTMENT_SUB_vkat}/{ENVIRON_COMPARTMENT_SUB_medium} (n={n})"
+    )
+  ) |>
+  pull(label) |>
+  paste(collapse = "; ")
+
+after_compartment <- current_data |>
+  filter(
+    ENVIRON_COMPARTMENT_vkat %in%
+      config$filters$compartment |
+      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
+    ENVIRON_COMPARTMENT_SUB_vkat %in%
+      config$filters$compartment_sub |
+      ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
   )
 
-count(vm_excluded, ENVIRON_COMPARTMENT_SUB_vkat)
-count(vm_excluded, ENVIRON_COMPARTMENT_medium)
-count(vm_merged, Objekttype)
+exclusion_summary <- exclusion_summary |>
+  add_row(
+    Filter = "Wrong compartment/ subcompartment",
+    Rows_Excluded = initial_count - nrow(after_compartment),
+    Rows_Remaining = nrow(after_compartment),
+    Excluded_Values = excluded_compartments
+  )
 
-message(glue(
-  "Excluded: {nrow(vm_excluded)} rows ({round(100*nrow(vm_excluded)/nrow(vm_merged), 1)}% of merged data)"
-))
+# Step 2: Site type filter
+excluded_sites <- after_compartment |>
+  filter(
+    Objekttype != "point" |
+      Vannlokalitetsnavn == config$filters$exclude_sites
+  ) |>
+  group_by(Objekttype, Vannlokalitetsnavn) |>
+  reframe(n = n()) |>
+  mutate(label = glue("{Objekttype}: {Vannlokalitetsnavn} (n={n})")) |>
+  pull(label) |>
+  paste(collapse = "; ")
 
+after_site_type <- after_compartment |>
+  filter(
+    Objekttype == "point",
+    Vannlokalitetsnavn != config$filters$exclude_sites
+  )
+
+exclusion_summary <- exclusion_summary |>
+  add_row(
+    Filter = "Not point sites or excluded sites",
+    Rows_Excluded = nrow(after_compartment) - nrow(after_site_type),
+    Rows_Remaining = nrow(after_site_type),
+    Excluded_Values = excluded_sites
+  )
+
+# Step 3: Date range filter
+excluded_dates <- after_site_type |>
+  filter(SAMPLING_DATE < config$filters$date_start) |>
+  group_by(year = year(SAMPLING_DATE)) |>
+  reframe(n = n()) |>
+  mutate(label = glue("{year} (n={n})")) |>
+  pull(label) |>
+  paste(collapse = "; ")
+
+after_date <- after_site_type |>
+  filter(SAMPLING_DATE >= config$filters$date_start)
+
+exclusion_summary <- exclusion_summary |>
+  add_row(
+    Filter = "Outside date range",
+    Rows_Excluded = nrow(after_site_type) - nrow(after_date),
+    Rows_Remaining = nrow(after_date),
+    Excluded_Values = excluded_dates
+  )
+
+# Add total row
+exclusion_summary <- exclusion_summary |>
+  add_row(
+    Filter = "**Total**",
+    Rows_Excluded = initial_count - nrow(after_date),
+    Rows_Remaining = nrow(after_date),
+    Excluded_Values = ""
+  ) |>
+  mutate(
+    Percent_Excluded = round(100 * Rows_Excluded / initial_count, 1),
+    Percent_Remaining = round(100 * Rows_Remaining / initial_count, 1)
+  )
+
+datatable(
+  exclusion_summary,
+  colnames = c(
+    "Filter Criterion",
+    "Rows Excluded",
+    "Rows Remaining",
+    "Excluded Values",
+    "% Excluded",
+    "% Remaining"
+  ),
+  rownames = FALSE,
+  escape = c("Excluded Values"),
+  options = list(
+    columnDefs = list(
+      list(width = "300px", targets = 3) # Make Excluded_Values column wider
+    )
+  )
+) |>
+  formatCurrency(
+    columns = c("Rows_Excluded", "Rows_Remaining"),
+    currency = "",
+    digits = 0
+  )
 ```
 
 A Sankey diagram would be better, but @fig-filter-visualisation will do for now.
 
 ```{r}
 #| label: fig-filter-visualisation
+#| fig-cap: Vannmiljø copper sample size at different steps of filtration
 
 # Create filtering summary
 filter_flow <- tibble(
@@ -743,7 +1119,6 @@ ggplot(filter_flow, aes(x = stage, y = records)) +
     expand = expansion(mult = c(0, 0.1))
   ) +
   labs(
-    title = "Data Retention Through Filtering Pipeline",
     x = NULL,
     y = "Number of Records"
   ) +
@@ -789,7 +1164,11 @@ conflict_check <- vm_filtered |>
   arrange(desc(count))
 
 if (nrow(conflict_check) > 0) {
-  warning("Conflicts detected between vannkategori and medium lookups")
+  warning(
+    glue(
+      "{nrow(conflict_check)} conflicts detected between vannkategori and medium lookups"
+    )
+  )
 }
 
 datatable(
@@ -821,7 +1200,7 @@ datatable(
 ```{r}
 #| label: resolve-compartment-conflicts
 
-# use the below function to resolve specific conflicts
+# TODO: This maybe should be a table, although the logic is a bit complicated and twisty
 resolve_compartment_conflicts <- function(df) {
   df <- df |>
     mutate(
@@ -829,6 +1208,17 @@ resolve_compartment_conflicts <- function(df) {
         # Explicit rule: Biota trumps all
         ENVIRON_COMPARTMENT_vkat == "Biota" |
           ENVIRON_COMPARTMENT_medium == "Biota" ~ "Biota",
+
+        # Check if one is wildcard - use the non-wildcard value
+        !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
+          !has_data_issue(ENVIRON_COMPARTMENT_medium) &
+          ENVIRON_COMPARTMENT_vkat == "*" &
+          ENVIRON_COMPARTMENT_medium != "*" ~ ENVIRON_COMPARTMENT_medium,
+
+        !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
+          !has_data_issue(ENVIRON_COMPARTMENT_medium) &
+          ENVIRON_COMPARTMENT_vkat != "*" &
+          ENVIRON_COMPARTMENT_medium == "*" ~ ENVIRON_COMPARTMENT_vkat,
 
         # No conflict, return NA
         .default = NA_character_
@@ -842,17 +1232,57 @@ resolve_compartment_conflicts <- function(df) {
         ENVIRON_COMPARTMENT_SUB_vkat == "Freshwater" &
           ENVIRON_COMPARTMENT_SUB_medium == "Aquatic Sediment" ~
           "Aquatic Sediment",
+        ENVIRON_COMPARTMENT_SUB_vkat == "Marine/Salt Water" &
+          ENVIRON_COMPARTMENT_SUB_medium == "Aquatic Sediment" ~
+          "Aquatic Sediment",
+
+        # Check if one is wildcard - use the non-wildcard value
+        !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
+          !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
+          ENVIRON_COMPARTMENT_SUB_vkat == "*" &
+          ENVIRON_COMPARTMENT_SUB_medium !=
+            "*" ~ ENVIRON_COMPARTMENT_SUB_medium,
+
+        !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
+          !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
+          ENVIRON_COMPARTMENT_SUB_vkat != "*" &
+          ENVIRON_COMPARTMENT_SUB_medium == "*" ~ ENVIRON_COMPARTMENT_SUB_vkat,
 
         # No conflict, return NA
         .default = NA_character_
       )
     )
 
-  n_resolved_sub <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+  # Count potential conflicts (where both sources differ and neither is NA)
+  n_potential_compartment <- df |>
+    filter(
+      !has_data_issue(ENVIRON_COMPARTMENT_vkat),
+      !has_data_issue(ENVIRON_COMPARTMENT_medium),
+      ENVIRON_COMPARTMENT_vkat != ENVIRON_COMPARTMENT_medium
+    ) |>
+    nrow()
+
+  n_potential_sub <- df |>
+    filter(
+      !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat),
+      !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium),
+      ENVIRON_COMPARTMENT_SUB_vkat != ENVIRON_COMPARTMENT_SUB_medium
+    ) |>
+    nrow()
+
+  # Count resolved
   n_resolved <- df |> tally(!is.na(ENVIRON_COMPARTMENT_resolved))
+  n_resolved_sub <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+
+  # Count unresolved
+  n_unresolved <- n_potential_compartment - n_resolved
+  n_unresolved_sub <- n_potential_sub - n_resolved_sub
 
   message(glue(
-    "Resolved {n_resolved} conflicting compartments and {n_resolved_sub} conflicting subcompartments."
+    "Compartments: {n_resolved} resolved, {n_unresolved} unresolved (of {n_potential_compartment} conflicts)"
+  ))
+  message(glue(
+    "Subcompartments: {n_resolved_sub} resolved, {n_unresolved_sub} unresolved (of {n_potential_sub} conflicts)"
   ))
 
   df
@@ -874,6 +1304,77 @@ vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(
     )
   )
 ```
+
+And let's take a look at anyting we failed to resolve: @tbl-unresolved-conflicts. At time of writing we have 1571 rows with unresolved conflicts, but this is a very small number and I don't (currently) judge it a good use of time to chase down these edge cases.
+
+```{r}
+#| label: tbl-unresolved-conflicts
+#| tbl-cap: "Remaining unresolved conflicts after applying resolution rules"
+
+# Check for unresolved conflicts
+unresolved_conflicts <- vm_compartment_conflicts_resolved |>
+  # Keep only rows where conflicts weren't resolved
+  filter(
+    # Compartment conflict exists but wasn't resolved
+    (!has_data_issue(ENVIRON_COMPARTMENT_vkat) &
+      !has_data_issue(ENVIRON_COMPARTMENT_medium) &
+      ENVIRON_COMPARTMENT_vkat != ENVIRON_COMPARTMENT_medium &
+      is.na(ENVIRON_COMPARTMENT_resolved)) |
+      # OR subcompartment conflict exists but wasn't resolved
+      (!has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
+        !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
+        ENVIRON_COMPARTMENT_SUB_vkat != ENVIRON_COMPARTMENT_SUB_medium &
+        is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+  ) |>
+  group_by(
+    ENVIRON_COMPARTMENT_vkat,
+    ENVIRON_COMPARTMENT_medium,
+    ENVIRON_COMPARTMENT_SUB_vkat,
+    ENVIRON_COMPARTMENT_SUB_medium
+  ) |>
+  reframe(count = n()) |>
+  mutate(
+    compartment_conflict = ENVIRON_COMPARTMENT_vkat !=
+      ENVIRON_COMPARTMENT_medium,
+    subcompartment_conflict = ENVIRON_COMPARTMENT_SUB_vkat !=
+      ENVIRON_COMPARTMENT_SUB_medium,
+    Conflict = case_when(
+      compartment_conflict & subcompartment_conflict ~ "Main, Sub",
+      compartment_conflict ~ "Main",
+      subcompartment_conflict ~ "Sub",
+      .default = NA_character_
+    )
+  ) |>
+  arrange(desc(count))
+
+if (nrow(unresolved_conflicts) > 0) {
+  warning(glue(
+    "{nrow(unresolved_conflicts)} conflict combinations remain unresolved ({sum(unresolved_conflicts$count)} rows)"
+  ))
+}
+
+datatable(
+  unresolved_conflicts |>
+    select(
+      ENVIRON_COMPARTMENT_vkat,
+      ENVIRON_COMPARTMENT_medium,
+      ENVIRON_COMPARTMENT_SUB_vkat,
+      ENVIRON_COMPARTMENT_SUB_medium,
+      count,
+      Conflict
+    ),
+  colnames = c(
+    "Compartment (Vannkategory)",
+    "Compartment (MediumName)",
+    "Subcompartment (Vannkategory)",
+    "Subcompartment (MediumName)",
+    "Rows",
+    "Conflict Type"
+  )
+)
+```
+
+
 
 @tbl-geographic-conflicts also lists all combinations, which means it also lists things that actually aren't problems. Again, may need cleaning up.
 
@@ -916,7 +1417,7 @@ geo_check <- vm_compartment_conflicts_resolved |>
 
 if (nrow(geo_check) > 0) {
   warning(glue(
-    "Geographic feature conflicts: {nrow(geo_check)} combinations"
+    "Geographic feature conflicts: {nrow(geo_check)} combinations ({sum(geo_check$count)} rows)"
   ))
 }
 
@@ -941,7 +1442,7 @@ datatable(
 )
 ```
 
-Since we haven't actually had any geographical conflicts flagged yet there's no need to write code to defuse them. But watch this space.
+At present there are 201 rows with conflicting site definitions (the number of actual sites will be lower). As this number is also rather low, I have elected not to spend time on digging through the data to resolve these conflicts either. Should it be necessary, the compartment resolution code can be reused (but chasing down individual sites would take far longer).
 
 ```{r}
 #| label: resolve-feature-conflicts
@@ -1396,20 +1897,31 @@ We also need to convert tissue types (stored as MediumID in Vannmiljø) into our
 #| label: tbl-raw-tissue
 
 # Create tissue table
+# TODO: Should become a junction table (?) in the fullness of time
+map_tissue_type <- function(medium_id_name) {
+  case_match(
+    medium_id_name,
+    "Biota bløtdeler" ~ "Total soft tissues",
+    "Biota gjeller" ~ "Gills",
+    "Biota helkropp" ~ "Whole body",
+    "Biota lever" ~ "Liver",
+    "Biota muskelvev" ~ "Muscle tissue",
+    "Biota plantevev" ~ "Plant tissue",
+    "Biota egg" ~ "Egg",
+    "Biota blod" ~ "Blood",
+    "Biota skuddspiss" ~ "Shoot tip",
+    "Biota fettvev" ~ "Adipose tissue",
+    "Biota galle" ~ "Bile",
+    .default = "Unknown Tissue"
+  )
+}
 
-# TODO: There are a lot more tissues to fix now!
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
 tissue_frequency <- count(edata_biota, MediumID_Name) |>
   arrange(desc(n)) |>
   mutate(
-    SAMPLE_TISSUE = case_match(
-      MediumID_Name,
-      "Biota bløtdeler" ~ "Total soft tissues",
-      "Biota gjeller" ~ "Gills",
-      "Biota helkropp" ~ "Whole body",
-      .default = "Unknown Tissue"
-    )
+    SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
   )
 
 # Report data quality issues
@@ -1426,13 +1938,7 @@ datatable(tissue_frequency)
 
 edata_biota_tissue_merged <- edata_biota_merged |>
   mutate(
-    SAMPLE_TISSUE = case_match(
-      MediumID_Name,
-      "Biota bløtdeler" ~ "Total soft tissues",
-      "Biota gjeller" ~ "Gills",
-      "Biota helkropp" ~ "Whole body",
-      .default = "Unknown Tissue"
-    )
+    SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
   )
 
 ```
@@ -1571,7 +2077,7 @@ message(glue(
 
 ## Create Export
 
-We export the resulting data to a zip file in our
+We export the resulting data to a zip file in our `data/raw/eData` folder where we keep the literature extractions
 
 ```{r}
 #| label: export-create-zip
