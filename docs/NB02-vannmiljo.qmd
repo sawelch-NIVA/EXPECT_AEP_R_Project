@@ -6,13 +6,26 @@ date: "2025.12.16"
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
 
+```{mermaid}
+%%| label: fig-mermaid-process
+%%| fig-width: 12
+%%| fig-cap: |
+%%|   A placeholder for a basic flow diagram of what we do here.
+flowchart LR
+  A[Export samples from Vannmijlø] --> C(Knitr)
+  B[Export sites from Vannmijlø] --> C(Knitr)
+  C(Knitr)
+```
+
 # To Do:
 -   [ ] Investigate some very strange detection and quantification limits
 -   [ ] Add probable contamination source
 -   [ ] More sanity checking of extracted values
 -   [ ] Move boring code to targets
+-   [ ] Work out how to do CREED for this data, then implement.
 ## Optional Improvements
 -   [ ] Improve heatmaps using https://github.com/raivokolde/pheatmap
+-   [ ] Make real Sankey diagrams
 
 # Libraries & Setup
 
@@ -237,7 +250,7 @@ Some of the lookups are actually direct from Vannmiljø though - they're the xls
 # Maps Vannmiljø Medium_id to eData compartment/species/tissue fields
 vm_lookup_medium_raw <- read_csv(
   config$files$lookup_medium,
-  guess_max = 1000000000, # this may not be the best idea in the world
+  guess_max = 100, # this may not be the best idea in the world
   show_col_types = FALSE # TODO: Come back to this
 )
 
@@ -674,6 +687,7 @@ We also consider sample size of @fig-sample-distribution-biota by campaign. This
 #| label: fig-sample-distribution-biota
 #| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
 #| fig-width: 12
+#| fig-height: 14
 #| warning: false
 
 # Create a summary of counts by the two variables (filter to non-NA species)
@@ -697,13 +711,13 @@ threshold_value_species <- mean(
 campaign_order_species_new <- vm_summary_species |>
   group_by(CAMPAIGN_DESCRIPTION_EN) |>
   summarise(total = sum(n_samples)) |>
-  arrange(total) |>
+  arrange(desc(total)) |>
   pull(CAMPAIGN_DESCRIPTION_EN)
 
 species_order_new <- vm_summary_species |>
   group_by(VitenskapligNavn) |>
   summarise(total = sum(n_samples)) |>
-  arrange(desc(total)) |>
+  arrange(total) |>
   pull(VitenskapligNavn)
 
 vm_summary_species_complete <- vm_summary_species |>
@@ -845,11 +859,11 @@ vm_summary_units_medium_complete |>
 
 ```
 
-Let's check out methods (@tbl-methods-by-year).
+Let's check out methods (@tbl-methods-by-year). Anything with an eData Classification column has been matched with the lookup. Vannmiljø methods without this are either not able to be matched (e.g. UKJENT) or aren't included in our filtered dataset (see next section).
 
 ```{r}
 #| label: tbl-methods-by-year
-#| tbl-cap: "Methods Used each year"
+#| tbl-cap: "Vannmiljø sampling and analysis method IDs reported by number of samples (rows), last year used, and corresponding eData Classification (if relevant)."
 
 vm_summary_methods <- vm_merged |>
   select(Tid_provetak, Provetakmetode_id, Analysemetode_id, Medium_id) |>
@@ -869,7 +883,9 @@ vm_summary_methods <- vm_merged |>
       Method_Name,
       pattern = "([A-Z\\-]* [0-9]{4,5}?(-[0-9]))"
     )
-  ) |>
+  )
+
+vm_summary_methods_table <- vm_summary_methods |>
   group_by(Method_Name) |>
   reframe(
     Rows = n(),
@@ -878,12 +894,25 @@ vm_summary_methods <- vm_merged |>
     Base_Method
   ) |>
   distinct() |>
-  arrange(desc(Rows))
+  arrange(desc(Rows)) |>
+  left_join(
+    vm_lookup_methods |> select(ISO_ID, PROTOCOL_NAME),
+    by = c("Method_Name" = "ISO_ID")
+  )
 
-datatable(vm_summary_methods)
+datatable(
+  vm_summary_methods_table,
+  colnames = c(
+    "n",
+    "Vm ID",
+    "Rows",
+    "Type",
+    "Last Used",
+    "Base Code",
+    "eData Classification"
+  )
+)
 
-
-vm_lookup_analysis
 ```
 
 ## Apply Filters
@@ -1079,6 +1108,7 @@ A Sankey diagram would be better, but @fig-filter-visualisation will do for now.
 ```{r}
 #| label: fig-filter-visualisation
 #| fig-cap: Vannmiljø copper sample size at different steps of filtration
+#| fig-width: 12
 
 # Create filtering summary
 filter_flow <- tibble(
@@ -1130,8 +1160,6 @@ At time of writing, we've got 94% of compartment data, which is well above our g
 ## Quality Checks
 
 We check for conflicts between our two lookups here - because we look up compartments, sites, biota, etc. based on both site `Vannlokalkode` and measurments' `MediumID`, it's possible that we might end up with conflicts and/or cases where neither of these give us the relevant data and we have to guess from context. Right now we filter down to only freshwater cases, hence the fact that we don't get hits below.
-
-- [ ] We have plenty of conflicts now! Hooray, and also... damn.
 
 Note: It's not necessarily a problem that something turns up as a conflict - we fix a lot of these in the next steps.
 
@@ -1204,25 +1232,33 @@ datatable(
 resolve_compartment_conflicts <- function(df) {
   df <- df |>
     mutate(
+      # SET COMPARTMENT
       ENVIRON_COMPARTMENT_resolved = case_when(
         # Explicit rule: Biota trumps all
         ENVIRON_COMPARTMENT_vkat == "Biota" |
           ENVIRON_COMPARTMENT_medium == "Biota" ~ "Biota",
 
-        # Check if one is wildcard - use the non-wildcard value
+        # if ENVIRON_COMPARTMENT_vkat is wildcard then use ENVIRON_COMPARTMENT_medium
         !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
           !has_data_issue(ENVIRON_COMPARTMENT_medium) &
           ENVIRON_COMPARTMENT_vkat == "*" &
           ENVIRON_COMPARTMENT_medium != "*" ~ ENVIRON_COMPARTMENT_medium,
 
+        # if ENVIRON_COMPARTMENT_medium is wildcard then use ENVIRON_COMPARTMENT_vkat
         !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
           !has_data_issue(ENVIRON_COMPARTMENT_medium) &
           ENVIRON_COMPARTMENT_vkat != "*" &
           ENVIRON_COMPARTMENT_medium == "*" ~ ENVIRON_COMPARTMENT_vkat,
 
-        # No conflict, return NA
-        .default = NA_character_
+        # if there's no conflict, use the first value
+        ENVIRON_COMPARTMENT_vkat ==
+          ENVIRON_COMPARTMENT_medium ~ ENVIRON_COMPARTMENT_medium,
+
+        # If none of these rules resolve the conflict, flag the row
+        .default = "FLAG: Compartment conflict."
       ),
+
+      # SET SUBCOMPARTMENT
       ENVIRON_COMPARTMENT_SUB_resolved = case_when(
         # Explicit rule: Biota trumps all
         ENVIRON_COMPARTMENT_SUB_vkat == "Biota, Aquatic" |
@@ -1236,24 +1272,30 @@ resolve_compartment_conflicts <- function(df) {
           ENVIRON_COMPARTMENT_SUB_medium == "Aquatic Sediment" ~
           "Aquatic Sediment",
 
-        # Check if one is wildcard - use the non-wildcard value
+        # if ENVIRON_COMPARTMENT_SUB_vkat is wildcard then use ENVIRON_COMPARTMENT_SUB_medium
         !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
           !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
           ENVIRON_COMPARTMENT_SUB_vkat == "*" &
           ENVIRON_COMPARTMENT_SUB_medium !=
             "*" ~ ENVIRON_COMPARTMENT_SUB_medium,
 
+        # if ENVIRON_COMPARTMENT_SUB_medium is wildcard then use ENVIRON_COMPARTMENT_MEDIUM_vkat
         !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
           !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
           ENVIRON_COMPARTMENT_SUB_vkat != "*" &
           ENVIRON_COMPARTMENT_SUB_medium == "*" ~ ENVIRON_COMPARTMENT_SUB_vkat,
 
-        # No conflict, return NA
-        .default = NA_character_
+        # if there's no conflict, use the first value
+        ENVIRON_COMPARTMENT_SUB_vkat ==
+          ENVIRON_COMPARTMENT_SUB_medium ~ ENVIRON_COMPARTMENT_SUB_vkat,
+
+        # If none of these rules resolve the conflict, flag the row
+        .default = "FLAG: Compartment conflict."
       )
     )
 
   # Count potential conflicts (where both sources differ and neither is NA)
+  # Why is this generating negative results?
   n_potential_compartment <- df |>
     filter(
       !has_data_issue(ENVIRON_COMPARTMENT_vkat),
@@ -1271,13 +1313,20 @@ resolve_compartment_conflicts <- function(df) {
     nrow()
 
   # Count resolved
-  n_resolved <- df |> tally(!is.na(ENVIRON_COMPARTMENT_resolved))
-  n_resolved_sub <- df |> tally(!is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+  n_resolved <- df |>
+    tally(ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.") -
+    n_potential_compartment
+  n_resolved_sub <- df |>
+    tally(ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict.") -
+    n_potential_sub
 
   # Count unresolved
-  n_unresolved <- n_potential_compartment - n_resolved
-  n_unresolved_sub <- n_potential_sub - n_resolved_sub
+  n_unresolved <- df |>
+    tally(ENVIRON_COMPARTMENT_resolved == "FLAG: Compartment conflict.")
+  n_unresolved_sub <- df |>
+    tally(ENVIRON_COMPARTMENT_SUB_resolved == "FLAG: Compartment conflict.")
 
+  # todo: this is a little confusing, because n_resolved currently includes all the problem-free rows too
   message(glue(
     "Compartments: {n_resolved} resolved, {n_unresolved} unresolved (of {n_potential_compartment} conflicts)"
   ))
@@ -1285,24 +1334,16 @@ resolve_compartment_conflicts <- function(df) {
     "Subcompartments: {n_resolved_sub} resolved, {n_unresolved_sub} unresolved (of {n_potential_sub} conflicts)"
   ))
 
+  if (n_unresolved + n_unresolved_sub > 0) {
+    warning("Some (sub)compartments still aren't resolved.")
+  }
+
   df
 }
 
 vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(
   vm_filtered
-) |>
-  mutate(
-    ENVIRON_COMPARTMENT_SUB = case_when(
-      !is.na(
-        ENVIRON_COMPARTMENT_SUB_resolved
-      ) ~ ENVIRON_COMPARTMENT_SUB_resolved,
-      .default = ENVIRON_COMPARTMENT_SUB_medium
-    ),
-    ENVIRON_COMPARTMENT = case_when(
-      !is.na(ENVIRON_COMPARTMENT_resolved) ~ ENVIRON_COMPARTMENT_resolved,
-      .default = ENVIRON_COMPARTMENT_medium
-    )
-  )
+)
 ```
 
 And let's take a look at anyting we failed to resolve: @tbl-unresolved-conflicts. At time of writing we have 1571 rows with unresolved conflicts, but this is a very small number and I don't (currently) judge it a good use of time to chase down these edge cases.
@@ -1312,19 +1353,11 @@ And let's take a look at anyting we failed to resolve: @tbl-unresolved-conflicts
 #| tbl-cap: "Remaining unresolved conflicts after applying resolution rules"
 
 # Check for unresolved conflicts
-unresolved_conflicts <- vm_compartment_conflicts_resolved |>
+unresolved_conflicts_summary <- vm_compartment_conflicts_resolved |>
   # Keep only rows where conflicts weren't resolved
   filter(
-    # Compartment conflict exists but wasn't resolved
-    (!has_data_issue(ENVIRON_COMPARTMENT_vkat) &
-      !has_data_issue(ENVIRON_COMPARTMENT_medium) &
-      ENVIRON_COMPARTMENT_vkat != ENVIRON_COMPARTMENT_medium &
-      is.na(ENVIRON_COMPARTMENT_resolved)) |
-      # OR subcompartment conflict exists but wasn't resolved
-      (!has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat) &
-        !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium) &
-        ENVIRON_COMPARTMENT_SUB_vkat != ENVIRON_COMPARTMENT_SUB_medium &
-        is.na(ENVIRON_COMPARTMENT_SUB_resolved))
+    ENVIRON_COMPARTMENT_SUB_resolved == "FLAG: Compartment conflict." &
+      ENVIRON_COMPARTMENT_resolved == "FLAG: Compartment conflict."
   ) |>
   group_by(
     ENVIRON_COMPARTMENT_vkat,
@@ -1347,14 +1380,20 @@ unresolved_conflicts <- vm_compartment_conflicts_resolved |>
   ) |>
   arrange(desc(count))
 
-if (nrow(unresolved_conflicts) > 0) {
+vm_compartment_conflicts_resolved_filter <- vm_compartment_conflicts_resolved |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict." &
+      ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict."
+  )
+
+if (nrow(unresolved_conflicts_summary) > 0) {
   warning(glue(
-    "{nrow(unresolved_conflicts)} conflict combinations remain unresolved ({sum(unresolved_conflicts$count)} rows)"
+    "{nrow(unresolved_conflicts_summary)} compartment conflict combinations remain unresolved ({sum(unresolved_conflicts_summary$count)} rows) and have been removed from the dataset."
   ))
 }
 
 datatable(
-  unresolved_conflicts |>
+  unresolved_conflicts_summary |>
     select(
       ENVIRON_COMPARTMENT_vkat,
       ENVIRON_COMPARTMENT_medium,
@@ -1373,7 +1412,6 @@ datatable(
   )
 )
 ```
-
 
 
 @tbl-geographic-conflicts also lists all combinations, which means it also lists things that actually aren't problems. Again, may need cleaning up.
@@ -1447,6 +1485,39 @@ At present there are 201 rows with conflicting site definitions (the number of a
 ```{r}
 #| label: resolve-feature-conflicts
 
+```
+
+Let's update the not-Sankey now that we've removed some more rows.
+
+```{r}
+#| label: fig-conflict_resoltion-visualisation
+#| fig-cap: Vannmiljø copper sample size at different steps of filtration and conflict removal
+#| fig-width: 12
+
+# Create filtering summary
+conflict_flow <- filter_flow |>
+  add_row(
+    stage = "Compartment Resolution",
+    records = nrow(vm_compartment_conflicts_resolved_filter),
+    pct = round(100 * records / first(filter_flow$records), 1),
+    label = glue("{scales::comma(records)}\n({pct}%)")
+  )
+
+# Simple bar plot
+ggplot(conflict_flow, aes(x = stage, y = records)) +
+  geom_col(aes(fill = stage)) +
+  geom_text(aes(label = label), vjust = -0.5, size = 3) +
+  scale_fill_discrete(name = "Filtering Stage") +
+  scale_x_discrete(limits = conflict_flow$stage) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  labs(
+    x = NULL,
+    y = "Number of Records"
+  ) +
+  theme_minimal()
 ```
 
 # Create eData Tables
@@ -1665,61 +1736,13 @@ ggplot() +
 
 ## Methods
 
+Because Vannmiljø publish their methods data in a format similar to ours, the majority of processing has already been done. We did the rest of the processing in Excel when assemling the lookup table, so no additional work is required here. However, this will change if we expand the filter criteria to include more compartments or older samples, and the lookup will need to be updated manually. 
+
 ```{r}
 #| label: edata-methods
 
-# Methods Mapping
-# NOTE: Methods mapping simplified for initial conversion
-# Current approach:
-# - Simple 1:1 mapping from Vannmiljø codes
-# - Filtered = assumed 0.45 µm
-# - Total concentration only (no fractionation detail)
-#
-# Known limitations:
-# - "UKJENT" (Unknown) methods not properly handled
-# - Fractionation protocol oversimplified
-# - Extraction protocols not captured
-# - Some method details may be in Norwegian standards not reviewed
-
-# Filter methods to those actually used in freshwater data
-vm_methods_used_analysis <- vm_lookup_analysis |>
-  filter(AnalysisMethodID %in% vm_filtered$Analysemetode_id)
-
-vm_methods_used_sampling <- vm_lookup_sampling |>
-  filter(
-    SamplingMethodID %in% vm_filtered$Provetakmetode_id,
-    str_detect(Name, "erskvann"), # Freshwater only
-    !str_detect(Name, "sediment") # Exclude sediment
-  )
-
 # Merge and categorize
-edata_methods <- vm_methods_used_sampling #
-# TODO: Renable methods.
-# bind_rows(vm_methods_used_analysis) |>
-# mutate(
-#   ID = case_when(
-#     !is.na(AnalysisMethodID) ~ AnalysisMethodID,
-#     !is.na(SamplingMethodID) ~ SamplingMethodID,
-#     .default = NA_character_
-#   ),
-#   Category = case_when(
-#     !is.na(AnalysisMethodID) ~ "Analysis",
-#     !is.na(SamplingMethodID) ~ "Sampling",
-#     .default = NA_character_
-#   ),
-#   .keep = "unused"
-# ) |>
-# # Join with eData mapping
-# left_join(
-#   vm_lookup_methods,
-#   by = c("PROTOCOL_ID", "Category")
-# ) |>
-# group_by(PROTOCOL_CATEGORY) |>
-# mutate(
-#   CAMPAIGN_NAME = config$metadata$campaign_name,
-#   PROTOCOL_ID = glue("{substr(PROTOCOL_CATEGORY, 1, 1)}{row_number()}-Vm2025")
-# ) |>
-# ungroup()
+edata_methods <- vm_lookup_methods
 
 message(glue("Created methods table: {nrow(edata_methods)} protocols"))
 ```
@@ -1766,10 +1789,8 @@ generate_sample_id_with_components <- function(
   # Vectorized replicate
   # Subsamples will generally be text, so let's abbreviate them a bit
 
-  subsample_suffix <- sapply(
-    subsample,
-    function(x) abbreviate_string(string = x, n_words = 3, case = "title")
-  )
+  # this is modified from the eDataDRF version and hopefully faster
+  subsample_suffix <- stringr::str_trunc(subsample, 20, "right", ellipsis = "")
   paste0(base_id, "-R-", subsample_suffix)
 }
 
@@ -1778,6 +1799,10 @@ generate_sample_id_with_components <- function(
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
 edata_samples_wide <- vm_compartment_conflicts_resolved |>
+  filter(
+    ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
+    ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
+  ) |>
   mutate(
     # Core identifiers
     SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
@@ -1786,8 +1811,8 @@ edata_samples_wide <- vm_compartment_conflicts_resolved |>
     PARAMETER_TYPE = "Not reported",
 
     # Compartment information
-    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB,
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_resolved,
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
     MEASURED_CATEGORY = NA_character_,
 
     SAMPLING_DATE = as.character(SAMPLING_DATE),
@@ -1837,12 +1862,18 @@ That's it.
 
 # TODO: Update to use geo conflicts resolved thingy as appropriate
 edata_biota <- vm_compartment_conflicts_resolved |>
-  filter(ENVIRON_COMPARTMENT == "Biota")
+  filter(ENVIRON_COMPARTMENT_resolved == "Biota")
+
+edata_species <- unique(edata_biota$VitenskapligNavn) |> length()
 message(glue(
-  "{nrow(edata_biota)} biota samples found"
+  "{nrow(edata_biota)} biota samples found ({edata_species} unique species)"
 ))
 
-biota_frequency <- count(edata_biota, VitenskapligNavn) |>
+biota_frequency <- count(
+  edata_biota,
+  VitenskapligNavn,
+  ENVIRON_COMPARTMENT_SUB_resolved
+) |>
   arrange(desc(n)) |>
   left_join(
     select(vm_lookup_species, VitenskapligNavn, species_group),
@@ -1865,9 +1896,16 @@ n_missing_species_group <- biota_frequency |>
   pull(n) |>
   sum()
 
+n_missing_sub_compartment <- biota_frequency |>
+  filter(ENVIRON_COMPARTMENT_SUB_resolved == "*") |>
+  pull(n) |>
+  sum()
+
 
 message(glue(
-  "Biota data quality: {n_missing_species_group} samples with missing species group"
+  "Biota data quality:,
+  - {n_missing_species_group} samples with missing species group,
+  - {n_missing_sub_compartment} samples with missing subcompartment"
 ))
 
 
@@ -1887,11 +1925,31 @@ edata_biota_merged <- edata_biota |>
     SAMPLE_SPECIES_LIFESTAGE = case_when(
       VitenskapligNavn == "Laksesmolt" ~ "Juvenile",
       TRUE ~ "Not reported"
+    ),
+    # Let's guess compartment from species
+    # all the species not sampled from something with a Vannkategori are terrestrial, so this isn't complicated for the
+    # current dataset
+    ENVIRON_COMPARTMENT_SUB_resolved = case_when(
+      ENVIRON_COMPARTMENT_SUB_resolved !=
+        "*" ~ ENVIRON_COMPARTMENT_SUB_resolved,
+      SAMPLE_SPECIES %in%
+        c(
+          "Capreolus capreolus",
+          "Felis catus",
+          "Hylocomium splendens",
+          "Larus argentatus",
+          "Lichen",
+          "Phoca vitulina",
+          "Rattus norvegicus",
+          "Somateria mollissima",
+          "Turdus pilaris",
+          "Vulpes vulpes"
+        ) ~ "Biota, terrestrial",
     )
   )
 ```
 
-We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent. At time of writing there are only 3, which keeps life relatively easy.
+We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent.
 
 ```{r}
 #| label: tbl-raw-tissue
@@ -1947,8 +2005,6 @@ edata_biota_tissue_merged <- edata_biota_merged |>
 ```{r}
 #| label: eData-biota
 
-vm_filtered
-
 vm_samples_biota_only <- edata_biota_tissue_merged |>
   mutate(
     # Core identifiers
@@ -1958,8 +2014,8 @@ vm_samples_biota_only <- edata_biota_tissue_merged |>
     # PARAMETER_TYPE = "Not reported", added later
 
     # Compartment information
-    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB,
+    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_resolved,
+    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
     MEASURED_CATEGORY = NA_character_,
 
     SAMPLING_DATE = as.character(SAMPLING_DATE),
@@ -2077,7 +2133,7 @@ message(glue(
 
 ## Create Export
 
-We export the resulting data to a zip file in our `data/raw/eData` folder where we keep the literature extractions
+We export the resulting data to a zip file in our `data/raw/eData` folder where we keep the literature extractions.
 
 ```{r}
 #| label: export-create-zip
@@ -2094,7 +2150,6 @@ export_datasets <- list(
 )
 
 # Export as ZIP
-# TODO: Disabled
 if (
   !file.exists(here(
     "data/raw/eData",
@@ -2122,23 +2177,29 @@ if (
 
 ## Validate Export
 
-Do some quick checks to see if the data we're exporting looks like we expect it to.
+Do some quick checks to see if the data we're exporting looks like we expect it to. In an ideal world we would be able to automatically check and validate against constrolled vocabulary, but we're not quite there yet
+
+### Compartments
+
+Are our compartments valid and reasonable? @tbl-validate-export-compartments suggests they are not.
+
+- Some Biota have * as a subcategory
+- Some biota have Freshwater or Marine/Salt Water as a subcategory
+
+Why didn't we flag these earlier?
 
 ```{r}
-#| label: validate_export
+#| label: tbl-validate-export-compartments
+count(edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
+  datatable()
 
-# TODO: We need to expand this session massively without treading on the toes of the main analysis pathway. How?
-edata_measurements |> count(ENVIRON_COMPARTMENT)
-
-
-edata_measurements |> count(MEASURED_UNIT)
-# nuts
-count(vm_filtered, Unit_Name)
-# the old classic lower case l for Liter
 ```
 
+@fig-vm-scatterplot is a basic plot of measured concentrations by year and unit. Without going into detailed analysis of campaigns, etc. the results are a little difficult to interprety, but it's reasonable to call some of the shapes we see down there suspicious.
+
 ```{r}
-#| label: fig-vm-dotplot
+#| label: fig-vm-scatterplot
+#| fig-cap: A basic scatterplot for visualising measured concentrations by year.
 
 edata_measurements |>
   ggplot(
@@ -2150,75 +2211,25 @@ edata_measurements |>
   ) +
   geom_point(shape = 1) +
   facet_wrap(
-    facets = vars(MEASURED_UNIT),
-    nrow = 2,
-    ncol = 2,
+    facets = vars(ENVIRON_COMPARTMENT_SUB),
+    nrow = 3,
     scales = "free_y"
   )
 ```
 
-@fig-vm-dotplot looks, frankly, very suspicious.
+We can pull out this data and take a closer look. We'll use the z-score method and assume anything more than 3 SD from the mean is worth investigation.
 
-## Species Data Coverage
-
-None of these are very informative yet, because we don't filter down to stuff that's definitely biota first.
+- [ ] Todo: find a citation for use of z-scores
 
 ```{r}
-#| label: eda-species-coverage
+#| label: tbl-vm-outliers
 
-# Species group coverage
-species_group_coverage <- vm_merged |>
-  group_by(SPECIES_GROUP_medium) |>
-  reframe(count = n()) |>
-  mutate(
-    flag = case_when(
-      SPECIES_GROUP_medium %in% c("Not reported", "", NA) ~ "Missing",
-      .default = NA_character_
-    )
-  ) |>
-  arrange(desc(count))
-
-datatable(species_group_coverage, caption = "Species Group Coverage")
-
-# Sample species coverage
-sample_species_coverage <- vm_merged |>
-  group_by(SAMPLE_SPECIES_medium) |>
-  reframe(count = n()) |>
-  mutate(
-    flag = case_when(
-      SAMPLE_SPECIES_medium %in% c("Not reported", "", NA) ~ "Missing",
-      .default = NA_character_
-    )
-  ) |>
-  arrange(desc(count))
-
-datatable(sample_species_coverage, caption = "Sample Species Coverage")
-
-# Species gender coverage
-species_gender_coverage <- vm_merged |>
-  group_by(SPECIES_GENDER_medium) |>
-  reframe(count = n()) |>
-  mutate(
-    flag = case_when(
-      SPECIES_GENDER_medium %in% c("Not reported", "", NA) ~ "Missing",
-      .default = NA_character_
-    )
-  ) |>
-  arrange(desc(count))
-
-datatable(species_gender_coverage, caption = "Species Gender Coverage")
-
-# Sample tissue coverage
-sample_tissue_coverage <- vm_merged |>
-  group_by(SAMPLE_TISSUE_medium) |>
-  reframe(count = n()) |>
-  mutate(
-    flag = case_when(
-      SAMPLE_TISSUE_medium %in% c("Not reported", "", NA) ~ "Missing",
-      .default = NA_character_
-    )
-  ) |>
-  arrange(desc(count))
-
-datatable(sample_tissue_coverage, caption = "Sample Tissue Coverage")
+edata_measurements |>
+  group_by(MEASURED_UNIT, ENVIRON_COMPARTMENT_SUB) |>
+  mutate(z_score = scale(MEASURED_VALUE)) |> # Calculate z-score
+  filter(z_score >= 3)
 ```
+
+## Species Data Coverage
+    
+None of these are very informative yet, because we don't filter down to stuff that's definitely biota first.
