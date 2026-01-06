@@ -2,6 +2,9 @@
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: "2025.12.16"
+html:
+  toc-depth: 3
+  toc-expand: 3
 ---
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
@@ -11,10 +14,120 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 %%| fig-width: 12
 %%| fig-cap: |
 %%|   A placeholder for a basic flow diagram of what we do here.
-flowchart LR
-  A[Export samples from Vannmijlø] --> C(Knitr)
-  B[Export sites from Vannmijlø] --> C(Knitr)
-  C(Knitr)
+flowchart TB
+    subgraph Input["Data Loading"]
+        A1[Raw Measurements<br/>Vm_Copper_2025.12.05.xlsx<br/>138,615 hits]
+        A2[Raw Sites<br/>3 Excel files<br/>split due to export limit]
+        A3[Lookup Tables<br/>medium, vannkategori,<br/>methods analysis/sampling,<br/>campaigns, units, species]
+    end
+    
+    subgraph Merge["Data Merging"]
+        B1[Join Sites + Measurements<br/>on Vannlok_kode]
+        B2[vm_merged<br/>Add all lookup tables]
+    end
+    
+    subgraph Explore["Initial Exploration on vm_merged"]
+        C1[Heatmaps:<br/>Campaign × Vannkategori<br/>Campaign × Medium<br/>Vannkategori × Medium<br/>Campaign × Species<br/>Units × Medium]
+        C2[Sample Distribution<br/>cumulative % table<br/>90% coverage goal]
+    end
+    
+    subgraph Filter["Apply Filters"]
+        D1[vm_filtered<br/>Compartment filters<br/>Point sites only<br/>Date: 2010-01-01 to 2025-12-05<br/>Exclude Svalbard]
+        D2[138,615 → 129,917 rows<br/>93.7% retained]
+    end
+    
+    subgraph QualityCheck["Conflict Detection & Resolution"]
+        E1[Detect Conflicts<br/>vannkategori vs medium<br/>compartment/subcompartment]
+        E2[resolve_compartment_conflicts<br/>Biota trumps all<br/>Sediment overrides water<br/>Wildcard handling]
+        E3[vm_compartment_conflicts_resolved]
+        E4[Filter out unresolved<br/>remove FLAG rows]
+        E5[vm_compartment_conflicts_resolved_filter]
+    end
+    
+    subgraph Tables["Create eData Tables"]
+        F1[edata_campaign]
+        F2[edata_reference]
+        F3[edata_parameters<br/>Copper only]
+        F4[edata_sites<br/>unique sites<br/>UTM33→WGS84 transform]
+        F5[edata_methods<br/>from vm_lookup_methods]
+    end
+    
+    subgraph Samples["Sample Processing"]
+        G1[edata_samples_wide<br/>from resolved+filtered<br/>generate_sample_id]
+        G2[vm_samples_biota_only<br/>filter to biota<br/>add tissue, species, lifestage]
+        G3[biota_samples_merged<br/>bind_rows of both]
+    end
+    
+    subgraph BiotaSpecial["Biota Table"]
+        H1[edata_biota<br/>species, tissue, gender<br/>from resolved data]
+    end
+    
+    subgraph Measurements["Measurements Table"]
+        I1[edata_measurements<br/>from biota_samples_merged<br/>values, flags, LOD/LOQ<br/>convert operators & units]
+    end
+    
+    subgraph Export["Export & Validation"]
+        J1[Assemble 7 tables<br/>into list]
+        J2[export_campaign_zip<br/>Vm_2010_2025_timestamp.zip<br/>to data/raw/eData/]
+        J3[Validate<br/>compartment counts<br/>outlier detection z≥3]
+    end
+    
+    A1 --> B1
+    A2 --> B1
+    B1 --> B2
+    A3 --> B2
+    
+    B2 --> C1
+    B2 --> C2
+    
+    C1 --> D1
+    C2 --> D1
+    B2 --> D1
+    
+    D1 --> D2
+    D2 --> E1
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+    E4 --> E5
+    
+    E5 --> F1
+    E5 --> F2
+    E5 --> F3
+    E5 --> F4
+    A3 --> F5
+    
+    E5 --> G1
+    E5 --> G2
+    G1 --> G3
+    G2 --> G3
+    
+    E5 --> H1
+    
+    G3 --> I1
+    
+    F1 --> J1
+    F2 --> J1
+    F3 --> J1
+    F4 --> J1
+    F5 --> J1
+    G1 --> J1
+    H1 --> J1
+    I1 --> J1
+    
+    J1 --> J2
+    J2 --> J3
+    
+    style Input fill:#e1f5ff
+    style Merge fill:#fff4e1
+    style Explore fill:#f0e1ff
+    style Filter fill:#ffe1e1
+    style QualityCheck fill:#e1ffe1
+    style Tables fill:#fff0f0
+    style Samples fill:#ffe1f0
+    style BiotaSpecial fill:#f0ffe1
+    style Measurements fill:#ffffe1
+    style Export fill:#f5f5f5
 ```
 
 # To Do:
@@ -192,6 +305,8 @@ if (!exists("vm_raw_copper")) {
 
 `summarytools::dfSummary()` generates an initial summary of the dataset here. It's not perfect but it's one line of code, and generally very helpful.
 
+::: {.callout-note collapse="true" title="Initial Dataset Summary"}
+
 ```{r}
 #| label: Initial data inspection
 print(
@@ -205,13 +320,15 @@ print(
 )
 ```
 
+:::
+
 ## Sites Data
 
 Vannmiljø export limit requires splitting site codes into multiple files
 
 Procedure:
 
-1.  Extract unique site codes: vm_raw_copper\$Vannlok_kode \|\> unique() \|\> writeClipboard()
+1.  Extract unique site codes: `vm_raw_copper\$Vannlok_kode |> unique() |> writeClipboard()`
 2.  Replace newlines with commas: Ctrl+H find "\n" replace with ", "
 3.  Split into chunks (Vannmiljø fails silently above unknown threshold)
 4.  Download as separate Excel files
@@ -558,6 +675,7 @@ We also check reported water category by sampling medium, for the sake of comple
 #| label: fig-heatmap-vannkategori-medium
 #| fig-cap: "Distribution of Vannmiljø copper samples by water category and reported sampling medium, all years"
 #| fig-width: 12
+#| fig-height: 3
 #| warning: false
 
 # Create a summary of counts by the two variables
@@ -681,13 +799,13 @@ datatable(
 ```
 
 
-We also consider sample size of @fig-sample-distribution-biota by campaign. This includes many largely irrelevant (not-aquatic) species, but the vast majority are standard aquatic monitoring species (mussels, cod, edible crabs, etc.).
+We also consider sample size of @fig-heatmap-campaign-biota by campaign. This includes many largely irrelevant (not-aquatic) species, but the vast majority are standard aquatic monitoring species (mussels, cod, edible crabs, etc.).
 
 ```{r}
-#| label: fig-sample-distribution-biota
+#| label: fig-heatmap-campaign-biota
 #| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
 #| fig-width: 12
-#| fig-height: 14
+#| fig-height: 20
 #| warning: false
 
 # Create a summary of counts by the two variables (filter to non-NA species)
@@ -1142,7 +1260,7 @@ filter_flow <- tibble(
 ggplot(filter_flow, aes(x = stage, y = records)) +
   geom_col(aes(fill = stage)) +
   geom_text(aes(label = label), vjust = -0.5, size = 3) +
-  scale_fill_discrete(name = "Filtering Stage") +
+  scale_fill_brewer(name = "Filtering Stage", palette = "Set1") +
   scale_x_discrete(limits = filter_flow$stage) +
   scale_y_continuous(
     labels = scales::comma,
@@ -1421,14 +1539,7 @@ datatable(
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for geographic features"
 
 # Check geographic feature consistency
-geo_check <- vm_compartment_conflicts_resolved |>
-  group_by(
-    SITE_GEOGRAPHIC_FEATURE_vkat,
-    SITE_GEOGRAPHIC_FEATURE_medium,
-    SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
-    SITE_GEOGRAPHIC_FEATURE_SUB_medium
-  ) |>
-  reframe(count = n()) |>
+vm_geo_conflicts_flagged <- vm_compartment_conflicts_resolved |>
   mutate(
     # Only flag as conflict if both values are present and different
     geo_conflict = !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
@@ -1449,18 +1560,27 @@ geo_check <- vm_compartment_conflicts_resolved |>
       geo_sub_conflict ~ "Sub",
       .default = NA_character_
     )
+  )
+
+vm_geo_conflicts_summary <- vm_geo_conflicts_flagged |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE_vkat,
+    SITE_GEOGRAPHIC_FEATURE_medium,
+    SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
+    SITE_GEOGRAPHIC_FEATURE_SUB_medium
   ) |>
+  reframe(count = n(), Conflict = first(Conflict)) |>
   filter(!is.na(Conflict)) |>
   arrange(desc(count))
 
-if (nrow(geo_check) > 0) {
+if (nrow(vm_geo_conflicts_summary) > 0) {
   warning(glue(
-    "Geographic feature conflicts: {nrow(geo_check)} combinations ({sum(geo_check$count)} rows)"
+    "Geographic feature conflicts: {nrow(vm_geo_conflicts_summary)} combinations ({sum(vm_geo_conflicts_summary$count)} rows)"
   ))
 }
 
 datatable(
-  geo_check |>
+  vm_geo_conflicts_summary |>
     select(
       SITE_GEOGRAPHIC_FEATURE_vkat,
       SITE_GEOGRAPHIC_FEATURE_medium,
@@ -1480,25 +1600,208 @@ datatable(
 )
 ```
 
-At present there are 201 rows with conflicting site definitions (the number of actual sites will be lower). As this number is also rather low, I have elected not to spend time on digging through the data to resolve these conflicts either. Should it be necessary, the compartment resolution code can be reused (but chasing down individual sites would take far longer).
+At present there are ~14000 rows with conflicting site definitions (the number of actual sites will be lower). As this number is relatively low, I have elected not to spend time on digging through the data to resolve these conflicts either. Should it be necessary, the compartment resolution code can be reused (but chasing down individual sites would take far longer).
 
 ```{r}
 #| label: resolve-feature-conflicts
 
+resolve_geographic_conflicts <- function(df) {
+  df <- df |>
+    mutate(
+      # SET GEOGRAPHIC FEATURE
+      SITE_GEOGRAPHIC_FEATURE_resolved = case_when(
+        # if SITE_GEOGRAPHIC_FEATURE_vkat is wildcard then use SITE_GEOGRAPHIC_FEATURE_medium
+        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
+          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium) &
+          SITE_GEOGRAPHIC_FEATURE_vkat == "*" &
+          SITE_GEOGRAPHIC_FEATURE_medium !=
+            "*" ~ SITE_GEOGRAPHIC_FEATURE_medium,
+
+        # if SITE_GEOGRAPHIC_FEATURE_medium is wildcard then use SITE_GEOGRAPHIC_FEATURE_vkat
+        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
+          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium) &
+          SITE_GEOGRAPHIC_FEATURE_vkat != "*" &
+          SITE_GEOGRAPHIC_FEATURE_medium == "*" ~ SITE_GEOGRAPHIC_FEATURE_vkat,
+
+        # if there's no conflict (unless both are *), use the first value
+        SITE_GEOGRAPHIC_FEATURE_vkat == SITE_GEOGRAPHIC_FEATURE_medium &
+          SITE_GEOGRAPHIC_FEATURE_medium !=
+            "*" ~ SITE_GEOGRAPHIC_FEATURE_medium,
+
+        # If none of these rules resolve the conflict, flag the row
+        .default = "FLAG: Geographic conflict."
+      ),
+
+      # SET GEOGRAPHIC FEATURE SUB
+      SITE_GEOGRAPHIC_FEATURE_SUB_resolved = case_when(
+        # if SITE_GEOGRAPHIC_FEATURE_SUB_vkat is wildcard then use SITE_GEOGRAPHIC_FEATURE_SUB_medium
+        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat) &
+          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
+          SITE_GEOGRAPHIC_FEATURE_SUB_vkat == "*" &
+          SITE_GEOGRAPHIC_FEATURE_SUB_medium !=
+            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+
+        # if SITE_GEOGRAPHIC_FEATURE_SUB_medium is wildcard then use SITE_GEOGRAPHIC_FEATURE_SUB_vkat
+        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat) &
+          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
+          SITE_GEOGRAPHIC_FEATURE_SUB_vkat != "*" &
+          SITE_GEOGRAPHIC_FEATURE_SUB_medium ==
+            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
+
+        # if there's no conflict (unless both are *), use the first value
+        SITE_GEOGRAPHIC_FEATURE_SUB_vkat == SITE_GEOGRAPHIC_FEATURE_SUB_medium &
+          SITE_GEOGRAPHIC_FEATURE_SUB_medium !=
+            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
+
+        # If none of these rules resolve the conflict, flag the row
+        .default = "FLAG: Geographic conflict."
+      )
+    )
+
+  # Count potential conflicts
+  n_potential_feature <- df |>
+    filter(
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat),
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium),
+      SITE_GEOGRAPHIC_FEATURE_vkat != SITE_GEOGRAPHIC_FEATURE_medium
+    ) |>
+    nrow()
+
+  n_potential_sub <- df |>
+    filter(
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat),
+      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium),
+      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != SITE_GEOGRAPHIC_FEATURE_SUB_medium
+    ) |>
+    nrow()
+
+  # Count unresolved
+  n_unresolved <- df |>
+    tally(SITE_GEOGRAPHIC_FEATURE_resolved == "FLAG: Geographic conflict.")
+  n_unresolved_sub <- df |>
+    tally(SITE_GEOGRAPHIC_FEATURE_SUB_resolved == "FLAG: Geographic conflict.")
+
+  message(glue(
+    "Geographic features: {n_potential_feature - n_unresolved} resolved, {n_unresolved} unresolved (of {n_potential_feature} conflicts)"
+  ))
+  message(glue(
+    "Geographic sub-features: {n_potential_sub - n_unresolved_sub} resolved, {n_unresolved_sub} unresolved (of {n_potential_sub} conflicts)"
+  ))
+
+  if (n_unresolved + n_unresolved_sub > 0) {
+    warning("Some geographic features still aren't resolved.")
+  }
+
+  df
+}
+
+# Filter out geographic conflicts
+# FIXME: For some reason this also drops all rows where ENVIRON_COMPARTMENT_resolved == "Biota"
+vm_compartment_geo_conflicts_removed <- resolve_geographic_conflicts(
+  vm_geo_conflicts_flagged
+) |>
+  filter(
+    SITE_GEOGRAPHIC_FEATURE_resolved != "FLAG: Geographic conflict.",
+    SITE_GEOGRAPHIC_FEATURE_SUB_resolved != "FLAG: Geographic conflict."
+  ) |>
+  select(-Conflict)
+
+message(glue(
+  "Removed {nrow(vm_geo_conflicts_flagged) - nrow(vm_compartment_geo_conflicts_removed)} rows with unresolved geographic conflicts"
+))
+
+# I really don't understand what's going on here...
+vm_compartment_geo_conflicts_for_table <- resolve_geographic_conflicts(
+  vm_geo_conflicts_flagged
+) |>
+  filter(
+    SITE_GEOGRAPHIC_FEATURE_resolved == "FLAG: Geographic conflict." |
+      SITE_GEOGRAPHIC_FEATURE_SUB_resolved == "FLAG: Geographic conflict."
+  )
 ```
 
-Let's update the not-Sankey now that we've removed some more rows.
+We also have the issue that our higher level of site resolution means we need to split some of Vannmiljø's sites. Specifically, they may sample from the same longitude and latitude (one vannmiljø site) but sample different parts of the feature (e.g. sediment and the water column; two vannmiljø media/matrices). Because in our format this is two separate sites, we need to split any sites where this happens.
+
+We do this in a fairly basic way - we take the existing `Vannlok_kode` (a string of digits, e.g. `02.61-29530) and, if we split it, append an incrementing number on the end (`02.61-29530` would become `02.61-29530-01` and `02.61-29530-02`). 
+
+Unfortunately this is quite slow.
 
 ```{r}
-#| label: fig-conflict_resoltion-visualisation
-#| fig-cap: Vannmiljø copper sample size at different steps of filtration and conflict removal
+# split sites where different types of samples have been taken
+vm_compartment_sites_split <- vm_compartment_geo_conflicts_removed |>
+  group_by(Vannlok_kode) |>
+  mutate(
+    n_geo_combos = n_distinct(paste(
+      SITE_GEOGRAPHIC_FEATURE_resolved,
+      SITE_GEOGRAPHIC_FEATURE_SUB_resolved
+    )),
+    geo_combo = paste(
+      SITE_GEOGRAPHIC_FEATURE_resolved,
+      SITE_GEOGRAPHIC_FEATURE_SUB_resolved
+    ),
+    geo_suffix = if_else(
+      n_geo_combos > 1,
+      match(geo_combo, unique(geo_combo)),
+      NA_integer_
+    ),
+    Vannlok_kode_split = case_when(
+      !is.na(geo_suffix) ~ paste0(
+        Vannlok_kode,
+        "-",
+        sprintf("%02d", geo_suffix)
+      ),
+      TRUE ~ Vannlok_kode
+    )
+  ) |>
+  ungroup()
+
+# Report on splitting
+split_summary <- vm_compartment_sites_split |>
+  distinct(Vannlok_kode, n_geo_combos) |>
+  count(n_geo_combos, name = "n_sites") |>
+  mutate(
+    total_split_sites = n_geo_combos * n_sites,
+    Status = if_else(n_geo_combos == 1, "Unsplit", "Split")
+  )
+
+n_original_sites <- n_distinct(vm_compartment_sites_split$Vannlok_kode)
+n_split_sites <- n_distinct(vm_compartment_sites_split$Vannlok_kode_split)
+n_affected <- split_summary |>
+  filter(n_geo_combos > 1) |>
+  pull(n_sites) |>
+  sum()
+
+message(glue(
+  "Site splitting summary:\n",
+  "  Original sites: {n_original_sites}\n",
+  "  Sites requiring splitting: {n_affected}\n",
+  "  Final unique site codes: {n_split_sites}"
+))
+
+# Clean up temporary columns
+vm_compartment_sites_split <- vm_compartment_sites_split |>
+  select(-n_geo_combos, -geo_combo, -geo_suffix)
+
+```
+
+Let's update the not-Sankey now that we've removed some more rows (@fig-conflict-resolution-visualisation).
+
+```{r}
+#| label: fig-conflict-resolution-visualisation
+#| fig-cap: Vannmiljø copper sample size at different steps of filtration and conflict removal.
 #| fig-width: 12
 
 # Create filtering summary
 conflict_flow <- filter_flow |>
   add_row(
     stage = "Compartment Resolution",
-    records = nrow(vm_compartment_conflicts_resolved_filter),
+    records = nrow(vm_compartment_conflicts_resolved),
+    pct = round(100 * records / first(filter_flow$records), 1),
+    label = glue("{scales::comma(records)}\n({pct}%)")
+  ) |>
+  add_row(
+    stage = "Geographic Conflicts Removed",
+    records = nrow(vm_compartment_sites_split),
     pct = round(100 * records / first(filter_flow$records), 1),
     label = glue("{scales::comma(records)}\n({pct}%)")
   )
@@ -1507,7 +1810,7 @@ conflict_flow <- filter_flow |>
 ggplot(conflict_flow, aes(x = stage, y = records)) +
   geom_col(aes(fill = stage)) +
   geom_text(aes(label = label), vjust = -0.5, size = 3) +
-  scale_fill_discrete(name = "Filtering Stage") +
+  scale_fill_brewer(palette = "Set1") +
   scale_x_discrete(limits = conflict_flow$stage) +
   scale_y_continuous(
     labels = scales::comma,
@@ -1517,7 +1820,8 @@ ggplot(conflict_flow, aes(x = stage, y = records)) +
     x = NULL,
     y = "Number of Records"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 # Create eData Tables
@@ -1525,7 +1829,7 @@ ggplot(conflict_flow, aes(x = stage, y = records)) +
 ## Campaign
 
 ```{r}
-#| label: edata-campaign
+#| label: edata-generate_campaign_table
 
 edata_campaign <- initialise_campaign_tibble() |>
   add_row(
@@ -1604,30 +1908,27 @@ message("Created parameters table")
 ## Sites
 
 ```{r}
-#| label: edata-sites
+#| label: edata-sites-extraction
 
 # Extract unique sites with relevant metadata
-vm_sites_unique <- vm_filtered |>
+vm_sites_unique <- vm_compartment_sites_split |>
   select(
-    Vannlok_kode,
+    Vannlok_kode_split,
     Vannlokalitetsnavn,
     Beskrivelse,
     `UTM33 Ost (X)`,
     `UTM33 Nord (Y)`,
     `Knytt til påvirkning`,
-    SITE_GEOGRAPHIC_FEATURE_medium,
-    SITE_GEOGRAPHIC_FEATURE_vkat,
-    SITE_GEOGRAPHIC_FEATURE_SUB_medium,
-    SITE_GEOGRAPHIC_FEATURE_SUB_vkat
+    SITE_GEOGRAPHIC_FEATURE_resolved,
+    SITE_GEOGRAPHIC_FEATURE_SUB_resolved
   ) |>
   distinct() |>
   # Clean up emission source
   mutate(
-    Emission_Source = case_match(
-      `Knytt til påvirkning`,
-      c("Industri", "INDUSTRI") ~ "Industrial",
-      c("Akvakultur", "AKVAKULTUR") ~ "Aquaculture",
-      .default = NA_character_
+    Emission_Source = case_when(
+      `Knytt til påvirkning` %in% c("Industri", "INDUSTRI") ~ "Industrial",
+      `Knytt til påvirkning` %in% c("Akvakultur", "AKVAKULTUR") ~ "Aquaculture",
+      TRUE ~ NA_character_
     )
   )
 
@@ -1636,10 +1937,10 @@ message(glue("Extracted {nrow(vm_sites_unique)} unique sites"))
 # Format to eData structure
 edata_sites_temp <- vm_sites_unique |>
   mutate(
-    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
+    SITE_CODE = glue("Vannmiljø_{Vannlok_kode_split}"),
     SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
-    SITE_GEOGRAPHIC_FEATURE = SITE_GEOGRAPHIC_FEATURE_vkat,
-    SITE_GEOGRAPHIC_FEATURE_SUB = SITE_GEOGRAPHIC_FEATURE_SUB_medium,
+    SITE_GEOGRAPHIC_FEATURE = SITE_GEOGRAPHIC_FEATURE_resolved,
+    SITE_GEOGRAPHIC_FEATURE_SUB = SITE_GEOGRAPHIC_FEATURE_SUB_resolved,
     COUNTRY_ISO = "Norway",
     OCEAN_IHO = "Not relevant",
     ENTERED_BY = glue("{config$metadata$entered_by} (Vm Conversion)"),
@@ -1664,42 +1965,100 @@ edata_sites_temp <- vm_sites_unique |>
   )
 
 # Reproject coordinates from UTM33 to WGS84
-sites_sf <- edata_sites_temp |>
-  st_as_sf(coords = c("UTM33 Ost (X)", "UTM33 Nord (Y)"), crs = 25833) |>
-  st_transform(4326) |>
-  mutate(
-    LATITUDE = st_coordinates(geometry)[, 2],
-    LONGITUDE = st_coordinates(geometry)[, 1],
-    SITE_COORDINATE_SYSTEM = "WGS84"
-  )
+tryCatch(
+  {
+    sites_sf <- edata_sites_temp |>
+      st_as_sf(coords = c("UTM33 Ost (X)", "UTM33 Nord (Y)"), crs = 25833) |>
+      st_transform(4326) |>
+      mutate(
+        LATITUDE = st_coordinates(geometry)[, 2],
+        LONGITUDE = st_coordinates(geometry)[, 1],
+        SITE_COORDINATE_SYSTEM = "WGS84"
+      )
 
-sites_coords <- sites_sf |>
-  st_coordinates() |>
-  as.data.frame() |>
-  bind_cols(st_drop_geometry(sites_sf))
+    sites_coords <- sites_sf |>
+      st_coordinates() |>
+      as.data.frame() |>
+      bind_cols(st_drop_geometry(sites_sf))
 
-# Finalize sites table
-edata_sites <- edata_sites_temp |>
-  left_join(
-    sites_sf |>
+    message(glue(
+      "Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84"
+    ))
+  },
+  error = function(e) {
+    stop(glue(
+      "Failed to reproject coordinates from UTM33 to WGS84: {e$message}"
+    ))
+  }
+)
+
+```
+
+```{r}
+#| label: edata-create-sites-table
+
+# Finalise sites table
+tryCatch(
+  {
+    # Check for duplicates before joining
+    sites_for_join <- sites_sf |>
       st_drop_geometry() |>
-      select(SITE_CODE, LATITUDE, LONGITUDE, SITE_COORDINATE_SYSTEM),
-    by = "SITE_CODE"
-  ) |>
-  select(
-    SITE_CODE,
-    SITE_NAME,
-    SITE_GEOGRAPHIC_FEATURE,
-    SITE_GEOGRAPHIC_FEATURE_SUB,
-    LATITUDE,
-    LONGITUDE,
-    SITE_COORDINATE_SYSTEM,
-    COUNTRY_ISO,
-    OCEAN_IHO,
-    ENTERED_BY,
-    ENTERED_DATE,
-    SITE_COMMENT
-  )
+      select(SITE_CODE, LATITUDE, LONGITUDE, SITE_COORDINATE_SYSTEM) |>
+      distinct()
+
+    duplicate_sites <- sites_for_join |>
+      group_by(SITE_CODE) |>
+      filter(n() > 1) |>
+      arrange(SITE_CODE)
+
+    if (nrow(duplicate_sites) > 0) {
+      warning(glue(
+        "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. ",
+        "Displaying first 10 conflicts:"
+      ))
+      print(head(duplicate_sites, 10))
+    }
+
+    edata_sites <- edata_sites_temp |>
+      left_join(
+        sites_for_join,
+        by = "SITE_CODE",
+        relationship = "many-to-many" # Temporarily allow to see what happens
+      ) |>
+      select(
+        SITE_CODE,
+        SITE_NAME,
+        SITE_GEOGRAPHIC_FEATURE,
+        SITE_GEOGRAPHIC_FEATURE_SUB,
+        LATITUDE,
+        LONGITUDE,
+        SITE_COORDINATE_SYSTEM,
+        COUNTRY_ISO,
+        OCEAN_IHO,
+        ENTERED_BY,
+        ENTERED_DATE,
+        SITE_COMMENT
+      )
+
+    # Check result for duplicates
+    result_duplicates <- edata_sites |>
+      distinct() |>
+      group_by(SITE_CODE) |>
+      filter(n() > 1)
+
+    if (nrow(result_duplicates) > 0) {
+      stop(glue(
+        "Many-to-many join created {nrow(result_duplicates)} duplicate rows. ",
+        "Check vm_sites_unique for duplicate coordinates per site."
+      ))
+    }
+  },
+  warning = function(w) {
+    stop(glue(
+      "Unexpected many-to-many relationship when joining sites table:\n{w}"
+    ))
+  }
+)
 
 # Validate against eData schema
 edata_sites <- initialise_sites_tibble() |> add_row(edata_sites)
@@ -1707,10 +2066,12 @@ edata_sites <- initialise_sites_tibble() |> add_row(edata_sites)
 message(glue("Created sites table: {nrow(edata_sites)} sites"))
 ```
 
-Visually inspecting transformed site distribution allows us to check that a) sites are roughly where they should be and b) the correct CRS transformation was used.
+Visually inspecting transformed site distribution (@fig-sites-sanity-map) allows us to check that a) sites are roughly where they should be and b) the correct CRS transformation was used.
 
 ```{r}
-#| label: fig-sanity-map
+#| label: fig-sites-sanity-map
+#| fig-cap: Vannmiljø sampling sites binned into 1000 hexagons, coloured by number of sites in area.
+#| fig-width: 12
 
 # Sanity check: plot sites on map
 world_map <- map_data("world")
@@ -1727,10 +2088,10 @@ ggplot() +
     bins = 1000
   ) +
   scale_fill_viridis_c() +
-  labs(
-    title = "Vannmiljø Freshwater Sites 2025",
-    subtitle = "Binned into 1000 hexagons, coloured by number of sites in area, for faster rendering."
-  )
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank())
 
 ```
 
@@ -1797,8 +2158,7 @@ generate_sample_id_with_components <- function(
 
 # Create samples table
 
-# TODO: Update to use geo conflicts resolved thingy as appropriate
-edata_samples_wide <- vm_compartment_conflicts_resolved |>
+edata_samples_wide <- vm_compartment_sites_split |>
   filter(
     ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
     ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
@@ -1860,8 +2220,7 @@ That's it.
 
 # Create biota table
 
-# TODO: Update to use geo conflicts resolved thingy as appropriate
-edata_biota <- vm_compartment_conflicts_resolved |>
+edata_biota <- vm_compartment_sites_split |>
   filter(ENVIRON_COMPARTMENT_resolved == "Biota")
 
 edata_species <- unique(edata_biota$VitenskapligNavn) |> length()
@@ -1949,10 +2308,11 @@ edata_biota_merged <- edata_biota |>
   )
 ```
 
-We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent.
+We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent (@tbl-raw-tissue).
 
 ```{r}
 #| label: tbl-raw-tissue
+#| tbl-caption: Table of Vannmiljø MediumIDs corresponding to biota tissues, with sample size (n) and corresponding eData SAMPLE_TISSUE value.
 
 # Create tissue table
 # TODO: Should become a junction table (?) in the fullness of time
@@ -2200,6 +2560,7 @@ count(edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
 ```{r}
 #| label: fig-vm-scatterplot
 #| fig-cap: A basic scatterplot for visualising measured concentrations by year.
+#| fig-width: 12
 
 edata_measurements |>
   ggplot(
@@ -2214,7 +2575,8 @@ edata_measurements |>
     facets = vars(ENVIRON_COMPARTMENT_SUB),
     nrow = 3,
     scales = "free_y"
-  )
+  ) +
+  labs(x = "Year", y = "Measured Value")
 ```
 
 We can pull out this data and take a closer look. We'll use the z-score method and assume anything more than 3 SD from the mean is worth investigation.

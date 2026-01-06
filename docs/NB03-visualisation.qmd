@@ -109,8 +109,8 @@ calculate_sample_sizes <- function(data) {
 ```{r}
 #| label: fig-paper-subcompartments
 #| fig-cap: "Number of environmental sub-compartments sampled per paper. Each bar represents a unique publication, with height indicating the diversity of compartments (e.g., surface water, sediment, soil) analysed within that study."
-#| warning: false
-#| fig-width: 10
+#| #| warning: false
+#| fig-width: 12
 #| fig-height: 8
 
 # Prepare data for plotting ----
@@ -123,34 +123,86 @@ plot_data <- literature_merged_data |>
     literature_merged_data |> distinct(REFERENCE_ID, YEAR),
     by = "REFERENCE_ID"
   ) |>
-  filter(!is.na(ENVIRON_COMPARTMENT_SUB))
+  filter(!is.na(ENVIRON_COMPARTMENT_SUB), ENVIRON_COMPARTMENT_SUB != "")
 
-# Calculate text color threshold ----
-threshold_value <- mean(plot_data$count, na.rm = TRUE)
+# Calculate text color threshold (on log10 scale) ----
+threshold_value <- mean(
+  log10(plot_data$count[plot_data$count > 0]),
+  na.rm = TRUE
+)
+
+# Calculate total samples per reference for ordering (y-axis) ----
+reference_order <- plot_data |>
+  group_by(REFERENCE_ID) |>
+  summarise(total = sum(count)) |>
+  arrange(total) |> # puts highest values at top
+  pull(REFERENCE_ID)
+
+# Calculate total samples per compartment for ordering (x-axis) ----
+compartment_order <- plot_data |>
+  group_by(ENVIRON_COMPARTMENT_SUB) |>
+  summarise(total = sum(count)) |>
+  arrange(desc(total)) |> # puts highest values on left
+  pull(ENVIRON_COMPARTMENT_SUB)
+
+# Wrap text, then create complete grid with all combinations ----
+plot_data_complete <- plot_data |>
+  mutate(
+    REFERENCE_ID_wrapped = str_wrap(REFERENCE_ID, 30),
+    ENVIRON_COMPARTMENT_SUB_wrapped = str_wrap(ENVIRON_COMPARTMENT_SUB, 20)
+  ) |>
+  complete(
+    REFERENCE_ID_wrapped = str_wrap(reference_order, 30),
+    ENVIRON_COMPARTMENT_SUB_wrapped = str_wrap(compartment_order, 20),
+    fill = list(count = 0)
+  ) |>
+  mutate(
+    # Factor with wrapped levels in the correct order
+    REFERENCE_ID_wrapped = factor(
+      REFERENCE_ID_wrapped,
+      levels = str_wrap(reference_order, 30)
+    ),
+    ENVIRON_COMPARTMENT_SUB_wrapped = factor(
+      ENVIRON_COMPARTMENT_SUB_wrapped,
+      levels = str_wrap(compartment_order, 20)
+    )
+  )
 
 # Create plot ----
-ggplot(
-  plot_data,
-  aes(
-    y = REFERENCE_ID,
-    x = ENVIRON_COMPARTMENT_SUB,
+plot_data_complete |>
+  ggplot(aes(
+    x = ENVIRON_COMPARTMENT_SUB_wrapped,
+    y = REFERENCE_ID_wrapped,
     fill = count
-  )
-) +
-  geom_tile() +
-  geom_text(aes(
-    label = count,
-    color = if_else(count > threshold_value, "black", "white")
   )) +
-  scale_fill_viridis(name = "Sample Size (n)") +
-  scale_color_identity() +
-  theme_aep_plots() +
-  theme(
-    axis.text.x = element_text(angle = 90, hjust = 1),
-    axis.title.y = element_blank(),
-    legend.position = "none"
+  geom_tile(colour = "white", linewidth = 0.25) +
+  geom_text(
+    aes(
+      label = if_else(count > 0, scales::comma(count), ""),
+      color = if_else(
+        count > 0 & log10(count) > threshold_value,
+        "black",
+        "white"
+      )
+    ),
+    size = 3
   ) +
-  labs(x = "Environmental Sub-Compartment")
+  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
+  scale_color_identity() +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(
+    x = "",
+    y = ""
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
+    axis.text.y = element_text(size = 7),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  )
+
 ```
 
 
@@ -158,7 +210,7 @@ ggplot(
 
 @fig-paper-species illustrates the taxonomic diversity captured across studies, highlighting which papers focused on biota measurements and the range of species groups investigated.
 
-```r
+```{r}
 #| label: fig-paper-species
 #| fig-cap: "Sample size per species per paper across the dataset."
 #| warning: false
