@@ -11,15 +11,6 @@ format:
     max-width: 4500px
 ---
 
-<!-- include-in-header:
-  - text
-      <style>
-      /* "Hide" TOC sidebar when card is in full-screen mode */
-      .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
-      body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
-        z-index: 0 !important;
-      }
-      </style> -->
 
 ```{r}
 #| label: targets-setup
@@ -194,7 +185,7 @@ compartment_site_complete |>
 
 For the sake of starting somewhere, we can start by defining each combination of compartment and site type in coastal, estuary, and marine water as a node.
 
-  ```{r}
+```{r}
 coastal_complex_combinations <- compartment_site_summary |>
   filter(
     SITE_GEOGRAPHIC_FEATURE %in%
@@ -204,7 +195,6 @@ coastal_complex_combinations <- compartment_site_summary |>
     SITE_x_SUB = glue("{SITE_GEOGRAPHIC_FEATURE} x {ENVIRON_COMPARTMENT_SUB}")
   )
 
-
 ```
 
 ```{r}
@@ -212,21 +202,21 @@ coastal_complex_combinations <- compartment_site_summary |>
 #| width: 20
 #| label: fig-network-diagram
 
-ggraph(graph, layout = "tree") +
-  geom_edge_diagonal2(
-    aes(label = flow_type),
-    colour = "darkgrey",
-    label_colour = "black",
-    strength = 0.8,
-    check_overlap = TRUE,
-    angle_calc = "along",
-    arrow = arrow(length = unit(4, 'mm')),
-    start_cap = circle(10, 'mm'),
-    end_cap = circle(10, 'mm')
-  ) +
-  geom_node_point(size = 20, aes(colour = name)) +
-  geom_node_text(aes(label = str_wrap(name, 10)), size = 3, ) +
-  scale_fill_manual(values = compartment_colours) +
-  theme_void() +
-  theme(legend.position = "none")
+# ggraph(graph, layout = "tree") +
+#   geom_edge_diagonal2(
+#     aes(label = flow_type),
+#     colour = "darkgrey",
+#     label_colour = "black",
+#     strength = 0.8,
+#     check_overlap = TRUE,
+#     angle_calc = "along",
+#     arrow = arrow(length = unit(4, 'mm')),
+#     start_cap = circle(10, 'mm'),
+#     end_cap = circle(10, 'mm')
+#   ) +
+#   geom_node_point(size = 20, aes(colour = name)) +
+#   geom_node_text(aes(label = str_wrap(name, 10)), size = 3, ) +
+#   scale_fill_manual(values = compartment_colours) +
+#   theme_void() +
+#   theme(legend.position = "none")
 ```

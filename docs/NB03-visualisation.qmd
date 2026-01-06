@@ -4,18 +4,6 @@ author: "Sam Welch"
 date: "2025.11.25"
 ---
 
-```{=html}
-<!-- include-in-header:
-  - text
-      <style>
-      /* "Hide" TOC sidebar when card is in full-screen mode */
-      .bslib-card[data-full-screen="true"] ~ #quarto-margin-sidebar,
-      body:has(.bslib-card[data-full-screen="true"]) #quarto-margin-sidebar {
-        z-index: 0 !important;
-      }
-      </style> -->
-```
-
 ```{r}
 #| label: targets-setup
 #| warning: false
@@ -109,7 +97,7 @@ calculate_sample_sizes <- function(data) {
 ```{r}
 #| label: fig-paper-subcompartments
 #| fig-cap: "Number of environmental sub-compartments sampled per paper. Each bar represents a unique publication, with height indicating the diversity of compartments (e.g., surface water, sediment, soil) analysed within that study."
-#| #| warning: false
+#| warning: false
 #| fig-width: 12
 #| fig-height: 8
 
@@ -205,19 +193,14 @@ plot_data_complete |>
 
 ```
 
-
 ### Species Coverage
 
-@fig-paper-species illustrates the taxonomic diversity captured across studies, highlighting which papers focused on biota measurements and the range of species groups investigated.
-
+@fig-paper-species-1, @fig-paper-species-2, @fig-paper-species-3, and @fig-paper-species-4 illustrate the taxonomic diversity captured across studies, highlighting which papers focused on biota measurements and the range of species groups investigated.
 ```{r}
-#| label: fig-paper-species
-#| fig-cap: "Sample size per species per paper across the dataset."
-#| warning: false
-#| fig-width: 16
-#| fig-height: 8
+#| label: data-prep-species-plots
+#| include: false
 
-# add species common names missing from ECOTOX data
+# add species common names missing from ECOTOX data ----
 new_species <- c(
   "Phoca vitulina" = "Harbor Seal",
   "Calanus finmarchicus" = "Copepod",
@@ -251,7 +234,7 @@ new_species <- c(
   "Reinhardtius hippoglossoides" = "Greenland Halibut"
 )
 
-# Extend species_lookup
+# Extend species_lookup ----
 species_lookup <- c(species_lookup, new_species)
 
 # Prepare data for plotting ----
@@ -267,7 +250,7 @@ plot_data <- literature_merged_data |>
   filter(!is.na(SAMPLE_SPECIES)) |>
   distinct()
 
-# Create formatted labels
+# Create formatted labels ----
 plot_data <- plot_data |>
   mutate(
     formatted_species = glue::glue(
@@ -275,17 +258,154 @@ plot_data <- plot_data |>
     )
   )
 
+# Define plot groups ----
+# Aim for ~36-37 species per plot
+plot_groups <- c(
+  "Fish" = 1, # 41 species
+  "Crustaceans" = 2, # 36 species
+  "Molluscs" = 3, # 19 species
+  "Invertebrates" = 3, # 18 species (total: 37)
+  "Mammals" = 4, # 14 species
+  "Worms" = 4, # 6 species
+  "Birds" = 4, # 5 species
+  "Moss/Hornworts" = 4, # 2 species
+  "Plants" = 4, # 2 species
+  "Algae" = 4, # 1 species
+  "Ecosystem" = 4, # 1 species
+  "Other" = 4 # 1 species (total: 32)
+)
+
+# Add plot group to data ----
+plot_data <- plot_data |>
+  mutate(plot_group = plot_groups[SPECIES_GROUP])
+
 # Calculate text color threshold ----
 threshold_value <- 2000 # set manually, as the 2050 mussels tend to overwhelm the others
+# TODO: No more!
+``
+`
+`
+``
+{
+  r
+}
+#| label: fig-paper-species-1
+#| fig-cap: "Sample size per species per paper across the dataset (Part 1: Fish)."
+#| warning: false
+#| fig-width: 16
+#| fig-height: 8
 
-# Create plot ----
 ggplot(
-  plot_data,
-  aes(
-    y = REFERENCE_ID,
-    x = formatted_species,
-    fill = count
+  plot_data |> filter(plot_group == 1),
+  aes(y = REFERENCE_ID, x = formatted_species, fill = count)
+) +
+  geom_tile() +
+  geom_text(aes(
+    label = count,
+    color = if_else(count > threshold_value, "black", "white")
+  )) +
+  scale_fill_viridis(name = "Sample Size (n)") +
+  scale_color_identity() +
+  theme_aep_plots() +
+  theme(
+    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(x = "Sampled Species") +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    space = "free_x",
+    scales = "free_x",
+    nrow = 1
   )
+`
+`
+`
+`
+``
+{
+  r
+}
+#| label: fig-paper-species-2
+#| fig-cap: "Sample size per species per paper across the dataset (Part 2: Crustaceans)."
+#| warning: false
+#| fig-width: 16
+#| fig-height: 8
+
+ggplot(
+  plot_data |> filter(plot_group == 2),
+  aes(y = REFERENCE_ID, x = formatted_species, fill = count)
+) +
+  geom_tile() +
+  geom_text(aes(
+    label = count,
+    color = if_else(count > threshold_value, "black", "white")
+  )) +
+  scale_fill_viridis(name = "Sample Size (n)") +
+  scale_color_identity() +
+  theme_aep_plots() +
+  theme(
+    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(x = "Sampled Species") +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    space = "free_x",
+    scales = "free_x",
+    nrow = 1
+  )
+``
+`
+`
+``
+{
+  r
+}
+#| label: fig-paper-species-3
+#| fig-cap: "Sample size per species per paper across the dataset (Part 3: Molluscs & Invertebrates)."
+#| warning: false
+#| fig-width: 16
+#| fig-height: 8
+
+ggplot(
+  plot_data |> filter(plot_group == 3),
+  aes(y = REFERENCE_ID, x = formatted_species, fill = count)
+) +
+  geom_tile() +
+  geom_text(aes(
+    label = count,
+    color = if_else(count > threshold_value, "black", "white")
+  )) +
+  scale_fill_viridis(name = "Sample Size (n)") +
+  scale_color_identity() +
+  theme_aep_plots() +
+  theme(
+    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(x = "Sampled Species") +
+  facet_wrap(
+    facets = vars(SPECIES_GROUP),
+    space = "free_x",
+    scales = "free_x",
+    nrow = 1
+  )
+```
+
+```{r}
+#| label: fig-paper-species-4
+#| fig-cap: "Sample size per species per paper across the dataset (Part 4: Mammals, Worms, Birds & Other)."
+#| warning: false
+#| fig-width: 16
+#| fig-height: 8
+
+ggplot(
+  plot_data |> filter(plot_group == 4),
+  aes(y = REFERENCE_ID, x = formatted_species, fill = count)
 ) +
   geom_tile() +
   geom_text(aes(

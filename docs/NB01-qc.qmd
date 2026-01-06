@@ -21,6 +21,8 @@ suppressMessages(
 
     i_am("README.md")
     tar_config_set(store = here("_targets"))
+
+    devtools::load_all()
   }
 )
 

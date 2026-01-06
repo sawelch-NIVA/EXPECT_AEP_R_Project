@@ -1,12 +1,5 @@
 ---
-title: AEP Manuscript
-authors:
-  - name: Sam Welch
-    affiliation: Norwegian Institute for Water Research
-    roles: writing
-    corresponding: true
-bibliography: references.bib
-number-sections: true
+title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability 
 ---
 
 # Introduction
@@ -19,11 +12,22 @@ The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept w
 
 Norway's economically important Arctic region is likely to come under increased pressure in coming years. Demand for copper is likely to drive increased mining in mineral rich zones. Melting sea ice will increase the feasibility of cross-Arctic shipping [@smithNewTransArcticShipping2013], likely increasing exposure to copper from antifoulant paints, while a growing demand for aquaculture may also drive use of copper-based antifoulants. Terrestrial biocides, brake dust, and natural weathering will likely also continue to add to pollution. In addition, changes to ecology, nutrient cycling, organic material, and the overall stressor landscape are likely to add to the challenges faced by the wildlife of the Norwegian sea and the industries and people that rely on them.
 
-[@alveMonitoringStrategiesReestablishment2009] here's a paper citation, just to check that it works. And it does, but not in any of the supporting information.
 
 # Materials and Methods
 
-See Notebook 03 for the most relevant stuff. Although the notebooks can't find their own images at the moment, which is ridiculous.
+An exhaustive version of the materials and methods are provided in the notebooks and appendices included. These are summarised below.
+
+## Data Selection 
+
+
+
+### Literature Review Protocol
+
+### CREED Assessment
+
+## Data Processing and Validation
+
+## Data Analysis
 
 # Results
 

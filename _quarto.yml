@@ -13,31 +13,76 @@ website:
     search: true
     contents:
       - href: index.qmd
-        text: "Article"
+        text: "<em>Article</em>"
       - Section: "Notebooks"
       - href: docs/NB01-qc.qmd
         text: "NB01 - Data QC"
+        icon: journal-code
       - href: docs/NB02-vannmiljo.qmd
         text: "NB02 - Vannmiljø"
+        icon: journal-code
       - href: docs/NB03-visualisation.qmd
         text: "NB03 - Visualisation"
+        icon: journal-code
       - href: docs/NB04-map.qmd
         text: "NB04 - Map"
+        icon: journal-code
       - href: docs/NB05-network.qmd
         text: "NB05 - Network Diagram"
+        icon: journal-code
       - href: docs/NB07-emissions.qmd
         text: "NB07 - Emissions"
+        icon: journal-code
       - href: docs/NB08-ecology.qmd
         text: "NB08 - Ecology"
+        icon: journal-code
+      - href: docs/AP01-review-protocol.qmd
+        text: "AP01 - Review Protocol"
+        icon: file-earmark-plus
+      - href: docs/AP02-acknowledgements.qmd
+        text: "AP01 - Acknowledgements"
+        icon: file-earmark-plus
+    theme:
+    light: flatly
+    dark: darkly
 
 format:
   html:
     code-fold: true
+    code-overflow: wrap
     fig-format: svg
     toc: true
+    grid:
+      sidebar-width: 400px
+
+authors:
+  - name: Sam Welch
+    affiliation: Norwegian Institute for Water Research
+    roles: [conceptualization, data curation, formal analysis, investigation, methodology, software, validation, visualization]
+    corresponding: true
+  - name: Knut Erik Tollefsen
+    affiliation: 
+      - Norwegian Institute for Water Research
+      - Norwegian University for Life Sciences
+    roles: writing
+    corresponding: false
+  - name: Pierre Blévin
+    affiliation: Akvaplan-NIVA AS
+    roles: writing
+    corresponding: false
+  - name: Anita Evenset
+    affiliation: Akvaplan-NIVA AS
+    roles: writing
+    corresponding: false
+  - name: Camden Karon Klefbom
+    affiliation: Norwegian Institute for Water Research
+    roles: writing
+    corresponding: false
+bibliography: references.bib
+number-sections: true
 
 comments:
-  hypothesis: true # this would enable comments... if it was a manuscript
+  hypothesis: true # enables comments using a 3rd party service
 
 execute:
   freeze: false

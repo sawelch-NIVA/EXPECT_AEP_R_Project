@@ -293,6 +293,7 @@ list(
     }
   ),
 
+  # TODO: I believe something I've done somewhere means that this doesn't properly update. We'll have to come back to it.
   tar_target(
     name = load_literature_pqt,
     command = {

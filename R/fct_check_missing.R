@@ -46,8 +46,7 @@ classify_data_issue <- function(x) {
 #' @param data A tibble/data.frame of literature data (e.g., load_literature_pqt)
 #' @return A named list containing summary statistics and tibbles of problem rows
 #'
-#' @importFrom dplyr filter group_by summarise n n_distinct if_any row_number
-#' @importFrom dplyr mutate where select rowwise ungroup first any_of
+#' @importFrom dplyr filter group_by summarise n n_distinct if_any row_number mutate where select rowwise ungroup first any_of
 #' @importFrom stringr str_detect
 #'
 #' @export
@@ -98,28 +97,37 @@ check_data_quality <- function(data) {
       missing_extraction = any(is_missing(EXTRACTION_PROTOCOL)),
       missing_fractionation = any(is_missing(FRACTIONATION_PROTOCOL)),
       missing_sampling = any(is_missing(SAMPLING_PROTOCOL)),
-      # sample_ids = list(SAMPLE_ID),
       .groups = "drop"
-    ) |>
-    rowwise() |>
-    mutate(
-      missing_elements = paste(
-        c(
-          if (missing_analytical) "Analytical",
-          if (missing_extraction) "Extraction",
-          if (missing_fractionation) "Fractionation",
-          if (missing_sampling) "Sampling"
-        ),
-        collapse = ", "
-      )
-    ) |>
-    ungroup() |>
+    )
+
+  # Only add missing_elements column if there are rows
+  if (nrow(missing_methods) > 0) {
+    missing_methods <- missing_methods |>
+      rowwise() |>
+      mutate(
+        missing_elements = paste(
+          c(
+            if (missing_analytical) "Analytical",
+            if (missing_extraction) "Extraction",
+            if (missing_fractionation) "Fractionation",
+            if (missing_sampling) "Sampling"
+          ),
+          collapse = ", "
+        )
+      ) |>
+      ungroup()
+  } else {
+    # Add empty missing_elements column for consistency
+    missing_methods <- missing_methods |>
+      mutate(missing_elements = character())
+  }
+
+  missing_methods <- missing_methods |>
     select(
       source_file_measurements,
       read_timestamp_measurements,
       n_rows,
-      missing_elements,
-      # sample_ids
+      missing_elements
     )
 
   # 4. Missing or problematic uncertainty ----

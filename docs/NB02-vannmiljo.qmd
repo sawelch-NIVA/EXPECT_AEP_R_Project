@@ -136,6 +136,7 @@ flowchart TB
 -   [ ] More sanity checking of extracted values
 -   [ ] Move boring code to targets
 -   [ ] Work out how to do CREED for this data, then implement.
+
 ## Optional Improvements
 -   [ ] Improve heatmaps using https://github.com/raivokolde/pheatmap
 -   [ ] Make real Sankey diagrams
@@ -559,7 +560,7 @@ We don't yet have an oversight over the distribution of site types, biota, tissu
 #| label: fig-heatmap-campaign-vannkategory
 #| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and reported water category, all years"
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 14
 #| warning: false
 
 # Create a summary of counts by the two variables
@@ -659,7 +660,7 @@ Rivers, lakes, and coastal waters are the majority of the dataset, which is appr
 #| label: fig-heatmap-medium-campaign
 #| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and reported sampling medium, all years"
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 14
 #| warning: false
 
 # Create a summary of counts by the two variables
@@ -879,9 +880,10 @@ We also consider sample size of @fig-heatmap-campaign-biota by campaign. This in
 #| label: fig-heatmap-campaign-biota
 #| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
 #| fig-width: 12
-#| fig-height: 20
+#| fig-height: 25
 #| warning: false
 
+# todo: facet this by species group, it's too tall otherwise
 # Create a summary of counts by the two variables (filter to non-NA species)
 vm_exploration_species <- vm_merged_lookups |>
   mutate(
@@ -971,7 +973,7 @@ Finally, we check units by sampling medium @fig-heatmap-units-medium. We would e
 
 ```{r}
 #| label: fig-heatmap-units-medium
-#| fig-cap: "Distribution of Vannmiljø copper samples by monitoring campaign and species, all years"
+#| fig-cap: "Units used in Vannmiljø copper samples by MediumName"
 #| fig-width: 12
 #| fig-height: 3
 #| warning: false
@@ -1999,7 +2001,7 @@ vm_compartment_sites_split |>
 
 ```
 
-Let's update the not-Sankey now that we've removed some more rows (@fig-conflict-resolution-visualisation).
+Let's update the not-Sankey now that we've removed some more rows (@fig-conflict-resolution-visualisation). Note the columns "Wrong compartment" and "Compartment Conflicts Removed" - these steps are pre- and post-transformation, which is why the samples are different.
 
 ```{r}
 #| label: fig-conflict-resolution-visualisation
@@ -2009,7 +2011,7 @@ Let's update the not-Sankey now that we've removed some more rows (@fig-conflict
 # Create filtering summary
 conflict_flow <- filter_flow |>
   add_row(
-    Filter = "Compartment Resolution",
+    Filter = "Compartment Conflicts Removed",
     Rows_Remaining = nrow(vm_compartment_conflicts_resolved),
     pct = round(100 * Rows_Remaining / first(filter_flow$Rows_Remaining), 1),
     label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
@@ -2022,7 +2024,10 @@ conflict_flow <- filter_flow |>
   )
 
 # Simple bar plot
-ggplot(conflict_flow, aes(x = Filter, y = Rows_Remaining)) +
+ggplot(
+  conflict_flow,
+  aes(x = Filter |> str_wrap(width = 20), y = Rows_Remaining)
+) +
   geom_col(aes(fill = Filter)) +
   geom_text(aes(label = label), vjust = -0.5, size = 3) +
   scale_fill_brewer(palette = "Set1") +
@@ -2791,12 +2796,8 @@ Do some quick checks to see if the data we're exporting looks like we expect it 
 
 ### Compartments
 
-Are our compartments valid and reasonable? @tbl-validate-export-compartments suggests they are not.
+Are our compartments valid and reasonable? @tbl-validate-export-compartments gives a quick summary..
 
-- Some Biota have * as a subcategory
-- Some biota have Freshwater or Marine/Salt Water as a subcategory
-
-Why didn't we flag these earlier?
 
 ```{r}
 #| label: tbl-validate-export-compartments
