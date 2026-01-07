@@ -49,7 +49,6 @@ biota_data_summary <- literature_biota_data |>
 # check missing common names
 biota_data_summary |> filter(is.na(SPECIES_COMMON_NAME))
 
-
 ```
 
 In an idea world, we can find an already existing dataset with rough trophic levels (or better yet relationships) for most or all of our species. This probably doesn't exist, although FishBase seems to have pretty good data for what various species of fish eat. 
