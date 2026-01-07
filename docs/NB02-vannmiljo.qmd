@@ -1,7 +1,7 @@
 ---
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
-date: "2025.12.16"
+date: last-modified
 html:
   toc-depth: 3
   toc-expand: 3

@@ -1,7 +1,10 @@
 ---
-title: "Notebook 03 - Exploration"
+title: "Notebook 03 - Visualisation"
 author: "Sam Welch"
-date: "2025.11.25"
+date: last-modified
+format:
+  html:
+    fig-format: svg
 ---
 
 ```{r}
@@ -80,6 +83,7 @@ calculate_sample_sizes <- function(data) {
 -   [ ] Reach out to Dag or Jens to ask if MD have any copper emissions data
 -   [ ] Talk to Marianne from reference group (or anyone else on the reference group)
 -   [ ] Get more data in
+-   [ ] (Maybe) renable plotly
 -   [ ] Make network diagram visualise uncertainty, etc.
 -   [ ] Functional and risk assessment trophic levels may not be perfectly aligned
     -   [ ] might be better off using ERA grouping - talk to Li about it
@@ -279,21 +283,22 @@ plot_groups <- c(
 plot_data <- plot_data |>
   mutate(plot_group = plot_groups[SPECIES_GROUP])
 
-# Calculate text color threshold ----
-threshold_value <- 2000 # set manually, as the 2050 mussels tend to overwhelm the others
-# TODO: No more!
-``
-`
-`
-``
-{
-  r
-}
+# should work automatically but actually not very good
+threshold_value <- 5000
+
+# <- mean(
+#   log10(plot_data$n_samples),
+#   na.rm = TRUE
+# )
+
+```
+
+```{r}
 #| label: fig-paper-species-1
 #| fig-cap: "Sample size per species per paper across the dataset (Part 1: Fish)."
 #| warning: false
 #| fig-width: 16
-#| fig-height: 8
+#| fig-height: 5
 
 ggplot(
   plot_data |> filter(plot_group == 1),
@@ -308,25 +313,21 @@ ggplot(
   scale_color_identity() +
   theme_aep_plots() +
   theme(
-    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x.bottom = element_markdown(angle = 270, hjust = 0, vjust = 0.5),
     axis.title.y = element_blank(),
-    legend.position = "none"
+    legend.position = "none",
+    base_size = 12
   ) +
-  labs(x = "Sampled Species") +
+  labs(x = "") +
   facet_wrap(
     facets = vars(SPECIES_GROUP),
     space = "free_x",
     scales = "free_x",
     nrow = 1
   )
-`
-`
-`
-`
-``
-{
-  r
-}
+```
+
+```{r}
 #| label: fig-paper-species-2
 #| fig-cap: "Sample size per species per paper across the dataset (Part 2: Crustaceans)."
 #| warning: false
@@ -346,7 +347,7 @@ ggplot(
   scale_color_identity() +
   theme_aep_plots() +
   theme(
-    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x.bottom = element_markdown(angle = 270, hjust = 0, vjust = 0.5),
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
@@ -357,13 +358,8 @@ ggplot(
     scales = "free_x",
     nrow = 1
   )
-``
-`
-`
-``
-{
-  r
-}
+```
+```{r}
 #| label: fig-paper-species-3
 #| fig-cap: "Sample size per species per paper across the dataset (Part 3: Molluscs & Invertebrates)."
 #| warning: false
@@ -383,7 +379,7 @@ ggplot(
   scale_color_identity() +
   theme_aep_plots() +
   theme(
-    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x.bottom = element_markdown(angle = 270, hjust = 0, vjust = 0.5),
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
@@ -416,11 +412,11 @@ ggplot(
   scale_color_identity() +
   theme_aep_plots() +
   theme(
-    axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x.bottom = element_markdown(angle = 270, hjust = 0, vjust = 0.5),
     axis.title.y = element_blank(),
     legend.position = "none"
   ) +
-  labs(x = "Sampled Species") +
+  labs(x = "") +
   facet_wrap(
     facets = vars(SPECIES_GROUP),
     space = "free_x",
@@ -429,23 +425,91 @@ ggplot(
   )
 ```
 
+## Simple Map
+
+@fig-sites-hex-map is a simple density map of all our sites. Needs a fair amount of aesthetic work, but gives an accurate impression of where we have sites. 
+
+```{r}
+#| label: fig-sites-hex-map
+#| fig-cap: All sampling sites binned into 500 hexagons, coloured by number of sites in area.
+#| fig-width: 12
+
+library(hexbin)
+
+sites_sample_number <- literature_merged_data |> 
+  group_by(SITE_CODE) |> 
+  reframe(LATITUDE, LONGITUDE, n = sum(MEASURED_N)) |> 
+  distinct()
+
+# Create hexbin object to get bin centers
+hb <- hexbin(sites_sample_number$LONGITUDE, 
+             sites_sample_number$LATITUDE, 
+             xbins = 100)
+
+# Extract hex centers and counts
+hex_coords <- data.frame(
+  x = hcell2xy(hb)$x,
+  y = hcell2xy(hb)$y,
+  count = hb@count
+)
+
+# Plot
+world_map <- map_data("world")
+ggplot() +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "lightgray",
+    colour = "white"
+  ) +
+  geom_hex(
+    data = sites_sample_number,
+    aes(x = LONGITUDE, y = LATITUDE),
+    bins = 100,
+    linewidth = 0
+  ) +
+  # geom_text(
+  #   data = hex_coords,
+  #   aes(x = x, y = y, label = count), 
+  #   colour = "pink",
+  #   size = 3
+  # ) +
+  scale_fill_viridis_b(name = "Samples", breaks = c(1, 5, 10, 50, 100, 500, 1000, 2000)) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank()) +
+  coord_sf(
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+```
+
 ## Copper Concentrations by Environmental Compartment
 
 Get a basic overview of the orders of magnitude for different sub-compartments (@fig-basic-subcompartments), so we can plot them on scales that make sense. Note that I haven't included uncertainty or sample sizes.
 
 ```{r}
-#| label: fig-basic-subcompartments
+#| label: fig-basic-subcompartments-dry-mass
 
 literature_merged_data |>
-  filter(!is.na(MEASURED_UNIT_STANDARD)) |>
+  filter(!is.na(MEASURED_UNIT_STANDARD), 
+         MEASURED_UNIT_STANDARD == "mg/kg (dry)") |>
   ggplot(aes(
     x = MEASURED_VALUE_STANDARD,
     y = ENVIRON_COMPARTMENT_SUB,
     color = ENVIRON_COMPARTMENT_SUB
   )) +
   geom_point() +
+  scale_y_continuous(trans = "log10") +
   facet_nested(
-    rows = vars(ENVIRON_COMPARTMENT, MEASURED_UNIT_STANDARD),
+    rows = vars(ENVIRON_COMPARTMENT),
     scales = "free_y",
     space = "free_y",
     nest_line = element_line()
@@ -456,8 +520,62 @@ literature_merged_data |>
     breaks = names(compartment_colours)
   ) +
   theme(legend.position = "none") +
-  labs(x = "", y = "")
+  labs(x = "Concentration (mg/kg dry)", y = "")
 
+```
+
+```{r}
+#| label: fig-basic-subcompartments-concentration
+
+literature_merged_data |>
+  filter(!is.na(MEASURED_UNIT_STANDARD), 
+         MEASURED_UNIT_STANDARD == "mg/L") |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = ENVIRON_COMPARTMENT_SUB,
+    color = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  facet_nested(
+    rows = vars(ENVIRON_COMPARTMENT),
+    scales = "free_y",
+    space = "free_y",
+    nest_line = element_line()
+  ) +
+  theme_minimal() +
+  scale_color_manual(
+    values = compartment_colours,
+    breaks = names(compartment_colours)
+  ) +
+  theme(legend.position = "none") +
+  labs(x = "Concentration (mg/L)", y = "")
+```
+
+```{r}
+#| label: fig-basic-subcompartments-wet-mass
+
+literature_merged_data |>
+  filter(!is.na(MEASURED_UNIT_STANDARD), 
+         MEASURED_UNIT_STANDARD == "mg/kg (wet)") |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD,
+    y = ENVIRON_COMPARTMENT_SUB,
+    color = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  facet_nested(
+    rows = vars(ENVIRON_COMPARTMENT),
+    scales = "free_y",
+    space = "free_y",
+    nest_line = element_line()
+  ) +
+  theme_minimal() +
+  scale_color_manual(
+    values = compartment_colours,
+    breaks = names(compartment_colours)
+  ) +
+  theme(legend.position = "none") +
+  labs(x = "Concentration (mg/kg wet)", y = "")
 ```
 
 The following sections present copper concentration distributions for each major environmental compartment. Plots are based on reported means uncertainty bounds (SD, range, 95% CI, etc.) and overlaid with relevant regulatory thresholds where available.
@@ -1158,8 +1276,6 @@ p <- literature_merged_data |>
     color = "Sub-compartment"
   ) +
   theme_minimal()
-
-plotly::ggplotly(p)
 ```
 
 ### Biota
@@ -1200,7 +1316,5 @@ p <- literature_merged_data |>
   ) +
   theme_minimal()
 
-plotly::ggplotly(p)
 ```
 
-#

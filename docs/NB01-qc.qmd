@@ -1,7 +1,7 @@
 ---
 title: "Notebook 01 - Quality Control"
 author: "Sam Welch"
-date: "2025.11.25"
+date: last-modified
 lightbox: true
 ---
 Notebook 1 contains code for quality control of extracted data. 

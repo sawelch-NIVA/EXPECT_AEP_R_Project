@@ -1,7 +1,7 @@
 ---
 title: "Appendix 03 - CREED Criteria"
 author: "Sam Welch"
-date: "2026.01.06"
+date: last-modified
 ---
 
 This text is transcripted from `STOPeData/inst/app/www/md/CREED_Copper_Purpose.yml`. Will make pretty at some point.
