@@ -1,8 +1,11 @@
 ---
-title: "Appendix 01 - Acknowledgements"
+title: "Appendix 02 - Acknowledgements"
 author: "Sam Welch"
 date: last-modified
 ---
+
+
+# EWMA project/Kristine Bondo Pedersen
 
 ::: callout-note Re: The impact of submarine copper mine tailing disposal from the 1970s on Repparfjorden, northern Norway
 
@@ -17,3 +20,24 @@ Let me know if you need me to dig for any other data from the project!
 Best wishes,
 
 Kristine :::
+
+# Bioaccumulation of metals (Cd, Cu, Ni, Pb and Zn) in suspended cultures of blue mussels exposed to different environmental conditions
+
+Marie Maar - Provided raw data on request 
+
+# Copper in Agriculture Sales Data
+- Collected by Matilsynet
+- Referred by Roger Holten
+
+# Distribution pattern of mercury in northern Barents Sea and Eurasian Basin
+
+Stephen Gustav Kohler provided full data on request.
+
+# Determination of Nanoparticles and Elements in Blue Mussels (Mytilus edulis) along the Norwegian Coastline 
+
+Are Sæle Bruvold provided raw data on request.
+
+# Consultation on Literature Reviews
+
+Aina Charlotte Weinberg, Maria Hultman, Max Nawarth
+

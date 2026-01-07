@@ -40,7 +40,7 @@ website:
         text: "AP01 - Review Protocol"
         icon: file-earmark-plus
       - href: docs/AP02-acknowledgements.qmd
-        text: "AP01 - Acknowledgements"
+        text: "AP02 - Acknowledgements"
         icon: file-earmark-plus
     theme:
     light: flatly

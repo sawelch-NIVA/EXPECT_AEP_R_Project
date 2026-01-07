@@ -4,13 +4,17 @@ author: "Sam Welch"
 date: last-modified
 lightbox: true
 ---
-Notebook 1 contains code for quality control of extracted data. 
+Notebook 1 contains code for quality control of extracted data. This has been largely done with custom functions up until now but I want to try `pointblank`.
+
+###### Todo:
+- [ ] Finish extending Pointblank
+- [ ] Put pointblank in correct order
+- [ ] Move pointblank to targets workflow
 
 ```{r, include=FALSE}
 
 suppressMessages(
   {
-    print(Sys.time())
     library(STOPeData)
     library(DT)
     library(dplyr)
@@ -18,6 +22,7 @@ suppressMessages(
     library(targets)
     library(here)
     library(glue)
+    library(pointblank)
 
     i_am("README.md")
     tar_config_set(store = here("_targets"))
@@ -29,9 +34,11 @@ suppressMessages(
 # load in any data we need from the targets workflow
 
 literature_merged_data <- tar_read(load_literature_pqt)
+literature_measurements_data <- tar_read(measurements_data)
 literature_reference_data <- tar_read(reference_data)
 literature_campaign_data <- tar_read(campaign_data)
 literature_sites_data <- tar_read(sites_data)
+literature_biota_data <- tar_read(biota_data)
 literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
 
@@ -154,13 +161,18 @@ Rows where UNCERTAINTY_TYPE or UNCERTAINTY\_\*\_STANDARD are missing.
 #| echo: false
 
 if (nrow(literature_qc$missing_uncertainty) > 0) {
-  display_df <- literature_qc$missing_uncertainty
+  display_df <- literature_qc$missing_uncertainty |>
+    mutate(
+      reference = sub("_Measurements.*$", "...", source_file_measurements)
+    ) |>
+    select(reference, n_rows, missing_elements) |>
+    arrange(desc(n_rows))
 
   datatable(
     display_df,
     options = list(pageLength = 10),
     caption = "References with missing or problematic uncertainty",
-    colnames = c("Source", "Timestamp", "Rows", "Uncertainty Issues")
+    colnames = c("Reference", "Rows", "Uncertainty Issues")
   )
 } else {
   cat("*No uncertainty issues found.*")
@@ -177,8 +189,15 @@ Sites missing coordinates, geographic features, country, or ocean information.
 #| echo: false
 
 if (nrow(literature_qc$missing_sites) > 0) {
+  display_df <- literature_qc$missing_sites |>
+    mutate(
+      reference = sub("_Measurements.*$", "...", source_file_measurements)
+    ) |>
+    select(reference, n_rows, SITE_CODE, missing_elements) |>
+    arrange(desc(n_rows))
+
   datatable(
-    literature_qc$missing_sites,
+    display_df,
     options = list(pageLength = 10),
     caption = "Sites with missing geographic data",
     colnames = c(
@@ -233,4 +252,337 @@ literature_merged_data |>
   filter(is_missing(REFERENCE_ID) | REFERENCE_ID == "Unknown Reference") |>
   distinct() |>
   datatable()
+```
+
+# Pointblank
+
+## Measurements
+
+```{r}
+#| label: pointblank-scratchpad
+
+# Generate a simple `action_levels` object to
+# set the `warn` state if a validation step
+# has a single 'fail' test unit
+al <- action_levels(warn_at = 1)
+
+agent <-
+  literature_measurements_data |>
+  select(-source_file, -read_timestamp) |>
+  # still a problem
+  create_agent(
+    label = "Check literature_measurements_data passes format conditions.",
+    actions = al
+  ) |>
+  col_schema_match(
+    col_schema(eDataDRF::initialise_measurements_tibble()),
+    brief = "Table matches initialise_measurements_tibble()"
+  ) |>
+  # Core identifiers
+  col_vals_not_null(columns = SITE_CODE) |>
+  col_vals_not_null(columns = PARAMETER_NAME) |>
+  col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
+  col_vals_not_null(columns = SAMPLING_DATE) |>
+  col_vals_gte(columns = SAMPLING_DATE, value = as.Date("1900-01-01")) |>
+  col_vals_lte(columns = SAMPLING_DATE, value = Sys.Date()) |>
+
+  # Environmental compartments
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT,
+    set = environ_compartments_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT_SUB,
+    set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+  ) |>
+
+  # Measurement values
+  col_vals_gte(columns = MEASURED_VALUE, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = MEASURED_N, value = 1, na_pass = TRUE) |>
+  col_vals_gte(columns = UNCERTAINTY_UPPER, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = UNCERTAINTY_LOWER, value = 0, na_pass = TRUE) |>
+
+  # LOQ/LOD values
+  col_vals_gte(columns = LOQ_VALUE, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = LOD_VALUE, value = 0, na_pass = TRUE) |>
+
+  # Units consistency
+  col_vals_not_null(columns = MEASURED_UNIT) |>
+  # col_vals_expr(
+  #   expr = case_when(
+  #     !is.na(LOQ_VALUE) ~ !is.na(LOQ_UNIT),
+  #     TRUE ~ TRUE
+  #   )
+  # ) |>
+  # col_vals_expr(
+  #   expr = case_when(
+  #     !is.na(LOD_VALUE) ~ !is.na(LOD_UNIT),
+  #     TRUE ~ TRUE
+  #   )
+  # ) |>
+
+  # Reference integrity
+  col_vals_not_null(columns = REFERENCE_ID) |>
+  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+  col_vals_not_null(columns = SAMPLE_ID) |>
+
+  interrogate()
+
+print(agent)
+
+
+# scan_data(literature_measurements_data) # has problems with µ
+```
+
+
+```{r}
+#| label: pointblank-sites
+#| echo: true
+
+agent_sites <-
+  literature_sites_data |>
+  select(-source_file, -read_timestamp) |>
+  create_agent(
+    label = "Check literature_sites_data passes format conditions.",
+    actions = al
+  ) |>
+  col_schema_match(
+    col_schema(eDataDRF::initialise_sites_tibble()),
+    brief = "Table matches initialise_sites_tibble()"
+  ) |>
+
+  # Core identifiers
+  col_vals_not_null(columns = SITE_CODE) |>
+  col_vals_not_null(columns = SITE_NAME) |>
+
+  # Geographic classifications
+  col_vals_in_set(
+    columns = SITE_GEOGRAPHIC_FEATURE,
+    set = geographic_features_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = SITE_GEOGRAPHIC_FEATURE_SUB,
+    set = geographic_features_sub_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = COUNTRY_ISO,
+    set = c(countries_vocabulary(), "Not reported", "Not relevant")
+  ) |>
+  col_vals_in_set(
+    columns = OCEAN_IHO,
+    set = c(areas_vocabulary(), "Not reported", "Not relevant")
+  ) |>
+
+  # Coordinates
+  col_vals_between(
+    columns = LATITUDE,
+    left = -90,
+    right = 90
+  ) |>
+  col_vals_between(
+    columns = LONGITUDE,
+    left = -180,
+    right = 180
+  ) |>
+  col_vals_in_set(
+    columns = SITE_COORDINATE_SYSTEM,
+    set = coordinate_systems_vocabulary()
+  ) |>
+
+  # Altitude
+  col_vals_between(
+    columns = ALTITUDE_VALUE,
+    left = -11000,
+    right = 9000
+  ) |>
+  col_vals_in_set(
+    columns = ALTITUDE_UNIT,
+    set = altitude_units_vocabulary()
+  ) |>
+
+  # Metadata
+  col_vals_not_null(columns = ENTERED_BY) |>
+  col_vals_not_null(columns = ENTERED_DATE) |>
+
+  interrogate()
+
+print(agent_sites)
+```
+
+
+```{r}
+#| label: pointblank-references
+#| echo: true
+
+agent_references <-
+  literature_reference_data |>
+  select(-source_file, -read_timestamp) |>
+  create_agent(
+    label = "Check literature_reference_data passes format conditions.",
+    actions = al
+  ) |>
+  col_schema_match(
+    col_schema(eDataDRF::initialise_references_tibble()),
+    brief = "Table matches initialise_references_tibble()"
+  ) |>
+
+  # Core identifiers
+  col_vals_not_null(columns = REFERENCE_ID) |>
+  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+  col_vals_not_null(columns = REFERENCE_TYPE) |>
+
+  # Bibliographic fields
+  col_vals_not_null(columns = AUTHOR) |>
+  col_vals_not_null(columns = TITLE) |>
+  col_vals_not_null(columns = YEAR) |>
+  col_vals_gte(columns = YEAR, value = 1900) |>
+  col_vals_lte(columns = YEAR, value = as.integer(format(Sys.Date(), "%Y"))) |>
+
+  # Access date
+  col_vals_gte(columns = ACCESS_DATE, value = as.Date("2000-01-01")) |>
+  col_vals_lte(columns = ACCESS_DATE, value = Sys.Date()) |>
+
+  # Numeric fields
+  col_vals_gte(columns = VOLUME, value = 1, na_pass = TRUE) |>
+  col_vals_gte(columns = ISSUE, value = 1, na_pass = TRUE) |>
+
+  interrogate()
+
+print(agent_references)
+```
+
+
+```{r}
+#| label: pointblank-campaign
+#| echo: true
+
+literature_campaign_data <- tar_read(campaign_data)
+
+campaign_schema <- col_schema(
+  eDataDRF::initialise_campaign_tibble() |>
+    mutate(
+      across(contains("DATE"), as.IDate),
+      source_file = NA_character_,
+      read_timestamp = NA_character_
+    )
+)
+
+
+agent_campaign <-
+  literature_campaign_data |>
+  create_agent(
+    label = "Check literature_campaign_data passes format conditions.",
+    actions = al
+  ) |>
+  col_schema_match(
+    campaign_schema,
+    brief = "Table matches initialise_campaign_tibble()"
+  ) |>
+
+  # Core identifiers
+  col_vals_not_null(columns = CAMPAIGN_NAME_SHORT) |>
+  col_vals_not_null(columns = CAMPAIGN_NAME) |>
+
+  # Date validation
+  col_vals_not_null(columns = CAMPAIGN_START_DATE) |>
+  col_vals_gte(columns = CAMPAIGN_START_DATE, value = as.Date("1900-01-01")) |>
+  col_vals_lte(columns = CAMPAIGN_START_DATE, value = Sys.Date()) |>
+  col_vals_gte(
+    columns = CAMPAIGN_END_DATE,
+    value = as.Date("1900-01-01"),
+    na_pass = TRUE # some campaigns lack an end date, but that isn't really a problem
+  ) |>
+  col_vals_lte(
+    columns = CAMPAIGN_END_DATE,
+    value = Sys.Date(),
+    na_pass = TRUE
+  ) |>
+
+  # Date logic: end date after start date
+  # col_vals_expr(
+  #   expr = is.na(CAMPAIGN_END_DATE) | CAMPAIGN_END_DATE >= CAMPAIGN_START_DATE
+  # ) |>
+
+  # Metadata
+  col_vals_not_null(columns = ENTERED_BY) |>
+  col_vals_not_null(columns = ENTERED_DATE) |>
+  col_vals_lte(columns = ENTERED_DATE, value = Sys.Date()) |>
+
+  interrogate()
+
+print(agent_campaign)
+```
+
+
+```{r}
+#| label: pointblank-biota
+#| echo: true
+
+literature_biota_data <- tar_read(biota_data)
+
+biota_schema <- col_schema(
+  eDataDRF::initialise_biota_tibble() |>
+    mutate(
+      across(contains("DATE"), as.IDate),
+      source_file = NA_character_,
+      read_timestamp = NA_character_
+    )
+)
+
+agent_biota <-
+  literature_biota_data |>
+  create_agent(
+    label = "Check literature_biota_data passes format conditions.",
+    actions = al
+  ) |>
+  col_schema_match(
+    schema = biota_schema,
+    brief = "Table matches initialise_biota_tibble()"
+  ) |>
+
+  # Core identifiers
+  col_vals_not_null(columns = SAMPLE_ID) |>
+  col_vals_not_null(columns = SITE_CODE) |>
+  col_vals_not_null(columns = PARAMETER_NAME) |>
+  col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
+
+  # Biota-specific fields
+  col_vals_not_null(columns = SPECIES_GROUP) |>
+  col_vals_not_null(columns = SAMPLE_SPECIES) |>
+  col_vals_not_null(columns = SAMPLE_TISSUE) |>
+
+  # Environmental compartments
+  col_vals_equal(
+    columns = ENVIRON_COMPARTMENT,
+    "Biota"
+  ) |>
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT_SUB,
+    set = environ_compartments_sub_vocabulary()$Biota
+  ) |>
+
+  # Biota-specific columns
+  col_vals_in_set(
+    columns = SPECIES_GROUP,
+    set = species_groups_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = SAMPLE_TISSUE,
+    set = tissue_types_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = SAMPLE_SPECIES_LIFESTAGE,
+    set = lifestage_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = SAMPLE_SPECIES_GENDER,
+    set = gender_vocabulary()
+  )
+
+
+get_agent_report(agent_biota)
+
+print(agent_biota)
+
+interrogate(agent_biota)
 ```

@@ -15,10 +15,10 @@ date: last-modified
 
 suppressMessages(
   {
-    print(Sys.time())
     library(STOPeData)
     library(DT)
     library(dplyr)
+    library(readxl)
     library(eDataDRF)
     library(targets)
     library(here)
@@ -97,3 +97,35 @@ https://www.sciencedirect.com/science/article/pii/S0048969714013801?via=ihub#s00
 https://www.sciencedirect.com/science/article/pii/S0048969705008351#fig4
 
 https://datadryad.org/dataset/doi:10.5061/dryad.4dq31c5
+
+
+```{r}
+#| label: phylopic-just-because
+library(rphylopic)
+
+# Get a single image uuid for a species
+uuid <- get_uuid(name = "Canis lupus", n = 1)
+# Get the image for that uuid
+img <- get_phylopic(uuid = uuid)
+# But multiple silhouettes can exist per species...
+uuid <- get_uuid(name = "Canis lupus", n = 5)
+
+
+img <- pick_phylopic(name = "Canis lupus", n = 5)
+
+
+# All of this functionality is available for ggplot2 as well...
+# But we use add_phylopic and geom_phylopic instead!
+library(ggplot2)
+# Get image
+uuid <- get_uuid(name = "Iris", n = 1)
+img <- get_phylopic(uuid = uuid)
+# Plot silhouettes as points!
+ggplot(iris) +
+  geom_phylopic(
+    aes(x = Sepal.Length, y = Sepal.Width),
+    img = img,
+    color = "purple",
+    height = 0.25
+  )
+```
