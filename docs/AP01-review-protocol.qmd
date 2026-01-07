@@ -4,3 +4,66 @@ author: "Sam Welch"
 date: last-modified
 ---
 
+Gradually copying from word doc.
+
+# Summary
+
+-   This review will use a Weight of Evidence assessment to screen, assess, weigh and integrate evidence for the presence and movement of copper to and in Norwegian marine Arctic ecosystems
+-   We will use the EFSA Weight of Evidence assessment guidelines (Hardy et al., 2017), PRISMA 2020 systematic literature review framework (Page et al., 2021), and Criteria for Reporting and Evaluating Exposure Datasets (CREED) (Di Paolo et al., 2024) to assess the quality, plausibility and complementarity of evidence in the open literature.
+-   We will use Covidence, an online systematic review platform to screen and review papers. Sam and either Maj or Pierre will screen papers based on the CREED gateway criteria and the specific domain of the study, with Richard and Knut Erik to act as arbitrators in case of disagreement.
+-   Once screening is complete, Sam and Maj/Pierre will extract relevant data using Covidence’s built in Data Extraction and Data Quality templates, following the CREED question battery (20-30 questions) o Sam will also conduct the same exercise with the Norwegian Environmental Agency’s water pollution database Vannmiljø and sector source/emissions data from the same
+-   Reported copper concentrations will be compared to background/reference concentrations for copper in various media in Norway to identify elevated levels compared to expected natural concentrations
+-   Sam/Maj/Pierre will assess a small subset of papers (10?) through the full screening and extraction pipeline first, to identify any issues or ambiguities in this protocol.
+-   As quality evidence becomes available, Sam will construct a network diagram to graphically display the occurrence, flows, and weight of evidence for the presence of copper.
+-   If no evidence is available for suspected flows/matrix occurrences of copper are found, targeted literature searches may be added to the protocol. It will be clearly indicated in methods if this is the case.
+-   Additional background material on the local ecological, economic, global change, geographical, enviro-chemical, and other relevant factors will be provided by Sam on an ad-hoc basis to be reviewed by co-authors.
+-   At regular intervals (2-4 weeks) through the review process Sam will call meetings of available co-authors to review progress, evidence, and evaluate if any changes need to be made to protocols. Current plans aren’t set in stone, if we can justify a deviation.
+-   Once all papers, Vannmiljø data, and copper emission data have been screened and had data extracted, results will be synthesised, graphed, and discussed in the broader environmental context.
+
+# Methodological Design
+
+| Title | Comments | Citation |
+|------------------------|------------------------|------------------------|
+| Guidance on the use of the weight of evidence approach in scientific assessments | EFSA 60-page guidelines on WoE. Probably the most comprehensive guide to WoEs, but not very comprehensive. Framework for synthesising diverse lines of evidence. | @hardyGuidanceUseWeight2017 |
+| Preferred Reporting Items for Systematic reviews and Meta-Analyses (PRISMA) statement | Checklist and principles for planning and reporting systematic reviews. Methodological framework for literature review and data review. | @pagePRISMA2020Statement2021 |
+| Implementation of the CREED approach for environmental assessments | Framework for developing questions to qualify relevance and reliability of a source in assessing chemical exposure | @dipaoloImplementationCREEDApproach2024 |
+
+: Table of primary methodological sources
+
+![Conceptual diagram of methodology and lines of evidence.](images/paste-1.png)
+
+# Paper Sections and PRISMA Questions
+
+## PRISMA-1: Identify the report as a systematic review
+
+Working title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability
+
+## PRISMA-2: Abstract
+
+To follow. Make sure to check out PRISMA abstracts checklist.
+
+## PRISMA-3: Describe the rationale for the review in the context of existing knowledge
+
+Copper is an important resource, nutrient, and pollutant; its demand is expected to increase significantly in coming decades
+
+The Arctic and near-Arctic are important ecosystems and will likely undergo significant shifts in economic use and ecological status as the climate changes
+
+The is a need to understand the sources, emission, fate, behaviour, speciation, bioavailability, and uptake of copper in the Arctic to assess current and potential future scenarios
+
+![Map of study area (placeholder)](images/paste-2.png)
+
+TODO: Insert list of selected/included oceans/seas from Covidence output here.
+
+## PRISMA 4: Provide an explicit statement of the objective(s) or question(s) the review addresses
+
+This paper aims to address the following question:
+
+-   How does anthropogenic (and natural) copper reach target sites in predatory fish, algae, zooplankton and mussels in the Arctic and Sub-Arctic oceans/seas?
+
+This question was selected on the following basis:
+
+-   The stressor and study region were selected by the EXPECT project before this protocol was written. Project partners have already conducted experiments with copper.
+
+-   Patterns of stress on the Norwegian Arctic ecosystem is likely to change considerably over coming decades, likely to the detriment of existing biota
+
+-   Although copper is unlikely to be a risk driver for Arctic ecosystems, its status as a well-studied classical stressor and shared ROS-based (partial) mode of action makes it an ideal test subject for AEP construction

@@ -11,3 +11,4 @@ visualisation_quarto_cache/*
 /_manuscript/*
 /_site/*
 /site_libs/*
+*.html

@@ -45,6 +45,7 @@ website:
     theme:
     light: flatly
     dark: darkly
+    code-links: https://github.com/sawelch-NIVA/EXPECT_AEP_R_Project
 
 format:
   html:
@@ -60,10 +61,14 @@ authors:
     affiliation: Norwegian Institute for Water Research
     roles: [conceptualization, data curation, formal analysis, investigation, methodology, software, validation, visualization]
     corresponding: true
+    email: sam.welch@niva.no]
+    orcid: 0000-0003-4743-4562
   - name: Knut Erik Tollefsen
     affiliation: 
-      - Norwegian Institute for Water Research
-      - Norwegian University for Life Sciences
+      - name: Norwegian Institute for Water Research
+        url: https://niva.no/en
+      - name: Norwegian University of Life Sciences
+        url: https://www.nmbu.no/en 
     roles: writing
     corresponding: false
   - name: Pierre Blévin

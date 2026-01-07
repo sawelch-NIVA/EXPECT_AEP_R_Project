@@ -2,27 +2,40 @@
 title: "Notebook 08 - Emissions Data"
 author: "Sam Welch"
 date: last-modified
+bibliography: "../references.bib"
 ---
 
 *Currently a holding space for data on sources.*. 
 
+```{r}
+#| label: setup
 
-# Appendices
+suppressMessages(
+  {
+    library(tibble)
+    library(dplyr)
+    library(ggplot2)
+    library(here)
+    library(devtools)
 
-## Appendix 1: Copper Sources Data
+    i_am("README.md")
+
+    load_all()
+  }
+)
+
+```
+
+# Appendix 1: Copper Emissions Data
 
 ### Submarine Tailing Disposal in/off Norway
 
-Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates estimated by LLM, confidence self-reported by LLM.
+Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates estimated by LLM, confidence self-reported by LLM. @kvassnesWasteSitesMines2013
+
 
 ```{r}
 #| label: tbl-std-data
 
-devtools::load_all()
-library(tibble)
-library(dplyr)
-library(ggplot2)
-library(here)
 mine_tailings_coords() |> DT::datatable()
 
 ```
@@ -30,6 +43,8 @@ mine_tailings_coords() |> DT::datatable()
 ### Apple Production Areas in Norway
 
 According to https://static02.nmbu.no/mina/studier/moppgaver/2018-Paulsen.pdf, 7 municipalities represent the main fruit districts in Norway. We also have sales of copper oxide for 2020-24 from https://mattilsynet-xp7prod.enonic.cloud/\_/attachment/inline/8311cd70-8877-4712-98cc-f7bc1dba46ac:0f491609e72f1d5f0dca5ad1030a4b979e8b4695/Omsetningsstatistikk%20for%20plantevernmidler%202020%20-%202024%20med%20uthevinger.pdf (table 2a, p4, thanks to Roger Holten).
+
+@mattilsynetOmsetningsstatistikkPlantevernmidler202020242025 - does the citation work now?
 
 N.B: Re Ronny Berdinsen, Mattilsynet (2025.12.15)
 
@@ -66,6 +81,8 @@ Although not explicitly stated, we assume that:
 ### Manufacturing Emissions of Copper in Norway
 
 Taken from https://www.norskeutslipp.no/no/Komponenter/Utslipp/Kobber/?ComponentType=utslipp&ComponentPageID=73&SectorID=600, which includes self-reported copper emissions by land-based Norwegian industries for 1985-2024. Date is *very* spotty and incomplete, but it allows us to highlight fylke with higher emissions. Map to follow.
+
+@miljodirektoratetNorskeUtslippUtslipp2025
 
 We assume:
 
@@ -105,7 +122,7 @@ copper_industrial_emissions <- read_excel(
   )
 
 # lots of NAs?
-copper_industrial_emissions_categorized <- copper_industrial_emissions |>
+copper_industrial_emissions_categorised <- copper_industrial_emissions |>
   mutate(
     missing_pattern = case_when(
       is.na(annual_emission_air) &
@@ -117,7 +134,7 @@ copper_industrial_emissions_categorized <- copper_industrial_emissions |>
   )
 
 # Summarize by year and missing pattern
-emissions_summary <- copper_industrial_emissions_categorized |>
+emissions_summary <- copper_industrial_emissions_categorised |>
   group_by(year, missing_pattern) |>
   reframe(count = n())
 

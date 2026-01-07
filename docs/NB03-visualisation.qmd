@@ -1304,17 +1304,19 @@ p <- literature_merged_data |>
     aes(ymin = UNCERTAINTY_LOWER_STANDARD, ymax = UNCERTAINTY_UPPER_STANDARD),
     width = .2,
   ) +
-  facet_wrap(
-    facets = vars(SPECIES_GROUP),
-    ncol = 1,
-    scales = "free_y"
-  ) +
+  # facet_wrap(
+  #   facets = vars(SPECIES_GROUP),
+  #   ncol = 1,
+  #   scales = "free_y"
+  # ) +
   labs(
     x = "Year",
     y = "Copper Concentration (standardised units)",
     color = "Species"
   ) +
   theme_minimal()
+
+p
 
 ```
 
