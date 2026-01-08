@@ -1,3 +1,7 @@
+project:
+  type: website
+  output-dir: _site
+  
 website:
   title: "EXPECT Copper AEP"
   sidebar:
@@ -40,10 +44,54 @@ website:
             text: "AP02 - Acknowledgements"
             icon: file-earmark-plus
 
-acronyms:
-  keys:
-    - shortname: AEP
-      longname: Aggregate Exposure Pathway
+# acronyms:
+#   keys:
+#     - shortname: AEP
+#       longname: Aggregate Exposure Pathway
 
 execute:
   freeze: auto
+
+format:
+  html:
+    code-fold: true
+    code-overflow: wrap
+    fig-format: svg
+    toc: true
+    grid:
+      sidebar-width: 400px
+
+authors:
+  - name: Sam Welch
+    affiliation: Norwegian Institute for Water Research
+    roles: [conceptualization, data curation, formal analysis, investigation, methodology, software, validation, visualization]
+    corresponding: true
+    email: sam.welch@niva.no]
+    orcid: 0000-0003-4743-4562
+  - name: Knut Erik Tollefsen
+    affiliation: 
+      - name: Norwegian Institute for Water Research
+        url: https://niva.no/en
+      - name: Norwegian University of Life Sciences
+        url: https://www.nmbu.no/en 
+    roles: writing
+    corresponding: false
+  - name: Pierre Blévin
+    affiliation: Akvaplan-NIVA AS
+    roles: writing
+    corresponding: false
+  - name: Anita Evenset
+    affiliation: Akvaplan-NIVA AS
+    roles: writing
+    corresponding: false
+  - name: Camden Karon Klefbom
+    affiliation: Norwegian Institute for Water Research
+    roles: writing
+    corresponding: false
+bibliography: references.bib
+number-sections: true
+
+comments:
+  hypothesis: true # enables comments using a 3rd party service
+
+engine: knitr

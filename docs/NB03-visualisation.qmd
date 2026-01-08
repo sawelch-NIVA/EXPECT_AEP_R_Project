@@ -492,7 +492,7 @@ ggplot() +
 
 ## Copper Concentrations by Environmental Compartment
 
-Get a basic overview of the orders of magnitude for different sub-compartments (@fig-basic-subcompartments), so we can plot them on scales that make sense. Note that I haven't included uncertainty or sample sizes.
+Get a basic overview of the orders of magnitude for different sub-compartments (@fig-basic-subcompartments-dry-mass, fig-basic-subcompartments-wet-mass, fig-basic-subcompartments-concentration), so we can plot them on scales that make sense. Note that I haven't included uncertainty or sample sizes.
 
 ```{r}
 #| label: fig-basic-subcompartments-dry-mass
@@ -1238,7 +1238,7 @@ presents copper body burdens across different species groups. Note: There appear
 
 ### Abiotic Compartments
 
-@fig-temporal-abiotic examines temporal trends in copper concentrations across abiotic environmental compartments. The current dataset has limited temporal coverage, but these trends may become more apparent as additional data from monitoring databases (e.g., Vannmiljø) are incorporated.
+ This figure examines temporal trends in copper concentrations across abiotic environmental compartments. The current dataset has limited temporal coverage, but these trends may become more apparent as additional data from monitoring databases (e.g., Vannmiljø) are incorporated.
 
 ```{r}
 #| label: fig-temporal-abiotic

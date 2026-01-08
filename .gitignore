@@ -12,3 +12,5 @@ visualisation_quarto_cache/*
 /_site/*
 /site_libs/*
 *.html
+_freeze/*
+index_files/*

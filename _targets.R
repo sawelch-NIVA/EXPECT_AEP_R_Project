@@ -9,6 +9,7 @@ library(tarchetypes) # better factories for watching many files
 library(crew) # parallel processing, faster execution?
 library(here) # salvage something from the horrible mess that is quarto working directories
 library(devtools) # load all functions
+library(quarto)
 
 i_am("Readme.md") # set wd to project root
 load_all(path = here())
@@ -63,7 +64,7 @@ tar_option_set(
   # which run as local R processes. Each worker launches when there is work
   # to do and exits if 60 seconds pass with no tasks to run.
   #
-  controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
+  # controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
   #
   # Alternatively, if you want workers to run on a high-performance computing
   # cluster, select a controller from the {crew.cluster} package.
@@ -379,71 +380,78 @@ list(
   tar_quarto(
     name = index.qmd,
     path = "./index.qmd",
-    quiet = FALSE,
+    quiet = TRUE,
     # watch quarto.yml so we rebuild the full quarto site output if it changes
     extra_files = "_quarto.yml"
   ),
 
   # Rerender QC notebook if needed
   tar_quarto(
-    name = nb01 - qc,
+    name = nb01_qc,
     path = "./docs/NB01-qc.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Vannmiljo notebook
   tar_quarto(
     name = nb02_vannmiljo,
     path = "docs/NB02-vannmiljo.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Visualisation notebook
   tar_quarto(
     name = nb03_visualisation,
     path = "docs/NB03-visualisation.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Map notebook
   tar_quarto(
     name = nb04_map,
     path = "docs/NB04-map.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Network notebook
   tar_quarto(
     name = nb05_network,
     path = "docs/NB05-network.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Emissions notebook
   tar_quarto(
     name = nb07_emissions,
     path = "docs/NB07-emissions.qmd",
-    quiet = FALSE
+    quiet = TRUE
   ),
 
   # Ecology notebook
   tar_quarto(
     name = nb08_ecology,
     path = "docs/NB08-ecology.qmd",
-    quiet = FALSE
+    quiet = TRUE
+  ),
+
+  tar_target(
+    name = deploy_posit_connect_cloud,
+    command = {
+      quarto::quarto_publish_site(
+        server = "connect.posit.cloud",
+        account = "sawelch-niva",
+        render = "none"
+      )
+      index.qmd
+      nb01_qc
+      nb02_vannmiljo
+      nb03_visualisation
+      nb04_map
+      nb05_network
+      nb07_emissions
+      nb08_ecology
+    }
   )
-
-  # tar_target(
-  #   name = deploy_posit_connect_cloud,
-  #   command = {
-  renv::snapshot()
-
-  rsconnect::writeManifest()
-  # rsconnect::deploySite(render = "local", account = "sawelch-niva", server = "connect.posit.cloud")
-  #     index.qmd # add dependency on index
-  #   },
-  #   deployment = "main"
-  # )
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

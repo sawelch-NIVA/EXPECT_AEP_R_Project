@@ -7,7 +7,8 @@ date: last-modified
 
 # EWMA project/Kristine Bondo Pedersen
 
-::: callout-note Re: The impact of submarine copper mine tailing disposal from the 1970s on Repparfjorden, northern Norway
+::: callout-note 
+## Re: The impact of submarine copper mine tailing disposal from the 1970s on Repparfjorden, northern Norway
 
 Hi Sam and a Happy New Year,
 
@@ -19,7 +20,9 @@ Let me know if you need me to dig for any other data from the project!
 
 Best wishes,
 
-Kristine :::
+Kristine 
+
+:::
 
 # Bioaccumulation of metals (Cd, Cu, Ni, Pb and Zn) in suspended cultures of blue mussels exposed to different environmental conditions
 
