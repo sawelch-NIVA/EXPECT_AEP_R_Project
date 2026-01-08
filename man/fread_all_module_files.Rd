@@ -12,9 +12,11 @@ fread_all_module_files(file_paths, format_initialiser)
 \item{format_initialiser}{Function that returns expected tibble structure}
 }
 \value{
-A tibble with all module data combined
+A tibble with all module data combined, plus \code{source_file} and
+\code{read_timestamp} columns
 }
 \description{
 Generic function to read and combine all CSV files for a specified module
-using the appropriate format initialiser
+using the appropriate format initialiser. Appends source file name and
+read timestamp to each row.
 }

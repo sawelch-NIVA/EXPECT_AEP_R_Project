@@ -54,7 +54,9 @@ literature_module_vocab <- function() {
     "Parameters",
     "Reference",
     "Sites",
-    "CREED_Scores"
+    "CREED_Score",
+    "CREED_RV",
+    "CREED_RB"
   )
 }
 
@@ -93,6 +95,9 @@ fread_module_csv <- function(filepath, format_initialiser) {
     as_tibble() |>
     mutate(across(where(\(x) inherits(x, "IDate")), as.Date))
 
+  if (length(result) == 0) {
+    stop("No data found for filepath: {filepath}")
+  }
   return(result)
 }
 

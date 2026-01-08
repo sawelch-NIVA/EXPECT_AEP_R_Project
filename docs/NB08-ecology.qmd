@@ -15,7 +15,6 @@ date: last-modified
 
 suppressMessages(
   {
-    library(STOPeData)
     library(DT)
     library(dplyr)
     library(readxl)
@@ -24,11 +23,12 @@ suppressMessages(
     library(here)
     library(glue)
     library(ggplot2)
+    library(devtools)
 
     i_am("README.md")
     tar_config_set(store = here("_targets"))
 
-    devtools::load_all()
+    load_all()
   }
 )
 
@@ -39,7 +39,7 @@ literature_biota_data <- tar_read(biota_data)
 ```{r}
 #| label: literature_species
 
-species_names <- eDataDRF::species_names_vocabulary()
+species_names <- species_names_vocabulary()
 
 biota_data_summary <- literature_biota_data |>
   group_by(SAMPLE_SPECIES) |>

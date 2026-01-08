@@ -2,13 +2,6 @@
 title: "Notebook 05 - AEP Network"
 author: "Sam Welch"
 date: last-modified
-format:
-  html:
-    grid:
-      body-width: 1500px
-      sidebar-width: 0px
-    page-layout: full
-    max-width: 4500px
 ---
 
 
@@ -16,7 +9,6 @@ format:
 #| label: targets-setup
 #| warning: false
 #| output: false
-library(STOPeData)
 library(DT)
 library(dplyr)
 library(tidyr)

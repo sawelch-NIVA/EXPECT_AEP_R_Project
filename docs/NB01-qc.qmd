@@ -2,20 +2,19 @@
 title: "Notebook 01 - Quality Control"
 author: "Sam Welch"
 date: last-modified
-lightbox: true
 ---
 Notebook 1 contains code for quality control of extracted data. This has been largely done with custom functions up until now but I want to try `pointblank`.
 
-###### Todo:
+# Todo:
 - [ ] Finish extending Pointblank
 - [ ] Put pointblank in correct order
 - [ ] Move pointblank to targets workflow
 
-```{r, include=FALSE}
+```{r}
+#| label: setup
 
 suppressMessages(
   {
-    library(STOPeData)
     library(DT)
     library(dplyr)
     library(eDataDRF)
@@ -23,11 +22,12 @@ suppressMessages(
     library(here)
     library(glue)
     library(pointblank)
+    library(devtools)
 
     i_am("README.md")
     tar_config_set(store = here("_targets"))
 
-    devtools::load_all()
+    load_all()
   }
 )
 
@@ -46,10 +46,16 @@ species_names <- species_names_vocabulary()
 species_lookup <- species_names |>
   with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
 
+
+# Action levels ----
+# Generate a simple `action_levels` object to
+# set the `warn` state if a validation step
+# has a single 'fail' test unit
+al <- action_levels(warn_at = 1)
 ```
 
 
-## Data Quality Overview
+# Data Quality Overview
 
 ```{r}
 #| label: quality-summary
@@ -254,102 +260,157 @@ literature_merged_data |>
   datatable()
 ```
 
-# Pointblank
+# Pointblank QC
 
-## Measurements
+`pointblank` (@iannonePointblankDataValidation2025) is a Tidyverse (?) R package that supports fast, high-quality validation of data. Ideally it should be integrated into our `targets` workflow, but for the time being life's easier if we run it here. 
+
+## Campaign
 
 ```{r}
-#| label: pointblank-scratchpad
+#| label: pointblank-campaign
+#| echo: true
 
-# Generate a simple `action_levels` object to
-# set the `warn` state if a validation step
-# has a single 'fail' test unit
-al <- action_levels(warn_at = 1)
+literature_campaign_data <- tar_read(campaign_data)
 
-agent <-
-  literature_measurements_data |>
-  select(-source_file, -read_timestamp) |>
-  # still a problem
+# Create schema ----
+campaign_schema <- col_schema(
+  initialise_campaign_tibble() |>
+    mutate(
+      across(contains("DATE"), as.IDate),
+      source_file = NA_character_,
+      read_timestamp = NA_character_
+    )
+)
+
+# Validation agent ----
+agent_campaign <-
+  literature_campaign_data |>
   create_agent(
-    label = "Check literature_measurements_data passes format conditions.",
+    label = "Check literature_campaign_data passes format conditions.",
     actions = al
   ) |>
-  col_schema_match(
-    col_schema(eDataDRF::initialise_measurements_tibble()),
-    brief = "Table matches initialise_measurements_tibble()"
-  ) |>
+  # col_schema_match(
+  #   campaign_schema,
+  #   brief = "Table matches initialise_campaign_tibble()",
+  #   in_order = FALSE,
+  #   is_exact = FALSE
+  # ) |>
+
   # Core identifiers
-  col_vals_not_null(columns = SITE_CODE) |>
-  col_vals_not_null(columns = PARAMETER_NAME) |>
-  col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
-  col_vals_not_null(columns = SAMPLING_DATE) |>
-  col_vals_gte(columns = SAMPLING_DATE, value = as.Date("1900-01-01")) |>
-  col_vals_lte(columns = SAMPLING_DATE, value = Sys.Date()) |>
+  col_vals_not_null(columns = CAMPAIGN_NAME_SHORT) |>
+  col_vals_not_null(columns = CAMPAIGN_NAME) |>
 
-  # Environmental compartments
-  col_vals_in_set(
-    columns = ENVIRON_COMPARTMENT,
-    set = environ_compartments_vocabulary()
+  # Date validation
+  col_vals_not_null(columns = CAMPAIGN_START_DATE) |>
+  col_vals_gte(columns = CAMPAIGN_START_DATE, value = as.Date("1900-01-01")) |>
+  col_vals_lte(columns = CAMPAIGN_START_DATE, value = Sys.Date()) |>
+  col_vals_gte(
+    columns = CAMPAIGN_END_DATE,
+    value = as.Date("1900-01-01"),
+    na_pass = TRUE # some campaigns lack an end date, but that isn't really a problem
   ) |>
-  col_vals_in_set(
-    columns = ENVIRON_COMPARTMENT_SUB,
-    set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+  col_vals_lte(
+    columns = CAMPAIGN_END_DATE,
+    value = Sys.Date(),
+    na_pass = TRUE
   ) |>
 
-  # Measurement values
-  col_vals_gte(columns = MEASURED_VALUE, value = 0, na_pass = TRUE) |>
-  col_vals_gte(columns = MEASURED_N, value = 1, na_pass = TRUE) |>
-  col_vals_gte(columns = UNCERTAINTY_UPPER, value = 0, na_pass = TRUE) |>
-  col_vals_gte(columns = UNCERTAINTY_LOWER, value = 0, na_pass = TRUE) |>
-
-  # LOQ/LOD values
-  col_vals_gte(columns = LOQ_VALUE, value = 0, na_pass = TRUE) |>
-  col_vals_gte(columns = LOD_VALUE, value = 0, na_pass = TRUE) |>
-
-  # Units consistency
-  col_vals_not_null(columns = MEASURED_UNIT) |>
+  # Date logic: end date after start date
   # col_vals_expr(
-  #   expr = case_when(
-  #     !is.na(LOQ_VALUE) ~ !is.na(LOQ_UNIT),
-  #     TRUE ~ TRUE
-  #   )
-  # ) |>
-  # col_vals_expr(
-  #   expr = case_when(
-  #     !is.na(LOD_VALUE) ~ !is.na(LOD_UNIT),
-  #     TRUE ~ TRUE
-  #   )
+  #   expr = is.na(CAMPAIGN_END_DATE) | CAMPAIGN_END_DATE >= CAMPAIGN_START_DATE
   # ) |>
 
-  # Reference integrity
-  col_vals_not_null(columns = REFERENCE_ID) |>
-  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
-  col_vals_not_null(columns = SAMPLE_ID) |>
+  # Metadata
+  col_vals_not_null(columns = ENTERED_BY) |>
+  col_vals_not_null(columns = ENTERED_DATE) |>
+  col_vals_lte(columns = ENTERED_DATE, value = Sys.Date())
 
-  interrogate()
+interrogate(agent_campaign)
 
-print(agent)
-
-
-# scan_data(literature_measurements_data) # has problems with µ
 ```
 
+
+## References
+
+```{r}
+#| label: pointblank-references
+#| echo: true
+
+# Create schema ----
+references_schema <- col_schema(
+  initialise_references_tibble() |>
+    mutate(
+      source_file = NA_character_,
+      read_timestamp = as.POSIXlt(NA_character_)
+    )
+)
+
+# Validation agent ----
+agent_references <-
+  literature_reference_data |>
+  create_agent(
+    label = "Check literature_reference_data passes format conditions.",
+    actions = al
+  ) |>
+  # col_schema_match(
+  #   references_schema,
+  #   brief = "Table matches initialise_references_tibble()",
+  #   in_order = FALSE,
+  #   is_exact = FALSE
+  # ) |>
+
+  # Core identifiers
+  col_vals_not_null(columns = REFERENCE_ID) |>
+  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+  col_vals_not_null(columns = REFERENCE_TYPE) |>
+
+  # Bibliographic fields
+  col_vals_not_null(columns = AUTHOR) |>
+  col_vals_not_null(columns = TITLE) |>
+  col_vals_not_null(columns = YEAR) |>
+  col_vals_gte(columns = YEAR, value = 1900) |>
+  col_vals_lte(columns = YEAR, value = as.integer(format(Sys.Date(), "%Y"))) |>
+
+  # Access date
+  col_vals_gte(columns = ACCESS_DATE, value = as.Date("2000-01-01")) |>
+  col_vals_lte(columns = ACCESS_DATE, value = Sys.Date()) |>
+
+  # Numeric fields
+  col_vals_gte(columns = VOLUME, value = 1, na_pass = TRUE) |>
+  col_vals_gte(columns = ISSUE, value = 1, na_pass = TRUE)
+
+interrogate(agent_references)
+
+```
+
+## Sites
 
 ```{r}
 #| label: pointblank-sites
 #| echo: true
 
+# Create schema ----
+sites_schema <- col_schema(
+  initialise_sites_tibble() |>
+    mutate(
+      source_file = NA_character_,
+      read_timestamp = as.POSIXlt(NA_character_)
+    )
+)
+
+# Validation agent ----
 agent_sites <-
   literature_sites_data |>
-  select(-source_file, -read_timestamp) |>
   create_agent(
     label = "Check literature_sites_data passes format conditions.",
     actions = al
   ) |>
-  col_schema_match(
-    col_schema(eDataDRF::initialise_sites_tibble()),
-    brief = "Table matches initialise_sites_tibble()"
-  ) |>
+  # col_schema_match(
+  #   sites_schema,
+  #   brief = "Table matches initialise_sites_tibble()",
+  #   in_order = FALSE,
+  #   is_exact = FALSE
+  # ) |>
 
   # Core identifiers
   col_vals_not_null(columns = SITE_CODE) |>
@@ -402,117 +463,87 @@ agent_sites <-
 
   # Metadata
   col_vals_not_null(columns = ENTERED_BY) |>
-  col_vals_not_null(columns = ENTERED_DATE) |>
+  col_vals_not_null(columns = ENTERED_DATE)
 
-  interrogate()
+interrogate(agent_sites)
 
-print(agent_sites)
 ```
 
+## Parameters
 
 ```{r}
-#| label: pointblank-references
+#| label: pointblank-parameters
 #| echo: true
 
-agent_references <-
-  literature_reference_data |>
-  select(-source_file, -read_timestamp) |>
-  create_agent(
-    label = "Check literature_reference_data passes format conditions.",
-    actions = al
-  ) |>
-  col_schema_match(
-    col_schema(eDataDRF::initialise_references_tibble()),
-    brief = "Table matches initialise_references_tibble()"
-  ) |>
+literature_parameters_data <- tar_read(parameters_data)
 
-  # Core identifiers
-  col_vals_not_null(columns = REFERENCE_ID) |>
-  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
-  col_vals_not_null(columns = REFERENCE_TYPE) |>
-
-  # Bibliographic fields
-  col_vals_not_null(columns = AUTHOR) |>
-  col_vals_not_null(columns = TITLE) |>
-  col_vals_not_null(columns = YEAR) |>
-  col_vals_gte(columns = YEAR, value = 1900) |>
-  col_vals_lte(columns = YEAR, value = as.integer(format(Sys.Date(), "%Y"))) |>
-
-  # Access date
-  col_vals_gte(columns = ACCESS_DATE, value = as.Date("2000-01-01")) |>
-  col_vals_lte(columns = ACCESS_DATE, value = Sys.Date()) |>
-
-  # Numeric fields
-  col_vals_gte(columns = VOLUME, value = 1, na_pass = TRUE) |>
-  col_vals_gte(columns = ISSUE, value = 1, na_pass = TRUE) |>
-
-  interrogate()
-
-print(agent_references)
-```
-
-
-```{r}
-#| label: pointblank-campaign
-#| echo: true
-
-literature_campaign_data <- tar_read(campaign_data)
-
-campaign_schema <- col_schema(
-  eDataDRF::initialise_campaign_tibble() |>
+# Create schema ----
+parameters_schema <- col_schema(
+  initialise_parameters_tibble() |>
     mutate(
-      across(contains("DATE"), as.IDate),
       source_file = NA_character_,
-      read_timestamp = NA_character_
+      read_timestamp = as.POSIXlt(NA_character_)
     )
 )
 
-
-agent_campaign <-
-  literature_campaign_data |>
+# Validation agent ----
+agent_parameters <-
+  literature_parameters_data |>
   create_agent(
-    label = "Check literature_campaign_data passes format conditions.",
+    label = "Check literature_parameters_data passes format conditions.",
     actions = al
   ) |>
-  col_schema_match(
-    campaign_schema,
-    brief = "Table matches initialise_campaign_tibble()"
-  ) |>
-
   # Core identifiers
-  col_vals_not_null(columns = CAMPAIGN_NAME_SHORT) |>
-  col_vals_not_null(columns = CAMPAIGN_NAME) |>
-
-  # Date validation
-  col_vals_not_null(columns = CAMPAIGN_START_DATE) |>
-  col_vals_gte(columns = CAMPAIGN_START_DATE, value = as.Date("1900-01-01")) |>
-  col_vals_lte(columns = CAMPAIGN_START_DATE, value = Sys.Date()) |>
-  col_vals_gte(
-    columns = CAMPAIGN_END_DATE,
-    value = as.Date("1900-01-01"),
-    na_pass = TRUE # some campaigns lack an end date, but that isn't really a problem
-  ) |>
-  col_vals_lte(
-    columns = CAMPAIGN_END_DATE,
-    value = Sys.Date(),
-    na_pass = TRUE
-  ) |>
-
-  # Date logic: end date after start date
-  # col_vals_expr(
-  #   expr = is.na(CAMPAIGN_END_DATE) | CAMPAIGN_END_DATE >= CAMPAIGN_START_DATE
-  # ) |>
+  col_vals_not_null(columns = PARAMETER_TYPE) |>
+  col_vals_not_null(columns = MEASURED_TYPE) |>
+  col_vals_not_null(columns = PARAMETER_NAME) |>
+  col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
 
   # Metadata
-  col_vals_not_null(columns = ENTERED_BY) |>
-  col_vals_not_null(columns = ENTERED_DATE) |>
-  col_vals_lte(columns = ENTERED_DATE, value = Sys.Date()) |>
+  col_vals_not_null(columns = ENTERED_BY)
 
-  interrogate()
-
-print(agent_campaign)
+interrogate(agent_parameters)
 ```
 
+```{r}
+#| label: pointblank-compartments
+#| echo: true
+
+literature_compartments_data <- tar_read(compartments_data)
+
+# Create schema ----
+compartments_schema <- col_schema(
+  initialise_compartments_tibble() |>
+    mutate(
+      source_file = NA_character_,
+      read_timestamp = as.POSIXlt(NA_character_)
+    )
+)
+
+# Validation agent ----
+agent_compartments <-
+  literature_compartments_data |>
+  create_agent(
+    label = "Check literature_compartments_data passes format conditions.",
+    actions = al
+  ) |>
+  # Environmental compartments
+  col_vals_not_null(columns = ENVIRON_COMPARTMENT) |>
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT,
+    set = environ_compartments_vocabulary()
+  ) |>
+  col_vals_not_null(columns = ENVIRON_COMPARTMENT_SUB) |>
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT_SUB,
+    set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+  ) |>
+  col_vals_not_null(columns = MEASURED_CATEGORY)
+
+interrogate(agent_compartments)
+```
+
+## Samples
 
 ```{r}
 #| label: pointblank-biota
@@ -520,8 +551,9 @@ print(agent_campaign)
 
 literature_biota_data <- tar_read(biota_data)
 
+# Create schema ----
 biota_schema <- col_schema(
-  eDataDRF::initialise_biota_tibble() |>
+  initialise_biota_tibble() |>
     mutate(
       across(contains("DATE"), as.IDate),
       source_file = NA_character_,
@@ -529,16 +561,19 @@ biota_schema <- col_schema(
     )
 )
 
+# Validation agent ----
 agent_biota <-
   literature_biota_data |>
   create_agent(
     label = "Check literature_biota_data passes format conditions.",
     actions = al
   ) |>
-  col_schema_match(
-    schema = biota_schema,
-    brief = "Table matches initialise_biota_tibble()"
-  ) |>
+  # col_schema_match(
+  #   schema = biota_schema,
+  #   brief = "Table matches initialise_biota_tibble()",
+  #   in_order = FALSE,
+  #   is_exact = FALSE
+  # ) |>
 
   # Core identifiers
   col_vals_not_null(columns = SAMPLE_ID) |>
@@ -579,10 +614,184 @@ agent_biota <-
     set = gender_vocabulary()
   )
 
-
-get_agent_report(agent_biota)
-
-print(agent_biota)
-
 interrogate(agent_biota)
 ```
+
+## Measurements
+
+```{r}
+#| label: tbl-pointblank-measurements
+
+# Create schema ----
+measurements_schema <- col_schema(
+  initialise_measurements_tibble() |>
+    mutate(
+      source_file = NA_character_,
+      read_timestamp = as.POSIXlt(NA_character_),
+      SAMPLING_DATE = as.IDate(SAMPLING_DATE)
+    )
+)
+
+# Validation agent ----
+agent_measurement <-
+  literature_measurements_data |>
+  create_agent(
+    label = "Check literature_measurements_data passes format conditions.",
+    actions = al
+  ) |>
+  # col_schema_match(
+  #   measurements_schema,
+  #   brief = "Table matches initialise_measurements_tibble()",
+  #   in_order = FALSE,
+  #   is_exact = FALSE # looser checking of date types, which will otherwise fail because of POSIXt/POSIXct/Date/IDate.
+  # ) |>
+  # Core identifiers
+  col_vals_not_null(columns = SITE_CODE) |>
+  col_vals_not_null(columns = PARAMETER_NAME) |>
+  col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
+  col_vals_not_null(columns = SAMPLING_DATE) |>
+  col_vals_gte(columns = SAMPLING_DATE, value = as.Date("1900-01-01")) |>
+  col_vals_lte(columns = SAMPLING_DATE, value = Sys.Date()) |>
+
+  # Environmental compartments
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT,
+    set = environ_compartments_vocabulary()
+  ) |>
+  col_vals_in_set(
+    columns = ENVIRON_COMPARTMENT_SUB,
+    set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+  ) |>
+
+  # Measurement values
+  col_vals_gte(columns = MEASURED_VALUE, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = MEASURED_N, value = 1, na_pass = TRUE) |>
+  col_vals_gte(columns = UNCERTAINTY_UPPER, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = UNCERTAINTY_LOWER, value = 0, na_pass = TRUE) |>
+
+  # LOQ/LOD values
+  col_vals_gte(columns = LOQ_VALUE, value = 0, na_pass = TRUE) |>
+  col_vals_gte(columns = LOD_VALUE, value = 0, na_pass = TRUE) |>
+
+  # Units consistency
+  col_vals_not_null(columns = MEASURED_UNIT) |>
+  # col_vals_expr(
+  #   expr = case_when(
+  #     !is.na(LOQ_VALUE) ~ !is.na(LOQ_UNIT),
+  #     TRUE ~ TRUE
+  #   )
+  # ) |>
+  # col_vals_expr(
+  #   expr = case_when(
+  #     !is.na(LOD_VALUE) ~ !is.na(LOD_UNIT),
+  #     TRUE ~ TRUE
+  #   )
+  # ) |>
+
+  # Reference integrity
+  col_vals_not_null(columns = REFERENCE_ID) |>
+  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+  col_vals_not_null(columns = SAMPLE_ID)
+
+interrogate(agent_measurement)
+
+```
+
+## CREED Scores
+
+```{r}
+#| label: pointblank-creed-scores
+#| echo: true
+
+literature_creed_scores_data <- tar_read(creed_scores_data)
+
+# Create schema ----
+creed_scores_schema <- col_schema(
+  initialise_CREED_scores_tibble() |>
+    mutate(
+      source_file = NA_character_,
+      read_timestamp = as.POSIXlt(NA_character_)
+    )
+)
+
+literature_creed_scores_data |>
+  group_by(
+    SILVER_RELEVANCE,
+    SILVER_RELIABILITY,
+    GOLD_RELEVANCE,
+    GOLD_RELIABILITY
+  ) |>
+  reframe(n = n())
+
+CREED_classifications_rb <- c(
+  "Not usable",
+  "Reliable with restrictions",
+  "Reliable without restrictions"
+)
+CREED_classifications_rv <- c(
+  "Not usable",
+  "Relevant with restrictions",
+  "Relevant without restrictions"
+)
+
+# Validation agent ----
+agent_creed_scores <-
+  literature_creed_scores_data |>
+  create_agent(
+    label = "Check literature_creed_scores_data passes format conditions.",
+    actions = al
+  ) |>
+  # Core identifiers
+  col_vals_not_null(columns = REFERENCE_ID) |>
+  col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+
+  # CREED fields
+  col_vals_in_set(
+    columns = c(SILVER_RELIABILITY, GOLD_RELIABILITY),
+    set = CREED_classifications_rb
+  ) |>
+  col_vals_in_set(
+    columns = c(SILVER_RELEVANCE, GOLD_RELEVANCE),
+    set = CREED_classifications_rv
+  )
+
+interrogate(agent_creed_scores)
+```
+
+## CREED Data
+
+Todo: Implement!
+
+```{r}
+#| label: pointblank-creed-data
+#| echo: true
+
+# literature_creed_data <- tar_read(creed_data)
+
+# # Create schema ----
+# creed_data_schema <- col_schema(
+#   initialise_CREED_data_tibble() |>
+#     mutate(
+#       source_file = NA_character_,
+#       read_timestamp = as.POSIXlt(NA_character_)
+#     )
+# )
+
+# # Validation agent ----
+# agent_creed_data <-
+#   literature_creed_data |>
+#   create_agent(
+#     label = "Check literature_creed_data passes format conditions.",
+#     actions = al
+#   ) |>
+#   # Core identifiers
+#   col_vals_not_null(columns = criterion_id) |>
+#   col_vals_not_null(columns = criterion_title) |>
+#   col_vals_not_null(columns = required_recommended) |>
+#   col_vals_not_null(columns = relevant_data) |>
+#   col_vals_not_null(columns = score)
+
+# interrogate(agent_creed_data)
+```
+
+## Joined Table

@@ -11,7 +11,6 @@ format:
 #| label: targets-setup
 #| warning: false
 #| output: false
-library(STOPeData)
 library(DT)
 library(dplyr)
 library(tidyr)

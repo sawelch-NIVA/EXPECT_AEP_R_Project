@@ -4,7 +4,12 @@
 \alias{standardise_measured_units}
 \title{Standardise measurement units and values}
 \usage{
-standardise_measured_units(data, value_columns = NULL, unit_column = NULL)
+standardise_measured_units(
+  data,
+  value_columns = NULL,
+  unit_column = NULL,
+  remove_other = FALSE
+)
 }
 \arguments{
 \item{data}{A tibble or data frame containing measurement data}
@@ -15,12 +20,16 @@ Default is NULL (no value conversion). If NULL, only unit standardisation occurs
 
 \item{unit_column}{Character string. Name of column containing measurement units.
 Default is NULL (no unit standardisation). If NULL, only value conversion occurs.}
+
+\item{remove_other}{Logical. If TRUE, removes rows where the unit column
+contains "Other". Default is FALSE.}
 }
 \value{
 The input data with new columns added depending on arguments:
 \itemize{
 \item If \code{unit_column} provided: \verb{\{unit_column\}_STANDARD} with standardised units
 \item If \code{value_columns} provided: \verb{\{value_column\}_STANDARD} for each value column
+If \code{remove_other = TRUE}, rows with "Other" units are excluded.
 }
 }
 \description{
@@ -47,6 +56,13 @@ data |>
   standardise_measured_units(
     value_columns = "MEASURED_VALUE",
     unit_column = "MEASURED_UNIT"
+  )
+
+# Remove rows marked with "Other" units
+data |>
+  standardise_measured_units(
+    unit_column = "MEASURED_UNIT",
+    remove_other = TRUE
   )
 }
 

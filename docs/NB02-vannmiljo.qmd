@@ -2,9 +2,7 @@
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: last-modified
-html:
-  toc-depth: 3
-  toc-expand: 3
+
 ---
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
@@ -163,7 +161,6 @@ library(ggplot2)
 library(sf)
 library(DT)
 library(summarytools)
-library(STOPeData)
 library(eDataDRF)
 library(here)
 library(knitr)
@@ -452,9 +449,10 @@ message(glue(
 
 # Data Processing
 
-## Merge Datasets
+## Join Datasets
 
 We join sites and measurements by `"Vannlok_kode" = "Vannlokalitetskode"`, then our compartment/etc. lookups. We check for and remove:
+
 - Non-null values: Vannlokalitetsnavn, Medium_id, Registrerings_id,`UTM33 Ost (X)`, `UTM33 Nord (Y)`
 - Medium_id, Enhet_id, Aktivitet_id, Vannkategori, VitenskapligNavn not in our lookups
 
@@ -1921,9 +1919,9 @@ vm_compartment_geo_conflicts_resolved_removed |>
 
 We also have the issue that our higher level of site resolution means we need to split some of Vannmiljø's sites. Specifically, they may sample from the same longitude and latitude (one vannmiljø site) but sample different parts of the feature (e.g. sediment and the water column; two vannmiljø media/matrices). Because in our format this is two separate sites, we need to split any sites where this happens.
 
-We do this in a fairly basic way - we take the existing `Vannlok_kode` (a string of digits, e.g. `02.61-29530) and, if we split it, append an incrementing number on the end (`02.61-29530` would become `02.61-29530-01` and `02.61-29530-02`). 
+We do this in a fairly basic way - we take the existing `Vannlok_kode` (a string of digits, e.g. `02.61-29530`) and, if we split it, append an incrementing number on the end (`02.61-29530` would become `02.61-29530-01` and `02.61-29530-02`). 
 
-Unfortunately this is quite slow. We 
+Unfortunately this is quite slow.
 
 ```{r}
 #| label: split-sites
@@ -2031,7 +2029,7 @@ ggplot(
   geom_col(aes(fill = Filter)) +
   geom_text(aes(label = label), vjust = -0.5, size = 3) +
   scale_fill_brewer(palette = "Set1") +
-  scale_x_discrete(limits = conflict_flow$Filter) +
+  scale_x_discrete(limits = conflict_flow$Filter |> str_wrap(width = 20)) +
   scale_y_continuous(
     labels = scales::comma,
     expand = expansion(mult = c(0, 0.1))
@@ -2333,7 +2331,7 @@ Visually inspecting transformed site distribution (@fig-sites-sanity-map) allows
 
 ```{r}
 #| label: fig-sites-sanity-map
-#| fig-cap: Vannmiljø sampling sites binned into 1000 hexagons, coloured by number of sites in area.
+#| fig-cap: Vannmiljø sampling sites binned into 10 hexagons, coloured by number of sites in area.
 #| fig-width: 12
 
 # Sanity check: plot sites on map
@@ -2348,7 +2346,7 @@ ggplot() +
   geom_hex(
     data = sites_coords,
     aes(x = X, y = Y),
-    bins = 1000
+    bins = 10
   ) +
   scale_fill_viridis_c() +
   scale_x_continuous(expand = c(0, 0)) +

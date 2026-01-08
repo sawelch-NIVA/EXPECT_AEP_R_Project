@@ -17,6 +17,9 @@ suppressMessages(
     library(ggplot2)
     library(here)
     library(devtools)
+    library(sf)
+    library(summarytools)
+    library(DT)
 
     i_am("README.md")
 
@@ -26,9 +29,9 @@ suppressMessages(
 
 ```
 
-# Appendix 1: Copper Emissions Data
+# Copper Emissions & Source Data
 
-### Submarine Tailing Disposal in/off Norway
+## Submarine Tailing Disposal in/off Norway
 
 Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates estimated by LLM, confidence self-reported by LLM. @kvassnesWasteSitesMines2013
 
@@ -40,7 +43,7 @@ mine_tailings_coords() |> DT::datatable()
 
 ```
 
-### Apple Production Areas in Norway
+## Apple Production Areas in Norway
 
 According to https://static02.nmbu.no/mina/studier/moppgaver/2018-Paulsen.pdf, 7 municipalities represent the main fruit districts in Norway. We also have sales of copper oxide for 2020-24 from https://mattilsynet-xp7prod.enonic.cloud/\_/attachment/inline/8311cd70-8877-4712-98cc-f7bc1dba46ac:0f491609e72f1d5f0dca5ad1030a4b979e8b4695/Omsetningsstatistikk%20for%20plantevernmidler%202020%20-%202024%20med%20uthevinger.pdf (table 2a, p4, thanks to Roger Holten).
 
@@ -78,7 +81,7 @@ Although not explicitly stated, we assume that:
 -   Apple farmers use the arthimetic mean of sold copper oxide for 2020 - 2024 every year. all applied copper oxide enters the environment.
 -   The total used copper is split equally between the "main fruit districts" named in Paulsen (2018).
 
-### Manufacturing Emissions of Copper in Norway
+## Manufacturing Emissions of Copper in Norway
 
 Taken from https://www.norskeutslipp.no/no/Komponenter/Utslipp/Kobber/?ComponentType=utslipp&ComponentPageID=73&SectorID=600, which includes self-reported copper emissions by land-based Norwegian industries for 1985-2024. Date is *very* spotty and incomplete, but it allows us to highlight fylke with higher emissions. Map to follow.
 
@@ -217,3 +220,78 @@ top_municipalities_plot <- ggplot(
 top_municipalities_plot
 ```
 
+## Aquaculture Locations in Norway
+
+Although I don't immediately have data for copper use in aquaculture in Norway (although this data probably exist?), the locations of licensed aquaculture sites are freely available from Fiskeridirektoratet as shapefiles (@norwegiandirectorateoffisheriesAquacultureLocationsNorway2025).
+
+Actually the source ended up being https://portal.fiskeridir.no/portal/apps/webappviewer/index.html?id=bed4faeea84e4d6dbc548d43cc134c96&layer=Akvakulturregisteret, which is annoyingly detail-free.
+
+
+```{r}
+#| label: load-aquaculture-data
+aquaculture <- sf::read_sf(here(
+  "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shx"
+)) # that was easy
+
+# View summary in browser
+aquaculture |> sf::st_drop_geometry() |> dfSummary()
+
+# Whatever, the data's a mess but we'll treat it as a starting point. We can do a simple map in any case.
+```
+
+This data's a mess but we'll treat it as a starting point. We can do a simple map in any case, using the same hex-bin approach as elsewhere.
+
+
+```{r}
+#| label: fig-sites-hex-map
+#| fig-cap: All Fiskerdirektoriet licensed sites. Doesn't include number of animals per site, because they're reported in lots of different units and I haven't worked out how to convert them yet.
+#| fig-width: 12
+
+# Plot
+norway_map <- map_data("world", region = "Norway(?!:Svalbard)")
+ggplot() +
+  geom_polygon(
+    data = norway_map,
+    aes(x = long, y = lat, group = group),
+    fill = "lightgray",
+    colour = "white"
+  ) +
+  geom_hex(
+    data = aquaculture,
+    aes(x = lon, y = lat),
+    bins = 100,
+    linewidth = 0
+  ) +
+  scale_fill_viridis_b() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank())
+```
+
+And an accompanying table, although here we aggregate by kommune, rather than binned based on spatial proximity.
+
+```{r}
+#| label: tbl-most-aquaculture
+
+aquaculture |>
+  group_by(kommune, fylke) |>
+  reframe(n = n()) |>
+  arrange(desc(n)) |>
+  datatable()
+```
+
+Technically geotraces isn't emissions either, but nevermind. Unfortunately they provide their data in a weird geochemistry/oceanography format (ODV). https://geotraces.webodv.awi.de/IDP2025%3Eseawater%3EGEOTRACES_IDP2025_Seawater/service/DataExtraction
+
+
+```{r}
+#| label: geotraces
+library(readr)
+library(oce)
+geotraces <- read.ctd.odv(
+  here(
+    "inst/extdata/exposure/Geotraces/IDP2025_seawater_GEOTRACES_IDP2025_Seawater_w1efqRDC.txt"
+  )
+)
+
+```

@@ -13,8 +13,8 @@ library(devtools) # load all functions
 i_am("Readme.md") # set wd to project root
 load_all(path = here())
 
-cat("_targets.R here() resolves to:", here(), "\n", file = stderr())
-cat("_targets.R wd:", getwd(), "\n", file = stderr())
+# cat("_targets.R here() resolves to:", here(), "\n", file = stderr())
+# cat("_targets.R wd:", getwd(), "\n", file = stderr())
 
 # Set target options:
 tar_option_set(
@@ -33,7 +33,6 @@ tar_option_set(
     "readxl",
     "arrow",
     "qs2",
-    "STOPeData", # local package, used for format functions
     "tarchetypes", # extend targets
     "glue",
     "purrr",
@@ -53,7 +52,7 @@ tar_option_set(
     "ggridges",
     "plotly"
   ),
-  format = "qs" # Optionally set the default storage format. qs is fast.
+  format = "qs", # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
   # optional distributed computing. To use this capability
@@ -64,7 +63,7 @@ tar_option_set(
   # which run as local R processes. Each worker launches when there is work
   # to do and exits if 60 seconds pass with no tasks to run.
   #
-  # controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
+  controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
   #
   # Alternatively, if you want workers to run on a high-performance computing
   # cluster, select a controller from the {crew.cluster} package.
@@ -139,13 +138,17 @@ list(
     command = get_literature_csv_paths(module = "Sites"),
     format = "file"
   ),
-
-  # FIXME: Enable once we have CREED data
   # tar_target(
-  #   name = creed_scores_files,
-  #   command = get_literature_csv_paths(module = "CREED_Scores"),
+  #   name = creed_data_files,
+  #   command = get_literature_csv_paths(module = "CREED_Data"),
   #   format = "file"
   # ),
+
+  tar_target(
+    name = creed_scores_files,
+    command = get_literature_csv_paths(module = "CREED_Score"),
+    format = "file"
+  ),
 
   # # Read in the data for each module, and rbind across studies it so we have a single table per module
   # We use initialise_*_tibble as part of the reading process to check things are formatted how they should be
@@ -218,12 +221,16 @@ list(
   ),
 
   # FIXME: Enable once we have CREED data
-  # tar_target(
-  #   name = creed_scores_data,
-  #   command = fread_all_module_files(creed_scores_files, initialise_creed_scores_tibble)
-  # ),
+  tar_target(
+    name = creed_scores_data,
+    command = fread_all_module_files(
+      creed_scores_files,
+      initialise_CREED_scores_tibble
+    )
+  ),
 
   # # Join and save literature data into a single big table ----
+  # TODO: extend for creed (which is largely missing)
   tar_target(
     name = literature_joined,
     command = join_all_literature_modules(
@@ -347,7 +354,7 @@ list(
     )
   ),
 
-  # # Create a basic Polar projectopm map of the study area.
+  # # Create a basic Polar projection map of the study area.
   # It's also pretty ugly.
   tar_target(
     name = polar_map,
@@ -370,7 +377,7 @@ list(
   ),
 
   tar_quarto(
-    name = index,
+    name = index.qmd,
     path = "./index.qmd",
     quiet = FALSE,
     # watch quarto.yml so we rebuild the full quarto site output if it changes
@@ -379,7 +386,7 @@ list(
 
   # Rerender QC notebook if needed
   tar_quarto(
-    name = qc,
+    name = nb01 - qc,
     path = "./docs/NB01-qc.qmd",
     quiet = FALSE
   ),
@@ -426,11 +433,21 @@ list(
     quiet = FALSE
   )
 
+  # tar_target(
+  #   name = deploy_posit_connect_cloud,
+  #   command = {
+  renv::snapshot()
+
+  rsconnect::writeManifest()
+  # rsconnect::deploySite(render = "local", account = "sawelch-niva", server = "connect.posit.cloud")
+  #     index.qmd # add dependency on index
+  #   },
+  #   deployment = "main"
+  # )
+
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different
   # do we need to do some sort of multi-factorial doodah
 
   # TODO: We should also do something with MEASURED_N vs actual replication. Hmm
-
-  # TODO: And the piece de registance -- the network digram
 )

@@ -21,6 +21,8 @@ join_all_literature_modules(
 
 \item{reference_data}{Tibble, reference dimension table}
 
+\item{biota_data}{Tibble, biota dimension table}
+
 \item{campaign_data}{Tibble, campaign dimension table}
 
 \item{parameters_data}{Tibble, parameters dimension table}
@@ -32,5 +34,6 @@ A tibble with all tables joined to measurements
 }
 \description{
 Joins Sites, Reference, Campaign, Parameters, and Methods to the Measurements
-fact table using appropriate foreign keys
+fact table using appropriate foreign keys. Columns with duplicate names
+receive explicit suffixes indicating their source table.
 }
