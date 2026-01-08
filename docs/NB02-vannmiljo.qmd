@@ -2,7 +2,8 @@
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: last-modified
-
+html:
+  code-overflow: wrap
 ---
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
@@ -12,120 +13,7 @@ This notebook summarises and reports on the process of importing, cleaning, and 
 %%| fig-width: 12
 %%| fig-cap: |
 %%|   A placeholder for a basic flow diagram of what we do here.
-flowchart TB
-    subgraph Input["Data Loading"]
-        A1[Raw Measurements<br/>Vm_Copper_2025.12.05.xlsx<br/>138,615 hits]
-        A2[Raw Sites<br/>3 Excel files<br/>split due to export limit]
-        A3[Lookup Tables<br/>medium, vannkategori,<br/>methods analysis/sampling,<br/>campaigns, units, species]
-    end
-    
-    subgraph Merge["Data Merging"]
-        B1[Join Sites + Measurements<br/>on Vannlok_kode]
-        B2[vm_merged<br/>Add all lookup tables]
-    end
-    
-    subgraph Explore["Initial Exploration on vm_merged"]
-        C1[Heatmaps:<br/>Campaign × Vannkategori<br/>Campaign × Medium<br/>Vannkategori × Medium<br/>Campaign × Species<br/>Units × Medium]
-        C2[Sample Distribution<br/>cumulative % table<br/>90% coverage goal]
-    end
-    
-    subgraph Filter["Apply Filters"]
-        D1[vm_filtered<br/>Compartment filters<br/>Point sites only<br/>Date: 2010-01-01 to 2025-12-05<br/>Exclude Svalbard]
-        D2[138,615 → 129,917 rows<br/>93.7% retained]
-    end
-    
-    subgraph QualityCheck["Conflict Detection & Resolution"]
-        E1[Detect Conflicts<br/>vannkategori vs medium<br/>compartment/subcompartment]
-        E2[resolve_compartment_conflicts<br/>Biota trumps all<br/>Sediment overrides water<br/>Wildcard handling]
-        E3[vm_compartment_conflicts_resolved]
-        E4[Filter out unresolved<br/>remove FLAG rows]
-        E5[vm_compartment_conflicts_resolved_filter]
-    end
-    
-    subgraph Tables["Create eData Tables"]
-        F1[edata_campaign]
-        F2[edata_reference]
-        F3[edata_parameters<br/>Copper only]
-        F4[edata_sites<br/>unique sites<br/>UTM33→WGS84 transform]
-        F5[edata_methods<br/>from vm_lookup_methods]
-    end
-    
-    subgraph Samples["Sample Processing"]
-        G1[edata_samples_wide<br/>from resolved+filtered<br/>generate_sample_id]
-        G2[vm_samples_biota_only<br/>filter to biota<br/>add tissue, species, lifestage]
-        G3[biota_samples_merged<br/>bind_rows of both]
-    end
-    
-    subgraph BiotaSpecial["Biota Table"]
-        H1[edata_biota<br/>species, tissue, gender<br/>from resolved data]
-    end
-    
-    subgraph Measurements["Measurements Table"]
-        I1[edata_measurements<br/>from biota_samples_merged<br/>values, flags, LOD/LOQ<br/>convert operators & units]
-    end
-    
-    subgraph Export["Export & Validation"]
-        J1[Assemble 7 tables<br/>into list]
-        J2[export_campaign_zip<br/>Vm_2010_2025_timestamp.zip<br/>to data/raw/eData/]
-        J3[Validate<br/>compartment counts<br/>outlier detection z≥3]
-    end
-    
-    A1 --> B1
-    A2 --> B1
-    B1 --> B2
-    A3 --> B2
-    
-    B2 --> C1
-    B2 --> C2
-    
-    C1 --> D1
-    C2 --> D1
-    B2 --> D1
-    
-    D1 --> D2
-    D2 --> E1
-    E1 --> E2
-    E2 --> E3
-    E3 --> E4
-    E4 --> E5
-    
-    E5 --> F1
-    E5 --> F2
-    E5 --> F3
-    E5 --> F4
-    A3 --> F5
-    
-    E5 --> G1
-    E5 --> G2
-    G1 --> G3
-    G2 --> G3
-    
-    E5 --> H1
-    
-    G3 --> I1
-    
-    F1 --> J1
-    F2 --> J1
-    F3 --> J1
-    F4 --> J1
-    F5 --> J1
-    G1 --> J1
-    H1 --> J1
-    I1 --> J1
-    
-    J1 --> J2
-    J2 --> J3
-    
-    style Input fill:#e1f5ff
-    style Merge fill:#fff4e1
-    style Explore fill:#f0e1ff
-    style Filter fill:#ffe1e1
-    style QualityCheck fill:#e1ffe1
-    style Tables fill:#fff0f0
-    style Samples fill:#ffe1f0
-    style BiotaSpecial fill:#f0ffe1
-    style Measurements fill:#ffffe1
-    style Export fill:#f5f5f5
+
 ```
 
 # To Do:
@@ -134,6 +22,7 @@ flowchart TB
 -   [ ] More sanity checking of extracted values
 -   [ ] Move boring code to targets
 -   [ ] Work out how to do CREED for this data, then implement.
+-   [ ] Update to use shorted campaign names.
 
 ## Optional Improvements
 -   [ ] Improve heatmaps using https://github.com/raivokolde/pheatmap
@@ -167,6 +56,7 @@ library(knitr)
 library(devtools)
 library(tibble)
 library(pointblank)
+library(targets)
 
 validation_config <- list(
   # For lookups: warn if ANY fail (we want to know), but don't stop (we'll investigate)
@@ -177,6 +67,9 @@ validation_config <- list(
 )
 
 load_all()
+
+# aesthetics
+theme_set(theme_minimal(base_size = 12))
 
 i_am("README.md") |> suppressMessages()
 ```
@@ -257,7 +150,8 @@ tar_load(c(
   vm_lookup_methods_raw,
   vm_lookup_campaigns,
   vm_lookup_units,
-  vm_lookup_species
+  vm_lookup_species,
+  vm_join_sites_measurements
 ))
 ```
 
@@ -350,7 +244,7 @@ This part is very messy - we generated a bunch of lookup tables (semi-reproducib
 Some of the lookups are actually direct from Vannmiljø though - they're the xlsx ones. They're also bad, but for different reasons!
 
 ```{r}
-#| label: transform-lookups
+#| label: t-lookups
 
 # Transform lookups
 vm_lookup_medium <- vm_lookup_medium_raw |>
@@ -397,11 +291,6 @@ message(glue(
   "Loaded {length(lookups)} lookup tables: {paste(lookups, collapse = ', ')}"
 ))
 
-lookups <- grepv("vm_lookup", ls())
-
-message(glue(
-  "Loaded {length(lookups)} lookup tables: {paste(lookups, collapse = ', ')}"
-))
 ```
 
 # Data Processing
@@ -419,19 +308,12 @@ Note that we only use four lookups at this stage: `vm_lookup_medium`, `vm_lookup
 #| label: processing-merge-datasets
 #| echo: false
 
-# Join sites to measurements
-vm_merged_sites <- vm_raw_copper |>
-  left_join(
-    vm_raw_sites,
-    by = c("Vannlok_kode" = "Vannlokalitetskode")
-  )
-
 message(glue(
-  "Joined vm_raw_copper and vm_raw_sites by Vannlokalitetskode. Output: vm_merged_sites ({nrow(vm_merged_sites)} x {ncol(vm_merged_sites)})"
+  "Joined vm_raw_copper and vm_raw_sites by Vannlokalitetskode. Output: vm_join_sites_measurements ({nrow(vm_join_sites_measurements)} x {ncol(vm_join_sites_measurements)})"
 ))
 
 # Add lookup tables
-vm_merged_lookups <- vm_merged_sites |>
+vm_merged_lookups <- vm_join_sites_measurements |>
   left_join(
     vm_lookup_medium |>
       rename(MediumID_Name = Name, MediumID_Description = Description),
@@ -495,8 +377,8 @@ vm_merged_lookups <- vm_merged_sites |>
 
 message(
   glue(
-    "Left joined vm_merged_sites to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns, vm_lookup_units.
-    vm_merged_sites ({nrow(vm_merged_sites)} x {ncol(vm_merged_sites)}) 
+    "Left joined vm_join_sites_measurements to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns, vm_lookup_units.
+    vm_join_sites_measurements ({nrow(vm_join_sites_measurements)} x {ncol(vm_join_sites_measurements)}) 
     + vm_lookup_medium 
     + vm_lookup_vannkategori 
     + vm_lookup_campaigns 
@@ -517,6 +399,9 @@ We don't yet have an oversight over the distribution of site types, biota, tissu
 #| fig-width: 12
 #| fig-height: 14
 #| warning: false
+
+wrap_x <- 30
+wrap_y <- 50
 
 # Create a summary of counts by the two variables
 vm_exploration_campaign_vannkategory <- vm_merged_lookups |>
@@ -552,23 +437,26 @@ vannkategori_order <- vm_exploration_campaign_vannkategory |>
 # Wrap text, then create complete grid with all combinations
 vm_exploration_complete <- vm_exploration_campaign_vannkategory |>
   mutate(
-    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(CAMPAIGN_DESCRIPTION_EN, 30),
-    Vannkategori_Description_wrapped = str_wrap(Vannkategori_Description, 20)
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(CAMPAIGN_DESCRIPTION_EN, wrap_y),
+    Vannkategori_Description_wrapped = str_wrap(
+      Vannkategori_Description,
+      wrap_x
+    )
   ) |>
   complete(
-    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order, 30),
-    Vannkategori_Description_wrapped = str_wrap(vannkategori_order, 20),
+    CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order, wrap_y),
+    Vannkategori_Description_wrapped = str_wrap(vannkategori_order, wrap_x),
     fill = list(n_samples = 0)
   ) |>
   mutate(
     # Factor with wrapped levels in the correct order
     CAMPAIGN_DESCRIPTION_EN_wrapped = factor(
       CAMPAIGN_DESCRIPTION_EN_wrapped,
-      levels = str_wrap(campaign_order, 30)
+      levels = str_wrap(campaign_order, wrap_y)
     ),
     Vannkategori_Description_wrapped = factor(
       Vannkategori_Description_wrapped,
-      levels = str_wrap(vannkategori_order, 20)
+      levels = str_wrap(vannkategori_order, wrap_x)
     )
   )
 
@@ -599,8 +487,8 @@ vm_exploration_complete |>
     y = ""
   ) +
   theme(
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
-    axis.text.y = element_text(size = 7),
+    axis.text.x = element_text(),
+    axis.text.y = element_text(),
     plot.background = element_blank(),
     panel.border = element_blank(),
     legend.position = "none"
@@ -649,7 +537,7 @@ medium_order <- vm_exploration_campaign_x_medium |>
 vm_exploration_campaign_x_medium_complete <- vm_exploration_campaign_x_medium |>
   mutate(
     CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(Name_EN, 30),
-    MediumID_Name_wrapped = str_wrap(MediumID_Name, 20)
+    MediumID_Name_wrapped = str_wrap(MediumID_Name, wrap_y)
   ) |>
   complete(
     CAMPAIGN_DESCRIPTION_EN_wrapped = str_wrap(campaign_order_medium, 30),
@@ -1182,7 +1070,7 @@ exclusion_summary <- exclusion_summary |>
 # Add total row
 exclusion_summary <- exclusion_summary |>
   add_row(
-    Filter = "**Total**",
+    Filter = "<b>Total</b>",
     Rows_Excluded = initial_count - nrow(after_date),
     Rows_Remaining = nrow(after_date),
     Excluded_Values = ""
@@ -1241,7 +1129,7 @@ For completeness, we also report on excluded groups (@tbl-processing-excluded-da
 
 # Create filtering summary for visualization
 filter_flow <- exclusion_summary |>
-  filter(Filter != "**Total**") |>
+  filter(Filter != "<b>Total</b>") |>
   mutate(
     stage = c("Compartments", "Point sites", "Date range"),
     pct = Percent_Remaining,
@@ -1269,10 +1157,10 @@ ggplot(filter_flow, aes(x = stage, y = Rows_Remaining)) +
     x = NULL,
     y = "Number of Records"
   ) +
-  theme_minimal()
+  theme(legend.position = "none")
 ```
 
-A Sankey diagram would be better, but @fig-filter-visualisation will do for now.
+A Sankey diagram would be better, but @fig-filter-visualisation will do for now. @tbl-processing-excluded-data provides a summary of what was excluded, and why.
 
 ```{r}
 #| label: tbl-processing-excluded-data

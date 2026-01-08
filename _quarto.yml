@@ -60,35 +60,52 @@ format:
     toc: true
     grid:
       sidebar-width: 400px
-  monofont: "Fira Code"
+    monofont: "Fira Code"
 
 authors:
   - name: Sam Welch
     affiliation: Norwegian Institute for Water Research
     roles: [conceptualization, data curation, formal analysis, investigation, methodology, software, validation, visualization]
     corresponding: true
-    email: sam.welch@niva.no]
+    email: sam.welch@niva.no
     orcid: 0000-0003-4743-4562
   - name: Knut Erik Tollefsen
-    affiliation: 
+    affiliations:
       - name: Norwegian Institute for Water Research
+        city: Oslo
+        country: Norway
         url: https://niva.no/en
       - name: Norwegian University of Life Sciences
+        city: Ås
+        country: Norway
         url: https://www.nmbu.no/en 
     roles: writing
     corresponding: false
   - name: Pierre Blévin
-    affiliation: Akvaplan-NIVA AS
+    affiliation:
+      name: Akvaplan-NIVA AS
+      city: Tromsø
+      country: Norway
+      url: https://akvaplan.no/en 
     roles: writing
     corresponding: false
   - name: Anita Evenset
-    affiliation: Akvaplan-NIVA AS
+    affiliation:
+      name: Akvaplan-NIVA AS
+      city: Tromsø
+      country: Norway
+      url: https://akvaplan.no/en
     roles: writing
     corresponding: false
   - name: Camden Karon Klefbom
-    affiliation: Norwegian Institute for Water Research
+    affiliation:
+      name: Norwegian Institute for Water Research
+      city: Oslo
+      country: Norway
+      url: https://niva.no/en
     roles: writing
     corresponding: false
+    
 bibliography: references.bib
 number-sections: true
 

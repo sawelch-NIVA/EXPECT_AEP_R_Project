@@ -1,7 +1,4 @@
 # Created by use_targets().
-# Follow the comments below to fill in this target script.
-# Then follow the manual to check and run the pipeline:
-#   https://books.ropensci.org/targets/walkthrough.html#inspect-the-pipeline
 
 # Load packages required to define the pipeline:
 library(targets)
@@ -9,13 +6,10 @@ library(tarchetypes) # better factories for watching many files
 library(crew) # parallel processing, faster execution?
 library(here) # salvage something from the horrible mess that is quarto working directories
 library(devtools) # load all functions
-library(quarto)
+library(quarto) # make beautiful documents, eventually
 
 i_am("Readme.md") # set wd to project root
 load_all(path = here())
-
-# cat("_targets.R here() resolves to:", here(), "\n", file = stderr())
-# cat("_targets.R wd:", getwd(), "\n", file = stderr())
 
 # Set target options:
 tar_option_set(
@@ -87,16 +81,16 @@ tar_option_set(
   # Set other options as needed.
 )
 
-# Run the R scripts in the R/ folder with your custom functions:
+# Source all custom functions stored in ~/R
 tar_source()
-# tar_source("other_functions.R") # Source other scripts as needed.
 
-# # Load raw Vannmiljø data
-# * These point to specific files, rather than the whole unzipped folder.
-# * If at some point you update the vannmilø data, you'll need to also
-# * update the file paths.
+
 list(
-  # Raw data - Vannmiljø copper measurements ----
+  # # Load raw Vannmiljø data ----
+  # * These point to specific files, rather than the whole unzipped folder.
+  # * If at some point you update the vannmilø data, you'll need to also
+  # * update the file paths.
+  ## # Raw data - Vannmiljø copper measurements ----
   tar_target(
     vm_raw_copper,
     read_excel(
@@ -106,7 +100,7 @@ list(
     )
   ),
 
-  # Raw data - Vannmiljø sites (3 files due to export limit) ----
+  ## # Raw data - Vannmiljø sites (3 files due to export limit) ----
   tar_target(
     vm_raw_sites,
     {
@@ -125,9 +119,9 @@ list(
     }
   ),
 
-  # Lookup tables - raw files only ----
+  ## # Vannmiljø Lookup tables ----
   tar_target(
-    vm_lookup_medium_raw,
+    vm_lookup_medium,
     read_csv(
       "data/clean/Vm_medium_lookup_matrix_filled.csv",
       guess_max = 100,
@@ -136,7 +130,7 @@ list(
   ),
 
   tar_target(
-    vm_lookup_vannkategori_raw,
+    vm_lookup_vannkategori,
     read_csv("data/clean/vm_sites_codes_lookup.csv", show_col_types = FALSE)
   ),
 
@@ -172,8 +166,60 @@ list(
     read_csv("data/clean/Vm_species_lookup.csv", show_col_types = FALSE)
   ),
 
+  # # Join Vannmiljø data -----
+
+  # join measurements and sites together
+  tar_target(
+    vm_join_sites_measurements,
+    (left_join(
+      vm_raw_copper,
+      vm_raw_sites,
+      by = c("Vannlok_kode" = "Vannlokalitetskode")
+    ))
+  ),
+
+  # Joining all the lookup tables is a mess but has to be done.
+  tar_target(
+    vm_join_sites_measurements_lookup,
+    ({
+      vm_join_sites_measurements |>
+        left_join(
+          # fix me
+          # this doesn't work because we load stuff in targets
+          # but then modify it in NB02.qmd. What do?
+          # * We could also ask ourselves the question:
+          # * Why bother putting lookups in targets?
+          # Then again, it's probably good practice.
+          vm_lookup_medium |>
+            rename(MediumID_Name = Name, MediumID_Description = Description),
+          by = c(Medium_id = "MediumID")
+        ) |>
+        left_join(
+          vm_lookup_vannkategori |>
+            rename(
+              Vannkategori_Name = Name,
+              Vannkategori_Description = Description
+            ),
+          by = c(Vannkategori = "VannkategoriID")
+        ) |>
+        left_join(
+          vm_lookup_campaigns,
+          by = c(Aktivitet_id = "ActivityID")
+        ) |>
+        left_join(
+          vm_lookup_units |>
+            rename(Unit_Name = Name, Unit_Description = Description),
+          by = c(Enhet_id = "UnitID")
+        ) |>
+        left_join(
+          vm_lookup_species,
+          by = "VitenskapligNavn"
+        )
+    })
+  ),
+
+  # # Load eData files ----
   # # Create one target for the CSV files in /unzipped associated with each module
-  # TODO: This is no longer just literature, so we ought to change the name
   tar_target(
     name = campaign_files,
     command = get_literature_csv_paths(module = "Campaign"),
@@ -231,9 +277,11 @@ list(
     format = "file"
   ),
 
+  # # Read eData by module ----
   # # Read in the data for each module, and rbind across studies it so we have a single table per module
   # We use initialise_*_tibble as part of the reading process to check things are formatted how they should be
   # (It (mostly) works, see SAMPLING_DATE below)
+  # uses data.table::fread for faster reading
   tar_target(
     name = campaign_data,
     command = fread_all_module_files(
@@ -310,7 +358,7 @@ list(
     )
   ),
 
-  # # Join and save literature data into a single big table ----
+  ## # Join eData into single table ----
   # TODO: extend for creed (which is largely missing)
   tar_target(
     name = literature_joined,
@@ -325,7 +373,7 @@ list(
     )
   ),
 
-  # # Remove any columns that aren't useful to us. Standardise all columns with names containing DATE to IDate type
+  ## # Clean joined eData ----
   # Currently columns_to_drop is empty, so we don't drop anything...
   tar_target(
     name = literature_clean,
@@ -339,7 +387,7 @@ list(
     }
   ),
 
-  # # Standardise reported units to a single value for concentrations, dry weight ratios, and wet weight ratios.
+  ## # Standardise & impute eData ----
   # Create a merged OCEAN/COUNTRY column.
   # Impute values below LOQ or LOD with x / sqrt(2)
   tar_target(
@@ -420,10 +468,9 @@ list(
     )
   ),
 
-  # Map creation  ----
+  # # Map creation  ----
 
-  # # Create a basic WGS84 map of the study area. Currently shows pretty much the whole Northern Hemisphere.
-  # It's pretty ugly.
+  ## # Create WGS84 map ----
   tar_target(
     name = wgs84_map,
     command = create_study_area_map_wgs84(
@@ -435,8 +482,7 @@ list(
     )
   ),
 
-  # # Create a basic Polar projection map of the study area.
-  # It's also pretty ugly.
+  ## # Create Polar projection map ----
   tar_target(
     name = polar_map,
     command = create_study_area_map_polar(
@@ -457,15 +503,16 @@ list(
     command = generate_copper_thresholds()
   ),
 
+  # # Generate Quarto Files ----
   tar_quarto(
     name = index.qmd,
     path = "./index.qmd",
-    quiet = TRUE,
-    # watch quarto.yml so we rebuild the full quarto site output if it changes
-    extra_files = "_quarto.yml"
+    quiet = FALSE, # generally we only need the first file complaining if something goes wrong
+    extra_files = "_quarto.yml" # watch quarto.yml so we rebuild the full quarto output if it changes
   ),
 
-  # Rerender QC notebook if needed
+  ## # Generate Quarto Notebooks ----
+  # QC notebook
   tar_quarto(
     name = nb01_qc,
     path = "./docs/NB01-qc.qmd",
@@ -514,10 +561,24 @@ list(
     quiet = TRUE
   ),
 
+  ## # Generate Quarto Appendices ----
+  tar_quarto(
+    name = ap01_protocol,
+    path = "docs/AP01-review-protocol.qmd",
+    quiet = TRUE
+  ),
+
+  tar_quarto(
+    name = ap02_acknowledgements,
+    path = "docs/AP02-acknowledgements.qmd",
+    quiet = TRUE
+  ),
+
+  # # Publish Site ----
   tar_target(
     name = deploy_posit_connect_cloud,
     command = {
-      quarto::quarto_publish_site(
+      quarto_publish_site(
         server = "connect.posit.cloud",
         account = "sawelch-niva",
         render = "none"
