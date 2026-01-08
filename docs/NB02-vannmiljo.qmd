@@ -190,28 +190,28 @@ See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters
 #| warning: false
 
 config <- list(
-  # File paths
-  files = list(
-    # TODO: Make imports more consistent and timestamp everything
-    vm_copper = here("data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx"),
-    vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
-    vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
-    vm_sites_3 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx"),
-    lookup_medium = here("data/clean/Vm_medium_lookup_matrix_filled.csv"),
-    lookup_vannkategori = here("data/clean/vm_sites_codes_lookup.csv"),
-    lookup_methods = here("data/clean/vm_methods_lookup_filled.csv"),
-    methods_analysis = here(
-      "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
-    ),
-    methods_sampling = here(
-      "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
-    ),
-    lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv"),
-    lookup_units = here(
-      "data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx"
-    ),
-    lookup_species = here("data/clean/Vm_species_lookup.csv") # not actually used rn
-  ),
+  # # File paths
+  # files = list(
+  #   # TODO: Make imports more consistent and timestamp everything
+  #   vm_copper = here("data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx"),
+  #   vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
+  #   vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
+  #   vm_sites_3 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx"),
+  #   lookup_medium = here("data/clean/Vm_medium_lookup_matrix_filled.csv"),
+  #   lookup_vannkategori = here("data/clean/vm_sites_codes_lookup.csv"),
+  #   lookup_methods = here("data/clean/vm_methods_lookup_filled.csv"),
+  #   methods_analysis = here(
+  #     "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
+  #   ),
+  #   methods_sampling = here(
+  #     "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+  #   ),
+  #   lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv"),
+  #   lookup_units = here(
+  #     "data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx"
+  #   ),
+  #   lookup_species = here("data/clean/Vm_species_lookup.csv") # not actually used rn
+  # ),
 
   # Filter criteria
   # * is used as a wildcard in compartment lookups
@@ -240,6 +240,25 @@ config <- list(
   )
 )
 
+```
+
+Load in raw vannmiljø data and lookups (which are a mixture of raw data from vannmiljø and data I've processed myself) from the `targets` workflow.
+
+```{r}
+#| label: load-raw-data
+
+tar_load(c(
+  vm_raw_copper,
+  vm_raw_sites,
+  vm_lookup_medium_raw,
+  vm_lookup_vannkategori_raw,
+  vm_lookup_analysis,
+  vm_lookup_sampling,
+  vm_lookup_methods_raw,
+  vm_lookup_campaigns,
+  vm_lookup_units,
+  vm_lookup_species
+))
 ```
 
 ```{r}
@@ -294,22 +313,6 @@ Search for Kobber & Kobberpyrition: 138615 hits
 
 NOTE: Data may extend beyond 2025 date range despite request parameters
 
-```{r}
-#| label: load-raw-measurements
-
-# Downloaded 2025.12.05, data for 2025.01.01 - 2025.12.05, all kommune, all media, all campaigns
-# Search for Kobber & Kobberpyrition: 138615 hits
-# NOTE: Data may extend beyond 2025 date range despite request parameters
-
-if (!exists("vm_raw_copper")) {
-  vm_raw_copper <- read_excel(
-    path = config$files$vm_copper,
-    sheet = 1,
-    guess_max = 138615 # Avoid automatic type conversion warnings
-  )
-}
-```
-
 `summarytools::dfSummary()` generates an initial summary of the dataset here. It's not perfect but it's one line of code, and generally very helpful.
 
 ::: {.callout-note collapse="true" title="Initial Dataset Summary"}
@@ -340,26 +343,6 @@ Procedure:
 3.  Split into chunks (Vannmiljø fails silently above unknown threshold)
 4.  Download as separate Excel files
 
-```{r}
-#| label: load-raw-sites
-#| echo: false
-
-vm_raw_sites <- read_excel(
-  config$files$vm_sites_1,
-  guess_max = 10000
-) |>
-  add_row(read_excel(
-    config$files$vm_sites_2,
-    guess_max = 10000
-  )) |>
-  add_row(read_excel(
-    config$files$vm_sites_3,
-    guess_max = 10000
-  ))
-
-message(glue("Loaded {nrow(vm_raw_sites)} site records"))
-```
-
 ## Lookup Tables
 
 This part is very messy - we generated a bunch of lookup tables (semi-reproducibly) and filled them by hand/with Claude. I don't have a lot of confidence in any of them.
@@ -367,17 +350,9 @@ This part is very messy - we generated a bunch of lookup tables (semi-reproducib
 Some of the lookups are actually direct from Vannmiljø though - they're the xlsx ones. They're also bad, but for different reasons!
 
 ```{r}
-#| label: load-lookups
-#| echo: false
+#| label: transform-lookups
 
-# Medium ID lookup
-# Maps Vannmiljø Medium_id to eData compartment/species/tissue fields
-vm_lookup_medium_raw <- read_csv(
-  config$files$lookup_medium,
-  guess_max = 100, # this may not be the best idea in the world
-  show_col_types = FALSE # TODO: Come back to this
-)
-
+# Transform lookups
 vm_lookup_medium <- vm_lookup_medium_raw |>
   rename_with(
     ~ paste0(., "_medium"),
@@ -393,13 +368,6 @@ vm_lookup_medium <- vm_lookup_medium_raw |>
     )
   )
 
-# Vannkategori lookup
-# Maps Vannmiljø Vannkategori codes to eData site/compartment fields
-vm_lookup_vannkategori_raw <- read_csv(
-  config$files$lookup_vannkategori,
-  show_col_types = FALSE
-)
-
 vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
   rename_with(
     ~ paste0(., "_vkat"),
@@ -412,33 +380,22 @@ vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
     )
   )
 
-# Methods lookup
-vm_lookup_analysis <- read_excel(config$files$methods_analysis)
-vm_lookup_sampling <- read_excel(config$files$methods_sampling)
-vm_lookup_methods <- read_csv(
-  config$files$lookup_methods,
-  show_col_types = FALSE
-) |>
+vm_lookup_methods <- vm_lookup_methods_raw |>
   mutate(
     CAMPAIGN_NAME = config$metadata$campaign_short,
     PROTOCOL_ID = generate_protocol_id(
       PROTOCOL_CATEGORY,
       PROTOCOL_NAME,
-      1, # FIXME: We don't have unique numbers for this rn.
+      1,
       config$metadata$campaign_short
     )
   )
-vm_lookup_campaigns <- read_csv(
-  config$files$lookup_campaigns,
-  show_col_types = FALSE
-)
 
-vm_lookup_units <- read_excel(config$files$lookup_units)
+lookups <- grepv("vm_lookup", ls())
 
-vm_lookup_species <- read_csv(
-  config$files$lookup_species,
-  show_col_types = FALSE
-)
+message(glue(
+  "Loaded {length(lookups)} lookup tables: {paste(lookups, collapse = ', ')}"
+))
 
 lookups <- grepv("vm_lookup", ls())
 
@@ -2329,9 +2286,11 @@ message(glue("Created sites table: {nrow(edata_sites)} sites"))
 
 Visually inspecting transformed site distribution (@fig-sites-sanity-map) allows us to check that a) sites are roughly where they should be and b) the correct CRS transformation was used.
 
+I swear there wasn't a site in Africa last time I checked...
+
 ```{r}
 #| label: fig-sites-sanity-map
-#| fig-cap: Vannmiljø sampling sites binned into 10 hexagons, coloured by number of sites in area.
+#| fig-cap: Vannmiljø sampling sites binned into 50 hexagons, coloured by number of sites in area.
 #| fig-width: 12
 
 # Sanity check: plot sites on map
@@ -2346,7 +2305,7 @@ ggplot() +
   geom_hex(
     data = sites_coords,
     aes(x = X, y = Y),
-    bins = 10
+    bins = 50
   ) +
   scale_fill_viridis_c() +
   scale_x_continuous(expand = c(0, 0)) +
@@ -2587,8 +2546,6 @@ map_tissue_type <- function(medium_id_name) {
   )
 }
 
-
-# TODO: Update to use geo conflicts resolved thingy as appropriate
 tissue_frequency <- count(edata_biota, MediumID_Name) |>
   arrange(desc(n)) |>
   mutate(
@@ -2680,8 +2637,6 @@ biota_samples_merged <- edata_samples_wide |> bind_rows(vm_samples_biota_only)
 #| label: edata-measurements
 
 # Create measurements table
-
-# TODO: Update to use geo conflicts resolved thingy as appropriate
 edata_measurements <- biota_samples_merged |>
   mutate(
     # Core identifiers
@@ -2804,35 +2759,49 @@ count(edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
 
 ```
 
-@fig-vm-scatterplot is a basic plot of measured concentrations by year and unit. Without going into detailed analysis of campaigns, etc. the results are a little difficult to interprety, but it's reasonable to call some of the shapes we see down there suspicious.
+@fig-vm-scatterplot is a basic plot of measured concentrations by year and unit. Without going into detailed analysis of campaigns, etc. the results are a little difficult to interpret, but it's reasonable to call some of the shapes we see down there suspicious.
 
 ```{r}
 #| label: fig-vm-scatterplot
-#| fig-cap: A basic scatterplot for visualising measured concentrations by year.
+#| fig-cap: A basic scatterplot for visualising measured concentrations by year. Values more/less than 3 S.D from the mean per group highlighted in red.
 #| fig-width: 12
+edata_zscore <- edata_measurements |>
+  group_by(ENVIRON_COMPARTMENT_SUB) |>
+  mutate(z_score = scale(MEASURED_VALUE)[, 1]) |>
+  ungroup()
 
-edata_measurements |>
-  ggplot(
-    aes(
-      y = MEASURED_VALUE,
-      x = SAMPLING_DATE |> as.Date(),
-      colour = ENVIRON_COMPARTMENT_SUB
-    )
+ggplot(
+  data = edata_zscore,
+  aes(
+    y = MEASURED_VALUE,
+    x = SAMPLING_DATE |> as.Date()
+  )
+) +
+  geom_point(shape = 1, alpha = 0.5, colour = "grey") +
+  geom_point(
+    data = edata_zscore |> filter(abs(z_score) >= 3),
+    colour = "red",
+    shape = 1
   ) +
-  geom_point(shape = 1) +
   facet_wrap(
     facets = vars(ENVIRON_COMPARTMENT_SUB),
-    nrow = 3,
+    nrow = 7,
     scales = "free_y"
   ) +
-  labs(x = "Year", y = "Measured Value")
+  labs(
+    x = "Year",
+    y = "Measured Value",
+    caption = "Red circles indicate |z-score| ≥ 3"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
-We can pull out this data and take a closer look. We'll use the z-score method and assume anything more than 3 SD from the mean is worth investigation.
-
-- [ ] Todo: find a citation for use of z-scores
-- [ ] Implement using pointblank
-
+  We can pull out this data and take a closer look. We'll use the z-score method and assume anything more than 3 SD from the mean is worth investigation.
+  
+  - [ ] Todo: find a citation for use of z-scores
+  - [ ] Implement using pointblank
+  
 ```{r}
 #| label: tbl-vm-outliers
 

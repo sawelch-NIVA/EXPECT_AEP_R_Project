@@ -91,8 +91,88 @@ tar_option_set(
 tar_source()
 # tar_source("other_functions.R") # Source other scripts as needed.
 
+# # Load raw Vannmiljø data
+# * These point to specific files, rather than the whole unzipped folder.
+# * If at some point you update the vannmilø data, you'll need to also
+# * update the file paths.
 list(
-  # # Create one target for the CSV files in /unzipped associated with each module#
+  # Raw data - Vannmiljø copper measurements ----
+  tar_target(
+    vm_raw_copper,
+    read_excel(
+      path = "data/raw/vannmiljo/Vm_Copper_2025.12.05.xlsx",
+      sheet = 1,
+      guess_max = 138615
+    )
+  ),
+
+  # Raw data - Vannmiljø sites (3 files due to export limit) ----
+  tar_target(
+    vm_raw_sites,
+    {
+      read_excel(
+        "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx",
+        guess_max = 10000
+      ) |>
+        add_row(read_excel(
+          "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx",
+          guess_max = 10000
+        )) |>
+        add_row(read_excel(
+          "data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx",
+          guess_max = 10000
+        ))
+    }
+  ),
+
+  # Lookup tables - raw files only ----
+  tar_target(
+    vm_lookup_medium_raw,
+    read_csv(
+      "data/clean/Vm_medium_lookup_matrix_filled.csv",
+      guess_max = 100,
+      show_col_types = FALSE
+    )
+  ),
+
+  tar_target(
+    vm_lookup_vannkategori_raw,
+    read_csv("data/clean/vm_sites_codes_lookup.csv", show_col_types = FALSE)
+  ),
+
+  tar_target(
+    vm_lookup_analysis,
+    read_excel("data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx")
+  ),
+
+  tar_target(
+    vm_lookup_sampling,
+    read_excel(
+      "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
+    )
+  ),
+
+  tar_target(
+    vm_lookup_methods_raw,
+    read_csv("data/clean/vm_methods_lookup_filled.csv", show_col_types = FALSE)
+  ),
+
+  tar_target(
+    vm_lookup_campaigns,
+    read_csv("data/clean/Vm_lookup_campaigns.csv", show_col_types = FALSE)
+  ),
+
+  tar_target(
+    vm_lookup_units,
+    read_excel("data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx")
+  ),
+
+  tar_target(
+    vm_lookup_species,
+    read_csv("data/clean/Vm_species_lookup.csv", show_col_types = FALSE)
+  ),
+
+  # # Create one target for the CSV files in /unzipped associated with each module
   # TODO: This is no longer just literature, so we ought to change the name
   tar_target(
     name = campaign_files,

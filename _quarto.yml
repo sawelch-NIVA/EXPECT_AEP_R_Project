@@ -60,6 +60,7 @@ format:
     toc: true
     grid:
       sidebar-width: 400px
+  monofont: "Fira Code"
 
 authors:
   - name: Sam Welch
