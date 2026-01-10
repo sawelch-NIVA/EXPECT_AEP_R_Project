@@ -1,8 +1,11 @@
 # Created by use_targets().
 
-# Load packages required to define the pipeline:
+# Setup ----
+
+# Load packages required to define the pipeline ----
 library(targets)
 library(tarchetypes) # better factories for watching many files
+library(eDataDRF) # schema/vocab functions
 library(crew) # parallel processing, faster execution?
 library(here) # salvage something from the horrible mess that is quarto working directories
 library(devtools) # load all functions
@@ -11,7 +14,7 @@ library(quarto) # make beautiful documents, eventually
 i_am("Readme.md") # set wd to project root
 load_all(path = here())
 
-# Set target options:
+# Set target options ----
 tar_option_set(
   # Packages that your targets need for their tasks.
   packages = c(
@@ -45,9 +48,10 @@ tar_option_set(
     "forcats",
     "viridis",
     "ggridges",
-    "plotly"
+    "plotly",
+    "eDataDRF"
   ),
-  format = "qs", # Optionally set the default storage format. qs is fast.
+  format = "qs" # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
   # optional distributed computing. To use this capability
@@ -58,7 +62,7 @@ tar_option_set(
   # which run as local R processes. Each worker launches when there is work
   # to do and exits if 60 seconds pass with no tasks to run.
   #
-  # controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
+  # controller = crew::crew_controller_local(workers = 10, seconds_idle = 60)
   #
   # Alternatively, if you want workers to run on a high-performance computing
   # cluster, select a controller from the {crew.cluster} package.
@@ -81,16 +85,17 @@ tar_option_set(
   # Set other options as needed.
 )
 
-# Source all custom functions stored in ~/R
+# Source all custom functions stored in ~/R ----
 tar_source()
 
+# Pipeline ----
 
 list(
-  # # Load raw Vannmiljø data ----
-  # * These point to specific files, rather than the whole unzipped folder.
-  # * If at some point you update the vannmilø data, you'll need to also
-  # * update the file paths.
-  ## # Raw data - Vannmiljø copper measurements ----
+  # # Vannmiljø Data ----
+
+  ## # Raw data ----
+
+  ### Copper measurements ----
   tar_target(
     vm_raw_copper,
     read_excel(
@@ -100,7 +105,7 @@ list(
     )
   ),
 
-  ## # Raw data - Vannmiljø sites (3 files due to export limit) ----
+  ### Sites (3 files due to export limit) ----
   tar_target(
     vm_raw_sites,
     {
@@ -119,26 +124,59 @@ list(
     }
   ),
 
-  ## # Vannmiljø Lookup tables ----
+  ## # Lookup tables ----
+
+  ### Medium lookup ----
   tar_target(
     vm_lookup_medium,
     read_csv(
       "data/clean/Vm_medium_lookup_matrix_filled.csv",
       guess_max = 100,
       show_col_types = FALSE
-    )
+    ) |>
+      rename_with(
+        ~ paste0(., "_medium"),
+        c(
+          ENVIRON_COMPARTMENT,
+          ENVIRON_COMPARTMENT_SUB,
+          SPECIES_GROUP,
+          SAMPLE_SPECIES,
+          SPECIES_GENDER,
+          SAMPLE_TISSUE,
+          SITE_GEOGRAPHIC_FEATURE,
+          SITE_GEOGRAPHIC_FEATURE_SUB
+        )
+      ) |>
+      rename(MediumID_Name = Name, MediumID_Description = Description)
   ),
 
+  ### Vannkategori lookup ----
   tar_target(
     vm_lookup_vannkategori,
-    read_csv("data/clean/vm_sites_codes_lookup.csv", show_col_types = FALSE)
+    read_csv("data/clean/vm_sites_codes_lookup.csv", show_col_types = FALSE) |>
+      rename_with(
+        ~ paste0(., "_vkat"),
+        c(
+          ENVIRON_COMPARTMENT,
+          ENVIRON_COMPARTMENT_SUB,
+          SITE_GEOGRAPHIC_FEATURE,
+          SITE_GEOGRAPHIC_FEATURE_SUB,
+          n
+        )
+      ) |>
+      rename(
+        Vannkategori_Name = Name,
+        Vannkategori_Description = Description
+      )
   ),
 
+  ### Analysis methods lookup ----
   tar_target(
     vm_lookup_analysis,
     read_excel("data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx")
   ),
 
+  ### Sampling methods lookup ----
   tar_target(
     vm_lookup_sampling,
     read_excel(
@@ -146,60 +184,68 @@ list(
     )
   ),
 
+  ### Methods lookup ----
   tar_target(
-    vm_lookup_methods_raw,
-    read_csv("data/clean/vm_methods_lookup_filled.csv", show_col_types = FALSE)
+    vm_lookup_methods,
+    {
+      read_csv(
+        "data/clean/vm_methods_lookup_filled.csv",
+        show_col_types = FALSE
+      ) |>
+        mutate(
+          CAMPAIGN_NAME = "Vm_2010_2025",
+          PROTOCOL_ID = generate_protocol_id(
+            PROTOCOL_CATEGORY,
+            PROTOCOL_NAME,
+            1,
+            "Vm_2010_2025"
+          )
+        )
+    }
   ),
 
+  ### Campaigns lookup ----
   tar_target(
     vm_lookup_campaigns,
     read_csv("data/clean/Vm_lookup_campaigns.csv", show_col_types = FALSE)
   ),
 
+  ### Units lookup ----
   tar_target(
     vm_lookup_units,
-    read_excel("data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx")
+    read_excel("data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx") |>
+      rename(Unit_Name = Name, Unit_Description = Description)
   ),
 
+  ### Species lookup ----
   tar_target(
     vm_lookup_species,
     read_csv("data/clean/Vm_species_lookup.csv", show_col_types = FALSE)
   ),
 
-  # # Join Vannmiljø data -----
+  ## # Join Vannmiljø data ----
 
-  # join measurements and sites together
+  ### Join measurements and sites ----
   tar_target(
     vm_join_sites_measurements,
-    (left_join(
+    left_join(
       vm_raw_copper,
       vm_raw_sites,
       by = c("Vannlok_kode" = "Vannlokalitetskode")
-    ))
+    )
   ),
 
-  # Joining all the lookup tables is a mess but has to be done.
+  ### Join all lookup tables ----
   tar_target(
     vm_join_sites_measurements_lookup,
-    ({
+    {
       vm_join_sites_measurements |>
         left_join(
-          # fix me
-          # this doesn't work because we load stuff in targets
-          # but then modify it in NB02.qmd. What do?
-          # * We could also ask ourselves the question:
-          # * Why bother putting lookups in targets?
-          # Then again, it's probably good practice.
-          vm_lookup_medium |>
-            rename(MediumID_Name = Name, MediumID_Description = Description),
+          vm_lookup_medium,
           by = c(Medium_id = "MediumID")
         ) |>
         left_join(
-          vm_lookup_vannkategori |>
-            rename(
-              Vannkategori_Name = Name,
-              Vannkategori_Description = Description
-            ),
+          vm_lookup_vannkategori,
           by = c(Vannkategori = "VannkategoriID")
         ) |>
         left_join(
@@ -207,64 +253,252 @@ list(
           by = c(Aktivitet_id = "ActivityID")
         ) |>
         left_join(
-          vm_lookup_units |>
-            rename(Unit_Name = Name, Unit_Description = Description),
+          vm_lookup_units,
           by = c(Enhet_id = "UnitID")
         ) |>
         left_join(
           vm_lookup_species,
           by = "VitenskapligNavn"
-        )
-    })
+        ) |>
+        mutate(SAMPLING_DATE = as.Date(Tid_provetak))
+    }
   ),
 
-  # # Load eData files ----
-  # # Create one target for the CSV files in /unzipped associated with each module
+  ## # Filter Vannmiljø data ----
+
+  ### Filter by compartments ----
+  tar_target(
+    vm_filter_compartments,
+    vm_filter_compartments(
+      vm_join_sites_measurements_lookup,
+      compartments = c("Aquatic", "Biota", "*"),
+      subcompartments = c(
+        "Freshwater",
+        "Aquatic Sediment",
+        "Marine/Salt Water",
+        "Brackish/Transitional Water",
+        "Biota, Aquatic",
+        "*"
+      )
+    )
+  ),
+
+  ### Filter by site type ----
+  # Remove the only Svalbard site, and any sites that are Polygons rather than points
+  tar_target(
+    vm_filter_sites,
+    vm_filter_sites(
+      vm_filter_compartments,
+      exclude_sites = "Svalbard, ENSB-Kilde 2"
+    )
+  ),
+
+  ### Filter by date range ----
+  tar_target(
+    vm_filter_dates,
+    vm_filter_dates(
+      vm_filter_sites,
+      date_start = as.Date("2010-01-01"),
+      date_end = as.Date("2025-12-05")
+    )
+  ),
+
+  ## # Resolve conflicts ----
+
+  ### Resolve compartment conflicts ----
+  # Use site, medium and species lookups to "decide" which of
+  # our compartments a given sample belongs to
+  tar_target(
+    vm_compartment_conflicts_resolved,
+    resolve_compartment_conflicts(vm_filter_dates)
+  ),
+
+  ### Remove unresolved compartment conflicts ----
+  # Separate step for the sake of reporting
+  tar_target(
+    vm_compartment_conflicts_resolved_removed,
+    vm_compartment_conflicts_resolved |>
+      filter(
+        ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
+        ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
+      )
+  ),
+
+  ### Resolve geographic conflicts ----
+  tar_target(
+    vm_compartment_geo_conflicts_resolved,
+    resolve_geographic_conflicts(vm_compartment_conflicts_resolved_removed)
+  ),
+
+  ### Remove unresolved geographic conflicts ----
+  # Separate step for the sake of reporting
+  tar_target(
+    vm_compartment_geo_conflicts_resolved_removed,
+    vm_compartment_geo_conflicts_resolved |>
+      filter(
+        SITE_GEOGRAPHIC_FEATURE_resolved != "FLAG: Geographic conflict.",
+        SITE_GEOGRAPHIC_FEATURE_SUB_resolved != "FLAG: Geographic conflict."
+      )
+  ),
+
+  ## # Split sites with multiple geographic features ----
+
+  ### Split sites ----
+  # Split sites where more than one GEO_FEATURE_SUB is reported
+  # (e.g. sediment (benthos) vs water (column))
+  tar_target(
+    vm_sites_split,
+    vm_split_sites(vm_compartment_geo_conflicts_resolved_removed)
+  ),
+
+  ### Clean up split sites ----
+  # Remove temporary columns from splitting process
+  tar_target(
+    vm_sites_split_clean,
+    vm_sites_split |>
+      select(-n_geo_combos, -geo_combo, -geo_suffix)
+  ),
+
+  ## # Convert Vannmiljø to eData Format ----
+
+  ### # Campaign table ----
+  tar_target(
+    vm_edata_campaign,
+    vm_create_edata_campaign_table(
+      vm_data = vm_sites_split_clean,
+      campaign_name_short = "Vm_2010_2025",
+      campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
+      date_start = as.Date("2010-01-01"),
+      date_end = as.Date("2025-12-05"),
+      organisation = "Miljødirektoratet",
+      entered_by = "Sam Welch"
+    )
+  ),
+
+  ### # Reference table ----
+  tar_target(
+    vm_edata_reference,
+    vm_create_edata_reference_table(
+      vm_data = vm_sites_split_clean,
+      reference_id = "VannmiljøCopper2010-2025",
+      date_start = as.Date("2010-01-01"),
+      date_end = as.Date("2025-12-05"),
+      organisation = "Miljødirektoratet",
+      entered_by = "Sam Welch"
+    )
+  ),
+
+  ### # Parameters table ----
+  tar_target(
+    vm_edata_parameters,
+    vm_create_edata_parameters_table(
+      vm_data = vm_sites_split_clean,
+      entered_by = "Sam Welch"
+    )
+  ),
+
+  ### # Sites table ----
+  tar_target(
+    vm_edata_sites,
+    # we also reproject here, since Vm data is in UT33M be default
+    vm_create_edata_sites_table(
+      vm_data = vm_sites_split_clean,
+      entered_by = "Sam Welch"
+    )
+  ),
+
+  ### # Intermediate samples-biota table ----
+  # This table contains both eData columns AND original Vannmiljø columns
+  # It's used to create samples, biota, and measurements tables
+  tar_target(
+    vm_edata_intermediate,
+    vm_create_intermediate_samples_biota_table(vm_data = vm_sites_split_clean)
+  ),
+
+  ### # Samples table ----
+  tar_target(
+    vm_edata_samples,
+    vm_create_edata_samples_table(vm_intermediate = vm_edata_intermediate)
+  ),
+
+  ### # Biota table ----
+  tar_target(
+    vm_edata_biota,
+    vm_create_edata_biota_table(vm_intermediate = vm_edata_intermediate)
+  ),
+
+  ### # Measurements table ----
+  tar_target(
+    vm_edata_measurements,
+    vm_create_edata_measurements_table(
+      # TODO: ain't got time for upper limits of detection.
+      vm_intermediate = vm_edata_intermediate |> filter(Operator != ">"),
+      campaign_name_short = "Vm_2010_2025",
+      reference_id = "VannmiljøCopper2010-2025"
+    )
+  ),
+
+  ### # CREED Scores table ----
+  # doesn't exist yet, haven't worked out how to do it
+
+  # # Literature Data (eData) ----
+
+  ## # Load file paths ----
+  # Create one target for the CSV files in /unzipped associated with each module
   tar_target(
     name = campaign_files,
     command = get_literature_csv_paths(module = "Campaign"),
     format = "file"
   ),
+
   tar_target(
     name = samples_files,
     command = get_literature_csv_paths(module = "Samples"),
     format = "file"
   ),
+
   tar_target(
     name = biota_files,
     command = get_literature_csv_paths(module = "Biota"),
     format = "file"
   ),
+
   tar_target(
     name = compartments_files,
     command = get_literature_csv_paths(module = "Compartments"),
     format = "file"
   ),
+
   tar_target(
     name = measurements_files,
     command = get_literature_csv_paths(module = "Measurements"),
     format = "file"
   ),
+
   tar_target(
     name = methods_files,
     command = get_literature_csv_paths(module = "Methods"),
     format = "file"
   ),
+
   tar_target(
     name = parameters_files,
     command = get_literature_csv_paths(module = "Parameters"),
     format = "file"
   ),
+
   tar_target(
     name = reference_files,
     command = get_literature_csv_paths(module = "Reference"),
     format = "file"
   ),
+
   tar_target(
     name = sites_files,
     command = get_literature_csv_paths(module = "Sites"),
     format = "file"
   ),
+
   # tar_target(
   #   name = creed_data_files,
   #   command = get_literature_csv_paths(module = "CREED_Data"),
@@ -277,11 +511,14 @@ list(
     format = "file"
   ),
 
-  # # Read eData by module ----
-  # # Read in the data for each module, and rbind across studies it so we have a single table per module
-  # We use initialise_*_tibble as part of the reading process to check things are formatted how they should be
-  # (It (mostly) works, see SAMPLING_DATE below)
-  # uses data.table::fread for faster reading
+  ## # Read eData by module ----
+  # Read in the data for each module, and rbind across studies
+  # so we have a single table per module.
+  # We use initialise_*_tibble as part of the reading process to check
+  # things are formatted how they should be (mostly works, see SAMPLING_DATE).
+  # Uses data.table::fread for faster reading.
+
+  ### Campaign data ----
   tar_target(
     name = campaign_data,
     command = fread_all_module_files(
@@ -290,6 +527,8 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Samples data ----
   tar_target(
     name = samples_data,
     command = fread_all_module_files(
@@ -298,11 +537,15 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Biota data ----
   tar_target(
     name = biota_data,
     command = fread_all_module_files(biota_files, initialise_biota_tibble) |>
       standardise_IDate_all()
   ),
+
+  ### Compartments data ----
   tar_target(
     name = compartments_data,
     command = fread_all_module_files(
@@ -311,6 +554,8 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Measurements data ----
   tar_target(
     name = measurements_data,
     command = fread_all_module_files(
@@ -319,6 +564,8 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Methods data ----
   tar_target(
     name = methods_data,
     command = fread_all_module_files(
@@ -327,6 +574,8 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Parameters data ----
   tar_target(
     name = parameters_data,
     command = fread_all_module_files(
@@ -335,6 +584,8 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Reference data ----
   tar_target(
     name = reference_data,
     command = fread_all_module_files(
@@ -343,12 +594,15 @@ list(
     ) |>
       standardise_IDate_all()
   ),
+
+  ### Sites data ----
   tar_target(
     name = sites_data,
     command = fread_all_module_files(sites_files, initialise_sites_tibble) |>
       standardise_IDate_all()
   ),
 
+  ### CREED scores data ----
   # FIXME: Enable once we have CREED data
   tar_target(
     name = creed_scores_data,
@@ -356,6 +610,24 @@ list(
       creed_scores_files,
       initialise_CREED_scores_tibble
     )
+  ),
+
+  ## # Get biota common names ----
+  # Get common names from taxize if there are any new ones. Uses an API call.
+  tar_target(
+    name = API_biota_common_names,
+    command = {
+      get_common_names(
+        biota_data,
+        input_col = "SAMPLE_SPECIES",
+        output_col = "SPECIES_COMMON_NAME",
+        cache_path = here::here(
+          "data/clean/species_common_names_cache.csv"
+        ),
+        db = "ncbi",
+        verbose = FALSE
+      )
+    }
   ),
 
   ## # Join eData into single table ----
@@ -366,7 +638,7 @@ list(
       measurements_data = measurements_data,
       sites_data = sites_data,
       reference_data = reference_data,
-      biota_data = biota_data,
+      biota_data = API_biota_common_names,
       campaign_data = campaign_data,
       parameters_data = parameters_data,
       methods_data = methods_data
@@ -429,7 +701,9 @@ list(
     }
   ),
 
-  # TODO: I believe something I've done somewhere means that this doesn't properly update. We'll have to come back to it.
+  ## # Load literature parquet ----
+  # TODO: I believe something I've done somewhere means that this doesn't
+  # properly update. We'll have to come back to it.
   tar_target(
     name = load_literature_pqt,
     command = {
@@ -441,15 +715,17 @@ list(
     }
   ),
 
-  # # Check for missing data. Write a report for the Quarto.
+  ## # Data quality report ----
+  # Check for missing data. Write a report for the Quarto.
   tar_target(
     name = data_quality_report,
     command = check_data_quality(load_literature_pqt)
   ),
 
-  # Geography data preparation targets ----
+  # # Geography Data ----
 
-  # # Set up WGS84 map shapefiles (oceans, countries), and add annotations
+  ## # Prepare WGS84 shapefiles ----
+  # Set up WGS84 map shapefiles (oceans, countries), and add annotations
   tar_target(
     name = wgs84_geography,
     command = prepare_geography_wgs84(
@@ -458,7 +734,8 @@ list(
     )
   ),
 
-  # # Set up polar projection map shapefiles (oceans, countries), and add annotations
+  ## # Prepare polar projection shapefiles ----
+  # Set up polar projection map shapefiles (oceans, countries), and add annotations
   tar_target(
     name = polar_geography,
     command = prepare_geography_polar(
@@ -468,7 +745,7 @@ list(
     )
   ),
 
-  # # Map creation  ----
+  # # Maps ----
 
   ## # Create WGS84 map ----
   tar_target(
@@ -482,7 +759,7 @@ list(
     )
   ),
 
-  ## # Create Polar projection map ----
+  ## # Create polar projection map ----
   tar_target(
     name = polar_map,
     command = create_study_area_map_polar(
@@ -494,87 +771,98 @@ list(
     )
   ),
 
-  # # Toxicity/safety threshholds!
+  # # Toxicity Thresholds ----
+
+  ## # Copper toxicity thresholds ----
   # TODO: We can add GeoTraces data here, although it may be too precise for our use:
   # https://geotraces.webodv.awi.de/IDP2021_v2%3EGEOTRACES_IDP2021_Seawater_Discrete_Sample_Data_v2/service/DataExtraction
-  # In general, the our big study area and many study compartments mean there's loads of values we can use here. Self-restrain is probably wise.
+  # In general, our big study area and many study compartments mean there's
+  # loads of values we can use here. Self-restraint is probably wise.
   tar_target(
     name = copper_toxicity_thresholds,
     command = generate_copper_thresholds()
   ),
 
-  # # Generate Quarto Files ----
+  # # Quarto Reports ----
+
+  ## # Index ----
   tar_quarto(
-    name = index.qmd,
+    name = render_index.qmd,
     path = "./index.qmd",
     quiet = FALSE, # generally we only need the first file complaining if something goes wrong
     extra_files = "_quarto.yml" # watch quarto.yml so we rebuild the full quarto output if it changes
   ),
 
-  ## # Generate Quarto Notebooks ----
-  # QC notebook
+  ## # Notebooks ----
+
+  ### QC notebook ----
   tar_quarto(
-    name = nb01_qc,
+    name = render_nb01_qc,
     path = "./docs/NB01-qc.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Vannmiljo notebook
+  ### Vannmiljø notebook ----
   tar_quarto(
-    name = nb02_vannmiljo,
+    name = render_nb02_vannmiljo,
     path = "docs/NB02-vannmiljo.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Visualisation notebook
+  ### Visualisation notebook ----
   tar_quarto(
-    name = nb03_visualisation,
+    name = render_nb03_visualisation,
     path = "docs/NB03-visualisation.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Map notebook
+  ### Map notebook ----
   tar_quarto(
-    name = nb04_map,
+    name = render_nb04_map,
     path = "docs/NB04-map.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Network notebook
+  ### Network notebook ----
   tar_quarto(
-    name = nb05_network,
+    name = render_nb05_network,
     path = "docs/NB05-network.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Emissions notebook
+  ### Emissions notebook ----
   tar_quarto(
-    name = nb07_emissions,
+    name = render_nb07_emissions,
     path = "docs/NB07-emissions.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # Ecology notebook
+  ### Ecology notebook ----
   tar_quarto(
-    name = nb08_ecology,
+    name = render_nb08_ecology,
     path = "docs/NB08-ecology.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  ## # Generate Quarto Appendices ----
+  ## # Appendices ----
+
+  ### Review protocol appendix ----
   tar_quarto(
-    name = ap01_protocol,
+    name = render_ap01_protocol,
     path = "docs/AP01-review-protocol.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
+  ### Acknowledgements appendix ----
   tar_quarto(
-    name = ap02_acknowledgements,
+    name = render_ap02_acknowledgements,
     path = "docs/AP02-acknowledgements.qmd",
-    quiet = TRUE
+    quiet = FALSE
   ),
 
-  # # Publish Site ----
+  # # Deployment ----
+
+  ## # Publish to Posit Connect Cloud ----
   tar_target(
     name = deploy_posit_connect_cloud,
     command = {
@@ -583,15 +871,24 @@ list(
         account = "sawelch-niva",
         render = "none"
       )
-      index.qmd
-      nb01_qc
-      nb02_vannmiljo
-      nb03_visualisation
-      nb04_map
-      nb05_network
-      nb07_emissions
-      nb08_ecology
-    }
+
+      # Create a deployment marker file with timestamp
+      marker_file <- "_targets/user/data/deploy_timestamp.txt"
+      dir.create(dirname(marker_file), showWarnings = FALSE, recursive = TRUE)
+      writeLines(as.character(Sys.time()), marker_file)
+      marker_file
+
+      # Dependencies to trigger redeployment
+      render_index.qmd
+      render_nb01_qc
+      render_nb02_vannmiljo
+      render_nb03_visualisation
+      render_nb04_map
+      render_nb05_network
+      render_nb07_emissions
+      render_nb08_ecology
+    },
+    format = "file"
   )
 
   # TODO: Are we allowed (statistically) to group similar compartments together?

@@ -4,6 +4,10 @@ title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Unders
 
 # Introduction
 
+::: callout-important
+## Please see the notebooks (especially NB03) for the most up-to-date changes.
+:::
+
 Copper is a vital resource in both biology and engineering due to its useful chemical and biological properties. Demand for copper is likely to grow significantly in coming decades due to demand in manufacturing and infrastructure [@schipperEstimatingGlobalCopper2018].
 
 Biota sensitivity to copper is highly variable and depends on diverse factors including water chemistry, availability of biological material, salinity, pH, and individual organism physiology, metabolism, and behaviour. In addition to its natural occurence, copper is emitted to the environment in a wide range of products and forms, which may be of greater or lesser relevance to the environment depending on their transport in the environment.
@@ -14,20 +18,18 @@ Norway's economically important Arctic region is likely to come under increased 
 
 Potential subsections:
 
-- AEPs
-- Copper biology
-- Copper pollution
-- Arctic/global change
-- Economic/demand shift
-- Area geography, ecology, economy
+-   AEPs
+-   Copper biology
+-   Copper pollution
+-   Arctic/global change
+-   Economic/demand shift
+-   Area geography, ecology, economy
 
 # Materials and Methods
 
 An exhaustive version of the materials and methods are provided in the notebooks and appendices included. These are summarised below.
 
-## Data Selection 
-
-
+## Data Selection
 
 ### Literature Review Protocol
 
@@ -44,4 +46,3 @@ An exhaustive version of the materials and methods are provided in the notebooks
 # Conclusion
 
 # References
-

@@ -1,0 +1,37 @@
+---
+title: "Appendix 03 - Project"
+author: "Sam Welch"
+date: last-modified
+---
+
+
+General dumping ground for papers I haven't read and project management stuff.
+
+# Papers
+
+## EPA: AQUATIC LIFE AMBIENT FRESHWATER QUALITY CRITERIA - COPPER
+
+https://www.epa.gov/sites/default/files/2019-02/documents/al-freshwater-copper-2007-revision.pdf
+
+## Toward a Better Understanding of the Global Ocean Copper Distribution and Speciation Through a Data-Constrained Model
+
+[label](https://doi.org/10.1029/2023GB007769)
+
+## A Refinement of the Processes Controlling Dissolved Copper and Nickel Biogeochemistry: Insights From the Pan-Arctic
+
+[label](https://doi.org/10.1029/2021JC018087)
+
+## A Bayesian Parametric and Nonparametric Approach for the Imputation of Multivariate Left-Censored Data Due to Limit of Detection
+[label](https://doi.org/10.1002/sim.70326)
+
+What inhibits fishing for Calanus?
+
+[label](https://www.sintef.no/en/latest-news/2025/what-inhibits-fishing-for-calanus/)
+
+New insights into submarine tailing disposal for a reduced environmental footprint: Lessons learnt from Norwegian fjords
+
+[label](https://doi.org/10.1016/j.marpolbul.2021.113150)
+
+## Characterisation of fine-grained tailings from a marble processing plant and their acute effects on the copepod Calanus finmarchicus
+
+[label](https://doi.org/10.1016/j.chemosphere.2016.11.118)

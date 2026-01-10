@@ -8,13 +8,6 @@ html:
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's Vannmiljø database.
 
-```{mermaid}
-%%| label: fig-mermaid-process
-%%| fig-width: 12
-%%| fig-cap: |
-%%|   A placeholder for a basic flow diagram of what we do here.
-
-```
 
 # To Do:
 -   [ ] Investigate some very strange detection and quantification limits
@@ -76,13 +69,14 @@ i_am("README.md") |> suppressMessages()
 
 ## Configuration
 
-See @tbl-config-filters and @tbl-config-metadata for a summary of the parameters of this extraction from Vannmiljø.
+See @tbl-vm_config-filters and @tbl-vm_config-metadata for a summary of the parameters of this extraction from Vannmiljø.
 
 ```{r}
 #| label: setup-configuration
 #| warning: false
 
-config <- list(
+# this needs to be rationalised at some point
+vm_config <- list(
   # # File paths
   # files = list(
   #   # TODO: Make imports more consistent and timestamp everything
@@ -133,6 +127,7 @@ config <- list(
   )
 )
 
+
 ```
 
 Load in raw vannmiljø data and lookups (which are a mixture of raw data from vannmiljø and data I've processed myself) from the `targets` workflow.
@@ -143,35 +138,70 @@ Load in raw vannmiljø data and lookups (which are a mixture of raw data from va
 tar_load(c(
   vm_raw_copper,
   vm_raw_sites,
-  vm_lookup_medium_raw,
-  vm_lookup_vannkategori_raw,
+  vm_lookup_medium,
+  vm_lookup_vannkategori,
   vm_lookup_analysis,
   vm_lookup_sampling,
-  vm_lookup_methods_raw,
+  vm_lookup_methods,
   vm_lookup_campaigns,
   vm_lookup_units,
   vm_lookup_species,
-  vm_join_sites_measurements
+  vm_join_sites_measurements,
+  vm_compartment_geo_conflicts_resolved
+))
+
+tar_load(c(
+  vm_join_sites_measurements_lookup,
+  vm_data_with_dates,
+  vm_filter_compartments,
+  vm_filter_sites,
+  vm_filter_dates,
+  vm_compartment_conflicts_resolved,
+  vm_compartment_conflicts_resolved_removed,
+  vm_compartment_geo_conflicts_resolved_removed
+))
+
+# Load Vannmiljø eData conversion targets ----
+tar_load(c(
+  vm_sites_split,
+  vm_sites_split_clean, # Last Vannmiljø processing step
+  vm_edata_campaign, # eData campaign metadata
+  vm_edata_reference, # eData reference metadata
+  vm_edata_parameters, # eData parameters (copper)
+  vm_edata_sites # eData sites with reprojected coordinates
+))
+
+tar_load(c(
+  vm_sites_split_clean, # Last Vannmiljø processing step
+  vm_edata_campaign, # eData campaign metadata
+  vm_edata_reference, # eData reference metadata
+  vm_edata_parameters, # eData parameters (copper)
+  vm_edata_sites, # eData sites with reprojected coordinates
+  vm_edata_samples, # eData samples
+  vm_edata_biota, # eData biota-specific information
+  vm_edata_measurements # eData measurements with values and limits
 ))
 ```
 
 ```{r}
-#| label: tbl-config-filters
+#| label: tbl-vm_config-filters
 
-config$filters |>
+vm_config$filters |>
   enframe(name = "Parameter", value = "Value") |>
   kable()
 ```
 
 ```{r}
-#| label: tbl-config-metadata
+#| label: tbl-vm_config-metadata
 
-config$metadata |>
+vm_config$metadata |>
   enframe(name = "Parameter", value = "Value") |>
   kable()
 ```
 
 ## Helper Functions
+
+These are also in fct_vm_processing.R but I include them here to remind myself I need a better documented solution.
 
 ```{r}
 #| label: setup-helper-functions
@@ -244,46 +274,7 @@ This part is very messy - we generated a bunch of lookup tables (semi-reproducib
 Some of the lookups are actually direct from Vannmiljø though - they're the xlsx ones. They're also bad, but for different reasons!
 
 ```{r}
-#| label: t-lookups
-
-# Transform lookups
-vm_lookup_medium <- vm_lookup_medium_raw |>
-  rename_with(
-    ~ paste0(., "_medium"),
-    c(
-      ENVIRON_COMPARTMENT,
-      ENVIRON_COMPARTMENT_SUB,
-      SPECIES_GROUP,
-      SAMPLE_SPECIES,
-      SPECIES_GENDER,
-      SAMPLE_TISSUE,
-      SITE_GEOGRAPHIC_FEATURE,
-      SITE_GEOGRAPHIC_FEATURE_SUB
-    )
-  )
-
-vm_lookup_vannkategori <- vm_lookup_vannkategori_raw |>
-  rename_with(
-    ~ paste0(., "_vkat"),
-    c(
-      ENVIRON_COMPARTMENT,
-      ENVIRON_COMPARTMENT_SUB,
-      SITE_GEOGRAPHIC_FEATURE,
-      SITE_GEOGRAPHIC_FEATURE_SUB,
-      n
-    )
-  )
-
-vm_lookup_methods <- vm_lookup_methods_raw |>
-  mutate(
-    CAMPAIGN_NAME = config$metadata$campaign_short,
-    PROTOCOL_ID = generate_protocol_id(
-      PROTOCOL_CATEGORY,
-      PROTOCOL_NAME,
-      1,
-      config$metadata$campaign_short
-    )
-  )
+#| label: lookups
 
 lookups <- grepv("vm_lookup", ls())
 
@@ -312,69 +303,6 @@ message(glue(
   "Joined vm_raw_copper and vm_raw_sites by Vannlokalitetskode. Output: vm_join_sites_measurements ({nrow(vm_join_sites_measurements)} x {ncol(vm_join_sites_measurements)})"
 ))
 
-# Add lookup tables
-vm_merged_lookups <- vm_join_sites_measurements |>
-  left_join(
-    vm_lookup_medium |>
-      rename(MediumID_Name = Name, MediumID_Description = Description),
-    by = c(Medium_id = "MediumID")
-  ) |>
-  left_join(
-    vm_lookup_vannkategori |>
-      rename(
-        Vannkategori_Name = Name,
-        Vannkategori_Description = Description
-      ),
-    by = c(Vannkategori = "VannkategoriID")
-  ) |>
-  left_join(
-    vm_lookup_campaigns,
-    by = c(Aktivitet_id = "ActivityID")
-  ) |>
-  left_join(
-    vm_lookup_units |> rename(Unit_Name = Name, Unit_Description = Description),
-    by = c(Enhet_id = "UnitID")
-  ) |>
-  left_join(
-    vm_lookup_species,
-    by = "VitenskapligNavn"
-  ) |>
-  # pointblank-based VALID II validation
-  col_vals_not_null(
-    columns = vars(
-      Vannlokalitetsnavn,
-      Medium_id,
-      Registrerings_id,
-      `UTM33 Ost (X)`,
-      `UTM33 Nord (Y)`
-    )
-  ) |>
-  col_vals_in_set(
-    columns = vars(Medium_id),
-    set = vm_lookup_medium$MediumID,
-    label = "All Medium_ids have lookup matches",
-    actions = validation_config$lookup
-  ) |>
-  col_vals_in_set(
-    columns = vars(Enhet_id),
-    set = vm_lookup_units$UnitID,
-    label = "All Enhet_ids have lookup matches",
-    actions = validation_config$lookup
-  ) |>
-  col_vals_in_set(
-    columns = vars(Aktivitet_id),
-    set = vm_lookup_campaigns$ActivityID,
-    label = "All Aktivitet_ids have lookup matches",
-    actions = validation_config$lookup
-  ) |>
-  col_vals_in_set(
-    columns = vars(Vannkategori),
-    set = vm_lookup_vannkategori$VannkategoriID,
-    label = "All Vannkategori have lookup matches",
-    actions = validation_config$lookup
-  )
-
-
 message(
   glue(
     "Left joined vm_join_sites_measurements to lookup tables: vm_lookup_medium, vm_lookup_vannkategori, vm_lookup_campaigns, vm_lookup_units.
@@ -384,7 +312,7 @@ message(
     + vm_lookup_campaigns 
     + vm_lookup_units 
     + vm_lookup_species
-    ---> vm_merged_lookups ({nrow(vm_merged_lookups)} x {ncol(vm_merged_lookups)})"
+    ---> vm_join_sites_measurements_lookup ({nrow(vm_join_sites_measurements_lookup)} x {ncol(vm_join_sites_measurements_lookup)})"
   )
 )
 ```
@@ -404,7 +332,7 @@ wrap_x <- 30
 wrap_y <- 50
 
 # Create a summary of counts by the two variables
-vm_exploration_campaign_vannkategory <- vm_merged_lookups |>
+vm_exploration_campaign_vannkategory <- vm_join_sites_measurements_lookup |>
   mutate(
     CAMPAIGN_DESCRIPTION_EN = case_when(
       is.na(Name_EN) ~ "Other",
@@ -507,7 +435,7 @@ Rivers, lakes, and coastal waters are the majority of the dataset, which is appr
 #| warning: false
 
 # Create a summary of counts by the two variables
-vm_exploration_campaign_x_medium <- vm_merged_lookups |>
+vm_exploration_campaign_x_medium <- vm_join_sites_measurements_lookup |>
   mutate(
     Name_EN = case_when(
       is.na(Name_EN) ~ "Other",
@@ -597,7 +525,7 @@ We also check reported water category by sampling medium, for the sake of comple
 #| warning: false
 
 # Create a summary of counts by the two variables
-vm_exploration_vkat_x_medium <- vm_merged_lookups |>
+vm_exploration_vkat_x_medium <- vm_join_sites_measurements_lookup |>
   group_by(Vannkategori_Description, MediumID_Name) |>
   summarise(n_samples = n(), .groups = "drop")
 
@@ -728,7 +656,7 @@ We also consider sample size of @fig-heatmap-campaign-biota by campaign. This in
 
 # todo: facet this by species group, it's too tall otherwise
 # Create a summary of counts by the two variables (filter to non-NA species)
-vm_exploration_species <- vm_merged_lookups |>
+vm_exploration_species <- vm_join_sites_measurements_lookup |>
   mutate(
     CAMPAIGN_DESCRIPTION_EN = case_when(
       is.na(Name_EN) ~ "Other",
@@ -821,7 +749,7 @@ Finally, we check units by sampling medium @fig-heatmap-units-medium. We would e
 #| fig-height: 3
 #| warning: false
 
-vm_exploration_units_x_medium <- vm_merged_lookups |>
+vm_exploration_units_x_medium <- vm_join_sites_measurements_lookup |>
   group_by(Unit_Name, MediumID_Name) |>
   summarise(n_samples = n(), .groups = "drop")
 threshold_value_units_x_medium <- mean(
@@ -862,7 +790,6 @@ vm_exploration_units_x_medium_complete <- vm_exploration_units_x_medium |>
     )
   )
 
-
 vm_exploration_units_x_medium_complete |>
   ggplot(aes(
     x = MediumID_Name_wrapped,
@@ -902,7 +829,7 @@ Let's check out methods (@tbl-methods-by-year). Anything with an eData Classific
 #| label: tbl-methods-by-year
 #| tbl-cap: "Vannmiljø sampling and analysis method IDs reported by number of samples (rows), last year used, and corresponding eData Classification (if relevant)."
 
-vm_exploration_methods_x_year <- vm_merged_lookups |>
+vm_exploration_methods_x_year <- vm_join_sites_measurements_lookup |>
   select(Tid_provetak, Provetakmetode_id, Analysemetode_id, Medium_id) |>
   pivot_longer(
     cols = c(Provetakmetode_id, Analysemetode_id),
@@ -958,7 +885,7 @@ As discussed above, to avoid spending excessive time on low-incidence edge cases
 
 Included:
 
--   See config tables in [Configuration](##Configuration) for specifics
+-   See vm_config tables in [Configuration](##Configuration) for specifics
 -   Point sites only (no polygons)
 -   Mainland Norway only (excluded Svalbard)
 
@@ -968,8 +895,9 @@ Excluded:
 
 ```{r}
 #| label: processing-apply-filters-and-summarise
+# Load the intermediate targets ----
 
-# Track exclusions step by step
+# Build exclusion summary ----
 exclusion_summary <- tibble(
   Filter = character(),
   Rows_Excluded = integer(),
@@ -977,143 +905,90 @@ exclusion_summary <- tibble(
   Excluded_Values = character()
 )
 
-# Start with merged data
-current_data <- vm_merged_lookups |>
-  mutate(SAMPLING_DATE = as.Date(Tid_provetak))
+# initial_count <- nrow(vm_data_with_dates)
 
-initial_count <- nrow(current_data)
+# # Step 1: Compartment exclusions ----
+# excluded_compartments <- vm_data_with_dates |>
+#   anti_join(
+#     vm_filter_compartments,
+#     by = join_by(across(everything()))
+#   ) |>
+#   group_by(ENVIRON_COMPARTMENT_SUB_vkat, ENVIRON_COMPARTMENT_SUB_medium) |>
+#   reframe(n = n()) |>
+#   mutate(
+#     label = glue(
+#       "{ENVIRON_COMPARTMENT_SUB_vkat}/{ENVIRON_COMPARTMENT_SUB_medium} (n={n})"
+#     )
+#   ) |>
+#   pull(label) |>
+#   paste(collapse = "; ")
 
-# Step 1: Compartment filters
-excluded_compartments <- current_data |>
-  filter(
-    !(ENVIRON_COMPARTMENT_vkat %in%
-      config$filters$compartment |
-      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment) |
-      !(ENVIRON_COMPARTMENT_SUB_vkat %in%
-        config$filters$compartment_sub |
-        ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub)
-  ) |>
-  group_by(ENVIRON_COMPARTMENT_SUB_vkat, ENVIRON_COMPARTMENT_SUB_medium) |>
-  reframe(n = n()) |>
-  mutate(
-    label = glue(
-      "{ENVIRON_COMPARTMENT_SUB_vkat}/{ENVIRON_COMPARTMENT_SUB_medium} (n={n})"
-    )
-  ) |>
-  pull(label) |>
-  paste(collapse = "; ")
+# exclusion_summary <- exclusion_summary |>
+#   add_row(
+#     Filter = "Wrong compartment/subcompartment",
+#     Rows_Excluded = initial_count - nrow(vm_filter_compartments),
+#     Rows_Remaining = nrow(vm_filter_compartments),
+#     Excluded_Values = excluded_compartments
+#   )
 
-after_compartment <- current_data |>
-  filter(
-    ENVIRON_COMPARTMENT_vkat %in%
-      config$filters$compartment |
-      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
-    ENVIRON_COMPARTMENT_SUB_vkat %in%
-      config$filters$compartment_sub |
-      ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
-  )
+# # Step 2: Site type exclusions ----
+# excluded_sites <- vm_filter_compartments |>
+#   anti_join(
+#     vm_filter_sites,
+#     by = join_by(across(everything()))
+#   ) |>
+#   group_by(Objekttype, Vannlokalitetsnavn) |>
+#   reframe(n = n()) |>
+#   mutate(label = glue("{Objekttype}: {Vannlokalitetsnavn} (n={n})")) |>
+#   pull(label) |>
+#   paste(collapse = "; ")
 
-exclusion_summary <- exclusion_summary |>
-  add_row(
-    Filter = "Wrong compartment/ subcompartment",
-    Rows_Excluded = initial_count - nrow(after_compartment),
-    Rows_Remaining = nrow(after_compartment),
-    Excluded_Values = excluded_compartments
-  )
+# exclusion_summary <- exclusion_summary |>
+#   add_row(
+#     Filter = "Not point sites or excluded sites",
+#     Rows_Excluded = nrow(vm_filter_compartments) - nrow(vm_filter_sites),
+#     Rows_Remaining = nrow(vm_filter_sites),
+#     Excluded_Values = excluded_sites
+#   )
 
-# Step 2: Site type filter
-excluded_sites <- after_compartment |>
-  filter(
-    Objekttype != "point" |
-      Vannlokalitetsnavn == config$filters$exclude_sites
-  ) |>
-  group_by(Objekttype, Vannlokalitetsnavn) |>
-  reframe(n = n()) |>
-  mutate(label = glue("{Objekttype}: {Vannlokalitetsnavn} (n={n})")) |>
-  pull(label) |>
-  paste(collapse = "; ")
+# # Step 3: Date range exclusions ----
+# excluded_dates <- vm_filter_sites |>
+#   anti_join(
+#     vm_filter_dates,
+#     by = join_by(across(everything()))
+#   ) |>
+#   group_by(year = year(SAMPLING_DATE)) |>
+#   reframe(n = n()) |>
+#   mutate(label = glue("{year} (n={n})")) |>
+#   pull(label) |>
+#   paste(collapse = "; ")
 
-after_site_type <- after_compartment |>
-  filter(
-    Objekttype == "point",
-    Vannlokalitetsnavn != config$filters$exclude_sites
-  )
+# exclusion_summary <- exclusion_summary |>
+#   add_row(
+#     Filter = "Outside date range",
+#     Rows_Excluded = nrow(vm_filter_sites) - nrow(vm_filter_dates),
+#     Rows_Remaining = nrow(vm_filter_dates),
+#     Excluded_Values = excluded_dates
+#   )
 
-exclusion_summary <- exclusion_summary |>
-  add_row(
-    Filter = "Not point sites or excluded sites",
-    Rows_Excluded = nrow(after_compartment) - nrow(after_site_type),
-    Rows_Remaining = nrow(after_site_type),
-    Excluded_Values = excluded_sites
-  )
+# # Add total row ----
+# exclusion_summary <- exclusion_summary |>
+#   add_row(
+#     Filter = "<b>Total</b>",
+#     Rows_Excluded = initial_count - nrow(vm_filter_dates),
+#     Rows_Remaining = nrow(vm_filter_dates),
+#     Excluded_Values = ""
+#   ) |>
+#   mutate(
+#     Percent_Excluded = round(100 * Rows_Excluded / initial_count, 1),
+#     Percent_Remaining = round(100 * Rows_Remaining / initial_count, 1)
+#   )
 
-# Step 3: Date range filter
-excluded_dates <- after_site_type |>
-  filter(SAMPLING_DATE < config$filters$date_start) |>
-  group_by(year = year(SAMPLING_DATE)) |>
-  reframe(n = n()) |>
-  mutate(label = glue("{year} (n={n})")) |>
-  pull(label) |>
-  paste(collapse = "; ")
-
-after_date <- after_site_type |>
-  filter(SAMPLING_DATE >= config$filters$date_start)
-
-exclusion_summary <- exclusion_summary |>
-  add_row(
-    Filter = "Outside date range",
-    Rows_Excluded = nrow(after_site_type) - nrow(after_date),
-    Rows_Remaining = nrow(after_date),
-    Excluded_Values = excluded_dates
-  )
-
-# Add total row
-exclusion_summary <- exclusion_summary |>
-  add_row(
-    Filter = "<b>Total</b>",
-    Rows_Excluded = initial_count - nrow(after_date),
-    Rows_Remaining = nrow(after_date),
-    Excluded_Values = ""
-  ) |>
-  mutate(
-    Percent_Excluded = round(100 * Rows_Excluded / initial_count, 1),
-    Percent_Remaining = round(100 * Rows_Remaining / initial_count, 1)
-  )
-
-# Store final filtered data
-vm_filtered <- after_date
-
-# Validation
-vm_filtered_validation <- vm_filtered |>
-  mutate(
-    .compartment_valid = ENVIRON_COMPARTMENT_vkat %in%
-      config$filters$compartment |
-      ENVIRON_COMPARTMENT_medium %in% config$filters$compartment,
-    .sub_compartment_valid = ENVIRON_COMPARTMENT_SUB_vkat %in%
-      config$filters$compartment_sub |
-      ENVIRON_COMPARTMENT_SUB_medium %in% config$filters$compartment_sub
-  ) |>
-  col_vals_equal(
-    columns = c(.compartment_valid, .sub_compartment_valid),
-    value = TRUE,
-    label = "At least one compartment source is within specified filter criteria",
-    actions = validation_config$standard
-  ) |>
-  col_vals_in_set(
-    Objekttype,
-    c("point"),
-    label = "All sites are of type point (not polygon)",
-    actions = validation_config$standard
-  ) |>
-  col_vals_not_in_set(
-    Vannlokalitetsnavn,
-    config$filters$exclude_sites,
-    label = "No sites are in set of excluded sites",
-    actions = validation_config$standard
-  )
+# # Display the summary ----
+# exclusion_summary
 
 message(glue(
-  "vm_merged_lookups ({nrow(vm_merged_lookups)} x {ncol(vm_merged_lookups)}) -> vm_filtered ({nrow(vm_filtered)} x {ncol(vm_filtered)}, {round(100*nrow(vm_filtered)/nrow(vm_merged_lookups), 1)}% of starting data)"
+  "vm_join_sites_measurements_lookup ({nrow(vm_join_sites_measurements_lookup)} x {ncol(vm_join_sites_measurements_lookup)}) -> vm_filter_dates ({nrow(vm_filter_dates)} x {ncol(vm_filter_dates)}, {round(100*nrow(vm_filter_dates)/nrow(vm_join_sites_measurements_lookup), 1)}% of starting data)"
 ))
 
 ```
@@ -1128,36 +1003,36 @@ For completeness, we also report on excluded groups (@tbl-processing-excluded-da
 #| fig-width: 12
 
 # Create filtering summary for visualization
-filter_flow <- exclusion_summary |>
-  filter(Filter != "<b>Total</b>") |>
-  mutate(
-    stage = c("Compartments", "Point sites", "Date range"),
-    pct = Percent_Remaining,
-    label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
-  ) |>
-  add_row(
-    Filter = "Raw",
-    stage = "Raw",
-    Rows_Remaining = initial_count,
-    pct = 100,
-    label = glue("{scales::comma(initial_count)}\n(100%)"),
-    .before = 1
-  )
+# filter_flow <- exclusion_summary |>
+#   filter(Filter != "<b>Total</b>") |>
+#   mutate(
+#     stage = c("Compartments", "Point sites", "Date range"),
+#     pct = Percent_Remaining,
+#     label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
+#   ) |>
+#   add_row(
+#     Filter = "Raw",
+#     stage = "Raw",
+#     Rows_Remaining = initial_count,
+#     pct = 100,
+#     label = glue("{scales::comma(initial_count)}\n(100%)"),
+#     .before = 1
+#   )
 
-ggplot(filter_flow, aes(x = stage, y = Rows_Remaining)) +
-  geom_col(aes(fill = stage)) +
-  geom_text(aes(label = label), vjust = -0.5, size = 3) +
-  scale_fill_brewer(name = "Filtering Stage", palette = "Set1") +
-  scale_x_discrete(limits = filter_flow$stage) +
-  scale_y_continuous(
-    labels = scales::comma,
-    expand = expansion(mult = c(0, 0.1))
-  ) +
-  labs(
-    x = NULL,
-    y = "Number of Records"
-  ) +
-  theme(legend.position = "none")
+# ggplot(filter_flow, aes(x = stage, y = Rows_Remaining)) +
+#   geom_col(aes(fill = stage)) +
+#   geom_text(aes(label = label), vjust = -0.5, size = 3) +
+#   scale_fill_brewer(name = "Filtering Stage", palette = "Set1") +
+#   scale_x_discrete(limits = filter_flow$stage) +
+#   scale_y_continuous(
+#     labels = scales::comma,
+#     expand = expansion(mult = c(0, 0.1))
+#   ) +
+#   labs(
+#     x = NULL,
+#     y = "Number of Records"
+#   ) +
+#   theme(legend.position = "none")
 ```
 
 A Sankey diagram would be better, but @fig-filter-visualisation will do for now. @tbl-processing-excluded-data provides a summary of what was excluded, and why.
@@ -1204,7 +1079,7 @@ Note: It's not necessarily a problem that something turns up as a conflict - we 
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for environmental compartments"
 
 # Check for conflicts between lookup sources
-conflict_check <- vm_filtered |>
+conflict_check <- vm_filter_dates |>
   group_by(
     ENVIRON_COMPARTMENT_vkat,
     ENVIRON_COMPARTMENT_medium,
@@ -1259,134 +1134,15 @@ datatable(
 
 @tbl-compartment-conflicts lists all combinations of compartments and subcompartments, and whether any conflict is detected between the two compartments. I feel a need to be explicit and reproducible about what trumps what where, so see below.
 
--   Subcompartment (Vkat) == Freshwater & Subcompartment (Medium) == Aquatic Sediment -\> Aquatic Sediment
+-   Subcompartment (Vkat) == Freshwater & Subcompartment (Medium) == Aquatic Sediment then Aquatic Sediment
 -   If one column returns biota, we use that (even if it's a fish e.g. living in the sea...)
 -   If only one (sub)compartment value is a wildcard (*), use the other. If both are wildcards, flag the row for exclusion. 
+-   If we know a row is biota (because it has a species name) and we don't have any other information on its sampling site (e.g. a `Vannkategori`), we guess from the species
 
 ```{r}
 #| label: resolve-compartment-conflicts
 
-# TODO: This maybe should be a table, although the logic is a bit complicated and twisty
-resolve_compartment_conflicts <- function(df) {
-  df <- df |>
-    mutate(
-      # SET COMPARTMENT
-      ENVIRON_COMPARTMENT_resolved = case_when(
-        # Explicit rule: Biota trumps all
-        ENVIRON_COMPARTMENT_vkat == "Biota" |
-          ENVIRON_COMPARTMENT_medium == "Biota" ~ "Biota",
-
-        # if ENVIRON_COMPARTMENT_vkat is wildcard then use ENVIRON_COMPARTMENT_medium
-        !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
-          !has_data_issue(ENVIRON_COMPARTMENT_medium) &
-          ENVIRON_COMPARTMENT_vkat == "*" &
-          ENVIRON_COMPARTMENT_medium != "*" ~ ENVIRON_COMPARTMENT_medium,
-
-        # if ENVIRON_COMPARTMENT_medium is wildcard then use ENVIRON_COMPARTMENT_vkat
-        !has_data_issue(ENVIRON_COMPARTMENT_vkat) &
-          !has_data_issue(ENVIRON_COMPARTMENT_medium) &
-          ENVIRON_COMPARTMENT_vkat != "*" &
-          ENVIRON_COMPARTMENT_medium == "*" ~ ENVIRON_COMPARTMENT_vkat,
-
-        # if there's no conflict, use the first value  - unless both are *
-        ENVIRON_COMPARTMENT_vkat == ENVIRON_COMPARTMENT_medium &
-          ENVIRON_COMPARTMENT_medium != "*" ~ ENVIRON_COMPARTMENT_medium,
-
-        # If none of these rules resolve the conflict, flag the row
-        .default = "FLAG: Compartment conflict."
-      ),
-
-      # SET SUBCOMPARTMENT
-      ENVIRON_COMPARTMENT_SUB_resolved = case_when(
-        # Handle Biota compartment first (all biota rules together)
-        ENVIRON_COMPARTMENT_resolved == "Biota" ~ case_when(
-          # Prefer explicit "Biota, Aquatic" from either source
-          ENVIRON_COMPARTMENT_SUB_vkat == "Biota, Aquatic" |
-            ENVIRON_COMPARTMENT_SUB_medium ==
-              "Biota, Aquatic" ~ "Biota, Aquatic",
-
-          # Use biota-specific lookup if available
-          !is.na(ENVIRON_COMPARTMENT_SUB_biota) &
-            ENVIRON_COMPARTMENT_SUB_biota !=
-              "*" ~ ENVIRON_COMPARTMENT_SUB_biota,
-
-          .default = "FLAG: Compartment conflict."
-        ),
-
-        # Non-biota compartments: simpler logic
-        # Sediment trumps water
-        ENVIRON_COMPARTMENT_SUB_medium ==
-          "Aquatic Sediment" ~ "Aquatic Sediment",
-
-        # Wildcard handling
-        ENVIRON_COMPARTMENT_SUB_vkat == "*" &
-          ENVIRON_COMPARTMENT_SUB_medium !=
-            "*" ~ ENVIRON_COMPARTMENT_SUB_medium,
-        ENVIRON_COMPARTMENT_SUB_medium == "*" &
-          ENVIRON_COMPARTMENT_SUB_vkat != "*" ~ ENVIRON_COMPARTMENT_SUB_vkat,
-
-        # No conflict
-        ENVIRON_COMPARTMENT_SUB_vkat == ENVIRON_COMPARTMENT_SUB_medium &
-          ENVIRON_COMPARTMENT_SUB_medium != "*" ~ ENVIRON_COMPARTMENT_SUB_vkat,
-
-        .default = "FLAG: Compartment conflict."
-      )
-    )
-
-  # Count potential conflicts (where both sources differ and neither is NA)
-  # Why is this generating negative results?
-  n_potential_compartment <- df |>
-    filter(
-      !has_data_issue(ENVIRON_COMPARTMENT_vkat),
-      !has_data_issue(ENVIRON_COMPARTMENT_medium),
-      ENVIRON_COMPARTMENT_vkat != ENVIRON_COMPARTMENT_medium
-    ) |>
-    nrow()
-
-  n_potential_sub <- df |>
-    filter(
-      !has_data_issue(ENVIRON_COMPARTMENT_SUB_vkat),
-      !has_data_issue(ENVIRON_COMPARTMENT_SUB_medium),
-      ENVIRON_COMPARTMENT_SUB_vkat != ENVIRON_COMPARTMENT_SUB_medium
-    ) |>
-    nrow()
-
-  # Count resolved
-  n_resolved <- df |>
-    tally(ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.") -
-    n_potential_compartment
-  n_resolved_sub <- df |>
-    tally(ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict.") -
-    n_potential_sub
-
-  # Count unresolved
-  n_unresolved <- df |>
-    tally(ENVIRON_COMPARTMENT_resolved == "FLAG: Compartment conflict.")
-  n_unresolved_sub <- df |>
-    tally(ENVIRON_COMPARTMENT_SUB_resolved == "FLAG: Compartment conflict.")
-
-  # todo: this is a little confusing, because n_resolved currently includes all the problem-free rows too
-  message(glue(
-    "Compartments: {n_resolved} resolved, {n_unresolved} flagged for removal (of {n_potential_compartment} conflicts)"
-  ))
-  message(glue(
-    "Subcompartments: {n_resolved_sub} resolved, {n_unresolved_sub} flagged for removal (of {n_potential_sub} conflicts)"
-  ))
-
-  if (n_unresolved + n_unresolved_sub > 0) {
-    warning(
-      "Some (sub)compartments still aren't resolved and have been flagged for removal."
-    )
-  }
-
-  df
-}
-
-vm_compartment_conflicts_resolved <- resolve_compartment_conflicts(
-  vm_filtered
-)
-
-test <- vm_filtered |>
+test <- vm_filter_dates |>
   filter(
     ENVIRON_COMPARTMENT_medium == "Biota",
     !str_detect(
@@ -1417,11 +1173,6 @@ In some cases we're unable to resolve conflicts with recourse to the simple rule
 
 ```{r}
 #| label: remove-compartment-conflicts
-vm_compartment_conflicts_resolved_removed <- vm_compartment_conflicts_resolved |>
-  filter(
-    ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
-    ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
-  )
 
 vm_compartment_conflicts_resolved_removed |>
   # inspect data
@@ -1460,7 +1211,7 @@ vm_compartment_conflicts_resolved_removed |>
 #   reframe(n = n())
 
 message(glue(
-  "vm_filtered ({nrow(vm_filtered)} x {ncol(vm_filtered)}) -> vm_compartment_conflicts_resolved_removed ({nrow(vm_compartment_conflicts_resolved_removed)} x {ncol(vm_compartment_conflicts_resolved_removed)})"
+  "vm_filter_dates ({nrow(vm_filter_dates)} x {ncol(vm_filter_dates)}) -> vm_compartment_conflicts_resolved_removed ({nrow(vm_compartment_conflicts_resolved_removed)} x {ncol(vm_compartment_conflicts_resolved_removed)})"
 ))
 
 ```
@@ -1597,105 +1348,12 @@ If the table above is empty (I don't update this text every time I update the pi
 
 My experience has been that `SITE_GEOGRAPHIC_FEATURE_SUB` is a lot harder to get information on, both in this conversion but also in papers. As it's less important, I've elected to just mark it as "Not reported" if it's not easy to solve with simple rules. This is unlikely to affect the eventual analysis.
 
+Unlike environmental compartments we don't apply any special logic here. We just pick whatever's not a wildcard, and if both disagree, we drop the row.
+
+
 ```{r}
 #| label: resolve-feature-conflicts
 
-resolve_geographic_conflicts <- function(df) {
-  df <- df |>
-    mutate(
-      # SET GEOGRAPHIC FEATURE
-      SITE_GEOGRAPHIC_FEATURE_resolved = case_when(
-        # if SITE_GEOGRAPHIC_FEATURE_vkat is wildcard then use SITE_GEOGRAPHIC_FEATURE_medium
-        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
-          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium) &
-          SITE_GEOGRAPHIC_FEATURE_vkat == "*" &
-          SITE_GEOGRAPHIC_FEATURE_medium !=
-            "*" ~ SITE_GEOGRAPHIC_FEATURE_medium,
-
-        # if SITE_GEOGRAPHIC_FEATURE_medium is wildcard then use SITE_GEOGRAPHIC_FEATURE_vkat
-        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat) &
-          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium) &
-          SITE_GEOGRAPHIC_FEATURE_vkat != "*" &
-          SITE_GEOGRAPHIC_FEATURE_medium == "*" ~ SITE_GEOGRAPHIC_FEATURE_vkat,
-
-        # if there's no conflict (unless both are *), use the first value
-        SITE_GEOGRAPHIC_FEATURE_vkat == SITE_GEOGRAPHIC_FEATURE_medium &
-          SITE_GEOGRAPHIC_FEATURE_medium !=
-            "*" ~ SITE_GEOGRAPHIC_FEATURE_medium,
-
-        # If none of these rules resolve the conflict, flag the row
-        .default = "FLAG: Geographic conflict."
-      ),
-
-      # SET GEOGRAPHIC FEATURE SUB
-      SITE_GEOGRAPHIC_FEATURE_SUB_resolved = case_when(
-        # if SITE_GEOGRAPHIC_FEATURE_SUB_vkat is wildcard then use SITE_GEOGRAPHIC_FEATURE_SUB_medium
-        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat) &
-          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
-          SITE_GEOGRAPHIC_FEATURE_SUB_vkat == "*" &
-          SITE_GEOGRAPHIC_FEATURE_SUB_medium !=
-            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_medium,
-
-        # if SITE_GEOGRAPHIC_FEATURE_SUB_medium is wildcard then use SITE_GEOGRAPHIC_FEATURE_SUB_vkat
-        !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat) &
-          !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium) &
-          SITE_GEOGRAPHIC_FEATURE_SUB_vkat != "*" &
-          SITE_GEOGRAPHIC_FEATURE_SUB_medium ==
-            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
-
-        # if there's no conflict (unless both are *), use the first value
-        SITE_GEOGRAPHIC_FEATURE_SUB_vkat == SITE_GEOGRAPHIC_FEATURE_SUB_medium &
-          SITE_GEOGRAPHIC_FEATURE_SUB_medium !=
-            "*" ~ SITE_GEOGRAPHIC_FEATURE_SUB_vkat,
-
-        # Sub-features are less important and not that frequently reported anyway.
-        .default = "Not reported"
-      )
-    )
-
-  # Count potential conflicts
-  n_potential_feature <- df |>
-    filter(
-      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_vkat),
-      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_medium),
-      SITE_GEOGRAPHIC_FEATURE_vkat != SITE_GEOGRAPHIC_FEATURE_medium
-    ) |>
-    nrow()
-
-  n_potential_sub <- df |>
-    filter(
-      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_vkat),
-      !has_data_issue(SITE_GEOGRAPHIC_FEATURE_SUB_medium),
-      SITE_GEOGRAPHIC_FEATURE_SUB_vkat != SITE_GEOGRAPHIC_FEATURE_SUB_medium
-    ) |>
-    nrow()
-
-  # Count unresolved
-  n_unresolved <- df |>
-    tally(SITE_GEOGRAPHIC_FEATURE_resolved == "FLAG: Geographic conflict.")
-  n_unresolved_sub <- df |>
-    tally(SITE_GEOGRAPHIC_FEATURE_SUB_resolved == "FLAG: Geographic conflict.")
-
-  message(glue(
-    "Geographic features: {n_potential_feature - n_unresolved} resolved, {n_unresolved} unresolved (of {n_potential_feature} conflicts)"
-  ))
-  message(glue(
-    "Geographic sub-features: {n_potential_sub - n_unresolved_sub} resolved, {n_unresolved_sub} unresolved (of {n_potential_sub} conflicts)"
-  ))
-
-  if (n_unresolved + n_unresolved_sub > 0) {
-    warning("Some geographic features still aren't resolved.")
-  }
-
-  df
-}
-
-
-# Attempt to resolve geographic conflicts, flag cases where this isn't possible
-vm_compartment_geo_conflicts_resolved <- resolve_geographic_conflicts(
-  vm_compartment_conflicts_resolved_removed
-)
-
 vm_compartment_geo_conflicts_resolved |>
   group_by(
     SITE_GEOGRAPHIC_FEATURE_resolved,
@@ -1704,17 +1362,6 @@ vm_compartment_geo_conflicts_resolved |>
   reframe(n = n()) |>
   arrange(desc(n))
 
-# what's going on with biota?
-vm_compartment_geo_conflicts_resolved |>
-  filter(ENVIRON_COMPARTMENT_resolved == "Biota") |>
-  group_by(
-    SITE_GEOGRAPHIC_FEATURE_resolved,
-    SITE_GEOGRAPHIC_FEATURE_SUB_resolved
-  ) |>
-  reframe(n = n()) |>
-  arrange(desc(n))
-# All biota apparently have a conflict...
-# # Not anymore!
 
 vm_compartment_geo_conflicts_resolved |>
   filter(ENVIRON_COMPARTMENT_resolved == "Biota") |>
@@ -1729,12 +1376,6 @@ vm_compartment_geo_conflicts_resolved |>
   reframe(n = n()) |>
   arrange(desc(n))
 
-# then filter out flagged cases
-vm_compartment_geo_conflicts_resolved_removed <- vm_compartment_geo_conflicts_resolved |>
-  filter(
-    SITE_GEOGRAPHIC_FEATURE_resolved != "FLAG: Geographic conflict.",
-    SITE_GEOGRAPHIC_FEATURE_SUB_resolved != "FLAG: Geographic conflict."
-  )
 
 message(glue(
   "Removed {nrow(vm_geo_conflicts_flagged) - nrow(vm_compartment_geo_conflicts_resolved_removed)} rows with unresolved geographic conflicts"
@@ -1772,35 +1413,9 @@ Unfortunately this is quite slow.
 #| label: split-sites
 
 # split sites where different types of samples have been taken
-vm_compartment_sites_split <- vm_compartment_geo_conflicts_resolved_removed |>
-  group_by(Vannlok_kode) |>
-  mutate(
-    n_geo_combos = n_distinct(paste(
-      SITE_GEOGRAPHIC_FEATURE_resolved,
-      SITE_GEOGRAPHIC_FEATURE_SUB_resolved
-    )),
-    geo_combo = paste(
-      SITE_GEOGRAPHIC_FEATURE_resolved,
-      SITE_GEOGRAPHIC_FEATURE_SUB_resolved
-    ),
-    geo_suffix = if_else(
-      n_geo_combos > 1,
-      match(geo_combo, unique(geo_combo)),
-      NA_integer_
-    ),
-    Vannlok_kode_split = case_when(
-      !is.na(geo_suffix) ~ paste0(
-        Vannlok_kode,
-        "-",
-        sprintf("%02d", geo_suffix)
-      ),
-      TRUE ~ Vannlok_kode
-    )
-  ) |>
-  ungroup()
 
 # Report on splitting
-split_summary <- vm_compartment_sites_split |>
+split_summary <- vm_sites_split |>
   distinct(Vannlok_kode, n_geo_combos) |>
   count(n_geo_combos, name = "n_sites") |>
   mutate(
@@ -1808,8 +1423,8 @@ split_summary <- vm_compartment_sites_split |>
     Status = if_else(n_geo_combos == 1, "Unsplit", "Split")
   )
 
-n_original_sites <- n_distinct(vm_compartment_sites_split$Vannlok_kode)
-n_split_sites <- n_distinct(vm_compartment_sites_split$Vannlok_kode_split)
+n_original_sites <- n_distinct(vm_sites_split$Vannlok_kode)
+n_split_sites <- n_distinct(vm_sites_split$Vannlok_kode_split)
 n_affected <- split_summary |>
   filter(n_geo_combos > 1) |>
   pull(n_sites) |>
@@ -1822,15 +1437,12 @@ message(glue(
   "  Final unique site codes: {n_split_sites}"
 ))
 
-# Clean up temporary columns
-vm_compartment_sites_split <- vm_compartment_sites_split |>
-  select(-n_geo_combos, -geo_combo, -geo_suffix)
 
 message(glue(
-  "vm_compartment_geo_conflicts_resolved_removed ({nrow(vm_compartment_geo_conflicts_resolved_removed)} x {ncol(vm_compartment_geo_conflicts_resolved_removed)}) -> vm_compartment_sites_split ({nrow(vm_compartment_sites_split)} x {ncol(vm_compartment_sites_split)})"
+  "vm_compartment_geo_conflicts_resolved_removed ({nrow(vm_compartment_geo_conflicts_resolved_removed)} x {ncol(vm_compartment_geo_conflicts_resolved_removed)}) -> vm_sites_split ({nrow(vm_sites_split)} x {ncol(vm_sites_split)})"
 ))
 
-vm_compartment_sites_split |>
+vm_sites_split |>
   # then check that most of what was there before is still there
   group_by(
     ENVIRON_COMPARTMENT_resolved,
@@ -1838,9 +1450,9 @@ vm_compartment_sites_split |>
     SITE_GEOGRAPHIC_FEATURE_resolved,
     SITE_GEOGRAPHIC_FEATURE_SUB_resolved
   ) |>
-  reframe(Rows = n(), Mean = mean(Verdi)) |>
-  # does it have biota in it? it should.
-  col_vals_make_set(ENVIRON_COMPARTMENT_resolved, c("Biota", "Aquatic"))
+  reframe(Rows = n(), Mean = mean(Verdi))
+# does it have biota in it? it should.
+# col_vals_make_set(ENVIRON_COMPARTMENT_resolved, c("Biota", "Aquatic"))
 
 ```
 
@@ -1851,82 +1463,82 @@ Let's update the not-Sankey now that we've removed some more rows (@fig-conflict
 #| fig-cap: Vannmiljø copper sample size at different steps of filtration and conflict removal.
 #| fig-width: 12
 
-# Create filtering summary
-conflict_flow <- filter_flow |>
-  add_row(
-    Filter = "Compartment Conflicts Removed",
-    Rows_Remaining = nrow(vm_compartment_conflicts_resolved),
-    pct = round(100 * Rows_Remaining / first(filter_flow$Rows_Remaining), 1),
-    label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
-  ) |>
-  add_row(
-    Filter = "Geographic Conflicts Removed",
-    Rows_Remaining = nrow(vm_compartment_sites_split),
-    pct = round(100 * Rows_Remaining / first(filter_flow$Rows_Remaining), 1),
-    label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
-  )
+# # Create filtering summary
+# conflict_flow <- filter_flow |>
+#   add_row(
+#     Filter = "Compartment Conflicts Removed",
+#     Rows_Remaining = nrow(vm_compartment_conflicts_resolved),
+#     pct = round(100 * Rows_Remaining / first(filter_flow$Rows_Remaining), 1),
+#     label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
+#   ) |>
+#   add_row(
+#     Filter = "Geographic Conflicts Removed",
+#     Rows_Remaining = nrow(vm_compartment_sites_split),
+#     pct = round(100 * Rows_Remaining / first(filter_flow$Rows_Remaining), 1),
+#     label = glue("{scales::comma(Rows_Remaining)}\n({pct}%)")
+#   )
 
-# Simple bar plot
-ggplot(
-  conflict_flow,
-  aes(x = Filter |> str_wrap(width = 20), y = Rows_Remaining)
-) +
-  geom_col(aes(fill = Filter)) +
-  geom_text(aes(label = label), vjust = -0.5, size = 3) +
-  scale_fill_brewer(palette = "Set1") +
-  scale_x_discrete(limits = conflict_flow$Filter |> str_wrap(width = 20)) +
-  scale_y_continuous(
-    labels = scales::comma,
-    expand = expansion(mult = c(0, 0.1))
-  ) +
-  labs(
-    x = NULL,
-    y = "Number of Records"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none")
+# # Simple bar plot
+# ggplot(
+#   conflict_flow,
+#   aes(x = Filter |> str_wrap(width = 20), y = Rows_Remaining)
+# ) +
+#   geom_col(aes(fill = Filter)) +
+#   geom_text(aes(label = label), vjust = -0.5, size = 3) +
+#   scale_fill_brewer(palette = "Set1") +
+#   scale_x_discrete(limits = conflict_flow$Filter |> str_wrap(width = 20)) +
+#   scale_y_continuous(
+#     labels = scales::comma,
+#     expand = expansion(mult = c(0, 0.1))
+#   ) +
+#   labs(
+#     x = NULL,
+#     y = "Number of Records"
+#   ) +
+#   theme_minimal() +
+#   theme(legend.position = "none")
 ```
 
 Finally, we need to run `pointblank` validation on our resolved/removed geographical feature data.
 
 ```{r}
 #| label: conflict-resolution-pointblank
-# first of all, does our table have data in it?
-if (nrow(vm_compartment_sites_split) * ncol(vm_compartment_sites_split) != 0) {
-  vm_compartment_sites_split |>
-    # is there a real dataset here?
-    # check that controlled vocab is respected
-    col_vals_in_set(
-      ENVIRON_COMPARTMENT_resolved,
-      eDataDRF::environ_compartments_vocabulary(),
-      label = "All ENVIRON_COMPARTMENT_resolved are in eDataDRF::environ_compartments_vocabulary()",
-      actions = validation_config$standard
-    ) |>
-    col_vals_in_set(
-      ENVIRON_COMPARTMENT_SUB_resolved,
-      purrr::flatten(eDataDRF::environ_compartments_sub_vocabulary()),
-      label = "All ENVIRON_COMPARTMENT_SUB_resolved are in eDataDRF::environ_compartments_sub_vocabulary()",
-      actions = validation_config$standard
-    ) |>
-    col_vals_in_set(
-      SITE_GEOGRAPHIC_FEATURE_resolved,
-      eDataDRF::geographic_features_vocabulary(),
-      label = "All SITE_GEOGRAPHIC_FEATURE_resolved are in eDataDRF::geographic_features_vocabulary()",
-      actions = validation_config$standard
-    ) |>
-    col_vals_in_set(
-      SITE_GEOGRAPHIC_FEATURE_SUB_resolved,
-      eDataDRF::geographic_features_sub_vocabulary(),
-      label = "All SITE_GEOGRAPHIC_FEATURE_SUB_resolved are in eDataDRF::geographic_features_sub_vocabulary()",
-      actions = validation_config$standard
-    ) |>
-    # then check that most of what was there before is still there
-    # e.g. in a prior version we accidentally filtered out all biota compartments
-    group_by(ENVIRON_COMPARTMENT_resolved, ENVIRON_COMPARTMENT_SUB_resolved) |>
-    reframe(n())
-} else {
-  stop("Error: vm_compartment_sites_split does not contain data.")
-}
+# # first of all, does our table have data in it?
+# if (nrow(vm_sites_split_clean) * ncol(vm_sites_split_clean) != 0) {
+#   vm_sites_split_clean |>
+#     # is there a real dataset here?
+#     # check that controlled vocab is respected
+#     col_vals_in_set(
+#       ENVIRON_COMPARTMENT_resolved,
+#       eDataDRF::environ_compartments_vocabulary(),
+#       label = "All ENVIRON_COMPARTMENT_resolved are in eDataDRF::environ_compartments_vocabulary()",
+#       actions = validation_config$standard
+#     ) |>
+#     col_vals_in_set(
+#       ENVIRON_COMPARTMENT_SUB_resolved,
+#       purrr::flatten(eDataDRF::environ_compartments_sub_vocabulary()),
+#       label = "All ENVIRON_COMPARTMENT_SUB_resolved are in eDataDRF::environ_compartments_sub_vocabulary()",
+#       actions = validation_config$standard
+#     ) |>
+#     col_vals_in_set(
+#       SITE_GEOGRAPHIC_FEATURE_resolved,
+#       eDataDRF::geographic_features_vocabulary(),
+#       label = "All SITE_GEOGRAPHIC_FEATURE_resolved are in eDataDRF::geographic_features_vocabulary()",
+#       actions = validation_config$standard
+#     ) |>
+#     col_vals_in_set(
+#       SITE_GEOGRAPHIC_FEATURE_SUB_resolved,
+#       eDataDRF::geographic_features_sub_vocabulary(),
+#       label = "All SITE_GEOGRAPHIC_FEATURE_SUB_resolved are in eDataDRF::geographic_features_sub_vocabulary()",
+#       actions = validation_config$standard
+#     ) |>
+#     # then check that most of what was there before is still there
+#     # e.g. in a prior version we accidentally filtered out all biota compartments
+#     group_by(ENVIRON_COMPARTMENT_resolved, ENVIRON_COMPARTMENT_SUB_resolved) |>
+#     reframe(n())
+# } else {
+#   stop("Error: vm_sites_split_clean does not contain data.")
+# }
 
 ```
 
@@ -1937,22 +1549,6 @@ if (nrow(vm_compartment_sites_split) * ncol(vm_compartment_sites_split) != 0) {
 ```{r}
 #| label: edata-generate_campaign_table
 
-edata_campaign <- initialise_campaign_tibble() |>
-  add_row(
-    CAMPAIGN_NAME_SHORT = config$metadata$campaign_short,
-    CAMPAIGN_NAME = config$metadata$campaign_name,
-    CAMPAIGN_START_DATE = config$filters$date_start,
-    CAMPAIGN_END_DATE = config$filters$date_end,
-    RELIABILITY_SCORE = NA_character_,
-    RELIABILITY_EVAL_SYS = NA_character_,
-    CONFIDENTIALITY_EXPIRY_DATE = as.Date(NA),
-    ORGANISATION = config$metadata$organisation,
-    ENTERED_BY = config$metadata$entered_by,
-    ENTERED_DATE = as.Date(Sys.Date()),
-    CAMPAIGN_COMMENT = "Copper and copper pyrithione measurements from Vannmiljø database covering all Norwegian municipalities and media types"
-  )
-
-message("Created campaign table")
 ```
 
 ## Reference
@@ -1960,55 +1556,17 @@ message("Created campaign table")
 ```{r}
 #| label: edata-reference
 
-edata_reference <- initialise_references_tibble() |>
-  add_row(
-    REFERENCE_ID = config$metadata$reference_id,
-    REFERENCE_TYPE = "Database",
-    DATA_SOURCE = "Vannmiljø",
-    AUTHOR = config$metadata$organisation,
-    TITLE = "Vannmiljø Database - Copper and Copper Pyrithione Data",
-    YEAR = 2025L,
-    ACCESS_DATE = config$filters$date_end,
-    PERIODICAL_JOURNAL = NA_character_,
-    VOLUME = NA_integer_,
-    ISSUE = NA_integer_,
-    PUBLISHER = NA_character_,
-    INSTITUTION = config$metadata$organisation,
-    DOI = NA_character_,
-    URL = "https://www.vannmiljo.no/",
-    ISBN_ISSN = NA_character_,
-    EDITION = NA_character_,
-    DOCUMENT_NUMBER = NA_character_,
-    REF_COMMENT = glue(
-      "Downloaded {config$filters$date_end}, data for {config$filters$date_start} to {config$filters$date_end}, ",
-      "all kommune, all media, all campaigns. Search for Kobber & Kobberpyrition. 138615 hits."
-    )
-  )
-
-message("Created reference table")
 ```
 
 ## Parameters
 
+Note: Only setup for copper copper, should probably be extended in case we accidentally include some copper pyrithrione (which is apparently in Vannmiljø) some time
+
 ```{r}
 #| label: edata-parameters
 
-# No copper pyrithione reported for 2025, only copper
-edata_parameters <- initialise_parameters_tibble() |>
-  add_row(
-    PARAMETER_TYPE = NA_character_,
-    PARAMETER_TYPE_SUB = NA_character_,
-    MEASURED_TYPE = NA_character_,
-    PARAMETER_NAME = "Copper",
-    PARAMETER_NAME_SUB = NA_character_,
-    INCHIKEY_SD = NA_character_,
-    PUBCHEM_CID = NA_integer_,
-    CAS_RN = NA_character_,
-    ENTERED_BY = glue("{config$metadata$entered_by} from Vannmiljø"),
-    PARAMETER_COMMENT = NA_character_
-  )
+# TODO: See above
 
-message("Created parameters table")
 ```
 
 ## Sites
@@ -2016,160 +1574,11 @@ message("Created parameters table")
 ```{r}
 #| label: edata-sites-extraction
 
-# Extract unique sites with relevant metadata
-vm_sites_unique <- vm_compartment_sites_split |>
-  select(
-    Vannlok_kode_split,
-    Vannlokalitetsnavn,
-    Beskrivelse,
-    `UTM33 Ost (X)`,
-    `UTM33 Nord (Y)`,
-    `Knytt til påvirkning`,
-    SITE_GEOGRAPHIC_FEATURE_resolved,
-    SITE_GEOGRAPHIC_FEATURE_SUB_resolved
-  ) |>
-  distinct() |>
-  # Clean up emission source
-  mutate(
-    Emission_Source = case_when(
-      `Knytt til påvirkning` %in% c("Industri", "INDUSTRI") ~ "Industrial",
-      `Knytt til påvirkning` %in% c("Akvakultur", "AKVAKULTUR") ~ "Aquaculture",
-      TRUE ~ NA_character_
-    )
-  )
-
-message(glue("Extracted {nrow(vm_sites_unique)} unique sites"))
-
-# Format to eData structure
-edata_sites_temp <- vm_sites_unique |>
-  mutate(
-    SITE_CODE = glue("Vannmiljø_{Vannlok_kode_split}"),
-    SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
-    SITE_GEOGRAPHIC_FEATURE = SITE_GEOGRAPHIC_FEATURE_resolved,
-    SITE_GEOGRAPHIC_FEATURE_SUB = SITE_GEOGRAPHIC_FEATURE_SUB_resolved,
-    COUNTRY_ISO = "Norway",
-    OCEAN_IHO = "Not relevant",
-    ENTERED_BY = glue("{config$metadata$entered_by} (Vm Conversion)"),
-    ENTERED_DATE = as.character(today()),
-    ALTITUDE_VALUE = 0, # Altitude not relevant for water monitoring
-    ALTITUDE_UNIT = "m",
-    # Combine description and emission source where available
-    SITE_COMMENT = case_when(
-      !is.na(Beskrivelse) &
-        Beskrivelse != "" &
-        !is.na(Emission_Source) &
-        Emission_Source != "" ~
-        glue(
-          "Vm Original Comment: {Beskrivelse}. Vm Emission Source: {Emission_Source}"
-        ),
-      !is.na(Beskrivelse) & Beskrivelse != "" ~
-        glue("Vm Original Comment: {Beskrivelse}"),
-      !is.na(Emission_Source) & Emission_Source != "" ~
-        glue("Vm Emission Source: {Emission_Source}"),
-      .default = NA_character_
-    )
-  )
-
-# Reproject coordinates from UTM33 to WGS84
-tryCatch(
-  {
-    sites_sf <- edata_sites_temp |>
-      st_as_sf(coords = c("UTM33 Ost (X)", "UTM33 Nord (Y)"), crs = 25833) |>
-      st_transform(4326) |>
-      mutate(
-        LATITUDE = st_coordinates(geometry)[, 2],
-        LONGITUDE = st_coordinates(geometry)[, 1],
-        SITE_COORDINATE_SYSTEM = "WGS84"
-      )
-
-    sites_coords <- sites_sf |>
-      st_coordinates() |>
-      as.data.frame() |>
-      bind_cols(st_drop_geometry(sites_sf))
-
-    message(glue(
-      "Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84"
-    ))
-  },
-  error = function(e) {
-    stop(glue(
-      "Failed to reproject coordinates from UTM33 to WGS84: {e$message}"
-    ))
-  }
-)
-
 ```
 
 ```{r}
 #| label: edata-create-sites-table
 
-# Finalise sites table
-tryCatch(
-  {
-    # Check for duplicates before joining
-    sites_for_join <- sites_sf |>
-      st_drop_geometry() |>
-      select(SITE_CODE, LATITUDE, LONGITUDE, SITE_COORDINATE_SYSTEM) |>
-      distinct()
-
-    duplicate_sites <- sites_for_join |>
-      group_by(SITE_CODE) |>
-      filter(n() > 1) |>
-      arrange(SITE_CODE)
-
-    if (nrow(duplicate_sites) > 0) {
-      warning(glue(
-        "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. ",
-        "Displaying first 10 conflicts:"
-      ))
-      print(head(duplicate_sites, 10))
-    }
-
-    edata_sites <- edata_sites_temp |>
-      left_join(
-        sites_for_join,
-        by = "SITE_CODE",
-        relationship = "many-to-many" # Temporarily allow to see what happens
-      ) |>
-      select(
-        SITE_CODE,
-        SITE_NAME,
-        SITE_GEOGRAPHIC_FEATURE,
-        SITE_GEOGRAPHIC_FEATURE_SUB,
-        LATITUDE,
-        LONGITUDE,
-        SITE_COORDINATE_SYSTEM,
-        COUNTRY_ISO,
-        OCEAN_IHO,
-        ENTERED_BY,
-        ENTERED_DATE,
-        SITE_COMMENT
-      )
-
-    # Check result for duplicates
-    result_duplicates <- edata_sites |>
-      distinct() |>
-      group_by(SITE_CODE) |>
-      filter(n() > 1)
-
-    if (nrow(result_duplicates) > 0) {
-      stop(glue(
-        "Many-to-many join created {nrow(result_duplicates)} duplicate rows. ",
-        "Check vm_sites_unique for duplicate coordinates per site."
-      ))
-    }
-  },
-  warning = function(w) {
-    stop(glue(
-      "Unexpected many-to-many relationship when joining sites table:\n{w}"
-    ))
-  }
-)
-
-# Validate against eData schema
-edata_sites <- initialise_sites_tibble() |> add_row(edata_sites)
-
-message(glue("Created sites table: {nrow(edata_sites)} sites"))
 ```
 
 Visually inspecting transformed site distribution (@fig-sites-sanity-map) allows us to check that a) sites are roughly where they should be and b) the correct CRS transformation was used.
@@ -2191,8 +1600,8 @@ ggplot() +
     colour = "white"
   ) +
   geom_hex(
-    data = sites_coords,
-    aes(x = X, y = Y),
+    data = vm_edata_sites,
+    aes(x = LONGITUDE, y = LATITUDE),
     bins = 50
   ) +
   scale_fill_viridis_c() +
@@ -2223,91 +1632,6 @@ In the eData workflow, we generate a samples table by combining sites, parameter
 ```{r}
 #| label: edata-samples
 
-# this function is copied from STOPeData::mod_samples_fct.R
-# I guess we forgot to export it. Good candidate to be moved to eDataDRF.
-# TODO: It's also quite slow, so we could probably make it better.
-#' Generate Sample ID with Components ----
-#' @param site_code Site code (vectorized)
-#' @param parameter_name Parameter name (vectorized)
-#' @param environ_compartment Environmental compartment (vectorized)
-#' @param environ_compartment_sub Environmental sub-compartment (vectorized)
-#' @param date Sampling date (vectorized)
-#' @param subsample subsample
-#' @importFrom stringr str_to_title str_remove_all
-#' @import eDataDRF
-#' @noRd
-generate_sample_id_with_components <- function(
-  site_code,
-  parameter_name,
-  environ_compartment,
-  environ_compartment_sub,
-  date,
-  subsample = 1
-) {
-  # Create abbreviated versions for ID (vectorized)
-  param_abbrev <- substr(gsub("[^A-Za-z0-9]", "", parameter_name), 1, 8)
-  comp_abbrev <- substr(
-    gsub("[^A-Za-z0-9]", "", environ_compartment_sub),
-    1,
-    12
-  )
-  date_abbrev <- gsub("-", "-", date)
-
-  base_id <- glue("{site_code}-{param_abbrev}-{comp_abbrev}-{date_abbrev}")
-
-  # Vectorized replicate
-  # Subsamples will generally be text, so let's abbreviate them a bit
-
-  # this is modified from the eDataDRF version and hopefully faster
-  subsample_suffix <- stringr::str_trunc(subsample, 20, "right", ellipsis = "")
-  paste0(base_id, "-R-", subsample_suffix)
-}
-
-
-# Create samples table
-
-edata_samples_wide <- vm_compartment_sites_split |>
-  filter(
-    ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
-    ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
-  ) |>
-  mutate(
-    # Core identifiers
-    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
-    SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"),
-    PARAMETER_NAME = "Copper",
-    PARAMETER_TYPE = "Not reported",
-
-    # Compartment information
-    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_resolved,
-    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
-    MEASURED_CATEGORY = NA_character_,
-
-    SAMPLING_DATE = as.character(SAMPLING_DATE),
-
-    # Sample information
-    SUBSAMPLE = "NA",
-    SAMPLE_ID = generate_sample_id_with_components(
-      SITE_CODE,
-      PARAMETER_NAME,
-      ENVIRON_COMPARTMENT,
-      ENVIRON_COMPARTMENT_SUB,
-      SAMPLING_DATE,
-      SUBSAMPLE
-    )
-  )
-
-# Validate against eData schema
-edata_samples <- initialise_samples_tibble() |>
-  add_row(
-    edata_samples_wide |>
-      select(any_of(names(initialise_samples_tibble())))
-  )
-
-
-message(glue(
-  "Created samples table: {nrow(edata_samples)} samples"
-))
 ```
 
 ## Biota
@@ -2326,86 +1650,6 @@ That's it.
 ```{r}
 #| label: tbl-raw-biota
 
-# Create biota table
-
-edata_biota <- vm_compartment_sites_split |>
-  filter(ENVIRON_COMPARTMENT_resolved == "Biota")
-
-edata_species <- unique(edata_biota$VitenskapligNavn) |> length()
-message(glue(
-  "{nrow(edata_biota)} biota samples found ({edata_species} unique species)"
-))
-
-biota_frequency <- count(
-  edata_biota,
-  VitenskapligNavn,
-  ENVIRON_COMPARTMENT_SUB_resolved
-) |>
-  arrange(desc(n)) |>
-  mutate(
-    SAMPLE_SPECIES = case_when(
-      VitenskapligNavn == "Laksesmolt" ~ "Salmo salar",
-      TRUE ~ VitenskapligNavn
-    ),
-    SAMPLE_SPECIES_LIFESTAGE = case_when(
-      VitenskapligNavn == "Laksesmolt" ~ "Juvenile",
-      TRUE ~ "Not reported"
-    )
-  )
-
-# Report data quality issues
-n_missing_species_group <- biota_frequency |>
-  filter(is.na(SAMPLE_SPECIES)) |>
-  pull(n) |>
-  sum()
-
-n_missing_sub_compartment <- biota_frequency |>
-  filter(ENVIRON_COMPARTMENT_SUB_resolved == "*") |>
-  pull(n) |>
-  sum()
-
-
-message(glue(
-  "Biota data quality:,
-  - {n_missing_species_group} samples with missing species group,
-  - {n_missing_sub_compartment} samples with missing subcompartment"
-))
-
-
-datatable(biota_frequency)
-
-# there's certainly a more elegant way to do this than twice
-edata_biota_merged <- edata_biota |>
-  mutate(
-    SAMPLE_SPECIES = case_when(
-      VitenskapligNavn == "Laksesmolt" ~ "Salmo salar",
-      TRUE ~ VitenskapligNavn
-    ),
-    SAMPLE_SPECIES_LIFESTAGE = case_when(
-      VitenskapligNavn == "Laksesmolt" ~ "Juvenile",
-      TRUE ~ "Not reported"
-    ),
-    # Let's guess compartment from species
-    # all the species not sampled from something with a Vannkategori are terrestrial, so this isn't complicated for the
-    # current dataset
-    ENVIRON_COMPARTMENT_SUB_resolved = case_when(
-      ENVIRON_COMPARTMENT_SUB_resolved !=
-        "*" ~ ENVIRON_COMPARTMENT_SUB_resolved,
-      SAMPLE_SPECIES %in%
-        c(
-          "Capreolus capreolus",
-          "Felis catus",
-          "Hylocomium splendens",
-          "Larus argentatus",
-          "Lichen",
-          "Phoca vitulina",
-          "Rattus norvegicus",
-          "Somateria mollissima",
-          "Turdus pilaris",
-          "Vulpes vulpes"
-        ) ~ "Biota, terrestrial",
-    )
-  )
 ```
 
 We also need to convert tissue types (stored as MediumID in Vannmiljø) into our appropriate equivalent (@tbl-raw-tissue).
@@ -2414,48 +1658,28 @@ We also need to convert tissue types (stored as MediumID in Vannmiljø) into our
 #| label: tbl-raw-tissue
 #| tbl-caption: Table of Vannmiljø MediumIDs corresponding to biota tissues, with sample size (n) and corresponding eData SAMPLE_TISSUE value.
 
-# Create tissue table
-# TODO: Should become a junction table (?) in the fullness of time
-map_tissue_type <- function(medium_id_name) {
-  case_match(
-    medium_id_name,
-    "Biota bløtdeler" ~ "Total soft tissues",
-    "Biota gjeller" ~ "Gills",
-    "Biota helkropp" ~ "Whole body",
-    "Biota lever" ~ "Liver",
-    "Biota muskelvev" ~ "Muscle tissue",
-    "Biota plantevev" ~ "Plant tissue",
-    "Biota egg" ~ "Egg",
-    "Biota blod" ~ "Blood",
-    "Biota skuddspiss" ~ "Shoot tip",
-    "Biota fettvev" ~ "Adipose tissue",
-    "Biota galle" ~ "Bile",
-    .default = "Unknown Tissue"
-  )
-}
+# tissue_frequency <- count(vm_edata_biota, MediumID_Name) |>
+#   arrange(desc(n)) |>
+#   mutate(
+#     SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
+#   )
 
-tissue_frequency <- count(edata_biota, MediumID_Name) |>
-  arrange(desc(n)) |>
-  mutate(
-    SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
-  )
+# # Report data quality issues
+# n_unknown_tissue <- tissue_frequency |>
+#   filter(SAMPLE_TISSUE == "Unknown Tissue") |>
+#   pull(n) |>
+#   sum()
 
-# Report data quality issues
-n_unknown_tissue <- tissue_frequency |>
-  filter(SAMPLE_TISSUE == "Unknown Tissue") |>
-  pull(n) |>
-  sum()
+# message(glue(
+#   "Biota data quality: {n_unknown_tissue} samples with unknown tissue type"
+# ))
 
-message(glue(
-  "Biota data quality: {n_unknown_tissue} samples with unknown tissue type"
-))
+# datatable(tissue_frequency)
 
-datatable(tissue_frequency)
-
-edata_biota_tissue_merged <- edata_biota_merged |>
-  mutate(
-    SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
-  )
+# edata_biota_tissue_merged <- edata_biota_merged |>
+#   mutate(
+#     SAMPLE_TISSUE = map_tissue_type(MediumID_Name)
+#   )
 
 ```
 
@@ -2463,59 +1687,12 @@ edata_biota_tissue_merged <- edata_biota_merged |>
 ```{r}
 #| label: eData-biota
 
-vm_samples_biota_only <- edata_biota_tissue_merged |>
-  mutate(
-    # Core identifiers
-    SITE_CODE = glue("Vannmiljø_{Vannlok_kode}"),
-    # SITE_NAME = glue("Vannmiljø Station {Vannlokalitetsnavn}"), added later
-    PARAMETER_NAME = "Copper",
-    # PARAMETER_TYPE = "Not reported", added later
-
-    # Compartment information
-    ENVIRON_COMPARTMENT = ENVIRON_COMPARTMENT_resolved,
-    ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
-    MEASURED_CATEGORY = NA_character_,
-
-    SAMPLING_DATE = as.character(SAMPLING_DATE),
-
-    # Sample information
-    SUBSAMPLE = "NA",
-    SAMPLE_ID = generate_sample_id_with_components(
-      SITE_CODE,
-      PARAMETER_NAME,
-      ENVIRON_COMPARTMENT,
-      ENVIRON_COMPARTMENT_SUB,
-      SAMPLING_DATE,
-      SUBSAMPLE
-    ),
-
-    # biota stuff
-    SPECIES_GROUP = species_group,
-    SAMPLE_SPECIES,
-    SAMPLE_TISSUE,
-    SAMPLE_SPECIES_LIFESTAGE,
-    SAMPLE_SPECIES_GENDER = "Not reported",
-    BIOTA_COMMENT = "Raw species names from Vannmiljø. May be erroneous.",
-  )
-
-# Validate against eData schema
-edata_biota <- initialise_biota_tibble() |>
-  add_row(
-    vm_samples_biota_only |>
-      select(any_of(names(initialise_biota_tibble())))
-  )
-
-message(glue(
-  "Created biota table: {nrow(edata_biota)} rows"
-))
 ```
 
 Once we've handled biota separately we can merge them with the rest of the samples to create the intermediate table used to create the measurements table. This is a slightly strange way of doing things, but it works.
 
 ```{r}
 #| label: merge-biota-samples
-
-biota_samples_merged <- edata_samples_wide |> bind_rows(vm_samples_biota_only)
 
 ```
 
@@ -2524,65 +1701,6 @@ biota_samples_merged <- edata_samples_wide |> bind_rows(vm_samples_biota_only)
 ```{r}
 #| label: edata-measurements
 
-# Create measurements table
-edata_measurements <- biota_samples_merged |>
-  mutate(
-    # Core identifiers
-    SITE_CODE,
-    PARAMETER_NAME,
-    SAMPLING_DATE = as.character(SAMPLING_DATE),
-    CAMPAIGN_NAME_SHORT = config$metadata$campaign_short,
-    REFERENCE_ID = config$metadata$reference_id,
-
-    # Compartment information
-    ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB,
-
-    # Parameter classification
-    PARAMETER_TYPE = "Stressor",
-    MEASURED_TYPE = "Concentration",
-
-    # Sample information
-    SUBSAMPLE,
-    SAMPLE_ID,
-
-    # Measurement values
-    MEASURED_FLAG = vm_convert_operator(Operator),
-    MEASURED_VALUE = Verdi,
-    MEASURED_UNIT = vm_convert_unit(Unit_Name),
-    MEASURED_N = Ant_verdier,
-
-    # Uncertainty (not reported in Vannmiljø)
-    UNCERTAINTY_TYPE = "Not reported",
-    UNCERTAINTY_UPPER = NA_real_,
-    UNCERTAINTY_LOWER = NA_real_,
-
-    # Detection limits
-    LOQ_VALUE = Kvantifiseringsgrense,
-    LOQ_UNIT = vm_convert_unit(Unit_Name),
-    LOD_VALUE = Deteksjonsgrense,
-    LOD_UNIT = vm_convert_unit(Unit_Name),
-
-    # TODO: Fix methods reference
-    # Protocol references (FIXME: Need proper protocol ID mapping)
-    SAMPLING_PROTOCOL = "1",
-    EXTRACTION_PROTOCOL = "2",
-    FRACTIONATION_PROTOCOL = "3",
-    ANALYTICAL_PROTOCOL = "4",
-
-    # Comments
-    MEASUREMENT_COMMENT = Kommentar,
-
-    .keep = "none"
-  )
-
-# Validate against eData schema
-edata_measurements <- initialise_measurements_tibble() |>
-  add_row(edata_measurements)
-
-message(glue(
-  "Created measurements table: {nrow(edata_measurements)} measurements"
-))
 ```
 
 # Export
@@ -2596,32 +1714,32 @@ We export the resulting data to a zip file in our `data/raw/eData` folder where 
 
 # Assemble datasets for export
 export_datasets <- list(
-  edata_sites = edata_sites,
-  edata_campaign = edata_campaign,
-  edata_reference = edata_reference,
-  edata_parameters = edata_parameters,
-  edata_samples = edata_samples,
-  edata_biota = edata_biota,
-  edata_measurements = edata_measurements
+  edata_sites = vm_edata_sites,
+  edata_campaign = vm_edata_campaign,
+  edata_reference = vm_edata_reference,
+  edata_parameters = vm_edata_parameters,
+  edata_samples = vm_edata_samples,
+  edata_biota = vm_edata_biota,
+  edata_measurements = vm_edata_measurements
 )
 
 # Export as ZIP
 if (
   !file.exists(here(
     "data/raw/eData",
-    paste0(config$metadata$campaign_short, ".zip")
+    paste0(vm_config$metadata$campaign_short, ".zip")
   ))
 ) {
   timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
 
   export_path <- export_campaign_zip(
     dataset_list = export_datasets,
-    campaign_name = config$metadata$campaign_short,
+    campaign_name = vm_config$metadata$campaign_short,
     output_path = here(
       "data",
       "raw",
       "eData",
-      glue("{config$metadata$campaign_short}_{timestamp}.zip")
+      glue("{vm_config$metadata$campaign_short}_{timestamp}.zip")
     )
   )
   message(glue("Export complete: {export_path}"))
@@ -2642,7 +1760,7 @@ Are our compartments valid and reasonable? @tbl-validate-export-compartments giv
 
 ```{r}
 #| label: tbl-validate-export-compartments
-count(edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
+count(vm_edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
   datatable()
 
 ```
@@ -2653,7 +1771,8 @@ count(edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
 #| label: fig-vm-scatterplot
 #| fig-cap: A basic scatterplot for visualising measured concentrations by year. Values more/less than 3 S.D from the mean per group highlighted in red.
 #| fig-width: 12
-edata_zscore <- edata_measurements |>
+#| fig-height: 12
+edata_zscore <- vm_edata_measurements |>
   group_by(ENVIRON_COMPARTMENT_SUB) |>
   mutate(z_score = scale(MEASURED_VALUE)[, 1]) |>
   ungroup()
@@ -2693,7 +1812,7 @@ ggplot(
 ```{r}
 #| label: tbl-vm-outliers
 
-edata_measurements |>
+vm_edata_measurements |>
   group_by(MEASURED_UNIT, ENVIRON_COMPARTMENT_SUB) |>
   mutate(z_score = scale(MEASURED_VALUE)) |> # Calculate z-score
   filter(z_score >= 3)

@@ -203,53 +203,12 @@ plot_data_complete |>
 #| label: data-prep-species-plots
 #| include: false
 
-# add species common names missing from ECOTOX data ----
-new_species <- c(
-  "Phoca vitulina" = "Harbor Seal",
-  "Calanus finmarchicus" = "Copepod",
-  "Calanus glacialis" = "Arctic Copepod",
-  "Calanus hyperboreus" = "Copepod",
-  "Conchoecia borealis" = "Ostracod",
-  "Euchaeta barbata" = "Copepod",
-  "Euchaeta glacialis" = "Arctic Copepod",
-  "Euchaeta norvegica" = "Copepod",
-  "Eukrohnia hamata" = "Arrow Worm",
-  "Hymenodora glacialis" = "Arctic Shrimp",
-  "Meganyctiphanes norvegica" = "Northern Krill",
-  "Metridia longa" = "Copepod",
-  "Themisto abyssorum" = "Amphipod",
-  "Themisto libellula" = "Amphipod",
-  "Thysanoessa inermis" = "Arctic Krill",
-  "Astarte borealis" = "Northern Astarte",
-  "Mya arenaria" = "Soft-shell Clam",
-  "Cystophora cristata" = "Hooded Seal",
-  "Pagophilus groenlandicus" = "Harp Seal",
-  "Salmo trutta" = "Brown Trout",
-  "Arenicola marina" = "Lugworm",
-  "Gammarus oceanicus" = "Amphipod",
-  "Littorina rudis" = "Rough Periwinkle",
-  "Mytilus edulis" = "Blue Mussel",
-  "Nucella lapillus" = "Dog Whelk",
-  "Phoca groenlandica" = "Harp Seal",
-  "Ursus maritimus" = "Polar Bear",
-  "Rissa tridactyla" = "Black-legged Kittiwake",
-  "Alitta virens" = "King Ragworm",
-  "Reinhardtius hippoglossoides" = "Greenland Halibut"
-)
-
-# Extend species_lookup ----
-species_lookup <- c(species_lookup, new_species)
-
 # Prepare data for plotting ----
 plot_data <- literature_merged_data |>
   group_by(REFERENCE_ID, SAMPLE_SPECIES) |>
   distinct() |>
-  reframe(count = sum(MEASURED_N, na.rm = TRUE), SPECIES_GROUP) |>
+  reframe(count = sum(MEASURED_N, na.rm = TRUE), SPECIES_GROUP, SPECIES_COMMON_NAME) |>
   # Join year data for y-axis ordering
-  left_join(
-    literature_merged_data |> distinct(REFERENCE_ID, YEAR),
-    by = "REFERENCE_ID"
-  ) |>
   filter(!is.na(SAMPLE_SPECIES)) |>
   distinct()
 
@@ -257,7 +216,7 @@ plot_data <- literature_merged_data |>
 plot_data <- plot_data |>
   mutate(
     formatted_species = glue::glue(
-      "**{species_lookup[SAMPLE_SPECIES]}**<br>*({SAMPLE_SPECIES})*"
+      "**{SPECIES_COMMON_NAME}**<br>*({SAMPLE_SPECIES})*"
     )
   )
 
@@ -452,8 +411,25 @@ hex_coords <- data.frame(
   count = hb@count
 )
 
+# Transform your data to a projected CRS (example: UTM or Arctic projection)
+sites_sample_number_proj <- sites_sample_number |> filter(!is.na(LONGITUDE), !is.na(LATITUDE)) |> 
+  sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = 4326) |>
+  sf::st_transform(crs = 3035) |>  # European LAEA projection, adjust for Arctic if needed
+  dplyr::mutate(
+    x = sf::st_coordinates(geometry)[,1],
+    y = sf::st_coordinates(geometry)[,2]
+  )
+
 # Plot
 world_map <- map_data("world")
+
+# Also transform your world map
+world_map_proj <- sf::st_as_sf(world_map, 
+                                coords = c("long", "lat"), 
+                                crs = 4326) |>
+  sf::st_transform(crs = 3035)
+
+
 ggplot() +
   geom_polygon(
     data = world_map,
@@ -478,16 +454,14 @@ ggplot() +
   scale_y_continuous(expand = c(0, 0)) +
   theme_minimal() +
   theme(axis.text = element_blank(), axis.title = element_blank()) +
-  coord_sf(
-    xlim = c(
+  coord_fixed(ratio = 1,     xlim = c(
       get_study_area_bbox()[[1]],
       get_study_area_bbox()[[3]]
     ),
     ylim = c(
       get_study_area_bbox()[[2]],
       get_study_area_bbox()[[4]]
-    )
-  )
+    ))
 ```
 
 ## Copper Concentrations by Environmental Compartment

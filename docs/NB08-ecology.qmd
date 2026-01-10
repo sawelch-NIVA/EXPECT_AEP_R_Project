@@ -24,6 +24,9 @@ suppressMessages(
     library(glue)
     library(ggplot2)
     library(devtools)
+    library(DT)
+    library(readr)
+    library(taxize)
 
     i_am("README.md")
     tar_config_set(store = here("_targets"))
@@ -32,7 +35,9 @@ suppressMessages(
   }
 )
 
-literature_biota_data <- tar_read(biota_data)
+literature_biota_data <- tar_read(API_biota_common_names)
+
+set_theme(theme_minimal())
 
 ```
 
@@ -42,19 +47,16 @@ literature_biota_data <- tar_read(biota_data)
 species_names <- species_names_vocabulary()
 
 biota_data_summary <- literature_biota_data |>
-  group_by(SAMPLE_SPECIES) |>
+  group_by(SAMPLE_SPECIES, SPECIES_COMMON_NAME) |>
   reframe(n = n()) |>
-  arrange(desc(n)) |>
-  left_join(species_names, by = c(SAMPLE_SPECIES = "SPECIES_NAME"))
+  arrange(desc(n))
 
 # check missing common names
-biota_data_summary |> filter(is.na(SPECIES_COMMON_NAME))
+biota_data_summary |> filter(is.na(SPECIES_COMMON_NAME)) |> datatable()
 
 ```
 
 In an idea world, we can find an already existing dataset with rough trophic levels (or better yet relationships) for most or all of our species. This probably doesn't exist, although FishBase seems to have pretty good data for what various species of fish eat. 
-
-MacKenzie, Kirsteen M; Jørgensen, Lis Lindal; Bluhm, Bodil A; Renaud, Paul E (2023): Trophic levels and simple functional groups for taxa recorded in the Barents Sea between 2014-2016, based on literature [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.954499
 
 This (@mackenzieTrophicLevelsSimple2023) has TL and functional groups for ~800 Barents species
 
@@ -85,8 +87,22 @@ BarentsEcologyClean <- BarentsEcologyTable |>
 
 BarentsEcologyClean |>
   ggplot(aes(y = TL, x = Functional_Group, colour = Functional_Group)) +
-  geom_point()
+  geom_point() +
+  theme(legend.position = "none")
 
+```
+
+```{r}
+#| label: tbl-study-species-with-trophic-data
+
+species_have_trophic <- biota_data_summary |>
+  left_join(BarentsEcologyClean, by = c("SAMPLE_SPECIES" = "Latin")) |>
+  filter(!is.na(Functional_Group)) |>
+  nrow()
+
+message(glue(
+  "Trophic data available for {species_have_trophic} of {biota_data_summary} species."
+))
 ```
 
 

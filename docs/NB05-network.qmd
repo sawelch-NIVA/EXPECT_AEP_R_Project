@@ -34,6 +34,8 @@ library(here)
 library(targets)
 
 devtools::load_all()
+
+theme_set(theme_minimal())
 ```
 
 ```{r}
@@ -68,13 +70,14 @@ calculate_sample_sizes <- function(data) {
 
 ```
 
-# Network Diagram
+# Heatmap
 
 ```{r}
 #| echo: false
 #| label: fig-heatmap-unique-site-compartments
 #| fig-width: 12
-#| fig-height: 6
+#| fig-height: 4
+#| warning: false
 
 unique_compartments_and_sites <- literature_merged_data |>
   select(

@@ -17,6 +17,7 @@
 #' @importFrom dplyr left_join select distinct filter mutate
 #' @importFrom stringr str_replace str_to_upper
 #' @importFrom purrr map
+#' @import eDataDRF
 #'
 #' @export
 join_all_literature_modules <- function(
@@ -44,6 +45,7 @@ join_all_literature_modules <- function(
       SUBSAMPLE,
       SPECIES_GROUP,
       SAMPLE_SPECIES,
+      SPECIES_COMMON_NAME,
       SAMPLE_TISSUE,
       SAMPLE_SPECIES_LIFESTAGE,
       SAMPLE_SPECIES_GENDER
@@ -77,7 +79,7 @@ join_all_literature_modules <- function(
     )
 
   # this is, frankly, bad, but it allows us to join out methods to measurements in a way that makes analysis easier
-  map(.x = protocol_categories_vocabulary(), .f = function(x) {
+  map(.x = eDataDRF::protocol_categories_vocabulary(), .f = function(x) {
     category_name_snake <- str_replace(x, pattern = " ", replacement = "_") |>
       str_to_upper()
     type_name_snake <- str_replace(
