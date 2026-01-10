@@ -1,0 +1,105 @@
+---
+title: "NB02 3: Vannmiljø QC"
+---
+
+I am also confused over notebook numbering. We'll sort it out at some point.
+
+This appendix documents the data quality validation results for Vannmiljø data converted to eData format.
+```{r}
+#| label: setup
+#| include: false
+
+library(targets)
+library(pointblank)
+library(dplyr)
+library(gt)
+
+tar_load(vm_edata_validation)
+```
+
+## Validation Overview
+
+The following sections show validation results for each eData table created from Vannmiljø data.
+
+### Campaign Table
+```{r}
+#| label: validation-campaign
+
+get_agent_report(vm_edata_validation$campaign)
+```
+
+### Reference Table
+```{r}
+#| label: validation-reference
+
+get_agent_report(vm_edata_validation$reference)
+```
+
+### Parameters Table
+```{r}
+#| label: validation-parameters
+
+get_agent_report(vm_edata_validation$parameters)
+```
+
+### Sites Table
+```{r}
+#| label: validation-sites
+
+get_agent_report(vm_edata_validation$sites)
+```
+
+### Samples Table
+```{r}
+#| label: validation-samples
+
+get_agent_report(vm_edata_validation$samples)
+```
+
+### Biota Table
+```{r}
+#| label: validation-biota
+
+get_agent_report(vm_edata_validation$biota)
+```
+
+### Measurements Table
+```{r}
+#| label: validation-measurements
+
+get_agent_report(vm_edata_validation$measurements)
+```
+
+## Validation Summary
+```{r}
+#| label: validation-summary
+
+# Create summary table
+# validation_summary <- data.frame(
+#   Table = names(vm_edata_validation),
+#   Passed = sapply(vm_edata_validation, x_passed),
+#   Failed = sapply(vm_edata_validation, x_failed),
+#   Pass_Rate = sapply(vm_edata_validation, function(x) {
+#     total <- x_passed(x) + x_failed(x)
+#     if (total == 0) {
+#       return(NA)
+#     }
+#     round(100 * x_passed(x) / total, 1)
+#   })
+# ) |>
+#   gt() |>
+#   tab_header(
+#     title = "eData Validation Summary",
+#     subtitle = "Results across all Vannmiljø tables"
+#   ) |>
+#   fmt_number(columns = Pass_Rate, decimals = 1, pattern = "{x}%") |>
+#   data_color(
+#     columns = Pass_Rate,
+#     colors = scales::col_numeric(
+#       palette = c("red", "yellow", "green"),
+#       domain = c(0, 100)
+#     )
+#   )
+
+# validation_summary
+```

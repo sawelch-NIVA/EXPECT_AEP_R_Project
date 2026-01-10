@@ -42,11 +42,6 @@ literature_biota_data <- tar_read(biota_data)
 literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
 
-species_names <- species_names_vocabulary()
-species_lookup <- species_names |>
-  with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
-
-
 # Action levels ----
 # Generate a simple `action_levels` object to
 # set the `warn` state if a validation step

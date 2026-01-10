@@ -3,8 +3,10 @@ title: "Notebook 04 - Maps of Sample Sites, Emission Zones, etc."
 author: "Sam Welch"
 date: last-modified
 lightbox: true
+cache: true
 ---
 
+# Stupid map was taking 5 minutes just to render. Now it's cached. Will have to find a better solution in future. 
 
 ```{r}
 #| label: setup
@@ -18,23 +20,16 @@ library(eDataDRF)
 library(targets)
 library(devtools)
 
-load_all()
+load_all() # TODO: Reduce render time by sourcing only what we specifically need?
 ```
 
 ```{r}
 #| label: load-data
 # load in any data we need from the targets workflow
 literature_merged_data <- tar_read(load_literature_pqt)
-literature_reference_data <- tar_read(reference_data)
-literature_campaign_data <- tar_read(campaign_data)
-literature_sites_data <- tar_read(sites_data)
-literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
 tar_load(copper_toxicity_thresholds)
 
-species_names <- eDataDRF::species_names_vocabulary()
-species_lookup <- species_names |>
-  with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
 
 ```
 
@@ -473,7 +468,7 @@ map <- map |>
   )
 
 # Display map ----
-bslib::card(
+card(
   full_screen = TRUE,
   map,
   style = "text-align: left; z-index: 999999;"

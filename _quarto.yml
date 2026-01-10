@@ -20,6 +20,9 @@ website:
           - href: docs/NB02-vannmiljo.qmd
             text: "NB02 - Vannmiljø"
             icon: journal-code
+          - href: docs/NB02-vannmiljo-qc.qmd
+            text: "NB02 - Vannmiljø QC"
+            icon: journal-code
           - href: docs/NB03-visualisation.qmd
             text: "NB03 - Visualisation"
             icon: journal-code
