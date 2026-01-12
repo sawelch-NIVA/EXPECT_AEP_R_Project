@@ -14,6 +14,7 @@ Report on the `targets` pipeline used for data analysis.
 ```{r}
 #| label: tbl-tar-meta
 library(targets)
+library(tidyverse)
 library(DT)
 tar_meta <- tar_meta()
 tar_meta |>
@@ -45,5 +46,5 @@ Finally, we'd like to get an oversight of the size of all our table objects.
 ```{r}
 #| label: tbl-tar-tables
 
-tar_load_everything()
+# tar_load_everything()
 ```

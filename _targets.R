@@ -584,6 +584,10 @@ list(
   tar_target(
     name = sites_data,
     command = fread_all_module_files(sites_files, initialise_sites_tibble) |>
+      # some dates are still messed up
+      mutate(
+        ENTERED_DATE = parse_date_time(ENTERED_DATE, orders = c("ymd", "dmy"))
+      ) |>
       standardise_IDate_all() |>
       add_row(vm_edata_sites)
   ),
@@ -640,6 +644,10 @@ list(
   tar_target(
     name = biota_data,
     command = fread_all_module_files(biota_files, initialise_biota_tibble) |>
+      # some dates are still messed up
+      mutate(
+        SAMPLING_DATE = parse_date_time(SAMPLING_DATE, orders = c("ymd", "dmy"))
+      ) |>
       standardise_IDate_all() |>
       add_row(vm_edata_biota)
   ),
@@ -647,10 +655,15 @@ list(
   #### # Measurements data ----
   tar_target(
     name = measurements_data,
-    command = fread_all_module_files(
+    # some measurement files are missing MEASUREMENT_COMMENT
+    # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
+    command = suppressWarnings(fread_all_module_files(
       measurements_files,
       initialise_measurements_tibble
-    ) |>
+    )) |> # some dates are still messed up
+      mutate(
+        SAMPLING_DATE = parse_date_time(SAMPLING_DATE, orders = c("ymd", "dmy"))
+      ) |>
       standardise_IDate_all() |>
       add_row(vm_edata_measurements)
   ),
@@ -874,8 +887,8 @@ list(
 
   #### # QC notebook ----
   tar_quarto(
-    name = render_nb01_qc,
-    path = "./docs/NB01-qc.qmd",
+    name = render_nb01_pipeline,
+    path = "./docs/NB01-pipeline.qmd",
     quiet = FALSE
   ),
 
@@ -894,6 +907,12 @@ list(
   ),
 
   #### # Visualisation notebook ----
+  tar_quarto(
+    name = render_nb03_qc,
+    path = "docs/NB03-qc.qmd",
+    quiet = FALSE
+  ),
+
   tar_quarto(
     name = render_nb03_visualisation,
     path = "docs/NB03-visualisation.qmd",
@@ -964,7 +983,7 @@ list(
 
       # Dependencies to trigger redeployment
       render_index.qmd
-      render_nb01_qc
+      render_nb01_pipeline
       render_nb02_vannmiljo
       render_nb02_vannmiljo_qc
       render_nb03_visualisation

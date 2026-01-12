@@ -46,7 +46,7 @@ classify_data_issue <- function(x) {
 #' @param data A tibble/data.frame of literature data (e.g., load_literature_pqt)
 #' @return A named list containing summary statistics and tibbles of problem rows
 #'
-#' @importFrom dplyr filter group_by summarise n n_distinct if_any row_number mutate where select rowwise ungroup first any_of
+#' @importFrom dplyr filter group_by reframe n n_distinct if_any row_number mutate where select rowwise ungroup first any_of
 #' @importFrom stringr str_detect
 #'
 #' @export
@@ -61,7 +61,7 @@ check_data_quality <- function(data) {
         is_missing(LOD_VALUE)
     ) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       # sample_ids = list(SAMPLE_ID),
@@ -73,7 +73,7 @@ check_data_quality <- function(data) {
   missing_n <- data |>
     filter(is_missing(MEASURED_N) | MEASURED_N == 0) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       # sample_ids = list(SAMPLE_ID),
@@ -90,7 +90,7 @@ check_data_quality <- function(data) {
         is_missing(SAMPLING_PROTOCOL)
     ) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       missing_analytical = any(is_missing(ANALYTICAL_PROTOCOL)),
@@ -149,7 +149,7 @@ check_data_quality <- function(data) {
           UNCERTAINTY_LOWER_STANDARD > MEASURED_VALUE_STANDARD)
     ) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       # Uncertainty type issues
@@ -216,7 +216,7 @@ check_data_quality <- function(data) {
         is_missing(OCEAN_IHO)
     ) |>
     group_by(SITE_CODE, source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       missing_coords = any(is_missing(LATITUDE) | is_missing(LONGITUDE)),
@@ -263,7 +263,7 @@ check_data_quality <- function(data) {
         is.na(SPECIES_GROUP)
     ) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       missing_species = any(is.na(SAMPLE_SPECIES)),
@@ -310,7 +310,7 @@ check_data_quality <- function(data) {
     ) |>
     filter(has_encoding_issue) |>
     group_by(source_file_measurements) |>
-    summarise(
+    reframe(
       read_timestamp_measurements = first(read_timestamp_measurements),
       n_rows = n(),
       # sample_ids = list(SAMPLE_ID),

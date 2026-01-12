@@ -1,5 +1,7 @@
 ---
 title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability 
+execute:
+    freeze: auto
 ---
 
 # Introduction
@@ -12,18 +14,93 @@ Copper is a vital resource in both biology and engineering due to its useful che
 
 Biota sensitivity to copper is highly variable and depends on diverse factors including water chemistry, availability of biological material, salinity, pH, and individual organism physiology, metabolism, and behaviour. In addition to its natural occurence, copper is emitted to the environment in a wide range of products and forms, which may be of greater or lesser relevance to the environment depending on their transport in the environment.
 
-The Adverse Outcome Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. Although uptake has not yet matched that of the AOP, AEPs are a valuable tool for understanding complex patterns of exposure such as copper's. Properly integrated, AOPs and AEPs together can provide deep insight into the current and potential evolution of chemical risk.
-
 Norway's economically important Arctic region is likely to come under increased pressure in coming years. Demand for copper is likely to drive increased mining in mineral rich zones. Melting sea ice will increase the feasibility of cross-Arctic shipping [@smithNewTransArcticShipping2013], likely increasing exposure to copper from antifoulant paints, while a growing demand for aquaculture may also drive use of copper-based antifoulants. Terrestrial biocides, brake dust, and natural weathering will likely also continue to add to pollution. In addition, changes to ecology, nutrient cycling, organic material, and the overall stressor landscape are likely to add to the challenges faced by the wildlife of the Norwegian sea and the industries and people that rely on them.
 
 Potential subsections:
 
--   AEPs
--   Copper biology
--   Copper pollution
--   Arctic/global change
--   Economic/demand shift
--   Area geography, ecology, economy
+## The Aggregate Exposure Pathway
+
+The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway [@ankleyAdverseOutcomePathways2010] for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. AOPs are conceptualised as a network connecting exposure to a toxicant (a Molecular Initiating Event, MIE) to a deleterious biological effect (Adverse Outcome, AO) through a series of mediating Key Events (KEs, network nodes) and Key Event Relationships (KERs, network edges).
+
+The AEP then ends where the AOP begins, logically completing the chain of events that (potentially) caused the MIE to begin with. AEPs consist of a series of Key Exposure States (KES, the state of a stressor in space and time) linked by Key Transitional Relationships (KTR, the transport or transformation of stressors) that link the source and Target Site Exposure (TSE), a biological entity (biomolecules, cells, tissues, etc.) where an MIE may occur.
+
+![Placeholder. Put a picture of an AEP and AOP here.](images/paste-1.gif)
+
+AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date the number of proposed AOPs is (x) of which (y) have been approved [@AOPwiki]. The OECD offers a program for AOP creation (details needed), while the EU/Norwegian government does... what do they do?
+
+By contrast, the AEP concept has seen less adoption, with 21 (?) papers mentioning and 15? emmploying the concept found in 2025. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. Certainly the AEP is not the first conceptual model to treat the environment as a series of nodes and edges, and it may be a solution looking for a problem.
+
+\[table of AEPs from mini lit-review goes here\]
+
+The Source to Outcome Pathway concept attempts to unify these two models by... KET is probably best-placed to write this section.
+
+## Weight of Evidence and Uncertainty
+
+The diverse range of uncertainties intrinsic to such a large-scale project deserve focused discussion. The concept of Weight of Evidence (WoE) has been formalised (cite) to provide a consistent terminology for discussing the relative value of difference types and pieces ("lines") of evidence.
+
+Within ecotoxicology, the primary
+
+We identify the following types of uncertainty in this work: - missing data: areas where insufficient data is available on a KES or KTR to know if it exists - weak data: data on a KES or KTR is insufficiently reliable or relevant to
+
+Although uptake has not yet matched that of the AOP, AEPs are a valuable tool for understanding complex patterns of exposure such as copper's. Properly integrated, AOPs and AEPs together can provide deep insight into the current and potential evolution of chemical risk.
+
+## Copper's Environmental Chemistry
+
+-   Speciation chemistry
+-   Bioavailability
+-   Dynamics in terrestrial, marine and freshwater environments
+-   Air?
+
+## Copper as a Nutrient and Toxicant
+
+Copper is a highly conserved essential nutrient that is used in enzymes (what kind?) due to its (what sort of?) properties. - How much copper do humans need? Per kg? - Are there any species where this is very different?
+
+Conversely, copper can be toxic
+
+ - Ref speciation chemistry from above
+
+\- Cite some of those AOP papers \[\] about copper toxicity, the BLM, etc.
+
+\- Different species tolerance, different stratgegies (maybe)
+
+\- Due to copper's essentiallity and toxicity, organisms are pretty good at regulating uptake
+
+\- But there are some that are surprisingly sensitive to copper
+
+-   Metallotheins [@amiardMetallothioneinsAquaticInvertebrates2006]
+
+-   Interactions with other stressors e.g. @lealCopperPollutionExacerbates2018
+
+## The Near Arctic
+
+-   The Arctic has long been the home to relatively few people, terra nulla or w/e
+-   How biodiverse is it?
+-   Resource extraction - especially mining - has long been one of the key pillars of the arctic economy \[\@arcticcouncilEconomyNorthECONOR2025\]
+
+### Global Change in Arctic Regions
+
+-   First technological development and now also climate change are opening arctic regions up to exploitation
+-   Also more activity in near arctic
+-   War?
+
+## Drivers of Copper Demand, Extraction, and Emission
+
+-   Copper is very useful because it's very conductive and easy to extract
+    -   Also used in:
+    -   Pipes
+    -   Roofing
+    -   Antifoulants @brooks2009
+    -   Fruit orchards
+    -   Cars
+    -   Infrastructure
+    -   Also a naturally occuring nutrient in soil/rock & therefore in ocean
+    -   etc. (need to cite Stien's paper loads here)
+-   How many tonnes of copper are embedded in our current stuff?
+-   I've got to guess that recycling copper from microcircuitry is expensive
+-   Cite that paper that uses LMs to extrapolate future copper demand
+-   Electrification, more stupid gadgets
+-   Growing interest in indigenous copper resources as a strategic asset - c.f. horse trading over Nussir in Norway
+-   Historically copper hasn't been mined in Norway since 1980s (?), but there's still a legacy of pollution
 
 # Materials and Methods
 
@@ -34,6 +111,26 @@ An exhaustive version of the materials and methods are provided in the notebooks
 ### Literature Review Protocol
 
 ### CREED Assessment
+
+-   Cite CRED also
+-   Has anyone else cite CREED yet?
+
+### Other datasets
+
+Maybe a big table for these?
+
+#### Regional Geography & Boundaries
+
+-   IHO Oceans
+-   RNatural Earth maps
+
+#### Copper Sources
+
+-   Norske utslipp
+-   Kværnes et al STP data
+-   Fiskerdirektoriet data
+
+#### Ecosystems & Trophic Levels
 
 ## Data Processing and Validation
 

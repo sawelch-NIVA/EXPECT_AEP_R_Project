@@ -32,10 +32,13 @@ suppressMessages(
 
 # Copper Emissions & Source Data
 
+## Closed Mines in Norway
+
+Dataset available as a pdf here: https://www.vannportalen.no/miljotiltak/nedlagte-gruver/. Doesn't specify sources.
+
 ## Submarine Tailing Disposal in/off Norway
 
 Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates estimated by LLM, confidence self-reported by LLM. @kvassnesWasteSitesMines2013
-
 
 ```{r}
 #| label: tbl-std-data

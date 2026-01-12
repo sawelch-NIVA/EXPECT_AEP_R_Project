@@ -14,14 +14,17 @@ website:
             text: "Manuscript Draft"
       - section: "Notebooks"
         contents:
-          - href: docs/NB01-qc.qmd
-            text: "NB01 - Data QC"
+          - href: docs/NB01-pipeline.qmd
+            text: "NB01 - Analysis Pipeline"
             icon: journal-code
           - href: docs/NB02-vannmiljo.qmd
             text: "NB02 - Vannmiljø"
             icon: journal-code
           - href: docs/NB02-vannmiljo-qc.qmd
             text: "NB02 - Vannmiljø QC"
+            icon: journal-code
+          - href: docs/NB03-qc.qmd
+            text: "NB03 - QC"
             icon: journal-code
           - href: docs/NB03-visualisation.qmd
             text: "NB03 - Visualisation"

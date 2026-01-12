@@ -219,13 +219,13 @@ process_countries_wgs84 <- function(
       geometry,
       highlight_name
     ) |>
-    filter(name %notin% exclude_countries)
+    filter(!(name %in% exclude_countries))
 
   # Process Norway components separately
   norway_mainland <- ne_states(geounit = "norway") |>
     select(name, geometry) |>
     st_crop(c(xmin = 0, xmax = 40, ymin = 57, ymax = 90)) |>
-    reframe(name = "Norway", geometry = st_union(geometry))
+    reframe(name = "Norway", geometry = st_union(st_geometry(geometry)))
 
   norway_janmayen <- ne_states(geounit = "norway") |>
     filter(name == "Nordland") |>
@@ -424,8 +424,9 @@ prepare_geography_wgs84 <- function(
     marine_polys = process_marine_geography_wgs84(
       scale = scale,
       destdir = destdir
-    ),
-    countries = process_countries_wgs84(scale = scale),
+    ) |>
+      suppressWarnings(),
+    countries = process_countries_wgs84(scale = scale) |> suppressWarnings(),
     arctic_circle = create_arctic_circle(),
     graticule = create_graticule()
   )
