@@ -262,7 +262,7 @@ list(
           vm_lookup_species,
           by = "VitenskapligNavn"
         ) |>
-        mutate(SAMPLING_DATE = as.Date(Tid_provetak))
+        mutate(SAMPLING_DATE = as.IDate(Tid_provetak))
     }
   ),
 
@@ -300,8 +300,8 @@ list(
     vm_filtered_dates,
     vm_filter_dates(
       vm_filtered_sites,
-      date_start = as.Date("2010-01-01"),
-      date_end = as.Date("2025-12-05")
+      date_start = as.IDate("2010-01-01"),
+      date_end = as.IDate("2025-12-05")
     )
   ),
 
@@ -370,8 +370,8 @@ list(
       vm_data = vm_sites_split_clean,
       campaign_name_short = "Vm_2010_2025",
       campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
-      date_start = as.Date("2010-01-01"),
-      date_end = as.Date("2025-12-05"),
+      date_start = as.IDate("2010-01-01"),
+      date_end = as.IDate("2025-12-05"),
       organisation = "Miljødirektoratet",
       entered_by = "Sam Welch"
     )
@@ -383,8 +383,8 @@ list(
     vm_create_edata_reference_table(
       vm_data = vm_sites_split_clean,
       reference_id = "VannmiljøCopper2010-2025",
-      date_start = as.Date("2010-01-01"),
-      date_end = as.Date("2025-12-05"),
+      date_start = as.IDate("2010-01-01"),
+      date_end = as.IDate("2025-12-05"),
       organisation = "Miljødirektoratet",
       entered_by = "Sam Welch"
     )
@@ -408,6 +408,14 @@ list(
       entered_by = "Sam Welch"
     )
   ),
+
+  #### # Methods table ----
+  tar_target(vm_edata_methods, {
+    # In the case of methods we ended up doing everything more-or-less by hand
+    edata_methods <- vm_lookup_methods
+
+    message(glue("Created methods table: {nrow(edata_methods)} protocols"))
+  }),
 
   #### # Intermediate samples-biota table ----
   # This table contains both eData columns AND original Vannmiljø columns
@@ -454,6 +462,20 @@ list(
       biota = vm_edata_biota,
       measurements = vm_edata_measurements
     )
+  ),
+
+  #### # Send a warning if something fails
+  tar_target(
+    vm_edata_validation_report,
+    {
+      if (
+        !all(map_lgl(vm_edata_validation, .f = \(x) {
+          all_passed(x)
+        }))
+      ) {
+        warning("Error(s) in Vannmiljø validation.")
+      }
+    }
   ),
 
   #### # CREED Scores table ----
@@ -543,8 +565,8 @@ list(
       campaign_files,
       initialise_campaign_tibble
     ) |>
-      add_row(vm_edata_campaign) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_campaign)
   ),
 
   #### # Reference data ----
@@ -554,15 +576,16 @@ list(
       reference_files,
       initialise_references_tibble
     ) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_reference)
   ),
 
   #### # Sites data ----
   tar_target(
     name = sites_data,
     command = fread_all_module_files(sites_files, initialise_sites_tibble) |>
-      add_row(vm_edata_sites) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_sites)
   ),
 
   #### # Parameters data ----
@@ -572,7 +595,8 @@ list(
       parameters_files,
       initialise_parameters_tibble
     ) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_parameters)
   ),
 
   #### # Compartments data ----
@@ -593,9 +617,12 @@ list(
     command = fread_all_module_files(
       methods_files,
       initialise_methods_tibble
-      # TODO: Josh... where's the methods?
     ) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(
+        vm_lookup_methods |>
+          select(-ISO_ID)
+      )
   ),
 
   #### # Samples data ----
@@ -605,16 +632,16 @@ list(
       samples_files,
       initialise_samples_tibble
     ) |>
-      add_row(vm_edata_samples) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_samples)
   ),
 
   #### # Biota data ----
   tar_target(
     name = biota_data,
     command = fread_all_module_files(biota_files, initialise_biota_tibble) |>
-      add_row(vm_edata_biota) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_biota)
   ),
 
   #### # Measurements data ----
@@ -624,8 +651,8 @@ list(
       measurements_files,
       initialise_measurements_tibble
     ) |>
-      add_row(vm_edata_measurements) |>
-      standardise_IDate_all()
+      standardise_IDate_all() |>
+      add_row(vm_edata_measurements)
   ),
 
   #### # CREED scores data ----
@@ -653,6 +680,34 @@ list(
         db = "ncbi",
         verbose = FALSE
       )
+    }
+  ),
+
+  ### # Validate literature and Vm data before joining it
+  #### # Run all validations ----
+  tar_target(
+    data_validation,
+    pb_validate_all_edata_tables(
+      campaign = campaign_data,
+      reference = reference_data,
+      parameters = parameters_data,
+      sites = sites_data,
+      samples = samples_data,
+      biota = biota_data,
+      measurements = measurements_data
+    )
+  ),
+
+  tar_target(
+    data_validation_report,
+    {
+      if (
+        !all(map_lgl(data_validation, .f = \(x) {
+          all_passed(x)
+        }))
+      ) {
+        warning("Error(s) in validation of all data.")
+      }
     }
   ),
 

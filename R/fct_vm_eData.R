@@ -30,17 +30,18 @@ vm_create_edata_campaign_table <- function(
   entered_by
 ) {
   edata_campaign <- initialise_campaign_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(
       CAMPAIGN_NAME_SHORT = campaign_name_short,
       CAMPAIGN_NAME = campaign_name,
-      CAMPAIGN_START_DATE = as.Date(date_start),
-      CAMPAIGN_END_DATE = as.Date(date_end),
+      CAMPAIGN_START_DATE = as.IDate(date_start),
+      CAMPAIGN_END_DATE = as.IDate(date_end),
       RELIABILITY_SCORE = NA_character_,
       RELIABILITY_EVAL_SYS = NA_character_,
-      CONFIDENTIALITY_EXPIRY_DATE = as.Date(NA),
+      CONFIDENTIALITY_EXPIRY_DATE = as.IDate(NA),
       ORGANISATION = organisation,
       ENTERED_BY = entered_by,
-      ENTERED_DATE = as.Date(Sys.Date()),
+      ENTERED_DATE = as.IDate(Sys.Date()),
       CAMPAIGN_COMMENT = glue(
         "Copper and copper pyrithione measurements from Vannmiljø database ",
         "covering all Norwegian municipalities and media types. ",
@@ -79,6 +80,8 @@ vm_create_edata_reference_table <- function(
   entered_by
 ) {
   edata_reference <- initialise_references_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
+
     add_row(
       REFERENCE_ID = reference_id,
       REFERENCE_TYPE = "Database",
@@ -86,7 +89,7 @@ vm_create_edata_reference_table <- function(
       AUTHOR = organisation,
       TITLE = "Vannmiljø Database - Copper and Copper Pyrithione Data",
       YEAR = year(date_end),
-      ACCESS_DATE = as.Date(date_end),
+      ACCESS_DATE = as.IDate(date_end),
       PERIODICAL_JOURNAL = NA_character_,
       VOLUME = NA_integer_,
       ISSUE = NA_integer_,
@@ -171,7 +174,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
       COUNTRY_ISO = "Norway",
       OCEAN_IHO = "Not relevant",
       ENTERED_BY = glue("{entered_by} (Vm Conversion)"),
-      ENTERED_DATE = as.character(today()),
+      ENTERED_DATE = as.IDate(today()),
       ALTITUDE_VALUE = 0, # Not used in our analysis, so being ignored.
       ALTITUDE_UNIT = "m",
       # Combine description and emission source where available
@@ -289,6 +292,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
 
   # Validate against eData schema
   edata_sites <- initialise_sites_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(edata_sites)
 
   message(glue("Created sites table: {nrow(edata_sites)} sites"))
@@ -331,16 +335,16 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   for (param in unique_params) {
     edata_parameters <- edata_parameters |>
       add_row(
-        PARAMETER_TYPE = "Homogenous metal",
+        PARAMETER_TYPE = "Homogeneous metal compounds",
         PARAMETER_TYPE_SUB = NA_character_,
-        MEASURED_TYPE = NA_character_,
+        MEASURED_TYPE = "Concentration",
         PARAMETER_NAME = "Copper",
         PARAMETER_NAME_SUB = NA_character_,
-        INCHIKEY_SD = NA_character_,
+        INCHIKEY_SD = "RYGMFSIKBFXOCR-UHFFFAOYSA-N",
         PUBCHEM_CID = NA_integer_,
         CAS_RN = "7440-50-8",
         ENTERED_BY = glue("{entered_by} from Vannmiljø"),
-        PARAMETER_COMMENT = NA_character_
+        PARAMETER_COMMENT = "NO: Kobber"
       )
   }
 
@@ -365,6 +369,8 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
 #' @export
 vm_create_edata_samples_table <- function(vm_intermediate) {
   edata_samples <- initialise_samples_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
+
     add_row(
       vm_intermediate |>
         select(any_of(names(initialise_samples_tibble())))
@@ -390,6 +396,7 @@ vm_create_edata_samples_table <- function(vm_intermediate) {
 #' @export
 vm_create_edata_biota_table <- function(vm_intermediate) {
   edata_biota <- initialise_biota_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(
       vm_intermediate |>
         filter(ENVIRON_COMPARTMENT == "Biota") |>
@@ -455,7 +462,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
       ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
       MEASURED_CATEGORY = NA_character_,
 
-      SAMPLING_DATE = as.character(SAMPLING_DATE),
+      SAMPLING_DATE = as.IDate(SAMPLING_DATE),
 
       # Sample information
       SUBSAMPLE = "NA",
@@ -580,7 +587,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
         ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
         MEASURED_CATEGORY = NA_character_,
 
-        SAMPLING_DATE = as.character(SAMPLING_DATE),
+        SAMPLING_DATE = as.IDate(SAMPLING_DATE),
 
         # Sample information
         SUBSAMPLE = "NA",
@@ -604,7 +611,8 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 
     # Merge biota and non-biota samples
     biota_samples_merged <- edata_samples_wide |>
-      bind_rows(vm_samples_biota_only)
+      filter(ENVIRON_COMPARTMENT != "Biota")
+    bind_rows(vm_samples_biota_only)
 
     message(glue(
       "Created intermediate table: {nrow(biota_samples_merged)} total samples ",
@@ -662,7 +670,7 @@ vm_create_edata_measurements_table <- function(
       # Core identifiers
       SITE_CODE,
       PARAMETER_NAME,
-      SAMPLING_DATE = as.character(SAMPLING_DATE),
+      SAMPLING_DATE = as.IDate(SAMPLING_DATE),
       CAMPAIGN_NAME_SHORT = campaign_name_short,
       REFERENCE_ID = reference_id,
 
@@ -710,6 +718,7 @@ vm_create_edata_measurements_table <- function(
 
   # Validate against eData schema
   edata_measurements <- initialise_measurements_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(edata_measurements)
 
   message(glue(

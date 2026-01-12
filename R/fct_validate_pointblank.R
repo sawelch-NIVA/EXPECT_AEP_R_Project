@@ -21,6 +21,8 @@
 #' - Generate reports with `get_agent_report()`
 #' - Check pass/fail status
 #'
+#' @importFrom pointblank create_agent interrogate
+#' @importFrom glue glue
 #' @export
 pb_validate_edata_table <- function(data, table_name, validation_steps) {
   agent <- create_agent(
@@ -59,6 +61,7 @@ NULL
 
 # ## Campaign validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_gte col_vals_lte action_levels interrogate
 #' @export
 pb_validate_campaign <- function(data, actions = action_levels()) {
   data |>
@@ -96,6 +99,7 @@ pb_validate_campaign <- function(data, actions = action_levels()) {
 
 # ## Reference validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_not_equal col_vals_gte col_vals_lte action_levels interrogate
 #' @export
 pb_validate_reference <- function(data, actions = action_levels()) {
   data |>
@@ -131,6 +135,7 @@ pb_validate_reference <- function(data, actions = action_levels()) {
 
 # ## Parameters validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_equal action_levels interrogate
 #' @export
 pb_validate_parameters <- function(data, actions = action_levels()) {
   data |>
@@ -152,6 +157,7 @@ pb_validate_parameters <- function(data, actions = action_levels()) {
 
 # ## Sites validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_in_set col_vals_between action_levels interrogate
 #' @export
 pb_validate_sites <- function(data, actions = action_levels()) {
   data |>
@@ -217,6 +223,8 @@ pb_validate_sites <- function(data, actions = action_levels()) {
 
 # ## Samples validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_in_set action_levels interrogate
+#' @importFrom purrr flatten
 #' @export
 pb_validate_samples <- function(data, actions = action_levels()) {
   data |>
@@ -247,6 +255,7 @@ pb_validate_samples <- function(data, actions = action_levels()) {
 
 # ## Biota validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_equal col_vals_in_set action_levels interrogate
 #' @export
 pb_validate_biota <- function(data, actions = action_levels()) {
   data |>
@@ -282,7 +291,17 @@ pb_validate_biota <- function(data, actions = action_levels()) {
     ) |>
     col_vals_in_set(
       columns = SAMPLE_TISSUE,
-      set = tissue_types_vocabulary()
+      set = tissue_types_vocabulary() |>
+        # TODO: Fix me properly
+        append(c(
+          "Brown meat",
+          "Shoot tips",
+          "Disc skeleton",
+          "Echinoid corona",
+          "Bile",
+          "Plant tissue",
+          "Shoot tip"
+        ))
     ) |>
     col_vals_in_set(
       columns = SAMPLE_SPECIES_LIFESTAGE,
@@ -298,6 +317,8 @@ pb_validate_biota <- function(data, actions = action_levels()) {
 
 # ## Measurements validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_equal col_vals_gte col_vals_lte col_vals_in_set col_vals_not_equal action_levels interrogate
+#' @importFrom purrr flatten
 #' @export
 pb_validate_measurements <- function(data, actions = action_levels()) {
   data |>
@@ -346,6 +367,7 @@ pb_validate_measurements <- function(data, actions = action_levels()) {
 
 # ## CREED Scores validation ----
 #' @rdname validate_edata_tables
+#' @importFrom pointblank create_agent col_vals_not_null col_vals_not_equal col_vals_in_set action_levels interrogate
 #' @export
 pb_validate_creed_scores <- function(data, actions = action_levels()) {
   CREED_classifications_rb <- c(

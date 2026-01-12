@@ -27,12 +27,9 @@ Translation
 
 # To Do:
 
--   [ ] Investigate some very strange detection and quantification limits
 -   [ ] Add probable contamination source
 -   [ ] More sanity checking of extracted values
--   [ ] Move boring code to targets
 -   [ ] Work out how to do CREED for this data, then implement.
--   [ ] Update to use shorted campaign names.
 
 ## Optional Improvements
 
@@ -50,7 +47,8 @@ Import required packages and set working directory to project root.
 
 knitr::opts_chunk$set(dev = "svglite") # otherwise some SVGs cause problems in firefox?
 
-library(dplyr)
+suppressMessages
+({library(dplyr)
 library(tidyr)
 library(stringr)
 library(lubridate)
@@ -67,15 +65,7 @@ library(knitr)
 library(devtools)
 library(tibble)
 library(pointblank)
-library(targets)
-
-validation_config <- list(
-  # For lookups: warn if ANY fail (we want to know), but don't stop (we'll investigate)
-  lookup = action_levels(warn_at = 0.0001, stop_at = NULL), # Never stops, always warns
-
-  # For critical stuff later: stop at 5% failure
-  standard = action_levels(warn_at = 0.01, stop_at = 0.05)
-)
+library(targets)})
 
 load_all()
 
@@ -1618,10 +1608,7 @@ Because Vannmiljø publish their methods data in a format similar to ours, the m
 ```{r}
 #| label: edata-methods
 
-# Merge and categorize
-edata_methods <- vm_lookup_methods
 
-message(glue("Created methods table: {nrow(edata_methods)} protocols"))
 ```
 
 ## Samples

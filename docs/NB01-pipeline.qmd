@@ -1,0 +1,49 @@
+---
+title: "Notebook 01 - Pipeline"
+author: "Sam Welch"
+date: last-modified
+---
+
+Report on the `targets` pipeline used for data analysis.
+
+# Todo:
+- [ ] Move pointblank to targets workflow
+
+@tbl-tar-meta flag any errors or warnings from target items.
+
+```{r}
+#| label: tbl-tar-meta
+library(targets)
+library(DT)
+tar_meta <- tar_meta()
+tar_meta |>
+  select(name, seconds, warnings, error) |>
+  mutate(
+    flagged = case_when(
+      !is.na(warnings) | !is.na(error) ~ TRUE,
+      .default = FALSE
+    )
+  ) |>
+  arrange(desc(flagged)) |>
+  datatable()
+```
+
+@tbl-tar-timing shows the slowest elements of the pipeline.
+
+```{r}
+#| label: tbl-tar-timing
+
+tar_meta |>
+  select(name, seconds, warnings, error) |>
+  arrange(desc(seconds)) |>
+  datatable()
+```
+
+Finally, we'd like to get an oversight of the size of all our table objects.
+
+
+```{r}
+#| label: tbl-tar-tables
+
+tar_load_everything()
+```
