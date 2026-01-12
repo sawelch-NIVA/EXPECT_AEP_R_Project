@@ -57,7 +57,7 @@ Copper is a highly conserved essential nutrient that is used in enzymes (what ki
 
 Conversely, copper can be toxic
 
- - Ref speciation chemistry from above
+-   Ref speciation chemistry from above
 
 \- Cite some of those AOP papers \[\] about copper toxicity, the BLM, etc.
 
@@ -79,7 +79,7 @@ Conversely, copper can be toxic
 
 ### Global Change in Arctic Regions
 
--   First technological development and now also climate change are opening arctic regions up to exploitation
+-   <https://www.vannportalen.no/miljotiltak/nedlagte-gruver/>First technological development and now also climate change are opening arctic regions up to exploitation
 -   Also more activity in near arctic
 -   War?
 
@@ -92,6 +92,7 @@ Conversely, copper can be toxic
     -   Antifoulants @brooks2009
     -   Fruit orchards
     -   Cars
+    -   Old mine waste @nedlagte
     -   Infrastructure
     -   Also a naturally occuring nutrient in soil/rock & therefore in ocean
     -   etc. (need to cite Stien's paper loads here)
@@ -99,7 +100,7 @@ Conversely, copper can be toxic
 -   I've got to guess that recycling copper from microcircuitry is expensive
 -   Cite that paper that uses LMs to extrapolate future copper demand
 -   Electrification, more stupid gadgets
--   Growing interest in indigenous copper resources as a strategic asset - c.f. horse trading over Nussir in Norway
+-   Growing interest in indigenous copper resources as a strategic asset - c.f. horse trading over Nussir in Norway @nussirasaNUSSIRProjectOverview2024
 -   Historically copper hasn't been mined in Norway since 1980s (?), but there's still a legacy of pollution
 
 # Materials and Methods
