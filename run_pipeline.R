@@ -1,4 +1,5 @@
 run_pipeline <- function(
+  destroy_all = FALSE,
   render_quarto = TRUE,
   deploy = FALSE,
   names = NULL,
@@ -7,6 +8,9 @@ run_pipeline <- function(
   # Setup Pushover credentials ----
   pushoverr::set_pushover_user(user = Sys.getenv("PUSHOVER_USER"))
   pushoverr::set_pushover_app(token = Sys.getenv("PUSHOVER_APP"))
+  if (destroy_all) {
+    targets::tar_destroy("all", ask = FALSE)
+  }
 
   tryCatch(
     {
@@ -70,3 +74,6 @@ run_pipeline <- function(
     }
   )
 }
+
+
+run_pipeline(destroy_all = FALSE, render_quarto = FALSE, deploy = FALSE)

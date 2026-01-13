@@ -4,19 +4,28 @@ author: "Sam Welch"
 date: last-modified
 ---
 
-Report on the `targets` pipeline used for data analysis.
+```{r}
+#| label: setup
 
-# Todo:
-- [ ] Move pointblank to targets workflow
+suppressPackageStartupMessages({
+  library(targets)
+  library(tidyverse)
+  library(DT)
+  tar_meta <- tar_meta(targets_only = TRUE)
+})
+```
 
-@tbl-tar-meta flag any errors or warnings from target items.
+This project uses the `targets` package [@landauTargetsPackageDynamic2021] and its extension `tarchetypes` [@landauTarchetypesArchetypesTargets2021] to construct a reproducible analysis and reporting pipeline. This is further enhanced using `pointblank` [@iannonePointblankDataValidation2025] to validate and report on the state of data throughout the pipeline.  
+
+For a technical explanation of the function of packages, we refer the reader to their respective repositories and documentation. This file contains reporting on the structure, state, and validation of the pipeline and its data objects. It is included as a notebook for the sake of completeness and transparency. 
+
+Each `targets` `tar_target(name, command = {})` call executes the code passed to the command argument and saves it to a data store as a a file (in our case, a `qs` file for improved performance). A hash of the file is also saved to a cross-reference table, which `targets` uses to determine when a given file has changed since the last runthrough of the pipeline. targets can depend on other targets, in which case if a target upstream is invalidated, so will its descendents, direct or indirect. Thus when we change elements of the source data, at the very beginning of the pipeline, only those data cleaning and analyses steps that are actually no longer up-to-date will be re-executed.
+
+@tbl-tar-meta is set to flag any errors or warnings from target items.
 
 ```{r}
 #| label: tbl-tar-meta
-library(targets)
-library(tidyverse)
-library(DT)
-tar_meta <- tar_meta()
+
 tar_meta |>
   select(name, seconds, warnings, error) |>
   mutate(
@@ -47,4 +56,12 @@ Finally, we'd like to get an oversight of the size of all our table objects.
 #| label: tbl-tar-tables
 
 # tar_load_everything()
+```
+
+@fig-tar-network shows a network diagram of the pipeline. It's complex and rather difficult to follow.
+
+```{r}
+#| label: fig-tar-network
+
+suppressMessages(tar_visnetwork(targets_only = TRUE))
 ```

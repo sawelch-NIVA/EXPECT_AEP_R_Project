@@ -9,32 +9,34 @@ date: last-modified
 #| label: targets-setup
 #| warning: false
 #| output: false
-library(DT)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(forcats)
-library(viridis)
-library(stringr)
-library(ggridges)
-library(ggh4x)
-library(tidygraph)
-library(ggraph)
-library(ggiraph)
-library(leaflet)
-library(sf)
-library(shiny)
-library(dplyr)
-library(bslib)
-library(ggtext)
-library(data.table)
-library(eDataDRF)
+suppressPackageStartupMessages({
+  library(DT)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(forcats)
+  library(viridis)
+  library(stringr)
+  library(ggridges)
+  library(ggh4x)
+  library(tidygraph)
+  library(ggraph)
+  library(ggiraph)
+  library(leaflet)
+  library(sf)
+  library(shiny)
+  library(dplyr)
+  library(bslib)
+  library(ggtext)
+  library(data.table)
+  library(eDataDRF)
 
-library(here)
-library(targets)
-library(devtools)
+  library(here)
+  library(targets)
+  library(devtools)
 
-devtools::load_all()
+  load_all()
+})
 
 theme_set(theme_minimal())
 ```
@@ -171,8 +173,33 @@ compartment_site_complete |>
 
 For the sake of starting somewhere, we can start by defining each combination of compartment and site type in coastal, estuary, and marine water as a node.
 
+This graph is still fairly bad, mind you.
+
 ```{r}
-coastal_complex_combinations <- compartment_site_summary |>
+unique_compartments_and_sites_wmean <- literature_merged_data |>
+  select(
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB,
+    MEASURED_N,
+    MEASURED_VALUE_STANDARD
+  ) |>
+  distinct() |>
+  filter(if_all(everything(), ~ !is.na(.))) |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE,
+    ENVIRON_COMPARTMENT_SUB
+  ) |>
+  reframe(
+    sum_n = sum(MEASURED_N),
+    mean_value = mean(MEASURED_VALUE_STANDARD)
+    modal_unit = names(which.max(MEASURED_UNIT_STANDARD)) # broken
+  ) |>
+  mutate(compartment_name_n = glue::glue("{ENVIRON_COMPARTMENT_SUB}\n{sum_n}"))
+
+
+coastal_complex_combinations <- unique_compartments_and_sites_wmean |>
   filter(
     SITE_GEOGRAPHIC_FEATURE %in%
       c("Coastal, fjord", "Ocean, sea, territorial waters", "Estuary")
@@ -180,6 +207,18 @@ coastal_complex_combinations <- compartment_site_summary |>
   mutate(
     SITE_x_SUB = glue("{SITE_GEOGRAPHIC_FEATURE} x {ENVIRON_COMPARTMENT_SUB}")
   )
+
+ggplot(
+  coastal_complex_combinations,
+  mapping = aes(
+    x = SITE_GEOGRAPHIC_FEATURE,
+    y = ENVIRON_COMPARTMENT_SUB,
+    colour = mean_value,
+    size = sum_n
+  )
+) +
+  scale_colour_viridis_b() +
+  geom_point(position = position_jitter(0.2, 0.2))
 
 ```
 

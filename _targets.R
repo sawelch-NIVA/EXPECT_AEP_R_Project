@@ -171,22 +171,7 @@ list(
       )
   ),
 
-  #### # Analysis methods lookup ----
-  # tar_target(
-  #   vm_lookup_analysis,
-  #   read_excel("data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx")
-  # ),
-
-  #### # Sampling methods lookup ----
-  # tar_target(
-  #   vm_lookup_sampling,
-  #   read_excel(
-  #     "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
-  #   )
-  # ),
-
   #### # Methods lookup ----
-  # TODO: Bit of methods lookup redundancy here, buddy.
   tar_target(
     vm_lookup_methods,
     {
@@ -420,6 +405,7 @@ list(
   #### # Intermediate samples-biota table ----
   # This table contains both eData columns AND original Vannmiljø columns
   # It's used to create samples, biota, and measurements tables
+  # FIXME: SUBSAMPLE is curretnly just NA
   tar_target(
     vm_edata_intermediate,
     vm_create_intermediate_samples_biota_table(vm_data = vm_sites_split_clean)
@@ -441,8 +427,9 @@ list(
   tar_target(
     vm_edata_measurements,
     vm_create_edata_measurements_table(
-      # TODO: ain't got time for upper limits of detection.
-      vm_intermediate = vm_edata_intermediate |> filter(Operator != ">"),
+      # TODO: Some cases where LOD/LOQ = ">", we ignore these.
+      vm_edata_intermediate = vm_edata_intermediate |> filter(Operator != ">"),
+      vm_lookup_methods = vm_lookup_methods,
       campaign_name_short = "Vm_2010_2025",
       reference_id = "VannmiljøCopper2010-2025"
     )
@@ -460,23 +447,25 @@ list(
       sites = vm_edata_sites,
       samples = vm_edata_samples,
       biota = vm_edata_biota,
-      measurements = vm_edata_measurements
+      measurements = vm_edata_measurements,
+      agent = FALSE
     )
   ),
 
   #### # Send a warning if something fails
-  tar_target(
-    vm_edata_validation_report,
-    {
-      if (
-        !all(map_lgl(vm_edata_validation, .f = \(x) {
-          all_passed(x)
-        }))
-      ) {
-        warning("Error(s) in Vannmiljø validation.")
-      }
-    }
-  ),
+  # Fixme: Seems not to work rn
+  # tar_target(
+  #   vm_edata_validation_report,
+  #   {
+  #     if (
+  #       !all(map_lgl(vm_edata_validation, .f = \(x) {
+  #         all_passed(x)
+  #       }))
+  #     ) {
+  #       warning("Error(s) in Vannmiljø validation.")
+  #     }
+  #   }
+  # ),
 
   #### # CREED Scores table ----
   # doesn't exist yet, haven't worked out how to do it
@@ -561,46 +550,62 @@ list(
   #### # Campaign data ----
   tar_target(
     name = campaign_data,
-    command = fread_all_module_files(
-      campaign_files,
-      initialise_campaign_tibble
-    ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_campaign)
+    command = {
+      fread_all_module_files(
+        campaign_files,
+        initialise_campaign_tibble
+      ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_campaign) |>
+        pb_validate_campaign(agent = FALSE)
+    }
   ),
 
   #### # Reference data ----
   tar_target(
     name = reference_data,
-    command = fread_all_module_files(
-      reference_files,
-      initialise_references_tibble
-    ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_reference)
+    command = {
+      fread_all_module_files(
+        reference_files,
+        initialise_references_tibble
+      ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_reference) |>
+        pb_validate_reference(agent = FALSE)
+    }
   ),
 
   #### # Sites data ----
   tar_target(
     name = sites_data,
-    command = fread_all_module_files(sites_files, initialise_sites_tibble) |>
-      # some dates are still messed up
-      mutate(
-        ENTERED_DATE = parse_date_time(ENTERED_DATE, orders = c("ymd", "dmy"))
-      ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_sites)
+    command = {
+      fread_all_module_files(sites_files, initialise_sites_tibble) |>
+        # some dates are still messed up
+        mutate(
+          ENTERED_DATE = parse_date_time(ENTERED_DATE, orders = c("ymd", "dmy"))
+        ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_sites) |>
+        pb_validate_sites(agent = FALSE)
+    }
   ),
 
   #### # Parameters data ----
   tar_target(
     name = parameters_data,
-    command = fread_all_module_files(
-      parameters_files,
-      initialise_parameters_tibble
-    ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_parameters)
+    command = {
+      # As we only have copper data there's no reason to overcomplicate things
+      # and a parameters table with more than one row will cause our
+      # joined dataset to grow proportionally
+      # fread_all_module_files(
+      #   parameters_files,
+      #   initialise_parameters_tibble
+      # ) |>
+      #   standardise_IDate_all() |>
+      vm_edata_parameters |>
+        pb_validate_parameters(agent = FALSE) |>
+        row_count_match(count = 1)
+    }
   ),
 
   #### # Compartments data ----
@@ -608,11 +613,13 @@ list(
   # and it was only ever an intermediate step anyway
   tar_target(
     name = compartments_data,
-    command = fread_all_module_files(
-      compartments_files,
-      initialise_compartments_tibble
-    ) |>
-      standardise_IDate_all()
+    command = {
+      fread_all_module_files(
+        compartments_files,
+        initialise_compartments_tibble
+      ) |>
+        standardise_IDate_all()
+    }
   ),
 
   #### # Methods data ----
@@ -627,29 +634,42 @@ list(
         vm_lookup_methods |>
           select(-ISO_ID)
       )
+    # TODO: Set up method validation
   ),
 
   #### # Samples data ----
   tar_target(
     name = samples_data,
-    command = fread_all_module_files(
-      samples_files,
-      initialise_samples_tibble
-    ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_samples)
+    # todo: the column SUBSAMPLE_ID is in initialise_samples_tibble() but not
+    # any of our data extracted from the app. fread() warns us that it can't
+    # find it in the CSVs, but as this is fine I've chosen to suppress.
+    command = {
+      suppressWarnings(fread_all_module_files(
+        samples_files,
+        initialise_samples_tibble
+      )) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_samples) |>
+        pb_validate_samples(agent = FALSE)
+    }
   ),
 
   #### # Biota data ----
   tar_target(
     name = biota_data,
-    command = fread_all_module_files(biota_files, initialise_biota_tibble) |>
-      # some dates are still messed up
-      mutate(
-        SAMPLING_DATE = parse_date_time(SAMPLING_DATE, orders = c("ymd", "dmy"))
-      ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_biota)
+    command = {
+      fread_all_module_files(biota_files, initialise_biota_tibble) |>
+        # some dates are still messed up
+        mutate(
+          SAMPLING_DATE = parse_date_time(
+            SAMPLING_DATE,
+            orders = c("ymd", "dmy")
+          )
+        ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_biota) |>
+        pb_validate_biota(agent = FALSE)
+    }
   ),
 
   #### # Measurements data ----
@@ -657,25 +677,35 @@ list(
     name = measurements_data,
     # some measurement files are missing MEASUREMENT_COMMENT
     # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
-    command = suppressWarnings(fread_all_module_files(
-      measurements_files,
-      initialise_measurements_tibble
-    )) |> # some dates are still messed up
-      mutate(
-        SAMPLING_DATE = parse_date_time(SAMPLING_DATE, orders = c("ymd", "dmy"))
-      ) |>
-      standardise_IDate_all() |>
-      add_row(vm_edata_measurements)
+    command = {
+      suppressWarnings(fread_all_module_files(
+        measurements_files,
+        initialise_measurements_tibble
+      )) |> # some dates are still messed up
+        mutate(
+          SAMPLING_DATE = parse_date_time(
+            SAMPLING_DATE,
+            orders = c("ymd", "dmy")
+          ),
+          PARAMETER_NAME = "Copper" # and for some reason this is blank somewhere
+        ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_measurements) |>
+        pb_validate_measurements(agent = FALSE)
+    }
   ),
 
   #### # CREED scores data ----
   # FIXME: Enable once we have CREED data
   tar_target(
     name = creed_scores_data,
-    command = fread_all_module_files(
-      creed_scores_files,
-      initialise_CREED_scores_tibble
-    )
+    command = {
+      fread_all_module_files(
+        creed_scores_files,
+        initialise_CREED_scores_tibble
+      ) |>
+        pb_validate_creed_scores(agent = FALSE)
+    }
   ),
 
   ### # Get biota common names ----
@@ -706,38 +736,48 @@ list(
       parameters = parameters_data,
       sites = sites_data,
       samples = samples_data,
-      biota = biota_data,
-      measurements = measurements_data
+      biota = API_biota_common_names,
+      measurements = measurements_data,
+      agent = FALSE
     )
   ),
 
-  tar_target(
-    data_validation_report,
-    {
-      if (
-        !all(map_lgl(data_validation, .f = \(x) {
-          all_passed(x)
-        }))
-      ) {
-        warning("Error(s) in validation of all data.")
-      }
-    }
-  ),
+  # tar_target(
+  #   data_validation_report,
+  #   {
+  #     if (
+  #       !all(map_lgl(data_validation, .f = \(x) {
+  #         all_passed(x)
+  #       }))
+  #     ) {
+  #       warning("Error(s) in validation of all data.")
+  #     }
+  #   }
+  # ),
 
   ### # Join eData into single table ----
   # TODO: extend for creed (which is largely missing)
   tar_target(
     name = literature_joined,
-    command = join_all_literature_modules(
-      measurements_data = measurements_data,
-      sites_data = sites_data,
-      reference_data = reference_data,
-      biota_data = API_biota_common_names,
-      campaign_data = campaign_data,
-      parameters_data = parameters_data,
-      methods_data = methods_data
-    )
+    command = {
+      # dataset should be the same number of rows at beginning and end
+      # joining can cause row duplication, best to be careful
+      target_rows <- nrow(measurements_data)
+
+      join_all_literature_modules(
+        measurements_data = measurements_data,
+        sites_data = sites_data,
+        reference_data = reference_data,
+        biota_data = API_biota_common_names, # FIXME: problems
+        campaign_data = campaign_data,
+        parameters_data = parameters_data,
+        methods_data = methods_data
+      ) |>
+        row_count_match(target_rows)
+    }
   ),
+
+  ### # Validate our joined eData
 
   ### # Clean joined eData ----
   # Currently columns_to_drop is empty, so we don't drop anything...

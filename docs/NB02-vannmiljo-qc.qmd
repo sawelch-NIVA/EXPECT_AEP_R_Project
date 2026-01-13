@@ -2,7 +2,9 @@
 title: "NB02 3: Vannmiljø QC"
 ---
 
-I am also confused over notebook numbering. We'll sort it out at some point.
+I am also confused over notebook numbering. We'll sort it out at some point. 
+
+# FIXME: Doesn't work rn because we're having an issue with the validation function. W/e.
 
 This appendix documents the data quality validation results for Vannmiljø data converted to eData format.
 ```{r}

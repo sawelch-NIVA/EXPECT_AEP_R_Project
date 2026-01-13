@@ -7,7 +7,11 @@ execute:
 # Introduction
 
 ::: callout-important
-## Please see the notebooks (especially NB03) for the most up-to-date changes.
+## Please see the notebooks (especially Visualisation) for the most up-to-date changes.
+
+I've taken the slightly unusual step of sharing this manuscript as a website. I know we're all used to word documents, but this spares me the effort of having to paste in new graphs every time I update the analysis (which is often). As most of the work is currently (mid Jan 2026) technical, the most frequently updated sections are the various notebooks (in the sidebar). Once I feel an area of analysis is mature, I'll choose the most informative bits and write up a summary in the main manuscript.
+
+If you want to leave a comment on something, you can do so using the panel to the far right (click the little eye button). I've never used this service before but I hope it will be a satisfactory alternative to Word's comments feature.
 :::
 
 Copper is a vital resource in both biology and engineering due to its useful chemical and biological properties. Demand for copper is likely to grow significantly in coming decades due to demand in manufacturing and infrastructure [@schipperEstimatingGlobalCopper2018].

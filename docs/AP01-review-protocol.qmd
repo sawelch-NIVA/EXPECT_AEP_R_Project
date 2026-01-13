@@ -67,3 +67,7 @@ This question was selected on the following basis:
 -   Patterns of stress on the Norwegian Arctic ecosystem is likely to change considerably over coming decades, likely to the detriment of existing biota
 
 -   Although copper is unlikely to be a risk driver for Arctic ecosystems, its status as a well-studied classical stressor and shared ROS-based (partial) mode of action makes it an ideal test subject for AEP construction
+
+## PRSIMA-5: Specify the inclusion and exclusion criteria for the review and how studies were grouped for the syntheses
+
+## PRISMA-6: Specify all databases, registers, websites, organisations, reference lists, and other sources searched or consulted to identify studies. Specify the date when each source was last searched or consulted.

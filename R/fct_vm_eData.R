@@ -661,11 +661,26 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 #'
 #' @export
 vm_create_edata_measurements_table <- function(
-  vm_intermediate,
+  vm_edata_intermediate,
+  vm_lookup_methods,
   campaign_name_short,
   reference_id
 ) {
-  edata_measurements <- vm_intermediate |>
+  # join methods lookup for sampling and analytical protocols
+  # TODO: this probably isn't the place for this methods transformation
+  vm_edata_intermediate_methods <- vm_edata_intermediate |>
+    left_join(
+      vm_lookup_methods |> select(ISO_ID, PROTOCOL_ID),
+      by = c("Provetakmetode_id" = "ISO_ID")
+    ) |>
+    rename(SAMPLING_PROTOCOL = PROTOCOL_ID) |>
+    left_join(
+      vm_lookup_methods |> select(ISO_ID, PROTOCOL_ID),
+      by = c("Analysemetode_id" = "ISO_ID")
+    ) |>
+    rename(ANALYTICAL_PROTOCOL = PROTOCOL_ID)
+
+  edata_measurements <- vm_edata_intermediate |>
     mutate(
       # Core identifiers
       SITE_CODE,
@@ -705,6 +720,7 @@ vm_create_edata_measurements_table <- function(
 
       # TODO: Fix methods reference
       # Protocol references (FIXME: Need proper protocol ID mapping)
+      # left join to vm_lookup_methods using Provetakmetode_id and Analysmethod
       SAMPLING_PROTOCOL = "1",
       EXTRACTION_PROTOCOL = "2",
       FRACTIONATION_PROTOCOL = "3",
