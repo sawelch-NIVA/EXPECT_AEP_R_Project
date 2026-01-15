@@ -31,7 +31,7 @@ suppressMessages(
     i_am("README.md")
     tar_config_set(store = here("_targets"))
 
-    load_all()
+    load_all(quiet = TRUE)
   }
 )
 

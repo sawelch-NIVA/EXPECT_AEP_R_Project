@@ -35,7 +35,7 @@ suppressPackageStartupMessages({
   library(targets)
   library(devtools)
 
-  load_all()
+  load_all(quiet = TRUE)
 })
 
 theme_set(theme_minimal())
@@ -183,7 +183,8 @@ unique_compartments_and_sites_wmean <- literature_merged_data |>
     ENVIRON_COMPARTMENT,
     ENVIRON_COMPARTMENT_SUB,
     MEASURED_N,
-    MEASURED_VALUE_STANDARD
+    MEASURED_VALUE_STANDARD,
+    MEASURED_UNIT_STANDARD
   ) |>
   distinct() |>
   filter(if_all(everything(), ~ !is.na(.))) |>
@@ -193,8 +194,8 @@ unique_compartments_and_sites_wmean <- literature_merged_data |>
   ) |>
   reframe(
     sum_n = sum(MEASURED_N),
-    mean_value = mean(MEASURED_VALUE_STANDARD)
-    modal_unit = names(which.max(MEASURED_UNIT_STANDARD)) # broken
+    mean_value = mean(MEASURED_VALUE_STANDARD),
+    MEASURED_UNIT_STANDARD = first(MEASURED_UNIT_STANDARD)
   ) |>
   mutate(compartment_name_n = glue::glue("{ENVIRON_COMPARTMENT_SUB}\n{sum_n}"))
 
@@ -213,12 +214,34 @@ ggplot(
   mapping = aes(
     x = SITE_GEOGRAPHIC_FEATURE,
     y = ENVIRON_COMPARTMENT_SUB,
-    colour = mean_value,
-    size = sum_n
+    fill = mean_value
   )
 ) +
-  scale_colour_viridis_b() +
-  geom_point(position = position_jitter(0.2, 0.2))
+  scale_fill_viridis_b() +
+  geom_tile(aes(
+    alpha = sum_n
+  )) +
+  geom_text(aes(
+    label = glue(
+      "n = {sum_n}
+       m = {round(mean_value, 3)} {MEASURED_UNIT_STANDARD}"
+    )
+  ))
+
+```
+
+Or something else:
+
+```{r}
+ggplot(
+  literature_merged_data,
+  mapping = aes(
+    x = SITE_GEOGRAPHIC_FEATURE,
+    y = MEASURED_VALUE_STANDARD
+  )
+) +
+  geom_boxplot() +
+  scale_y_log10()
 
 ```
 

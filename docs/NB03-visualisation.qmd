@@ -34,7 +34,7 @@ library(eDataDRF)
 library(here)
 library(targets)
 
-devtools::load_all()
+devtools::load_all(quiet = TRUE)
 ```
 
 ```{r}

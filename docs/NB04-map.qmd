@@ -19,7 +19,9 @@ library(eDataDRF)
 library(targets)
 library(devtools)
 
-load_all() # TODO: Reduce render time by sourcing only what we specifically need?
+suppressMessages(
+  load_all(quiet = TRUE)
+) # TODO: Reduce render time by sourcing only what we specifically need?
 ```
 
 ```{r}
@@ -166,4 +168,57 @@ study_lines_sf <- study_lines |>
 #| label: fig-sampling-map
 #| warning: false
 
+# First, ensure leaflet.extras2 is loaded (add to setup chunk)
+# library(leaflet.extras2)
+
+# Prepare data for hexbin - needs coordinates and a value for intensity
+hexbin_data <- data_sf |>
+  st_drop_geometry() |>
+  group_by(LATITUDE, LONGITUDE) |>
+  summarise(
+    sample_size = sum(MEASURED_N, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  filter(!is.na(LATITUDE), !is.na(LONGITUDE))
+
+# Create the map with hexbins
+leaflet() |>
+  addProviderTiles(providers$CartoDB.Positron) |>
+  addHexbin(
+    lng = hexbin_data$LONGITUDE,
+    lat = hexbin_data$LATITUDE,
+    options = hexbinOptions(
+      colorRange = c("#440154", "#21918c", "#fde725"), # viridis-ish
+      radiusRange = c(10, 20),
+      opacity = 0.7,
+      colorScaleExtent = c(
+        min(hexbin_data$sample_size, na.rm = TRUE),
+        max(hexbin_data$sample_size, na.rm = TRUE)
+      )
+    )
+  ) |>
+  # Keep your existing polygon layers if desired
+
+  addPolygons(
+    data = wgs84_geo$marine_polys,
+    fillColor = ~ ifelse(
+      highlight_name,
+      marine_colors$highlight,
+      marine_colors$default
+    ),
+    fillOpacity = 0.2,
+    weight = 1,
+    color = "darkblue"
+  ) |>
+  addPolygons(
+    data = wgs84_geo$countries,
+    fillColor = ~ ifelse(
+      highlight_name,
+      country_colours$highlight,
+      country_colours$default
+    ),
+    fillOpacity = 0.2,
+    weight = 1,
+    color = "darkgreen"
+  )
 ```

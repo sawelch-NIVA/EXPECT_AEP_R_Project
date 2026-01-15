@@ -1,18 +1,36 @@
 # Created by use_targets().
 
-# # Load packages required to define the pipeline ----
-library(targets)
-library(tarchetypes) # better factories for watching many files
-library(eDataDRF) # schema/vocab functions
-library(crew) # parallel processing, faster execution?
-library(here) # salvage something from the horrible mess that is quarto working directories
-library(devtools) # load all functions
-library(quarto) # make beautiful documents, eventually
-library(pointblank)
-library(dplyr)
+# TODO: What might be useful.
+# If we hit an error
+# call tar workspace
+# if triggered by pointblank sets, RETURN THE FAILING DATA
 
-i_am("Readme.md") # set wd to project root
-load_all(path = here())
+# # Load packages required to define the pipeline ----
+suppressPackageStartupMessages({
+  library(targets)
+  library(tarchetypes) # better factories for watching many files
+  library(eDataDRF) # schema/vocab functions
+  library(crew) # parallel processing, faster execution?
+  library(here) # salvage something from the horrible mess that is quarto working directories
+  library(devtools) # load all functions
+  library(quarto) # make beautiful documents, eventually
+  library(pointblank)
+  library(dplyr)
+})
+
+suppressMessages({
+  i_am("Readme.md") # set wd to project root
+  load_all(path = here())
+})
+
+# set pointblank action levels - when do we flag issues as serious
+pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.1)
+
+options(
+  targets.verbose = FALSE, # less chatter from targets itself
+  pointblank.verbose = FALSE # if this option exists (not sure)
+)
+
 
 # # Set target options ----
 tar_option_set(
@@ -179,12 +197,14 @@ list(
         "data/clean/vm_methods_lookup_filled.csv",
         show_col_types = FALSE
       ) |>
+        group_by(PROTOCOL_CATEGORY, PROTOCOL_NAME) |>
+        mutate(n = row_number()) |>
         mutate(
           CAMPAIGN_NAME = "Vm_2010_2025",
           PROTOCOL_ID = generate_protocol_id(
             PROTOCOL_CATEGORY,
             PROTOCOL_NAME,
-            1,
+            n,
             "Vm_2010_2025"
           )
         )
@@ -351,15 +371,21 @@ list(
   #### # Campaign table ----
   tar_target(
     vm_edata_campaign,
-    vm_create_edata_campaign_table(
-      vm_data = vm_sites_split_clean,
-      campaign_name_short = "Vm_2010_2025",
-      campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
-      date_start = as.IDate("2010-01-01"),
-      date_end = as.IDate("2025-12-05"),
-      organisation = "Miljødirektoratet",
-      entered_by = "Sam Welch"
-    )
+    {
+      vm_create_edata_campaign_table(
+        vm_data = vm_sites_split_clean,
+        campaign_name_short = "Vm_2010_2025",
+        campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
+        date_start = as.IDate("2010-01-01"),
+        date_end = as.IDate("2025-12-05"),
+        organisation = "Miljødirektoratet",
+        entered_by = "Sam Welch"
+      ) |>
+        mutate(
+          source_file = "vannmiljø data transferred directly in _targets.R",
+          read_timestamp = as.Date(today())
+        )
+    }
   ),
 
   #### # Reference table ----
@@ -414,7 +440,9 @@ list(
   #### # Samples table ----
   tar_target(
     vm_edata_samples,
-    vm_create_edata_samples_table(vm_intermediate = vm_edata_intermediate)
+    vm_create_edata_samples_table(vm_intermediate = vm_edata_intermediate) |>
+      # check number of rows hasn't changed
+      row_count_match(count = nrow(vm_edata_intermediate))
   ),
 
   #### # Biota table ----
@@ -448,24 +476,26 @@ list(
       samples = vm_edata_samples,
       biota = vm_edata_biota,
       measurements = vm_edata_measurements,
-      agent = FALSE
+      creed_scores = NULL,
+      actions = action_levels(),
+      agent = TRUE
     )
   ),
 
   #### # Send a warning if something fails
   # Fixme: Seems not to work rn
-  # tar_target(
-  #   vm_edata_validation_report,
-  #   {
-  #     if (
-  #       !all(map_lgl(vm_edata_validation, .f = \(x) {
-  #         all_passed(x)
-  #       }))
-  #     ) {
-  #       warning("Error(s) in Vannmiljø validation.")
-  #     }
-  #   }
-  # ),
+  tar_target(
+    vm_edata_validation_report,
+    {
+      if (
+        !all(map_lgl(vm_edata_validation, .f = \(x) {
+          all_passed(x)
+        }))
+      ) {
+        warning("Error(s) in Vannmiljø validation.")
+      }
+    }
+  ),
 
   #### # CREED Scores table ----
   # doesn't exist yet, haven't worked out how to do it
@@ -547,6 +577,31 @@ list(
   # things are formatted how they should be (mostly works, see SAMPLING_DATE).
   # Uses data.table::fread for faster reading.
 
+  #### # Measurements data ----
+  # * We load measurements first because it's essentially the central table of
+  # * our schema and we validate other tables against it
+  tar_target(
+    name = measurements_data,
+    # some measurement files are missing MEASUREMENT_COMMENT
+    # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
+    command = {
+      suppressWarnings(fread_all_module_files(
+        measurements_files,
+        initialise_measurements_tibble
+      )) |> # some dates are still messed up
+        mutate(
+          SAMPLING_DATE = parse_date_time(
+            SAMPLING_DATE,
+            orders = c("ymd", "dmy")
+          ),
+          PARAMETER_NAME = "Copper" # and for some reason this is blank somewhere
+        ) |>
+        standardise_IDate_all() |>
+        add_row(vm_edata_measurements) |>
+        pb_validate_measurements(agent = FALSE, actions = pb_action_levels)
+    }
+  ),
+
   #### # Campaign data ----
   tar_target(
     name = campaign_data,
@@ -557,7 +612,13 @@ list(
       ) |>
         standardise_IDate_all() |>
         add_row(vm_edata_campaign) |>
-        pb_validate_campaign(agent = FALSE)
+        pb_validate_campaign(agent = FALSE, actions = pb_action_levels) |>
+        # do we have 1+ measurement corresponding to every campaign
+        col_vals_in_set(
+          columns = CAMPAIGN_NAME_SHORT,
+          set = unique(measurements_data$CAMPAIGN_NAME_SHORT),
+          actions = pb_action_levels
+        )
     }
   ),
 
@@ -571,7 +632,13 @@ list(
       ) |>
         standardise_IDate_all() |>
         add_row(vm_edata_reference) |>
-        pb_validate_reference(agent = FALSE)
+        pb_validate_reference(agent = FALSE, actions = pb_action_levels) |>
+        col_vals_in_set_verbose(
+          columns = REFERENCE_ID,
+          set = unique(measurements_data$REFERENCE_ID),
+          actions = pb_action_levels,
+          value_name = "Reference IDs"
+        )
     }
   ),
 
@@ -586,7 +653,13 @@ list(
         ) |>
         standardise_IDate_all() |>
         add_row(vm_edata_sites) |>
-        pb_validate_sites(agent = FALSE)
+        pb_validate_sites(agent = FALSE, actions = pb_action_levels) |>
+        # do we have 1+ measurement corresponding to every site
+        col_vals_in_set(
+          columns = SITE_CODE,
+          set = measurements_data$SITE_CODE,
+          actions = pb_action_levels
+        )
     }
   ),
 
@@ -603,7 +676,7 @@ list(
       # ) |>
       #   standardise_IDate_all() |>
       vm_edata_parameters |>
-        pb_validate_parameters(agent = FALSE) |>
+        pb_validate_parameters(agent = FALSE, actions = pb_action_levels) |>
         row_count_match(count = 1)
     }
   ),
@@ -625,17 +698,75 @@ list(
   #### # Methods data ----
   tar_target(
     name = methods_data,
-    command = fread_all_module_files(
-      methods_files,
-      initialise_methods_tibble
-    ) |>
-      standardise_IDate_all() |>
-      add_row(
-        vm_lookup_methods |>
-          select(-ISO_ID)
-      )
-    # TODO: Set up method validation
+    command = {
+      fread_all_module_files(
+        methods_files,
+        initialise_methods_tibble
+      ) |>
+        standardise_IDate_all() |>
+        add_row(
+          vm_lookup_methods |>
+            select(-ISO_ID, -n)
+        ) |>
+        pb_validate_methods(agent = FALSE)
+    }
   ),
+
+  #### # Validate methods table against measurements table
+  tar_target(name = methods_data_validation, command = {
+    methods_agent <- create_agent(methods_data)
+    # are all our methods used?
+    create_agent(measurements_data) |>
+      col_vals_make_set(
+        brief = "Flag sampling protocols with ID not in methods_data table",
+        columns = SAMPLING_PROTOCOL,
+        set = pull(
+          filter(
+            methods_data,
+            PROTOCOL_CATEGORY == "Sampling Protocol"
+          ),
+          PROTOCOL_ID
+        ),
+        actions = pb_action_levels
+      ) |>
+      col_vals_make_set(
+        brief = "Flag analytical protocols with ID not in methods_data table",
+        columns = ANALYTICAL_PROTOCOL,
+        set = pull(
+          filter(
+            methods_data,
+            PROTOCOL_CATEGORY == "Analytical Protocol"
+          ),
+          PROTOCOL_ID
+        ),
+        actions = pb_action_levels
+      ) |>
+      col_vals_make_set(
+        brief = "Flag fractionation protocols with ID not in methods_data table",
+        columns = FRACTIONATION_PROTOCOL,
+        set = pull(
+          filter(
+            methods_data,
+            PROTOCOL_CATEGORY == "Fractionation Protocol"
+          ),
+          PROTOCOL_ID
+        ),
+        actions = pb_action_levels
+      ) |>
+      col_vals_make_set(
+        brief = "Flag extraction protocols with ID not in methods_data table",
+        columns = EXTRACTION_PROTOCOL,
+        set = pull(
+          filter(
+            methods_data,
+            PROTOCOL_CATEGORY == "Extraction Protocol"
+          ),
+          PROTOCOL_ID
+        ),
+        actions = pb_action_levels
+      ) |>
+      interrogate()
+  }),
 
   #### # Samples data ----
   tar_target(
@@ -650,7 +781,7 @@ list(
       )) |>
         standardise_IDate_all() |>
         add_row(vm_edata_samples) |>
-        pb_validate_samples(agent = FALSE)
+        pb_validate_samples(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
@@ -668,30 +799,7 @@ list(
         ) |>
         standardise_IDate_all() |>
         add_row(vm_edata_biota) |>
-        pb_validate_biota(agent = FALSE)
-    }
-  ),
-
-  #### # Measurements data ----
-  tar_target(
-    name = measurements_data,
-    # some measurement files are missing MEASUREMENT_COMMENT
-    # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
-    command = {
-      suppressWarnings(fread_all_module_files(
-        measurements_files,
-        initialise_measurements_tibble
-      )) |> # some dates are still messed up
-        mutate(
-          SAMPLING_DATE = parse_date_time(
-            SAMPLING_DATE,
-            orders = c("ymd", "dmy")
-          ),
-          PARAMETER_NAME = "Copper" # and for some reason this is blank somewhere
-        ) |>
-        standardise_IDate_all() |>
-        add_row(vm_edata_measurements) |>
-        pb_validate_measurements(agent = FALSE)
+        pb_validate_biota(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
@@ -704,7 +812,7 @@ list(
         creed_scores_files,
         initialise_CREED_scores_tibble
       ) |>
-        pb_validate_creed_scores(agent = FALSE)
+        pb_validate_creed_scores(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
@@ -738,7 +846,8 @@ list(
       samples = samples_data,
       biota = API_biota_common_names,
       measurements = measurements_data,
-      agent = FALSE
+      agent = FALSE,
+      actions = pb_action_levels
     )
   ),
 

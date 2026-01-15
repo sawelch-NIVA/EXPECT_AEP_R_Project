@@ -24,7 +24,7 @@ suppressMessages(
 
     i_am("README.md")
 
-    load_all()
+    load_all(quiet = TRUE)
   }
 )
 

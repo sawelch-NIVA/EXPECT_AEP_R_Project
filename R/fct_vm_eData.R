@@ -448,7 +448,8 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
   edata_samples_wide <- vm_data |>
     filter(
       ENVIRON_COMPARTMENT_resolved != "FLAG: Compartment conflict.",
-      ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict."
+      ENVIRON_COMPARTMENT_SUB_resolved != "FLAG: Compartment conflict.",
+      ENVIRON_COMPARTMENT_resolved != "Biota"
     ) |>
     mutate(
       # Core identifiers
@@ -611,8 +612,8 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 
     # Merge biota and non-biota samples
     biota_samples_merged <- edata_samples_wide |>
-      filter(ENVIRON_COMPARTMENT != "Biota")
-    bind_rows(vm_samples_biota_only)
+      filter(ENVIRON_COMPARTMENT != "Biota") |>
+      bind_rows(vm_samples_biota_only)
 
     message(glue(
       "Created intermediate table: {nrow(biota_samples_merged)} total samples ",

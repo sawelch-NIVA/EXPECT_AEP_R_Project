@@ -69,26 +69,29 @@ Import required packages and set working directory to project root.
 knitr::opts_chunk$set(dev = "svglite") # otherwise some SVGs cause problems in firefox?
 
 suppressMessages
-({library(dplyr)
-library(tidyr)
-library(stringr)
-library(lubridate)
-library(readr)
-library(readxl)
-library(glue)
-library(ggplot2)
-library(sf)
-library(DT)
-library(summarytools)
-library(eDataDRF)
-library(here)
-library(knitr)
-library(devtools)
-library(tibble)
-library(pointblank)
-library(targets)})
+({
+  library(dplyr)
+  library(tidyr)
+  library(stringr)
+  library(lubridate)
+  library(readr)
+  library(readxl)
+  library(glue)
+  library(ggplot2)
+  library(sf)
+  library(DT)
+  library(summarytools)
+  library(eDataDRF)
+  library(here)
+  library(knitr)
+  library(devtools)
+  library(tibble)
+  library(pointblank)
+  library(targets)
+})
 
-load_all()
+suppressMessages(
+load_all(quiet = TRUE))
 
 # aesthetics
 theme_set(theme_minimal(base_size = 12))

@@ -33,6 +33,12 @@ get_literature_csv_paths <- function(
     full.names = TRUE
   )
 
+  if (length(paths) <= 0) {
+    stop(glue(
+      "get_literature_csv_paths(module = {module}) returned 0 paths. Check module name, search path, and folder contents."
+    ))
+  }
+
   return(paths)
 }
 
@@ -74,7 +80,7 @@ literature_module_vocab <- function() {
 #' @importFrom data.table fread
 #' @importFrom dplyr summarise_all as_tibble
 #' @importFrom purrr as_vector
-
+#'
 #'
 #' @export
 fread_module_csv <- function(filepath, format_initialiser) {
@@ -123,25 +129,52 @@ fread_all_module_files <- function(file_paths, format_initialiser) {
   )
 
   # Capture read time once for the entire batch
-
   read_time <- Sys.time()
 
-  # Read each file and reduce by binding rows sequentially
-  file_paths |>
-    map(\(x) {
-      # message(sprintf("Reading: %s", x))
-      fread_module_csv(x, format_initialiser) |>
-        mutate(
-          source_file = basename(x),
-          read_timestamp = read_time
+  # Read each file with enhanced error reporting
+  file_data <- map(file_paths, \(x) {
+    withCallingHandlers(
+      {
+        fread_module_csv(x, format_initialiser) |>
+          mutate(
+            source_file = basename(x),
+            read_timestamp = read_time
+          )
+      },
+      warning = function(w) {
+        warning(
+          sprintf("Warning reading file '%s': %s", x, conditionMessage(w)),
+          call. = FALSE
         )
-    }) |>
-    reduce(
-      bind_rows,
-      .init = format_initialiser() |>
-        mutate(
-          source_file = character(),
-          read_timestamp = as.POSIXct(character())
+        invokeRestart("muffleWarning")
+      },
+      error = function(e) {
+        stop(
+          sprintf("Error reading file '%s': %s", x, conditionMessage(e)),
+          call. = FALSE
         )
+      }
     )
+  })
+
+  # Combine all files with error reporting
+  tryCatch(
+    {
+      reduce(
+        .x = file_data,
+        .f = bind_rows,
+        .init = format_initialiser() |>
+          mutate(
+            source_file = character(),
+            read_timestamp = as.POSIXct(character())
+          )
+      )
+    },
+    error = function(e) {
+      stop(
+        sprintf("Error combining module files: %s", conditionMessage(e)),
+        call. = FALSE
+      )
+    }
+  )
 }

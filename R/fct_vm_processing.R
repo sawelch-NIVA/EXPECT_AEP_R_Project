@@ -618,31 +618,31 @@ generate_sample_id_with_components <- function(
 #' - Biota gjeller → Gills
 #' - Biota helkropp → Whole body
 #' - Biota lever → Liver
-#' - Biota muskelvev → Muscle tissue
+#' - Biota muskelvev → Muscle
 #' - Biota plantevev → Plant tissue
 #' - Biota egg → Egg
 #' - Biota blod → Blood
 #' - Biota skuddspiss → Shoot tip
-#' - Biota fettvev → Adipose tissue
+#' - Biota fettvev → Fat/Adipose
 #' - Biota galle → Bile
 #' - Unknown values → "Unknown Tissue"
 #'
 #' @keywords internal
 map_tissue_type <- function(medium_id_name) {
   case_match(
-    # TODO: should be a table or something
+    # TODO: tissue mapping should be a table or something
     medium_id_name,
     "Biota bløtdeler" ~ "Total soft tissues",
-    "Biota gjeller" ~ "Gills",
+    "Biota gjeller" ~ "Gill",
     "Biota helkropp" ~ "Whole body",
     "Biota lever" ~ "Liver",
-    "Biota muskelvev" ~ "Muscle tissue",
+    "Biota muskelvev" ~ "Muscle",
     "Biota plantevev" ~ "Plant tissue",
     "Biota egg" ~ "Egg",
     "Biota blod" ~ "Blood",
     "Biota skuddspiss" ~ "Shoot tip",
-    "Biota fettvev" ~ "Adipose tissue",
+    "Biota fettvev" ~ "Fat/Adipose",
     "Biota galle" ~ "Bile",
-    .default = "Unknown Tissue"
+    .default = "Unknown tissue"
   )
 }

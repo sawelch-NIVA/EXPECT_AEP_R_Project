@@ -20,8 +20,6 @@ Biota sensitivity to copper is highly variable and depends on diverse factors in
 
 Norway's economically important Arctic region is likely to come under increased pressure in coming years. Demand for copper is likely to drive increased mining in mineral rich zones. Melting sea ice will increase the feasibility of cross-Arctic shipping [@smithNewTransArcticShipping2013], likely increasing exposure to copper from antifoulant paints, while a growing demand for aquaculture may also drive use of copper-based antifoulants. Terrestrial biocides, brake dust, and natural weathering will likely also continue to add to pollution. In addition, changes to ecology, nutrient cycling, organic material, and the overall stressor landscape are likely to add to the challenges faced by the wildlife of the Norwegian sea and the industries and people that rely on them.
 
-Potential subsections:
-
 ## The Aggregate Exposure Pathway
 
 The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway [@ankleyAdverseOutcomePathways2010] for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. AOPs are conceptualised as a network connecting exposure to a toxicant (a Molecular Initiating Event, MIE) to a deleterious biological effect (Adverse Outcome, AO) through a series of mediating Key Events (KEs, network nodes) and Key Event Relationships (KERs, network edges).
@@ -30,11 +28,34 @@ The AEP then ends where the AOP begins, logically completing the chain of events
 
 ![Placeholder. Put a picture of an AEP and AOP here.](images/paste-1.gif)
 
-AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date the number of proposed AOPs is (x) of which (y) have been approved [@AOPwiki]. The OECD offers a program for AOP creation (details needed), while the EU/Norwegian government does... what do they do?
+A few key differences:
 
-By contrast, the AEP concept has seen less adoption, with 21 (?) papers mentioning and 15? emmploying the concept found in 2025. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. Certainly the AEP is not the first conceptual model to treat the environment as a series of nodes and edges, and it may be a solution looking for a problem.
+-   AOPs are generally stressor-agnostic. AEPs aren't.
 
-\[table of AEPs from mini lit-review goes here\]
+-   
+
+AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date 561 AOPs are available on the AOP Wiki of which (42) have been endorsed (what does WHPA... endorsed mean?) [@societyforadvancementofaopsAOPwikiV272026]. The OECD offers a program for AOP creation (details needed), while the EU/Norwegian government does... what do they do?
+
+By contrast, the AEP concept has seen less adoption, with 21 (?) papers mentioning and 15? employing the concept ([@tbl-aep-review]) found in 2025. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. Certainly the AEP is not the first conceptual model to treat the environment as a series of nodes and edges, and it may be a solution looking for a problem.
+
+```{r}
+#| label: tbl-aep-review
+#| tbl-cap: Table condensed from the output of an mini literature review on the use of the AEP concept. Uncertain whether to keep it here in its current form, as it's rather bulky. May summarise in text and move to SI.
+
+suppressPackageStartupMessages({
+  library(readr)
+  library(gt)
+  library(dplyr)
+})
+
+aep_literature_review_table <- read_csv(
+  "data/clean/aep_literature_summary_claude.csv",
+  show_col_types = FALSE
+) |>
+  select(-`Paper ID`)
+
+aep_literature_review_table |> gt::gt()
+```
 
 The Source to Outcome Pathway concept attempts to unify these two models by... KET is probably best-placed to write this section.
 
@@ -57,19 +78,15 @@ Although uptake has not yet matched that of the AOP, AEPs are a valuable tool fo
 
 ## Copper as a Nutrient and Toxicant
 
-Copper is a highly conserved essential nutrient that is used in enzymes (what kind?) due to its (what sort of?) properties. - How much copper do humans need? Per kg? - Are there any species where this is very different?
+Life on Earth has evolved alongside copper as both a stressor and potentially useful element, and a wide variety of both copper-containing proteins and copper-protective proteins have been found across the kingdoms of life [@festaCopperEssentialMetal2011]. Both its utility and toxicity stem from its oxidation and binding dynamics, which make it both a useful structural element in protein design, as well as a source of oxidative stress in the cell [@festaCopperEssentialMetal2011]. This long and consistent exposure has driven organisms to develop a diverese range of effective mechanisms for controlling internal copper concentrations in response to a changing external environment. By precise control of copper concentrations in different tissues or parts of the cell, organisms reduce oxidative stress in sensitive areas but increase it where a "hostile environment" can be useful, such as within bacteriacidal macrophages [@focarelliCopperMicroenvironmentsHuman2022]. This rich, nuanced and complex set of interactions make copper both an interesting and difficult object of study. Organisms have been shown to regulate copper uptake and detoxification to maintain homeostasis along a copper gradient [@vandenberghePosttranslationalRegulationCopper2010, @penaDelicateBalanceHomeostatic1999], which in a ecotoxicological context makes linear assumptions of bioaccumulation hard to justify.
 
-Conversely, copper can be toxic
+However, the relative ease of sourcing, working with, and analysing copper has made it a popular "classical" stressor in ecotoxicology.
 
--   Ref speciation chemistry from above
+-   Cite some of those AOP papers about copper toxicity, the BLM, etc.
 
-\- Cite some of those AOP papers \[\] about copper toxicity, the BLM, etc.
+-   Different species tolerance, different stratgegies (maybe)
 
-\- Different species tolerance, different stratgegies (maybe)
-
-\- Due to copper's essentiallity and toxicity, organisms are pretty good at regulating uptake
-
-\- But there are some that are surprisingly sensitive to copper
+-   But there are some that are surprisingly sensitive to copper
 
 -   Metallotheins [@amiardMetallothioneinsAquaticInvertebrates2006]
 
@@ -93,7 +110,7 @@ Conversely, copper can be toxic
     -   Also used in:
     -   Pipes
     -   Roofing
-    -   Antifoulants @brooks2009
+    -   Antifoulants [@brooksCopperBiocidesMarine2009]
     -   Fruit orchards
     -   Cars
     -   Old mine waste @nedlagte
@@ -115,9 +132,38 @@ An exhaustive version of the materials and methods are provided in the notebooks
 
 ### Literature Review Protocol
 
+A systematic literature review framework was developed from the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment. For the full PRISMA checklist of this paper please consult (the relevant Notebook), but in summary: ...
+
+#### Databases and Search Terms
+
+| Source | Date Searched | Hits | Comments |
+|----------------|-------------------------|----------------|----------------|
+| [Crossref](https://www.crossref.org/) | Excluded |  | Doesn't support Booleans. |
+| [Scopus](https://www.scopus.com/home.uri) | Excluded |  | No institutional access. |
+| [Web of Science](https://www.webofscience.com) | 2025.06.24 | 218 | [Query link](https://www.webofscience.com/wos/woscc/summary/9c9af98d-7ee8-4163-9d48-93dd4cb52b6f-0166a1b51b/relevance/1). Topic (title, abstract, keyword plus, and author keywords) search. Searching all fields returned 750 hits. |
+| [PubMed](https://pubmed.ncbi.nlm.nih.gov/26759916/) | 2025.06.24 | 284 | Keyword search [Query link](https://pubmed.ncbi.nlm.nih.gov/?term=((copper%20OR%20Cu%20OR%20copper%20OR%20cuprous%20OR%20cupric%20OR%20kobber%20OR%20coper%20OR%207440-50-8)%20%0D%0AAND%20(Barents%20OR%20Norwegian%20OR%20Arctic%20OR%20Svalbard%20OR%20Greenland*)%0D%0AAND%20(wildlife%20OR%20ecotox*%20OR%20biota%20OR%20environment*%20OR%20animal%20OR%20ecosystem*)%20%0D%0AAND%20(emission%20OR%20exposure%20OR%20fate%20OR%20behaviour%20OR%20concentration%20OR%20dose%20OR%20chem*%20OR%20bioaccumul*%20OR%20trophic)%20%0D%0AAND%20(aqua*%20OR%20water*%20OR%20marine%20OR%20river%20OR%20lake%20OR%20fjord%20OR%20estuary%20OR%20sea%20OR%20ocean%20OR%20sediment*%20OR%20soil)%0D%0A)%20AND%20((%222010%2F01%2F01%22%5BDate%20-%20Publication%5D%20%3A%20%223000%22%5BDate%20-%20Publication%5D))&sort) |
+| Semantic Scholar | Excluded | 1 | Issues with search, only returned 1 hit. Dropped as is unlikely to include papers not already covered by PubMed and Web of Science. |
+| OpenAlex | Excluded |  | Doesn't support OR Boolean. |
+
+: nb: not up to date
+
+#### Inclusion and Exclusion Criteria
+
+Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers. Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as irrelevant based on abstract screening, and 46 studies were excluded after full text screening, resulting in a set of 214 manuscripts for data extraction. The decision was then taken to reduce this set of papers further to the most useful subset; papers were rated arbitrarily on a scale of 1 (least relevant) to 5 (most relevant) based on a single reviewer's holistic assessment of their relevance and utility to the research question. The reviewers then proceeded from the highest-ranked papers (ordered by score then alphabetically), began data extraction from all papers with a score of 4 or 5 (n in total, y% of ...).
+
+![Covidence PRISMA diagram.](images/paste-1.png){width="500"}
+
+#### Screening
+
+#### Data Extraction
+
+### Weight of Evidence Assessment
+
+A need to compare diverse types of evidence was identified... @hardyGuidanceUseWeight2017.
+
 ### CREED Assessment
 
--   Cite CRED also
+-   Cite CRED also @moermondCREDCriteriaReporting2016
 -   Has anyone else cite CREED yet?
 
 ### Other datasets

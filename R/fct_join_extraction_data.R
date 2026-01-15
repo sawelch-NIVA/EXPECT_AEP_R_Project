@@ -55,27 +55,37 @@ join_all_literature_modules <- function(
     left_join(
       sites_data,
       by = "SITE_CODE",
-      suffix = c("_measurements", "_sites")
+      suffix = c("_measurements", "_sites"),
+      unmatched = "error",
+      relationship = "one-to-many"
     ) |>
     left_join(
       reference_data,
       by = "REFERENCE_ID",
-      suffix = c("", "_reference")
+      suffix = c("", "_reference"),
+      unmatched = "error",
+      relationship = "many-to-one"
     ) |>
     left_join(
       biota_data,
       by = c("SAMPLE_ID", "SUBSAMPLE"),
-      suffix = c("", "_biota")
+      suffix = c("", "_biota"),
+      unmatched = "error",
+      relationship = "one-to-many"
     ) |>
     left_join(
       campaign_data,
       by = "CAMPAIGN_NAME_SHORT",
-      suffix = c("", "_campaign")
+      suffix = c("", "_campaign"),
+      unmatched = "error",
+      relationship = "many-to-one"
     ) |>
     left_join(
       parameters_data,
       by = "PARAMETER_NAME",
-      suffix = c("", "_parameters")
+      suffix = c("", "_parameters"),
+      unmatched = "error",
+      relationship = "many-to-one"
     )
 
   # this is, frankly, bad, but it allows us to join out methods to measurements in a way that makes analysis easier
