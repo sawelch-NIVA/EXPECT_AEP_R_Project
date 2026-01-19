@@ -3,8 +3,9 @@ run_pipeline <- function(
   render_quarto = TRUE,
   deploy = FALSE,
   names = NULL,
-  reporter = NULL, # FIXME: this doesn't work rn
-  callr_function = NULL
+  reporter = "balanced",
+  callr_function = callr::r,
+  load_workspace_on_error = FALSE
 ) {
   # Setup Pushover credentials ----
   pushoverr::set_pushover_user(user = Sys.getenv("PUSHOVER_USER"))
@@ -26,10 +27,17 @@ run_pipeline <- function(
             title = "Pipeline Warning"
           )
         }
-        targets::tar_make(names = names, callr_function = callr_function)
+        targets::tar_make(
+          names = names,
+          callr_function = callr_function,
+          reporter = reporter
+        )
       } else if (render_quarto && deploy) {
         # Run all targets
-        targets::tar_make(callr_function = callr_function)
+        targets::tar_make(
+          callr_function = callr_function,
+          reporter = reporter
+        )
       } else if (render_quarto) {
         # Run only rendering targets
         targets::tar_make(
@@ -62,6 +70,18 @@ run_pipeline <- function(
     error = function(e) {
       print(e$message)
 
+      # Load workspace for failed target ----
+      if (load_workspace_on_error) {
+        failed_targets <- targets::tar_meta(fields = error) |>
+          dplyr::filter(!is.na(error)) |>
+          dplyr::pull(name)
+
+        if (length(failed_targets) > 0) {
+          message("Loading workspace for failed target: ", failed_targets[1])
+          targets::tar_workspace(failed_targets[1])
+        }
+      }
+
       # Failure notification ----
       pushoverr::pushover_high(
         message = stringr::str_sub(
@@ -79,23 +99,14 @@ run_pipeline <- function(
   )
 }
 
-#  preferred: don't start from scratch, don't render documents, don't update website
+
+#  preferred
 run_pipeline(
-  destroy_all = FALSE,
-  render_quarto = FALSE,
-  deploy = FALSE,
-  reporter = "terse"
+  destroy_all = FALSE, # don't start from scratch,
+  render_quarto = TRUE, # don't render documents,
+  deploy = TRUE, # don't update website
+  names = NULL, # no specific targets
+  reporter = "balanced", # reasonable amount of metadata
+  callr_function = callr::r, # new R session
+  load_workspace_on_error = FALSE # load workspace for the failing target
 )
-
-# # Reporters:
-# "balanced": a reporter that balances efficiency with informative detail. Uses a cli progress bar instead of printing messages for individual dynamic branches. To the right of the progress bar is a text string like "22.6s, 4510+, 124-" (22.6 seconds elapsed, 4510 targets completed successfully so far, 124 targets skipped so far).
-
-# For best results with the balanced reporter, you may need to adjust your cli settings. See global options cli.num_colors and cli.dynamic at https://cli.r-lib.org/reference/cli-config.html. On that page is also the CLI_TICK_TIME environment variable which controls the time delay between progress bar updates. If the delay is too low, then overhead from printing to the console may slow down the pipeline.
-
-# "terse": like the "balanced" reporter, but without a progress bar.
-
-# "silent": print nothing.
-
-# "timestamp": same as the "verbose" reporter except that each message begins with a time stamp.
-
-# "verbose": print messages for individual targets as they dispatch or complete. Each individual target-specific time (e.g. "3.487 seconds") is strictly the elapsed runtime of the target and does not include steps like data retrieval and output storage.

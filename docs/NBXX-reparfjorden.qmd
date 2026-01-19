@@ -1,0 +1,34 @@
+---
+title: "Notebook XX - Repparfjorden Case Study"
+author: "Sam Welch"
+date: last-modified
+lightbox: true
+---
+
+# Stupid map was taking 5 minutes just to render. Now it's cached. Will have to find a better solution in future. 
+
+```{r}
+#| label: setup
+#| warning: false
+#| output: false
+library(dplyr)
+library(leaflet)
+library(sf)
+library(bslib)
+library(eDataDRF)
+library(targets)
+library(devtools)
+
+suppressMessages(
+  load_all(quiet = TRUE)
+) # TODO: Reduce render time by sourcing only what we specifically need?
+```
+
+```{r}
+#| label: load-data
+# load in any data we need from the targets workflow
+literature_merged_data <- tar_read(load_literature_pqt)
+wgs84_geo <- tar_read(wgs84_geography)
+tar_load(copper_toxicity_thresholds)
+
+```

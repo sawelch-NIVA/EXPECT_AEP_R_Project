@@ -15,7 +15,7 @@
 #'   it with validation steps added. Should be a function like:
 #'   `function(x) { x |> col_vals_not_null(...) |> ... }`
 #' @param agent Logical. If TRUE (default), returns a pointblank agent object.
-#'   If FALSE, returns the validated data with failed rows removed.
+#'   If FALSE, returns the validated data with validation failures removed.
 #' @param actions Action levels for pointblank agent (only used when agent = TRUE)
 #'
 #' @return If agent = TRUE, a pointblank agent object containing validation results.
@@ -87,31 +87,47 @@ pb_validate_campaign <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = CAMPAIGN_NAME_SHORT) |>
-      col_vals_not_null(columns = CAMPAIGN_NAME) |>
+      col_vals_not_null(
+        columns = CAMPAIGN_NAME_SHORT,
+        actions = actions
+      ) |>
+      col_vals_not_null(columns = CAMPAIGN_NAME, actions = actions) |>
+      # does core id match file name?
+      # currently we just match the date, because the formats are different
+      # FIXME: Doesn't work!
+      # col_vals_equal(
+      #   columns = CAMPAIGN_NAME_SHORT,
+      #   value = vars(expected_year),
+      #   preconditions = ~ . |>
+      #     dplyr::filter(!str_detect(CAMPAIGN_NAME_SHORT, "Vm")) |>
+      #     dplyr::mutate(expected_year = str_extract(source_file, "\\d{4}")),
+      #   actions = actions
+      # ) |>
+
+      # no repeated campaigns
+      rows_distinct(columns = c(CAMPAIGN_NAME_SHORT, CAMPAIGN_NAME)) |>
 
       # Date validation
-      col_vals_not_null(columns = CAMPAIGN_START_DATE) |>
+      col_vals_not_null(columns = CAMPAIGN_START_DATE, actions = actions) |>
       col_vals_gte(
         columns = CAMPAIGN_START_DATE,
-        value = as.Date("1900-01-01")
+        value = as.Date("1900-01-01"),
+        actions = actions
       ) |>
-      col_vals_lte(columns = CAMPAIGN_START_DATE, value = Sys.Date()) |>
-      # col_vals_gte(
-      #   columns = CAMPAIGN_END_DATE,
-      #   value = as.Date("1900-01-01"),
-      #   na_pass = TRUE # not all papers report this
-      # ) |>
-      # col_vals_lte(
-      #   columns = CAMPAIGN_END_DATE,
-      #   value = Sys.Date(),
-      #   na_pass = TRUE # not all papers report this
-      # ) |>
+      col_vals_lte(
+        columns = CAMPAIGN_START_DATE,
+        value = Sys.Date(),
+        actions = actions
+      ) |>
 
       # Metadata
-      col_vals_not_null(columns = ENTERED_BY) |>
-      col_vals_not_null(columns = ENTERED_DATE) |>
-      col_vals_lte(columns = ENTERED_DATE, value = Sys.Date())
+      col_vals_not_null(columns = ENTERED_BY, actions = actions) |>
+      col_vals_not_null(columns = ENTERED_DATE, actions = actions) |>
+      col_vals_lte(
+        columns = ENTERED_DATE,
+        value = Sys.Date(),
+        actions = actions
+      )
   }
 
   pb_validate_edata_table(
@@ -135,27 +151,50 @@ pb_validate_reference <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = REFERENCE_ID) |>
-      col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
-      col_vals_not_null(columns = REFERENCE_TYPE) |>
+      col_vals_not_null(columns = REFERENCE_ID, actions = actions) |>
+      col_vals_not_equal(
+        columns = REFERENCE_ID,
+        value = "Unknown Reference",
+        actions = actions
+      ) |>
+      col_vals_not_null(columns = REFERENCE_TYPE, actions = actions) |>
 
       # Bibliographic fields
-      col_vals_not_null(columns = AUTHOR) |>
-      col_vals_not_null(columns = TITLE) |>
-      col_vals_not_null(columns = YEAR) |>
-      col_vals_gte(columns = YEAR, value = 1900) |>
+      col_vals_not_null(columns = AUTHOR, actions = actions) |>
+      col_vals_not_null(columns = TITLE, actions = actions) |>
+      col_vals_not_null(columns = YEAR, actions = actions) |>
+      col_vals_gte(columns = YEAR, value = 1900, actions = actions) |>
       col_vals_lte(
         columns = YEAR,
-        value = as.integer(format(Sys.Date(), "%Y"))
+        value = as.integer(format(Sys.Date(), "%Y")),
+        actions = actions
       ) |>
 
       # Access date
-      col_vals_gte(columns = ACCESS_DATE, value = as.Date("2000-01-01")) |>
-      col_vals_lte(columns = ACCESS_DATE, value = Sys.Date()) |>
+      col_vals_gte(
+        columns = ACCESS_DATE,
+        value = as.Date("2000-01-01"),
+        actions = actions
+      ) |>
+      col_vals_lte(
+        columns = ACCESS_DATE,
+        value = Sys.Date(),
+        actions = actions
+      ) |>
 
       # Numeric fields
-      col_vals_gte(columns = VOLUME, value = 1, na_pass = TRUE) |>
-      col_vals_gte(columns = ISSUE, value = 1, na_pass = TRUE)
+      col_vals_gte(
+        columns = VOLUME,
+        value = 1,
+        na_pass = TRUE,
+        actions = actions
+      ) |>
+      col_vals_gte(
+        columns = ISSUE,
+        value = 1,
+        na_pass = TRUE,
+        actions = actions
+      )
   }
 
   pb_validate_edata_table(
@@ -179,13 +218,13 @@ pb_validate_parameters <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = PARAMETER_TYPE) |>
-      col_vals_not_null(columns = MEASURED_TYPE) |>
-      col_vals_not_null(columns = PARAMETER_NAME) |>
-      col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
+      col_vals_not_null(columns = PARAMETER_TYPE, actions = actions) |>
+      col_vals_not_null(columns = MEASURED_TYPE, actions = actions) |>
+      col_vals_not_null(columns = PARAMETER_NAME, actions = actions) |>
+      col_vals_equal(columns = PARAMETER_NAME, "Copper", actions = actions) |>
 
       # Metadata
-      col_vals_not_null(columns = ENTERED_BY)
+      col_vals_not_null(columns = ENTERED_BY, actions = actions)
   }
 
   pb_validate_edata_table(
@@ -209,59 +248,68 @@ pb_validate_sites <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = SITE_CODE) |>
-      col_vals_not_null(columns = SITE_NAME) |>
+      col_vals_not_null(columns = SITE_CODE, actions = actions) |>
+      col_vals_not_null(columns = SITE_NAME, actions = actions) |>
       # No duplicate codes/names
-      rows_distinct(columns = c(SITE_CODE, SITE_NAME)) |>
+      rows_distinct(columns = c(SITE_CODE, SITE_NAME), actions = actions) |>
 
       # Geographic classifications
       col_vals_in_set(
         columns = SITE_GEOGRAPHIC_FEATURE,
-        set = geographic_features_vocabulary()
+        set = geographic_features_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = SITE_GEOGRAPHIC_FEATURE_SUB,
-        set = geographic_features_sub_vocabulary()
+        set = geographic_features_sub_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = COUNTRY_ISO,
-        set = c(countries_vocabulary(), "Not reported", "Not relevant")
+        set = c(countries_vocabulary(), "Not reported", "Not relevant"),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = OCEAN_IHO,
-        set = c(areas_vocabulary(), "Not reported", "Not relevant")
+        set = c(areas_vocabulary(), "Not reported", "Not relevant"),
+        actions = actions
       ) |>
 
       # Coordinates
       col_vals_between(
         columns = LATITUDE,
         left = -90,
-        right = 90
+        right = 90,
+        actions = actions
       ) |>
       col_vals_between(
         columns = LONGITUDE,
         left = -180,
-        right = 180
+        right = 180,
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = SITE_COORDINATE_SYSTEM,
-        set = coordinate_systems_vocabulary()
+        set = coordinate_systems_vocabulary(),
+        actions = actions
       ) |>
 
       # Altitude
       col_vals_between(
         columns = ALTITUDE_VALUE,
         left = -11000,
-        right = 9000
+        right = 9000,
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = ALTITUDE_UNIT,
-        set = altitude_units_vocabulary()
+        set = altitude_units_vocabulary(),
+        actions = actions
       ) |>
 
       # Metadata
-      col_vals_not_null(columns = ENTERED_BY) |>
-      col_vals_not_null(columns = ENTERED_DATE)
+      col_vals_not_null(columns = ENTERED_BY, actions = actions) |>
+      col_vals_not_null(columns = ENTERED_DATE, actions = actions)
   }
 
   pb_validate_edata_table(
@@ -286,22 +334,21 @@ pb_validate_samples <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = SAMPLE_ID) |>
-      col_vals_not_null(columns = SITE_CODE) |>
-      col_vals_not_null(columns = PARAMETER_NAME) |>
+      col_vals_not_null(columns = SAMPLE_ID, actions = actions) |>
+      col_vals_not_null(columns = SITE_CODE, actions = actions) |>
+      col_vals_not_null(columns = PARAMETER_NAME, actions = actions) |>
 
       # Environmental compartments
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT,
-        set = environ_compartments_vocabulary()
+        set = environ_compartments_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT_SUB,
-        set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+        set = environ_compartments_sub_vocabulary() |> purrr::flatten(),
+        actions = actions
       )
-    # TODO: We never actually set this properly, not that it really matters.
-    # Will always be internal for biota and otherwise external, I think.
-    # col_vals_not_null(columns = MEASURED_CATEGORY)
   }
 
   pb_validate_edata_table(
@@ -325,30 +372,33 @@ pb_validate_biota <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = SAMPLE_ID) |>
-      col_vals_not_null(columns = SITE_CODE) |>
-      col_vals_not_null(columns = PARAMETER_NAME) |>
-      col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
+      col_vals_not_null(columns = SAMPLE_ID, actions = actions) |>
+      col_vals_not_null(columns = SITE_CODE, actions = actions) |>
+      col_vals_not_null(columns = PARAMETER_NAME, actions = actions) |>
+      col_vals_equal(columns = PARAMETER_NAME, "Copper", actions = actions) |>
 
       # Biota-specific fields
-      col_vals_not_null(columns = SPECIES_GROUP) |>
-      col_vals_not_null(columns = SAMPLE_SPECIES) |>
-      col_vals_not_null(columns = SAMPLE_TISSUE) |>
+      col_vals_not_null(columns = SPECIES_GROUP, actions = actions) |>
+      col_vals_not_null(columns = SAMPLE_SPECIES, actions = actions) |>
+      col_vals_not_null(columns = SAMPLE_TISSUE, actions = actions) |>
 
       # Environmental compartments
       col_vals_equal(
         columns = ENVIRON_COMPARTMENT,
-        "Biota"
+        "Biota",
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT_SUB,
-        set = environ_compartments_sub_vocabulary()$Biota
+        set = environ_compartments_sub_vocabulary()$Biota,
+        actions = actions
       ) |>
 
       # Biota-specific vocabularies
       col_vals_in_set(
         columns = SPECIES_GROUP,
-        set = species_groups_vocabulary()
+        set = species_groups_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = SAMPLE_TISSUE,
@@ -363,15 +413,18 @@ pb_validate_biota <- function(
             "Plant tissue",
             "Shoot tip",
             "Total soft tissues minus gonads"
-          ))
+          )),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = SAMPLE_SPECIES_LIFESTAGE,
-        set = lifestage_vocabulary()
+        set = lifestage_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = SAMPLE_SPECIES_GENDER,
-        set = gender_vocabulary()
+        set = gender_vocabulary(),
+        actions = actions
       )
   }
 
@@ -397,45 +450,78 @@ pb_validate_measurements <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = SITE_CODE) |>
-      col_vals_not_null(columns = PARAMETER_NAME) |>
-      col_vals_equal(columns = PARAMETER_NAME, "Copper") |>
-      col_vals_not_null(columns = SAMPLING_DATE) |>
-      col_vals_gte(columns = SAMPLING_DATE, value = as.Date("1900-01-01")) |>
-      col_vals_lte(columns = SAMPLING_DATE, value = Sys.Date()) |>
+      col_vals_not_null(columns = SITE_CODE, actions = actions) |>
+      col_vals_not_null(columns = PARAMETER_NAME, actions = actions) |>
+      col_vals_equal(columns = PARAMETER_NAME, "Copper", actions = actions) |>
+      col_vals_not_null(columns = SAMPLING_DATE, actions = actions) |>
+      col_vals_gte(
+        columns = SAMPLING_DATE,
+        value = as.Date("1900-01-01"),
+        actions = actions
+      ) |>
+      col_vals_lte(
+        columns = SAMPLING_DATE,
+        value = Sys.Date(),
+        actions = actions
+      ) |>
 
       # Environmental compartments
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT,
-        set = environ_compartments_vocabulary()
+        set = environ_compartments_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT_SUB,
-        set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+        set = environ_compartments_sub_vocabulary() |> purrr::flatten(),
+        actions = actions
       ) |>
 
       # Measurement values
-      col_vals_gte(columns = MEASURED_VALUE, value = 0, na_pass = TRUE) |>
-      col_vals_gte(columns = MEASURED_N, value = 1, na_pass = TRUE) |>
+      col_vals_gte(
+        columns = MEASURED_VALUE,
+        value = 0,
+        na_pass = TRUE,
+        actions = actions
+      ) |>
+      col_vals_gte(
+        columns = MEASURED_N,
+        value = 1,
+        na_pass = TRUE,
+        actions = actions
+      ) |>
       col_vals_gte(
         columns = UNCERTAINTY_UPPER,
         value = 0,
-        na_pass = TRUE
+        na_pass = TRUE,
+        actions = actions
       ) |>
-      # FIXME: Papers do report lower uncertainty bounds below 0 fairly often
-      # col_vals_gte(columns = UNCERTAINTY_LOWER, value = 0, na_pass = TRUE) |>
 
       # LOQ/LOD values
-      col_vals_gte(columns = LOQ_VALUE, value = 0, na_pass = TRUE) |>
-      col_vals_gte(columns = LOD_VALUE, value = 0, na_pass = TRUE) |>
+      col_vals_gte(
+        columns = LOQ_VALUE,
+        value = 0,
+        na_pass = TRUE,
+        actions = actions
+      ) |>
+      col_vals_gte(
+        columns = LOD_VALUE,
+        value = 0,
+        na_pass = TRUE,
+        actions = actions
+      ) |>
 
       # Units consistency
-      col_vals_not_null(columns = MEASURED_UNIT) |>
+      col_vals_not_null(columns = MEASURED_UNIT, actions = actions) |>
 
       # Reference integrity
-      col_vals_not_null(columns = REFERENCE_ID) |>
-      col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
-      col_vals_not_null(columns = SAMPLE_ID)
+      col_vals_not_null(columns = REFERENCE_ID, actions = actions) |>
+      col_vals_not_equal(
+        columns = REFERENCE_ID,
+        value = "Unknown Reference",
+        actions = actions
+      ) |>
+      col_vals_not_null(columns = SAMPLE_ID, actions = actions)
   }
 
   pb_validate_edata_table(
@@ -459,14 +545,19 @@ pb_validate_methods <- function(
 ) {
   apply_validations <- function(x) {
     x |>
-      col_vals_not_null(columns = c(PROTOCOL_ID, CAMPAIGN_NAME)) |>
+      col_vals_not_null(
+        columns = c(PROTOCOL_ID, CAMPAIGN_NAME),
+        actions = actions
+      ) |>
       col_vals_in_set(
         PROTOCOL_CATEGORY,
-        set = protocol_categories_vocabulary()
+        set = protocol_categories_vocabulary(),
+        actions = actions
       ) |>
       col_vals_in_set(
         PROTOCOL_NAME,
-        set = protocol_options_vocabulary() |> pull(Long_Name)
+        set = protocol_options_vocabulary() |> pull(Long_Name),
+        actions = actions
       )
   }
 
@@ -502,17 +593,23 @@ pb_validate_creed_scores <- function(
   apply_validations <- function(x) {
     x |>
       # Core identifiers
-      col_vals_not_null(columns = REFERENCE_ID) |>
-      col_vals_not_equal(columns = REFERENCE_ID, value = "Unknown Reference") |>
+      col_vals_not_null(columns = REFERENCE_ID, actions = actions) |>
+      col_vals_not_equal(
+        columns = REFERENCE_ID,
+        value = "Unknown Reference",
+        actions = actions
+      ) |>
 
       # CREED fields
       col_vals_in_set(
         columns = c(SILVER_RELIABILITY, GOLD_RELIABILITY),
-        set = CREED_classifications_rb
+        set = CREED_classifications_rb,
+        actions = actions
       ) |>
       col_vals_in_set(
         columns = c(SILVER_RELEVANCE, GOLD_RELEVANCE),
-        set = CREED_classifications_rv
+        set = CREED_classifications_rv,
+        actions = actions
       )
   }
 

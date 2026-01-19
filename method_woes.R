@@ -32,6 +32,7 @@ command = join_all_literature_modules(
   methods_data = methods_data # FIXME: problems with Vm numbered protocols - why are they still there?
 )
 
+
 print("sites_data")
 join1 <- left_join(measurements_data, sites_data)
 nrow(join1)
@@ -48,16 +49,38 @@ join6 <- left_join(join5, methods_data)
 nrow(join6)
 
 
-## Campaign
-campaign_data |>
-  group_by(CAMPAIGN_NAME_SHORT) |>
-  reframe(n = n()) |>
-  arrange(desc(n))
-# vm is in here twice... why?
+print("sites_data")
+join1 <- left_join_diagnostic(measurements_data, sites_data)
+nrow(join1)
+print("reference_data")
+join2 <- left_join_diagnostic(join1, reference_data)
+nrow(join2)
+join3 <- left_join_diagnostic(join2, API_biota_common_names)
+join4 <- left_join_diagnostic(join3, campaign_data, by = "CAMPAIGN_NAME_SHORT")
+join5 <- left_join_diagnostic(
+  join4,
+  parameters_data
+)
 
-tar_read(vm_edata_campaign) |>
-  group_by(CAMPAIGN_NAME_SHORT) |>
-  reframe(n = n()) |>
-  arrange(desc(n))
 
-tar_read(campaign_data) |> filter(str_detect(CAMPAIGN_NAME_SHORT, "Vm"))
+map(.x = eDataDRF::protocol_categories_vocabulary(), .f = function(x) {
+  category_name_snake <- str_replace(x, pattern = " ", replacement = "_") |>
+    str_to_upper()
+  type_name_snake <- str_replace(
+    x,
+    pattern = " Protocol",
+    replacement = "_PROTOCOL_CLASS"
+  ) |>
+    str_to_upper()
+
+  methods_filtered <- methods_data |>
+    filter(PROTOCOL_CATEGORY == x) |>
+    mutate(
+      !!category_name_snake := PROTOCOL_ID,
+      !!type_name_snake := PROTOCOL_NAME
+    ) |>
+    left_join_diagnostic(
+      join5,
+      by = eval(category_name_snake)
+    )
+})

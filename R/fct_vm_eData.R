@@ -373,6 +373,7 @@ vm_create_edata_samples_table <- function(vm_intermediate) {
 
     add_row(
       vm_intermediate |>
+        mutate(SUBSAMPLE = as.character(SUBSAMPLE)) |>
         select(any_of(names(initialise_samples_tibble())))
     )
 
@@ -400,6 +401,7 @@ vm_create_edata_biota_table <- function(vm_intermediate) {
     add_row(
       vm_intermediate |>
         filter(ENVIRON_COMPARTMENT == "Biota") |>
+        mutate(SUBSAMPLE = as.character(SUBSAMPLE)) |>
         select(any_of(names(initialise_biota_tibble())))
     )
 
@@ -463,10 +465,20 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
       ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
       MEASURED_CATEGORY = NA_character_,
 
-      SAMPLING_DATE = as.IDate(SAMPLING_DATE),
+      SAMPLING_DATE = as.IDate(SAMPLING_DATE)
+    ) |>
+    # need to group and generate subsample numbers, or else we'll end up with collisions later
+    group_by(
+      SITE_CODE,
+      PARAMETER_NAME,
+      ENVIRON_COMPARTMENT,
+      ENVIRON_COMPARTMENT_SUB,
+      SAMPLING_DATE
+    ) |>
 
+    mutate(
       # Sample information
-      SUBSAMPLE = "NA",
+      SUBSAMPLE = row_number(),
       SAMPLE_ID = generate_sample_id_with_components(
         SITE_CODE,
         PARAMETER_NAME,
@@ -588,10 +600,20 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
         ENVIRON_COMPARTMENT_SUB = ENVIRON_COMPARTMENT_SUB_resolved,
         MEASURED_CATEGORY = NA_character_,
 
-        SAMPLING_DATE = as.IDate(SAMPLING_DATE),
+        SAMPLING_DATE = as.IDate(SAMPLING_DATE)
+      ) |>
+      # need to group and generate subsample numbers, or else we'll end up with collisions later
+      group_by(
+        SITE_CODE,
+        PARAMETER_NAME,
+        ENVIRON_COMPARTMENT,
+        ENVIRON_COMPARTMENT_SUB,
+        SAMPLING_DATE
+      ) |>
 
+      mutate(
         # Sample information
-        SUBSAMPLE = "NA",
+        SUBSAMPLE = row_number(),
         SAMPLE_ID = generate_sample_id_with_components(
           SITE_CODE,
           PARAMETER_NAME,
@@ -699,7 +721,7 @@ vm_create_edata_measurements_table <- function(
       MEASURED_TYPE = "Concentration",
 
       # Sample information
-      SUBSAMPLE,
+      SUBSAMPLE = as.integer(SUBSAMPLE),
       SAMPLE_ID,
 
       # Measurement values
@@ -735,8 +757,10 @@ vm_create_edata_measurements_table <- function(
 
   # Validate against eData schema
   edata_measurements <- initialise_measurements_tibble() |>
-    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
-    add_row(edata_measurements)
+    mutate(
+      across(.cols = contains("DATE"), .fns = as.IDate)
+    ) |>
+    add_row(edata_measurements |> mutate(SUBSAMPLE = as.character(SUBSAMPLE)))
 
   message(glue(
     "Created measurements table: {nrow(edata_measurements)} measurements"

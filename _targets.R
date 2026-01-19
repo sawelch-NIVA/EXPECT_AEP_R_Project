@@ -24,7 +24,7 @@ suppressMessages({
 })
 
 # set pointblank action levels - when do we flag issues as serious
-pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.1)
+pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.50)
 
 options(
   targets.verbose = FALSE, # less chatter from targets itself
@@ -431,7 +431,6 @@ list(
   #### # Intermediate samples-biota table ----
   # This table contains both eData columns AND original Vannmiljø columns
   # It's used to create samples, biota, and measurements tables
-  # FIXME: SUBSAMPLE is curretnly just NA
   tar_target(
     vm_edata_intermediate,
     vm_create_intermediate_samples_biota_table(vm_data = vm_sites_split_clean)
@@ -453,6 +452,7 @@ list(
 
   #### # Measurements table ----
   tar_target(
+    # TODO: THis has become very slow since we added grouping. not the end of the world, but how to fix?
     vm_edata_measurements,
     vm_create_edata_measurements_table(
       # TODO: Some cases where LOD/LOQ = ">", we ignore these.
@@ -585,10 +585,10 @@ list(
     # some measurement files are missing MEASUREMENT_COMMENT
     # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
     command = {
-      suppressWarnings(fread_all_module_files(
+      fread_all_module_files(
         measurements_files,
         initialise_measurements_tibble
-      )) |> # some dates are still messed up
+      ) |> # some dates are still messed up
         mutate(
           SAMPLING_DATE = parse_date_time(
             SAMPLING_DATE,
@@ -614,10 +614,11 @@ list(
         add_row(vm_edata_campaign) |>
         pb_validate_campaign(agent = FALSE, actions = pb_action_levels) |>
         # do we have 1+ measurement corresponding to every campaign
-        col_vals_in_set(
+        col_vals_in_set_verbose(
           columns = CAMPAIGN_NAME_SHORT,
           set = unique(measurements_data$CAMPAIGN_NAME_SHORT),
-          actions = pb_action_levels
+          actions = pb_action_levels,
+          value_name = "Campaign Name Shorts"
         )
     }
   ),
@@ -655,10 +656,11 @@ list(
         add_row(vm_edata_sites) |>
         pb_validate_sites(agent = FALSE, actions = pb_action_levels) |>
         # do we have 1+ measurement corresponding to every site
-        col_vals_in_set(
+        col_vals_in_set_verbose(
           columns = SITE_CODE,
-          set = measurements_data$SITE_CODE,
-          actions = pb_action_levels
+          set = unique(measurements_data$SITE_CODE),
+          actions = pb_action_levels,
+          value_name = "Site Codes"
         )
     }
   ),
@@ -708,7 +710,7 @@ list(
           vm_lookup_methods |>
             select(-ISO_ID, -n)
         ) |>
-        pb_validate_methods(agent = FALSE)
+        pb_validate_methods(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
