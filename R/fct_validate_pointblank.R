@@ -275,7 +275,7 @@ pb_validate_sites <- function(
         actions = actions
       ) |>
 
-      # Coordinates
+      # Coordinates - valid values, and in
       col_vals_between(
         columns = LATITUDE,
         left = -90,

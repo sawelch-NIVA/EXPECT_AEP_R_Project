@@ -18,6 +18,7 @@ library(bslib)
 library(eDataDRF)
 library(targets)
 library(devtools)
+library(leaflet.extras2)
 
 suppressMessages(
   load_all(quiet = TRUE)
@@ -187,10 +188,10 @@ leaflet() |>
   addHexbin(
     lng = hexbin_data$LONGITUDE,
     lat = hexbin_data$LATITUDE,
+    radius = 5,
     options = hexbinOptions(
       colorRange = c("#440154", "#21918c", "#fde725"), # viridis-ish
-      radiusRange = c(10, 20),
-      opacity = 0.7,
+      radiusRange = c(1, 5),
       colorScaleExtent = c(
         min(hexbin_data$sample_size, na.rm = TRUE),
         max(hexbin_data$sample_size, na.rm = TRUE)
@@ -199,26 +200,26 @@ leaflet() |>
   ) |>
   # Keep your existing polygon layers if desired
 
-  addPolygons(
-    data = wgs84_geo$marine_polys,
-    fillColor = ~ ifelse(
-      highlight_name,
-      marine_colors$highlight,
-      marine_colors$default
-    ),
-    fillOpacity = 0.2,
-    weight = 1,
-    color = "darkblue"
-  ) |>
-  addPolygons(
-    data = wgs84_geo$countries,
-    fillColor = ~ ifelse(
-      highlight_name,
-      country_colours$highlight,
-      country_colours$default
-    ),
-    fillOpacity = 0.2,
-    weight = 1,
-    color = "darkgreen"
-  )
+  # addPolygons(
+  #   data = wgs84_geo$marine_polys,
+  #   fillColor = ~ ifelse(
+  #     highlight_name,
+  #     marine_colors$highlight,
+  #     marine_colors$default
+  #   ),
+  #   fillOpacity = 0.2,
+  #   weight = 1,
+  #   color = "darkblue"
+  # ) |>
+  # addPolygons(
+  #   data = wgs84_geo$countries,
+  #   fillColor = ~ ifelse(
+  #     highlight_name,
+  #     country_colours$highlight,
+  #     country_colours$default
+  #   ),
+  #   fillOpacity = 0.2,
+  #   weight = 1,
+  #   color = "darkgreen"
+  # )
 ```

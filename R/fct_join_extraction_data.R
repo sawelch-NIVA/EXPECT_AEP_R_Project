@@ -256,17 +256,6 @@ join_all_literature_modules <- function(
     relationship = "many-to-one"
   )
 
-  # joined_biota <- joined_biota |>
-  #   mutate(
-  #     CAMPAIGN_NAME_SHORT = case_when(
-  #       str_detect(
-  #         SITE_CODE,
-  #         "SorfjordStarfish"
-  #       ) ~ "SorfjordStarfish2000",
-  #       .default = CAMPAIGN_NAME_SHORT
-  #     )
-  #   )
-
   # ## Parameters ----
   # there's currenly only one parameter
   joined_parameters <- left_join_diagnostic(
