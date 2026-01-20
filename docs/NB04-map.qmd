@@ -197,29 +197,29 @@ leaflet() |>
         max(hexbin_data$sample_size, na.rm = TRUE)
       )
     )
-  ) |>
-  # Keep your existing polygon layers if desired
+  )
+# Keep your existing polygon layers if desired
 
-  # addPolygons(
-  #   data = wgs84_geo$marine_polys,
-  #   fillColor = ~ ifelse(
-  #     highlight_name,
-  #     marine_colors$highlight,
-  #     marine_colors$default
-  #   ),
-  #   fillOpacity = 0.2,
-  #   weight = 1,
-  #   color = "darkblue"
-  # ) |>
-  # addPolygons(
-  #   data = wgs84_geo$countries,
-  #   fillColor = ~ ifelse(
-  #     highlight_name,
-  #     country_colours$highlight,
-  #     country_colours$default
-  #   ),
-  #   fillOpacity = 0.2,
-  #   weight = 1,
-  #   color = "darkgreen"
-  # )
+# addPolygons(
+#   data = wgs84_geo$marine_polys,
+#   fillColor = ~ ifelse(
+#     highlight_name,
+#     marine_colors$highlight,
+#     marine_colors$default
+#   ),
+#   fillOpacity = 0.2,
+#   weight = 1,
+#   color = "darkblue"
+# ) |>
+# addPolygons(
+#   data = wgs84_geo$countries,
+#   fillColor = ~ ifelse(
+#     highlight_name,
+#     country_colours$highlight,
+#     country_colours$default
+#   ),
+#   fillOpacity = 0.2,
+#   weight = 1,
+#   color = "darkgreen"
+# )
 ```

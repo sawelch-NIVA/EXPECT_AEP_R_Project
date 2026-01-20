@@ -478,7 +478,8 @@ list(
       measurements = vm_edata_measurements,
       creed_scores = NULL,
       actions = action_levels(),
-      agent = TRUE
+      agent = TRUE,
+      northern_hemisphere = TRUE
     )
   ),
 
@@ -654,7 +655,11 @@ list(
         ) |>
         standardise_IDate_all() |>
         add_row(vm_edata_sites) |>
-        pb_validate_sites(agent = FALSE, actions = pb_action_levels) |>
+        pb_validate_sites(
+          agent = FALSE,
+          actions = pb_action_levels,
+          northern_hemisphere = TRUE
+        ) |>
         # do we have 1+ measurement corresponding to every site
         col_vals_in_set_verbose(
           columns = SITE_CODE,

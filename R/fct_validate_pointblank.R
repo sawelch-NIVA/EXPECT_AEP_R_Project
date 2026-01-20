@@ -235,16 +235,22 @@ pb_validate_parameters <- function(
     actions = actions
   )
 }
-
 # ## Sites validation ----
 #' @rdname validate_edata_tables
+#' @param northern_hemisphere Logical. If TRUE, constrains latitude validation
+#'   to northern hemisphere (0-90). Default is FALSE (allows -90 to 90).
 #' @importFrom pointblank col_vals_not_null col_vals_in_set col_vals_between rows_distinct action_levels
 #' @export
 pb_validate_sites <- function(
   data,
   actions = action_levels(),
-  agent = TRUE
+  agent = TRUE,
+  northern_hemisphere = FALSE
 ) {
+  # Set latitude bounds based on hemisphere constraint ----
+  lat_min <- if (northern_hemisphere) 0 else -90
+  lat_max <- 90
+
   apply_validations <- function(x) {
     x |>
       # Core identifiers
@@ -275,11 +281,11 @@ pb_validate_sites <- function(
         actions = actions
       ) |>
 
-      # Coordinates - valid values, and in
+      # Coordinates - valid values
       col_vals_between(
         columns = LATITUDE,
-        left = -90,
-        right = 90,
+        left = lat_min,
+        right = lat_max,
         actions = actions
       ) |>
       col_vals_between(
@@ -637,6 +643,7 @@ pb_validate_creed_scores <- function(
 #' @param actions Action levels for pointblank agents (only used when agent = TRUE)
 #' @param agent Logical. If TRUE (default), returns a list of pointblank agent objects.
 #'   If FALSE, returns a list of validated data frames with failures removed.
+#' @param northern_hemisphere Logical. If TRUE, check that site coordinates are in northern hemisphere.
 #'
 #' @return If agent = TRUE, a named list of pointblank agent objects.
 #'   If agent = FALSE, a named list of validated data frames.
@@ -652,13 +659,14 @@ pb_validate_all_edata_tables <- function(
   methods = NULL,
   creed_scores = NULL,
   actions = action_levels(),
-  agent = TRUE
+  agent = TRUE,
+  northern_hemisphere = FALSE
 ) {
   results <- list(
     campaign = pb_validate_campaign(campaign, actions, agent),
     reference = pb_validate_reference(reference, actions, agent),
     parameters = pb_validate_parameters(parameters, actions, agent),
-    sites = pb_validate_sites(sites, actions, agent),
+    sites = pb_validate_sites(sites, actions, agent, northern_hemisphere),
     measurements = pb_validate_measurements(measurements, actions, agent)
   )
 

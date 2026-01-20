@@ -102,7 +102,7 @@ run_pipeline <- function(
 
 #  preferred
 run_pipeline(
-  destroy_all = FALSE, # don't start from scratch,
+  destroy_all = TRUE, # don't start from scratch,
   render_quarto = TRUE, # don't render documents,
   deploy = TRUE, # don't update website
   names = NULL, # no specific targets
