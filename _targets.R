@@ -1089,6 +1089,13 @@ list(
     quiet = FALSE
   ),
 
+  #### # Weight of Evidence notebook ----
+  tar_quarto(
+    name = render_nb06_woe,
+    path = "docs/NB06-WoE.qmd",
+    quiet = FALSE
+  ),
+
   #### # Emissions notebook ----
   tar_quarto(
     name = render_nb07_emissions,

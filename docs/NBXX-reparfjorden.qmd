@@ -5,7 +5,9 @@ date: last-modified
 lightbox: true
 ---
 
-# Stupid map was taking 5 minutes just to render. Now it's cached. Will have to find a better solution in future. 
+I've been asked to put together a quick overview of the Repparfjorden, its history and likely relevant sources. So here goes.
+
+Repparfjorden is a fjord in Hammerfest, Finnmark, at the far north of Norway. It has historically been a Submarine Tailing Disposal site, and may be again despite popular resistance. Nussir ASA wants to start mining copper near Repparfjorden, and this would be the logical place to put it (https://en.wikipedia.org/wiki/Repparfjorden).
 
 ```{r}
 #| label: setup
@@ -18,17 +20,225 @@ library(bslib)
 library(eDataDRF)
 library(targets)
 library(devtools)
+library(here)
+library(readxl)
+library(htmltools)
+library(readxl)
 
 suppressMessages(
   load_all(quiet = TRUE)
 ) # TODO: Reduce render time by sourcing only what we specifically need?
 ```
 
+According to Wikipedia the coordinates of the fjord are (70.5, 24.17) (https://geohack.toolforge.org/geohack.php?pagename=Repparfjorden&params=70.5_N_24.17_E_type:waterbody_region:NO_dim:50000). We'll use this as a starting point for our map. It's apparently 14km long, so to get an appropriate amount of its surroundings we'll project it out by 30 km. (actually we won't yet).
+
+# Define Study Area ----
+
 ```{r}
-#| label: load-data
-# load in any data we need from the targets workflow
+#| label: define-study-area
+
+rf_coords <- st_sfc(st_point(c(70.50, 24.17)), crs = 4326)
+
+rf_bbox <- st_bbox(
+  c(xmin = 23.87, xmax = 24.47, ymin = 70.3, ymax = 70.8),
+  crs = st_crs(4326)
+)
+```
+
+# Literature Data ----
+
+```{r}
+#| label: load-literature-data
+
 literature_merged_data <- tar_read(load_literature_pqt)
-wgs84_geo <- tar_read(wgs84_geography)
 tar_load(copper_toxicity_thresholds)
 
+literature_sf <- literature_merged_data |>
+  filter(
+    !is.na(LATITUDE),
+    !is.na(LONGITUDE),
+    !is.na(MEASURED_OR_IMPUTED_VALUE_STANDARD)
+  ) |>
+  st_as_sf(
+    coords = c("LONGITUDE", "LATITUDE"),
+    crs = st_crs("WGS84"),
+    remove = FALSE
+  ) |>
+  st_crop(rf_bbox)
+```
+
+# Mining Sites ----
+
+```{r}
+#| label: load-mining-sites
+
+mining_sites_sf <- mine_tailings_coords() |>
+  st_as_sf(
+    coords = c("LONGITUDE", "LATITUDE"),
+    crs = st_crs("WGS84"),
+    remove = FALSE
+  )
+```
+
+# Aquaculture Sites ----
+
+```{r}
+#| label: load-aquaculture
+
+aquaculture_sf <- sf::read_sf(here(
+  "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shx"
+)) |>
+  filter(fylke == "FINNMARK")
+```
+
+# Industrial Emissions ----
+
+```{r}
+#| label: load-industrial-emissions
+
+copper_industrial_emissions <- read_excel(
+  here::here(
+    "data",
+    "raw",
+    "norske_utslipp",
+    "norske_utslipp_copper_land_industries_individ.xlsx"
+  ),
+  skip = 2
+) |>
+  rename(
+    facility_name = Anleggsnavn,
+    county = Fylke,
+    municipality = Kommune,
+    nace_code = `NACE Kode`,
+    year = År,
+    annual_emission_air = `Årlig utslipp til luft`,
+    basis_air = `Grunnlagsverdi for luft`,
+    annual_emission_water = `Årlig utslipp til vann`,
+    basis_water = `Grunnlagsverdi for vann`,
+    unit = Enhet,
+    facility_id = AnleggId,
+    org_number = `Org.nr.`
+  ) |>
+  mutate(
+    missing_pattern = case_when(
+      is.na(annual_emission_air) &
+        is.na(annual_emission_water) ~ "Both missing",
+      is.na(annual_emission_air) ~ "Air missing",
+      is.na(annual_emission_water) ~ "Water missing",
+      TRUE ~ "Complete data"
+    )
+  )
+```
+
+# Interactive Map ----
+
+```{r}
+#| label: repparfjord-map
+
+# Build labels for literature data ----
+# NOTE: Adjust column names below to match your actual data structure
+literature_labels <- lapply(seq_len(nrow(literature_sf)), function(i) {
+  row <- literature_sf[i, ]
+  htmltools::HTML(sprintf(
+    "<strong>Literature Data</strong><br/>
+    Value: %s<br/>
+    Lat: %.4f, Lon: %.4f",
+    row$MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    row$LATITUDE,
+    row$LONGITUDE
+  ))
+})
+
+# Build labels for mining sites ----
+# NOTE: Adjust column names to match mine_tailings_coords() output
+mining_labels <- lapply(seq_len(nrow(mining_sites_sf)), function(i) {
+  row <- mining_sites_sf[i, ]
+  htmltools::HTML(sprintf(
+    "<strong>Mining/Tailings Site</strong><br/>
+    Name: %s<br/>
+    (%.4f, %.4f)<br/>
+    Ore: %s",
+    row$SITE_NAME,
+    row$LATITUDE,
+    row$LONGITUDE,
+    row$ORE_TYPE
+  ))
+})
+
+# Build labels for aquaculture sites ----
+# NOTE: Adjust column names to match your shapefile attributes
+aquaculture_labels <- lapply(seq_len(nrow(aquaculture_sf)), function(i) {
+  row <- aquaculture_sf[i, ]
+  htmltools::HTML(sprintf(
+    "<strong>Aquaculture Site</strong><br/>
+    Name: %s<br/>
+    Kommune: %s<br/>
+    Capacity: %s %s",
+    if ("navn" %in% names(row)) row$navn else "Unknown",
+    if ("kommune" %in% names(row)) row$kommune else "Unknown",
+    row$kapasitet_,
+    row$kapasitet1
+  ))
+})
+
+# Render map ----
+leaflet() |>
+  addProviderTiles(providers$CartoDB.Positron) |>
+  # Literature data points
+
+  addCircleMarkers(
+    data = literature_sf,
+    radius = 6,
+    color = "orange",
+    fillOpacity = 0.6,
+    stroke = TRUE,
+    label = literature_labels,
+    group = "Literature Data"
+  ) |>
+  # Mining/tailings sites
+
+  addCircleMarkers(
+    data = mining_sites_sf,
+    radius = 20,
+    color = "grey",
+    fillOpacity = 0.6,
+    stroke = TRUE,
+    label = mining_labels,
+    group = "Mining Sites"
+  ) |>
+  # Aquaculture sites
+  addCircleMarkers(
+    data = aquaculture_sf,
+    radius = 10,
+    color = "skyblue",
+    fillOpacity = 0.6,
+    stroke = TRUE,
+    label = aquaculture_labels,
+    group = "Aquaculture"
+  ) |>
+  # Layer control
+  addLayersControl(
+    overlayGroups = c("Literature Data", "Mining Sites", "Aquaculture"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+```{r}
+#| label: literature_data
+
+literature_sf |>
+  ggplot2::ggplot(aes(
+    x = ENVIRON_COMPARTMENT_SUB,
+    y = REFERENCE_ID,
+    fill = MEASURED_VALUE_STANDARD
+  )) +
+  geom_tile()
+
+# Hmmm.
+
+# Not an incredible amount of data. Where's the Repparfjorden studies?
+literature_sf |>
+  group_by(ENVIRON_COMPARTMENT_SUB, SAMPLE_SPECIES, REFERENCE_ID) |>
+  reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD))
 ```

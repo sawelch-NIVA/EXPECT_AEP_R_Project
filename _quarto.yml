@@ -35,6 +35,9 @@ website:
           - href: docs/NB05-network.qmd
             text: "NB05 - Network Diagram"
             icon: journal-code
+          - href: docs/NB06-WoE.qmd
+            text: "NB06 - Weight of Evidence"
+            icon: journal-code
           - href: docs/NB07-emissions.qmd
             text: "NB07 - Emissions"
             icon: journal-code
