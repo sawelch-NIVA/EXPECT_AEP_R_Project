@@ -22,19 +22,18 @@ Norway's economically important Arctic region is likely to come under increased 
 
 ## The Aggregate Exposure Pathway
 
-The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway [@ankleyAdverseOutcomePathways2010, @tanAggregateExposurePathways2018] for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. AOPs are conceptualised as a network connecting exposure to a toxicant (a Molecular Initiating Event, MIE) to a deleterious biological effect (Adverse Outcome, AO) through a series of mediating Key Events (KEs, network nodes) and Key Event Relationships (KERs, network edges). 
+The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway [@ankleyAdverseOutcomePathways2010, @tanAggregateExposurePathways2018] for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. AOPs are conceptualised as a directed acyclic graph (i.e a directional, non-looping network) connecting exposure to a toxicant (a Molecular Initiating Event, MIE) to a deleterious biological effect (Adverse Outcome, AO) through a series of mediating Key Events (KEs, network nodes) and Key Event Relationships (KERs, network edges).
 
-Linkages between nodes are created on from a putative relationship by applying a number of Weight of Evidence (WoE) criteria. [@beckerIncreasingScientificConfidence2015] advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism.  
+Linkages between nodes are created on from a putative relationship by applying a number of Weight of Evidence (WoE) criteria. [@beckerIncreasingScientificConfidence2015] advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism.
 
 The AEP then ends where the AOP begins, logically completing the chain of events that (potentially) caused the MIE to begin with. AEPs consist of a series of Key Exposure States (KES, the state of a stressor in space and time) linked by Key Transitional Relationships (KTR, the transport or transformation of stressors) that link the source and Target Site Exposure (TSE), a biological entity (biomolecules, cells, tissues, etc.) where an MIE may occur. No specific set of WoE guidlines have been developed for AEP , but the modfied Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs [@pengAggregateExposurePathways2022].
-
 
 ![Placeholder. Put a picture of an AEP and AOP here.](images/paste-1.gif)
 
 A few key differences:
 
 -   AOPs are generally stressor-agnostic. AEPs aren't.
--   What else?
+-   What else? ==KET - any comments?==
 
 AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date 561 AOPs are available on the AOP Wiki of which (42) have been endorsed (what does WHPA... endorsed mean?) [@societyforadvancementofaopsAOPwikiV272026]. The OECD offers a program for AOP creation (details needed), while the EU/Norwegian government does... what do they do?
 
@@ -102,7 +101,6 @@ However, the relative ease of sourcing, working with, and analysing copper has m
 
 ## Drivers of Copper Demand, Extraction, and Emission
 
-
 -   Copper is very useful because it's very conductive and easy to extract
     -   Also used in:
     -   Pipes
@@ -134,7 +132,7 @@ A systematic literature review framework was developed from the PRISMA2020 frame
 #### Databases and Search Terms
 
 | Source | Date Searched | Hits | Comments |
-|----------------|-------------------------|----------------|----------------|
+|-----------------|-----------------------|-----------------|-----------------|
 | [Crossref](https://www.crossref.org/) | Excluded |  | Doesn't support Booleans. |
 | [Scopus](https://www.scopus.com/home.uri) | Excluded |  | No institutional access. |
 | [Web of Science](https://www.webofscience.com) | 2025.06.24 | 218 | [Query link](https://www.webofscience.com/wos/woscc/summary/9c9af98d-7ee8-4163-9d48-93dd4cb52b6f-0166a1b51b/relevance/1). Topic (title, abstract, keyword plus, and author keywords) search. Searching all fields returned 750 hits. |
