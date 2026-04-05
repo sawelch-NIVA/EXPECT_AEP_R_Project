@@ -19,6 +19,7 @@
 #' @return A tibble conforming to eData campaign schema with one row containing
 #'   campaign metadata
 #'
+#' @importFrom eDataDRF initialise_campaign_tibble
 #' @export
 vm_create_edata_campaign_table <- function(
   vm_data,
@@ -36,9 +37,6 @@ vm_create_edata_campaign_table <- function(
       CAMPAIGN_NAME = campaign_name,
       CAMPAIGN_START_DATE = as.IDate(date_start),
       CAMPAIGN_END_DATE = as.IDate(date_end),
-      RELIABILITY_SCORE = NA_character_,
-      RELIABILITY_EVAL_SYS = NA_character_,
-      CONFIDENTIALITY_EXPIRY_DATE = as.IDate(NA),
       ORGANISATION = organisation,
       ENTERED_BY = entered_by,
       ENTERED_DATE = as.IDate(Sys.Date()),
@@ -70,6 +68,7 @@ vm_create_edata_campaign_table <- function(
 #' @return A tibble conforming to eData reference schema with one row containing
 #'   bibliographic information for the Vannmiljø database
 #'
+#' @importFrom eDataDRF initialise_references_tibble
 #' @export
 vm_create_edata_reference_table <- function(
   vm_data,
@@ -137,6 +136,7 @@ vm_create_edata_reference_table <- function(
 #'
 #'   Validates against duplicate SITE_CODEs and checks coordinate reprojection.
 #'
+#' @importFrom eDataDRF initialise_sites_tibble
 #' @export
 vm_create_edata_sites_table <- function(vm_data, entered_by) {
   # Extract unique sites with relevant metadata
@@ -316,6 +316,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
 #'   set to NA and should be filled in separately if needed. Extracts unique
 #'   values from the Parameter column in vm_data.
 #'
+#' @importFrom eDataDRF initialise_parameters_tibble
 #' @export
 vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   # Extract unique parameters from the data
@@ -366,6 +367,7 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
 #'
 #' @return A tibble conforming to eData samples schema
 #'
+#' @importFrom eDataDRF initialise_samples_tibble
 #' @export
 vm_create_edata_samples_table <- function(vm_intermediate) {
   edata_samples <- initialise_samples_tibble() |>
@@ -394,6 +396,7 @@ vm_create_edata_samples_table <- function(vm_intermediate) {
 #'
 #' @return A tibble conforming to eData biota schema
 #'
+#' @importFrom eDataDRF initialise_biota_tibble
 #' @export
 vm_create_edata_biota_table <- function(vm_intermediate) {
   edata_biota <- initialise_biota_tibble() |>
@@ -682,6 +685,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 #' - Currently uses placeholder IDs ("1", "2", "3", "4")
 #' - TODO: Implement proper protocol ID mapping
 #'
+#' @importFrom eDataDRF initialise_measurements_tibble
 #' @export
 vm_create_edata_measurements_table <- function(
   vm_edata_intermediate,
