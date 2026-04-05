@@ -1,0 +1,6 @@
+---
+title: "Readme"
+format: gfm
+---
+
+This is a bit of a mess and I haven't necessarily documented everything as well as I could have.

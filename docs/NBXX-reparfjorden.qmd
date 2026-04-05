@@ -5,14 +5,29 @@ date: last-modified
 lightbox: true
 ---
 
+To do:
+- Check excluded chemical concentrations
+- Get rest of Norske utslipp's emission types
+- Cross-ref with REACH data
+
 I've been asked to put together a quick overview of the Repparfjorden, its history and likely relevant sources. So here goes.
 
 Repparfjorden is a fjord in Hammerfest, Finnmark, at the far north of Norway. It has historically been a Submarine Tailing Disposal site, and may be again despite popular resistance. Nussir ASA wants to start mining copper near Repparfjorden, and this would be the logical place to put it (https://en.wikipedia.org/wiki/Repparfjorden).
 
+SNL has a better historical summary than Wikipedia (https://snl.no/Repparfjorden):
+
+- Relatively deep with av. depth of 40-60m and deepest at 123m
+- Rv 94 runs along the south side of the Fjord = we should look at car emissions
+- South side of the fjord is copper rich, ~10 Mtonnes mined since 1900. Mine was closed in 1978?
 ```{r}
 #| label: setup
 #| warning: false
 #| output: false
+
+# ============================================================================
+# Libraries ----
+# ============================================================================
+
 library(dplyr)
 library(leaflet)
 library(sf)
@@ -24,31 +39,63 @@ library(here)
 library(readxl)
 library(htmltools)
 library(readxl)
+library(ggplot2)
+library(patchwork)
+library(DT)
 
 suppressMessages(
   load_all(quiet = TRUE)
 ) # TODO: Reduce render time by sourcing only what we specifically need?
-```
 
-According to Wikipedia the coordinates of the fjord are (70.5, 24.17) (https://geohack.toolforge.org/geohack.php?pagename=Repparfjorden&params=70.5_N_24.17_E_type:waterbody_region:NO_dim:50000). We'll use this as a starting point for our map. It's apparently 14km long, so to get an appropriate amount of its surroundings we'll project it out by 30 km. (actually we won't yet).
+knitr::opts_chunk$set(dev = "svglite")
 
-# Define Study Area ----
+# ============================================================================
+# Repparfjorden location and bounding box ----
+# ============================================================================
 
-```{r}
-#| label: define-study-area
+repparfjorden <- tibble(
+  lon = 24.17,
+  lat = 70.5,
+  label = "Repparfjorden"
+)
 
 rf_coords <- st_sfc(st_point(c(70.50, 24.17)), crs = 4326)
 
 rf_bbox <- st_bbox(
-  c(xmin = 23.87, xmax = 24.47, ymin = 70.3, ymax = 70.8),
+  c(xmin = 23, xmax = 25, ymin = 70, ymax = 71),
   crs = st_crs(4326)
+)
+
+# ============================================================================
+# Common spatial data ----
+# ============================================================================
+
+# Calculate map extent with padding
+lon_range <- c(rf_bbox["xmin"], rf_bbox["xmax"])
+lat_range <- c(rf_bbox["ymin"], rf_bbox["ymax"])
+pad_lon <- diff(lon_range) * 0.9
+pad_lat <- diff(lat_range) * 0.9
+
+# Get Norway coastline
+norway_map <- map_data(
+  "world",
+  region = "Norway(?!:Svalbard)"
 )
 ```
 
-# Literature Data ----
+According to Wikipedia the coordinates of the fjord are (70.5, 24.17) (https://geohack.toolforge.org/geohack.php?pagename=Repparfjorden&params=70.5_N_24.17_E_type:waterbody_region:NO_dim:50000). We'll use this as a starting point for our map. It's apparently 14km long, so to get an appropriate amount of its surroundings we'll project it out by 30 km. (actually we won't yet).
+
+# Define Study Area 
+
+Study area defined in setup chunk above.
+
+# Literature Data 
+
+We grab our big dataset and crop to a bounding box: (23, 25, 70, 71)
 
 ```{r}
-#| label: load-literature-data
+#| label: fig-literature-data
+#| fig-caption: All currently imported and processed data from literature + vannmiljø within the bounding box (23, 25, 70, 71), binned by sampling frequency 1990 - 2025.
 
 literature_merged_data <- tar_read(load_literature_pqt)
 tar_load(copper_toxicity_thresholds)
@@ -65,10 +112,74 @@ literature_sf <- literature_merged_data |>
     remove = FALSE
   ) |>
   st_crop(rf_bbox)
+
+ggplot() +
+  # Coastline
+  geom_polygon(
+    data = norway_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey85",
+    colour = "white",
+    linewidth = 0.3
+  ) +
+  # Hexbin density
+  geom_hex(
+    data = literature_sf,
+    aes(x = LONGITUDE, y = LATITUDE),
+    bins = 500,
+    alpha = 0.85
+  ) +
+  geom_point(
+    data = repparfjorden,
+    aes(x = lon, y = lat),
+    colour = "red",
+    size = 3
+  ) +
+  # Repparfjorden label (nudged above the point)
+  geom_text(
+    data = repparfjorden,
+    aes(x = lon, y = lat, label = label),
+    colour = "red",
+    fontface = "bold",
+    vjust = -1,
+    size = 3.5
+  ) +
+  coord_sf(
+    xlim = c(lon_range[1] - pad_lon, lon_range[2] + pad_lon),
+    ylim = c(lat_range[1] - pad_lat, lat_range[2] + pad_lat),
+    expand = FALSE
+  ) +
+  scale_fill_viridis_c()
 ```
 
-# Mining Sites ----
+A quick search of Zotero tells me that these are the papers I have on Repparfjorden:
 
+Andersson, M., Finne, T., Jensen, L., Eggen, O., 2018. Geochemistry of a copper mine tailings deposit in Repparfjorden, northern Norway. SCIENCE OF THE TOTAL ENVIRONMENT 644, 1219–1231. https://doi.org/10.1016/j.scitotenv.2018.06.385
+
+We should have this one in the dataset, although we had to merge some sites together.
+
+Hoff M, Argentino C, Huljek L, Fiket Ž, Mun Y, Angeles IB, Palinkas SS, Panieri G, 2024. Biogeochemical impact of historical submarine mine tailings on benthic ecosystems in the repparfjord (northern Norway). Sci Total Env. 924, 171468. https://doi.org/10.1016/j.scitotenv.2024.171468
+
+This should also be in the dataset.
+
+Pedersen, K.B., Jensen, P.E., Ottosen, L.M., Evenset, A., Christensen, G.N., Frantzen, M., 2017. Metal speciation of historic and new copper mine tailings from repparfjorden, northern Norway, before and after acid, base and electrodialytic extraction. Miner. Eng. 107, 100–111. https://doi.org/10.1016/j.mineng.2016.10.009
+
+Sternal, B., Junttila, J., Skirbekk, K., Forwick, M., Carroll, J., Pedersen, K., 2017. The impact of submarine copper mine tailing disposal from the 1970s on repparfjorden, northern Norway. Mar. Pollut. Bull. 120, 136–153. https://doi.org/10.1016/j.marpolbul.2017.04.054
+
+Not in Zotero (somehow), but in spreadsheet: https://docs.google.com/spreadsheets/d/1Tq2vd6-Cwzh93O8prHdXuML0cgBU1mbR9l7Ka_u70BE/edit?gid=1566526983#gid=1566526983
+
+*Long-term dispersion and availability of metals from submarine mine tailing disposal in a fjord in Arctic Norway*
+"MS reports fraction by depth (including bioavailability), but actual concentrations appear to be sourced from Sternal 2017. Skipping."
+
+*Impacts of climate change on metal leaching and partitioning for submarine mine tailings disposal.*
+"I don't believe this paper actually included any copper concentrations, just biodiversity metrics. Will check."
+
+*Recolonization and recovery of an Arctic benthic community subject to mine-tailings deposits*
+"I don't believe this paper actually included any copper concentrations, just biodiversity metrics. Will check."
+
+# Mining Sites 
+
+Or, more accurately, submarine tailing disposal sites as of 2013 (via [@kvassnesWasteSitesMines2013])
 ```{r}
 #| label: load-mining-sites
 
@@ -78,79 +189,304 @@ mining_sites_sf <- mine_tailings_coords() |>
     crs = st_crs("WGS84"),
     remove = FALSE
   )
+
+mining_sites_sf |>
+  filter(str_detect(SITE_NAME, "Repparfjord")) |>
+  DT::datatable()
 ```
 
-# Aquaculture Sites ----
+# Aquaculture Sites 
 
+We also have data on aquaculture sites @norwegiandirectorateoffisheriesAquacultureLocationsNorway2025. Rather than filter these spatially I've just selected everything in Finnmark. I haven't spent a lot of time inspecting this data; I don't know what "Clearance date" actually means.
 ```{r}
 #| label: load-aquaculture
+
+# ============================================================================
+# Load and prepare aquaculture data ----
+# ============================================================================
 
 aquaculture_sf <- sf::read_sf(here(
   "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shx"
 )) |>
-  filter(fylke == "FINNMARK")
-```
-
-# Industrial Emissions ----
-
-```{r}
-#| label: load-industrial-emissions
-
-copper_industrial_emissions <- read_excel(
-  here::here(
-    "data",
-    "raw",
-    "norske_utslipp",
-    "norske_utslipp_copper_land_industries_individ.xlsx"
-  ),
-  skip = 2
-) |>
-  rename(
-    facility_name = Anleggsnavn,
-    county = Fylke,
-    municipality = Kommune,
-    nace_code = `NACE Kode`,
-    year = År,
-    annual_emission_air = `Årlig utslipp til luft`,
-    basis_air = `Grunnlagsverdi for luft`,
-    annual_emission_water = `Årlig utslipp til vann`,
-    basis_water = `Grunnlagsverdi for vann`,
-    unit = Enhet,
-    facility_id = AnleggId,
-    org_number = `Org.nr.`
-  ) |>
+  filter(kommune == "HAMMERFEST") |>
   mutate(
-    missing_pattern = case_when(
-      is.na(annual_emission_air) &
-        is.na(annual_emission_water) ~ "Both missing",
-      is.na(annual_emission_air) ~ "Air missing",
-      is.na(annual_emission_water) ~ "Water missing",
-      TRUE ~ "Complete data"
+    value = case_when(
+      kapasitet1 == "TN" ~ kapasitet_,
+      kapasitet1 == "KG" ~ kapasitet_ / 1000,
+      TRUE ~ 0
+    ),
+    unit = case_when(
+      kapasitet1 == "TN" ~ "tonnes",
+      kapasitet1 == "KG" ~ "tonnes",
+      TRUE ~ "NA"
     )
+  )
+
+# ============================================================================
+# Scatter plot: Capacity over time by type ----
+# ============================================================================
+
+p_scatter <- aquaculture_sf |>
+  ggplot(aes(
+    x = klarerings,
+    y = value,
+    colour = klarerin_1,
+  )) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_y_log10(
+    labels = scales::label_comma()
+  ) +
+  labs(
+    x = "Clearance date",
+    y = "Capacity (tonnes, log10)",
+    colour = "Type",
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical",
+    legend.margin = margin(t = 0)
+  )
+
+# ============================================================================
+# Map: Aquaculture site density in Finnmark ----
+# ============================================================================
+
+p_map <- ggplot() +
+  # Coastline
+  geom_polygon(
+    data = norway_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey85",
+    colour = "white",
+    linewidth = 0.3
+  ) +
+  # Hexbin density
+  geom_hex(
+    data = aquaculture_sf,
+    aes(x = lon, y = lat),
+    bins = 500,
+    alpha = 0.85
+  ) +
+  # Repparfjorden point
+  geom_point(
+    data = repparfjorden,
+    aes(x = lon, y = lat),
+    colour = "red",
+    size = 3
+  ) +
+  # Repparfjorden label (nudged above the point)
+  geom_text(
+    data = repparfjorden,
+    aes(x = lon, y = lat, label = label),
+    colour = "red",
+    fontface = "bold",
+    vjust = -1,
+    size = 3.5
+  ) +
+  scale_fill_viridis_c(
+    name = "No. Sites",
+    option = "viridis"
+  ) +
+  # Zoom to data extent
+  coord_sf(
+    xlim = c(lon_range[1] - pad_lon, lon_range[2] + pad_lon),
+    ylim = c(lat_range[1] - pad_lat, lat_range[2] + pad_lat),
+    expand = FALSE
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_line(colour = "grey95")
+  )
+
+# ============================================================================
+# Combine side-by-side ----
+# ============================================================================
+
+p_map +
+  p_scatter +
+  plot_layout(widths = c(1.2, 1)) +
+  plot_annotation(
+    title = "Aquaculture sites in Finnmark",
+    theme = theme(plot.title = element_text(face = "bold", size = 14))
   )
 ```
 
-# Interactive Map ----
+# Emissions 
+
+Copper emissions are not (as far as I know) reported with exact coordinates, so we'll look at Hammerfest. These data are from @miljodirektoratetNorskeUtslippUtslipp2025 (i.e. the Norwegian PRTR); they cover the following website sections: land industries, landfills, wastewater treatment plants, and offshore oil facilities (none of which are included below as they aren't in Finnmark/Hammerfest). 
+
+Emissions from households, "products", transport, and "various sectors" were also downloaded but these are aggregated to the national level. Hammerfest has multiple WWTPs, but in fact they aren't included below because none of them report copper concentrations. 
 
 ```{r}
-#| label: repparfjord-map
+#| label: load-industrial-emissions
+#| tbl-cap: A bit of a rough table of land industrial emissions of copper in Hammerfest. Reporting is very spotty, so take all numbers with a pinch of salt, and I'm not immediately sure what basis is. Both Sar as and Finnmark gevinning are waste management companies.
+library(purrr)
+library(fs)
+library(readxl)
+library(dplyr)
 
+# Get all Excel files in the directory
+excel_files <- dir_ls(
+  here::here("data", "raw", "norske_utslipp"),
+  glob = "*.xlsx"
+)
+
+# Read and process each file
+norske_utslipp_data <- excel_files |>
+  set_names(path_file) |>
+  map(\(file) {
+    # Read the file
+    df <- read_excel(file, skip = 2)
+
+    # Remove completely empty columns (those named ...2, ...3, etc.)
+    df <- df |>
+      select(-matches("^\\.\\.\\.\\d+$"))
+
+    # Build rename vector based on available columns
+    rename_vec <- c(
+      facility_name = "Anleggsnavn",
+      county = "Fylke",
+      municipality = "Kommune",
+      year = "År",
+      unit = "Enhet",
+      nace_code = "NACE Kode",
+      annual_emission_air = "Årlig utslipp til luft",
+      basis_air = "Grunnlagsverdi for luft",
+      annual_emission_water = "Årlig utslipp til vann",
+      basis_water = "Grunnlagsverdi for vann",
+      annual_emission_underground = "Årlig utslipp til undergrunn",
+      facility_id = "AnleggId",
+      org_number = "Org.nr.",
+      annual_emission_kg = "Utslipp per år (i kg)",
+      municipality_number = "KommNr",
+      substance_code = "Stoffkode"
+    )
+
+    # Rename columns that exist
+    df |>
+      rename(any_of(rename_vec)) |>
+      select(-starts_with("...")) # Remove any remaining empty columns
+  })
+
+# Bind all into one dataframe
+all_norske_utslipp <- bind_rows(norske_utslipp_data, .id = "source_file")
+
+copper_emissions_hammerfest <-
+  all_norske_utslipp |>
+  filter(str_detect(municipality, "Hammerfest")) |>
+  group_by(facility_name) |>
+  reframe(
+    year_range = paste0(min(year), " - ", max(year)),
+    mean_air_kg = mean(annual_emission_air, na.rm = TRUE) |> round(2),
+    mean_water_kg = mean(annual_emission_water, na.rm = TRUE) |> round(2),
+    basis_water = paste0(unique(basis_water), collapse = ", "),
+    basis_air = paste0(unique(basis_air), collapse = ", ")
+  )
+
+
+# Hammerfest facility coordinates ----
+# Guessed/sourced from Claude
+library(tibble)
+
+hammerfest_sites <- tribble(
+  ~facility_name                                                                   , ~lat    , ~lon    , ~confidence   ,
+  "Hammerfest lng"                                                                 , 70.6854 , 23.5900 , "High"        ,
+  "Sar as avd. hammerfest"                                                         , 70.6418 , 23.6820 , "Medium-High" ,
+  "Finnmark ressursselskap as, grøtnes avfallsdeponi (Finnmark ressursselskap as)" , 70.5470 , 23.7280 , "Medium"      ,
+  "Deponi for borekaks på ulveryggen (Finnmark gjenvinning as)"                    , 70.4553 , 24.1989 , "Medium-High" ,
+  "Finnmark gjenvinning as, repparfjord"                                           , 70.4200 , 24.5500 , "Low"
+)
+
+copper_emissions_hammerfest |>
+  filter(
+    facility_name !=
+      "Finnmark gjenvinning - deponi for borekaks på ulveryggen (Finnmark gjenvinning as)" # this one is included twice...
+  ) |>
+  datatable(
+    rownames = FALSE,
+    colnames = c(
+      "Years with Data (Range)",
+      "Mean Air Emission (kg)",
+      "Mean Water Emission (kg)",
+      "Water Basis?",
+      "Air Basis?"
+    )
+  )
+
+copper_emissions_hammerfest_map <- copper_emissions_hammerfest |>
+  left_join(hammerfest_sites) |>
+  filter(
+    facility_name !=
+      "Finnmark gjenvinning - deponi for borekaks på ulveryggen (Finnmark gjenvinning as)" # this one is included twice...
+  )
+```
+
+# Interactive Map 
+
+An interactive map. Cropped to the same bounding box as above. The points should obviously have dates on them, but every time I add them it breaks the whole label. See the graphs below instead.
+
+The main takeaway is actually, we don't have a lot of data for the Repparfjord itself at the moment. So I need to go and check why all the papers I remember reading about the Repparfjord aren't included.
+```{r}
+#| label: repparfjord-map
+#| warning: false
+
+# ============================================================================
+# Crop mining and aquaculture to same bbox ----
+# ============================================================================
+
+mining_sites_sf <- mine_tailings_coords() |>
+  st_as_sf(
+    coords = c("LONGITUDE", "LATITUDE"),
+    crs = st_crs("WGS84"),
+    remove = FALSE
+  ) |>
+  st_crop(rf_bbox)
+
+aquaculture_sf <- sf::read_sf(here(
+  "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shx"
+)) |>
+  filter(kommune == "HAMMERFEST") |>
+  mutate(
+    value = case_when(
+      kapasitet1 == "TN" ~ kapasitet_,
+      kapasitet1 == "KG" ~ kapasitet_ / 1000,
+      TRUE ~ 0
+    ),
+    unit = case_when(
+      kapasitet1 == "TN" ~ "tonnes",
+      kapasitet1 == "KG" ~ "tonnes",
+      TRUE ~ "NA"
+    )
+  ) |>
+  st_crop(rf_bbox)
+
+# ============================================================================
 # Build labels for literature data ----
-# NOTE: Adjust column names below to match your actual data structure
+# ============================================================================
+
 literature_labels <- lapply(seq_len(nrow(literature_sf)), function(i) {
   row <- literature_sf[i, ]
   htmltools::HTML(sprintf(
-    "<strong>Literature Data</strong><br/>
-    Value: %s<br/>
+    "<strong>Measured Concentration</strong><br/>
+    %s %s<br/>
+    Compartment: %s<br/>
     Lat: %.4f, Lon: %.4f",
     row$MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    row$MEASURED_UNIT_STANDARD,
+    row$ENVIRON_COMPARTMENT_SUB,
     row$LATITUDE,
     row$LONGITUDE
   ))
 })
 
+# ============================================================================
 # Build labels for mining sites ----
-# NOTE: Adjust column names to match mine_tailings_coords() output
+# ============================================================================
+
 mining_labels <- lapply(seq_len(nrow(mining_sites_sf)), function(i) {
   row <- mining_sites_sf[i, ]
   htmltools::HTML(sprintf(
@@ -165,8 +501,10 @@ mining_labels <- lapply(seq_len(nrow(mining_sites_sf)), function(i) {
   ))
 })
 
+# ============================================================================
 # Build labels for aquaculture sites ----
-# NOTE: Adjust column names to match your shapefile attributes
+# ============================================================================
+
 aquaculture_labels <- lapply(seq_len(nrow(aquaculture_sf)), function(i) {
   row <- aquaculture_sf[i, ]
   htmltools::HTML(sprintf(
@@ -181,64 +519,170 @@ aquaculture_labels <- lapply(seq_len(nrow(aquaculture_sf)), function(i) {
   ))
 })
 
-# Render map ----
-leaflet() |>
-  addProviderTiles(providers$CartoDB.Positron) |>
-  # Literature data points
+# Industrial sites/landfills/WWTPs
 
-  addCircleMarkers(
-    data = literature_sf,
-    radius = 6,
-    color = "orange",
-    fillOpacity = 0.6,
-    stroke = TRUE,
-    label = literature_labels,
-    group = "Literature Data"
-  ) |>
-  # Mining/tailings sites
+# Create labels for emission sites
+emission_labels <- lapply(
+  seq_len(nrow(copper_emissions_hammerfest_map)),
+  function(i) {
+    row <- copper_emissions_hammerfest_map[i, ]
+    htmltools::HTML(sprintf(
+      "<strong>Industrial Facility</strong><br/>
+    %s<br/>
+    Years: %s<br/>
+    Mean Air Emission: %s kg<br/>
+    Mean Water Emission: %s kg<br/>
+    Lat: %.4f, Lon: %.4f",
+      row$facility_name,
+      row$year_range,
+      ifelse(is.nan(row$mean_air_kg), "No data", as.character(row$mean_air_kg)),
+      ifelse(
+        is.nan(row$mean_water_kg),
+        "No data",
+        as.character(row$mean_water_kg)
+      ),
+      row$lat,
+      row$lon
+    ))
+  }
+)
 
-  addCircleMarkers(
-    data = mining_sites_sf,
-    radius = 20,
-    color = "grey",
-    fillOpacity = 0.6,
-    stroke = TRUE,
-    label = mining_labels,
-    group = "Mining Sites"
-  ) |>
-  # Aquaculture sites
-  addCircleMarkers(
-    data = aquaculture_sf,
-    radius = 10,
-    color = "skyblue",
-    fillOpacity = 0.6,
-    stroke = TRUE,
-    label = aquaculture_labels,
-    group = "Aquaculture"
-  ) |>
-  # Layer control
-  addLayersControl(
-    overlayGroups = c("Literature Data", "Mining Sites", "Aquaculture"),
-    options = layersControlOptions(collapsed = FALSE)
+# Determine marker color based on emission type
+copper_emissions_hammerfest_map <- copper_emissions_hammerfest_map |>
+  mutate(
+    marker_color = case_when(
+      !is.nan(mean_air_kg) & !is.nan(mean_water_kg) ~ "purple", # Both
+      !is.nan(mean_air_kg) ~ "lightblue", # Air only
+      !is.nan(mean_water_kg) ~ "darkblue", # Water only
+      TRUE ~ "gray" # Neither
+    )
   )
+
+# Create icons for each facility
+emission_icon <-
+  makeAwesomeIcon(
+    icon = "industry",
+    iconColor = "white",
+    markerColor = "darkblue",
+    library = "fa"
+  )
+
+# ============================================================================
+# Custom icons ----
+# ============================================================================
+
+mining_icon <- makeAwesomeIcon(
+  icon = "industry",
+  iconColor = "white",
+  markerColor = "gray",
+  library = "fa"
+)
+
+aqua_icon <- makeAwesomeIcon(
+  icon = "water",
+  iconColor = "white",
+  markerColor = "lightblue",
+  library = "fa"
+)
+
+# ============================================================================
+# Render map ----
+# ============================================================================
+
+card(
+  leaflet() |>
+    addProviderTiles(providers$CartoDB.Positron) |>
+
+    addCircleMarkers(
+      data = literature_sf,
+      radius = 6,
+      color = "orange",
+      fillOpacity = 0.6,
+      stroke = TRUE,
+      label = literature_labels,
+      group = "Literature Data"
+    ) |>
+
+    addAwesomeMarkers(
+      data = mining_sites_sf,
+      icon = mining_icon,
+      label = mining_labels,
+      group = "Mining Sites"
+    ) |>
+
+    addAwesomeMarkers(
+      data = aquaculture_sf,
+      icon = aqua_icon,
+      label = aquaculture_labels,
+      group = "Aquaculture"
+    ) |>
+    addAwesomeMarkers(
+      data = copper_emissions_hammerfest_map,
+      lng = ~lon,
+      lat = ~lat,
+      icon = emission_icon,
+      label = emission_labels,
+      group = "PTRT Sites"
+    ) |>
+    addLayersControl(
+      overlayGroups = c(
+        "Literature Data",
+        "Mining Sites",
+        "Aquaculture",
+        "PTRT Sites"
+      ),
+      options = layersControlOptions(collapsed = FALSE)
+    ),
+  full_screen = TRUE
+)
 ```
 
+# Literature and Vm Data
 
+There's not a great deal of this. See below:
+
+Odd that we don't have any marine data.
+```{r}
+literature_sf |>
+  ggplot(aes(
+    x = SAMPLING_DATE,
+    y = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    colour = ENVIRON_COMPARTMENT_SUB
+  )) +
+  geom_point() +
+  facet_wrap(facets = vars(MEASURED_UNIT_STANDARD), ncol = 1)
+```
+
+And by species:
+```{r}
+literature_sf |>
+  filter(!is.na(SAMPLE_SPECIES)) |>
+  ggplot(aes(
+    x = SAMPLING_DATE,
+    y = MEASURED_OR_IMPUTED_VALUE_STANDARD,
+    colour = SAMPLE_SPECIES
+  )) +
+  geom_point() +
+  facet_wrap(facets = vars(MEASURED_UNIT_STANDARD), ncol = 1)
+```
+
+Disappointing, since we know there are papers out there with relevant data. But a start.
 ```{r}
 #| label: literature_data
 
-literature_sf |>
-  ggplot2::ggplot(aes(
-    x = ENVIRON_COMPARTMENT_SUB,
-    y = REFERENCE_ID,
-    fill = MEASURED_VALUE_STANDARD
-  )) +
-  geom_tile()
+# literature_sf |>
+#   ggplot2::ggplot(aes(
+#     x = ENVIRON_COMPARTMENT_SUB,
+#     y = REFERENCE_ID,
+#     fill = MEASURED_VALUE_STANDARD
+#   )) +
+#   geom_tile()
 
 # Hmmm.
 
 # Not an incredible amount of data. Where's the Repparfjorden studies?
 literature_sf |>
   group_by(ENVIRON_COMPARTMENT_SUB, SAMPLE_SPECIES, REFERENCE_ID) |>
-  reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD))
+  reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
+  datatable()
 ```

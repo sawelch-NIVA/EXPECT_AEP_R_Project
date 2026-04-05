@@ -1110,6 +1110,13 @@ list(
     quiet = FALSE
   ),
 
+  #### # Repparfjorden notebook ----
+  tar_quarto(
+    name = render_nbxx_repparfjorden,
+    path = "docs/NBXX-reparfjorden.qmd",
+    quiet = FALSE
+  ),
+
   ### # Appendices ----
 
   #### # Review protocol appendix ----
@@ -1154,6 +1161,7 @@ list(
       render_nb05_network
       render_nb07_emissions
       render_nb08_ecology
+      render_nbxx_repparfjorden
     },
     format = "file"
   )

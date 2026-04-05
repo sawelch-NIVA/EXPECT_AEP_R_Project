@@ -102,10 +102,10 @@ run_pipeline <- function(
 
 #  preferred
 run_pipeline(
-  destroy_all = TRUE, # don't start from scratch,
-  render_quarto = TRUE, # don't render documents,
-  deploy = TRUE, # don't update website
-  names = NULL, # no specific targets
+  destroy_all = TRUE, # start from scratch?
+  render_quarto = TRUE, # render documents?
+  deploy = FALSE, # update website?
+  names = NULL, # run specific parts of pipeline?
   reporter = "balanced", # reasonable amount of metadata
   callr_function = callr::r, # new R session
   load_workspace_on_error = FALSE # load workspace for the failing target

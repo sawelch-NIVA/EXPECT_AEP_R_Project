@@ -13,3 +13,4 @@ data/*
 _freeze/*
 index_files/*
 docs/*_cache
+docs/*_files/*

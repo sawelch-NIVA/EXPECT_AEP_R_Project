@@ -237,7 +237,7 @@ aquaculture <- sf::read_sf(here(
 )) # that was easy
 
 # View summary in browser
-aquaculture |> sf::st_drop_geometry() |> dfSummary()
+# aquaculture |> sf::st_drop_geometry() |> dfSummary()
 
 # Whatever, the data's a mess but we'll treat it as a starting point. We can do a simple map in any case.
 ```
@@ -291,10 +291,141 @@ Technically geotraces isn't emissions either, but nevermind. Unfortunately they 
 #| label: geotraces
 library(readr)
 library(oce)
+library(here)
 geotraces <- read.ctd.odv(
   here(
     "inst/extdata/exposure/Geotraces/IDP2025_seawater_GEOTRACES_IDP2025_Seawater_w1efqRDC.txt"
   )
 )
 
+show(geotraces)
+
+library(maps)
+
+world_map <- map_data("world")
+library(sf)
+geotraces_tibble <- as_tibble(geotraces@data, .name_repair = "universal") |>
+  mutate(lon = longitude, lat = latitude) |>
+  st_as_sf(coords = c("lon", "lat")) |>
+  mutate(Cu_D_nmol_kg = `Cu_D_CONC..nmol.kg.`)
+
+
+geotraces_tibble_grouped <- geotraces_tibble |>
+  group_by(longitude, latitude) |>
+  reframe(mean_conc = mean(Cu_D_nmol_kg, na.rm = TRUE)) |>
+  filter(!is.na(mean_conc))
+#  |>
+# st_as_sf(coords = c("longitude", "latitude"))
+
+# desnity mapping: https://www.andrewheiss.com/blog/2023/07/28/gradient-map-fills-r-sf/
+# actually, this might not be it because we don't want density, we want to visualise the mean concentration
+# what I want is a statistically valid way to assume concentration gradients from point data
+
+# claude suggests kriging:
+# 2. Kriging (Gaussian Process interpolation)
+# More statistically principled — models spatial autocorrelation explicitly via a variogram. Gives you uncertainty estimates too, which is valuable for saying "concentration here is X ± Y". This is probably closest to what you want for making defensible statements.
+
+# This might be overkill
+
+ggplot() +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "lightgray",
+    colour = "white"
+  ) +
+  geom_hex(
+    data = geotraces_tibble_grouped,
+    aes(x = longitude, y = latitude),
+    bins = 50
+  ) +
+  scale_fill_viridis_c() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank())
 ```
+
+REACH/PTPR data from Vannmiljø. TODO: Check permissions before publication.
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+
+reach_data_by_product <- read_excel(
+  here("data/raw/reach/Sum kobberstoffer i produktregisteret.xlsx"),
+  sheet = 4,
+  skip = 1,
+  col_names = c("Year", "Weight_tonnes", "Product_type"),
+  col_types = c("numeric", "numeric", "text")
+) |>
+  replace_na(list(Product_type = "Not Reported"))
+
+# this is incomplete
+prod_name_translations <- tribble(
+  ~Product_type                                                         , ~Product_type_en                    ,
+  "BRENSELTILSETNINGER"                                                 , "Fuel Additives"                    ,
+  "Absorpsjons/ og adsorpsjonsmaterialer"                               , "Absorption/Adsorption Materials"   ,
+  "ANDRE SMØREMIDLER"                                                   , "Other Lubricants"                  ,
+  "ARMERINGSMIDLER"                                                     , "Reinforcing Agents"                ,
+  "Bindemidler"                                                         , "Binders"                           ,
+  "Biocider"                                                            , "Biocides"                          ,
+  "Borekjemikalier inkl råolje/gass"                                    , "Drilling Chemicals"                ,
+  "BOREOLJER"                                                           , "Drilling Oils"                     ,
+  "BUNNFELLINGSHINDRENDE MIDLER, GENERELT"                              , "Anti-Settling Agents"              ,
+  "Fyllingsmidler"                                                      , "Fillers"                           ,
+  "GJØDNING, GENERELT"                                                  , "Fertilisers"                       ,
+  "Impregnering"                                                        , "Impregnation"                      ,
+  "INSEKTSMIDDEL, INSEKTMIDLER OG ANDRE MIDLER MOT SKADEDYR PÅ PLANTER" , "Insecticides & Plant Pest Control" ,
+  "Konstruksjonsmaterialer"                                             , "Construction Materials"            ,
+  "Lim"                                                                 , "Adhesives"                         ,
+  "Maling"                                                              , "Paint"                             ,
+  "PH-REGULERENDE MIDLER, GENERELT"                                     , "pH Regulating Agents"              ,
+  "Prosessregulerendemidler"                                            , "Process Control Agents"            ,
+  "Rengjøring"                                                          , "Cleaning"                          ,
+  "Rustbeskyttelse"                                                     , "Rust Protection"                   ,
+  "SALT TIL GALVANISKE BAD"                                             , "Galvanic Bath Salts"               ,
+  "Sprengstoff"                                                         , "Explosives"                        ,
+  "STØPEMASSER, GENERELT"                                               , "Casting Compounds"
+)
+
+reach_data_by_industry <- read_excel(
+  here("data/raw/reach/Sum kobberstoffer i produktregisteret.xlsx"),
+  sheet = 3,
+  skip = 1,
+  col_names = c("Year", "Weight_tonnes", "Industry"),
+  col_types = c("numeric", "numeric", "text")
+) |>
+  replace_na(list(Industry = "Not Reported"))
+
+reach_data_by_product_grouped <- reach_data_by_product |>
+  arrange(Weight_tonnes) |>
+  reframe(
+    Year,
+    group = case_when(
+      Weight_tonnes < quantile(Weight_tonnes, 0.9) ~ "Other",
+      .default = Product_type
+    ),
+    Weight_tonnes
+  ) |>
+  group_by(Year, group) |>
+  reframe(Weight_tonnes = sum(Weight_tonnes)) |>
+  left_join(prod_name_translations, by = c(group = "Product_type"))
+
+# ggplot(
+#   data = reach_data_by_application,
+#   mapping = aes(x = Year, y = Weight_tonnes, fill = Industry)
+# ) +
+#   geom_col(position = "stack") +
+#   theme(axis.text.x = element_text(angle = 90))
+
+ggplot(
+  data = reach_data_by_product_grouped,
+  mapping = aes(x = Year, y = Weight_tonnes, fill = Product_type_en)
+) +
+  geom_col(position = "stack") +
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+

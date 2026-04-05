@@ -44,6 +44,9 @@ website:
           - href: docs/NB08-ecology.qmd
             text: "NB08 - Ecology"
             icon: journal-code
+          - href: docs/NBXX-reparfjorden.qmd
+            text: "NBXX - Repparfjorden"
+            icon: journal-code
       - section: "Appendices"
         contents:
           - href: docs/AP01-review-protocol.qmd
