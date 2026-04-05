@@ -70,8 +70,8 @@ tar_option_set(
     "eDataDRF",
     "pointblank",
     "here"
-  ),
-  format = "auto" # Optionally set the default storage format. qs is fast.
+  )
+  # format = "auto" # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
   # optional distributed computing. To use this capability
@@ -788,7 +788,8 @@ list(
       )) |>
         standardise_IDate_all() |>
         add_row(vm_edata_samples) |>
-        pb_validate_samples(agent = FALSE, actions = pb_action_levels)
+        pb_validate_samples(agent = TRUE, actions = pb_action_levels) |>
+        interrogate()
     }
   ),
 
@@ -819,7 +820,7 @@ list(
         creed_scores_files,
         initialise_CREED_scores_tibble
       ) |>
-        pb_validate_creed_scores(agent = FALSE, actions = pb_action_levels)
+        pb_validate_CREED_scores(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
