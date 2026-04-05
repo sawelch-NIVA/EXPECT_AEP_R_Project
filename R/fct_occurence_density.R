@@ -8,7 +8,8 @@
 #' @param n_points Number of points for density calculation
 #' @param scale_ridges Scale parameter for ridgeline heights (default 0.05)
 #'
-#' @importFrom dplyr filter mutate uncount
+#' @importFrom dplyr filter mutate
+#' @importFrom tidyr uncount
 #' @importFrom ggplot2 ggplot aes geom_vline labs
 #' @importFrom ggridges geom_ridgeline theme_ridges
 #' @importFrom stringr str_wrap
@@ -101,7 +102,8 @@ plot_copper_ridges <- function(
 #' @param n_points Number of points for density calculation
 #' @param scale_ridges Scale parameter for ridgeline heights (default 0.05)
 #'
-#' @importFrom dplyr filter mutate uncount
+#' @importFrom dplyr filter mutate
+#' @importFrom tidyr uncount
 #' @importFrom ggplot2 ggplot aes geom_vline labs
 #' @importFrom ggridges geom_ridgeline theme_ridges
 #' @importFrom stringr str_wrap

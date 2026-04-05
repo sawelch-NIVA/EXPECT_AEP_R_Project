@@ -1204,7 +1204,7 @@ vm_compartment_conflicts_resolved_removed |>
   ) |>
   col_vals_in_set(
     ENVIRON_COMPARTMENT_SUB_resolved,
-    purrr::flatten(eDataDRF::environ_compartments_sub_vocabulary())
+    purrr::list_flatten(eDataDRF::environ_compartments_sub_vocabulary())
   )
 
 # Todo: Could this be a conditional code chunk?
@@ -1219,7 +1219,7 @@ vm_compartment_conflicts_resolved_removed |>
 # vm_compartment_conflicts_resolved_removed |>
 #   filter(
 #     !(ENVIRON_COMPARTMENT_SUB_resolved %in%
-#       purrr::flatten(eDataDRF::environ_compartments_sub_vocabulary()))
+#       purrr::list_flatten(eDataDRF::environ_compartments_sub_vocabulary()))
 #   ) |>
 #   group_by(ENVIRON_COMPARTMENT_SUB_resolved) |>
 #   reframe(n = n())
@@ -1529,7 +1529,7 @@ Finally, we need to run `pointblank` validation on our resolved/removed geograph
 #     ) |>
 #     col_vals_in_set(
 #       ENVIRON_COMPARTMENT_SUB_resolved,
-#       purrr::flatten(eDataDRF::environ_compartments_sub_vocabulary()),
+#       purrr::list_flatten(eDataDRF::environ_compartments_sub_vocabulary()),
 #       label = "All ENVIRON_COMPARTMENT_SUB_resolved are in eDataDRF::environ_compartments_sub_vocabulary()",
 #       actions = validation_config$standard
 #     ) |>

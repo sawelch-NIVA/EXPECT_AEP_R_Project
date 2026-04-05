@@ -92,8 +92,8 @@ process_marine_geography_wgs84 <- function(
     category = "physical",
     destdir = destdir
   ) |>
-    select(name_en, geometry) |>
-    rename(name = name_en)
+    select(name_en, geom) |>
+    rename(name = name_en, geometry = geom)
 
   # Split Atlantic Ocean into North and South
   atlantic <- marine_polys |>
@@ -197,7 +197,6 @@ transform_marine_to_polar <- function(
 #' @importFrom rnaturalearth ne_countries ne_states
 #' @importFrom dplyr mutate select filter bind_rows case_match reframe row_number
 #' @importFrom sf st_as_sf st_crop st_union
-
 #'
 #' @export
 process_countries_wgs84 <- function(

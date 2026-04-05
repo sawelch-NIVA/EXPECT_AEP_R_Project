@@ -32,6 +32,7 @@
 #' )
 #' impute_below_limits(df, "measured", "lod", "loq")
 #'
+#' @importFrom dplyr case_when
 #' @export
 impute_below_limits <- function(
   data,

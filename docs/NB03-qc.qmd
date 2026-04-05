@@ -324,7 +324,7 @@ agent_compartments <-
   col_vals_not_null(columns = ENVIRON_COMPARTMENT_SUB) |>
   col_vals_in_set(
     columns = ENVIRON_COMPARTMENT_SUB,
-    set = environ_compartments_sub_vocabulary() |> purrr::flatten()
+    set = environ_compartments_sub_vocabulary() |> purrr::list_flatten()
   ) |>
   col_vals_not_null(columns = MEASURED_CATEGORY)
 

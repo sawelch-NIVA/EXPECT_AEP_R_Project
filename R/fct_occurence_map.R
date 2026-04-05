@@ -1,6 +1,6 @@
 # merge geographic columns
 merge_country_ocean <- function(country, ocean) {
-  merged <- case_when(
+  merged <- dplyr::case_when(
     has_data_issue(country) ~ ocean,
     has_data_issue(ocean) ~ country,
     TRUE ~ ocean # oceans are bigger and get priority
@@ -27,6 +27,9 @@ merge_country_ocean <- function(country, ocean) {
 #' )
 #' }
 #'
+#' @importFrom dplyr filter
+#' @importFrom sf st_as_sf st_crs
+#' @importFrom ggplot2 geom_sf coord_sf aes
 #' @export
 map_literature_data_wgs84 <- function(
   wgs84_map,
@@ -42,13 +45,13 @@ map_literature_data_wgs84 <- function(
 
   # Add points to map with study area bbox constraints
   wgs84_map +
-    geom_sf(
+    ggplot2::geom_sf(
       data = data_sf,
       color = "black",
       size = 3,
-      aes(fill = REFERENCE_ID),
+      ggplot2::aes(fill = REFERENCE_ID),
     ) +
-    coord_sf(
+    ggplot2::coord_sf(
       xlim = c(
         get_study_area_bbox()[[1]],
         get_study_area_bbox()[[3]]

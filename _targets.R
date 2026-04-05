@@ -71,7 +71,7 @@ tar_option_set(
     "pointblank",
     "here"
   ),
-  format = "qs" # Optionally set the default storage format. qs is fast.
+  format = "auto" # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
   # optional distributed computing. To use this capability

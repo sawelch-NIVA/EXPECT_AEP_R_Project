@@ -151,7 +151,6 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
 #'
 #' @importFrom dplyr left_join select distinct filter mutate
 #' @importFrom stringr str_replace str_to_upper
-#' @import eDataDRF
 #'
 #' @export
 join_all_literature_modules <- function(

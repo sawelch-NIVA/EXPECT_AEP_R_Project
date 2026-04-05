@@ -330,7 +330,7 @@ pb_validate_sites <- function(
 # ## Samples validation ----
 #' @rdname validate_edata_tables
 #' @importFrom pointblank col_vals_not_null col_vals_in_set action_levels
-#' @importFrom purrr flatten
+#' @importFrom purrr list_flatten
 #' @export
 pb_validate_samples <- function(
   data,
@@ -352,7 +352,7 @@ pb_validate_samples <- function(
       ) |>
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT_SUB,
-        set = environ_compartments_sub_vocabulary() |> purrr::flatten(),
+        set = environ_compartments_sub_vocabulary() |> purrr::list_flatten(),
         actions = actions
       )
   }
@@ -446,7 +446,7 @@ pb_validate_biota <- function(
 # ## Measurements validation ----
 #' @rdname validate_edata_tables
 #' @importFrom pointblank col_vals_not_null col_vals_equal col_vals_gte col_vals_lte col_vals_in_set col_vals_not_equal action_levels
-#' @importFrom purrr flatten
+#' @importFrom purrr list_flatten
 #' @export
 pb_validate_measurements <- function(
   data,
@@ -479,7 +479,7 @@ pb_validate_measurements <- function(
       ) |>
       col_vals_in_set(
         columns = ENVIRON_COMPARTMENT_SUB,
-        set = environ_compartments_sub_vocabulary() |> purrr::flatten(),
+        set = environ_compartments_sub_vocabulary() |> purrr::list_flatten(),
         actions = actions
       ) |>
 

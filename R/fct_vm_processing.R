@@ -428,6 +428,7 @@ vm_split_sites <- function(
 #' - Compartments are abbreviated to 12 characters (alphanumeric only)
 #' - Subsample values are truncated to 20 characters
 #'
+#' @importFrom stringr str_trunc
 #' @keywords internal
 generate_sample_id_with_components <- function(
   site_code,
@@ -554,53 +555,6 @@ vm_convert_unit <- function(col) {
     "mg/kg v.v." ~ "mg/kg (wet)",
     .default = NA_character_
   )
-}
-
-
-#' Generate sample ID with components
-#'
-#' Creates unique sample identifiers by concatenating site code, parameter,
-#' copied from STOPeData::mod_samples_fct.R.
-#'
-#' @param site_code Site code (vectorised)
-#' @param parameter_name Parameter name (vectorised)
-#' @param environ_compartment Environmental compartment (vectorised)
-#' @param environ_compartment_sub Environmental sub-compartment (vectorised)
-#' @param date Sampling date (vectorised)
-#' @param subsample Subsample identifier (vectorised)
-#'
-#' @return Character vector of sample IDs in format:
-#'   {site_code}-{param_abbrev}-{comp_abbrev}-{date}-R-{subsample}
-#'
-#' @details
-#' - Parameter names are abbreviated to 8 characters (alphanumeric only)
-#' - Compartments are abbreviated to 12 characters (alphanumeric only)
-#' - Subsample values are truncated to 20 characters
-#'
-#' @keywords internal
-generate_sample_id_with_components <- function(
-  site_code,
-  parameter_name,
-  environ_compartment,
-  environ_compartment_sub,
-  date,
-  subsample = 1
-) {
-  # Create abbreviated versions for ID (vectorised)
-  param_abbrev <- substr(gsub("[^A-Za-z0-9]", "", parameter_name), 1, 8)
-  comp_abbrev <- substr(
-    gsub("[^A-Za-z0-9]", "", environ_compartment_sub),
-    1,
-    12
-  )
-  date_abbrev <- gsub("-", "-", date)
-
-  base_id <- glue("{site_code}-{param_abbrev}-{comp_abbrev}-{date_abbrev}")
-
-  # vectorised replicate
-  # Subsamples will generally be text, so let's abbreviate them a bit
-  subsample_suffix <- stringr::str_trunc(subsample, 20, "right", ellipsis = "")
-  paste0(base_id, "-R-", subsample_suffix)
 }
 
 
