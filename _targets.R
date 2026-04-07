@@ -1,76 +1,81 @@
 # Created by use_targets().
 
-# TODO: What might be useful.
-# If we hit an error
-# call tar workspace
-# if triggered by pointblank sets, RETURN THE FAILING DATA
-
 # # Load packages required to define the pipeline ----
-suppressPackageStartupMessages({
-  library(targets)
-  library(tarchetypes) # better factories for watching many files
-  library(eDataDRF) # schema/vocab functions
-  library(crew) # parallel processing, faster execution?
-  library(here) # salvage something from the horrible mess that is quarto working directories
-  library(devtools) # load all functions
-  library(quarto) # make beautiful documents, eventually
-  library(pointblank)
-  library(dplyr)
-})
+options(conflicts.policy = "strict") # error on load in case of any function name masking
 
-suppressMessages({
-  i_am("Readme.md") # set wd to project root
-  load_all(path = here())
-})
+library(targets)
+library(tarchetypes) # better factories for watching many files
+library(eDataDRF) # schema/vocab functions
+library(crew) # parallel processing, faster execution?
+library(here) # salvage something from the horrible mess that is quarto working directories
+library(usethis) # devtools dependency
+library(devtools) # load all functions
+library(quarto) # make beautiful documents, eventually
+library(pointblank) # validation functions (TODO: Remove)
+suppressPackageStartupMessages(
+  library(
+    dplyr,
+    mask.ok = c("filter", "lag", "intersect", "setdiff", "setequal", "union") # allow dplyr to mask functions we never use from base/stats
+  )
+)
+library(testthat, mask.ok = c("test_file"))
+library(
+  lubridate,
+  mask.ok = c("as.difftime", "date", "intersect", "setdiff", "union")
+)
+
+# suppressMessages({
+#   here::i_am("Readme.md") # set wd to project root
+#   devtools::load_all(path = here::here())
+# })
 
 # set pointblank action levels - when do we flag issues as serious
 pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.50)
 
 options(
-  targets.verbose = FALSE, # less chatter from targets itself
-  pointblank.verbose = FALSE # if this option exists (not sure)
+  targets.verbose = TRUE # less chatter from targets itself
 )
 
 
 # # Set target options ----
 tar_option_set(
   # Packages that your targets need for their tasks.
-  packages = c(
-    "sf",
-    "sfhelper",
-    "rnaturalearth",
-    "rnaturalearthdata",
-    "mapproj",
-    "rlang",
-    "data.table",
-    "leaflet",
-    "janitor",
-    "shiny",
-    "readxl",
-    "arrow",
-    "qs2",
-    "tarchetypes", # extend targets
-    "glue",
-    "purrr",
-    "lubridate",
-    "stringr",
-    "readr",
-    "tibble",
-    "tidyr",
-    "ggplot2",
-    "ggspatial",
-    "shadowtext",
-    "ggrepel",
-    "dplyr",
-    "dtplyr",
-    "forcats",
-    "viridis",
-    "ggridges",
-    "plotly",
-    "eDataDRF",
-    "pointblank",
-    "here"
-  )
+  # packages = c(
+  #   "sf",
+  #   "sfhelper",
+  #   "rnaturalearth",
+  #   "rnaturalearthdata",
+  #   "mapproj",
+  #   "rlang",
+  #   "data.table",
+  #   "leaflet",
+  #   "janitor",
+  #   "shiny",
+  #   "readxl",
+  #   "arrow",
+  #   "qs2",
+  #   "tarchetypes", # extend targets
+  #   "glue",
+  #   "purrr",
+  #   "lubridate",
+  #   "stringr",
+  #   "readr",
+  #   "tibble",
+  #   "tidyr",
+  #   "ggplot2",
+  #   "ggspatial",
+  #   "shadowtext",
+  #   "ggrepel",
+  #   "dplyr",
+  #   "dtplyr",
+  #   "forcats",
+  #   "viridis",
+  #   "ggridges",
+  #   "plotly",
+  #   "eDataDRF",
+  #   "pointblank",
+  #   "here"
+  # )
   # format = "auto" # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
@@ -583,6 +588,7 @@ list(
   # * our schema and we validate other tables against it
   tar_target(
     name = measurements_data,
+    packages = c("lubridate"),
     # some measurement files are missing MEASUREMENT_COMMENT
     # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
     command = {
@@ -683,8 +689,8 @@ list(
       # ) |>
       #   standardise_IDate_all() |>
       vm_edata_parameters |>
-        pb_validate_parameters(agent = FALSE, actions = pb_action_levels) |>
-        row_count_match(count = 1)
+        pb_validate_parameters(agent = TRUE, actions = pb_action_levels) |>
+        row_count_match(count = 1) # check table has one row
     }
   ),
 

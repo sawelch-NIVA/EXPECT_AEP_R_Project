@@ -336,8 +336,8 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   for (param in unique_params) {
     edata_parameters <- edata_parameters |>
       add_row(
-        PARAMETER_TYPE = "Homogeneous metal compounds",
-        PARAMETER_TYPE_SUB = NA_character_,
+        PARAMETER_TYPE = "Stressor",
+        PARAMETER_TYPE_SUB = "Homogeneous metal compounds",
         MEASURED_TYPE = "Concentration",
         PARAMETER_NAME = "Copper",
         PARAMETER_NAME_SUB = NA_character_,

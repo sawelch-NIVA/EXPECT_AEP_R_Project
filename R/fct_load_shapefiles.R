@@ -23,7 +23,7 @@ read_and_process_oceans <- function(
   force_reprocess = FALSE
 ) {
   # Disable spherical geometry for cropping
-  sf::sf_use_s2(FALSE)
+  sf_use_s2(FALSE)
 
   # Check if the raw source file exists
   stopifnot(
@@ -36,17 +36,17 @@ read_and_process_oceans <- function(
   # Check if processed file exists
   if (file.exists(output_path) && !force_reprocess) {
     message(sprintf("Reading cached shapefile from: %s", output_path))
-    return(sf::read_sf(output_path))
+    return(read_sf(output_path))
   }
 
   # Process from raw data
   message(sprintf("Processing ocean shapefile from: %s", raw_path))
 
-  oceans_raw <- sf::read_sf(raw_path)
+  oceans_raw <- read_sf(raw_path)
 
   study_area <- oceans_raw |>
-    sf::st_crop(bbox) |>
-    sf::st_simplify()
+    st_crop(bbox) |>
+    st_simplify()
 
   # Ensure output directory exists
   output_dir <- dirname(output_path)
@@ -55,7 +55,7 @@ read_and_process_oceans <- function(
   }
 
   # Save processed shapefile
-  sf::write_sf(study_area, output_path)
+  write_sf(study_area, output_path)
   message(sprintf("Processed shapefile saved to: %s", output_path))
 
   return(study_area)
@@ -84,7 +84,7 @@ read_and_process_countries <- function(
 ) {
   message("Reading country boundaries from Natural Earth")
 
-  countries <- rnaturalearth::ne_countries(scale = scale) |>
+  countries <- ne_countries(scale = scale) |>
     mutate(
       in_study = case_match(
         name,

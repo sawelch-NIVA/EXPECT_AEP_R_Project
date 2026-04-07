@@ -2,7 +2,7 @@
 
 #' Annotate ocean polygons for mapping
 #'
-#' Adds display names, visibility flags, and color mappings to ocean polygons
+#' Adds display names, visibility flags, and color mappings to ocean sf file
 #'
 #' @param ocean_sf An sf object with ocean polygons (must have NAME column)
 #' @param named_oceans Character vector, names of oceans to highlight
@@ -149,7 +149,6 @@ process_marine_geography_wgs84 <- function(
 #' @importFrom sf st_transform st_convex_hull
 #' @importFrom dplyr filter mutate bind_rows
 #' @importFrom stringr str_replace_all
-
 #'
 #' @export
 transform_marine_to_polar <- function(
@@ -265,7 +264,6 @@ process_countries_wgs84 <- function(
 #' @return An sf object with country polygons in polar projection
 #'
 #' @importFrom sf st_transform
-
 #'
 #' @export
 transform_countries_to_polar <- function(
