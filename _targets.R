@@ -1,44 +1,74 @@
 # Created by use_targets().
 
 # # Load packages required to define the pipeline ----
-options(conflicts.policy = "strict") # error on load in case of any function name masking
+# options(conflicts.policy = "strict") # error on load in case of any function name masking
 
-library(targets)
-library(tarchetypes) # better factories for watching many files
-library(eDataDRF) # schema/vocab functions
-library(crew) # parallel processing, faster execution?
-library(here) # salvage something from the horrible mess that is quarto working directories
-library(usethis) # devtools dependency
-library(devtools) # load all functions
-library(quarto) # make beautiful documents, eventually
-library(pointblank) # validation functions (TODO: Remove)
-suppressPackageStartupMessages(
-  library(
-    dplyr,
-    mask.ok = c("filter", "lag", "intersect", "setdiff", "setequal", "union") # allow dplyr to mask functions we never use from base/stats
+{
+  starttime <- Sys.time()
+
+  library(targets, quietly = TRUE)
+  library(tarchetypes) # better factories for watching many files
+  library(qs2)
+  library(eDataDRF) # schema/vocab functions
+  library(crew) # parallel processing, faster execution?
+  library(here) # salvage something from the horrible mess that is quarto working directories
+  library(quarto) # make beautiful documents, eventually
+  library(pointblank) # validation functions (TODO: Remove)
+  suppressPackageStartupMessages(
+    library(
+      dplyr,
+      mask.ok = c("filter", "lag", "intersect", "setdiff", "setequal", "union") # allow dplyr to mask functions we never use from base/stats
+    )
   )
-)
-library(testthat, mask.ok = c("test_file"))
-library(
-  lubridate,
-  mask.ok = c("as.difftime", "date", "intersect", "setdiff", "union")
-)
+  library(testthat, mask.ok = c("test_file"))
+  library(
+    lubridate,
+    mask.ok = c("as.difftime", "date", "intersect", "setdiff", "union")
+  )
+  library(
+    data.table,
+    # TODO: All these?
+    mask.ok = c(
+      "hour",
+      "isoweek",
+      "isoyear",
+      "mday",
+      "minute",
+      "month",
+      "quarter",
+      "second",
+      "wday",
+      "week",
+      "yday",
+      "year",
+      "between",
+      "first",
+      "last"
+    )
+  )
+  library(purrr, mask.ok = c("transpose"))
+  message(paste("Loaded packages in", Sys.time() - starttime, "seconds"))
+}
 
-# suppressMessages({
-#   here::i_am("Readme.md") # set wd to project root
-#   devtools::load_all(path = here::here())
-# })
+
+{
+  starttime <- Sys.time()
+  here::i_am("Readme.md") # set wd to project root
+  pkgload::load_all(path = here::here())
+  message(paste("Loaded local functions in", Sys.time() - starttime, "seconds"))
+}
 
 # set pointblank action levels - when do we flag issues as serious
 pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.50)
 
 options(
-  targets.verbose = TRUE # less chatter from targets itself
+  targets.verbose = TRUE # chatter from targets itself
 )
 
 
 # # Set target options ----
 tar_option_set(
+  format = "qs",
   # Packages that your targets need for their tasks.
   # packages = c(
   #   "sf",
@@ -112,6 +142,7 @@ tar_option_set(
 
 # # Source all custom functions stored in ~/R ----
 tar_source()
+
 
 # # Pipeline ----
 list(
@@ -491,6 +522,7 @@ list(
   #### # Send a warning if something fails
   # Fixme: Seems not to work rn
   tar_target(
+    packages = c("purrr"),
     vm_edata_validation_report,
     {
       if (
@@ -588,7 +620,7 @@ list(
   # * our schema and we validate other tables against it
   tar_target(
     name = measurements_data,
-    packages = c("lubridate"),
+    packages = c("lubridate", "purrr"),
     # some measurement files are missing MEASUREMENT_COMMENT
     # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
     command = {
@@ -980,6 +1012,7 @@ list(
   ### # Prepare WGS84 shapefiles ----
   # Set up WGS84 map shapefiles (oceans, countries), and add annotations
   tar_target(
+    packages = c("sf"),
     name = wgs84_geography,
     command = prepare_geography_wgs84(
       scale = 10,
@@ -990,6 +1023,7 @@ list(
   ### # Prepare polar projection shapefiles ----
   # Set up polar projection map shapefiles (oceans, countries), and add annotations
   tar_target(
+    packages = c("sf"),
     name = polar_geography,
     command = prepare_geography_polar(
       scale = 10,
@@ -1002,6 +1036,7 @@ list(
 
   ### # Create WGS84 map ----
   tar_target(
+    packages = c("sf"),
     name = wgs84_map,
     command = create_study_area_map_wgs84(
       ocean_sf = wgs84_geography$marine_polys,
@@ -1014,6 +1049,7 @@ list(
 
   ### # Create polar projection map ----
   tar_target(
+    packages = c("sf"),
     name = polar_map,
     command = create_study_area_map_polar(
       ocean_sf = polar_geography$marine_polys,
