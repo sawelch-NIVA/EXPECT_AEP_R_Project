@@ -47,6 +47,8 @@
     )
   )
   library(purrr, mask.ok = c("transpose"))
+  library(readr)
+  library(readxl)
   message(paste("Loaded packages in", Sys.time() - starttime, "seconds"))
 }
 
@@ -815,6 +817,7 @@ list(
 
   #### # Samples data ----
   tar_target(
+    packages = c("rlang"),
     name = samples_data,
     # todo: the column SUBSAMPLE_ID is in initialise_samples_tibble() but not
     # any of our data extracted from the app. fread() warns us that it can't
@@ -826,8 +829,7 @@ list(
       )) |>
         standardise_IDate_all() |>
         add_row(vm_edata_samples) |>
-        pb_validate_samples(agent = TRUE, actions = pb_action_levels) |>
-        interrogate()
+        pb_validate_samples(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
@@ -1036,7 +1038,7 @@ list(
 
   ### # Create WGS84 map ----
   tar_target(
-    packages = c("sf"),
+    packages = c("sf", "shadowtext"),
     name = wgs84_map,
     command = create_study_area_map_wgs84(
       ocean_sf = wgs84_geography$marine_polys,
@@ -1049,7 +1051,7 @@ list(
 
   ### # Create polar projection map ----
   tar_target(
-    packages = c("sf"),
+    packages = c("sf", "shadowtext"),
     name = polar_map,
     command = create_study_area_map_polar(
       ocean_sf = polar_geography$marine_polys,
