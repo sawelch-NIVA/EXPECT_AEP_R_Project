@@ -47,7 +47,7 @@ vm_create_edata_campaign_table <- function(
       )
     )
 
-  message(glue("Created campaign table with {nrow(edata_campaign)} row"))
+  message(glue("Created campaign table with {nrow(edata_campaign)} row\n"))
   edata_campaign
 }
 
@@ -650,7 +650,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
     message("No biota samples found in dataset")
   }
 
-  biota_samples_merged
+  biota_samples_merged |> ungroup()
 }
 
 

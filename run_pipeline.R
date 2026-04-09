@@ -84,6 +84,7 @@ run_pipeline <- function(
 
       # Failure notification ----
       pushoverr::pushover_high(
+        # trim really long errors to avoid surpassing pushoverr's limit
         message = stringr::str_sub(
           paste(
             "Pipeline failed with error:",
