@@ -47,6 +47,8 @@
 #'   )
 #' }
 #'
+#' @importFrom dplyr mutate case_when filter
+#' @importFrom stringr str_detect
 #' @export
 standardise_measured_units <- function(
   data,
@@ -216,6 +218,7 @@ standardise_IDate <- function(column, verbose = FALSE) {
 #' @importFrom data.table as.IDate
 #' @importFrom lubridate dmy ymd
 #' @importFrom glue glue
+#' @importFrom rlang inherits_only
 #' @export
 standardise_IDate <- function(column, verbose = FALSE, char_format = "dmy") {
   if (inherits(column, "IDate")) {

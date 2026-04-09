@@ -27,6 +27,8 @@
 #' )
 #' }
 #'
+#' @importFrom ggplot2 ggplot aes geom_boxplot facet_wrap vars geom_point
+#' @importFrom dplyr filter
 #' @export
 make_measurement_boxplot <- function(
   data,

@@ -98,6 +98,8 @@ theme_arctic_map <- function(
 }
 
 # Single source of truth for theming. Will adjust as needed.
+#' @importFrom ggplot2 theme_minimal
+#' @keywords internal
 theme_aep_plots <- function() {
   theme_minimal()
 }

@@ -110,7 +110,7 @@ read_and_process_countries <- function(
       geometry
     ) |>
     st_as_sf() |>
-    sf::st_crop(bbox)
+    st_crop(bbox)
 
   return(countries)
 }
@@ -134,8 +134,8 @@ ne_get <- function(scale, type, category, destdir = "data/raw/shapefiles") {
   filepath <- file.path(destdir, paste0("ne_", scale, "m_", type, ".shp"))
 
   if (file.exists(filepath)) {
-    rnaturalearth::ne_load(scale, type, category, destdir)
+    ne_load(scale, type, category, destdir)
   } else {
-    rnaturalearth::ne_download(scale, type, category, destdir)
+    ne_download(scale, type, category, destdir)
   }
 }

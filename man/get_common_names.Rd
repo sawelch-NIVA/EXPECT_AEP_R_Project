@@ -8,7 +8,7 @@ get_common_names(
   biota_data,
   input_col = "SAMPLE_SPECIES",
   output_col = "SPECIES_COMMON_NAME",
-  cache_path = here::here("data/clean/species_common_names_cache.csv"),
+  cache_path = here("data/clean/species_common_names_cache.csv"),
   db = "ncbi",
   verbose = TRUE
 )

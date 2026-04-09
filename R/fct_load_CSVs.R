@@ -78,7 +78,7 @@ literature_module_vocab <- function() {
 #' @return A tibble with validated columns matching the initialiser structure
 #'
 #' @importFrom data.table fread
-#' @importFrom dplyr summarise_all as_tibble
+#' @importFrom dplyr summarise_all as_tibble mutate across where
 #' @importFrom purrr as_vector
 #'
 #'

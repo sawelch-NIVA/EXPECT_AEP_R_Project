@@ -54,7 +54,7 @@ annotate_oceans_for_display <- function(
 #'
 #' @return An sf object with processed marine geography polygons in WGS84
 #'
-#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n
+#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n row_number
 #' @importFrom sf st_as_sf
 #' @importFrom stringr str_replace_all
 #'
@@ -195,7 +195,7 @@ transform_marine_to_polar <- function(
 #'
 #' @importFrom rnaturalearth ne_countries ne_states
 #' @importFrom dplyr mutate select filter bind_rows case_match reframe row_number
-#' @importFrom sf st_as_sf st_crop st_union
+#' @importFrom sf st_as_sf st_crop st_union st_geometry
 #'
 #' @export
 process_countries_wgs84 <- function(
@@ -204,7 +204,7 @@ process_countries_wgs84 <- function(
   exclude_countries = c("Norway", "Antarctica")
 ) {
   # Get general country polygons (excluding special cases)
-  countries_general <- rnaturalearth::ne_countries(scale = scale) |>
+  countries_general <- ne_countries(scale = scale) |>
     mutate(
       highlight_name = case_match(
         name,

@@ -41,9 +41,9 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       join_keys <- names(by)
     }
 
-    cli::cli_h1("Many-to-many join diagnostic")
-    cli::cli_alert_danger("Detected an unexpected many-to-many relationship")
-    cli::cli_alert_info(
+    cli_h1("Many-to-many join diagnostic")
+    cli_alert_danger("Detected an unexpected many-to-many relationship")
+    cli_alert_info(
       "Join keys: {.field {paste(join_keys, collapse = ', ')}}"
     )
 
@@ -62,8 +62,8 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
 
     # Report problematic x row
     if (length(x_row) > 0 && !is.na(x_row)) {
-      cli::cli_h1("Problematic row from x")
-      cli::cli_alert_warning(
+      cli_h1("Problematic row from x")
+      cli_alert_warning(
         "Row {.val {x_row}} of {.var x} matches multiple rows in {.var y}"
       )
       print(x[x_row, join_keys, drop = FALSE])
@@ -71,19 +71,19 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       # Find all y rows matching this x row
       x_key_vals <- x[x_row, join_keys, drop = FALSE]
       y_matches <- semi_join(y, x_key_vals, by = join_keys)
-      cli::cli_alert_info(
+      cli_alert_info(
         "Found {.val {nrow(y_matches)}} matching rows in {.var y}:"
       )
       print(head(y_matches, .report_n))
       if (nrow(y_matches) > .report_n) {
-        cli::cli_text("{.emph ... and {nrow(y_matches) - .report_n} more}")
+        cli_text("{.emph ... and {nrow(y_matches) - .report_n} more}")
       }
     }
 
     # Report problematic y row
     if (length(y_row) > 0 && !is.na(y_row)) {
-      cli::cli_h1("Problematic row from y")
-      cli::cli_alert_warning(
+      cli_h1("Problematic row from y")
+      cli_alert_warning(
         "Row {.val {y_row}} of {.var y} matches multiple rows in {.var x}"
       )
       print(y[y_row, join_keys, drop = FALSE])
@@ -91,17 +91,17 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       # Find all x rows matching this y row
       y_key_vals <- y[y_row, join_keys, drop = FALSE]
       x_matches <- semi_join(x, y_key_vals, by = join_keys)
-      cli::cli_alert_info(
+      cli_alert_info(
         "Found {.val {nrow(x_matches)}} matching rows in {.var x}:"
       )
       print(head(x_matches[, join_keys, drop = FALSE], .report_n))
       if (nrow(x_matches) > .report_n) {
-        cli::cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
+        cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
       }
     }
 
     # Summary of key duplicates
-    cli::cli_h1("Key duplication summary")
+    cli_h1("Key duplication summary")
 
     x_key_counts <- x |>
       count(across(all_of(join_keys)), name = "n") |>
@@ -113,10 +113,10 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       filter(n > 1) |>
       nrow()
 
-    cli::cli_alert_info(
+    cli_alert_info(
       "Duplicate key combinations in {.var x}: {.val {x_key_counts}}"
     )
-    cli::cli_alert_info(
+    cli_alert_info(
       "Duplicate key combinations in {.var y}: {.val {y_key_counts}}"
     )
 

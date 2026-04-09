@@ -20,6 +20,10 @@
 #'   campaign metadata
 #'
 #' @importFrom eDataDRF initialise_campaign_tibble
+#' @importFrom dplyr mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_campaign_table <- function(
   vm_data,
@@ -69,6 +73,11 @@ vm_create_edata_campaign_table <- function(
 #'   bibliographic information for the Vannmiljø database
 #'
 #' @importFrom eDataDRF initialise_references_tibble
+#' @importFrom dplyr mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom lubridate year
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_reference_table <- function(
   vm_data,
@@ -137,6 +146,12 @@ vm_create_edata_reference_table <- function(
 #'   Validates against duplicate SITE_CODEs and checks coordinate reprojection.
 #'
 #' @importFrom eDataDRF initialise_sites_tibble
+#' @importFrom dplyr select distinct mutate case_when group_by filter n arrange left_join bind_cols row_number
+#' @importFrom tibble add_row
+#' @importFrom lubridate today
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
+#' @importFrom sf st_as_sf st_transform st_coordinates st_drop_geometry
 #' @export
 vm_create_edata_sites_table <- function(vm_data, entered_by) {
   # Extract unique sites with relevant metadata
@@ -317,6 +332,9 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
 #'   values from the Parameter column in vm_data.
 #'
 #' @importFrom eDataDRF initialise_parameters_tibble
+#' @importFrom dplyr distinct pull
+#' @importFrom tibble add_row
+#' @importFrom glue glue
 #' @export
 vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   # Extract unique parameters from the data
@@ -368,6 +386,10 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
 #' @return A tibble conforming to eData samples schema
 #'
 #' @importFrom eDataDRF initialise_samples_tibble
+#' @importFrom dplyr mutate across contains select any_of
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_samples_table <- function(vm_intermediate) {
   edata_samples <- initialise_samples_tibble() |>
@@ -397,6 +419,10 @@ vm_create_edata_samples_table <- function(vm_intermediate) {
 #' @return A tibble conforming to eData biota schema
 #'
 #' @importFrom eDataDRF initialise_biota_tibble
+#' @importFrom dplyr mutate across contains filter select any_of
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_biota_table <- function(vm_intermediate) {
   edata_biota <- initialise_biota_tibble() |>
@@ -447,6 +473,9 @@ vm_create_edata_biota_table <- function(vm_intermediate) {
 #' - Reports number of samples with missing subcompartments
 #' - Reports number of samples with unknown tissue types
 #'
+#' @importFrom dplyr filter mutate group_by row_number count arrange desc pull bind_rows ungroup case_when
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_intermediate_samples_biota_table <- function(vm_data) {
   # Create base samples table (all samples, non-biota structure)
@@ -686,6 +715,10 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 #' - TODO: Implement proper protocol ID mapping
 #'
 #' @importFrom eDataDRF initialise_measurements_tibble
+#' @importFrom dplyr left_join select rename mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_measurements_table <- function(
   vm_edata_intermediate,
