@@ -545,4 +545,4 @@ if (nrow(creed_reliability) > 1 && nrow(creed_relevance) > 1) {
   
   ## Report saved files ----
   cat("\n\n========== FILES SAVED ==========\n")
-  cat("✓", filename_rb, "\n
+  cat("✓", filename_rb, "\n")
