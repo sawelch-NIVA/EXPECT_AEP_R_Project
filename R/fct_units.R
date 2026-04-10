@@ -138,6 +138,7 @@ standardise_measured_units <- function(
   data
 }
 
+
 #' Standardise a date column to IDate format
 #'
 #' Converts Date, character, or POSIXct columns to data.table's IDate format.
@@ -147,53 +148,60 @@ standardise_measured_units <- function(
 #'   character (in dmy or ymd format), or POSIXct.
 #' @param verbose Logical. If TRUE, prints messages about conversions performed.
 #'   Default is FALSE.
+#' @param char_format Character. The expected format for character dates.
+#'   One of "dmy" (default) or "ymd". Only used when column is character.
 #'
 #' @return An IDate vector
 #'
 #' @examples
 #' standardise_IDate(as.Date("2024-01-15"))
 #' standardise_IDate("15/01/2024", verbose = TRUE)
-#' standardise_IDate("2024-01-15", verbose = TRUE)
+#' standardise_IDate("2024-01-15", char_format = "ymd", verbose = TRUE)
 #'
-#' @importFrom cli cli_abort
+#' @importFrom data.table as.IDate
+#' @importFrom lubridate dmy ymd
+#' @importFrom glue glue
 #' @importFrom rlang inherits_only
+#' @importFrom cli cli_abort cli_inform
 #' @export
-standardise_IDate <- function(column, verbose = FALSE) {
+standardise_IDate <- function(column, verbose = FALSE, char_format = "dmy") {
   if (inherits(column, "IDate")) {
     if (verbose) {
-      message(glue("Column already of class IDate."))
+      cli_inform("Column already of class IDate.")
     }
     as.IDate(column)
   } else if (inherits_only(column, "Date")) {
     if (verbose) {
-      message(glue("Column reformatted from Date to IDate."))
+      cli_inform("Column reformatted from Date to IDate.")
     }
     as.IDate(column)
   } else if (inherits_only(column, "character")) {
-    # Try to detect date format
+    # Detect format from first non-NA value
     sample_val <- column[!is.na(column)][1]
 
-    # Simple heuristic: if contains "/" likely dmy, if "-" and starts with 4 digits likely ymd
-    if (grepl("/", sample_val)) {
+    detected_format <- if (grepl("^\\d{4}", sample_val)) {
+      "ymd"
+    } else {
+      "dmy"
+    }
+
+    # Use char_format argument, fallback to detected
+    format_to_use <- char_format
+
+    if (format_to_use == "ymd") {
       if (verbose) {
-        message(glue("Column reformatted from character (dmy) to IDate."))
-      }
-      as.IDate(dmy(column))
-    } else if (grepl("^\\d{4}-", sample_val)) {
-      if (verbose) {
-        message(glue("Column reformatted from character (ymd) to IDate."))
+        cli_inform("Column reformatted from character (ymd) to IDate.")
       }
       as.IDate(ymd(column))
     } else {
-      # Default to dmy for backwards compatibility
       if (verbose) {
-        message(glue("Column reformatted from character (dmy) to IDate."))
+        cli_inform("Column reformatted from character (dmy) to IDate.")
       }
       as.IDate(dmy(column))
     }
   } else if (inherits(column, "POSIXct") || inherits(column, "POSIXlt")) {
     if (verbose) {
-      message(glue("Column reformatted from POSIXct/POSIXlt to IDate."))
+      cli_inform("Column reformatted from POSIXct/POSIXlt to IDate.")
     }
     as.IDate(column)
   } else {
