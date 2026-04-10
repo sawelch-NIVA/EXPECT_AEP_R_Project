@@ -103,7 +103,7 @@ run_pipeline <- function(
 
 #  preferred
 run_pipeline(
-  destroy_all = TRUE, # start from scratch?
+  destroy_all = FALSE, # start from scratch?
   render_quarto = FALSE, # render documents?
   deploy = FALSE, # update website?
   names = NULL, # run specific parts of pipeline?

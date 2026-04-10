@@ -27,49 +27,49 @@ The following sections show validation results for each eData table created from
 ```{r}
 #| label: validation-campaign
 
-get_agent_report(vm_edata_validation$campaign)
+get_agent_report(interrogate(vm_edata_validation$campaign))
 ```
 
 ### Reference Table
 ```{r}
 #| label: validation-reference
 
-get_agent_report(vm_edata_validation$reference)
+get_agent_report(interrogate(vm_edata_validation$reference))
 ```
 
 ### Parameters Table
 ```{r}
 #| label: validation-parameters
 
-get_agent_report(vm_edata_validation$parameters)
+get_agent_report(interrogate(vm_edata_validation$parameters))
 ```
 
 ### Sites Table
 ```{r}
 #| label: validation-sites
 
-get_agent_report(vm_edata_validation$sites)
+get_agent_report(interrogate(vm_edata_validation$sites))
 ```
 
 ### Samples Table
 ```{r}
 #| label: validation-samples
 
-get_agent_report(vm_edata_validation$samples)
+get_agent_report(interrogate(vm_edata_validation$samples))
 ```
 
 ### Biota Table
 ```{r}
 #| label: validation-biota
 
-get_agent_report(vm_edata_validation$biota)
+get_agent_report(interrogate(vm_edata_validation$biota))
 ```
 
 ### Measurements Table
 ```{r}
 #| label: validation-measurements
 
-get_agent_report(vm_edata_validation$measurements)
+get_agent_report(interrogate(vm_edata_validation$measurements))
 ```
 
 ## Validation Summary

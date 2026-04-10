@@ -81,7 +81,6 @@ tar_option_set(
   format = "qs"
 )
 
-message("Targets has got to the list() part")
 # # Pipeline ----
 list(
   ## # Vannmiljø Data ----
@@ -460,19 +459,19 @@ list(
 
   #### # Send a warning if something fails
   # Fixme: Seems not to work rn
-  tar_target(
-    packages = c("purrr"),
-    vm_edata_validation_report,
-    {
-      if (
-        !all(map_lgl(vm_edata_validation, .f = \(x) {
-          all_passed(x)
-        }))
-      ) {
-        warning("Error(s) in Vannmiljø validation.")
-      }
-    }
-  ),
+  # tar_target(
+  #   packages = c("purrr"),
+  #   vm_edata_validation_report,
+  #   {
+  #     if (
+  #       !all(map_lgl(vm_edata_validation, .f = \(x) {
+  #         all_passed(x)
+  #       }))
+  #     ) {
+  #       warning("Error(s) in Vannmiljø validation.")
+  #     }
+  #   }
+  # ),
 
   #### # CREED Scores table ----
   # doesn't exist yet, haven't worked out how to do it
@@ -592,11 +591,10 @@ list(
         add_row(vm_edata_campaign) |>
         pb_validate_campaign(agent = FALSE, actions = pb_action_levels) |>
         # do we have 1+ measurement corresponding to every campaign
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = CAMPAIGN_NAME_SHORT,
           set = unique(measurements_data$CAMPAIGN_NAME_SHORT),
-          actions = pb_action_levels,
-          value_name = "Campaign Name Shorts"
+          actions = pb_action_levels
         )
     }
   ),
@@ -612,11 +610,10 @@ list(
         standardise_IDate_all() |>
         add_row(vm_edata_reference) |>
         pb_validate_reference(agent = FALSE, actions = pb_action_levels) |>
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = REFERENCE_ID,
           set = unique(measurements_data$REFERENCE_ID),
-          actions = pb_action_levels,
-          value_name = "Reference IDs"
+          actions = pb_action_levels
         )
     }
   ),
@@ -638,11 +635,10 @@ list(
           northern_hemisphere = TRUE
         ) |>
         # do we have 1+ measurement corresponding to every site
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = SITE_CODE,
           set = unique(measurements_data$SITE_CODE),
-          actions = pb_action_levels,
-          value_name = "Site Codes"
+          actions = pb_action_levels
         )
     }
   ),
@@ -660,7 +656,7 @@ list(
       # ) |>
       #   standardise_IDate_all() |>
       vm_edata_parameters |>
-        pb_validate_parameters(agent = TRUE, actions = pb_action_levels) |>
+        pb_validate_parameters(agent = FALSE, actions = pb_action_levels) |>
         row_count_match(count = 1) # check table has one row
     }
   ),

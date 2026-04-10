@@ -172,8 +172,6 @@ tar_load(c(
   vm_raw_sites,
   vm_lookup_medium,
   vm_lookup_vannkategori,
-  vm_lookup_analysis,
-  vm_lookup_sampling,
   vm_lookup_methods,
   vm_lookup_campaigns,
   vm_lookup_units,
@@ -181,7 +179,6 @@ tar_load(c(
   vm_join_sites_measurements,
   vm_compartment_geo_conflicts_resolved,
   vm_join_sites_measurements_lookup,
-  vm_data_with_dates,
   vm_filtered_compartments,
   vm_filtered_sites,
   vm_filtered_dates,
@@ -1204,7 +1201,7 @@ vm_compartment_conflicts_resolved_removed |>
   ) |>
   col_vals_in_set(
     ENVIRON_COMPARTMENT_SUB_resolved,
-    purrr::list_flatten(eDataDRF::environ_compartments_sub_vocabulary())
+    purrr::list_c(eDataDRF::environ_compartments_sub_vocabulary())
   )
 
 # Todo: Could this be a conditional code chunk?
