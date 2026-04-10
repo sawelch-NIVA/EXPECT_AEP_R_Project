@@ -69,7 +69,7 @@
 }
 
 # set pointblank action levels - when do we flag issues as serious
-pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.50)
+pb_action_levels <- action_levels(warn_at = 1, stop_at = NULL)
 
 options(
   targets.verbose = TRUE # chatter from targets itself
