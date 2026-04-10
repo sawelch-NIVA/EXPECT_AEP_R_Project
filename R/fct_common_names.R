@@ -17,6 +17,7 @@
 #' @importFrom taxize sci2comm
 #' @importFrom rlang sym :=
 #' @importFrom stringr str_to_sentence
+#' @importFrom cli cli_warn
 #'
 #' @examples
 #' \dontrun{
@@ -38,12 +39,11 @@ get_common_names <- function(
 ) {
   # Check for ENTREZ API key if using NCBI
   if (db == "ncbi" && Sys.getenv("ENTREZ_KEY") == "") {
-    warning(
-      "No ENTREZ_KEY found in environment. ",
-      "API calls will be slower without a key. ",
-      "Get one at https://www.ncbi.nlm.nih.gov/account/ ",
-      "and set with Sys.setenv(ENTREZ_KEY = 'your_key_here')"
-    )
+    cli_warn(c(
+      "No ENTREZ_KEY found in environment.",
+      "i" = "API calls will be slower without a key.",
+      "i" = "Get one at {.url https://www.ncbi.nlm.nih.gov/account/} and set with {.code Sys.setenv(ENTREZ_KEY = 'your_key_here')}"
+    ))
   }
 
   # Convert column names to symbols for tidy evaluation

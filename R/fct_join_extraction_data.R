@@ -13,7 +13,7 @@
 #'
 #' @return Result of left_join (possibly with many-to-many rows)
 #' @importFrom dplyr left_join semi_join count across all_of filter
-#' @importFrom cli cli_h1 cli_alert_warning cli_alert_info cli_text cli_alert_danger
+#' @importFrom cli cli_h1 cli_alert_warning cli_alert_info cli_text cli_alert_danger cli_inform
 #' @export
 left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
   # Capture warnings during the join
@@ -66,7 +66,7 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_warning(
         "Row {.val {x_row}} of {.var x} matches multiple rows in {.var y}"
       )
-      print(x[x_row, join_keys, drop = FALSE])
+      cli_inform(paste(format(x[x_row, join_keys, drop = FALSE]), collapse = "\n"))
 
       # Find all y rows matching this x row
       x_key_vals <- x[x_row, join_keys, drop = FALSE]
@@ -74,7 +74,7 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_info(
         "Found {.val {nrow(y_matches)}} matching rows in {.var y}:"
       )
-      print(head(y_matches, .report_n))
+      cli_inform(paste(format(head(y_matches, .report_n)), collapse = "\n"))
       if (nrow(y_matches) > .report_n) {
         cli_text("{.emph ... and {nrow(y_matches) - .report_n} more}")
       }
@@ -86,7 +86,7 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_warning(
         "Row {.val {y_row}} of {.var y} matches multiple rows in {.var x}"
       )
-      print(y[y_row, join_keys, drop = FALSE])
+      cli_inform(paste(format(y[y_row, join_keys, drop = FALSE]), collapse = "\n"))
 
       # Find all x rows matching this y row
       y_key_vals <- y[y_row, join_keys, drop = FALSE]
@@ -94,7 +94,7 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_info(
         "Found {.val {nrow(x_matches)}} matching rows in {.var x}:"
       )
-      print(head(x_matches[, join_keys, drop = FALSE], .report_n))
+      cli_inform(paste(format(head(x_matches[, join_keys, drop = FALSE], .report_n)), collapse = "\n"))
       if (nrow(x_matches) > .report_n) {
         cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
       }
@@ -389,6 +389,7 @@ clean_joined_columns <- function(data, columns_to_drop = character()) {
 #' @return Invisible NULL (called for side effect of writing file)
 #'
 #' @importFrom arrow write_parquet
+#' @importFrom cli cli_inform
 #'
 #' @export
 save_literature_parquet <- function(
@@ -407,7 +408,7 @@ save_literature_parquet <- function(
   # Write parquet file
   write_parquet(data, full_path)
 
-  message(sprintf("Literature data saved to: %s", full_path))
+  cli_inform("Literature data saved to: {.path {full_path}}")
 
   invisible(NULL)
 }

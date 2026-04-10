@@ -125,6 +125,7 @@ vm_filter_dates <- function(data, date_start, date_end) {
 #'
 #' @importFrom dplyr mutate case_when filter tally
 #' @importFrom glue glue
+#' @importFrom cli cli_warn
 #' @export
 resolve_compartment_conflicts <- function(df) {
   df <- df |>
@@ -233,9 +234,7 @@ resolve_compartment_conflicts <- function(df) {
   ))
 
   if (n_unresolved + n_unresolved_sub > 0) {
-    warning(
-      "Some (sub)compartments still aren't resolved and have been flagged for removal."
-    )
+    cli_warn("Some (sub)compartments still aren't resolved and have been flagged for removal.")
   }
 
   df
@@ -268,6 +267,7 @@ resolve_compartment_conflicts <- function(df) {
 #'
 #' @importFrom dplyr mutate case_when filter tally
 #' @importFrom glue glue
+#' @importFrom cli cli_warn
 #' @export
 resolve_geographic_conflicts <- function(df) {
   df <- df |>
@@ -353,7 +353,7 @@ resolve_geographic_conflicts <- function(df) {
   ))
 
   if (n_unresolved + n_unresolved_sub > 0) {
-    warning("Some geographic features still aren't resolved.")
+    cli_warn("Some geographic features still aren't resolved.")
   }
 
   df
@@ -492,18 +492,16 @@ generate_sample_id_with_components <- function(
 #'
 #' @importFrom dplyr case_match
 #' @importFrom glue glue
+#' @importFrom cli cli_abort
 #' @export
 vm_convert_operator <- function(col) {
   # Check for unexpected operators before conversion
   unexpected <- col[!col %in% c("=", "<", "ND", NA)]
 
   if (length(unexpected) > 0) {
-    stop(glue(
-      "Unexpected operator(s) found in Vannmiljø data: ",
-      "{paste(unique(unexpected), collapse = ', ')}. ",
-      "Expected operators are: '=', '<', 'ND'. ",
-      "Please investigate why '>' or other operators are present."
-    ))
+    cli_abort(
+      "Unexpected operator(s) found in Vannmilj\u00f8 data: {paste(unique(unexpected), collapse = ', ')}. Expected operators are: '=', '<', 'ND'. Please investigate why '>' or other operators are present."
+    )
   }
 
   case_match(
@@ -545,6 +543,7 @@ vm_convert_operator <- function(col) {
 #'
 #' @importFrom dplyr case_match
 #' @importFrom glue glue
+#' @importFrom cli cli_abort
 #' @export
 vm_convert_unit <- function(col) {
   # Get unique units for checking
@@ -553,12 +552,9 @@ vm_convert_unit <- function(col) {
   unknown_units <- setdiff(unique_units, known_units)
 
   if (length(unknown_units) > 0) {
-    stop(glue(
-      "Unknown unit(s) found in Vannmiljø data: ",
-      "{paste(unknown_units, collapse = ', ')}. ",
-      "Known units are: {paste(known_units, collapse = ', ')}. ",
-      "Please add conversion rule to vm_convert_unit() function."
-    ))
+    cli_abort(
+      "Unknown unit(s) found in Vannmilj\u00f8 data: {paste(unknown_units, collapse = ', ')}. Known units are: {paste(known_units, collapse = ', ')}. Please add conversion rule to vm_convert_unit() function."
+    )
   }
 
   case_match(

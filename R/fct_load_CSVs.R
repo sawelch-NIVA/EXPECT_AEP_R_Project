@@ -12,6 +12,7 @@
 #'
 #' @importFrom dplyr filter if_else
 #' @importFrom glue glue
+#' @importFrom cli cli_abort
 #'
 #' @export
 get_literature_csv_paths <- function(
@@ -34,9 +35,9 @@ get_literature_csv_paths <- function(
   )
 
   if (length(paths) <= 0) {
-    stop(glue(
-      "get_literature_csv_paths(module = {module}) returned 0 paths. Check module name, search path, and folder contents."
-    ))
+    cli_abort(
+      "get_literature_csv_paths(module = {.val {module}}) returned 0 paths. Check module name, search path, and folder contents."
+    )
   }
 
   return(paths)
@@ -80,7 +81,7 @@ literature_module_vocab <- function() {
 #' @importFrom data.table fread
 #' @importFrom dplyr summarise_all as_tibble mutate across where
 #' @importFrom purrr as_vector
-#'
+#' @importFrom cli cli_abort
 #'
 #' @export
 fread_module_csv <- function(filepath, format_initialiser) {
@@ -102,7 +103,7 @@ fread_module_csv <- function(filepath, format_initialiser) {
     mutate(across(where(\(x) inherits(x, "IDate")), as.Date))
 
   if (length(result) == 0) {
-    stop("No data found for filepath: {filepath}")
+    cli_abort("No data found for filepath: {.path {filepath}}")
   }
   return(result)
 }
@@ -121,6 +122,7 @@ fread_module_csv <- function(filepath, format_initialiser) {
 #'
 #' @importFrom dplyr pull bind_rows mutate
 #' @importFrom purrr map reduce
+#' @importFrom cli cli_abort cli_warn
 #'
 #' @export
 fread_all_module_files <- function(file_paths, format_initialiser) {
@@ -142,17 +144,11 @@ fread_all_module_files <- function(file_paths, format_initialiser) {
           )
       },
       warning = function(w) {
-        warning(
-          sprintf("Warning reading file '%s': %s", x, conditionMessage(w)),
-          call. = FALSE
-        )
+        cli_warn("Warning reading file {.path {x}}: {conditionMessage(w)}")
         invokeRestart("muffleWarning")
       },
       error = function(e) {
-        stop(
-          sprintf("Error reading file '%s': %s", x, conditionMessage(e)),
-          call. = FALSE
-        )
+        cli_abort("Error reading file {.path {x}}: {conditionMessage(e)}")
       }
     )
   })
@@ -171,10 +167,7 @@ fread_all_module_files <- function(file_paths, format_initialiser) {
       )
     },
     error = function(e) {
-      stop(
-        sprintf("Error combining module files: %s", conditionMessage(e)),
-        call. = FALSE
-      )
+      cli_abort("Error combining module files: {conditionMessage(e)}")
     }
   )
 }

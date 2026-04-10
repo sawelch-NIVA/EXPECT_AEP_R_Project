@@ -152,6 +152,7 @@ vm_create_edata_reference_table <- function(
 #' @importFrom data.table as.IDate
 #' @importFrom glue glue
 #' @importFrom sf st_as_sf st_transform st_coordinates st_drop_geometry
+#' @importFrom cli cli_inform cli_warn cli_abort
 #' @export
 vm_create_edata_sites_table <- function(vm_data, entered_by) {
   # Extract unique sites with relevant metadata
@@ -177,7 +178,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
       )
     )
 
-  message(glue("Extracted {nrow(vm_sites_unique)} unique sites"))
+  cli_inform("Extracted {nrow(vm_sites_unique)} unique sites")
 
   # Format to eData structure
   edata_sites_temp <- vm_sites_unique |>
@@ -229,14 +230,10 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         as.data.frame() |>
         bind_cols(st_drop_geometry(sites_sf))
 
-      message(glue(
-        "Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84"
-      ))
+      cli_inform("Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84")
     },
     error = function(e) {
-      stop(glue(
-        "Failed to reproject coordinates from UTM33 to WGS84: {e$message}"
-      ))
+      cli_abort("Failed to reproject coordinates from UTM33 to WGS84: {e$message}")
     }
   )
 
@@ -255,11 +252,10 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         arrange(SITE_CODE)
 
       if (nrow(duplicate_sites) > 0) {
-        warning(glue(
-          "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. ",
-          "Displaying first 10 conflicts:"
-        ))
-        print(head(duplicate_sites, 10))
+        cli_warn(
+          "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. Displaying first 10 conflicts:"
+        )
+        cli_inform(paste(format(head(duplicate_sites, 10)), collapse = "\n"))
       }
 
       edata_sites <- edata_sites_temp |>
@@ -292,16 +288,13 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         filter(n() > 1)
 
       if (nrow(result_duplicates) > 0) {
-        stop(glue(
-          "Many-to-many join created {nrow(result_duplicates)} duplicate rows. ",
-          "Check vm_sites_unique for duplicate coordinates per site."
-        ))
+        cli_abort(
+          "Many-to-many join created {nrow(result_duplicates)} duplicate rows. Check vm_sites_unique for duplicate coordinates per site."
+        )
       }
     },
     warning = function(w) {
-      stop(glue(
-        "Unexpected many-to-many relationship when joining sites table:\n{w}"
-      ))
+      cli_abort("Unexpected many-to-many relationship when joining sites table:\n{w}")
     }
   )
 
@@ -310,7 +303,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
     mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(edata_sites)
 
-  message(glue("Created sites table: {nrow(edata_sites)} sites"))
+  cli_inform("Created sites table: {nrow(edata_sites)} sites")
 
   edata_sites
 }

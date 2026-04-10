@@ -49,6 +49,7 @@
 #'
 #' @importFrom dplyr mutate case_when filter
 #' @importFrom stringr str_detect
+#' @importFrom cli cli_abort
 #' @export
 standardise_measured_units <- function(
   data,
@@ -58,26 +59,29 @@ standardise_measured_units <- function(
 ) {
   # Check that at least one argument is provided ----
   if (is.null(value_columns) && is.null(unit_column)) {
-    stop("At least one of 'value_columns' or 'unit_column' must be specified")
+    cli_abort(
+      "At least one of {.arg value_columns} or {.arg unit_column} must be specified"
+    )
   }
 
   # Check that specified columns exist ----
   if (!is.null(value_columns)) {
     missing_cols <- setdiff(value_columns, names(data))
     if (length(missing_cols) > 0) {
-      stop(
-        "Column(s) not found in data: ",
-        paste(missing_cols, collapse = ", ")
-      )
+      cli_abort("Column(s) not found in data: {.val {missing_cols}}")
     }
   }
   if (!is.null(unit_column) && !unit_column %in% names(data)) {
-    stop("Column '", unit_column, "' not found in data")
+    cli_abort(
+      "Column {.arg unit_column} ({.val {unit_column}}) not found in data"
+    )
   }
 
   # Check remove_other requirements ----
   if (remove_other && is.null(unit_column)) {
-    stop("'unit_column' must be specified when 'remove_other = TRUE'")
+    cli_abort(
+      "{.arg unit_column} must be specified when {.code remove_other = TRUE}"
+    )
   }
 
   # Standardise units if unit_column provided ----
@@ -100,7 +104,7 @@ standardise_measured_units <- function(
   if (!is.null(value_columns)) {
     # Need unit_column for conversion logic
     if (is.null(unit_column)) {
-      stop("'unit_column' must be specified when converting values")
+      cli_abort("{.arg unit_column} must be specified when converting values")
     }
 
     # Convert each value column
@@ -151,6 +155,8 @@ standardise_measured_units <- function(
 #' standardise_IDate("15/01/2024", verbose = TRUE)
 #' standardise_IDate("2024-01-15", verbose = TRUE)
 #'
+#' @importFrom cli cli_abort
+#' @importFrom rlang inherits_only
 #' @export
 standardise_IDate <- function(column, verbose = FALSE) {
   if (inherits(column, "IDate")) {
@@ -191,77 +197,7 @@ standardise_IDate <- function(column, verbose = FALSE) {
     }
     as.IDate(column)
   } else {
-    stop(glue("Cannot convert column of class {class(column)} to IDate."))
-  }
-}
-
-
-#' Standardise a date column to IDate format
-#'
-#' Converts Date, character, or POSIXct columns to data.table's IDate format.
-#' Handles character dates in both dmy and ymd formats.
-#'
-#' @param column A vector to be converted to IDate. Can be IDate, Date,
-#'   character (in dmy or ymd format), or POSIXct.
-#' @param verbose Logical. If TRUE, prints messages about conversions performed.
-#'   Default is FALSE.
-#' @param char_format Character. The expected format for character dates.
-#'   One of "dmy" (default) or "ymd". Only used when column is character.
-#'
-#' @return An IDate vector
-#'
-#' @examples
-#' standardise_IDate(as.Date("2024-01-15"))
-#' standardise_IDate("15/01/2024", verbose = TRUE)
-#' standardise_IDate("2024-01-15", char_format = "ymd", verbose = TRUE)
-#'
-#' @importFrom data.table as.IDate
-#' @importFrom lubridate dmy ymd
-#' @importFrom glue glue
-#' @importFrom rlang inherits_only
-#' @export
-standardise_IDate <- function(column, verbose = FALSE, char_format = "dmy") {
-  if (inherits(column, "IDate")) {
-    if (verbose) {
-      message(glue("Column already of class IDate."))
-    }
-    as.IDate(column)
-  } else if (inherits_only(column, "Date")) {
-    if (verbose) {
-      message(glue("Column reformatted from Date to IDate."))
-    }
-    as.IDate(column)
-  } else if (inherits_only(column, "character")) {
-    # Detect format from first non-NA value
-    sample_val <- column[!is.na(column)][1]
-
-    detected_format <- if (grepl("^\\d{4}", sample_val)) {
-      "ymd"
-    } else {
-      "dmy"
-    }
-
-    # Use char_format argument, fallback to detected
-    format_to_use <- char_format
-
-    if (format_to_use == "ymd") {
-      if (verbose) {
-        message(glue("Column reformatted from character (ymd) to IDate."))
-      }
-      as.IDate(ymd(column))
-    } else {
-      if (verbose) {
-        message(glue("Column reformatted from character (dmy) to IDate."))
-      }
-      as.IDate(dmy(column))
-    }
-  } else if (inherits(column, "POSIXct") || inherits(column, "POSIXlt")) {
-    if (verbose) {
-      message(glue("Column reformatted from POSIXct/POSIXlt to IDate."))
-    }
-    as.IDate(column)
-  } else {
-    stop(glue("Cannot convert column of class {class(column)} to IDate."))
+    cli_abort("Cannot convert column of class {.cls {class(column)}} to IDate.")
   }
 }
 

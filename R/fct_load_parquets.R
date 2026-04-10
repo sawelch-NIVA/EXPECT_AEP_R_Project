@@ -9,7 +9,7 @@
 #'
 #' @importFrom arrow read_parquet
 #' @importFrom dplyr as_tibble
-
+#' @importFrom cli cli_abort cli_inform
 #'
 #' @export
 load_literature_parquet <- function(
@@ -21,16 +21,16 @@ load_literature_parquet <- function(
 
   # Check if file exists
   if (!file.exists(full_path)) {
-    stop(sprintf("Parquet file not found at: %s", full_path))
+    cli_abort("Parquet file not found at: {.path {full_path}}")
   }
 
-  message(sprintf("Loading literature data from: %s", full_path))
+  cli_inform("Loading literature data from: {.path {full_path}}")
 
   # Read parquet file
   data <- read_parquet(full_path) |>
     as_tibble()
 
-  message(sprintf("Loaded %s rows and %s columns", nrow(data), ncol(data)))
+  cli_inform("Loaded {nrow(data)} rows and {ncol(data)} columns")
 
   return(data)
 }
