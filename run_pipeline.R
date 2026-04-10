@@ -4,7 +4,6 @@ run_pipeline <- function(
   deploy = FALSE,
   names = NULL,
   reporter = "balanced",
-  callr_function = callr::r,
   load_workspace_on_error = FALSE
 ) {
   # Setup Pushover credentials ----
@@ -29,34 +28,29 @@ run_pipeline <- function(
         }
         targets::tar_make(
           names = names,
-          callr_function = callr_function,
           reporter = reporter
         )
       } else if (render_quarto && deploy) {
         # Run all targets
         targets::tar_make(
-          callr_function = callr_function,
           reporter = reporter
         )
       } else if (render_quarto) {
         # Run only rendering targets
         targets::tar_make(
           names = starts_with("render_"),
-          callr_function = callr_function,
           reporter = reporter
         )
       } else if (deploy) {
         # Run only deployment targets
         targets::tar_make(
           names = starts_with("deploy_"),
-          callr_function = callr_function,
           reporter = reporter
         )
       } else {
         # Run everything except render and deploy targets
         targets::tar_make(
           names = !starts_with("render_") & !starts_with("deploy_"),
-          callr_function = callr_function,
           reporter = reporter
         )
       }
@@ -108,6 +102,5 @@ run_pipeline(
   deploy = FALSE, # update website?
   names = NULL, # run specific parts of pipeline?
   reporter = "balanced", # reasonable amount of metadata
-  callr_function = callr::r, # new R session
   load_workspace_on_error = FALSE # load workspace for the failing target
 )
