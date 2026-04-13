@@ -44,7 +44,7 @@ geom_sf_shadowtext <- function(
 ) {
   if (!missing(nudge_x) || !missing(nudge_y)) {
     if (!missing(position)) {
-      cli::cli_abort(c(
+      cli_abort(c(
         "Both {.arg position} and {.arg nudge_x}/{.arg nudge_y} are supplied.",
         i = "Only use one approach to alter the position."
       ))
@@ -87,7 +87,7 @@ geom_sf_shadowtext <- function(
 #'
 #' @return A ggplot object
 #'
-#' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin
+#' @importFrom ggplot2 ggplot geom_sf geom_sf_text aes scale_fill_identity scale_color_identity guides theme element_rect element_blank margin coord_sf
 #' @importFrom dplyr if_else
 #'
 #' @export
@@ -154,20 +154,20 @@ create_study_area_map_wgs84 <- function(
     geom_sf_shadowtext(
       data = ocean_sf,
       aes(
-        label = dplyr::if_else(highlight_name, name, NA_character_),
-        fontface = dplyr::if_else(highlight_name, "bold.italic", "italic"),
-        # size = dplyr::if_else(major_body, "12px", "10px"),
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold.italic", "italic"),
+        # size = if_else(major_body, "12px", "10px"),
         color = label_colors["ocean"],
-        alpha = dplyr::if_else(major_body | highlight_name, 1, 0)
+        alpha = if_else(major_body | highlight_name, 1, 0)
       )
     ) +
     # Country names
     geom_sf_shadowtext(
       data = country_sf,
       aes(
-        label = dplyr::if_else(highlight_name, name, NA_character_),
-        fontface = dplyr::if_else(highlight_name, "bold", "plain"),
-        alpha = dplyr::if_else(highlight_name, 1, 0)
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold", "plain"),
+        alpha = if_else(highlight_name, 1, 0)
       ),
       # size = 3,
       color = label_colors["country"],
@@ -279,20 +279,20 @@ create_study_area_map_polar <- function(
     geom_sf_shadowtext(
       data = ocean_sf,
       aes(
-        label = dplyr::if_else(highlight_name, name, NA_character_),
-        fontface = dplyr::if_else(highlight_name, "bold.italic", "italic"),
-        size = dplyr::if_else(major_body, "12px", "10px"),
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold.italic", "italic"),
+        size = if_else(major_body, "12px", "10px"),
         color = label_colors["ocean"],
-        alpha = dplyr::if_else(major_body | highlight_name, 1, 0)
+        alpha = if_else(major_body | highlight_name, 1, 0)
       )
     ) +
     # Country names
     geom_sf_shadowtext(
       data = country_sf,
       aes(
-        label = dplyr::if_else(highlight_name, name, NA_character_),
-        fontface = dplyr::if_else(highlight_name, "bold", "plain"),
-        alpha = dplyr::if_else(highlight_name, 1, 0)
+        label = if_else(highlight_name, name, NA_character_),
+        fontface = if_else(highlight_name, "bold", "plain"),
+        alpha = if_else(highlight_name, 1, 0)
       ),
       size = 3,
       color = label_colors["country"],

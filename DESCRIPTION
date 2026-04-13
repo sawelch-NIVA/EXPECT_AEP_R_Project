@@ -1,9 +1,9 @@
-Package: EXPECT_AEP_R_Project
-Title: What the Package Does (One Line, Title Case)
+Package: STOPAEP
+Title: AEP-ish functions for my work with copper eData
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Sam", "Welch", , "saw@niva.no", role = c("aut", "cre"))
+Description: A bit of a mess so far. 
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -12,6 +12,53 @@ RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Imports: 
+Imports:
+    arrow,
+    bslib,
+    cli,
+    data.table,
+    dplyr,
+    DT,
+    eDataDRF (>= 0.0.0.9005),
+    forcats,
+    fs,
+    ggh4x,
+    ggiraph,
+    ggplot2,
+    ggraph,
+    ggridges,
+    ggtext,
+    glue,
+    gt,
+    hexbin,
+    here,
+    htmltools,
+    jsonlite,
+    knitr,
+    leaflet,
+    leaflet.extras2,
+    lubridate,
+    maps,
+    networkD3,
+    oce,
+    patchwork,
+    pointblank,
+    purrr,
+    readr,
+    readxl,
+    rlang,
+    rnaturalearth,
+    scales,
+    sf,
+    shiny,
+    stringr,
+    svglite,
     tarchetypes,
-    targets
+    targets,
+    taxize,
+    tibble,
+    tidygraph,
+    tidyr,
+    viridis
+Remotes:  
+    NIVANorge/eDataDRF

@@ -1,112 +1,85 @@
 # Created by use_targets().
 
-# TODO: What might be useful.
-# If we hit an error
-# call tar workspace
-# if triggered by pointblank sets, RETURN THE FAILING DATA
-
 # # Load packages required to define the pipeline ----
-suppressPackageStartupMessages({
-  library(targets)
+# options(conflicts.policy = "strict") # error on load in case of any function name masking
+
+{
+  starttime <- Sys.time()
+
+  library(targets, quietly = TRUE)
   library(tarchetypes) # better factories for watching many files
+  library(qs2)
   library(eDataDRF) # schema/vocab functions
   library(crew) # parallel processing, faster execution?
   library(here) # salvage something from the horrible mess that is quarto working directories
-  library(devtools) # load all functions
   library(quarto) # make beautiful documents, eventually
-  library(pointblank)
-  library(dplyr)
-})
+  library(pointblank) # validation functions (TODO: Remove)
+  suppressPackageStartupMessages(
+    library(
+      dplyr,
+      mask.ok = c("filter", "lag", "intersect", "setdiff", "setequal", "union") # allow dplyr to mask functions we never use from base/stats
+    )
+  )
+  library(testthat, mask.ok = c("test_file"))
+  library(
+    lubridate,
+    mask.ok = c("as.difftime", "date", "intersect", "setdiff", "union")
+  )
+  library(
+    data.table,
+    # TODO: All these?
+    mask.ok = c(
+      "hour",
+      "isoweek",
+      "isoyear",
+      "mday",
+      "minute",
+      "month",
+      "quarter",
+      "second",
+      "wday",
+      "week",
+      "yday",
+      "year",
+      "between",
+      "first",
+      "last"
+    )
+  )
+  library(purrr, mask.ok = c("transpose"))
+  library(readr)
+  library(readxl)
+  message(paste(
+    "Loaded packages in",
+    round(Sys.time() - starttime, 2),
+    "seconds"
+  ))
+}
 
-suppressMessages({
-  i_am("Readme.md") # set wd to project root
-  load_all(path = here())
-})
+
+{
+  starttime <- Sys.time()
+  here::i_am("Readme.md") # set wd to project root
+  pkgload::load_all(path = here::here())
+  message(paste(
+    "Loaded local functions in",
+    round(Sys.time() - starttime, 2),
+    "seconds"
+  ))
+}
 
 # set pointblank action levels - when do we flag issues as serious
-pb_action_levels <- action_levels(warn_at = 1, stop_at = 0.50)
+pb_action_levels <- action_levels(warn_at = 1, stop_at = NULL)
 
 options(
-  targets.verbose = FALSE, # less chatter from targets itself
-  pointblank.verbose = FALSE # if this option exists (not sure)
+  targets.verbose = TRUE # chatter from targets itself
 )
 
 
 # # Set target options ----
 tar_option_set(
-  # Packages that your targets need for their tasks.
-  packages = c(
-    "sf",
-    "sfhelper",
-    "rnaturalearth",
-    "rnaturalearthdata",
-    "mapproj",
-    "rlang",
-    "data.table",
-    "leaflet",
-    "janitor",
-    "shiny",
-    "readxl",
-    "arrow",
-    "qs2",
-    "tarchetypes", # extend targets
-    "glue",
-    "purrr",
-    "lubridate",
-    "stringr",
-    "readr",
-    "tibble",
-    "tidyr",
-    "ggplot2",
-    "ggspatial",
-    "shadowtext",
-    "ggrepel",
-    "dplyr",
-    "dtplyr",
-    "forcats",
-    "viridis",
-    "ggridges",
-    "plotly",
-    "eDataDRF",
-    "pointblank",
-    "here"
-  ),
-  format = "qs" # Optionally set the default storage format. qs is fast.
-  #
-  # Pipelines that take a long time to run may benefit from
-  # optional distributed computing. To use this capability
-  # in tar_make(), supply a {crew} controller
-  # as discussed at https://books.ropensci.org/targets/crew.html.
-  # Choose a controller that suits your needs. For example, the following
-  # sets a controller that scales up to a maximum of two workers
-  # which run as local R processes. Each worker launches when there is work
-  # to do and exits if 60 seconds pass with no tasks to run.
-  #
-  # controller = crew::crew_controller_local(workers = 10, seconds_idle = 60)
-  #
-  # Alternatively, if you want workers to run on a high-performance computing
-  # cluster, select a controller from the {crew.cluster} package.
-  # For the cloud, see plugin packages like {crew.aws.batch}.
-  # The following example is a controller for Sun Grid Engine (SGE).
-  #
-  #   controller = crew.cluster::crew_controller_sge(
-  #     # Number of workers that the pipeline can scale up to:
-  #     workers = 10,
-  #     # It is recommended to set an idle time so workers can shut themselves
-  #     # down if they are not running tasks.
-  #     seconds_idle = 120,
-  #     # Many clusters install R as an environment module, and you can load it
-  #     # with the script_lines argument. To select a specific verison of R,
-  #     # you may need to include a version string, e.g. "module load R/4.3.2".
-  #     # Check with your system administrator if you are unsure.
-  #     script_lines = "module load R"
-  #   )
-  #
-  # Set other options as needed.
+  format = "qs"
 )
-
-# # Source all custom functions stored in ~/R ----
-tar_source()
 
 # # Pipeline ----
 list(
@@ -431,6 +404,7 @@ list(
   #### # Intermediate samples-biota table ----
   # This table contains both eData columns AND original Vannmiljø columns
   # It's used to create samples, biota, and measurements tables
+  # TODO: THis is also very slow. How fix?
   tar_target(
     vm_edata_intermediate,
     vm_create_intermediate_samples_biota_table(vm_data = vm_sites_split_clean)
@@ -449,7 +423,7 @@ list(
     vm_edata_biota,
     vm_create_edata_biota_table(vm_intermediate = vm_edata_intermediate)
   ),
-
+  ####################################################################
   #### # Measurements table ----
   tar_target(
     # TODO: THis has become very slow since we added grouping. not the end of the world, but how to fix?
@@ -485,18 +459,19 @@ list(
 
   #### # Send a warning if something fails
   # Fixme: Seems not to work rn
-  tar_target(
-    vm_edata_validation_report,
-    {
-      if (
-        !all(map_lgl(vm_edata_validation, .f = \(x) {
-          all_passed(x)
-        }))
-      ) {
-        warning("Error(s) in Vannmiljø validation.")
-      }
-    }
-  ),
+  # tar_target(
+  #   packages = c("purrr"),
+  #   vm_edata_validation_report,
+  #   {
+  #     if (
+  #       !all(map_lgl(vm_edata_validation, .f = \(x) {
+  #         all_passed(x)
+  #       }))
+  #     ) {
+  #       warning("Error(s) in Vannmiljø validation.")
+  #     }
+  #   }
+  # ),
 
   #### # CREED Scores table ----
   # doesn't exist yet, haven't worked out how to do it
@@ -583,6 +558,7 @@ list(
   # * our schema and we validate other tables against it
   tar_target(
     name = measurements_data,
+    packages = c("lubridate", "purrr"),
     # some measurement files are missing MEASUREMENT_COMMENT
     # or CAMPAIGN_NAME_SHORT, but that doesn't matter really
     command = {
@@ -615,11 +591,10 @@ list(
         add_row(vm_edata_campaign) |>
         pb_validate_campaign(agent = FALSE, actions = pb_action_levels) |>
         # do we have 1+ measurement corresponding to every campaign
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = CAMPAIGN_NAME_SHORT,
           set = unique(measurements_data$CAMPAIGN_NAME_SHORT),
-          actions = pb_action_levels,
-          value_name = "Campaign Name Shorts"
+          actions = pb_action_levels
         )
     }
   ),
@@ -635,11 +610,10 @@ list(
         standardise_IDate_all() |>
         add_row(vm_edata_reference) |>
         pb_validate_reference(agent = FALSE, actions = pb_action_levels) |>
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = REFERENCE_ID,
           set = unique(measurements_data$REFERENCE_ID),
-          actions = pb_action_levels,
-          value_name = "Reference IDs"
+          actions = pb_action_levels
         )
     }
   ),
@@ -661,11 +635,10 @@ list(
           northern_hemisphere = TRUE
         ) |>
         # do we have 1+ measurement corresponding to every site
-        col_vals_in_set_verbose(
+        col_vals_in_set(
           columns = SITE_CODE,
           set = unique(measurements_data$SITE_CODE),
-          actions = pb_action_levels,
-          value_name = "Site Codes"
+          actions = pb_action_levels
         )
     }
   ),
@@ -684,7 +657,7 @@ list(
       #   standardise_IDate_all() |>
       vm_edata_parameters |>
         pb_validate_parameters(agent = FALSE, actions = pb_action_levels) |>
-        row_count_match(count = 1)
+        row_count_match(count = 1) # check table has one row
     }
   ),
 
@@ -777,6 +750,7 @@ list(
 
   #### # Samples data ----
   tar_target(
+    packages = c("rlang"),
     name = samples_data,
     # todo: the column SUBSAMPLE_ID is in initialise_samples_tibble() but not
     # any of our data extracted from the app. fread() warns us that it can't
@@ -788,6 +762,7 @@ list(
       )) |>
         standardise_IDate_all() |>
         add_row(vm_edata_samples) |>
+        # FIXME: this fails because none of our sample IDs pass regex... oops
         pb_validate_samples(agent = FALSE, actions = pb_action_levels)
     }
   ),
@@ -819,7 +794,7 @@ list(
         creed_scores_files,
         initialise_CREED_scores_tibble
       ) |>
-        pb_validate_creed_scores(agent = FALSE, actions = pb_action_levels)
+        pb_validate_CREED_scores(agent = FALSE, actions = pb_action_levels)
     }
   ),
 
@@ -973,6 +948,7 @@ list(
   ### # Prepare WGS84 shapefiles ----
   # Set up WGS84 map shapefiles (oceans, countries), and add annotations
   tar_target(
+    packages = c("sf"),
     name = wgs84_geography,
     command = prepare_geography_wgs84(
       scale = 10,
@@ -983,6 +959,7 @@ list(
   ### # Prepare polar projection shapefiles ----
   # Set up polar projection map shapefiles (oceans, countries), and add annotations
   tar_target(
+    packages = c("sf"),
     name = polar_geography,
     command = prepare_geography_polar(
       scale = 10,
@@ -995,6 +972,7 @@ list(
 
   ### # Create WGS84 map ----
   tar_target(
+    packages = c("sf", "shadowtext"),
     name = wgs84_map,
     command = create_study_area_map_wgs84(
       ocean_sf = wgs84_geography$marine_polys,
@@ -1007,6 +985,7 @@ list(
 
   ### # Create polar projection map ----
   tar_target(
+    packages = c("sf", "shadowtext"),
     name = polar_map,
     command = create_study_area_map_polar(
       ocean_sf = polar_geography$marine_polys,

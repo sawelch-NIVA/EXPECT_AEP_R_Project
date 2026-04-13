@@ -13,7 +13,7 @@
 #'
 #' @return Result of left_join (possibly with many-to-many rows)
 #' @importFrom dplyr left_join semi_join count across all_of filter
-#' @importFrom cli cli_h1 cli_alert_warning cli_alert_info cli_text cli_alert_danger
+#' @importFrom cli cli_h1 cli_alert_warning cli_alert_info cli_text cli_alert_danger cli_inform
 #' @export
 left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
   # Capture warnings during the join
@@ -41,9 +41,9 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       join_keys <- names(by)
     }
 
-    cli::cli_h1("Many-to-many join diagnostic")
-    cli::cli_alert_danger("Detected an unexpected many-to-many relationship")
-    cli::cli_alert_info(
+    cli_h1("Many-to-many join diagnostic")
+    cli_alert_danger("Detected an unexpected many-to-many relationship")
+    cli_alert_info(
       "Join keys: {.field {paste(join_keys, collapse = ', ')}}"
     )
 
@@ -62,46 +62,46 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
 
     # Report problematic x row
     if (length(x_row) > 0 && !is.na(x_row)) {
-      cli::cli_h1("Problematic row from x")
-      cli::cli_alert_warning(
+      cli_h1("Problematic row from x")
+      cli_alert_warning(
         "Row {.val {x_row}} of {.var x} matches multiple rows in {.var y}"
       )
-      print(x[x_row, join_keys, drop = FALSE])
+      cli_inform(paste(format(x[x_row, join_keys, drop = FALSE]), collapse = "\n"))
 
       # Find all y rows matching this x row
       x_key_vals <- x[x_row, join_keys, drop = FALSE]
       y_matches <- semi_join(y, x_key_vals, by = join_keys)
-      cli::cli_alert_info(
+      cli_alert_info(
         "Found {.val {nrow(y_matches)}} matching rows in {.var y}:"
       )
-      print(head(y_matches, .report_n))
+      cli_inform(paste(format(head(y_matches, .report_n)), collapse = "\n"))
       if (nrow(y_matches) > .report_n) {
-        cli::cli_text("{.emph ... and {nrow(y_matches) - .report_n} more}")
+        cli_text("{.emph ... and {nrow(y_matches) - .report_n} more}")
       }
     }
 
     # Report problematic y row
     if (length(y_row) > 0 && !is.na(y_row)) {
-      cli::cli_h1("Problematic row from y")
-      cli::cli_alert_warning(
+      cli_h1("Problematic row from y")
+      cli_alert_warning(
         "Row {.val {y_row}} of {.var y} matches multiple rows in {.var x}"
       )
-      print(y[y_row, join_keys, drop = FALSE])
+      cli_inform(paste(format(y[y_row, join_keys, drop = FALSE]), collapse = "\n"))
 
       # Find all x rows matching this y row
       y_key_vals <- y[y_row, join_keys, drop = FALSE]
       x_matches <- semi_join(x, y_key_vals, by = join_keys)
-      cli::cli_alert_info(
+      cli_alert_info(
         "Found {.val {nrow(x_matches)}} matching rows in {.var x}:"
       )
-      print(head(x_matches[, join_keys, drop = FALSE], .report_n))
+      cli_inform(paste(format(head(x_matches[, join_keys, drop = FALSE], .report_n)), collapse = "\n"))
       if (nrow(x_matches) > .report_n) {
-        cli::cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
+        cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
       }
     }
 
     # Summary of key duplicates
-    cli::cli_h1("Key duplication summary")
+    cli_h1("Key duplication summary")
 
     x_key_counts <- x |>
       count(across(all_of(join_keys)), name = "n") |>
@@ -113,10 +113,10 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       filter(n > 1) |>
       nrow()
 
-    cli::cli_alert_info(
+    cli_alert_info(
       "Duplicate key combinations in {.var x}: {.val {x_key_counts}}"
     )
-    cli::cli_alert_info(
+    cli_alert_info(
       "Duplicate key combinations in {.var y}: {.val {y_key_counts}}"
     )
 
@@ -151,7 +151,6 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
 #'
 #' @importFrom dplyr left_join select distinct filter mutate
 #' @importFrom stringr str_replace str_to_upper
-#' @import eDataDRF
 #'
 #' @export
 join_all_literature_modules <- function(
@@ -390,6 +389,7 @@ clean_joined_columns <- function(data, columns_to_drop = character()) {
 #' @return Invisible NULL (called for side effect of writing file)
 #'
 #' @importFrom arrow write_parquet
+#' @importFrom cli cli_inform
 #'
 #' @export
 save_literature_parquet <- function(
@@ -408,7 +408,7 @@ save_literature_parquet <- function(
   # Write parquet file
   write_parquet(data, full_path)
 
-  message(sprintf("Literature data saved to: %s", full_path))
+  cli_inform("Literature data saved to: {.path {full_path}}")
 
   invisible(NULL)
 }

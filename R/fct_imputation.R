@@ -32,6 +32,7 @@
 #' )
 #' impute_below_limits(df, "measured", "lod", "loq")
 #'
+#' @importFrom dplyr case_when
 #' @export
 impute_below_limits <- function(
   data,
@@ -46,7 +47,7 @@ impute_below_limits <- function(
   data[[paste0(loq_col, "_IMPUTED")]] <- impute_fn(data[[loq_col]])
 
   # Prioritize: measured > LOD imputed > LOQ imputed > NA
-  data[[output_col]] <- dplyr::case_when(
+  data[[output_col]] <- case_when(
     !is.na(data[[measured_col]]) ~ data[[measured_col]],
     !is.na(data[[paste0(lod_col, "_IMPUTED")]]) ~ data[[paste0(
       lod_col,

@@ -20,6 +20,7 @@
 #' @return Filtered data frame containing only rows matching the specified
 #'   compartment and subcompartment criteria
 #'
+#' @importFrom dplyr filter
 #' @export
 vm_filter_compartments <- function(
   data,
@@ -57,6 +58,7 @@ vm_filter_compartments <- function(
 #' @return Filtered data frame containing only point sites that are not in the
 #'   exclusion list
 #'
+#' @importFrom dplyr filter
 #' @export
 vm_filter_sites <- function(data, exclude_sites = character()) {
   data |>
@@ -79,6 +81,7 @@ vm_filter_sites <- function(data, exclude_sites = character()) {
 #' @return Filtered data frame containing only rows with SAMPLING_DATE between
 #'   date_start and date_end (inclusive)
 #'
+#' @importFrom dplyr filter
 #' @export
 vm_filter_dates <- function(data, date_start, date_end) {
   if (is.character(date_start)) {
@@ -120,6 +123,9 @@ vm_filter_dates <- function(data, date_start, date_end) {
 #' @details Prints messages showing number of conflicts resolved and flagged.
 #'   Issues a warning if any conflicts remain unresolved.
 #'
+#' @importFrom dplyr mutate case_when filter tally
+#' @importFrom glue glue
+#' @importFrom cli cli_warn
 #' @export
 resolve_compartment_conflicts <- function(df) {
   df <- df |>
@@ -228,9 +234,7 @@ resolve_compartment_conflicts <- function(df) {
   ))
 
   if (n_unresolved + n_unresolved_sub > 0) {
-    warning(
-      "Some (sub)compartments still aren't resolved and have been flagged for removal."
-    )
+    cli_warn("Some (sub)compartments still aren't resolved and have been flagged for removal.")
   }
 
   df
@@ -261,6 +265,9 @@ resolve_compartment_conflicts <- function(df) {
 #' @details Prints messages showing number of conflicts resolved and unresolved.
 #'   Issues a warning if any main feature conflicts remain unresolved.
 #'
+#' @importFrom dplyr mutate case_when filter tally
+#' @importFrom glue glue
+#' @importFrom cli cli_warn
 #' @export
 resolve_geographic_conflicts <- function(df) {
   df <- df |>
@@ -346,7 +353,7 @@ resolve_geographic_conflicts <- function(df) {
   ))
 
   if (n_unresolved + n_unresolved_sub > 0) {
-    warning("Some geographic features still aren't resolved.")
+    cli_warn("Some geographic features still aren't resolved.")
   }
 
   df
@@ -375,6 +382,7 @@ resolve_geographic_conflicts <- function(df) {
 #' @details Sites are only split when they have >1 distinct geographic feature
 #'   combination. Suffixes are zero-padded to 2 digits.
 #'
+#' @importFrom dplyr group_by mutate n_distinct if_else case_when ungroup
 #' @export
 vm_split_sites <- function(
   vm_compartment_geo_conflicts_resolved_removed
@@ -428,6 +436,8 @@ vm_split_sites <- function(
 #' - Compartments are abbreviated to 12 characters (alphanumeric only)
 #' - Subsample values are truncated to 20 characters
 #'
+#' @importFrom stringr str_trunc
+#' @importFrom glue glue
 #' @keywords internal
 generate_sample_id_with_components <- function(
   site_code,
@@ -450,7 +460,7 @@ generate_sample_id_with_components <- function(
 
   # vectorised replicate
   # Subsamples will generally be text, so let's abbreviate them a bit
-  subsample_suffix <- stringr::str_trunc(subsample, 20, "right", ellipsis = "")
+  subsample_suffix <- str_trunc(subsample, 20, "right", ellipsis = "")
   paste0(base_id, "-R-", subsample_suffix)
 }
 
@@ -480,18 +490,18 @@ generate_sample_id_with_components <- function(
 #' # Returns: c("", "< LOQ", "< LOD")
 #' }
 #'
+#' @importFrom dplyr case_match
+#' @importFrom glue glue
+#' @importFrom cli cli_abort
 #' @export
 vm_convert_operator <- function(col) {
   # Check for unexpected operators before conversion
   unexpected <- col[!col %in% c("=", "<", "ND", NA)]
 
   if (length(unexpected) > 0) {
-    stop(glue(
-      "Unexpected operator(s) found in Vannmiljø data: ",
-      "{paste(unique(unexpected), collapse = ', ')}. ",
-      "Expected operators are: '=', '<', 'ND'. ",
-      "Please investigate why '>' or other operators are present."
-    ))
+    cli_abort(
+      "Unexpected operator(s) found in Vannmilj\u00f8 data: {paste(unique(unexpected), collapse = ', ')}. Expected operators are: '=', '<', 'ND'. Please investigate why '>' or other operators are present."
+    )
   }
 
   case_match(
@@ -531,6 +541,9 @@ vm_convert_operator <- function(col) {
 #' # Returns: c("µg/L", "mg/kg (dry)", "mg/kg (wet)")
 #' }
 #'
+#' @importFrom dplyr case_match
+#' @importFrom glue glue
+#' @importFrom cli cli_abort
 #' @export
 vm_convert_unit <- function(col) {
   # Get unique units for checking
@@ -539,12 +552,9 @@ vm_convert_unit <- function(col) {
   unknown_units <- setdiff(unique_units, known_units)
 
   if (length(unknown_units) > 0) {
-    stop(glue(
-      "Unknown unit(s) found in Vannmiljø data: ",
-      "{paste(unknown_units, collapse = ', ')}. ",
-      "Known units are: {paste(known_units, collapse = ', ')}. ",
-      "Please add conversion rule to vm_convert_unit() function."
-    ))
+    cli_abort(
+      "Unknown unit(s) found in Vannmilj\u00f8 data: {paste(unknown_units, collapse = ', ')}. Known units are: {paste(known_units, collapse = ', ')}. Please add conversion rule to vm_convert_unit() function."
+    )
   }
 
   case_match(
@@ -554,53 +564,6 @@ vm_convert_unit <- function(col) {
     "mg/kg v.v." ~ "mg/kg (wet)",
     .default = NA_character_
   )
-}
-
-
-#' Generate sample ID with components
-#'
-#' Creates unique sample identifiers by concatenating site code, parameter,
-#' copied from STOPeData::mod_samples_fct.R.
-#'
-#' @param site_code Site code (vectorised)
-#' @param parameter_name Parameter name (vectorised)
-#' @param environ_compartment Environmental compartment (vectorised)
-#' @param environ_compartment_sub Environmental sub-compartment (vectorised)
-#' @param date Sampling date (vectorised)
-#' @param subsample Subsample identifier (vectorised)
-#'
-#' @return Character vector of sample IDs in format:
-#'   {site_code}-{param_abbrev}-{comp_abbrev}-{date}-R-{subsample}
-#'
-#' @details
-#' - Parameter names are abbreviated to 8 characters (alphanumeric only)
-#' - Compartments are abbreviated to 12 characters (alphanumeric only)
-#' - Subsample values are truncated to 20 characters
-#'
-#' @keywords internal
-generate_sample_id_with_components <- function(
-  site_code,
-  parameter_name,
-  environ_compartment,
-  environ_compartment_sub,
-  date,
-  subsample = 1
-) {
-  # Create abbreviated versions for ID (vectorised)
-  param_abbrev <- substr(gsub("[^A-Za-z0-9]", "", parameter_name), 1, 8)
-  comp_abbrev <- substr(
-    gsub("[^A-Za-z0-9]", "", environ_compartment_sub),
-    1,
-    12
-  )
-  date_abbrev <- gsub("-", "-", date)
-
-  base_id <- glue("{site_code}-{param_abbrev}-{comp_abbrev}-{date_abbrev}")
-
-  # vectorised replicate
-  # Subsamples will generally be text, so let's abbreviate them a bit
-  subsample_suffix <- stringr::str_trunc(subsample, 20, "right", ellipsis = "")
-  paste0(base_id, "-R-", subsample_suffix)
 }
 
 
@@ -627,6 +590,7 @@ generate_sample_id_with_components <- function(
 #' - Biota galle → Bile
 #' - Unknown values → "Unknown Tissue"
 #'
+#' @importFrom dplyr case_match
 #' @keywords internal
 map_tissue_type <- function(medium_id_name) {
   case_match(

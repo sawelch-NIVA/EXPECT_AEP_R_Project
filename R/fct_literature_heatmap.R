@@ -20,6 +20,10 @@
 #'
 #' @return A ggplot2 object
 #'
+#' @importFrom dplyr group_by across all_of distinct reframe mutate left_join if_else
+#' @importFrom forcats fct_reorder
+#' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_color_identity theme element_text element_blank labs
+#' @importFrom viridis scale_fill_viridis
 #' @export
 #'
 #' @examples
@@ -100,6 +104,10 @@ plot_reference_compartment_heatmap <- function(
 }
 
 
+#' @importFrom dplyr group_by across all_of distinct reframe mutate left_join filter if_else
+#' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_color_identity theme element_text element_blank labs facet_wrap vars
+#' @importFrom viridis scale_fill_viridis
+#' @keywords internal
 plot_reference_species_heatmap <- function(
   data,
   x_var = "SAMPLE_SPECIES",

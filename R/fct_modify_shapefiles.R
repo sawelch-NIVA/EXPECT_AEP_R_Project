@@ -2,7 +2,7 @@
 
 #' Annotate ocean polygons for mapping
 #'
-#' Adds display names, visibility flags, and color mappings to ocean polygons
+#' Adds display names, visibility flags, and color mappings to ocean sf file
 #'
 #' @param ocean_sf An sf object with ocean polygons (must have NAME column)
 #' @param named_oceans Character vector, names of oceans to highlight
@@ -54,7 +54,7 @@ annotate_oceans_for_display <- function(
 #'
 #' @return An sf object with processed marine geography polygons in WGS84
 #'
-#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n
+#' @importFrom dplyr select rename group_by reframe filter mutate bind_rows case_when n row_number
 #' @importFrom sf st_as_sf
 #' @importFrom stringr str_replace_all
 #'
@@ -92,8 +92,8 @@ process_marine_geography_wgs84 <- function(
     category = "physical",
     destdir = destdir
   ) |>
-    select(name_en, geometry) |>
-    rename(name = name_en)
+    select(name_en, geom) |>
+    rename(name = name_en, geometry = geom)
 
   # Split Atlantic Ocean into North and South
   atlantic <- marine_polys |>
@@ -149,7 +149,6 @@ process_marine_geography_wgs84 <- function(
 #' @importFrom sf st_transform st_convex_hull
 #' @importFrom dplyr filter mutate bind_rows
 #' @importFrom stringr str_replace_all
-
 #'
 #' @export
 transform_marine_to_polar <- function(
@@ -196,8 +195,7 @@ transform_marine_to_polar <- function(
 #'
 #' @importFrom rnaturalearth ne_countries ne_states
 #' @importFrom dplyr mutate select filter bind_rows case_match reframe row_number
-#' @importFrom sf st_as_sf st_crop st_union
-
+#' @importFrom sf st_as_sf st_crop st_union st_geometry
 #'
 #' @export
 process_countries_wgs84 <- function(
@@ -206,7 +204,7 @@ process_countries_wgs84 <- function(
   exclude_countries = c("Norway", "Antarctica")
 ) {
   # Get general country polygons (excluding special cases)
-  countries_general <- rnaturalearth::ne_countries(scale = scale) |>
+  countries_general <- ne_countries(scale = scale) |>
     mutate(
       highlight_name = case_match(
         name,
@@ -266,7 +264,6 @@ process_countries_wgs84 <- function(
 #' @return An sf object with country polygons in polar projection
 #'
 #' @importFrom sf st_transform
-
 #'
 #' @export
 transform_countries_to_polar <- function(

@@ -5,8 +5,6 @@
 \title{Standardise a date column to IDate format}
 \usage{
 standardise_IDate(column, verbose = FALSE, char_format = "dmy")
-
-standardise_IDate(column, verbose = FALSE, char_format = "dmy")
 }
 \arguments{
 \item{column}{A vector to be converted to IDate. Can be IDate, Date,
@@ -20,21 +18,12 @@ One of "dmy" (default) or "ymd". Only used when column is character.}
 }
 \value{
 An IDate vector
-
-An IDate vector
 }
 \description{
 Converts Date, character, or POSIXct columns to data.table's IDate format.
 Handles character dates in both dmy and ymd formats.
-
-Converts Date, character, or POSIXct columns to data.table's IDate format.
-Handles character dates in both dmy and ymd formats.
 }
 \examples{
-standardise_IDate(as.Date("2024-01-15"))
-standardise_IDate("15/01/2024", verbose = TRUE)
-standardise_IDate("2024-01-15", verbose = TRUE)
-
 standardise_IDate(as.Date("2024-01-15"))
 standardise_IDate("15/01/2024", verbose = TRUE)
 standardise_IDate("2024-01-15", char_format = "ymd", verbose = TRUE)

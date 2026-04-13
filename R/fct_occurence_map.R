@@ -1,4 +1,6 @@
 # merge geographic columns
+#' @importFrom dplyr case_when
+#' @keywords internal
 merge_country_ocean <- function(country, ocean) {
   merged <- case_when(
     has_data_issue(country) ~ ocean,
@@ -27,6 +29,9 @@ merge_country_ocean <- function(country, ocean) {
 #' )
 #' }
 #'
+#' @importFrom dplyr filter
+#' @importFrom sf st_as_sf st_crs
+#' @importFrom ggplot2 geom_sf coord_sf aes
 #' @export
 map_literature_data_wgs84 <- function(
   wgs84_map,
@@ -36,9 +41,9 @@ map_literature_data_wgs84 <- function(
   # Convert to sf object, removing records with missing coordinates
   # TODO: Obviously this is arse and needs to be better
   data_sf <- literature_data |>
-    dplyr::filter(!is.na(LATITUDE)) |>
-    dplyr::filter(!is.na(LONGITUDE)) |>
-    sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("WGS84"))
+    filter(!is.na(LATITUDE)) |>
+    filter(!is.na(LONGITUDE)) |>
+    st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = st_crs("WGS84"))
 
   # Add points to map with study area bbox constraints
   wgs84_map +

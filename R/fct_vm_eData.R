@@ -19,6 +19,11 @@
 #' @return A tibble conforming to eData campaign schema with one row containing
 #'   campaign metadata
 #'
+#' @importFrom eDataDRF initialise_campaign_tibble
+#' @importFrom dplyr mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_campaign_table <- function(
   vm_data,
@@ -36,9 +41,6 @@ vm_create_edata_campaign_table <- function(
       CAMPAIGN_NAME = campaign_name,
       CAMPAIGN_START_DATE = as.IDate(date_start),
       CAMPAIGN_END_DATE = as.IDate(date_end),
-      RELIABILITY_SCORE = NA_character_,
-      RELIABILITY_EVAL_SYS = NA_character_,
-      CONFIDENTIALITY_EXPIRY_DATE = as.IDate(NA),
       ORGANISATION = organisation,
       ENTERED_BY = entered_by,
       ENTERED_DATE = as.IDate(Sys.Date()),
@@ -49,7 +51,7 @@ vm_create_edata_campaign_table <- function(
       )
     )
 
-  message(glue("Created campaign table with {nrow(edata_campaign)} row"))
+  message(glue("Created campaign table with {nrow(edata_campaign)} row\n"))
   edata_campaign
 }
 
@@ -70,6 +72,12 @@ vm_create_edata_campaign_table <- function(
 #' @return A tibble conforming to eData reference schema with one row containing
 #'   bibliographic information for the Vannmiljø database
 #'
+#' @importFrom eDataDRF initialise_references_tibble
+#' @importFrom dplyr mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom lubridate year
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_reference_table <- function(
   vm_data,
@@ -137,6 +145,14 @@ vm_create_edata_reference_table <- function(
 #'
 #'   Validates against duplicate SITE_CODEs and checks coordinate reprojection.
 #'
+#' @importFrom eDataDRF initialise_sites_tibble
+#' @importFrom dplyr select distinct mutate case_when group_by filter n arrange left_join bind_cols row_number
+#' @importFrom tibble add_row
+#' @importFrom lubridate today
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
+#' @importFrom sf st_as_sf st_transform st_coordinates st_drop_geometry
+#' @importFrom cli cli_inform cli_warn cli_abort
 #' @export
 vm_create_edata_sites_table <- function(vm_data, entered_by) {
   # Extract unique sites with relevant metadata
@@ -162,7 +178,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
       )
     )
 
-  message(glue("Extracted {nrow(vm_sites_unique)} unique sites"))
+  cli_inform("Extracted {nrow(vm_sites_unique)} unique sites")
 
   # Format to eData structure
   edata_sites_temp <- vm_sites_unique |>
@@ -214,14 +230,10 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         as.data.frame() |>
         bind_cols(st_drop_geometry(sites_sf))
 
-      message(glue(
-        "Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84"
-      ))
+      cli_inform("Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84")
     },
     error = function(e) {
-      stop(glue(
-        "Failed to reproject coordinates from UTM33 to WGS84: {e$message}"
-      ))
+      cli_abort("Failed to reproject coordinates from UTM33 to WGS84: {e$message}")
     }
   )
 
@@ -240,11 +252,10 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         arrange(SITE_CODE)
 
       if (nrow(duplicate_sites) > 0) {
-        warning(glue(
-          "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. ",
-          "Displaying first 10 conflicts:"
-        ))
-        print(head(duplicate_sites, 10))
+        cli_warn(
+          "Found {nrow(duplicate_sites)} duplicate SITE_CODE entries in sites_sf. Displaying first 10 conflicts:"
+        )
+        cli_inform(paste(format(head(duplicate_sites, 10)), collapse = "\n"))
       }
 
       edata_sites <- edata_sites_temp |>
@@ -277,16 +288,13 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         filter(n() > 1)
 
       if (nrow(result_duplicates) > 0) {
-        stop(glue(
-          "Many-to-many join created {nrow(result_duplicates)} duplicate rows. ",
-          "Check vm_sites_unique for duplicate coordinates per site."
-        ))
+        cli_abort(
+          "Many-to-many join created {nrow(result_duplicates)} duplicate rows. Check vm_sites_unique for duplicate coordinates per site."
+        )
       }
     },
     warning = function(w) {
-      stop(glue(
-        "Unexpected many-to-many relationship when joining sites table:\n{w}"
-      ))
+      cli_abort("Unexpected many-to-many relationship when joining sites table:\n{w}")
     }
   )
 
@@ -295,7 +303,7 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
     mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
     add_row(edata_sites)
 
-  message(glue("Created sites table: {nrow(edata_sites)} sites"))
+  cli_inform("Created sites table: {nrow(edata_sites)} sites")
 
   edata_sites
 }
@@ -316,6 +324,10 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
 #'   set to NA and should be filled in separately if needed. Extracts unique
 #'   values from the Parameter column in vm_data.
 #'
+#' @importFrom eDataDRF initialise_parameters_tibble
+#' @importFrom dplyr distinct pull
+#' @importFrom tibble add_row
+#' @importFrom glue glue
 #' @export
 vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   # Extract unique parameters from the data
@@ -335,8 +347,8 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
   for (param in unique_params) {
     edata_parameters <- edata_parameters |>
       add_row(
-        PARAMETER_TYPE = "Homogeneous metal compounds",
-        PARAMETER_TYPE_SUB = NA_character_,
+        PARAMETER_TYPE = "Stressor",
+        PARAMETER_TYPE_SUB = "Homogeneous metal compounds",
         MEASURED_TYPE = "Concentration",
         PARAMETER_NAME = "Copper",
         PARAMETER_NAME_SUB = NA_character_,
@@ -366,6 +378,11 @@ vm_create_edata_parameters_table <- function(vm_data, entered_by) {
 #'
 #' @return A tibble conforming to eData samples schema
 #'
+#' @importFrom eDataDRF initialise_samples_tibble
+#' @importFrom dplyr mutate across contains select any_of
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_samples_table <- function(vm_intermediate) {
   edata_samples <- initialise_samples_tibble() |>
@@ -394,6 +411,11 @@ vm_create_edata_samples_table <- function(vm_intermediate) {
 #'
 #' @return A tibble conforming to eData biota schema
 #'
+#' @importFrom eDataDRF initialise_biota_tibble
+#' @importFrom dplyr mutate across contains filter select any_of
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_biota_table <- function(vm_intermediate) {
   edata_biota <- initialise_biota_tibble() |>
@@ -444,6 +466,9 @@ vm_create_edata_biota_table <- function(vm_intermediate) {
 #' - Reports number of samples with missing subcompartments
 #' - Reports number of samples with unknown tissue types
 #'
+#' @importFrom dplyr filter mutate group_by row_number count arrange desc pull bind_rows ungroup case_when
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_intermediate_samples_biota_table <- function(vm_data) {
   # Create base samples table (all samples, non-biota structure)
@@ -647,7 +672,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
     message("No biota samples found in dataset")
   }
 
-  biota_samples_merged
+  biota_samples_merged |> ungroup()
 }
 
 
@@ -682,6 +707,11 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 #' - Currently uses placeholder IDs ("1", "2", "3", "4")
 #' - TODO: Implement proper protocol ID mapping
 #'
+#' @importFrom eDataDRF initialise_measurements_tibble
+#' @importFrom dplyr left_join select rename mutate across contains
+#' @importFrom tibble add_row
+#' @importFrom data.table as.IDate
+#' @importFrom glue glue
 #' @export
 vm_create_edata_measurements_table <- function(
   vm_edata_intermediate,

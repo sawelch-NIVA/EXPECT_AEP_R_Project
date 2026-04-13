@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(EXPECT_AEP_R_Project)
+library(AEP)
 
 test_check("EXPECT_AEP_R_Project")

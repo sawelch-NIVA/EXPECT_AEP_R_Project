@@ -18,5 +18,5 @@ annotate_oceans_for_display(
 An sf object with annotation columns added
 }
 \description{
-Adds display names, visibility flags, and color mappings to ocean polygons
+Adds display names, visibility flags, and color mappings to ocean sf file
 }

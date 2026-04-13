@@ -31,8 +31,9 @@ has_data_issue <- function(x) {
 #' Classify the type of data issue for a value
 #' @param x Vector to check
 #' @return Character vector with "Missing", "Not reported", "Not relevant", or NA (for valid data)
+#' @importFrom dplyr case_when
 classify_data_issue <- function(x) {
-  dplyr::case_when(
+  case_when(
     is_missing(x) ~ "Missing (NA, blank string, null)",
     is_not_reported(x) ~ "Not reported",
     is_not_relevant(x) ~ "Not relevant",
