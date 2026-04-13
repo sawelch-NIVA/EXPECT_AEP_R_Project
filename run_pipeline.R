@@ -98,7 +98,7 @@ run_pipeline <- function(
 #  preferred
 run_pipeline(
   destroy_all = FALSE, # start from scratch?
-  render_quarto = FALSE, # render documents?
+  render_quarto = TRUE, # render documents?
   deploy = FALSE, # update website?
   names = NULL, # run specific parts of pipeline?
   reporter = "balanced", # reasonable amount of metadata
