@@ -1112,6 +1112,19 @@ list(
     quiet = FALSE
   ),
 
+  #### Background Documents
+  tar_quarto(
+    name = render_journal_notes,
+    path = "docs/_journals.qmd",
+    quiet = FALSE
+  ),
+
+  tar_quarto(
+    name = render_planning_notes,
+    path = "docs/_planning.qmd",
+    quiet = FALSE
+  ),
+
   ## # Deployment ----
 
   ### # Publish to Posit Connect Cloud ----

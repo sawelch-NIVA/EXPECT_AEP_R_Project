@@ -1,6 +1,6 @@
 project:
   type: website
-  output-dir: docs
+  output-dir: _site
   
 website:
   title: "EXPECT Copper AEP"
@@ -8,6 +8,12 @@ website:
     style: "docked"
     search: true
     contents:
+      - section: "Planning & Admin"
+        contents:
+          - href: docs/_planning.qmd
+            text: "Planning and Todo"
+          - href: docs/_journals.qmd
+            text: "Target Journal"
       - section: "Article"
         contents:
           - href: index.qmd

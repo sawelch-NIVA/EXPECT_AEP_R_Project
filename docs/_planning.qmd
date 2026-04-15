@@ -1,0 +1,48 @@
+---
+title: "Planning and Comments"
+date: last-modified
+---
+
+# Timings
+
+- My contract ends August 31st. Practically speaking I want to get the MS submitted by the start of August, to give some allowance for complications. 
+- It's currently mid-April. That gives 3.5 months to get it ready for submission, but...
+    - May has SETAC and multiple holidays
+    - June has Dublin and home office
+    - July has general holidays and my mum's 70th birthday party (not in work calendar yet)
+
+Concurrently, we can also expect:
+- Revisions to the eData paper
+- Busyness/uncertainty over contract extensions
+(Although none of these are too disruptive.)
+
+This gives us about ~60 working days to get the paper ready. Which sounds like a lot!
+
+# What we're missing
+
+From my POV the most important things the paper is currently lacking are:
+
+## Materials/Methods
+
+1. Small, linear AEPs, in the style of @pengAggregateExposurePathways2022 (based on case study areas: Repparfjorden + 1)
+2. A big, "hollistic" AEP, with less detail but all the putative/plausible nodes and links
+3. Suitable thresholds for compartment pollution magnitude, and a metric of uncertainty (likewise for flows?)
+4. A systematic format for flows so they can be analysed/integrated en masse and not piecemeal (similar but not identical to eData)
+5. Lab/non-geographic studies for internal exposure - the last leg to the TSE
+6. Consideration of essentiality, plausibility, and quant. understanding of KES/KTRs?
+7. A pragmatic decision on how to handle ecological/food chain copper flows (almost certainly simplify down to ecotox-relevant trophic levels)
+8. Better ways of handling the massive amount of VM data than we currently have
+
+## Discussion/Conclusion
+
+1. This can be written once we have results to discuss. 
+2. Based on experience with the eData paper, I imagine a lot of what's currently in the introduction can be moved to discussion
+
+Some of these are obviously dependent on others.
+
+## Nice to Have
+This is stuff that probably shouldn't be prioritised right now, but _could_ be worth doing for reuse's sake. But best to wait until we have a contract extension.
+
+- Proper documentation for functions
+- Better documentation for emissions data format
+- Split reusable functions out into own 
