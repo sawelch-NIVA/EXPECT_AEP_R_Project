@@ -263,7 +263,7 @@ literature_merged_data |>
 ```{r}
 #| label: pointblank-campaign
 #| echo: true
-data_validation$campaign
+data_validation$campaign |> eDataDRF::pb_validate_campaign() |> interrogate()
 
 ```
 
@@ -273,7 +273,7 @@ data_validation$campaign
 ```{r}
 #| label: pointblank-references
 #| echo: true
-data_validation$reference
+data_validation$reference |> eDataDRF::pb_validate_reference() |> interrogate()
 
 ```
 
@@ -282,7 +282,7 @@ data_validation$reference
 ```{r}
 #| label: pointblank-sites
 #| echo: true
-data_validation$sites
+data_validation$sites |> eDataDRF::pb_validate_sites() |> interrogate()
 ```
 
 ## Parameters
