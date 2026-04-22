@@ -214,7 +214,7 @@ copper_emissions_by_source_summarised <- copper_emissions_aggregated |>
     mean_sum_emissions_kg = mean(sum_emissions_kg),
     sd_sum_emissions_kg = sd(sum_emissions_kg),
     n_years_reported = n(),
-    .by = "source_category"
+    .by = c("source_category", "medium")
   ) |>
   distinct() |>
   arrange(desc(mean_sum_emissions_kg))
