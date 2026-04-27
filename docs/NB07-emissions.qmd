@@ -9,7 +9,6 @@ bibliography: "../references.bib"
 
 ```{r}
 #| label: setup
-
 suppressMessages(
   {
     library(tibble)
@@ -27,7 +26,6 @@ suppressMessages(
     load_all(quiet = TRUE)
   }
 )
-
 ```
 
 # Copper Emissions & Source Data
@@ -42,9 +40,7 @@ Note: STD locations (named) extracted from Kvassnes & Iversen 2013. Coordinates 
 
 ```{r}
 #| label: tbl-std-data
-
 mine_tailings_coords() |> DT::datatable()
-
 ```
 
 ## Apple Production Areas in Norway
@@ -99,7 +95,6 @@ We assume:
 ```{r}
 #| label: fig-industrial-emissions
 #| fig-width: 16
-
 # library(readxl)
 # library(dplyr)
 # library(esquisse)
@@ -249,7 +244,6 @@ This data's a mess but we'll treat it as a starting point. We can do a simple ma
 #| label: fig-sites-hex-map
 #| fig-cap: All Fiskerdirektoriet licensed sites. Doesn't include number of animals per site, because they're reported in lots of different units and I haven't worked out how to convert them yet.
 #| fig-width: 12
-
 # Plot
 norway_map <- map_data("world", region = "Norway(?!:Svalbard)")
 ggplot() +
@@ -276,7 +270,6 @@ And an accompanying table, although here we aggregate by kommune, rather than bi
 
 ```{r}
 #| label: tbl-most-aquaculture
-
 aquaculture |>
   group_by(kommune, fylke) |>
   reframe(n = n()) |>
@@ -426,6 +419,5 @@ ggplot(
 ) +
   geom_col(position = "stack") +
   theme(axis.text.x = element_text(angle = 90))
-
 ```
 
