@@ -176,17 +176,31 @@ copper_emissions <- bind_rows(
     medium,
     emission_kg
   ) |>
-  arrange(source_category, year)
+  arrange(source_category, year) |>
+  mutate(
+    medium = recode_values(
+      medium,
+      "vann" ~ "Aquatic",
+      "jord" ~ "Terrestrial",
+      "luft" ~ "Atmospherice"
+    )
+  )
 
 copper_emissions_aggregated <- copper_emissions |>
   # aggregate to national level
   reframe(
     .by = c("year", "source_category", "medium"),
     sum_emissions_kg = sum(emission_kg)
-  )
+  ) |>
+  mutate(
+    z_score = scale(sum_emissions_kg)[, 1],
+    .by = c("source_category", "medium")
+  ) |>
+  ungroup() |>
+  # TODO: This doesn't catch the unlikely changes in products or land_industry
+  mutate(outlier = (z_score > 2)) # use z = 2 as a cutoff
 
-
-copper_emissions_aggregated |>
+copper_emissions_plot <- copper_emissions_aggregated |>
   ggplot(
     mapping = aes(
       x = year,
@@ -194,10 +208,19 @@ copper_emissions_aggregated |>
       colour = source_category
     )
   ) +
-  geom_point() +
+  geom_point(mapping = aes(alpha = !outlier)) +
   geom_line() +
   facet_grid(rows = vars(medium)) +
-  scale_y_log10()
+  scale_y_log10() +
+  scale_colour_brewer(palette = "Set1", name = "Source Category") +
+  theme_minimal() +
+  labs(
+    title = "Emissions of Copper Reported Under REACH By Year and Recieving Compartment",
+    subtitle = "1985 - 2024, via norskeutslipp.no. Outliers shown without points",
+    x = "Year",
+    y = "Reported Emissions (kg)"
+  ) +
+  theme(strip.placement = "top")
 
 
 # Aside from some highly suspicious outliers it looks like reported copper emissions to various compartments have more

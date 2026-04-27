@@ -1,0 +1,153 @@
+---
+title: "Copper REACH Data for Norway"
+format: html
+---
+
+```{r}
+suppressMessages(
+  {
+    library(tibble)
+    library(dplyr)
+    library(ggplot2)
+    library(here)
+    library(devtools)
+    library(sf)
+    library(summarytools)
+    library(DT)
+    library(readxl)
+    library(visNetwork)
+    i_am("README.md")
+
+    # load_all(quiet = TRUE)
+  }
+)
+```
+
+REACH PRTD data for copper was obtained by contacting Miljødirektoratet (personal communications, 2nd May 2025).
+
+> Hei
+Din henvendelse REQ0014380 - Copper Pollution/Use Statistics er oppdatert med følgende:
+Beklager sent svar. Legger ved tall for utvalgte kobberstoffer i produktregisteret. Stoffene er fra liste som vi har brukt i forbindelse med statistikken for kobber i notimpregnering i akvakultur. Du kjenner kanskje tallene fra HI rapporter etc. Det er godt mulig det er flere kobberstoffer i registeret. Har du forslag til stoffer vi kunne sjekke, eller bare søke kjapt å se om det er noe? (altså andre enn de i listen)
+Det er også mulig å dele opp bransjer og typer mye mer. Du kan se mer om produkttypene våre og bransjekodene våre på hjemmesidene. Jeg brukte nå en hovedgruppering for at du kunne få en bilde av hva vi har av disse kobberstoffene.
+Mer spesifikt for typer og bransjer kan du spørre om. Det er da også mulig at det blir uoff tall særlig om du også spesifiserer spørsmål om stoffene.
+Lagde også en med mengder per stoff.
+Tallene per stoff kan være at noen er unntatt offentlighet.
+Vil du se fordelingen per stoff så kan jeg sende deg en kryptert fil.
+Da trenger jeg telefonnummeret så jeg kan sende deg passord.(så sender jeg en mail med en separat fil)
+ 
+Hvis du svarer på denne e-posten, blir svaret automatisk lagt til i saken. 
+Hilsen Miljødirektoratet
+
+
+Attached was a spreadsheet consisting of five sheets:
+
+- Forklaring (Explanation)
+- Figurer (Figures)
+- Sum HovedgruppeAndvendelse (Sum Main Group... something)
+- kobber sum på produkttype (Copper sum of product type)
+- Ark4 (an empty sheet)
+
+The most salient details:
+
+- The search was run on copper and copper-containing substances (see table below)
+- Net quantities are calculated from the weight % of chemicals
+- The net quantity is the imported quantity, plus produced quantity, minus exported quantity for each declaration 
+
+Although REACH declarations are mandatory, it has to be assumed that the level of detail and quality is, overall, low. Nevertheless, this information can give us a rough idea of the relative importance of uses of copper in Norway.
+
+```{r}
+#| label: tbl-copper-cas
+reach_cas <- tribble(
+  ~cas_nr      , ~kjemisk_navn             ,
+  "1111-67-7"  , "kobberthiocyanat"        ,
+  "1317-38-0"  , "Kobber(II)oksid"         ,
+  "1317-39-1"  , "Kobber(I)oksid"          ,
+  "1338-02-9"  , "Kobbernaftenat"          ,
+  "7440-50-8"  , "kobber pulver"           ,
+  "7447-39-4"  , "Kobberklorid"            ,
+  "7758-89-6"  , "Kobber(I)klorid"         ,
+  "7758-98-7"  , "Kobber(II)sulfat"        ,
+  "12069-69-1" , "Kobberhydroksidkarbonat" ,
+  "14915-37-8" , "kobberpyrition"          ,
+  "54253-62-2" , "Kobber(II)metansulfonat"
+)
+
+reach_cas
+# TODO: Neaten and translate
+```
+
+
+```{r}
+# most logic is currently still in a bare R file
+# TODO: Move
+source("R/fct_read_reach.R")
+```
+
+# By Sector
+
+Looking at sales by sector is an obvious place to start. Product details are more complicated (but potentially asl more useful).
+
+Sectors are based on NACE codes. We translate names to English based on the NACE standard, and put categories into supercategories (primary, secondary, tertiary/service) for easier plotting.
+
+```{r}
+reach_by_sector_en <- reach_by_sector |>
+  left_join(nace_sectors, by = join_by("sector" == "sector_no")) |>
+  mutate(
+    net_kg = netto_tonn * 1000,
+    NACE_supercategory = recode_values(
+      isic_nace_section,
+      c("A", "B") ~ "Primary",
+      c("C", "F", "L") ~ "Secondary",
+      c("E", "H", "L", "S") ~ "Tertiary",
+      default = "Unclassified"
+    )
+  )
+
+ggplot(
+  data = reach_by_sector_en,
+  mapping = aes(
+    x = year,
+    y = net_kg,
+    group = sector_en,
+    colour = NACE_supercategory
+  )
+) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(vars(sector_en), scales = "free_y") +
+  # not enough colours here...
+  # scale_colour_brewer(palette = "Set1", name = "Sector") +
+  theme_minimal() +
+  labs(
+    title = "Net Copper Reported by Industry",
+    subtitle = "???",
+    x = "Year",
+    y = "Net Copper (kg)"
+  )
+```
+
+This data is not particularly trustworthy. Spikes in net quantity may represent improper data entry or simply normal year-on-year staggered purchasing behaviour. 
+Lacking the ability to follow up on it to a satisfactory level of detail, it seems the safest option is to:
+
+a) take the mean value over the period
+a) assign it the lowest level of quality
+
+This leaves us with the following dataset (@tbl-reach-by-sector):
+
+```{r}
+#| label: tbl-reach-by-sector
+reach_by_sector_en_summarised
+```
+
+# Products
+
+We might as well also look at products. The raw data is in Norwegian and not immediately very informative.
+
+
+```{r}
+#| label: tbl-reach_by_product
+reach_by_product_summarised |> DT::datatable()
+```
+
+This isn't massively informative either because we don't have any useful grouping categories, but it's a start. Basically synthesis raw materials, biocides, and insecticides are the most imoprtant categories by far. Which is good to know.
+

@@ -90,27 +90,13 @@ nace_sectors <- tribble(
 
 nace_sectors
 
-reach_by_sector_en <- reach_by_sector |>
-  left_join(nace_sectors, by = join_by("sector" == "sector_no")) |>
-  mutate(net_kg = netto_tonn * 1000)
 
-ggplot(
-  data = reach_by_sector_en,
-  mapping = aes(
-    x = year,
-    y = net_kg,
-    colour = sector_en
-  )
-) +
-  geom_point() +
-  geom_line() +
-  scale_y_log10()
 # ! now what?
 
 reach_by_sector_en_summarised <- reach_by_sector_en |>
-  mutate(z_score = scale(net_kg)[, 1], .by = sector_en) |>
-  ungroup() |>
-  filter(abs(z_score) < 2) |> # use z = 2 as a cutoff
+  # mutate(z_score = scale(net_kg)[, 1], .by = sector_en) |>
+  # ungroup() |>
+  # filter(abs(z_score) < 2) |> # use z = 2 as a cutoff
   reframe(
     mean_net_kg = mean(net_kg),
     sd_net_kg = sd(net_kg),
@@ -121,19 +107,59 @@ reach_by_sector_en_summarised <- reach_by_sector_en |>
   distinct() |>
   arrange(desc(mean_net_kg))
 
-reach_by_sector_en_summarised
-# ok, this gives us something to work with
-#    sector_en                                              mean_net_kg sd_net_kg n_years_reported nace_section
-#    <chr>                                                        <dbl>     <dbl>            <int> <chr>
-#  1 Manufacturing                                        40620233.       2.48e+7                6 C
-#  2 Agriculture, forestry and fishing                     1114054.       9.70e+5                6 A
-#  3 Mining and quarrying                                   682269.       1.26e+5                6 B
-#  4 Unclassified                                            37212.       5.78e+4                5 NA
-#  5 Wholesale and retail trade, repair of motor vehicles     7962.       6.98e+3                6 G
-#  6 Construction                                             1243.       4.18e+2                5 F
-#  7 Transportation and storage                                715.       4.83e+2                6 H
-#  8 Water supply, sewerage and waste management                98.6      4.27e+1                3 E
-#  9 Arts, entertainment and recreation                         18.8      9.14e+0                4 R
-# 10 Real estate activities                                      3.06     1.60e+0                6 L
-# 11 Professional, scientific and technical activities           0.0562   7.07e-3                2 M
-# 12 Other service activities                                    0.0117   1.46e-2                2 S
+# TODO: Product category translations via LLM. Could find a better source
+product_category_translations <- tibble::tribble(
+  ~category_no                                                          , ~category_en                                       , ~confidence ,
+  "BRENSELTILSETNINGER"                                                 , "Fuel additives"                                   , "high"      ,
+  "Absorpsjons/ og adsorpsjonsmaterialer"                               , "Absorption and adsorption materials"              , "high"      ,
+  "ANDRE SMØREMIDLER"                                                   , "Other lubricants"                                 , "high"      ,
+  "ARMERINGSMIDLER"                                                     , "Reinforcing agents"                               , "medium"    , # could be "armoring agents" in some contexts
+  "Bindemidler"                                                         , "Binders"                                          , "high"      ,
+  "Biocider"                                                            , "Biocides"                                         , "high"      ,
+  "Borekjemikalier inkl råolje/gass"                                    , "Drilling chemicals incl. crude oil/gas"           , "high"      ,
+  "BOREOLJER"                                                           , "Drilling oils"                                    , "high"      ,
+  "BUNNFELLINGSHINDRENDE MIDLER, GENERELT"                              , "Anti-precipitation agents, general"               , "medium"    , # could be "anti-settling" or "anti-sedimentation"
+  "Fyllingsmidler"                                                      , "Fillers"                                          , "high"      ,
+  "GJØDNING, GENERELT"                                                  , "Fertilisers, general"                             , "high"      ,
+  "Impregnering"                                                        , "Impregnation agents"                              , "high"      ,
+  "INSEKTSMIDDEL, INSEKTMIDLER OG ANDRE MIDLER MOT SKADEDYR PÅ PLANTER" , "Insecticides and other plant pest control agents" , "high"      ,
+  "Konstruksjonsmaterialer"                                             , "Construction materials"                           , "high"      ,
+  "Lim"                                                                 , "Adhesives"                                        , "high"      ,
+  "Maling"                                                              , "Paint"                                            , "high"      ,
+  "PH-REGULERENDE MIDLER, GENERELT"                                     , "pH-regulating agents, general"                    , "high"      ,
+  "Prosessregulerendemidler"                                            , "Process control agents"                           , "medium"    , # or "process regulating agents"
+  "Rengjøring"                                                          , "Cleaning agents"                                  , "high"      ,
+  "Rustbeskyttelse"                                                     , "Corrosion protection"                             , "high"      ,
+  "SALT TIL GALVANISKE BAD"                                             , "Salts for electroplating baths"                   , "high"      ,
+  "Sprengstoff"                                                         , "Explosives"                                       , "high"      ,
+  "STØPEMASSER, GENERELT"                                               , "Casting compounds, general"                       , "medium"    , # could be "moulding compounds"
+  "SYNTESERÅVARER OG MELLOMPRODUKTER"                                   , "Synthesis raw materials and intermediates"        , "high"      ,
+  "Trykkfarger"                                                         , "Printing inks"                                    , "high"      ,
+  "BLEKERE TIL FOTOGRAFISK FILM"                                        , "Bleaching agents for photographic film"           , "high"      ,
+  "BRUNERINGSSALTER"                                                    , "Browning salts"                                   , "medium"    , # technical term for metal darkening/bluing salts
+  "Glasur, emalje"                                                      , "Glaze, enamel"                                    , "high"      ,
+  "Herdere"                                                             , "Hardeners/curing agents"                          , "high"      ,
+  "Loddemidler"                                                         , "Soldering agents/fluxes"                          , "medium"    , # loddemidler is broad; could be just "solders"
+  "BILPLEIEMIDLER, GENERELT"                                            , "Car care products, general"                       , "high"      ,
+  "FLUSSMIDLER (SVEISING)"                                              , "Fluxes (welding)"                                 , "high"      ,
+  "PIGMENT TIL GLASURER, EMALJER OG GLASS"                              , "Pigments for glazes, enamels and glass"           , "high"      ,
+  "Metalloverflatebehandlingsmidler"                                    , "Metal surface treatment agents"                   , "high"      ,
+  "ANTIOKSIDANTER (ANTIOZONANTER)"                                      , "Antioxidants (antiozonants)"                      , "high"      ,
+  "Poler og pleieMIDLER"                                                , "Polishes and care products"                       , "medium" # odd capitalisation in source; "poler" = polishes
+)
+
+reach_by_product_translated <- reach_by_product |>
+  left_join(
+    product_category_translations,
+    by = join_by(product_type == category_no)
+  )
+
+reach_by_product_summarised <- reach_by_product_translated |>
+  reframe(
+    mean_net_kg = mean(netto_tonn * 1000),
+    sd_net_kg = sd(netto_tonn * 1000),
+    n_years_reported = n(),
+    .by = "category_en"
+  ) |>
+  distinct() |>
+  arrange(desc(mean_net_kg))
