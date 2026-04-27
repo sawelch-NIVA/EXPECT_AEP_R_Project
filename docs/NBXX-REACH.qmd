@@ -431,4 +431,4 @@ reach_by_product_summarised_lumped |>
   )
 ```
 
-Where does this leave us? We have a lot of data, but how much of it is relevant or important is still a big question.
+Where does this leave us? We have a lot of data, but how much of it is relevant or important is still a big question. And unlike emissions data, we don't know what the relevant receving compartment is. 
