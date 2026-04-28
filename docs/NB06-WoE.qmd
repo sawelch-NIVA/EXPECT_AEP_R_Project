@@ -8,17 +8,9 @@ date: last-modified
 
 ## The State of the Art
 
-Our starting point is [@hardyGuidanceUseWeight2017]. At time of writing - and probably now too - WoE is very ad hoc. [@agerstrandWeightEvidenceEvaluation2016] identified EFSA as the only EU institution doing WoE at time of writing... is this still true?
+The synthesis and integration of diverse scientific evidence requires the understanding and comparison of diverse lines of evidence. The reliability of a line of evidence, its relevance to a given research question, and the consistency between evidence are key factors in weighting its value to an assessment. For it to be reproducible, transparent and comprehensive, the methodology used in making these judgements must be systematic and follow best practice.
 
-Some starting vocabulary:
-
-> The present document identifies **reliability, relevance and consistency** as three basic considerations for weighing evidence. They are defined in terms of their contributions to the weight of evidence assessment: Reliability is the extent to which the information comprising a piece or line of evidence is correct. Relevance is the contribution a piece or line of evidence would make to answer a specified question, if the information comprising the line of evidence was fully reliable. Consistency is the extent to which the contributions of different pieces or lines of evidence to answering the specified question are compatible.
-
-Some vocab. Literature can be white, grey, or black:
-
--   White: Scientific literature. Indexed and published.
--   Grey: Institutional reports, datasets, etc. Generally public, but not well indexed.
--   Black: Private government or commercial literature.
+Weight of Evidence (WoE) has been identified as an important component of environmental assessments for some time [@agerstrandWeightEvidenceEvaluation2016]. In the European Union, the European Food Safety Authority (EFSA) has been at the forefront of developing a regulatory basis for the use of WoE assessments [@hardyGuidanceUseWeight2017]. At present, this consists of guidance rather than any legal requirement; however, it provides a useful guide for the state of the art of WoE assessment.
 
 ## EFSA WoE Framework
 
@@ -32,9 +24,19 @@ Some vocab. Literature can be white, grey, or black:
 3)  Uncertainty analysis
 4)  Conclusions
 
+## Problem Formulation
+
+(See PRISMA statement)
+
+## Assembling the Evidence
+
+(See lit review protocol)
+
 ## Weighting Diverse Evidence
 
-Any kind of WoE assessment is likely to involve comparing different types of data. [@hardyGuidanceUseWeight2017] cites [@linkovWeightofevidenceEvaluationEnvironmental2009]'s ranking of WoE approaches, from worst to best:
+All but the narrowest WoE assessments will likely have to compare different kinds of evidence.
+
+[@hardyGuidanceUseWeight2017] cites [@linkovWeightofevidenceEvaluationEnvironmental2009]'s ranking of WoE approaches, from worst to best:
 
 1.  Listing evidence: Presentation of individual lines of evidence without attempt at integration
 2.  Best professional judgement: Qualitative integration of multiple lines of evidence
@@ -44,33 +46,54 @@ Any kind of WoE assessment is likely to involve comparing different types of dat
 6.  Indexing: Integration of lines of evidence into a single measure based on empirical models
 7.  Quantification: Integrated assessment using formal decision analysis and statistical methods.
 
-To the authors' knowledge, no WoE framework exists in categories 6-7 (and even if it did, it'd be too late to use it now.) However, the report identifies a number of approaches belonging to the different categories.
+To the authors' knowledge, no formal WoE framework exists in categories 6-7. However, the report identifies a number of approaches belonging to the different categories. Below, we discuss these approaches and our methodology.
 
 ### Causal Criteria
 
-The Bradford Hill considerations [@hillEnvironmentDiseaseAssociation1965] are "widely used, especially in epidemiology", and have been adapted for use in Adverse Outcome Pathway development [@beckerIncreasingScientificConfidence2015] to assess the biological plausibility, empirical support, and essentiality of a given relationship. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism. The most sophisticated implementation of WoE assessment (that I know of) is in the interactive AOP-helpFinder 3.0 tool [@jayletAOPhelpFinder30Text2025], which assesses quantity of evidence (number of relevant papers) and quality (degree of confidence in the connection, as measured by using Fisher's exact text to compare the representation of a relationship in the overall corpus of relevant papers [@jayletAOPhelpFinder20Integration2023])
+The Bradford Hill considerations [@hillEnvironmentDiseaseAssociation1965] are "widely used, especially in epidemiology", and have been adapted for use in Adverse Outcome Pathway development [@beckerIncreasingScientificConfidence2015] to assess the biological plausibility, empirical support, and essentiality of a given relationship. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism.
 
-No specific set of WoE guidelines have been developed for AEP, but the modified Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs. [@pengAggregateExposurePathways2022] developed their AEPs by first constructing a putative network based on expert knowledge, then qualifying WoE along the following lines:
+The most sophisticated implementation of WoE assessment is in the interactive AOP-helpFinder 3.0 tool [@jayletAOPhelpFinder30Text2025], which assesses quantity of evidence (number of relevant papers) and quality (degree of confidence in the connection, as measured by using Fisher's exact text to compare the representation of a relationship in the overall corpus of relevant papers [@jayletAOPhelpFinder20Integration2023]).
 
--   What is the essentially of a KES (node)
+No specific set of WoE guidelines have been developed for Aggregate Exposure Pathways, but the modified Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs. [@pengAggregateExposurePathways2022] developed their AEPs by first constructing a putative network based on expert knowledge, then qualifying WoE along the following lines:
 
--   What is the
+- What is the essentially of a KES (node)
 
-    -   Theoretical plausibility
+- What is the
 
-    -   Empirical support
+  - Theoretical plausibility
 
-    -   Quantitative understanding
+  - Empirical support
 
-    for a KTR (edge)
+  - Quantitative understanding
 
-![Figure copy-pasted from Peng et al. Will replace once I work out what it is I want here.](images/paste-1.png)
+  for a KTR (edge)
 
-This allows them to make very nice diagrams:
+![Unfinished diagram to summarise Peng's approach to WoE assessment and building AEPs](images/paste-1.png)
 
-![But it also presents us with a bit of a quandary - how do we capture this level of detail for KTRs and not just KERs, when most of our data is about occurrence?](images/paste-2.png)
+Ok, so clearly "just CREED" isn't going to fly. How do we evaluate our diverse types of evidence against these different criteria?
 
-**I don't know yet.**
+- Net weights and emissions probably need to be considered as two lines of evidence for the same thing
+
+- Essentiality is tricky - only in few cases can we confidently state "this copper concentration is because of emissions and not natural levels". but we can compare values to background criteria
+
+- Most of our proposed flows are extremely plausible because of the nature of the system we're trying to understand\]
+
+- There are probably models for lots of this stuff, but I didn't go looking for them
+
+| Evidence Type/Line of Evidence | Essentiality | Plausibility | Empirical Evidence | Quantitative Understanding |
+|-----------------|-------------|--------------|----------------|-------------|
+| Copper Net Weights (REACH) | N/A |  |  |  |
+| Copper Emissions (REACH) |  |  |  |  |
+| Copper Concentrations (Scientific Literature) | KES~downstream~ will be reduced/will not take place if KES~upstream~ is reduced/stopped.\* | Theoretical knowledge supporting dependent and sequential change of two adjacent KESs. | Empirical data supporting dependent and sequential change of two 
+adjacent KESs, with temporal, spatial and incidence concordance. \* | Quantitative model describing dependent and sequential change of two adjacent KESs. \* |
+| Copper Concentrations (Monitoring Data) |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+
+: Tabel adapted from Peng et al, in turn adapted from OECD Guidance Document on Developing and Assessing Adverse Outcome Pathways ([OECD, 2018](https://www.sciencedirect.com/science/article/pii/S0043135421010678#bib0054)). \*: criteria directly copied.
 
 ### Scoring
 
@@ -96,9 +119,7 @@ If we want to use these labels quantitatively - and we do - the easiest option i
 
 It would make our lives even easier if we could convert this into a single number. We reach, therefore, for that old standby of the ecotoxicologist: dividing things by other things, even when it doesn't necessarily make sense to do so.
 
-$$
-\text{CREED Score} = \frac{\text{Reliability Score + Relevance Score}}{10}
-$$ {#1}
+$$\text{CREED Score} = \frac{\text{Reliability Score + Relevance Score}}{10}$$ {#1}
 
 We have, thus created a scoring method. It doesn't cover essentiality, theoretical support, or plausibility of a node... but it does give us a way to score evidence. I think we can call it an incremental improvement on [@pengAggregateExposurePathways2022], if not a paradigm shift.
 

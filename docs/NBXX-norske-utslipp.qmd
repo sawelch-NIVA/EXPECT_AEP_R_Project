@@ -20,13 +20,15 @@ suppressMessages(
     library(DT)
     library(readxl)
     library(visNetwork)
-
+library(readxl)
+library(tidyverse)
     # load_all(quiet = TRUE)
+      library(here)
+i_am("README.md")
   }
 )
 
-library(here)
-i_am("README.md")
+
 
 options(
   DT.options = list(
@@ -41,14 +43,6 @@ options(
 #| label: load-data-libraries
 #| warning: false
 #| output: false
-library(readxl)
-library(tidyverse)
-library(stringr)
-
-
-# ==============================================================================
-# 1. Helper functions ----
-# ==============================================================================
 
 # Pivot an individual-facility file to long format.
 # Handles variable column presence (air, water, sea).
@@ -238,9 +232,6 @@ copper_emissions <- bind_rows(
 
 Copper emissions data for Norway was obtained from the website norskeutslipp.no.
 
-
-Blah blah blah
-
 - Just copper
 - Confusing categories
 - A bunch of 0s in inconvenient places
@@ -299,10 +290,7 @@ copper_emissions_plot <- copper_emissions_aggregated |>
 copper_emissions_plot
 ```
 
-There are some rather improbable changes here. We'll proceed as follows:
-- Remove the big drop for products/aquatic 2009 - 2012
-- Remove the big increase for landfill/aquatic 2009 - 2011
-- Keep the suspect increase of products/atmospheric from 0 to ~1e3 (it's suspicious, but I don't have a good reason to assume that nothing happened here)
+There are some rather improbable changes here. We'll proceed as follows: - Remove the big drop for products/aquatic 2009 - 2012 - Remove the big increase for landfill/aquatic 2009 - 2011 - Keep the suspect increase of products/atmospheric from 0 to \~1e3 (it's suspicious, but I don't have a good reason to assume that nothing happened here)
 
 ```{r}
 #| label: filter-outliers
@@ -414,7 +402,7 @@ copper_emissions_plot <- copper_emissions_aggregated |>
 copper_emissions_plot
 ```
 
-Another attempt at the same data. Both have their problems, but I think I prefer the latter slightly more. 
+Another attempt at the same data. Both have their problems, but I think I prefer the latter slightly more.
 
 ```{r}
 #| label: plot-alternative
@@ -491,7 +479,6 @@ copper_emissions_plot
 
 A Sankey diagram gives a slightly more useful view of how the dataset is utterly dominated by aquatic emissions of products. However, without more specific information it's difficult to know e.g. *which* aquatic environments are recieving the copper, if at all.
 
-
 ```{r}
 #| label: sankey-diagram
 #| fig-width: 10
@@ -526,4 +513,15 @@ sankeyNetwork(
 )
 ```
 
-Well, that is informative.
+# Line of Evidence Asssessment
+
+As a line of scientific evidence Norske Utslipp lacks much of what we would hope for. However, it does represent quantified, specific routes of copper emission. Taken alone, this dataset would be scored as follows.
+
+| Criterion | Score | Justification |
+|-----------------------------|---------------|----------------------------|
+| Essentiality | 1 | Copper emissions to the environment are copper emissions to the environment. However, by themselves, it is impossible to determine whether these emissions, natural occurrence, transport, other sources, etc. are the most important contributors. |
+| Theoretical Plausibility | 3 | Copper emission is not a complex, hidden biological system; mechanisms of dispersal are well and inutuitively understood without needing reference to the literature. |
+| Empirical Support | 1 | This data is unlikely to be contradicted, but is perhaps by its nature unfalsifiable, except in cases where mistakes are made with data entry. Large gaps as well as unlikely drastic changes in emissions are found in the dataset. |
+| Quantitative Understanding | 1 | Models for various modes of copper emissions exist, but are not addressed in this line of evidence. |
+
+: Norske Utslipp WoE Assessment

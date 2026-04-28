@@ -37,11 +37,6 @@ options(
 ```
 
 ```{r}
-# most logic is currently still in a bare R file
-# TODO: Move
-# read_reach_produktregisteret.R
-# Reads REACH/Produktregisteret copper data from the two data sheets.
-# Source: Produktregisteret export, net quantities in tonnes.
 # Note: covers declared chemicals only (deklarasjonspliktige kjemikalier).
 #       "Netto mengde" = imported + produced - exported per declaration.
 
@@ -85,8 +80,6 @@ reach_by_product <- read_excel(
     product_type = trimws(product_type)
   )
 
-reach_by_sector |> select(sector) |> distinct()
-
 # Based on https://ec.europa.eu/eurostat/documents/3859598/5902521/KS-RA-07-015-EN.PDF.pdf/dd5443f5-b886-40e4-920d-9df03590ff91?t=1414781457000
 # p143
 nace_sectors <- tribble(
@@ -122,7 +115,6 @@ reach_by_sector_en <- reach_by_sector |>
     )
   )
 
-# ! now what?
 
 reach_by_sector_en_summarised <- reach_by_sector_en |>
   # mutate(z_score = scale(net_kg)[, 1], .by = sector_en) |>
@@ -284,6 +276,7 @@ Sectors are based on NACE codes. We translate names to English based on the NACE
 #| fig-cap: "Net copper quantities reported to Produktregisteret by industry sector. Net = (imported + produced) − exported quantity. Facets ordered by NACE supercategory."
 #| fig-width: 10
 #| fig-height: 12
+#| warning: false
 reach_by_sector_en |>
   group_by(sector_en) |>
   mutate(mean_net = mean(net_kg)) |>
@@ -299,12 +292,12 @@ reach_by_sector_en |>
       x = year,
       y = net_kg,
       group = sector_en,
-      colour = NACE_supercategory
+      fill = NACE_supercategory
     )
   ) +
-  geom_point() +
-  geom_line() +
-  scale_colour_brewer(palette = "Set2", name = "NACE supercategory") +
+  geom_col() +
+  geom_hline(yintercept = 0) +
+  scale_fill_brewer(palette = "Set2", name = "NACE supercategory") +
   scale_y_continuous(labels = scales::label_comma()) +
   facet_wrap(vars(sector_en), scales = "free_y", ncol = 2) +
   theme_minimal() +
@@ -356,21 +349,21 @@ We might as well also look at products. The raw data is in Norwegian and not imm
 These are less obviously stupid than those per industry sector, although some categories drop to 0 year-on-year with more alacrity than we might expect.
 
 ```{r}
-#| label: fig-reach-by-prdocut
+#| label: fig-reach-by-product
 #| fig-cap: "Net copper quantities reported to Produktregisteret by product type. Net = (imported + produced) − exported quantity."
 #| fig-width: 10
-#| fig-height: 12
+#| fig-height: 20
+#| warning: false
 reach_by_product_translated |>
   group_by(category_en) |>
   ggplot(
     aes(
       x = year,
       y = net_kg,
-      colour = category_en
+      fill = category_en
     )
   ) +
-  geom_point() +
-  geom_line() +
+  geom_col() +
   scale_y_continuous(labels = scales::label_comma()) +
   facet_wrap(vars(category_en), scales = "free_y", ncol = 2) +
   theme_minimal() +
@@ -431,4 +424,3 @@ reach_by_product_summarised_lumped |>
   )
 ```
 
-Where does this leave us? We have a lot of data, but how much of it is relevant or important is still a big question. And unlike emissions data, we don't know what the relevant receving compartment is. 
