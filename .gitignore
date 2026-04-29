@@ -14,3 +14,6 @@ _freeze/*
 index_files/*
 docs/*_cache
 docs/*_files/*
+.images_raw
+.claude
+.vscode

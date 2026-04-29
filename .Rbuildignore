@@ -1,2 +1,14 @@
 ^renv$
 ^renv\.lock$
+^scripts$
+^docs$
+^_targets\.R$
+^_targets\.yaml$
+^_quarto\.yml$
+^references\.bib$
+^manifest\.json$
+^custom-reference-doc\.docx$
+^index\.qmd$
+^README\.qmd$
+^images$
+^.images-raw$
