@@ -1,9 +1,13 @@
 ---
-title: "Copper REACH Data for Norway"
-format: html
+title: "Copper Emissions Data for Norway"
 execute:
   output: true
   echo: false
+format: 
+  html: default
+  docx: 
+    fig-width: 8
+    fig-height: 6
 ---
 
 ```{r}
@@ -20,14 +24,13 @@ suppressMessages(
     library(DT)
     library(readxl)
     library(visNetwork)
-library(readxl)
-library(tidyverse)
+    library(readxl)
+    library(tidyverse)
     # load_all(quiet = TRUE)
-      library(here)
-i_am("README.md")
+    library(here)
+    i_am("README.md")
   }
 )
-
 
 
 options(
@@ -37,13 +40,22 @@ options(
     dom = "ftp" # filter, table, pagination — drops the length menu
   )
 )
+
+# Helper: render a table appropriately for the current output format ----
+# Uses DT::datatable() for HTML, knitr::kable() for everything else (docx, pdf, etc.)
+render_table <- function(df, caption = NULL, ...) {
+  if (knitr::is_html_output()) {
+    DT::datatable(df, caption = caption, ...)
+  } else {
+    knitr::kable(df, caption = caption)
+  }
+}
 ```
 
 ```{r}
 #| label: load-data-libraries
 #| warning: false
 #| output: false
-
 # Pivot an individual-facility file to long format.
 # Handles variable column presence (air, water, sea).
 #' @param df  Wide tibble as read from Excel (after skip + rename)
@@ -305,7 +317,10 @@ copper_emissions_by_source_summarised <- copper_emissions_aggregated |>
   arrange(desc(mean_sum_emissions_kg))
 
 
-copper_emissions_by_source_summarised
+render_table(
+  copper_emissions_by_source_summarised,
+  caption = "Mean copper emissions by source and medium"
+)
 ```
 
 For the sake of completion, let's make a graph showing all this information.
@@ -477,13 +492,15 @@ copper_emissions_plot <- copper_emissions_aggregated |>
 copper_emissions_plot
 ```
 
-A Sankey diagram gives a slightly more useful view of how the dataset is utterly dominated by aquatic emissions of products. However, without more specific information it's difficult to know e.g. *which* aquatic environments are recieving the copper, if at all.
+<!-- A Sankey diagram gives a slightly more useful view of how the dataset is utterly dominated by aquatic emissions of products. However, without more specific information it's difficult to know e.g. *which* aquatic environments are recieving the copper, if at all. -->
 
 ```{r}
 #| label: sankey-diagram
 #| fig-width: 10
 #| fig-height: 10
 #| warning: false
+#| include: false
+#| eval: false
 library(networkD3)
 
 nodes <- data.frame(
@@ -513,12 +530,12 @@ sankeyNetwork(
 )
 ```
 
-# Line of Evidence Asssessment
+# Line of Evidence Assessment
 
 As a line of scientific evidence Norske Utslipp lacks much of what we would hope for. However, it does represent quantified, specific routes of copper emission. Taken alone, this dataset would be scored as follows.
 
 | Criterion | Score | Justification |
-|-----------------------------|---------------|----------------------------|
+|----------------------------|------------------|---------------------------|
 | Essentiality | 1 | Copper emissions to the environment are copper emissions to the environment. However, by themselves, it is impossible to determine whether these emissions, natural occurrence, transport, other sources, etc. are the most important contributors. |
 | Theoretical Plausibility | 3 | Copper emission is not a complex, hidden biological system; mechanisms of dispersal are well and inutuitively understood without needing reference to the literature. |
 | Empirical Support | 1 | This data is unlikely to be contradicted, but is perhaps by its nature unfalsifiable, except in cases where mistakes are made with data entry. Large gaps as well as unlikely drastic changes in emissions are found in the dataset. |
