@@ -33,6 +33,7 @@ library(data.table)
 library(eDataDRF)
 library(here)
 library(targets)
+library(purrr)
 
 devtools::load_all(quiet = TRUE)
 ```
@@ -51,12 +52,10 @@ wgs84_geo <- tar_read(wgs84_geography)
 species_names <- eDataDRF::species_names_vocabulary()
 species_lookup <- species_names |>
   with(setNames(SPECIES_COMMON_NAME, SPECIES_NAME))
-
 ```
 
 ```{r}
 #| label: themes-and-helpers
-
 copper_toxicity_thresholds <- tar_read(copper_toxicity_thresholds)
 
 # Helper function for sample sizes
@@ -70,7 +69,6 @@ calculate_sample_sizes <- function(data) {
     ) |>
     summarise(total_n = sum(MEASURED_N, na.rm = TRUE), .groups = "drop")
 }
-
 ```
 
 ## Dataset Overview
@@ -103,18 +101,29 @@ calculate_sample_sizes <- function(data) {
 #| warning: false
 #| fig-width: 12
 #| fig-height: 8
+#| 
+# Helper: parse REFERENCE_ID into a two-line y-axis label ----
+format_ref_label <- function(id) {
+  if (str_detect(id, "\\d{4}(-\\d{4})?")) {
+    year_part <- str_extract(id, "\\d{4}(-\\d{4})?")
+    remainder <- str_remove(id, "\\d{4}(-\\d{4})?")
+    glue("**{remainder}**<br>{year_part}")
+  } else {
+    str_wrap(id, width = 40)
+  }
+}
 
 # Prepare data for plotting ----
 plot_data <- literature_merged_data |>
   group_by(REFERENCE_ID, ENVIRON_COMPARTMENT_SUB) |>
   distinct() |>
   reframe(count = sum(MEASURED_N, na.rm = TRUE)) |>
-  # Join year data for y-axis ordering
   left_join(
     literature_merged_data |> distinct(REFERENCE_ID, YEAR),
     by = "REFERENCE_ID"
   ) |>
-  filter(!is.na(ENVIRON_COMPARTMENT_SUB), ENVIRON_COMPARTMENT_SUB != "")
+  filter(!is.na(ENVIRON_COMPARTMENT_SUB), ENVIRON_COMPARTMENT_SUB != "") |>
+  mutate(label_2line = map_chr(REFERENCE_ID, format_ref_label))
 
 # Calculate text color threshold (on log10 scale) ----
 threshold_value <- mean(
@@ -126,44 +135,39 @@ threshold_value <- mean(
 reference_order <- plot_data |>
   group_by(REFERENCE_ID) |>
   summarise(total = sum(count)) |>
-  arrange(total) |> # puts highest values at top
+  arrange(total) |>
   pull(REFERENCE_ID)
+
+# Derive label order from reference_order ----
+label_order <- map_chr(reference_order, format_ref_label)
 
 # Calculate total samples per compartment for ordering (x-axis) ----
 compartment_order <- plot_data |>
   group_by(ENVIRON_COMPARTMENT_SUB) |>
   summarise(total = sum(count)) |>
-  arrange(desc(total)) |> # puts highest values on left
+  arrange(desc(total)) |>
   pull(ENVIRON_COMPARTMENT_SUB)
 
-# Wrap text, then create complete grid with all combinations ----
+# Create complete grid with all combinations ----
 plot_data_complete <- plot_data |>
-  mutate(
-    REFERENCE_ID_wrapped = str_wrap(REFERENCE_ID, 30),
-    ENVIRON_COMPARTMENT_SUB_wrapped = str_wrap(ENVIRON_COMPARTMENT_SUB, 20)
-  ) |>
   complete(
-    REFERENCE_ID_wrapped = str_wrap(reference_order, 30),
-    ENVIRON_COMPARTMENT_SUB_wrapped = str_wrap(compartment_order, 20),
+    label_2line = label_order,
+    ENVIRON_COMPARTMENT_SUB = compartment_order,
     fill = list(count = 0)
   ) |>
   mutate(
-    # Factor with wrapped levels in the correct order
-    REFERENCE_ID_wrapped = factor(
-      REFERENCE_ID_wrapped,
-      levels = str_wrap(reference_order, 30)
-    ),
-    ENVIRON_COMPARTMENT_SUB_wrapped = factor(
-      ENVIRON_COMPARTMENT_SUB_wrapped,
-      levels = str_wrap(compartment_order, 20)
+    label_2line = factor(label_2line, levels = label_order),
+    ENVIRON_COMPARTMENT_SUB = factor(
+      ENVIRON_COMPARTMENT_SUB,
+      levels = compartment_order
     )
   )
 
 # Create plot ----
-plot_data_complete |>
+compartments_matrix <- plot_data_complete |>
   ggplot(aes(
-    x = ENVIRON_COMPARTMENT_SUB_wrapped,
-    y = REFERENCE_ID_wrapped,
+    x = ENVIRON_COMPARTMENT_SUB,
+    y = label_2line,
     fill = count
   )) +
   geom_tile(colour = "white", linewidth = 0.25) +
@@ -178,22 +182,35 @@ plot_data_complete |>
     ),
     size = 3
   ) +
-  scale_fill_viridis_c(trans = "log10", na.value = "grey90") +
+  scale_fill_viridis_c(
+    transform = scales::transform_log10(),
+    na.value = "white"
+  ) +
   scale_color_identity() +
   scale_y_discrete(expand = c(0, 0)) +
-  scale_x_discrete(expand = c(0, 0)) +
-  labs(
-    x = "",
-    y = ""
-  ) +
+  scale_x_discrete(expand = c(0, 0), labels = \(x) {
+    str_wrap(x, 15, whitespace_only = FALSE)
+  }) +
+  labs(x = "", y = "") +
   theme(
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
-    axis.text.y = element_text(size = 7),
-    plot.background = element_blank(),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
+    axis.text.y = element_markdown(lineheight = 0.85),
+    axis.ticks.y = element_blank(),
+    panel.background = element_blank(),
     panel.border = element_blank(),
     legend.position = "none"
   )
 
+ggsave(
+  plot = compartments_matrix,
+  filename = "images/fig_paper_subcompartments.png",
+  width = 11,
+  height = 10,
+  units = "in",
+  dpi = 300
+)
+
+compartments_matrix
 ```
 
 ### Species Coverage
@@ -202,12 +219,15 @@ plot_data_complete |>
 ```{r}
 #| label: data-prep-species-plots
 #| include: false
-
 # Prepare data for plotting ----
 plot_data <- literature_merged_data |>
   group_by(REFERENCE_ID, SAMPLE_SPECIES) |>
   distinct() |>
-  reframe(count = sum(MEASURED_N, na.rm = TRUE), SPECIES_GROUP, SPECIES_COMMON_NAME) |>
+  reframe(
+    count = sum(MEASURED_N, na.rm = TRUE),
+    SPECIES_GROUP,
+    SPECIES_COMMON_NAME
+  ) |>
   # Join year data for y-axis ordering
   filter(!is.na(SAMPLE_SPECIES)) |>
   distinct()
@@ -248,7 +268,6 @@ threshold_value <- 5000
 #   log10(plot_data$n_samples),
 #   na.rm = TRUE
 # )
-
 ```
 
 ```{r}
@@ -257,7 +276,6 @@ threshold_value <- 5000
 #| warning: false
 #| fig-width: 16
 #| fig-height: 5
-
 ggplot(
   plot_data |> filter(plot_group == 1),
   aes(y = REFERENCE_ID, x = formatted_species, fill = count)
@@ -291,7 +309,6 @@ ggplot(
 #| warning: false
 #| fig-width: 16
 #| fig-height: 8
-
 ggplot(
   plot_data |> filter(plot_group == 2),
   aes(y = REFERENCE_ID, x = formatted_species, fill = count)
@@ -323,7 +340,6 @@ ggplot(
 #| warning: false
 #| fig-width: 16
 #| fig-height: 8
-
 ggplot(
   plot_data |> filter(plot_group == 3),
   aes(y = REFERENCE_ID, x = formatted_species, fill = count)
@@ -356,7 +372,6 @@ ggplot(
 #| warning: false
 #| fig-width: 16
 #| fig-height: 8
-
 ggplot(
   plot_data |> filter(plot_group == 4),
   aes(y = REFERENCE_ID, x = formatted_species, fill = count)
@@ -391,18 +406,19 @@ ggplot(
 #| label: fig-sites-hex-map
 #| fig-cap: All sampling sites binned into 500 hexagons, coloured by number of sites in area.
 #| fig-width: 12
-
 library(hexbin)
 
-sites_sample_number <- literature_merged_data |> 
-  group_by(SITE_CODE) |> 
-  reframe(LATITUDE, LONGITUDE, n = sum(MEASURED_N)) |> 
+sites_sample_number <- literature_merged_data |>
+  group_by(SITE_CODE) |>
+  reframe(LATITUDE, LONGITUDE, n = sum(MEASURED_N)) |>
   distinct()
 
 # Create hexbin object to get bin centers
-hb <- hexbin(sites_sample_number$LONGITUDE, 
-             sites_sample_number$LATITUDE, 
-             xbins = 100)
+hb <- hexbin(
+  sites_sample_number$LONGITUDE,
+  sites_sample_number$LATITUDE,
+  xbins = 100
+)
 
 # Extract hex centers and counts
 hex_coords <- data.frame(
@@ -412,21 +428,24 @@ hex_coords <- data.frame(
 )
 
 # Transform your data to a projected CRS (example: UTM or Arctic projection)
-sites_sample_number_proj <- sites_sample_number |> filter(!is.na(LONGITUDE), !is.na(LATITUDE)) |> 
+sites_sample_number_proj <- sites_sample_number |>
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE)) |>
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = 4326) |>
-  sf::st_transform(crs = 3035) |>  # European LAEA projection, adjust for Arctic if needed
+  sf::st_transform(crs = 3035) |> # European LAEA projection, adjust for Arctic if needed
   dplyr::mutate(
-    x = sf::st_coordinates(geometry)[,1],
-    y = sf::st_coordinates(geometry)[,2]
+    x = sf::st_coordinates(geometry)[, 1],
+    y = sf::st_coordinates(geometry)[, 2]
   )
 
 # Plot
 world_map <- map_data("world")
 
 # Also transform your world map
-world_map_proj <- sf::st_as_sf(world_map, 
-                                coords = c("long", "lat"), 
-                                crs = 4326) |>
+world_map_proj <- sf::st_as_sf(
+  world_map,
+  coords = c("long", "lat"),
+  crs = 4326
+) |>
   sf::st_transform(crs = 3035)
 
 
@@ -445,23 +464,29 @@ ggplot() +
   ) +
   # geom_text(
   #   data = hex_coords,
-  #   aes(x = x, y = y, label = count), 
+  #   aes(x = x, y = y, label = count),
   #   colour = "pink",
   #   size = 3
   # ) +
-  scale_fill_viridis_b(name = "Samples", breaks = c(1, 5, 10, 50, 100, 500, 1000, 2000)) +
+  scale_fill_viridis_b(
+    name = "Samples",
+    breaks = c(1, 5, 10, 50, 100, 500, 1000, 2000)
+  ) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
-  theme_minimal() +
+  theme_void() +
   theme(axis.text = element_blank(), axis.title = element_blank()) +
-  coord_fixed(ratio = 1,     xlim = c(
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
       get_study_area_bbox()[[1]],
       get_study_area_bbox()[[3]]
     ),
     ylim = c(
       get_study_area_bbox()[[2]],
       get_study_area_bbox()[[4]]
-    ))
+    )
+  )
 ```
 
 ## Copper Concentrations by Environmental Compartment
@@ -470,10 +495,11 @@ Get a basic overview of the orders of magnitude for different sub-compartments (
 
 ```{r}
 #| label: fig-basic-subcompartments-dry-mass
-
 literature_merged_data |>
-  filter(!is.na(MEASURED_UNIT_STANDARD), 
-         MEASURED_UNIT_STANDARD == "mg/kg (dry)") |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    MEASURED_UNIT_STANDARD == "mg/kg (dry)"
+  ) |>
   ggplot(aes(
     x = MEASURED_VALUE_STANDARD,
     y = ENVIRON_COMPARTMENT_SUB,
@@ -494,15 +520,12 @@ literature_merged_data |>
   ) +
   theme(legend.position = "none") +
   labs(x = "Concentration (mg/kg dry)", y = "")
-
 ```
 
 ```{r}
 #| label: fig-basic-subcompartments-concentration
-
 literature_merged_data |>
-  filter(!is.na(MEASURED_UNIT_STANDARD), 
-         MEASURED_UNIT_STANDARD == "mg/L") |>
+  filter(!is.na(MEASURED_UNIT_STANDARD), MEASURED_UNIT_STANDARD == "mg/L") |>
   ggplot(aes(
     x = MEASURED_VALUE_STANDARD,
     y = ENVIRON_COMPARTMENT_SUB,
@@ -526,10 +549,11 @@ literature_merged_data |>
 
 ```{r}
 #| label: fig-basic-subcompartments-wet-mass
-
 literature_merged_data |>
-  filter(!is.na(MEASURED_UNIT_STANDARD), 
-         MEASURED_UNIT_STANDARD == "mg/kg (wet)") |>
+  filter(
+    !is.na(MEASURED_UNIT_STANDARD),
+    MEASURED_UNIT_STANDARD == "mg/kg (wet)"
+  ) |>
   ggplot(aes(
     x = MEASURED_VALUE_STANDARD,
     y = ENVIRON_COMPARTMENT_SUB,
@@ -1184,7 +1208,6 @@ presents copper body burdens across different species groups. Note: There appear
 #| fig-width: 10
 #| fig-height: 10
 #| include: false
-
 # TODO: Fix pls
 # literature_merged_data |>
 #   filter(
@@ -1220,7 +1243,6 @@ presents copper body burdens across different species groups. Note: There appear
 #| warning: false
 #| fig-width: 10
 #| fig-height: 12
-
 p <- literature_merged_data |>
   filter(
     !is.na(MEASURED_UNIT_STANDARD),
@@ -1261,7 +1283,6 @@ p <- literature_merged_data |>
 #| warning: false
 #| fig-width: 10
 #| fig-height: 12
-
 p <- literature_merged_data |>
   filter(
     !is.na(MEASURED_UNIT_STANDARD),
@@ -1290,6 +1311,5 @@ p <- literature_merged_data |>
   theme_minimal()
 
 p
-
 ```
 
