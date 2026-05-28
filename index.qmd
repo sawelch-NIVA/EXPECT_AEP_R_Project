@@ -6,14 +6,6 @@ execute:
 
 # Introduction
 
-::: callout-important
-## Please see the notebooks (especially Visualisation) for the most up-to-date changes.
-
-I've taken the slightly unusual step of sharing this manuscript as a website. I know we're all used to word documents, but this spares me the effort of having to paste in new graphs every time I update the analysis (which is often). As most of the work is currently (mid Jan 2026) technical, the most frequently updated sections are the various notebooks (in the sidebar). Once I feel an area of analysis is mature, I'll choose the most informative bits and write up a summary in the main manuscript.
-
-If you want to leave a comment on something, you can do so using the panel to the far right (click the little eye button). I've never used this service before but I hope it will be a satisfactory alternative to Word's comments feature.
-:::
-
 Copper is a vital resource in both biology and engineering due to its useful chemical and biological properties. Demand for copper is likely to grow significantly in coming decades due to demand in manufacturing and infrastructure [@schipperEstimatingGlobalCopper2018].
 
 Biota sensitivity to copper is highly variable and depends on diverse factors including water chemistry, availability of biological material, salinity, pH, and individual organism physiology, metabolism, and behaviour. In addition to its natural occurence, copper is emitted to the environment in a wide range of products and forms, which may be of greater or lesser relevance to the environment depending on their transport in the environment.
@@ -42,7 +34,6 @@ By contrast, the AEP concept has seen less adoption, with 21 (?) papers mentioni
 ```{r}
 #| label: tbl-aep-review
 #| tbl-cap: Table condensed from the output of an mini literature review on the use of the AEP concept. Uncertain whether to keep it here in its current form, as it's rather bulky. May summarise in text and move to SI.
-
 suppressPackageStartupMessages({
   library(readr)
   library(gt)
