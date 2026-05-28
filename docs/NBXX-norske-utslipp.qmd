@@ -1,0 +1,544 @@
+---
+title: "Copper Emissions Data for Norway"
+execute:
+  output: true
+  echo: false
+format: 
+  html: default
+  docx: 
+    fig-width: 8
+    fig-height: 6
+---
+
+```{r}
+#| label: setup-libraries
+suppressMessages(
+  {
+    library(tibble)
+    library(dplyr)
+    library(ggplot2)
+    library(forcats)
+    library(devtools)
+    library(sf)
+    library(summarytools)
+    library(DT)
+    library(readxl)
+    library(visNetwork)
+    library(readxl)
+    library(tidyverse)
+    # load_all(quiet = TRUE)
+    library(here)
+    i_am("README.md")
+  }
+)
+
+
+options(
+  DT.options = list(
+    pageLength = 25,
+    language = list(search = "Filter:"),
+    dom = "ftp" # filter, table, pagination — drops the length menu
+  )
+)
+
+# Helper: render a table appropriately for the current output format ----
+# Uses DT::datatable() for HTML, knitr::kable() for everything else (docx, pdf, etc.)
+render_table <- function(df, caption = NULL, ...) {
+  if (knitr::is_html_output()) {
+    DT::datatable(df, caption = caption, ...)
+  } else {
+    knitr::kable(df, caption = caption)
+  }
+}
+```
+
+```{r}
+#| label: load-data-libraries
+#| warning: false
+#| output: false
+# Pivot an individual-facility file to long format.
+# Handles variable column presence (air, water, sea).
+#' @param df  Wide tibble as read from Excel (after skip + rename)
+#' @param category  String label for source_category column
+pivot_individual <- function(df, category) {
+  # Identify emission value columns (those containing "Årlig utslipp")
+  emission_cols <- names(df)[str_detect(names(df), "Årlig utslipp til")]
+
+  # Build a named vector: medium label -> column name
+  medium_map <- c(
+    "luft" = "Årlig utslipp til luft",
+    "vann" = "Årlig utslipp til vann",
+    "sjø" = "Årlig utslipp til sjø" # present in oil/marine
+  )
+
+  # Keep only those that exist in this file
+  medium_map <- medium_map[medium_map %in% emission_cols]
+
+  df |>
+    select(
+      facility_name = any_of("Anleggsnavn"),
+      fylke = any_of("Fylke"),
+      kommune = any_of("Kommune"),
+      year = any_of("År"),
+      all_of(unname(medium_map))
+    ) |>
+    pivot_longer(
+      cols = all_of(unname(medium_map)),
+      names_to = "medium_raw",
+      values_to = "emission_kg"
+    ) |>
+    mutate(
+      source_category = category,
+      medium = names(medium_map)[match(medium_raw, medium_map)],
+      year = as.integer(year)
+    ) |>
+    select(-medium_raw) |>
+    filter(!is.na(emission_kg))
+}
+
+# Read and reshape an aggregate (sector-level) file.
+# These have 3–4 junk header rows, then År + one or more medium columns.
+#' @param path      Path to xlsx
+#' @param category  String label
+#' @param media     Named character vector: medium_label -> col name in file
+read_aggregate <- function(path, category, media) {
+  # Find the real header row: first row where col 1 == "År"
+  raw <- read_excel(path, col_names = FALSE)
+  header_row <- which(raw[[1]] == "År") - 1
+
+  df <- read_excel(path, skip = header_row, col_names = TRUE)
+
+  # Rename first col to year; remaining cols per media map
+  names(df)[1] <- "year"
+  for (medium_label in names(media)) {
+    col_name <- media[[medium_label]]
+    if (col_name %in% names(df)) {
+      names(df)[names(df) == col_name] <- medium_label
+    }
+  }
+  df |>
+    select(year, any_of(names(media))) |>
+    pivot_longer(
+      cols = -year,
+      names_to = "medium",
+      values_to = "emission_kg"
+    ) |>
+    mutate(
+      source_category = category,
+      facility_name = NA_character_,
+      fylke = NA_character_,
+      kommune = NA_character_,
+      year = as.integer(year),
+      emission_kg = as.numeric(emission_kg) # TODO: This warns on conversion of sentinel strings (e.g. "IT", but could be safer)
+    ) |>
+    filter(!is.na(emission_kg), !is.na(year))
+}
+
+
+# ==============================================================================
+# 2. Read individual-facility files ----
+# ==============================================================================
+
+emissions_land_industry <- read_excel(
+  here(
+    "inst/extdata/emissions/norske_utslipp_copper_land_industries_individ.xlsx"
+  ),
+  skip = 1
+) |>
+  pivot_individual("land_industry")
+
+emissions_landfills <- read_excel(
+  here("inst/extdata/emissions/norske_utslipp_copper_landfills_individ.xlsx"),
+  skip = 1
+) |>
+  pivot_individual("landfill")
+
+emissions_oil_marine <- read_excel(
+  here("inst/extdata/emissions/norske_utslipp_oil_marine.xlsx"),
+  skip = 1
+) |>
+  pivot_individual("oil_marine")
+
+emissions_water_treatment <- read_excel(
+  here("inst/extdata/emissions/norske_utslipp_water_treatment.xlsx"),
+  skip = 1
+) |>
+  pivot_individual("water_treatment")
+
+
+# ==============================================================================
+# 3. Read aggregate sector files ----
+# ==============================================================================
+
+emissions_households <- read_aggregate(
+  here("inst/extdata/emissions/norske_utslipp_households.xlsx"),
+  category = "households",
+  media = c(luft = "Utslipp til luft")
+)
+
+emissions_transport <- read_aggregate(
+  here("inst/extdata/emissions/norske_utslipp_transport.xlsx"),
+  category = "transport",
+  media = c(luft = "Utslipp til luft")
+)
+
+# it's completely unclear what this one represents, so we'll remove it from the final aggregation
+emissions_various_sectors <- read_aggregate(
+  here("inst/extdata/emissions/norske_utslipp_various_sectors.xlsx"),
+  category = "various_sectors",
+  media = c(luft = "Utslipp til luft")
+)
+
+emissions_products <- read_aggregate(
+  here("inst/extdata/emissions/norske_utslipp_products.xlsx"),
+  category = "products",
+  media = c(
+    luft = "Utslipp til luft",
+    vann = "Utslipp til vann",
+    jord = "Utslipp til jord"
+  )
+)
+
+
+# ==============================================================================
+# 4. Bind into single table ----
+# ==============================================================================
+
+copper_emissions <- bind_rows(
+  emissions_land_industry,
+  emissions_landfills,
+  emissions_oil_marine,
+  emissions_water_treatment,
+  emissions_households,
+  emissions_transport,
+  # emissions_various_sectors,
+  emissions_products
+) |>
+  select(
+    source_category,
+    facility_name,
+    fylke,
+    kommune,
+    year,
+    medium,
+    emission_kg
+  ) |>
+  arrange(source_category, year) |>
+  mutate(
+    medium = recode_values(
+      medium,
+      "vann" ~ "Aquatic",
+      "jord" ~ "Terrestrial",
+      "luft" ~ "Atmospheric"
+    )
+  )
+
+# TODO:
+# Match emissions to fylke/site coordinates
+# Translate medium to ENVIRON_COMPARTMENT
+# Get average emissions for kommune, country
+# Pull out (hopefully) case study regions for focused AEPs
+# Make a flow diagram for average copper emissions to compartments per year, from industries
+# How do we then link this to concentrations in water? can we get rough volumes for receiving water?
+```
+
+Copper emissions data for Norway was obtained from the website norskeutslipp.no.
+
+- Just copper
+- Confusing categories
+- A bunch of 0s in inconvenient places
+
+```{r}
+#| label: plot-initial
+copper_emissions_aggregated <- copper_emissions |>
+  # aggregate to national level
+  reframe(
+    .by = c("year", "source_category", "medium"),
+    sum_emissions_kg = sum(emission_kg)
+  ) |>
+  filter_out(
+    (source_category == "products" & medium == "Aquatic" & year %in% 2009:2012),
+    (source_category == "landfill" & medium == "Aquatic" & year %in% 2009:2011)
+  )
+
+copper_emissions_plot <- copper_emissions_aggregated |>
+  ggplot(
+    mapping = aes(
+      x = year,
+      y = sum_emissions_kg,
+      colour = source_category
+    )
+  ) +
+  geom_point(mapping = aes(shape = (sum_emissions_kg == 0))) +
+  geom_line() +
+  facet_wrap(
+    facets = vars(medium),
+    nrow = 3,
+    strip.position = "top",
+    axes = "all"
+  ) +
+  scale_y_log10() +
+  scale_colour_brewer(palette = "Set1", name = "Source Category") +
+  scale_x_continuous(
+    breaks = seq(1980, 2025, by = 5),
+    minor_breaks = seq(1980, 2025, by = 1),
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Emissions of Copper Reported Under REACH By Year and Recieving Compartment",
+    subtitle = "1985 - 2024, via norskeutslipp.no. Outliers shown without points",
+    x = "Year",
+    y = "Reported Emissions (kg)"
+  ) +
+  theme(
+    strip.placement = "top",
+    axis.minor.ticks.x.bottom = element_line(colour = "#aaa")
+  ) +
+  coord_cartesian(clip = FALSE)
+
+# Aside from some highly suspicious outliers it looks like reported copper emissions to various compartments have more
+# or less held steady. it seems reasonable to take averages. of course, we don't know where all these sites are...
+
+copper_emissions_plot
+```
+
+There are some rather improbable changes here. We'll proceed as follows: - Remove the big drop for products/aquatic 2009 - 2012 - Remove the big increase for landfill/aquatic 2009 - 2011 - Keep the suspect increase of products/atmospheric from 0 to \~1e3 (it's suspicious, but I don't have a good reason to assume that nothing happened here)
+
+```{r}
+#| label: filter-outliers
+copper_emissions_by_source_summarised <- copper_emissions_aggregated |>
+  reframe(
+    mean_sum_emissions_kg = mean(sum_emissions_kg),
+    sd_sum_emissions_kg = sd(sum_emissions_kg),
+    n_years_reported = n(),
+    .by = c("source_category", "medium")
+  ) |>
+  distinct() |>
+  arrange(desc(mean_sum_emissions_kg))
+
+
+render_table(
+  copper_emissions_by_source_summarised,
+  caption = "Mean copper emissions by source and medium"
+)
+```
+
+For the sake of completion, let's make a graph showing all this information.
+
+It looks funny because the log scale makes ribbons that extend to/beyond 0 far too big, but what can you do?
+
+```{r}
+#| label: fig-copper-emissions
+#| fig-cap: "Reported copper emissions by source category and receiving compartment, 1985–2024. Points show annual aggregates; horizontal lines show period means; ribbons show ±1 SD. Zero-value years shown as triangles."
+#| fig-width: 10
+#| fig-height: 10
+source_category_labels <- c(
+  products = "Products",
+  transport = "Transport",
+  land_industry = "Land & Industry",
+  water_treatment = "Water Treatment",
+  oil_marine = "Oil & Marine",
+  households = "Households",
+  landfill = "Landfill"
+)
+
+copper_emissions_plot <- copper_emissions_aggregated |>
+  ggplot(
+    mapping = aes(
+      x = year,
+      y = sum_emissions_kg,
+      colour = source_category
+    )
+  ) +
+  # mean line ----
+  geom_hline(
+    data = copper_emissions_by_source_summarised,
+    mapping = aes(
+      yintercept = mean_sum_emissions_kg,
+      colour = source_category
+    ),
+    linetype = "dashed",
+    linewidth = 0.5
+  ) +
+  # sd ribbon ----
+  # geom_rect(
+  #   data = copper_emissions_by_source_summarised,
+  #   mapping = aes(
+  #     xmin = -Inf,
+  #     xmax = Inf,
+  #     ymin = pmax(mean_sum_emissions_kg - sd_sum_emissions_kg, 0.1), # floor at log scale min
+  #     ymax = mean_sum_emissions_kg + sd_sum_emissions_kg,
+  #     fill = source_category
+  #   ),
+  #   alpha = 0.07,
+  #   colour = NA,
+  #   inherit.aes = FALSE
+  # ) +
+  # annual points and lines ----
+  geom_line(alpha = 0.6) +
+  geom_point(
+    mapping = aes(shape = (sum_emissions_kg == 0)),
+    size = 2
+  ) +
+  scale_shape_manual(
+    values = c("FALSE" = 16, "TRUE" = 1),
+    labels = c("FALSE" = "Non-zero", "TRUE" = "Zero"),
+    name = NULL
+  ) +
+  facet_wrap(
+    facets = vars(medium),
+    nrow = 3,
+    strip.position = "top",
+    axes = "all"
+  ) +
+  scale_y_log10(labels = scales::label_comma()) +
+  scale_colour_viridis_d(
+    name = "Source category",
+    labels = source_category_labels
+  ) +
+  scale_x_continuous(
+    breaks = seq(1980, 2025, by = 5),
+    minor_breaks = seq(1980, 2025, by = 1)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Reported Copper Emissions by Source Category and Receiving Compartment",
+    subtitle = "1985–2024, via norskeutslipp.no. Dashed lines = period mean, ribbons = ±1 SD",
+    x = "Year",
+    y = "Reported emissions (kg)"
+  ) +
+  theme(
+    strip.placement = "top",
+    axis.minor.ticks.x.bottom = element_line(colour = "#aaa"),
+    legend.position = "bottom"
+  ) +
+  coord_cartesian(clip = FALSE)
+
+copper_emissions_plot
+```
+
+Another attempt at the same data. Both have their problems, but I think I prefer the latter slightly more.
+
+```{r}
+#| label: plot-alternative
+#| fig-width: 10
+#| fig-height: 10
+#| 
+medium_colours <- c(
+  "Aquatic" = "#43d4b0",
+  "Atmospheric" = "#60b4db",
+  "Terrestrial" = "#d8a12b"
+)
+
+copper_emissions_plot <- copper_emissions_aggregated |>
+  ggplot(
+    mapping = aes(
+      x = year,
+      y = sum_emissions_kg,
+      colour = medium
+    )
+  ) +
+  # mean line ----
+  geom_hline(
+    data = copper_emissions_by_source_summarised,
+    mapping = aes(
+      yintercept = mean_sum_emissions_kg,
+      colour = medium
+    ),
+    linetype = "dashed",
+    linewidth = 0.5
+  ) +
+  # annual points and lines ----
+  geom_line(alpha = 0.6) +
+  geom_point(
+    mapping = aes(shape = (sum_emissions_kg == 0)),
+    size = 2
+  ) +
+  scale_shape_manual(
+    values = c("FALSE" = 16, "TRUE" = 1),
+    labels = c("FALSE" = "Non-zero", "TRUE" = "Zero"),
+    name = NULL
+  ) +
+  facet_wrap(
+    facets = vars(source_category),
+    nrow = 4,
+    labeller = as_labeller(source_category_labels),
+    strip.position = "top",
+    axes = "all"
+  ) +
+  scale_y_log10(labels = scales::label_comma()) +
+  scale_colour_manual(
+    values = medium_colours,
+    name = "Receiving compartment"
+  ) +
+  scale_x_continuous(
+    breaks = seq(1980, 2025, by = 5),
+    minor_breaks = seq(1980, 2025, by = 1)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Reported Copper Emissions by Source Category and Receiving Compartment",
+    subtitle = "1985–2024, via norskeutslipp.no. Dashed lines = period mean",
+    x = "Year",
+    y = "Reported emissions (kg)"
+  ) +
+  theme(
+    strip.placement = "top",
+    axis.minor.ticks.x.bottom = element_line(colour = "#aaa"),
+    legend.position = "bottom"
+  ) +
+  coord_cartesian(clip = FALSE)
+
+copper_emissions_plot
+```
+
+<!-- A Sankey diagram gives a slightly more useful view of how the dataset is utterly dominated by aquatic emissions of products. However, without more specific information it's difficult to know e.g. *which* aquatic environments are recieving the copper, if at all. -->
+
+```{r}
+#| label: sankey-diagram
+#| fig-width: 10
+#| fig-height: 10
+#| warning: false
+#| include: false
+#| eval: false
+library(networkD3)
+
+nodes <- data.frame(
+  name = unique(c(
+    copper_emissions_by_source_summarised$source_category,
+    copper_emissions_by_source_summarised$medium
+  ))
+)
+
+links <- copper_emissions_by_source_summarised |>
+  transmute(
+    source = match(source_category, nodes$name) - 1,
+    target = match(medium, nodes$name) - 1,
+    value = mean_sum_emissions_kg
+  )
+
+sankeyNetwork(
+  Links = links,
+  Nodes = nodes,
+  Source = "source",
+  Target = "target",
+  Value = "value",
+  NodeID = "name",
+  units = "kg",
+  fontSize = 14,
+  fontFamily = "Arial"
+)
+```
+
+# Line of Evidence Assessment
+
+As a line of scientific evidence Norske Utslipp lacks much of what we would hope for. However, it does represent quantified, specific routes of copper emission. Taken alone, this dataset would be scored as follows.
+
+| Criterion | Score | Justification |
+|----------------------------|------------------|---------------------------|
+| Essentiality | 1 | Copper emissions to the environment are copper emissions to the environment. However, by themselves, it is impossible to determine whether these emissions, natural occurrence, transport, other sources, etc. are the most important contributors. |
+| Theoretical Plausibility | 3 | Copper emission is not a complex, hidden biological system; mechanisms of dispersal are well and inutuitively understood without needing reference to the literature. |
+| Empirical Support | 1 | This data is unlikely to be contradicted, but is perhaps by its nature unfalsifiable, except in cases where mistakes are made with data entry. Large gaps as well as unlikely drastic changes in emissions are found in the dataset. |
+| Quantitative Understanding | 1 | Models for various modes of copper emissions exist, but are not addressed in this line of evidence. |
+
+: Norske Utslipp WoE Assessment

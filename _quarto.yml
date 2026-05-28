@@ -80,6 +80,7 @@ format:
       sidebar-width: 400px
     monofont: "Fira Code"
     fig-width: 12
+  
 
 authors:
   - name: Sam Welch
