@@ -38,19 +38,54 @@ Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertai
 
 There's one improbably high outlier in the dataset. We'll remove anything over 50mg/kg dry weight. Black Angel (2017) results are reported with SDs, while Vannmiljø data is just points. But, we need to be careful about sites, dates, and especially campaigns.
 
+The below plot code uses the thresholds for coastal marine waters, since we don't have a background level for algae. We infer that seaweed bioaccumulate copper!
+
 ```{r}
 #| label: algae-comparison
-algae |>
+threshold_data <- generate_copper_thresholds() |>
+  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
+
+# let's cluster our points based on proximity.
+library(sf)
+distance_matrix <- st_as_sf(algae, coords = c("LONGITUDE", "LATITUDE")) |>
+  st_distance()
+
+# for the sake of argument, sites within 20km of each other
+# from https://stackoverflow.com/questions/77179007/group-spatial-points-by-distance-in-r-how-to-group-cluster-spatial-points-so-gr
+binary_matrix <- matrix(
+  as.numeric(
+    distance_matrix
+  ) <
+    20000,
+  nrow = nrow(distance_matrix)
+)
+
+library(igraph)
+g <- graph_from_adjacency_matrix(binary_matrix)
+plot(g)
+
+algae_pointrange <- algae |>
   filter(MEASURED_VALUE <= 50) |>
   mutate(
     SITE_COMMENT = SITE_COMMENT |>
       stringr::str_remove("^.*?\\."),
     SITE_NAME = SITE_NAME |> stringr::str_remove("Vannmiljø Station")
   ) |>
-  ggplot(aes(y = SITE_NAME, x = MEASURED_VALUE, colour = )) +
+  ggplot(aes(y = SITE_NAME, x = MEASURED_VALUE, colour = MEASURED_VALUE)) +
+  scale_colour_viridis_c() +
   geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
+  ggnewscale::new_scale_color() +
+  geom_vline(
+    # TODO: Fix cvolours, add labels to lines.
+    data = threshold_data,
+    aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
   geom_text(
     aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
+    colour = "black",
     hjust = 0
   ) +
   labs(y = "Site Code", x = "Measured Value (mg/kg)") +
@@ -59,14 +94,15 @@ algae |>
     ncol = 1,
     scales = "free_y",
     space = "free_y"
-  )
-theme(axis.text.y = element_text(angle = 90))
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 Otherwise, our standard workup should be something like:
 - Any temporal patterns?
 - Any spatial patterns?
-- Any 
+- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: algae-hexmaps
@@ -76,6 +112,10 @@ library(viridis)
 library(patchwork)
 
 world_map <- map_data("world")
+# reduce bbox size
+get_study_area_bbox <- function() {
+  st_bbox(c(xmin = -65, xmax = 40, ymin = 55, ymax = 75))
+}
 
 algae_hex <- algae |>
   filter(!is.na(LONGITUDE), !is.na(LATITUDE))
@@ -100,10 +140,9 @@ sample_size_map <- algae_hex |>
   ) +
   theme_minimal() +
   labs(
-    title = "Algae sample size by hexbin",
-    x = "Longitude",
-    y = "Latitude"
+    title = "Sample Size",
   ) +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
   coord_fixed(
     ratio = 2,
     xlim = c(
@@ -135,10 +174,9 @@ mean_conc_map <- algae_hex |>
     name = "Mean concentration\n(mg/kg dry & wet)"
   ) +
   theme_minimal() +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
   labs(
     title = "Mean algae concentration by hexbin",
-    x = "Longitude",
-    y = "Latitude"
   ) +
   coord_fixed(
     ratio = 2,
@@ -151,8 +189,6 @@ mean_conc_map <- algae_hex |>
       get_study_area_bbox()[[4]]
     )
   )
-
-sample_size_map / mean_conc_map
 ```
 
 Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
@@ -161,9 +197,21 @@ Finally, any time trends? We're unlikely to see much massively illuminating, bec
 
 ```{r}
 #| label: algae-time-trends
+algae_timetrend <- algae |>
+  filter(MEASURED_VALUE <= 50) |>
+  ggplot(aes(x = SAMPLING_DATE, y = MEASURED_VALUE, group = SITE_NAME)) +
+  geom_point(aes(colour = MEASURED_VALUE)) +
+  scale_colour_viridis_c() +
+  theme_minimal() +
+  geom_smooth(method = "lm", se = FALSE)
+
+algae_timetrend
 
 
+algae_pointrange + (sample_size_map / mean_conc_map / algae_timetrend)
 ```
+
+Well, that's helpful.
 
 # Gap-Filling
 
