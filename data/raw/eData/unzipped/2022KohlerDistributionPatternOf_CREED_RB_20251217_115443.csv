@@ -1,0 +1,37 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Aquatic Sediment)
+
+3 protocols:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)
+Fractionation Protocol - Acid extractable: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)
+Extraction Protocol - Acid digestion: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)","2","Moderate detail on sample matrix."
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)","2","Moderate detail on sampling."
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)
+Extraction Protocol - Acid digestion: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)","1","Transport reported, container appropriate."
+"RB4","Site Location","Required","26 sites. Countries: Not relevant. Areas (2): Barents Sea, Arctic Ocean. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Water benthos. Lowest coordinate precision: 2","1","Yes, with high precision."
+"RB5","Date and Time","Required","2019-08-01 (n=1)","2","Approximately, sampling period covered 2019-2021, but exact date breakdowns not provided."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","4",""
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","4","Justification: No accreditation reported."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)
+Fractionation Protocol - Acid extractable: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)
+Extraction Protocol - Acid digestion: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","2","Moderate detail."
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","4","No blanks reported."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","1","Two SRM used."
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","4","Not reported."
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)","4","Not reported."
+"RB14","Calculations","Recommended","Uncertainty types: Not Relevant","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 0 to 2 significant figures","1","Not relevant."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Not Relevant","1","Not relevant."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."

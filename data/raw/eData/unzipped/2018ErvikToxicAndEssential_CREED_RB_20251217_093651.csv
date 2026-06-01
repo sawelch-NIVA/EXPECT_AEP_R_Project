@@ -1,0 +1,39 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","2 compartments: Biota (Biota, Aquatic); Aquatic (Aquatic Sediment)
+
+20 biota samples. Species (3): Gadus morhua, Hippoglossus hippoglossus, Cancer pagurus. Tissue types (2): Muscle, Brown meat. Life stages: Not reported. Genders: Not reported
+
+3 protocols:
+Sampling Protocol - Other: (Halibut and cod were caught using lines and cod traps, and crab using crab pots in the selected locations. Cod, halibut, and crab were kept in sea water and brought alive to Mausund fieldstation, and euthanized at the field station, prior to sampling of the tissues.)
+Fractionation Protocol - Acid extractable.: (Samples were extracted by HNO3. For sediments: Ultra Clave digestion of 300 mg using 50% HNO3 (50/50 HNO3/water).)
+Extraction Protocol - Acid digestion: (Samples were extracted by HNO3. For sediments: Ultra Clave digestion of 300 mg using 50% HNO3 (50/50 HNO3/water).)","1","Sampling media generally well-described."
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Other: (Halibut and cod were caught using lines and cod traps, and crab using crab pots in the selected locations. Cod, halibut, and crab were kept in sea water and brought alive to Mausund fieldstation, and euthanized at the field station, prior to sampling of the tissues.)","2","Some ambiguity around biota sampling."
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Other: (Halibut and cod were caught using lines and cod traps, and crab using crab pots in the selected locations. Cod, halibut, and crab were kept in sea water and brought alive to Mausund fieldstation, and euthanized at the field station, prior to sampling of the tissues.)
+Extraction Protocol - Acid digestion: (Samples were extracted by HNO3. For sediments: Ultra Clave digestion of 300 mg using 50% HNO3 (50/50 HNO3/water).)","1","Sample handling well-described."
+"RB4","Site Location","Required","5 sites. Countries: Norway. Areas: Norwegian Sea. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Other. Lowest coordinate precision: 2","2","Sampling site coordinates reported to reasonable precision, but measured concentrations pooled."
+"RB5","Date and Time","Required","2012-09-01 to 2015-09-01 (n=4, 1095 days (to nearest day))","1","Sampling period reported as first half of september each year."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyzed using inductively coupled plasma mass spectroscopy (ICP-MS) at the Norwegian University of Science and Technology (NTNU). For sediments, analyzed using ICP-MS for 59 elements, including the 15 elements B, Se, Cd, Sn, Cs, Hg, Pb, Al, Cr, Mn, Fe, Ni, Cu, Zn, and As.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","4","Not reported."
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","4","Justification: No accreditation reported."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Other: (Halibut and cod were caught using lines and cod traps, and crab using crab pots in the selected locations. Cod, halibut, and crab were kept in sea water and brought alive to Mausund fieldstation, and euthanized at the field station, prior to sampling of the tissues.)
+Fractionation Protocol - Acid extractable.: (Samples were extracted by HNO3. For sediments: Ultra Clave digestion of 300 mg using 50% HNO3 (50/50 HNO3/water).)
+Extraction Protocol - Acid digestion: (Samples were extracted by HNO3. For sediments: Ultra Clave digestion of 300 mg using 50% HNO3 (50/50 HNO3/water).)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyzed using inductively coupled plasma mass spectroscopy (ICP-MS) at the Norwegian University of Science and Technology (NTNU). For sediments, analyzed using ICP-MS for 59 elements, including the 15 elements B, Se, Cd, Sn, Cs, Hg, Pb, Al, Cr, Mn, Fe, Ni, Cu, Zn, and As.)","4","Analytical techniques not described in great detail."
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyzed using inductively coupled plasma mass spectroscopy (ICP-MS) at the Norwegian University of Science and Technology (NTNU). For sediments, analyzed using ICP-MS for 59 elements, including the 15 elements B, Se, Cd, Sn, Cs, Hg, Pb, Al, Cr, Mn, Fe, Ni, Cu, Zn, and As.)","4","No mention of blanks."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyzed using inductively coupled plasma mass spectroscopy (ICP-MS) at the Norwegian University of Science and Technology (NTNU). For sediments, analyzed using ICP-MS for 59 elements, including the 15 elements B, Se, Cd, Sn, Cs, Hg, Pb, Al, Cr, Mn, Fe, Ni, Cu, Zn, and As.)","4","No mention of SRM/CRM."
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyzed using inductively coupled plasma mass spectroscopy (ICP-MS) at the Norwegian University of Science and Technology (NTNU). For sediments, analyzed using ICP-MS for 59 elements, including the 15 elements B, Se, Cd, Sn, Cs, Hg, Pb, Al, Cr, Mn, Fe, Ni, Cu, Zn, and As.)","4","Not mentioned."
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Other: (Halibut and cod were caught using lines and cod traps, and crab using crab pots in the selected locations. Cod, halibut, and crab were kept in sea water and brought alive to Mausund fieldstation, and euthanized at the field station, prior to sampling of the tissues.)","4","No field QC mentioned."
+"RB14","Calculations","Recommended","Uncertainty types: Standard Deviation, Not Reported, Not Relevant","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 0 to 3 significant figures","2","Generally, although table values truncated."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","No outliers reported."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","No censored data reported."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Standard Deviation, Not Reported, Not Relevant","1","Assuming correct calculation of means and SDs."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."

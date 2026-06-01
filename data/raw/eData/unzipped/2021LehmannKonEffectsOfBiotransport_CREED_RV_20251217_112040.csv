@@ -1,0 +1,18 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Freshwater)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)","1",""
+"RV3","Study Area","Required","2 sites. Countries: Norway. Areas: Not relevant. Lowest coordinate precision: 3","2","Site coordinates not provided."
+"RV4","Site Type","Recommended","2 sites. Distinct features: Types: River, stream, canal, Subtypes: Other","1","Logic behind site selection (effects of weather, herring gull nesting on water elements) reported. Relevant changes to river discharge reported."
+"RV5","Sampling Timespan","Required","2012-07-13 (n=1)","2","Sampling conducted over ~1 month, although no breakdown of measurements by time period."
+"RV6","Sampling Frequency","Required","2012-07-13 (n=1)","2",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","1","Paper reports potential contaminant sources, hydrology, and flow events."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Filtered through 0.45 micrometer membrane: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)","1",""
+"RV9","Sensitivity/LOD/LOQ","Required","LOQ: 0.03 to 0.03 μg/L; LOD: 0.01 to 0.01 μg/L
+
+1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","1"," ICP-MS appropriate for medium."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Standard Deviation","1",""
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Filtered through 0.45 micrometer membrane: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)","2","Paper reports samples filtered. No mention (that I could find) of acidification, but I assume it was also conducted. "

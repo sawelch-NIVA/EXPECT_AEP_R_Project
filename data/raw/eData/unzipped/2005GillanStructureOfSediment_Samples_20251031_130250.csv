@@ -1,0 +1,5 @@
+﻿SITE_CODE,SITE_NAME,PARAMETER_NAME,PARAMETER_TYPE,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,MEASURED_CATEGORY,SAMPLING_DATE,SUBSAMPLE,SAMPLE_ID
+SorfjordHM2003_S1,Most contaminated site near zinc smelter,Copper,Stressor,Aquatic,Aquatic Sediment,External,01/03/2003,1,SorfjordHM2003_S1-Copper-AquaticSedim-2003-03-01-R 1
+SorfjordHM2003_S2,Site in front of titanium smelter,Copper,Stressor,Aquatic,Aquatic Sediment,External,01/03/2003,1,SorfjordHM2003_S2-Copper-AquaticSedim-2003-03-01-R 1
+SorfjordHM2003_S3,Site 12 km north of S2,Copper,Stressor,Aquatic,Aquatic Sediment,External,01/03/2003,1,SorfjordHM2003_S3-Copper-AquaticSedim-2003-03-01-R 1
+SorfjordHM2003_S4,Control site in neighboring fjord,Copper,Stressor,Aquatic,Aquatic Sediment,External,01/03/2003,1,SorfjordHM2003_S4-Copper-AquaticSedim-2003-03-01-R 1

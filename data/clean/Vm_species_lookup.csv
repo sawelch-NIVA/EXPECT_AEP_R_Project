@@ -1,0 +1,109 @@
+VitenskapligNavn,ENVIRON_COMPARTMENT_SUB_biota,Name,Justification,species_group,species_me_source
+Mytilus edulis,"Biota, Aquatic",Blue mussel,Marine bivalve species,Molluscs,Mytilus edulis
+Carcinus maes,"Biota, Aquatic",European green crab,,Crustaceans,Carcinus maes
+Actinopterygii (Klasse),"Biota, Aquatic",Actinopterygii (Class),,Fish,Actinopterygii (Klasse)
+Polychaeta (Klasse),"Biota, Aquatic",Polychaeta (Class),,Worms,Polychaeta (Klasse)
+Patella vulgata,"Biota, Aquatic",Common limpet,Marine gastropod species,Molluscs,Patella vulgata
+Gadidae (Familie),"Biota, Aquatic",Gadidae (Family),,Fish,Gadidae (Familie)
+Lithodidae (Familie),"Biota, Aquatic",Lithodidae (Family),,Crustaceans,Lithodidae (Familie)
+Perca fluviatilis,"Biota, Aquatic",European perch,"Biota, Aquatic fish species",Fish,Perca fluviatilis
+Esox lucius,"Biota, Aquatic",Northern pike,"Biota, Aquatic fish species",Fish,Esox lucius
+Gadus morhua,"Biota, Aquatic",Atlantic cod,Marine fish species,Fish,Gadus morhua
+Littori littorea,"Biota, Aquatic",Common periwinkle,Marine sil species,Molluscs,Littori littorea
+Limanda limanda,"Biota, Aquatic",Common dab,Marine fish species,Fish,Limanda limanda
+Platichthys flesus,"Biota, Aquatic",European flounder,Marine fish species,Fish,Platichthys flesus
+Modiolus modiolus,"Biota, Aquatic",Northern Horsemussel,,Molluscs,Modiolus modiolus
+Salmo trutta,"Biota, Aquatic",Brown trout,"Biota, Aquatic fish species",Fish,Salmo trutta
+Salvelinus alpinus,"Biota, Aquatic",Arctic char,"Biota, Aquatic fish species",Fish,Salvelinus alpinus
+Gymnocephalus cernuus,"Biota, Aquatic",Ruffe,"Biota, Aquatic fish species",Fish,Gymnocephalus cernuus
+Lota lota,"Biota, Aquatic",Burbot,"Biota, Aquatic fish species",Fish,Lota lota
+Chlamys islandica,"Biota, Aquatic",Iceland scallop,Marine bivalve species,Molluscs,Chlamys islandica
+Gastropoda (Klasse),"Biota, Aquatic",Gastropoda (Class),,Molluscs,Gastropoda (Klasse)
+Salmo salar,"Biota, Aquatic",Atlantic salmon,Adromous fish species,Fish,Salmo salar
+Cancer pagurus,"Biota, Aquatic",Edible crab,Marine crustacean species,Crustaceans,Cancer pagurus
+Coregonus lavaretus,"Biota, Aquatic",European whitefish,"Biota, Aquatic fish species",Fish,Coregonus lavaretus
+Fucus vesiculosus,"Biota, Aquatic",Bladderwrack,,Algae,Fucus vesiculosus
+Ascophyllum nodosum,"Biota, Aquatic",Knotted wrack,Marine algae species,Algae,Ascophyllum nodosum
+Acesta excavata,"Biota, Aquatic",Deep-sea file clam,Marine bivalve species,Molluscs,Acesta excavata
+Thymallus thymallus,"Biota, Aquatic",European grayling,,Fish,Thymallus thymallus
+Pleuronectes platessa,"Biota, Aquatic",European plaice,Marine fish species,Fish,Pleuronectes platessa
+Euphausiacea (Orden),"Biota, Aquatic",Euphausiacea (Order),,Crustaceans,Euphausiacea (Orden)
+Pandalus borealis,"Biota, Aquatic",Northern shrimp,Marine crustacean species,Crustaceans,Pandalus borealis
+Nucella lapillus,"Biota, Aquatic",Dog whelk,Marine sil species,Molluscs,Nucella lapillus
+Littori (Slekt),"Biota, Aquatic",Littori (Genus),,Molluscs,Littori (Slekt)
+Palaemon adspersus,"Biota, Aquatic",Baltic prawn,,Crustaceans,Palaemon adspersus
+Melanogrammus aeglefinus,"Biota, Aquatic",Haddock,,Fish,Melanogrammus aeglefinus
+Erginus (Slekt),"Biota, Aquatic",Erginus (Genus),,Molluscs,Erginus (Slekt)
+Lepetella (Slekt),"Biota, Aquatic",Lepetella (Genus),,Molluscs,Lepetella (Slekt)
+Ctenolabrus rupestris,"Biota, Aquatic",Goldsinny wrasse,Marine fish species,Fish,Ctenolabrus rupestris
+Symphodus melops,"Biota, Aquatic",Corkwing wrasse,Marine fish species,Fish,Symphodus melops
+Rhombogthus setosus,"Biota, Aquatic",Marine mite,Marine mite species,Invertebrates,Rhombogthus setosus
+Labrus bergylta,"Biota, Aquatic",Ballan wrasse,Marine fish species,Fish,Labrus bergylta
+Centrolabrus exoletus,"Biota, Aquatic",Rock cook wrasse,Marine fish species,Fish,Centrolabrus exoletus
+Bunndyr,"Biota, Aquatic",Benthic Organisms,,Other,Bunndyr
+Rutilus rutilus,"Biota, Aquatic",Common roach,Common roach,Fish,Rutilus rutilus
+Sander lucioperca,"Biota, Aquatic",Zander,Zander,Fish,Sander lucioperca
+Blicca bjoerk,"Biota, Aquatic",White bream,,Fish,Blicca bjoerk
+Abramis brama,"Biota, Aquatic",Common bream,,Fish,Abramis brama
+Leuciscus idus,"Biota, Aquatic",Leuciscus idus,,Fish,Leuciscus idus
+Labrus mixtus,"Biota, Aquatic",Cuckoo wrasse,Marine fish species,Fish,Labrus mixtus
+Chironomidae (Familie),"Biota, Aquatic",Chironomidae (Family),,Other,Chironomidae (Familie)
+Laksesmolt,"Biota, Aquatic",,,Fish,
+Blicca bjoerkna,"Biota, Aquatic",White bream,,Fish,
+Insecta,"Biota, Terrestrial",Insects (Class),,Invertebrates,
+Mysis relicta,"Biota, Aquatic",,,Crustaceans,
+Zooplankton epilimnion,"Biota, Aquatic",,,Ecosystem,
+Chironomidae,"Biota, Terrestrial",,,Invertebrates,
+Astacus astacus,"Biota, Aquatic",,,Invertebrates,
+Eisenia hortensis,"Biota, Aquatic",,,Worms,
+Gastropoda,"Biota, Other",,,Molluscs,
+Leuciscus cephalus,"Biota, Aquatic",,,Fish,
+Lumbricus,"Biota, Terrestrial",,,Worms,
+Hylocomium splendens,"Biota, Terrestrial",Stair-step moss,,Moss/Hornworts,
+Somateria mollissima,"Biota, Terrestrial",Common eider,,Birds,
+Larus argentatus,"Biota, Terrestrial",Herring gull,,Birds,
+Vulpes vulpes,"Biota, Terrestrial",Red fox,,Mammals,
+Turdus pilaris,"Biota, Terrestrial",Fieldfare,,Birds,
+Rattus norvegicus,"Biota, Terrestrial",Brown rat,,Mammals,
+Lichen,"Biota, Terrestrial",Lichen (general),,Lichens,
+Lumbricidae,"Biota, Terrestrial",Earthworms (family),,Worms,
+Polychaeta,"Biota, Aquatic",Polychaete worms (class),,Worms,
+Phaeophyceae,"Biota, Aquatic",Brown algae (class),,Algae,
+Littorina littorea,"Biota, Aquatic",Common periwinkle,,Molluscs,
+Euphausiacea,"Biota, Aquatic",Krill (order),,Crustaceans,
+Isobactrus setosus,"Biota, Aquatic",Isopod species,,Crustaceans,
+Clupea harengus,"Biota, Aquatic",Atlantic herring,,Fish,
+Aporrectodea caliginosa,"Biota, Terrestrial",Grey worm,,Worms,
+Phoca vitulina,"Biota, Terrestrial",Harbor seal,,Mammals,
+Carcinus maenas,"Biota, Aquatic",Green crab,,Crustaceans,
+Meles meles,"Biota, Terrestrial",European badger,,Mammals,
+Brosme brosme,"Biota, Aquatic",Tusk,,Fish,
+Littorina,"Biota, Aquatic",Periwinkles (genus),,Molluscs,
+Capreolus capreolus,"Biota, Terrestrial",Roe deer,,Mammals,
+Merlangius merlangus,"Biota, Aquatic",Whiting,,Fish,
+Pollachius pollachius,"Biota, Aquatic",Pollack,,Fish,
+Sorbus aucuparia,"Biota, Aquatic",Rowan,,Plants,
+Arenicola marina,"Biota, Aquatic",Lugworm,,Worms,
+Actinopterygii,"Biota, Aquatic",Ray-finned fishes (class),,Fish,
+Gadidae,"Biota, Aquatic",Cod family,,Fish,
+Bombus,"Biota, Terrestrial",Bumblebees (genus),,Invertebrates,
+Fontinalis antipyretica,"Biota, Terrestrial",Willow moss,,Moss/Hornworts,
+Gulosus aristotelis,"Biota, Terrestrial",European shag,,Birds,
+Lamna nasus,"Biota, Aquatic",Porbeagle shark,,Fish,
+Molva molva,"Biota, Aquatic",Ling,,Fish,
+Orcinus orca,"Biota, Aquatic",Killer whale,,Mammals,
+Phocoena phocoena,"Biota, Terrestrial",Harbor porpoise,,Mammals,
+Squalus acanthias,"Biota, Aquatic",Spiny dogfish,,Fish,
+Apis mellifera,"Biota, Terrestrial",European honey bee,,Invertebrates,
+Balaenoptera physalus,"Biota, Aquatic",Fin whale,,Mammals,
+Buccinum undatum,"Biota, Aquatic",Common whelk,,Molluscs,
+Erginus,"Biota, Aquatic",Limpet genus,,Molluscs,
+Felis catus,"Biota, Terrestrial",Domestic cat,,Mammals,
+Lagenorhynchus albirostris,"Biota, Aquatic",White-beaked dolphin,,Mammals,
+Lepetella,"Biota, Aquatic",Limpet genus,,Molluscs,
+Lithodidae,"Biota, Aquatic",King crabs (family),,Crustaceans,
+Megaptera novaeangliae,"Biota, Aquatic",Humpback whale,,Mammals,
+Nephrops norvegicus,"Biota, Aquatic",Norway lobster,,Crustaceans,
+Physeter macrocephalus,"Biota, Aquatic",Sperm whale,,Mammals,
+Somniosus microcephalus,"Biota, Aquatic",Greenland shark,,Fish,
+Trisopterus minutus,"Biota, Aquatic",Poor cod,,Fish,

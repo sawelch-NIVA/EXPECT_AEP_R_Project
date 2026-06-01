@@ -1,0 +1,19 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","3 compartments: Biota (Biota, Aquatic); Aquatic (Marine/Salt Water); Aquatic (Aquatic Sediment)","1",""
+"RV2","Collection Method/Sample Type","Recommended","4 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)","1",""
+"RV3","Study Area","Required","3 sites. Countries: Greenland. Areas: North Atlantic Ocean. Lowest coordinate precision: 3","2","Sites were well-described but coordinates not reported."
+"RV4","Site Type","Recommended","3 sites. Distinct features: Types: Coastal, fjord, Subtypes: Not relevant","1","Context of mining area reported."
+"RV5","Sampling Timespan","Required","2017-08-01 (n=1)","2","Only one timepoint, but this is largely appropriate for a study of historical pollution."
+"RV6","Sampling Frequency","Required","2017-08-01 (n=1)","2","Only one timepoint, but this is largely appropriate for a study of historical pollution."
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","No reporting of weather conditions, etc. May not be relevant for historical pollution."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (All samples were either fractionated with acid or acid + microwave)","1","Acid digestion was appropriate for sediment and biota. DGT was used for labile copper fraction in seawater."
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","ICP-MS was appropriate for media/copper."
+"RV10","Summary Statistics Type","Recommended","Relevant data not found","2","Values reported as mean +- SD."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (All samples were either fractionated with acid or acid + microwave)","1","Acid digestion was appropriate for sediment and biota. DGT was used for labile copper fraction in seawater."

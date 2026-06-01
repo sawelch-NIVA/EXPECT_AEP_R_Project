@@ -1,0 +1,18 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","2 compartments: Aquatic (Aquatic Sediment); Aquatic (Porewater)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)","1","ISO standard."
+"RV3","Study Area","Required","3 sites. Countries: Norway. Areas: North Atlantic Ocean. Lowest coordinate precision: 2","2","Sites aggregated to group."
+"RV4","Site Type","Recommended","3 sites. Distinct features: Types (2): Coastal, fjord, Ocean, sea, territorial waters, Subtypes: Other","1","Generally context rich. Given location in sea, seasonal concerns expected to be less relevant."
+"RV5","Sampling Timespan","Required","2015-11-17 (n=1)","2","One-off."
+"RV6","Sampling Frequency","Required","2015-11-17 (n=1)","2",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","Long-term conditions reported, but not short-term."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Sediments/porewater acidified.)","2",""
+"RV9","Sensitivity/LOD/LOQ","Required","LOQ: 0.03 to 0.03 μg/g (wet)
+
+1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)","1",""
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Not Relevant","2",""
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Sediments/porewater acidified.)","2",""

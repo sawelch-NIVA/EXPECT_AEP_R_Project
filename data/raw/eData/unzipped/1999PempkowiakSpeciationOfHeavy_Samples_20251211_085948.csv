@@ -1,0 +1,5 @@
+﻿"SITE_CODE","SITE_NAME","PARAMETER_NAME","PARAMETER_TYPE","ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","MEASURED_CATEGORY","SAMPLING_DATE","SUBSAMPLE","SAMPLE_ID"
+"SpitsBalticMetals99_NORWEG","Norwegian Sea off Spitsbergen","Copper","Stressor","Biota","Biota, Aquatic","Internal","01/01/1999","Mya arenaria","SpitsBalticMetals99_NORWEG-Copper-BiotaAquatic-1999-01-01-R-MyaArenaria"
+"SpitsBalticMetals99_NORWEG","Norwegian Sea off Spitsbergen","Copper","Stressor","Biota","Biota, Aquatic","Internal","01/01/1999","Astarte borealis","SpitsBalticMetals99_NORWEG-Copper-BiotaAquatic-1999-01-01-R-AstarteBorealis"
+"SpitsBalticMetals99_BALTIC","Baltic Sea off Poland","Copper","Stressor","Biota","Biota, Aquatic","Internal","01/01/1999","Mya arenaria","SpitsBalticMetals99_BALTIC-Copper-BiotaAquatic-1999-01-01-R-MyaArenaria"
+"SpitsBalticMetals99_BALTIC","Baltic Sea off Poland","Copper","Stressor","Biota","Biota, Aquatic","Internal","01/01/1999","Astarte borealis","SpitsBalticMetals99_BALTIC-Copper-BiotaAquatic-1999-01-01-R-AstarteBorealis"

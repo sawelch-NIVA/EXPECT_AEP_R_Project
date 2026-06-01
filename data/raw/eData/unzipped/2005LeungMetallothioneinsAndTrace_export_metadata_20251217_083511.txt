@@ -1,0 +1,21 @@
+STOPeData Export Metadata
+==================================================
+
+Campaign Name: Metallothioneins and trace metals in dogwhelk Nucella lapillus from Icelandic coasts
+Export Date/Time: 2025-12-17 08:35:11 UTC
+Exported By: SAW
+
+Application Information:
+  App Name: STOPeData
+  App Version: 0.0.0.9006
+  App URL: https://github.com/sawelch-NIVA/STOPedata
+
+Technical Information:
+  Browser: Unknown browser
+
+==================================================
+
+This ZIP file contains CSV data files exported from STOPeData.
+Each CSV file contains one type of data (sites, parameters, etc.).
+To re-import this data, use the 'Upload session data' option
+in STOPeData.

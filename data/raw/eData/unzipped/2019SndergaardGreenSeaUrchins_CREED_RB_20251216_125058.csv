@@ -1,0 +1,57 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","3 compartments: Biota (Biota, Aquatic); Aquatic (Marine/Salt Water); Aquatic (Aquatic Sediment)
+
+18 biota samples. Species (3): Strongylocentrotus droebachiensis, Fucus vesiculosus, Mytilus edulis. Tissue types (4): Total soft tissues minus gonads, Gonad, Shoot tips, Total soft tissues. Life stages: Adult. Genders: Not reported
+
+7 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)
+Fractionation Protocol - Acid extractable: (All samples were either fractionated with acid or acid + microwave)
+Extraction Protocol - Microwave-assisted acid digestion: (Freeze-dried subsamples of biota (c. 300 mg) microwave-digested (Anton Paar Multiwave 3000) in Teflon bombs in 4 ml/4 ml Merck Suprapure HNO3/MilliQ water)
+Extraction Protocol - Acid digestion: (Freeze-dried subsamples of sediment (c. 200 mg) digested in a mixture of 0.25 ml/0.75 ml/3 ml Suprapure HNO3/HCl/HF in Berghof bombs at 120 °C for 4 h, then diluted with MilliQ water and the HF was neutralised by boric acid)","2","Many matrices/mediums were sampled, but not all potentially relevant details were provided for each of these."
+"RB2","Collection Method/Sample Type","Recommended","4 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)","1","Detailed sampling methods were reported for each species/media."
+"RB3","Sample Handling","Recommended","6 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)
+Extraction Protocol - Microwave-assisted acid digestion: (Freeze-dried subsamples of biota (c. 300 mg) microwave-digested (Anton Paar Multiwave 3000) in Teflon bombs in 4 ml/4 ml Merck Suprapure HNO3/MilliQ water)
+Extraction Protocol - Acid digestion: (Freeze-dried subsamples of sediment (c. 200 mg) digested in a mixture of 0.25 ml/0.75 ml/3 ml Suprapure HNO3/HCl/HF in Berghof bombs at 120 °C for 4 h, then diluted with MilliQ water and the HF was neutralised by boric acid)","1","Detailed sample handling methods were reported for each species/media."
+"RB4","Site Location","Required","3 sites. Countries: Greenland. Areas: North Atlantic Ocean. Distinct features: Types: Coastal, fjord, Subtypes: Not relevant. Lowest coordinate precision: 3","1","Site locations were reported, albeit not with coordinates."
+"RB5","Date and Time","Required","2017-08-01 (n=1)","1","To the month."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","Yes, analytical techniques were thorough and appropriate."
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","2","LODs were reported where substances were not detected."
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","1","Justification: No lab accreditation was reported."
+"RB9","Method","Required","8 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)
+Fractionation Protocol - Acid extractable: (All samples were either fractionated with acid or acid + microwave)
+Extraction Protocol - Microwave-assisted acid digestion: (Freeze-dried subsamples of biota (c. 300 mg) microwave-digested (Anton Paar Multiwave 3000) in Teflon bombs in 4 ml/4 ml Merck Suprapure HNO3/MilliQ water)
+Extraction Protocol - Acid digestion: (Freeze-dried subsamples of sediment (c. 200 mg) digested in a mixture of 0.25 ml/0.75 ml/3 ml Suprapure HNO3/HCl/HF in Berghof bombs at 120 °C for 4 h, then diluted with MilliQ water and the HF was neutralised by boric acid)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","Yes, methods were reported in detail. CRMs were used to check recovery."
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","Lab blanks were used."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","SRM/CRMs were used."
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Analyses performed using an Agilent 7900 ICP-MS for 60+ elements. Quality checked by analysing blanks, duplicates and certified reference materials DOLT-5, DORM-4 and TORT-3 (for biota) and MESS-4, PACS-2 and HISS-1 (for sediment). Recovery percentages for CRMs were 82-107% for biota and 79-114% for sediment)","1","Duplicates were reported, and I presume this is the same as replicates (for n = 2)."
+"RB13","Field QC","Recommended","4 protocols:
+Sampling Protocol - Grab sampling: (Green sea urchins collected at depths between 1 and 10 m using nets either attached to a pole or dragged across the sea floor from a boat, put into polyethylene bags and frozen)
+Sampling Protocol - Point sampling: (Blue mussels (c. 10 individual per site) and seaweed collected from shore at low tide. For seaweed, the fresh growth tips were cut from the rest of the plants using stainless steel scissors)
+Sampling Protocol - Grab sampling: (Sea bottom sediment collected using an Ekman grab sampler and the upper c. 5-cm layer sampled from three different spots and pooled into one bag)
+Sampling Protocol - DGT: (Measurements of labile dissolved metal concentration in seawater using DGT sampling devices (Diffusive Gradients in Thin films) suspended in the water column c. 3 m above the bottom and deployed from 2 to 11 August 2017)","4","No field sampling QC was reported."
+"RB14","Calculations","Recommended","Relevant data not found","1","No normalisation reported."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 3 significant figures","1","Appropriate accuracy for copper in sampled matrices."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","LODs were reported appropriately, no substitution were used."
+"RB18","Summary Statistics Procedures","Recommended","Relevant data not found","1","No summary stats reported."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not needed."

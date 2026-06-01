@@ -1,0 +1,4 @@
+﻿"SITE_CODE","SITE_NAME","PARAMETER_NAME","PARAMETER_TYPE","ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","MEASURED_CATEGORY","SAMPLING_DATE","SUBSAMPLE","SAMPLE_ID"
+"seafoodprocessing_Greenland_prawns","West coast of Greenland - FAO 21 Major fishing area, NAFO subarea 1A and 1B","Copper","Stressor","Biota","Biota, Aquatic","Internal to Organism","2024-11-01","1","seafoodprocessing_Greenland_prawns-Copper-BiotaAquatic-2024-11-01-R 1"
+"seafoodprocessing_Greenland_halibut","Fishery Near Ilulissat, West Greenland","Copper","Stressor","Biota","Biota, Aquatic","Internal to Organism","2024-11-01","1","seafoodprocessing_Greenland_halibut-Copper-BiotaAquatic-2024-11-01-R 1"
+"seafoodprocessing_Atlantic_salmon","Fish Farm Near Rørvik, Norway","Copper","Stressor","Biota","Biota, Aquatic","Internal to Organism","2024-11-01","1","seafoodprocessing_Atlantic_salmon-Copper-BiotaAquatic-2024-11-01-R 1"

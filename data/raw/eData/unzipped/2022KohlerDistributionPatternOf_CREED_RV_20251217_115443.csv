@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Aquatic Sediment)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Grab sampling: (Samples collected either via box corer or Van Veen grab. Sediment was collected from the upper 0–2 cm and subsampled into trace-metal free tubes (Falcon) while avoiding all contact with metal equipment.)","1","Detailed collection method."
+"RV3","Study Area","Required","26 sites. Countries: Not relevant. Areas (2): Barents Sea, Arctic Ocean. Lowest coordinate precision: 2","2","Precise site coordinates, placed in context of overall sea concentrations. No discussion of ecosystems/sources."
+"RV4","Site Type","Recommended","26 sites. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Water benthos","1",""
+"RV5","Sampling Timespan","Required","2019-08-01 (n=1)","2",""
+"RV6","Sampling Frequency","Required","2019-08-01 (n=1)","2",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2",""
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)","2","Acid-digestion."
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Samples were analyzed for Al, Fe, and trace elements (Li, V, Cr, Mn, Co, Ni, Cu, Zn, As, Ag, Cd, Pb) on an 8800 triple quadrupole ICP-MS (Agilent Technologies) using O2 or H2 as a reaction gas in MS/MS mode, depending on the element. Accuracy and precision of the method were determined using the certified reference materials MESS-4 (n = 3) and BCR-277R (n = 3), with all recoveries between 82 and 107 %.)","1","ICPMS appropriate."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Not Relevant","1",""
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Approximately 250 mg of dried homogenized sediment sample was digested in a 50 % v/v clean HNO3 acid mixture using an Ultraclave (Milestone).)","2",""

@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Biopsy: (Skin samples from O. r. rosmarus were collected using steel tips for arrows. Steel composition 12X18H10: 0.12% carbon (C), 18% chromium (Cr), 10% nickel (Ni), <0.8% titanium (Ti). Depth 1.5-2 cm, width 0.5 cm, weight about 5 g. Samples from O. r. divergens collected using medical scalpel. Skin samples about 2 cm depth and 2 cm width, weight about 15 g. Organ samples taken from any part, weight not less 15 g.)","1",""
+"RV3","Study Area","Required","9 sites. Countries: Russia. Areas (3): Barents Sea, Arctic Ocean, Bering Sea. Lowest coordinate precision: 0","2","Limited site precision."
+"RV4","Site Type","Recommended","9 sites. Distinct features: Types: Bare land and lichen/moss, Subtypes: Other","1","Sampling areas are walrus habitats and sites of aboriginal hunting."
+"RV5","Sampling Timespan","Required","2019-08-01 to 2021-08-01 (n=3, 731 days (to nearest day))","1",""
+"RV6","Sampling Frequency","Required","2019-08-01 to 2021-08-01 (n=3, 731 days (to nearest day))","1",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","4",""
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Biomaterial samples were thawed at room temperature. Before analysis 1 to 5 g of sample was ashed in a muffle furnace at 450°C. The ash was dissolved in diluted nitric acid.)","1",""
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Copper was determined in the flame mode of a Varian AA 140 atomic absorption spectrometer. Analysis according to GOST 26929-94 Preparation of samples. Mineralization for determination of toxic element content and MUK 4.1.991-00 Methodology for measuring the mass fraction of copper and zinc in food products and food raw materials by electrothermal atomic absorption spectrometry.)","2","FAAS may be inappropriate, although no measurements were below LOD/LOQ, and a standard was followed."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Standard Deviation, Not relevant","1","Original values reported. SDs and means were calculated during extraction to speed up data entry."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Biomaterial samples were thawed at room temperature. Before analysis 1 to 5 g of sample was ashed in a muffle furnace at 450°C. The ash was dissolved in diluted nitric acid.)","2","Acid extractable."

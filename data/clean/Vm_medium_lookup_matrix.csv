@@ -1,0 +1,55 @@
+﻿"MediumID","Name","Description","n","ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","SPECIES_GROUP","SAMPLE_SPECIES","SAMPLE_TISSUE","SITE_GEOGRAPH_FEATURE","SITE_GEOGRAPH_FEATURE_SUB"
+"BB","Biota bløtdeler","Innmat i muslinger (blåskjell) og skalldyr (f.eks. brunmat i krabbe). Analyseresultater angis i våtvekt.",4597,NA,NA,NA,NA,NA,NA,NA
+"BH","Biota helkropp","Homogenisert prøve av fisk (ulike vevstyper). Analyseresultater angis i våtvekt.",488,NA,NA,NA,NA,NA,NA,NA
+"BL","Biota lever","Leverprøver av organismer. Analyseresultater angis i våtvekt.",4280,NA,NA,NA,NA,NA,NA,NA
+"BM","Biota muskelvev","Muskelvev av organismer, f.eks. fiskefillet og krabbeklo. Analyseresultater angis i våtvekt.",777,NA,NA,NA,NA,NA,NA,NA
+"BS","Biota mageinnhold","Ufordøyde matrester i magesekk hos fisk.",NA,NA,NA,NA,NA,NA,NA,NA
+"PA","Partikler","Suspenderte eller sedimenterende partikler fanget i sedimentfelle, holdt igjen på filter, komprimert til sentrifugat e.l.",439,NA,NA,NA,NA,NA,NA,NA
+"SF","Sediment ferskvann","Vertikale snitt av sedimentert materiale i ferskvann. Analyseresultater angis i tørrvekt.",3009,NA,NA,NA,NA,NA,NA,NA
+"SS","Sediment saltvann","Vertikale snitt av sedimentert materiale i marint vann. Analyseresultater angis i tørrvekt.",29681,NA,NA,NA,NA,NA,NA,NA
+"VF","Ferskvann","Vannvolum fra overflate eller nærmere angitte dyp/dybdeintervall i innsjøer og elver. Omfatter også vannlevende organismer i pelagial- og litoralsonen.",81921,NA,NA,NA,NA,NA,NA,NA
+"VS","Saltvann","Vannvolum fra overflate eller nærmere angitte dyp/dybdeintervall i marint vann. Omfatter også marine organismer i pelagialen og på bløtbunn og hardbunn.",5434,NA,NA,NA,NA,NA,NA,NA
+"BK","Biota skuddspiss","Skuddspiss av tang og tare. Analyseresultater angis i våtvekt.",216,NA,NA,NA,NA,NA,NA,NA
+"BG","Biota gjeller","Gjeller av fisk (særlig anadrom laksefisk). Analyseresultater angis i tørrvekt.",244,NA,NA,NA,NA,NA,NA,NA
+"BE","Biota egg","Homogenisert prøve av eggehvite og eggeplomme i sjøfuglegg. Analyseresultater angis i våtvekt.",338,NA,NA,NA,NA,NA,NA,NA
+"NS","Bunnsubstrat saltvann","Marin bløtbunnsfauna og marin hardbunnsflora og -fauna.",NA,NA,NA,NA,NA,NA,NA,NA
+"NF","Bunnsubstrat ferskvann","Bunndyr og fastsittende organismer på innsjø- og elvebunn.",NA,NA,NA,NA,NA,NA,NA,NA
+"U","Uspesifisert","Organismer som ikke kan knyttes til noe bestemt medium.",NA,NA,NA,NA,NA,NA,NA,NA
+"BO","Biota blod","Blodprøver (fullblod) av organismer. Analyseresultater angis i våtvekt.",225,NA,NA,NA,NA,NA,NA,NA
+"GV","Grunnvann","Vannvolum fra grunnvannsbrønn.",4074,NA,NA,NA,NA,NA,NA,NA
+"AFP","Øvrige faste bearbeidete produkter","Faste bearbeidete produkter ikke nevn i andre kategorier",NA,NA,NA,NA,NA,NA,NA,NA
+"AKP","Øvrige kjemiske produkter","Kjemiske produkter ikke nevn i andre kategorier",NA,NA,NA,NA,NA,NA,NA,NA
+"BF","Biota fettvev","Fettvev og spekk i organismer. Analyseresultat angis i våtvekt.",17,NA,NA,NA,NA,NA,NA,NA
+"BJ","Biota hjernevev","Hjernevev. Analyseresultat angis i våtvekt.",NA,NA,NA,NA,NA,NA,NA,NA
+"BP","Biota blodplasma","Andel av blodet som er igjen etter at blodceller er fjernet ved sentrifugering. Analyseresultat angis i våtvekt.",NA,NA,NA,NA,NA,NA,NA,NA
+"BPV","Biota plantevev","Vevsprøver fra terrestriske planter f.eks. etasjemose og barnåler.  Analyseresultat angis i våtvekt.",573,NA,NA,NA,NA,NA,NA,NA
+"BU","Biota blodserum","Væskefasen av blod etter at det har koagulert. Analyseresultat angis i våtvekt.",NA,NA,NA,NA,NA,NA,NA,NA
+"BYG","Byggevarer","En byggevare er et produkt som bygges inn i byggverk og som påvirker byggverkets grunnleggende egenskaper (mekanisk stabilitet, brannsikkerhet, beskyttelse av brukernes helse og hygiene, sikkerhet ved bruk, vern mot støy og energi).",NA,NA,NA,NA,NA,NA,NA,NA
+"EEP","EE-produkter","Omfattende og sammensatt gruppe produkter, som for eksempel støvsugere, komfyrer, TV-apparater, PCer, mobiltelefoner, lysstoffrør, kabler og ledninger",NA,NA,NA,NA,NA,NA,NA,NA
+"EMB","Emballasje","Emballasje er den gjenstand et produkt er innpakket i for å sikre det under alle distribusjonspåkjenninger, fra varen produseres og frem til endelig forbruk (SNL).",NA,NA,NA,NA,NA,NA,NA,NA
+"JOR","Jord","Alt løsmateriale av uorganisk og organisk opprinnelse over fast fjell. Analyseresultat angis i tørrvekt.",178,NA,NA,NA,NA,NA,NA,NA
+"KLS","Kloakkslam","Avvannet og stabilisert slam fra avløpsrenseanlegg. Analyseresultat angis i tørrvekt.",1,NA,NA,NA,NA,NA,NA,NA
+"LEK","Leker","Produkter som, utelukkende eller delvis, er konstruert eller beregnet for å brukes av barn under 14 år i lek.",NA,NA,NA,NA,NA,NA,NA,NA
+"LUF","Luft","Luft inne- og utemiljø.",1123,NA,NA,NA,NA,NA,NA,NA
+"MAL","Maling og lakk","Pigment- og bindemiddelholdige bestrykningsmidler som brukes til overflatebehandling av tre, mur, metaller og andre materialer for å beskytte, dekorere eller merke dem. (SNL)",NA,NA,NA,NA,NA,NA,NA,NA
+"MP","Mikroplastpartikler","Plastpartikler med partikkelstørrelse < 1 mm",NA,NA,NA,NA,NA,NA,NA,NA
+"PSS","Porevann sediment saltvann","Vannvolum av porevann fra vertikale snitt i sedimentert materiale i marint vann.",50,NA,NA,NA,NA,NA,NA,NA
+"SBA","Småbarnsartikler","Produkt beregnet på å lette barns søvn, avslapning, som brukes til hygiene, eller som barn kan mates med eller suge på.",NA,NA,NA,NA,NA,NA,NA,NA
+"SPF","Sport og fritidsutstyr","Omfattende og sammensatt gruppe av utstyr ment for å brukes ved fritidsaktiviteter og sport, for eksempel ski, sykler, fiskeutstyr mm.",NA,NA,NA,NA,NA,NA,NA,NA
+"TEK","Tekstiler og sko","Tekstiler og sko.",NA,NA,NA,NA,NA,NA,NA,NA
+"VAR","Avløpsvann renset","Renset vann i utløp fra avløpsrenseanlegg (minimum mekanisk rensing).",137,NA,NA,NA,NA,NA,NA,NA
+"VAU","Avløpsvann urenset","Urenset vann i avløpsnettet (kum, overløp etc.) eller i innløp til avløpsrenseanlegg.",56,NA,NA,NA,NA,NA,NA,NA
+"VRG","Regnvann","Vann oppsamlet fra nedbør i form av regn.",388,NA,NA,NA,NA,NA,NA,NA
+"BA","Biota galle","Galle. Analyseresultatet angis i våtvekt.",1,NA,NA,NA,NA,NA,NA,NA
+"SVS","Svevestøv","Partikler i luft med diameter mindre enn 10 µm (PM10).",NA,NA,NA,NA,NA,NA,NA,NA
+"PSF","Porevann sediment ferskvann","Vannvolum av porevann fra vertikale snitt i sedimentert materiale i ferskvann.",NA,NA,NA,NA,NA,NA,NA,NA
+"HS","Husstøv","Støvpartikler i innemiljø oppsamlet med støvsuger eller tørkepapir. Analyseresultat angis i tørrvekt.",5,NA,NA,NA,NA,NA,NA,NA
+"FKG","Fyllingsmateriale kunstgress","Fyllingsmateriale i kunstgress (sand og granulat). Angis i tørrvekt.",NA,NA,NA,NA,NA,NA,NA,NA
+"VOV","Overvann","Vann i overvannsnett (kum etc.) fra avrenning etter nedbør.",363,NA,NA,NA,NA,NA,NA,NA
+"BN","Biota nyrer","Nyreprøver av organismer. Analyseresultater angis i våtvekt.",NA,NA,NA,NA,NA,NA,NA,NA
+"BRO","Biota rogn","Rogn fra hunnfisk",NA,NA,NA,NA,NA,NA,NA,NA
+"BSP","Biota melke","Melke (spermier) fra hannfisk",NA,NA,NA,NA,NA,NA,NA,NA
+"BD","Biota gonader","Prøver av kjønnskjertler (gonader) hos fisk",NA,NA,NA,NA,NA,NA,NA,NA
+"RSL","Råslam","Slam fra avløpsrenseanlegg som ikke har gjennomgått noen form for stabilisering eller hygienisering.",NA,NA,NA,NA,NA,NA,NA,NA
+"BDM","Biota gonader (hann)","Prøver av kjønnskjertler (testikler) hos hannfisk",NA,NA,NA,NA,NA,NA,NA,NA
+"BDF","Biota gonader (hunn)","Prøver av kjønnskjertler (ovarier) hos hunnfisk",NA,NA,NA,NA,NA,NA,NA,NA

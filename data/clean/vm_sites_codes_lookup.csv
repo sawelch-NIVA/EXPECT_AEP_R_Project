@@ -1,0 +1,10 @@
+VannkategoriID,Name,Description,n,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB
+C,Kyst,Coastal waters,20927,Aquatic,Marine/Salt Water,"Coastal, fjord",*
+R,Elv,River,4756,Aquatic,Freshwater,"River, stream, canal",*
+L,Innsjø,Lake,3025,Aquatic,Freshwater,"Lake, pond, pool, reservoir",*
+J,Terrestrisk,Terrestrial,707,Terrestrial,*,*,*
+G,Grunnvann,Groundwater,550,Aquatic,Groundwater,"Groundwater, aquifer",*
+O,Ocean?,Ocean?,256,Aquatic,Marine/Salt Water,"Ocean, sea, territorial waters",*
+U,Ukategorisert,Uncategorized,250,Not reported,*,*,*
+S,Sewage?,Stormwater?,63,Aquatic,*,*,*
+A,Luft,Air,7,Atmospheric,*,*,*

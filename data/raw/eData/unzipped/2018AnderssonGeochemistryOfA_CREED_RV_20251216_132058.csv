@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Aquatic Sediment)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)","1",""
+"RV3","Study Area","Required","1 sites. Countries: Norway. Areas: Not relevant. Lowest coordinate precision: 1","2","As mentioned in reliability section, the aggregation of 139 data points across 8 sites for reporting drastically reduces the value of the otherwise detailed site information."
+"RV4","Site Type","Recommended","1 sites. Distinct features: Types: Coastal, fjord, Subtypes: Water benthos","2","Rationale and context for site (mine waste dumping) are clear from study."
+"RV5","Sampling Timespan","Required","2015-06-01 (n=1)","2","One-off sampling."
+"RV6","Sampling Frequency","Required","2015-06-01 (n=1)","2","One-off sampling."
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","Paper reports sampling conditions at each site to a high level of detail. However, sites are aggregated."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)","2","Full acid digested fraction."
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)","1","ICP-MS"
+"RV10","Summary Statistics Type","Recommended","Relevant data not found","2","Values only reported as quantiles."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)","2","Total digested fraction."

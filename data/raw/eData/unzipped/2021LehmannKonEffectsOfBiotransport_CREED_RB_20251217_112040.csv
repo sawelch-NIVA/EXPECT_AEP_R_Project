@@ -1,0 +1,37 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Freshwater)
+
+3 protocols:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)
+Fractionation Protocol - Filtered through 0.45 micrometer membrane: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)
+Extraction Protocol - Not reported: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)","1","River hydrology well-described. "
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)","1",""
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)
+Extraction Protocol - Not reported: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)","1",""
+"RB4","Site Location","Required","2 sites. Countries: Norway. Areas: Not relevant. Distinct features: Types: River, stream, canal, Subtypes: Other. Lowest coordinate precision: 3","1",""
+"RB5","Date and Time","Required","2012-07-13 (n=1)","1",""
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","LOQ: 0.03 to 0.03 μg/L; LOD: 0.01 to 0.01 μg/L","1",""
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","1","Justification: No accreditation metioned."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)
+Fractionation Protocol - Filtered through 0.45 micrometer membrane: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)
+Extraction Protocol - Not reported: (Samples filtered through 0.45 µm-filter prior to analysis. Presumably acidified too, but this isn't reported.)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","1",""
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","1","""In order to mitigate a possible impact of the sampling containers, a blank sample was used as a control."""
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","1","""Due to the various matrix compositions of freshwater samples in the environment, there is a necessity to validate the analytical procedures which are applied in the determination of individual components against certified reference materials (Standard Reference Material NIST 1643e Trace Elements in Water, and Reference Material EnviroMAT ES-L-2 CRM, ES-H-2 CRM SCP SCIENCE). Moreover, the apparatus calibration phase involved using reference materials by Inorganic Ventures Analityk- CCS-4, CCS-6, CCS-1, IV-ICPMS-71A."""
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Thermo Scientific XSERIES 2 ICP-MS, Germany, Collision Cell Technology, Cool gas flow Ar: 12 l/min, Cell gas flow He/H: 5.5 ml/min. Cu had measurement range 0.010-1,000 µg/L, LOD = 0.010 µg/L, LOQ = 0.030 µg/L. Quality control using certified reference materials NIST 1643e and EnviroMAT ES-L-2 CRM, ES-H-2 CRM.)","4","Not reported."
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Point sampling: (Surface water manually collected into chemically clean 0.5 L HDPE bottles by personnel with polyethylene gloves. Bottles washed with alkaline cleaning powder, soaked in ultrapure water for one week, rinsed 4 times with ultrapure water, triple-rinsed with sample before collection. Sample stored at +4°C without light access.)","1","""In order to mitigate a possible impact of the sampling containers, a blank sample was used as a control."""
+"RB14","Calculations","Recommended","Uncertainty types: Standard Deviation","1","Assuming no errors in SD/mean calc."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 2 significant figures","1",""
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1",""
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1",""
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Standard Deviation","1",""
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1",""

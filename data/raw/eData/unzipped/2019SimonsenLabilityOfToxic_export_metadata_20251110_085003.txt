@@ -1,0 +1,22 @@
+STOPeData Export Metadata
+==================================================
+
+Campaign Name: Submarine Tailings Disposal Study - Bøkfjorden 2016
+Export Date/Time: 2025-11-10 08:50:03 UTC
+Exported By: Camden Karon Klefbom
+
+Application Information:
+  App Name: STOPeData
+  App Version: 0.0.0.9004
+  Git Commit: 07109f3
+  App URL: https://github.com/sawelch-NIVA/STOPedata
+
+Technical Information:
+  Browser: Unknown browser
+
+==================================================
+
+This ZIP file contains CSV data files exported from STOPeData.
+Each CSV file contains one type of data (sites, parameters, etc.).
+To re-import this data, use the 'Upload session data' option
+in STOPeData.

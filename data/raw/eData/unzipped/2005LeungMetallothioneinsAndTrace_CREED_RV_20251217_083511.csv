@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Point sampling: (Different sizes of dogwhelk Nucella lapillus were collected from eight locations. Non-tagged snails (n > 60) were collected at each study site for metal and biochemical analyses. After field collection, all non-tagged samples were immediately kept at -25°C)","2","Yes, although could have been more specific."
+"RV3","Study Area","Required","8 sites. Countries: Iceland. Areas: North Atlantic Ocean. Lowest coordinate precision: 0","2","Local pollution context of sites well-reported, but no coordinates provided."
+"RV4","Site Type","Recommended","8 sites. Distinct features: Types: Coastal, fjord, Subtypes: Not reported","1","Rationale for site selection (elevated Pb/Hg concentrations in mussels in vicinity of Reykjavik due to human activities) provided. "
+"RV5","Sampling Timespan","Required","1999-08-31 (n=1)","2","One off."
+"RV6","Sampling Frequency","Required","1999-08-31 (n=1)","2",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","Paper reports general site conditions (e.g. marine traffic, WWTPs) but not recent events."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Remaining homogenate was dried at 60°C for at least 96h until constant mass achieved. Homogenates were then digested in concentrated nitric acid for 24h at room temperature followed by boiling for at least 2h until clear solution obtained)","2","Total digestable fraction appropriate for biota, although whole soft-body tissue analysis may include digestive gland content and therefore overestimate copper?"
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Concentrations of trace metals (Cd, Cr, Cu, Mn, Ni, Pb and Zn) were determined using inductively coupled plasma-atomic emission spectrometer (ICP-AES, Perkin Elmer Optima 3300RL). Accuracy regularly checked by including standard reference material (dogfish muscle, DORM-2, from National Research Council, Canada) within batches. Agreement considered good, within 14%)","2","ICP-OES is generally appropriate for copper in biota at a contaminated site, but lack of LOD/LOQ information makes full confidence difficult."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Standard Deviation","2","Mean/SD."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Remaining homogenate was dried at 60°C for at least 96h until constant mass achieved. Homogenates were then digested in concentrated nitric acid for 24h at room temperature followed by boiling for at least 2h until clear solution obtained)","1","Full fraction appropriate for biota."

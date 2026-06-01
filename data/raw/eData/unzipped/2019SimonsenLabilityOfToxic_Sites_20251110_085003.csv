@@ -1,0 +1,8 @@
+﻿SITE_CODE,SITE_NAME,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,SITE_COORDINATE_SYSTEM,LATITUDE,LONGITUDE,COUNTRY_ISO,OCEAN_IHO,ALTITUDE_VALUE,ALTITUDE_UNIT,ENTERED_BY,ENTERED_DATE,SITE_COMMENT
+Bokfjorden2016_St 1,Source area,"Coastal, fjord",Other,WGS 84,69.7325,30.0329,Norway,Barents Sea,58,m,Camden Karon Klefbom,07/11/2025,Closest to mine tailings discharge point at 20-28 m depth
+Bokfjorden2016_St 2,Inner fjord,"Coastal, fjord",Other,WGS 84,69.7542,30.0715,Norway,Barents Sea,101,m,Camden Karon Klefbom,07/11/2025,
+Bokfjorden2016_St 3,Inner fjord,"Coastal, fjord",Other,WGS 84,69.7633,30.0936,Norway,Barents Sea,142,m,Camden Karon Klefbom,07/11/2025,
+Bokfjorden2016_St 4,Centre fjord,"Coastal, fjord",Other,WGS 84,69.8074,30.1065,Norway,Barents Sea,232,m,Camden Karon Klefbom,07/11/2025,
+Bokfjorden2016_St 5,Outer fjord,"Coastal, fjord",Other,WGS 84,69.8276,30.1111,Norway,Barents Sea,231,m,Camden Karon Klefbom,07/11/2025,
+Bokfjorden2016_St 6,Outer fjord,"Coastal, fjord",Other,WGS 84,69.8423,30.0847,Norway,Barents Sea,226,m,Camden Karon Klefbom,07/11/2025,
+Bokfjorden2016_St 7,Outer fjord,"Coastal, fjord",Other,WGS 84,69.8587,30.1176,Norway,Barents Sea,269,m,Camden Karon Klefbom,07/11/2025,

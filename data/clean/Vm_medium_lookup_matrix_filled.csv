@@ -1,0 +1,55 @@
+MediumID,Name,Description,n,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SPECIES_GROUP,SAMPLE_SPECIES,SPECIES_GENDER,SAMPLE_TISSUE,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB
+BB,Biota bløtdeler,Innmat i muslinger (blåskjell) og skalldyr (f.eks. brunmat i krabbe). Alyseresultater angis i våtvekt.,4597,Biota,"Biota, Aquatic",*,*,*,Total soft tissues,*,*
+BH,Biota helkropp,Homogenisert prøve av fisk (ulike vevstyper). Alyseresultater angis i våtvekt.,488,Biota,"Biota, Aquatic",*,*,*,Whole body,*,*
+BL,Biota lever,Leverprøver av organismer. Alyseresultater angis i våtvekt.,4280,Biota,*,*,*,*,Liver,*,*
+BM,Biota muskelvev,"Muskelvev av organismer, f.eks. fiskefillet og krabbeklo. Alyseresultater angis i våtvekt.",777,Biota,*,*,*,*,Muscle,*,*
+BS,Biota mageinnhold,Ufordøyde matrester i magesekk hos fisk.,,Biota,"Biota, Aquatic",*,*,*,Other,*,*
+PA,Partikler,"Suspenderte eller sedimenterende partikler fanget i sedimentfelle, holdt igjen på filter, komprimert til sentrifugat e.l.",439,Aquatic,Aquatic Sediment,*,*,*,*,*,"Water column, pelagic zone"
+SF,Sediment ferskvann,Vertikale snitt av sedimentert materiale i ferskvann. Alyseresultater angis i tørrvekt.,3009,Aquatic,Aquatic Sediment,*,*,*,*,*,Water benthos
+SS,Sediment saltvann,Vertikale snitt av sedimentert materiale i marint vann. Alyseresultater angis i tørrvekt.,29681,Aquatic,Aquatic Sediment,*,*,*,*,*,Water benthos
+VF,Ferskvann,Vannvolum fra overflate eller nærmere angitte dyp/dybdeintervall i innsjøer og elver. Omfatter også vannlevende organismer i pelagial- og litoralsonen.,81921,Aquatic,Freshwater,*,*,*,*,*,"Water column, pelagic zone"
+VS,Saltvann,Vannvolum fra overflate eller nærmere angitte dyp/dybdeintervall i marint vann. Omfatter også marine organismer i pelagialen og på bløtbunn og hardbunn.,5434,Aquatic,Marine/Salt Water,*,*,*,*,*,"Water column, pelagic zone"
+BK,Biota skuddspiss,Skuddspiss av tang og tare. Alyseresultater angis i våtvekt.,216,Biota,"Biota, Aquatic",Plants,*,*,Other,*,*
+BG,Biota gjeller,Gjeller av fisk (særlig adrom laksefisk). Alyseresultater angis i tørrvekt.,244,Biota,"Biota, Aquatic",Fish,*,*,Gill,*,*
+BE,Biota egg,Homogenisert prøve av eggehvite og eggeplomme i sjøfuglegg. Alyseresultater angis i våtvekt.,338,Biota,*,*,*,*,Egg,*,*
+NS,Bunnsubstrat saltvann,Marin bløtbunnsfau og marin hardbunnsflora og -fau.,,Biota,"Biota, Aquatic",*,*,*,Whole body,*,Water benthos
+NF,Bunnsubstrat ferskvann,Bunndyr og fastsittende organismer på innsjø- og elvebunn.,,Biota,"Biota, Aquatic",*,*,*,Whole body,*,Water benthos
+U,Uspesifisert,Organismer som ikke kan knyttes til noe bestemt medium.,,Biota,"Biota, Other",Not reported,*,*,Not reported,*,*
+BO,Biota blod,Blodprøver (fullblod) av organismer. Alyseresultater angis i våtvekt.,225,Biota,*,*,*,*,Blood,*,*
+GV,Grunnvann,Vannvolum fra grunnvannsbrønn.,4074,Aquatic,Groundwater,*,*,*,*,"Groundwater, aquifer",*
+AFP,Øvrige faste bearbeidete produkter,Faste bearbeidete produkter ikke nevn i andre kategorier,,*,*,*,*,*,*,*,*
+AKP,Øvrige kjemiske produkter,Kjemiske produkter ikke nevn i andre kategorier,,*,*,*,*,*,*,*,*
+BF,Biota fettvev,Fettvev og spekk i organismer. Alyseresultat angis i våtvekt.,17,Biota,*,*,*,*,Fat/Adipose,*,*
+BJ,Biota hjernevev,Hjernevev. Alyseresultat angis i våtvekt.,,Biota,*,*,*,*,Brain,*,*
+BP,Biota blodplasma,Andel av blodet som er igjen etter at blodceller er fjernet ved sentrifugering. Alyseresultat angis i våtvekt.,,Biota,*,*,*,*,Blood plasma,*,*
+BPV,Biota plantevev,Vevsprøver fra terrestriske planter f.eks. etasjemose og barnåler.  Alyseresultat angis i våtvekt.,573,Biota,*,Plants,*,*,Other,*,*
+BU,Biota blodserum,Væskefasen av blod etter at det har koagulert. Alyseresultat angis i våtvekt.,,Biota,*,*,*,*,Blood serum,*,*
+BYG,Byggevarer,"En byggevare er et produkt som bygges inn i byggverk og som påvirker byggverkets grunnleggende egenskaper (mekanisk stabilitet, brannsikkerhet, beskyttelse av brukernes helse og hygiene, sikkerhet ved bruk, vern mot støy og energi).",,*,*,*,*,*,*,*,*
+EEP,EE-produkter,"Omfattende og sammensatt gruppe produkter, som for eksempel støvsugere, komfyrer, TV-apparater, PCer, mobiltelefoner, lysstoffrør, kabler og ledninger",,*,*,*,*,*,*,*,*
+EMB,Emballasje,"Emballasje er den gjenstand et produkt er innpakket i for å sikre det under alle distribusjonspåkjenninger, fra varen produseres og frem til endelig forbruk (SNL).",,*,*,*,*,*,*,*,*
+JOR,Jord,Alt løsmateriale av uorganisk og organisk opprinnelse over fast fjell. Alyseresultat angis i tørrvekt.,178,Terrestrial,Soil A Horizon (Topsoil),*,*,*,*,*,Not relevant
+KLS,Kloakkslam,Avvannet og stabilisert slam fra avløpsrenseanlegg. Alyseresultat angis i tørrvekt.,1,Aquatic,Sludge,*,*,*,*,WWTP,Not relevant
+LEK,Leker,"Produkter som, utelukkende eller delvis, er konstruert eller beregnet for å brukes av barn under 14 år i lek.",,*,*,*,*,*,*,*,*
+LUF,Luft,Luft inne- og utemiljø.,1123,Atmospheric,*,*,*,*,*,*,Not relevant
+MAL,Maling og lakk,"Pigment- og bindemiddelholdige bestrykningsmidler som brukes til overflatebehandling av tre, mur, metaller og andre materialer for å beskytte, dekorere eller merke dem. (SNL)",,*,*,*,*,*,*,*,*
+MP,Mikroplastpartikler,Plastpartikler med partikkelstørrelse < 1 mm,,*,*,*,*,*,*,*,Not reported
+PSS,Porevann sediment saltvann,Vannvolum av porevann fra vertikale snitt i sedimentert materiale i marint vann.,50,Aquatic,Porewater,*,*,*,*,*,Water benthos
+SBA,Småbarnsartikler,"Produkt beregnet på å lette barns søvn, avslapning, som brukes til hygiene, eller som barn kan mates med eller suge på.",,*,*,*,*,*,*,*,*
+SPF,Sport og fritidsutstyr,"Omfattende og sammensatt gruppe av utstyr ment for å brukes ved fritidsaktiviteter og sport, for eksempel ski, sykler, fiskeutstyr mm.",,*,*,*,*,*,*,*,*
+TEK,Tekstiler og sko,Tekstiler og sko.,,*,*,*,*,*,*,*,*
+VAR,Avløpsvann renset,Renset vann i utløp fra avløpsrenseanlegg (minimum mekanisk rensing).,137,Aquatic,Wastewater,*,*,*,*,WWTP,*
+VAU,Avløpsvann urenset,"Urenset vann i avløpsnettet (kum, overløp etc.) eller i innløp til avløpsrenseanlegg.",56,Aquatic,Wastewater,*,*,*,*,WWTP,*
+VRG,Regnvann,Vann oppsamlet fra nedbør i form av regn.,388,Aquatic,Rainwater,*,*,*,*,*,*
+BA,Biota galle,Galle. Alyseresultatet angis i våtvekt.,1,Biota,*,*,*,*,Gills,*,*
+SVS,Svevestøv,Partikler i luft med diameter mindre enn 10 µm (PM10).,,Atmospheric,*,*,*,*,*,*,*
+PSF,Porevann sediment ferskvann,Vannvolum av porevann fra vertikale snitt i sedimentert materiale i ferskvann.,,Aquatic,Porewater,*,*,*,*,"River, stream, canal",Water benthos
+HS,Husstøv,Støvpartikler i innemiljø oppsamlet med støvsuger eller tørkepapir. Alyseresultat angis i tørrvekt.,5,Atmospheric,Indoor Air,*,*,*,*,*,*
+FKG,Fyllingsmateriale kunstgress,Fyllingsmateriale i kunstgress (sand og granulat). Angis i tørrvekt.,,Terrestrial,*,*,*,*,*,Artificial Land/Urban Areas,Not relevant
+VOV,Overvann,Vann i overvannsnett (kum etc.) fra avrenning etter nedbør.,363,Aquatic,Stormwater,*,*,*,*,"Drainage, sewer, artificial water",Not relevant
+BN,Biota nyrer,Nyreprøver av organismer. Alyseresultater angis i våtvekt.,,Biota,*,*,*,*,Kidney,*,*
+BRO,Biota rogn,Rogn fra hunnfisk,,Biota,"Biota, Aquatic",Fish,*,Female,Egg,*,*
+BSP,Biota melke,Melke (spermier) fra hannfisk,,Biota,"Biota, Aquatic",Fish,*,Male,Sperm,*,*
+BD,Biota goder,Prøver av kjønnskjertler (goder) hos fisk,,Biota,"Biota, Aquatic",Fish,*,*,Gonads,*,*
+RSL,Råslam,Slam fra avløpsrenseanlegg som ikke har gjennomgått noen form for stabilisering eller hygienisering.,,Aquatic,Sludge,*,*,*,*,WWTP,Not relevant
+BDM,Biota goder (hann),Prøver av kjønnskjertler (testikler) hos hannfisk,,Biota,"Biota, Aquatic",Fish,*,Male,Gonads,*,*
+BDF,Biota goder (hunn),Prøver av kjønnskjertler (ovarier) hos hunnfisk,,Biota,"Biota, Aquatic",Fish,*,Male,Gonads,*,*

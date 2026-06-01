@@ -1,0 +1,22 @@
+STOPeData Export Metadata
+==================================================
+
+Campaign Name: Arctic seal metal concentrations and metallothionein binding capacity study
+Export Date/Time: 2025-10-31 12:38:07 UTC
+Exported By: Sam We
+
+Application Information:
+  App Name: STOPeData
+  App Version: 0.0.0.9004
+  Git Commit: 3515231
+  App URL: https://github.com/sawelch-NIVA/STOPedata
+
+Technical Information:
+  Browser: Unknown browser
+
+==================================================
+
+This ZIP file contains CSV data files exported from STOPeData.
+Each CSV file contains one type of data (sites, parameters, etc.).
+To re-import this data, use the 'Upload session data' option
+in STOPeData.

@@ -1,0 +1,44 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)
+
+14 biota samples. Species (9): Pandalus borealis, Eukronia hamata, Calanus hyperboreus, Calanus finmarchicus, Metridia longa, Euchaeta norvegica, Themisto abyssorum, Meganyctiphanes norvegica, Sabinea sarsi. Tissue types: Whole body. Life stages: Not reported. Genders: Not reported
+
+4 protocols:
+Sampling Protocol - Plankton net sampling: (Zooplankton samples taken with vertically towed 'Helgoländer Planktonnetz' (mesh size 500 µm, diameter 1 m), hauled at 0.7 m sec-1 from depths of 200-460 m. Animals kept alive in sea water for 1-3 h to allow defecation.)
+Sampling Protocol - Trawl sampling: (Decapod samples from GOV (Chalut à Grande Ouverture Verticale) trawl from depths of 170-330 m, trawling time 30 min at 4 knots.)
+Fractionation Protocol - Acid extractable: (Freeze-dried samples homogenised using boron carbide mortar and pestle or agate ball mill. ~10 mg dried material digested for 3 h at 80°C with 100 µl HNO3 (65%, suprapure, Merck) in tightly closed 2-ml Eppendorf tubes. Digests made up to 2 ml with double distilled water.)
+Extraction Protocol - Acid digestion: (Freeze-dried samples homogenised using boron carbide mortar and pestle or agate ball mill. ~10 mg dried material digested for 3 h at 80°C with 100 µl HNO3 (65%, suprapure, Merck) in tightly closed 2-ml Eppendorf tubes. Digests made up to 2 ml with double distilled water.)","1","Paper identifies biota to species level, although how confident we can be in their identification is unclear."
+"RB2","Collection Method/Sample Type","Recommended","2 protocols:
+Sampling Protocol - Plankton net sampling: (Zooplankton samples taken with vertically towed 'Helgoländer Planktonnetz' (mesh size 500 µm, diameter 1 m), hauled at 0.7 m sec-1 from depths of 200-460 m. Animals kept alive in sea water for 1-3 h to allow defecation.)
+Sampling Protocol - Trawl sampling: (Decapod samples from GOV (Chalut à Grande Ouverture Verticale) trawl from depths of 170-330 m, trawling time 30 min at 4 knots.)","1",""
+"RB3","Sample Handling","Recommended","3 protocols:
+Sampling Protocol - Plankton net sampling: (Zooplankton samples taken with vertically towed 'Helgoländer Planktonnetz' (mesh size 500 µm, diameter 1 m), hauled at 0.7 m sec-1 from depths of 200-460 m. Animals kept alive in sea water for 1-3 h to allow defecation.)
+Sampling Protocol - Trawl sampling: (Decapod samples from GOV (Chalut à Grande Ouverture Verticale) trawl from depths of 170-330 m, trawling time 30 min at 4 knots.)
+Extraction Protocol - Acid digestion: (Freeze-dried samples homogenised using boron carbide mortar and pestle or agate ball mill. ~10 mg dried material digested for 3 h at 80°C with 100 µl HNO3 (65%, suprapure, Merck) in tightly closed 2-ml Eppendorf tubes. Digests made up to 2 ml with double distilled water.)","1",""
+"RB4","Site Location","Required","6 sites. Countries: Not relevant. Areas (2): Barents Sea, Arctic Ocean. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Water column, pelagic zone. Lowest coordinate precision: 0","2","Sampling sites generally well-identified, although sites were merged for all species except P. borealis."
+"RB5","Date and Time","Required","1991-01-01 to 2000-01-01 (n=3, 3287 days)","2","Yes, to the year."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Cu determined using Varian SpectrAA 880 Zeeman instrument with GTA 110 graphite tube atomiser. Ashing temperature 800°C, atomisation temperature 2300°C for Cu. Quality assurance following German GLP regulations with certified reference materials.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","1","LODs were reported based on CRMs."
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","1","Justification: Yes, lab was German GLP accredited."
+"RB9","Method","Required","5 protocols:
+Sampling Protocol - Plankton net sampling: (Zooplankton samples taken with vertically towed 'Helgoländer Planktonnetz' (mesh size 500 µm, diameter 1 m), hauled at 0.7 m sec-1 from depths of 200-460 m. Animals kept alive in sea water for 1-3 h to allow defecation.)
+Sampling Protocol - Trawl sampling: (Decapod samples from GOV (Chalut à Grande Ouverture Verticale) trawl from depths of 170-330 m, trawling time 30 min at 4 knots.)
+Fractionation Protocol - Acid extractable: (Freeze-dried samples homogenised using boron carbide mortar and pestle or agate ball mill. ~10 mg dried material digested for 3 h at 80°C with 100 µl HNO3 (65%, suprapure, Merck) in tightly closed 2-ml Eppendorf tubes. Digests made up to 2 ml with double distilled water.)
+Extraction Protocol - Acid digestion: (Freeze-dried samples homogenised using boron carbide mortar and pestle or agate ball mill. ~10 mg dried material digested for 3 h at 80°C with 100 µl HNO3 (65%, suprapure, Merck) in tightly closed 2-ml Eppendorf tubes. Digests made up to 2 ml with double distilled water.)
+Analytical Protocol - Atomic absorption spectroscopy: (Cu determined using Varian SpectrAA 880 Zeeman instrument with GTA 110 graphite tube atomiser. Ashing temperature 800°C, atomisation temperature 2300°C for Cu. Quality assurance following German GLP regulations with certified reference materials.)","1",""
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Cu determined using Varian SpectrAA 880 Zeeman instrument with GTA 110 graphite tube atomiser. Ashing temperature 800°C, atomisation temperature 2300°C for Cu. Quality assurance following German GLP regulations with certified reference materials.)","1",""
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Cu determined using Varian SpectrAA 880 Zeeman instrument with GTA 110 graphite tube atomiser. Ashing temperature 800°C, atomisation temperature 2300°C for Cu. Quality assurance following German GLP regulations with certified reference materials.)","1",""
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Cu determined using Varian SpectrAA 880 Zeeman instrument with GTA 110 graphite tube atomiser. Ashing temperature 800°C, atomisation temperature 2300°C for Cu. Quality assurance following German GLP regulations with certified reference materials.)","1",""
+"RB13","Field QC","Recommended","2 protocols:
+Sampling Protocol - Plankton net sampling: (Zooplankton samples taken with vertically towed 'Helgoländer Planktonnetz' (mesh size 500 µm, diameter 1 m), hauled at 0.7 m sec-1 from depths of 200-460 m. Animals kept alive in sea water for 1-3 h to allow defecation.)
+Sampling Protocol - Trawl sampling: (Decapod samples from GOV (Chalut à Grande Ouverture Verticale) trawl from depths of 170-330 m, trawling time 30 min at 4 knots.)","4","Field QC was not specifically reported."
+"RB14","Calculations","Recommended","Uncertainty types: Standard Deviation","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 2 significant figures","4","Low level of precision in reported mean concentrations, perhaps due to space limitations."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","No outliers reported deleted."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","No nondectects reported."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Standard Deviation","1","Assuming that authors calculated means correctly."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not needed."

@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)","1",""
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Grab: (Mussels were collected by means of a dredge fitted with a 5-mm mesh net. Then, mussels of size between 30-40 mm were selected and left for 24 hours in sea water for depuration. The uppermost 5-cm layer of sediments was collected by means of a Petterson grab sampler, and kept frozen until analysis.)","1","Sampling reported to high level of detail."
+"RV3","Study Area","Required","2 sites. Countries (2): Norway, Poland. Areas (2): Norwegian Sea, Baltic Sea. Lowest coordinate precision: 2","4","Only two sites reported, obvious error in coordinates for one site undermine reliability of both."
+"RV4","Site Type","Recommended","2 sites. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Water benthos","4","Rationale for specific site choices not given"
+"RV5","Sampling Timespan","Required","01/01/1999 (n=1)","4","Sampling date not reported."
+"RV6","Sampling Frequency","Required","01/01/1999 (n=1)","4",""
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","4","Conditions, season, etc. not reported."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Not reported","1","Paper reports fractionation of sediment metals, but results are only displayed as a poorly-photocopied 3D graph, making reading results difficult."
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Atomic absorption spectroscopy: (Concentrations were measured using a model Video 11E Thermo Jarrel Ash atomic absorption spectrometer using either air-acetylene flame or a model CTF 188 furnace for atomization. Smith-Heftjer or D2 background correction was applied throughout the measurements. IAEA-140/TM (sea plant homogenate) and IAEA-SD-M-2/TM (marine bottom sediment) standards were analyzed. Recovery was between 93% (Fe) and 103% (Cd).)","2","FAAS/GFAAS used, although authors don't specify which approach for which metal. Although both are probably appropriate for assessing copper in filter feeders, due to the lack of specificity I will report this as ""partly met""."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Standard Deviation","2","Means +- SD"
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Not reported","2","Total copper is appropriate for biota sampling."

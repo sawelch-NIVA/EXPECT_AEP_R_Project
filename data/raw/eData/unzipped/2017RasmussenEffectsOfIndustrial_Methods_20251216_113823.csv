@@ -1,0 +1,6 @@
+﻿"PROTOCOL_ID","CAMPAIGN_NAME","PROTOCOL_CATEGORY","PROTOCOL_NAME","PROTOCOL_COMMENT"
+"S01_TrawlSampling_SeafoodPro","Effects of industrial processing on seafood contaminants study - DTU 2014-2016","Sampling Protocol","Trawl sampling","Prawns caught by net near the west coast of Greenland in different seasons"
+"S02_Other_SeafoodPro","Effects of industrial processing on seafood contaminants study - DTU 2014-2016","Sampling Protocol","Other","Greenland halibut caught by long line near Ilulissat, West Greenland"
+"F01_Acidextractable_SeafoodPro","Effects of industrial processing on seafood contaminants study - DTU 2014-2016","Fractionation Protocol","Acid extractable fraction","Fractionation with HNO3 reported in supplementary information."
+"E01_AcidDigestion_SeafoodPro","Effects of industrial processing on seafood contaminants study - DTU 2014-2016","Extraction Protocol","Acid digestion","Fractionation with HNO3 reported in supplementary information."
+"A01_InductivelyCoup_SeafoodPro","Effects of industrial processing on seafood contaminants study - DTU 2014-2016","Analytical Protocol","Inductively coupled plasma mass spectrometry","Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis"

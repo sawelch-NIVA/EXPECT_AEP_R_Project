@@ -1,0 +1,59 @@
+# LLM_Raw_Response
+# Exported: 2025-11-03 09:34:48
+# Type: List
+
+# Structure:
+List of 8
+ $ campaign    :List of 6
+  ..$ campaign_name      : chr "Copper mine tailings geochemistry study Repparfjorden Norway 1970s-2015"
+  ..$ campaign_name_short: chr "RepparfjordCu2015"
+  ..$ campaign_start_date: chr "2015-06-01"
+  ..$ campaign_end_date  : chr "2015-06-30"
+  ..$ organisation       : chr "Geological Survey of Norway"
+  ..$ campaign_comment   : chr "Study investigates copper ore tailings deposited in Repparfjorden, Norway in the 1970s. Bathymetric analysis sh"| __truncated__
+ $ references  :List of 8
+  ..$ author            : chr "Andersson, M.; Finne, T.E.; Jensen, L.K.; Eggen, O.A."
+  ..$ title             : chr "Geochemistry of a copper mine tailings deposit in Repparfjorden, northern Norway"
+  ..$ year              : int 2018
+  ..$ periodical_journal: chr "Science of the Total Environment"
+  ..$ volume            : int 644
+  ..$ issue             : NULL
+  ..$ publisher         : NULL
+  ..$ doi               : chr "10.1016/j.scitotenv.2018.06.385"
+ $ sites       :'data.frame':	8 obs. of  9 variables:
+  ..$ site_code                  : chr [1:8] "1110" "2" "3" "4" ...
+  ..$ site_name                  : chr [1:8] "Repparfjorden inner inlet location 1110" "Repparfjorden inner inlet location 2" "Repparfjorden inner inlet location 3" "Repparfjorden inner inlet location 4" ...
+  ..$ latitude                   : num [1:8] NA NA NA NA NA NA NA NA
+  ..$ longitude                  : num [1:8] NA NA NA NA NA NA NA NA
+  ..$ country                    : chr [1:8] "Norway" "Norway" "Norway" "Norway" ...
+  ..$ area                       : chr [1:8] NA NA NA NA ...
+  ..$ site_geographic_feature    : chr [1:8] "Coastal, fjord" "Coastal, fjord" "Coastal, fjord" "Coastal, fjord" ...
+  ..$ site_geographic_feature_sub: chr [1:8] "Other" "Other" "Other" "Other" ...
+  ..$ site_comment               : chr [1:8] "Core taken using heavier gravity corer from R/V Helmer Hanssen. 60 cm long core taken from EWMA programme at Th"| __truncated__ "Core located in proximity of tailing deposit. Taken using Niemistö corer." "Core located further out in fjord from deposit. Taken using Niemistö corer." "Core extracted from box corer, 8 cm long. Located in vicinity of location 3." ...
+ $ parameters  :'data.frame':	1 obs. of  4 variables:
+  ..$ parameter_name   : chr "Copper"
+  ..$ parameter_type   : chr "Stressor"
+  ..$ cas_rn           : chr "7440-50-8"
+  ..$ parameter_comment: chr "Main target element. Deposited tailings are clearly enriched in Cu. Cu concentrations range from 10.3-836 mg/kg"| __truncated__
+ $ compartments:'data.frame':	1 obs. of  3 variables:
+  ..$ environ_compartment    : chr "Aquatic"
+  ..$ environ_compartment_sub: chr "Aquatic Sediment"
+  ..$ measured_category      : chr "External Media"
+ $ biota       :'data.frame':	0 obs. of  6 variables:
+  ..$ sample_id               : chr(0) 
+  ..$ species_group           : chr(0) 
+  ..$ sample_species          : chr(0) 
+  ..$ sample_tissue           : chr(0) 
+  ..$ sample_species_lifestage: chr(0) 
+  ..$ sample_species_gender   : chr(0) 
+ $ methods     :'data.frame':	3 obs. of  3 variables:
+  ..$ protocol_category: chr [1:3] "Sampling Protocol" "Extraction Protocol" "Analytical Protocol"
+  ..$ protocol_name    : chr [1:3] "Core sampling" "Aqua Regia extraction" "Inductively coupled plasma mass spectrometry"
+  ..$ protocol_comment : chr [1:3] "Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample c"| __truncated__ "25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory." "Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51"| __truncated__
+ $ samples     :'data.frame':	8 obs. of  6 variables:
+  ..$ sampling_dates      : chr [1:8] "2015-06-01" "2015-06-01" "2015-06-01" "2015-06-01" ...
+  ..$ sampling_site_code  : chr [1:8] "1110" "2" "3" "4" ...
+  ..$ sampling_site_name  : chr [1:8] "Repparfjorden inner inlet location 1110" "Repparfjorden inner inlet location 2" "Repparfjorden inner inlet location 3" "Repparfjorden inner inlet location 4" ...
+  ..$ sampling_compartment: chr [1:8] "Aquatic > Aquatic Sediment > External Media" "Aquatic > Aquatic Sediment > External Media" "Aquatic > Aquatic Sediment > External Media" "Aquatic > Aquatic Sediment > External Media" ...
+  ..$ sampling_parameters : chr [1:8] "Copper" "Copper" "Copper" "Copper" ...
+  ..$ subsample_indices   : chr [1:8] "0-1cm, 1-2cm, 2-3cm, 3-4cm, 4-5cm, 5-6cm, 6-7cm, 7-8cm, 8-9cm, 9-10cm, 10-11cm, 11-12cm, 12-13cm, 13-14cm, 14-1"| __truncated__ "0-1cm, 1-2cm, 2-3cm, 3-4cm, 4-5cm, 5-6cm, 6-7cm, 7-8cm, 8-9cm, 9-10cm, 10-11cm, 11-12cm, 12-13cm, 13-14cm, 14-1"| __truncated__ "0-1cm, 1-2cm, 2-3cm, 3-4cm, 4-5cm, 5-6cm, 7-8cm, 8-9cm, 9-10cm, 10-11cm, 11-12cm, 12-13cm, 13-14cm, 14-15cm, 15"| __truncated__ "0-1cm, 1-2cm, 2-3cm, 3-4cm, 4-5cm, 5-6cm, 6-7cm, 7-8cm" ...

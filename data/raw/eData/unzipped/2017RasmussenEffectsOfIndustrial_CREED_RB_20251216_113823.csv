@@ -1,0 +1,35 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB2","Collection Method/Sample Type","Recommended","2 protocols:
+Sampling Protocol - Trawl sampling: (Prawns caught by net near the west coast of Greenland in different seasons)
+Sampling Protocol - Other: (Greenland halibut caught by long line near Ilulissat, West Greenland)","2","Sampling medium and techniques were reported with moderate detail."
+"RB3","Sample Handling","Recommended","3 protocols:
+Sampling Protocol - Trawl sampling: (Prawns caught by net near the west coast of Greenland in different seasons)
+Sampling Protocol - Other: (Greenland halibut caught by long line near Ilulissat, West Greenland)
+Extraction Protocol - Acid digestion: (Fractionation with HNO3 reported in supplementary information.)","1","Transport and processing of samples well-reported."
+"RB4","Site Location","Required","3 sites. Countries (2): Denmark, Norway. Areas: North Atlantic Ocean. Distinct features: Types: Coastal, fjord, Subtypes: Water column, pelagic zone. Lowest coordinate precision: 0","2","Sites reported with moderate precision, based on FAO/NAFO shipping zones, but approximated during extraction."
+"RB5","Date and Time","Required","2024-11-01 (n=1)","2","Moderate precision (e.g., to month/year)."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","Yes."
+"RB7","Limit of Detection and/or Limit of Quantification","Required","LOQ: 0.009 to 0.037 mg/kg (wet)","1","LOQs were reported for copper in both fish and prawns."
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","4","Justification: Paper does not report lab accreditation."
+"RB9","Method","Required","5 protocols:
+Sampling Protocol - Trawl sampling: (Prawns caught by net near the west coast of Greenland in different seasons)
+Sampling Protocol - Other: (Greenland halibut caught by long line near Ilulissat, West Greenland)
+Fractionation Protocol - Acid extractable: (Fractionation with HNO3 reported in supplementary information.)
+Extraction Protocol - Acid digestion: (Fractionation with HNO3 reported in supplementary information.)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","Methods were generally well described in the SI.. Certified materials and lab blanks were used."
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","Yes, reported in SI."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","Yes, reported in SI"
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","Reported in SI."
+"RB13","Field QC","Recommended","2 protocols:
+Sampling Protocol - Trawl sampling: (Prawns caught by net near the west coast of Greenland in different seasons)
+Sampling Protocol - Other: (Greenland halibut caught by long line near Ilulissat, West Greenland)","1","Not relevant for biota study."
+"RB14","Calculations","Recommended","Uncertainty types: Standard Deviation","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 2 significant figures","1","Yes, means/SDs reported to appropriate SD."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","No censored data were reported."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Standard Deviation","1","Basic summary statistics are assumed to be calculated correctly (e.g. mean and SD)."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."

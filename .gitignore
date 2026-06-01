@@ -3,7 +3,6 @@
 .RData
 .rdx
 .Ruserdata
-data/*
 /.quarto/
 **/*.quarto_ipynb
 /_targets/*
@@ -17,3 +16,9 @@ docs/*_files/*
 .images_raw
 .claude
 .vscode
+
+# big data files
+*.shp
+*.zip
+*.pdf
+*.gpgk

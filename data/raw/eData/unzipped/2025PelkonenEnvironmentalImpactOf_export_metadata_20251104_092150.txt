@@ -1,0 +1,22 @@
+STOPeData Export Metadata
+==================================================
+
+Campaign Name: Environmental impact of acid-forming alum shale waste rock legacy site in Norway - Taraldrud site
+Export Date/Time: 2025-11-04 09:21:50 UTC
+Exported By: Sam Welch
+
+Application Information:
+  App Name: STOPeData
+  App Version: 0.0.0.9004
+  Git Commit: 6ecae62
+  App URL: https://github.com/sawelch-NIVA/STOPedata
+
+Technical Information:
+  Browser: Unknown browser
+
+==================================================
+
+This ZIP file contains CSV data files exported from STOPeData.
+Each CSV file contains one type of data (sites, parameters, etc.).
+To re-import this data, use the 'Upload session data' option
+in STOPeData.

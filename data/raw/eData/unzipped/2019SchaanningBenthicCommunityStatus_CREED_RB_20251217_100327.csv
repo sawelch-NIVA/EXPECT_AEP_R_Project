@@ -1,0 +1,37 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","2 compartments: Aquatic (Aquatic Sediment); Aquatic (Porewater)
+
+3 protocols:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)
+Extraction Protocol - Centrifugation: (Pore water extracted by centrifugation at 4000 rpm for 10 min at 10°C within 30 min of sediment sampling.)
+Fractionation Protocol - Acid extractable: (Sediments/porewater acidified.)","1","Study reports matrix in detail, as well as ISO standard."
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)","1","Study reports sampling in detail, as well as ISO standard."
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)
+Extraction Protocol - Centrifugation: (Pore water extracted by centrifugation at 4000 rpm for 10 min at 10°C within 30 min of sediment sampling.)","1","Sample transport/standard reported."
+"RB4","Site Location","Required","3 sites. Countries: Norway. Areas: North Atlantic Ocean. Distinct features: Types (2): Coastal, fjord, Ocean, sea, territorial waters, Subtypes: Other. Lowest coordinate precision: 2","2","Site locations reported as map. However, means given for groups of sites."
+"RB5","Date and Time","Required","2015-11-17 (n=1)","1","Yes, to the day!"
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","LOQ: 0.03 to 0.03 μg/g (wet)","1",""
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","1","Justification: Yes, NIVA analytical chemistry lab is ISO accredited."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)
+Extraction Protocol - Centrifugation: (Pore water extracted by centrifugation at 4000 rpm for 10 min at 10°C within 30 min of sediment sampling.)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)
+Fractionation Protocol - Acid extractable: (Sediments/porewater acidified.)","1",""
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)","1",""
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)","1",""
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Metals determined by inductively coupled plasma mass spectrometry (ICP-MS). Pore water acidified, diluted 10× and stored at 4°C until analysis.)","1",""
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Box core sampling: (Sediments sampled using KC-Denmark box corer modified with internal polycarbonate liners. Twelve cores with surface area 0.1 m2 and depth of 30–40 cm collected.)","4","Field QC not specifically reported."
+"RB14","Calculations","Recommended","Uncertainty types: Not Relevant","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 3 significant figures","2","Possibly - µg/g is a low concentration, but these values (in sediment) were reported without d.p."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1",""
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1",""
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Not Relevant","1","Assuming no issues for calculation of means."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1",""

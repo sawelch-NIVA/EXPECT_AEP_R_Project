@@ -1,0 +1,22 @@
+STOPeData Export Metadata
+==================================================
+
+Campaign Name: Western Barents Sea Greenland halibut genetic diversity and heavy metals study
+Export Date/Time: 2025-10-30 16:33:38 UTC
+Exported By: Sam Welch
+
+Application Information:
+  App Name: STOPeData
+  App Version: 0.0.0.9004
+  Git Commit: ce2e392
+  App URL: https://github.com/sawelch-NIVA/STOPedata
+
+Technical Information:
+  Browser: Unknown browser
+
+==================================================
+
+This ZIP file contains CSV data files exported from STOPeData.
+Each CSV file contains one type of data (sites, parameters, etc.).
+To re-import this data, use the 'Upload session data' option
+in STOPeData.

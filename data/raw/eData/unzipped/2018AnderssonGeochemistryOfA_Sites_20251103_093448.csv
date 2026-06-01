@@ -1,0 +1,2 @@
+﻿SITE_CODE,SITE_NAME,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,SITE_COORDINATE_SYSTEM,LATITUDE,LONGITUDE,COUNTRY_ISO,OCEAN_IHO,ALTITUDE_VALUE,ALTITUDE_UNIT,ENTERED_BY,ENTERED_DATE,SITE_COMMENT
+RepparfjordCu2015-Merged,Repparfjorden inner inlet location 1110,"Coastal, fjord",Water benthos,WGS 84,70.4,24.3,Norway,Not relevant,0,m,Sam Welch,03/11/2025,"Manuscript reports 8 sites with high degree of detail, but numerical measured copper data are averaged across all sites."

@@ -1,0 +1,39 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)
+
+26 biota samples. Species (14): Hippasteria phrygiana, Urasterias lincki, Pteraster pulvillus, Gorgonocephalus arcticus, Pteraster obscurus, Strongylocentrotus pallidus, Gorgonocephalus lamarckii, Ophiopleura borealis, Ophiura sarsii, Pontaster tenuispinus (and 4 more). Tissue types (2): Disc skeleton, Echinoid corona. Life stages: Not reported. Genders: Not reported
+
+3 protocols:
+Sampling Protocol - Trawl sampling: (Bottom trawl dragged on the sea bottom for 15 min at depths ranging from 74 to 309 m. Skin and soft body parts were separated from the skeleton, then remaining organic tissue were removed from each skeletal piece under stereomicroscope. No chemical bleaching was used. Skeletal pieces were homogenized using mortar and pestle made of agate.)
+Fractionation Protocol - Acid extractable: (For the analysis of other elements, approximately 300 mg of ground and lyophilized samples were weighed and subjected to digestion using the Anton Paar Multiwave GO Microwave Assisted Digestion system. Digestion was carried out using 8 ml of nitric acid.)
+Extraction Protocol - Microwave-assisted acid digestion: (For the analysis of other elements, approximately 300 mg of ground and lyophilized samples were weighed and subjected to digestion using the Anton Paar Multiwave GO Microwave Assisted Digestion system. Digestion was carried out using 8 ml of nitric acid.)","2","Species and tissue reported in detail. Age and gender not reported."
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Trawl sampling: (Bottom trawl dragged on the sea bottom for 15 min at depths ranging from 74 to 309 m. Skin and soft body parts were separated from the skeleton, then remaining organic tissue were removed from each skeletal piece under stereomicroscope. No chemical bleaching was used. Skeletal pieces were homogenized using mortar and pestle made of agate.)","1",""
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Trawl sampling: (Bottom trawl dragged on the sea bottom for 15 min at depths ranging from 74 to 309 m. Skin and soft body parts were separated from the skeleton, then remaining organic tissue were removed from each skeletal piece under stereomicroscope. No chemical bleaching was used. Skeletal pieces were homogenized using mortar and pestle made of agate.)
+Extraction Protocol - Microwave-assisted acid digestion: (For the analysis of other elements, approximately 300 mg of ground and lyophilized samples were weighed and subjected to digestion using the Anton Paar Multiwave GO Microwave Assisted Digestion system. Digestion was carried out using 8 ml of nitric acid.)","1","Some detail."
+"RB4","Site Location","Required","17 sites. Countries: Svalbard and Jan Mayen. Areas: Barents Sea. Distinct features: Types: Ocean, sea, territorial waters, Subtypes: Water benthos. Lowest coordinate precision: 0","1","Yes, on a map."
+"RB5","Date and Time","Required","2015-08-01 (n=1)","2","Roughly."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Copper determined using Agilent MP-AES 4210 equipment at wavelengths 327.395 nm and 324.754 nm. Four repetitions for each wavelength. CRM MODAS-5 Cod Tissue and MODAS-3 Herring tissue used for validation with 80-120% recovery rates.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","LOQ: 0.43 to 0.43 mg/kg (dry); LOD: 1.41 to 1.41 mg/kg (dry)","1",""
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","4","Justification: No accreditation is mentioned."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Trawl sampling: (Bottom trawl dragged on the sea bottom for 15 min at depths ranging from 74 to 309 m. Skin and soft body parts were separated from the skeleton, then remaining organic tissue were removed from each skeletal piece under stereomicroscope. No chemical bleaching was used. Skeletal pieces were homogenized using mortar and pestle made of agate.)
+Fractionation Protocol - Acid extractable: (For the analysis of other elements, approximately 300 mg of ground and lyophilized samples were weighed and subjected to digestion using the Anton Paar Multiwave GO Microwave Assisted Digestion system. Digestion was carried out using 8 ml of nitric acid.)
+Extraction Protocol - Microwave-assisted acid digestion: (For the analysis of other elements, approximately 300 mg of ground and lyophilized samples were weighed and subjected to digestion using the Anton Paar Multiwave GO Microwave Assisted Digestion system. Digestion was carried out using 8 ml of nitric acid.)
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Copper determined using Agilent MP-AES 4210 equipment at wavelengths 327.395 nm and 324.754 nm. Four repetitions for each wavelength. CRM MODAS-5 Cod Tissue and MODAS-3 Herring tissue used for validation with 80-120% recovery rates.)","1",""
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Copper determined using Agilent MP-AES 4210 equipment at wavelengths 327.395 nm and 324.754 nm. Four repetitions for each wavelength. CRM MODAS-5 Cod Tissue and MODAS-3 Herring tissue used for validation with 80-120% recovery rates.)","4","Not mentioned."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Copper determined using Agilent MP-AES 4210 equipment at wavelengths 327.395 nm and 324.754 nm. Four repetitions for each wavelength. CRM MODAS-5 Cod Tissue and MODAS-3 Herring tissue used for validation with 80-120% recovery rates.)","1","CRM used."
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma optical emission spectroscopy: (Copper determined using Agilent MP-AES 4210 equipment at wavelengths 327.395 nm and 324.754 nm. Four repetitions for each wavelength. CRM MODAS-5 Cod Tissue and MODAS-3 Herring tissue used for validation with 80-120% recovery rates.)","4","Not mentioned."
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Trawl sampling: (Bottom trawl dragged on the sea bottom for 15 min at depths ranging from 74 to 309 m. Skin and soft body parts were separated from the skeleton, then remaining organic tissue were removed from each skeletal piece under stereomicroscope. No chemical bleaching was used. Skeletal pieces were homogenized using mortar and pestle made of agate.)","4","Not mentioned."
+"RB14","Calculations","Recommended","Uncertainty types: Not Relevant, Standard Deviation","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 4 significant figures","1","Not relevant."
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","Not relevant."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Not Relevant, Standard Deviation","1","Not relevant."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."

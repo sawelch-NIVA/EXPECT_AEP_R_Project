@@ -1,0 +1,46 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Terrestrial)
+
+10 biota samples. Species: Ursus maritimus. Tissue types: Liver. Life stages: Mixed. Genders: Mixed
+
+3 protocols:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)
+Fractionation Protocol - Acid extractable: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)
+Extraction Protocol - Acid digestion: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)","2","All data is from analysed livers. Polar bear age ranges and genders were reported, but copper concentrations were not broken down in this way."
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)","1","Detailed information on sampling reported at https://doi.org/10.1016/j.envint.2010.10.008."
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)
+Extraction Protocol - Acid digestion: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)","2",""
+"RB4","Site Location","Required","10 sites. Countries (3): United States, Canada, Greenland. Areas (7): Chukchi Sea, Beaufort Sea, Arctic Ocean, Hudson Bay, Baffin Bay, Davis Strait, Greenland Sea. Distinct features: Types: Coastal, fjord, Subtypes: Other. Lowest coordinate precision: 0","2","Yes, although copper concentrations were only reported by rough bounding box."
+"RB5","Date and Time","Required","2005-01-01 (n=1)","4","Sampling dates are extremely rough, as copper concentrations are not grouped by date."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","4","Paper reports Practical Detection Limit ranges for analysed substances:
+""The practical detection limit (PDL; mg L1) is based on a trace
+element response that is 5 times the theoretical detection limit
+(TDL). The TDL (mg L1) is a response that is based on 3 times
+the standard deviation of the analysis noise. The PDLs for total
+Hg, As, Cu, Cd, Hg, Mn, Rb, Se, and Zn ranged from 0.005 (Cd)
+to 5.5 (Zn) mg L1. The TDLs for total Hg, As, Cu, Cd, Hg, Mn,
+Rb, Se, and Zn ranged from 0.001 (Cd) to 1.1 (Zn) mg L1."""
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","4","Justification: Paper does not report that lab is accredited."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)
+Fractionation Protocol - Acid extractable: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)
+Extraction Protocol - Acid digestion: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","1","Methods section generally detailed. Reported EPA Method 200.8 used for metal analysis in livers."
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","4","Calibration blanks were used."
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","1","Certified Reference Materials used."
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","4","Not reported."
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)","1","Not relevant for sampling type."
+"RB14","Calculations","Recommended","Uncertainty types: Geometric Mean and Standard Deviation; Measurement comments: Results reported only by rough sampling area, not by site or year. Geo. Mean + Standard Deviation given for each population in low-resolution graph. Values read off manually.","1",""
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 2 significant figures","1",""
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1",""
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","No censored data were reported."
+"RB18","Summary Statistics Procedures","Recommended","Uncertainty types: Geometric Mean and Standard Deviation","1","No censored data were reported."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Polar bear age and sex ranges were reported."

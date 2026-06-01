@@ -1,0 +1,38 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RB1","Sample Medium/Matrix","Required","1 compartment: Aquatic (Aquatic Sediment)
+
+3 protocols:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)
+Fractionation Protocol - Acid extractable: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)
+Extraction Protocol - Acid digestion: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)","1",""
+"RB2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)","1",""
+"RB3","Sample Handling","Recommended","2 protocols:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)
+Extraction Protocol - Acid digestion: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)","2","Sample handling partially but not fully reported."
+"RB4","Site Location","Required","1 sites. Countries: Norway. Areas: Not relevant. Distinct features: Types: Coastal, fjord, Subtypes: Water benthos. Lowest coordinate precision: 1","1","Yes, although merging of data for reporting means sites had to be merged too."
+"RB5","Date and Time","Required","2015-06-01 (n=1)","1","Yes, to the month."
+"RB6","Analyte(s) Measured","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)","1",""
+"RB7","Limit of Detection and/or Limit of Quantification","Required","Relevant data not found","1","LODs reported per element, and proportion of samples below LODs (none for copper)."
+"RB8","Accreditation/Quality Management System","Required","Relevant data not collected by app. Please complete manually.","1","Justification: Yes, by ALS Vancouver."
+"RB9","Method","Required","4 protocols:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)
+Fractionation Protocol - Acid extractable: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)
+Extraction Protocol - Acid digestion: (25 g sample weight used for Aqua Regia extraction according to Au-ME-TL43 method at ALS Vancouver laboratory.)","1",""
+"RB10","Lab Blank Contamination","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)","1",""
+"RB11","Recovery/Accuracy","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)","1",""
+"RB12","Reproducibility/Precision","Recommended","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Chemical composition analyzed by ICP-MS by accredited laboratory ALS Vancouver, Canada. Samples analyzed for 51 chemical elements with ICP-MS finish.)","1",""
+"RB13","Field QC","Recommended","1 protocol:
+Sampling Protocol - Core sampling: (Modified Niemistö corer (65 mm inner diameter) typically 20 cm long cores. Some cores taken by pushing sample cylinders (10 cm diameter) through box core samples. One core taken using heavier gravity corer.)","4","Field QC was not specifically reported."
+"RB14","Calculations","Recommended","Relevant data not found","1","Not relevant."
+"RB15","Significant Figures","Recommended","Measured parameter values reported to 1 to 2 significant figures","2","Authors identify their own rounding as potentially problematic:
+""Several elements suffer from the rounding effect, which may pose problems in statistical analysis. Both in-house standards used in the analytical sequence show good results."""
+"RB16","Outliers","Recommended","Relevant data not collected by app. Please complete manually.","1","No outliers were reported deleted."
+"RB17","Censored Data","Required","Relevant data not collected by app. Please complete manually.","1","No copper data was censored."
+"RB18","Summary Statistics Procedures","Recommended","Relevant data not found","1","Simple sample statistics (quantiles) were calculated."
+"RB19","Supporting Data Quality","Recommended","Relevant data not collected by app. Please complete manually.","1","Not relevant."

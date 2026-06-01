@@ -1,0 +1,175 @@
+---
+title: "Algae"
+format: html
+---
+
+How much algae data?
+
+```{r}
+#| label: algae-data
+library(tidyverse)
+library(targets)
+library(hexbin)
+devtools::load_all(quiet = TRUE)
+
+algae <- tar_read(load_literature_pqt) |> filter(SPECIES_GROUP == "Algae")
+
+algae |>
+  group_by(SAMPLE_SPECIES, REFERENCE_ID) |>
+  reframe(n = n()) |>
+  arrange(n)
+```
+
+We have a lot of data for algae, but it's macroalgae rather than microalgae. We probably can't assume consistent internal concentrations across such a biodiverse set of taxa, but nevertheless it's a starting point. I can (and will) go looking for more papers, but I want to work with what I have first.
+
+## Fucus vesiculosus
+a.k.a Bladderwrack
+![Bladderwrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AFucus_vesiculosus_closeup.jpg)
+
+Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdetails&id=145548#distributions) regions, but is it an arctic species? 
+
+## Ascophyllum nodosum
+a.k.a Knotted wrack
+![Knotted wrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AAscophyllum_nodosum.jpg)
+
+Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertain, but probably sufficient for our purposes.
+
+# Distribution of Copper Concentrations
+
+There's one improbably high outlier in the dataset. We'll remove anything over 50mg/kg dry weight. Black Angel (2017) results are reported with SDs, while Vannmiljø data is just points. But, we need to be careful about sites, dates, and especially campaigns.
+
+```{r}
+#| label: algae-comparison
+algae |>
+  filter(MEASURED_VALUE <= 50) |>
+  mutate(
+    SITE_COMMENT = SITE_COMMENT |>
+      stringr::str_remove("^.*?\\."),
+    SITE_NAME = SITE_NAME |> stringr::str_remove("Vannmiljø Station")
+  ) |>
+  ggplot(aes(y = SITE_NAME, x = MEASURED_VALUE, colour = )) +
+  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
+  geom_text(
+    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
+    hjust = 0
+  ) +
+  labs(y = "Site Code", x = "Measured Value (mg/kg)") +
+  facet_wrap(
+    facets = vars(MEASURED_UNIT_STANDARD),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  )
+theme(axis.text.y = element_text(angle = 90))
+```
+
+Otherwise, our standard workup should be something like:
+- Any temporal patterns?
+- Any spatial patterns?
+- Any 
+
+```{r}
+#| label: algae-hexmaps
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(patchwork)
+
+world_map <- map_data("world")
+
+algae_hex <- algae |>
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
+
+sample_size_map <- algae_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_bin_hex(
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "magma",
+    trans = "sqrt",
+    name = "Sample count"
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Algae sample size by hexbin",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+mean_conc_map <- algae_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_summary_hex(
+    fun = function(x) mean(x, na.rm = TRUE),
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "viridis",
+    name = "Mean concentration\n(mg/kg dry & wet)"
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Mean algae concentration by hexbin",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+sample_size_map / mean_conc_map
+```
+
+Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
+
+Finally, any time trends? We're unlikely to see much massively illuminating, because we don't have a great deal of data for any given site.
+
+```{r}
+#| label: algae-time-trends
+
+
+```
+
+# Gap-Filling
+
+Initial research suggests it's difficult to say how much copper is "in algae". We can still do AEP stuff, but the evidence is necessarily going to be weak. Some key points:
+
+- Copper is also a stressor and essential nutrient in microalgae, but knowledge is spotty
+https://www.mdpi.com/2305-6304/10/9/527
+
+I guess we can start with the information we have and hopefull extend it if/when we get some more data...

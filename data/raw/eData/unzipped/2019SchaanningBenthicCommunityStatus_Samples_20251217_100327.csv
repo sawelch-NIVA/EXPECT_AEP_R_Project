@@ -1,0 +1,7 @@
+﻿"SITE_CODE","SITE_NAME","PARAMETER_NAME","PARAMETER_TYPE","ENVIRON_COMPARTMENT","ENVIRON_COMPARTMENT_SUB","MEASURED_CATEGORY","SAMPLING_DATE","SUBSAMPLE","SAMPLE_ID"
+"NorwaySeadeposits2015_JF","Jøssingfjorden Merged Stations","Copper","Stressor","Aquatic","Aquatic Sediment","External","2015-11-17","1","NorwaySeadeposits2015_JF-Copper-AquaticSedim-2015-11-17-R-1"
+"NorwaySeadeposits2015_JF","Jøssingfjorden Merged Stations","Copper","Stressor","Aquatic","Porewater","External Media","2015-11-17","1","NorwaySeadeposits2015_JF-Copper-Porewater-2015-11-17-R-1"
+"NorwaySeadeposits2015_DD","Dyngadjupet Merged Stations","Copper","Stressor","Aquatic","Aquatic Sediment","External","2015-11-17","1","NorwaySeadeposits2015_DD-Copper-AquaticSedim-2015-11-17-R-1"
+"NorwaySeadeposits2015_DD","Dyngadjupet Merged Stations","Copper","Stressor","Aquatic","Porewater","External Media","2015-11-17","1","NorwaySeadeposits2015_DD-Copper-Porewater-2015-11-17-R-1"
+"NorwaySeadeposits2015_REF","Reference Merged Stations","Copper","Stressor","Aquatic","Aquatic Sediment","External","2015-11-17","1","NorwaySeadeposits2015_REF-Copper-AquaticSedim-2015-11-17-R-1"
+"NorwaySeadeposits2015_REF","Reference Merged Stations","Copper","Stressor","Aquatic","Porewater","External Media","2015-11-17","1","NorwaySeadeposits2015_REF-Copper-Porewater-2015-11-17-R-1"

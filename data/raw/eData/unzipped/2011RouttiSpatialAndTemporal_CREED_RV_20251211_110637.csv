@@ -1,0 +1,16 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Terrestrial)","4","Polar bear livers are an appropriate media for studying polar bear copper accumulation."
+"RV2","Collection Method/Sample Type","Recommended","1 protocol:
+Sampling Protocol - Other: (Polar bear samples collected from native subsistence hunts during 2005-2008. Bears of both sexes aged 2 to 29 years.)","1","Sampling method is intrinsically difficult to reproduce given stochastic nature. Thus assuming sufficiently specific, despite lack of spatial precision."
+"RV3","Study Area","Required","10 sites. Countries (3): United States, Canada, Greenland. Areas (7): Chukchi Sea, Beaufort Sea, Arctic Ocean, Hudson Bay, Baffin Bay, Davis Strait, Greenland Sea. Lowest coordinate precision: 0","2","Only rough regional bounding boxes are provided for polar bears. However, polar bears are frequently highly mobile, so I will interpret this is ""Partly met"". "
+"RV4","Site Type","Recommended","10 sites. Distinct features: Types: Coastal, fjord, Subtypes: Other","2","As above. More generally, polar bears were shot where the polar bears were."
+"RV5","Sampling Timespan","Required","2005-01-01 (n=1)","1","Yes, although dates were not reported with appropriate specificity. Regions/population were resampled frequently."
+"RV6","Sampling Frequency","Required","2005-01-01 (n=1)","1","See above."
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","Not reported, although given the study area's massive range and relative lack of monitoring, this would be difficult."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)","1","Acid digestion appropriate for biota tissue."
+"RV9","Sensitivity/LOD/LOQ","Required","1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (EPA Method 200.8 with modifications for biological samples. Concentrations measured using ELAN 9000, inductively coupled plasma mass spectrometry from Perkin Elmer. CRMs used included Dolt-3, Tort-2, Oyster Tissue 1566b, Bovine Liver 1577a, Bovine Muscle 8414 and Mussel Tissue 2976. Average recoveries ranged from 80.9% for copper to 103.5% for Se.)","1","ICP-MS appropriate for biota tissue."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Geometric Mean and Standard Deviation","2","Geometric Mean and Standard Deviation reported for heavily aggregated populations."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Each sample was digested in 0.5 mL of ROP (Reverse Osmosis Purified) water and 1.0 mL of 70% nitric acid overnight at room temperature. The sample was then heated at 100°C for 4 hours and diluted with ROP water to 4 mL.)","1","Appropriate fractions reported."

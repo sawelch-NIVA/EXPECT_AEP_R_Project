@@ -1,0 +1,19 @@
+﻿"criterion_id","criterion_title","required_recommended","relevant_data","score","limitations"
+"RV1","Sample Medium/Matrix","Required","1 compartment: Biota (Biota, Aquatic)","1",""
+"RV2","Collection Method/Sample Type","Recommended","2 protocols:
+Sampling Protocol - Trawl sampling: (Prawns caught by net near the west coast of Greenland in different seasons)
+Sampling Protocol - Other: (Greenland halibut caught by long line near Ilulissat, West Greenland)","2","As paper sampled commercially caught animals, sampling methods were less detailed than would be expected for a study fully conducted by research personnel."
+"RV3","Study Area","Required","3 sites. Countries (2): Denmark, Norway. Areas: North Atlantic Ocean. Lowest coordinate precision: 0","2","As above, less detail is provided on sampling areas than would be expected for e.g. a research cruise. This is an unavoidable result of the method. "
+"RV4","Site Type","Recommended","3 sites. Distinct features: Types: Coastal, fjord, Subtypes: Water column, pelagic zone","1","Within the aims of the study (qualifying pollutant/element content removal by different preparation methods) rationale was adequately explained."
+"RV5","Sampling Timespan","Required","2024-11-01 (n=1)","2","Prawns caught in separate months of 2011, but no real temporal aspect to paper."
+"RV6","Sampling Frequency","Required","2024-11-01 (n=1)","2","See above."
+"RV7","Temporal Conditions","Recommended","Relevant data not collected by app. Please complete manually.","2","Little detail, but an adequate level of detail would be very difficult giving the large study area."
+"RV8","Analyte","Required","1 protocol:
+Fractionation Protocol - Acid extractable: (Fractionation with HNO3 reported in supplementary information.)","1","Full digestion is appropriate for biota samples."
+"RV9","Sensitivity/LOD/LOQ","Required","LOQ: 0.009 to 0.037 mg/kg (wet)
+
+1 protocol:
+Analytical Protocol - Inductively coupled plasma mass spectrometry: (Total elements including copper determined by ICP-MS. Method validated using certified reference material DORM-4 with recoveries between 86-111% for prawns and 85-123% for fish analysis)","1","ICP-MS is appropriate for sampling metals in biota. All measurements were above LOQ, which were reported."
+"RV10","Summary Statistics Type","Recommended","Uncertainty types: Standard Deviation","1","Study reported individual measurements per organism, although only summary statistics have been extracted."
+"RV11","Supporting Parameters","Recommended","1 protocol:
+Fractionation Protocol - Acid extractable: (Fractionation with HNO3 reported in supplementary information.)","1","Total fraction, which is appropriate for biota."
