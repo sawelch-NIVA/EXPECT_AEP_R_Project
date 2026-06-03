@@ -2,7 +2,7 @@
 title: "Algae"
 execute:
   output: true
-  echo: falseou
+  echo: false
   warning: false
 format: 
   html: 
