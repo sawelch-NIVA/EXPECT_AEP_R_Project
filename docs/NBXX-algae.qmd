@@ -30,7 +30,7 @@ I don't actually know if free-living algae have all that much to do with copper,
 1. Algae tissues (first degree)
 2. Algae habitat - marine water (second degree)
 3. Matrices adjacent to marine water - marine and freshwater sediment, freshwater, atmosphere
-4. Emissions/sources
+4. Emissions/s
 
 
 Start in the middle and work out.
@@ -56,7 +56,6 @@ Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdeta
 
 ## Ascophyllum nodosum
 a.k.a Knotted wrack
-
 
 Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertain, but probably sufficient for our purposes.
 
@@ -110,7 +109,7 @@ algae_pointrange <- algae |>
 Otherwise, our standard workup should be something like:
 - Any temporal patterns?
 - Any spatial patterns?
-- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
+- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: algae-hexmaps
@@ -311,8 +310,8 @@ remove_patterns <- c(
   "(?i)rapporter?\\b|(?i)reference(?:\\s+site)?\\b|\\bref\\.?\\b",
   # vannmiljø / vm markers and resipient/resipientundersøkelse noise
   "(?i)vannmilj[oø]\\b|\\bvm\\b|(?i)resipient(?:unders[kq]økelse|unde)?",
-  # 'Vm Emission Source' and variants; Miljøgifter etc.
-  "(?i)vm\\s*emission\\s*source|(?i)miljøgifter\\b|(?i)miljøgifter\\s+i",
+  # 'Vm Emission ' and variants; Miljøgifter etc.
+  "(?i)vm\\s*emission\\s*|(?i)miljøgifter\\b|(?i)miljøgifter\\s+i",
   # contractor / org names (common Norwegian consultancies + generic ' AS' suffix)
   "(?i)akvaplan-?niva|niva\\b|nina\\b|ramb[ao]ll\\b|norconsult\\b|asplan\\s+viak\\b|ngi\\b|ng\\&i\\b|APN|AS",
   "\\b\\p{Lu}[\\p{L}'’\\-]+(?:\\s+\\p{Lu}[\\p{L}'’\\-]+)*\\s+AS\\b",
@@ -324,13 +323,22 @@ remove_patterns <- c(
   "[,;:\\|]{2,}|--+|\\.\\.+",
   # original comment
   "Original Comment:",
-  "Emission Source:",
+  "Emission :",
   "rsøkelse",
   "Vannmiljø Station",
   "Station"
 )
 
-# Some keywords for source characterisation:
+remove_duplicate_segments <- function(x) {
+  segments <- str_split(x, ";")[[1]]
+  segments <- trimws(segments)
+  segments <- unique(segments)
+  segments <- segments[segments != "" & segments != "NA"]
+  paste(segments, collapse = "; ")
+}
+
+
+# Some keywords for  characterisation:
 # deponi
 # industri*
 
@@ -363,6 +371,10 @@ algae_sites_groups <- algae_grouped |>
       unique(SITE_GEOGRAPHIC_FEATURE_SUB),
       collapse = ";"
     ),
+    _characterisation = case_when(
+      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
+      .default = NA_character_
+    ),
     n_sites = n(),
     n_samples = sum(MEASURED_N)
   )
@@ -370,6 +382,7 @@ algae_sites_groups <- algae_grouped |>
 
 # wrap long text in character columns
 df_wrap <- algae_sites_groups |>
+  select(-condensed_comments) |>
   mutate(across(where(is.character), ~ str_wrap(.x, width = 100)))
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
@@ -402,7 +415,7 @@ The below plot code uses the thresholds for coastal marine waters, since we don'
 Our standard workup should be something like:
 - Any temporal patterns?
 - Any spatial patterns?
-- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
+- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
 
@@ -435,7 +448,7 @@ algae_lines_of_evidence <- algae_wet_weight |>
   nrow()
 # Essentiality (1-3)
 algae_essentiality_score = 3
-algae_essentiality_justification = "Copper is an essential component in photosynthesis (source?). Thus algae must have a system for the controlled uptake of copper."
+algae_essentiality_justification = "Copper is an essential component in photosynthesis (?). Thus algae must have a system for the controlled uptake of copper."
 # Plausibility (1-3)
 algae_plausibility_score = 3
 algae_plausibility_justification = "As above, the role of copper in photosynthetic organisms (including algae) is well studied and understood."
@@ -591,8 +604,6 @@ groups_map <- ggplot(
   )
 
 
-combined <- str_c(remove_patterns, collapse = "|")
-
 marine_sites_groups <- marine_grouped |>
   mutate(
     SITE_COMMENT = str_remove_all(
@@ -609,7 +620,7 @@ marine_sites_groups <- marine_grouped |>
   reframe(
     .by = "site_group",
     condensed_name = paste(unique(SITE_NAME), collapse = ";"),
-    # condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
+    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
     condensed_site_types = paste(
       unique(SITE_GEOGRAPHIC_FEATURE),
       collapse = ";"
@@ -619,12 +630,17 @@ marine_sites_groups <- marine_grouped |>
       collapse = ";"
     ),
     n_sites = n(),
-    n_samples = sum(MEASURED_N)
+    n_samples = sum(MEASURED_N),
+    site_characterisation = case_when(
+      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
+      .default = NA_character_
+    )
   )
 
 
 # wrap long text in character columns
 df_wrap <- marine_sites_groups |>
+  select(-condensed_comments) |>
   mutate(across(where(is.character), ~ str_wrap(.x, width = 100)))
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
@@ -632,8 +648,7 @@ groups_table <- tableGrob(df_wrap, rows = NULL)
 grid::grid.newpage()
 grid::grid.draw(groups_table)
 
-groups_map
-groups_table
+groups_map / groups_table
 ```
 
 
@@ -681,7 +696,7 @@ marine_pointrange <- marine |>
 Otherwise, our standard workup should be something like:
 - Any temporal patterns?
 - Any spatial patterns?
-- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
+- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: marine-hexmaps
@@ -745,7 +760,7 @@ mean_conc_map <- marine_hex |>
   ) +
   scale_fill_viridis_c(
     option = "viridis",
-    name = "Mean concentration\n(mg/kg dry & wet)"
+    name = "Mean concentration\n(mg/L)"
   ) +
   theme_minimal() +
   theme(legend.position = "bottom", axis.title = element_blank()) +
@@ -765,10 +780,6 @@ mean_conc_map <- marine_hex |>
   )
 ```
 
-Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
-
-Finally, any time trends? We're unlikely to see much massively illuminating, because we don't have a great deal of data for any given site.
-
 ```{r}
 #| label: marine-time-trends
 marine_timetrend <- marine |>
@@ -785,7 +796,388 @@ marine_timetrend
 marine_pointrange + (sample_size_map / mean_conc_map / marine_timetrend)
 ```
 
-This is a nightmare. We could reduce our data load to everything inside the arctic circle?
+We have a handful of sites in Nordfjorden with elevated copper concentrations (>5 mg/L), but most are in the background-Level II zone. It's probably safe to just take an average here, although it would be wise to drill down further spatially - but do we have the time to do that for each set of sites?
+
+
+# EPEQ Assessment
+
+We can do the same assessment with the marine data; again, it's not going to be great.
+
+```{r}
+#| label: epeq_assessment-marine
+# mean +- SD
+marine_mean <- marine |>
+  reframe(mean_value = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
+marine_sd <- marine |>
+  reframe(sd_value = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
+# sample size
+marine_n = marine |> reframe(n = n()) |> pull()
+# lines of evidence
+# counting Vm as one feels wrong, but what can you do?
+marine_lines_of_evidence <- marine |>
+  reframe(.by = REFERENCE_ID) |>
+  nrow()
+# Essentiality (1-3)
+marine_essentiality_score = 3
+marine_essentiality_justification = "Copper is known to be naturally present in the earth's crust and aquatic ecosystems."
+# Plausibility (1-3)
+marine_plausibility_score = 3
+marine_plausibility_justification = "As above."
+# Evidence (1-3)
+marine_evidence_score = 3
+marine_evidence_justification = "The studied dataset contains substantial evidence on copper concentrations in marine water."
+# Quantification (1-3)
+marine_quantification_score = 2
+marine_quantification_justification = "Copper kinetics in marine environments are generally well studied and modelled. I can perhaps cite some papers here, but I'll have to get them via gap-filling."
+# TODO: could add CREED here as a measure of data quality?
+
+# so our evidence is shaped like (for nodes)
+# build long EPEQ table for marine
+epeq_marine_long <- tibble::tibble(
+  parameter = c(
+    "matrix",
+    "mean",
+    "sd",
+    # TODO: add unit
+    "n",
+    "n_lines_of_evidence",
+    "essentiality_score",
+    "plausibility_score",
+    "evidence_score",
+    "quantification_score"
+  ),
+  value = c(
+    "Aquatic (Marine/Sea Water)",
+    as.character(marine_mean),
+    as.character(marine_sd),
+    as.character(marine_n),
+    as.character(marine_lines_of_evidence),
+    as.character(marine_essentiality_score),
+    as.character(marine_plausibility_score),
+    as.character(marine_evidence_score),
+    as.character(marine_quantification_score)
+  ),
+  justification = c(
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    marine_essentiality_justification,
+    marine_plausibility_justification,
+    marine_evidence_justification,
+    marine_quantification_justification
+  )
+) |>
+  tibble::as_tibble()
+
+epeq_marine_long
+```
+
+# Freshwater - Rivers/Streams/Canals
+
+Next node we might expect is rivers as a source of copper. This is also a little tricky, because source characterisation for a long river is even harder (and we might generally expect them to be less homogenous than the ocean as a consequence of their hydrology). But we can try.
+
+```{r}
+freshwater <- tar_read(load_literature_pqt) |>
+  filter(
+    ENVIRON_COMPARTMENT_SUB == "Freshwater",
+    LATITUDE >= 66.5,
+    SITE_GEOGRAPHIC_FEATURE == "River, stream, canal"
+  )
+
+freshwater |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    REFERENCE_ID
+  ) |>
+  reframe(n = n()) |>
+  arrange(n)
+```
+
+
+```{r}
+#| label: freshwater-comparison
+threshold_data <- generate_copper_thresholds() |>
+  filter(ENVIRON_COMPARTMENT_SUB == "Freshwater")
+
+
+freshwater_pointrange <- freshwater |>
+  filter(MEASURED_VALUE <= 50) |>
+  mutate(
+    SITE_COMMENT = SITE_COMMENT |>
+      stringr::str_remove("^.*?\\."),
+    SITE_NAME = SITE_NAME |> stringr::str_remove("Vannmiljø Station")
+  ) |>
+  ggplot(aes(y = SITE_NAME, x = MEASURED_VALUE, colour = MEASURED_VALUE)) +
+  scale_colour_viridis_c() +
+  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
+  ggnewscale::new_scale_color() +
+  geom_vline(
+    # TODO: Fix cvolours, add labels to lines.
+    data = threshold_data,
+    aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  geom_text(
+    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
+    colour = "black",
+    hjust = 0
+  ) +
+  labs(y = "Site Code", x = "Measured Value (mg/kg)") +
+  facet_wrap(
+    facets = vars(MEASURED_UNIT_STANDARD),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Otherwise, our standard workup should be something like:
+- Any temporal patterns?
+- Any spatial patterns?
+- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
+
+```{r}
+#| label: freshwater-hexmaps
+world_map <- map_data("world")
+# reduce bbox size
+get_study_area_bbox <- function() {
+  st_bbox(c(xmin = -65, xmax = 40, ymin = 55, ymax = 75))
+}
+
+freshwater_hex <- freshwater |>
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
+
+sample_size_map <- freshwater_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_bin_hex(
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "magma",
+    trans = "sqrt",
+    name = "Sample count"
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sample Size",
+  ) +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+mean_conc_map <- freshwater_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_summary_hex(
+    fun = function(x) mean(x, na.rm = TRUE),
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "viridis",
+    name = "Mean concentration\n(mg/kg dry & wet)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
+  labs(
+    title = "Mean freshwater concentration by hexbin",
+  ) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+```
+
+We have lots of data for rivers/streams above the arctic circle, and some of it has super-high concentrations.
+
+```{r}
+#| label: freshwater-time-trends
+freshwater_timetrend <- freshwater |>
+  filter(MEASURED_VALUE <= 50) |>
+  ggplot(aes(x = SAMPLING_DATE, y = MEASURED_VALUE, group = SITE_NAME)) +
+  geom_point() +
+  theme_minimal() +
+  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
+  theme(legend.position = "none")
+
+freshwater_timetrend
+
+
+freshwater_pointrange + (sample_size_map / mean_conc_map / freshwater_timetrend)
+```
+
+
+
+```{r}
+# let's cluster our points based on proximity.
+distance_matrix <- st_as_sf(freshwater, coords = c("LONGITUDE", "LATITUDE")) |>
+  st_set_crs(4326) |> # tell sf these are WGS84 lat/lon
+  st_distance()
+
+# for the sake of argument, sites within 20km of each other
+# from https://stackoverflow.com/questions/77179007/group-spatial-points-by-distance-in-r-how-to-group-cluster-spatial-points-so-gr
+binary_matrix <- matrix(
+  as.numeric(
+    distance_matrix
+  ) <
+    20000,
+  nrow = nrow(distance_matrix)
+)
+
+
+g <- graph_from_adjacency_matrix(binary_matrix)
+
+# grouped freshwater sites
+freshwater_grouped <- freshwater
+freshwater_grouped$site_group <- factor(components(g)$membership)
+
+
+# create sf (keep original lon/lat columns)
+freshwater_sf <- st_as_sf(
+  freshwater_grouped,
+  coords = c("LONGITUDE", "LATITUDE"),
+  crs = 4326,
+  remove = FALSE
+)
+
+centroids <- freshwater_sf |>
+  st_transform(3857) |> # metric projection for accurate centroids
+  group_by(site_group) |>
+  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |> # combine points per group
+  st_centroid() |> # centroid of multipoint
+  st_transform(4326) # back to lon/lat (if needed)
+
+# centroids is an sf point layer with site_group and geometry
+centroids_xy <- centroids |>
+  mutate(
+    LONGITUDE = st_coordinates(geometry)[, 1],
+    LATITUDE = st_coordinates(geometry)[, 2]
+  )
+
+groups_map <- ggplot(
+  data = centroids_xy,
+  aes(x = LONGITUDE, y = LATITUDE)
+) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  geom_label_repel(
+    aes(colour = site_group, label = site_group),
+    max.overlaps = 100
+  ) +
+  theme_minimal() +
+
+  theme(legend.position = "none", axis.title = element_blank()) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+# Example: combine and apply
+combined <- str_c(remove_patterns, collapse = "|")
+# then use: df |> mutate(SITE_COMMENT = str_remove_all(SITE_COMMENT, regex(combined, ignore_case=TRUE)) |> str_squish())
+
+freshwater_sites_groups <- freshwater_grouped |>
+  mutate(
+    SITE_COMMENT = str_remove_all(
+      SITE_COMMENT,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish(),
+    SITE_NAME = str_remove_all(
+      SITE_NAME,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish()
+  ) |>
+  reframe(
+    .by = "site_group",
+    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
+    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
+    condensed_site_types = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE),
+      collapse = ";"
+    ),
+    condensed_site_subtypes = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
+      collapse = ";"
+    ),
+    site_characterisation = case_when(
+      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
+      .default = NA_character_
+    ),
+    n_sites = n(),
+    n_samples = sum(MEASURED_N)
+  )
+
+
+# wrap long text in character columns
+df_wrap <- freshwater_sites_groups |>
+  select(-condensed_comments) |>
+  mutate(across(where(is.character), ~ str_wrap(.x, width = 100)))
+
+groups_table <- tableGrob(df_wrap, rows = NULL)
+
+grid::grid.newpage()
+grid::grid.draw(groups_table)
+
+groups_map
+groups_table
+```
+
+As ever, we need to do a proper interpretation on it, and this will take time. For now:
+
+
 
 # Gap-Filling
 
