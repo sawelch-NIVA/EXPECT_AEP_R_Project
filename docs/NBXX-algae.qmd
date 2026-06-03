@@ -3,17 +3,41 @@ title: "Algae"
 format: html
 ---
 
-How much algae data?
-
 ```{r}
-#| label: algae-data
+#| label: setup
 library(tidyverse)
 library(targets)
 library(hexbin)
 library(ggrepel)
 library(stringr)
-devtools::load_all(quiet = TRUE)
+library(viridis)
+library(patchwork)
+library(igraph)
+library(sf)
+library(gridExtra)
+library(grid)
 
+devtools::load_all(quiet = TRUE)
+```
+
+If we want to build an AEP for algae, we need to start by working out what our relevant datasets are. Off the cuff, the most important are:
+- Marine (fjord and ocean) concentrations
+- Maybe marine sediment concentrations?
+- Algae concentrations
+
+I don't actually know if free-living algae have all that much to do with copper, and I presume that macroalgae (which is all we have data for) doesn't directly uptake copper from sediment, because they don't have roots. So if we were to sketch out the required matrices:
+
+1. Algae tissues (first degree)
+2. Algae habitat - marine water (second degree)
+3. Matrices adjacent to marine water - marine and freshwater sediment, freshwater, atmosphere
+4. Emissions/sources
+
+
+Start in the middle and work out.
+
+# Algae
+
+```{r}
 algae <- tar_read(load_literature_pqt) |> filter(SPECIES_GROUP == "Algae")
 
 algae |>
@@ -201,7 +225,6 @@ Can we be a bit more spatially intelligent without having to do lots more work?
 
 ```{r}
 # let's cluster our points based on proximity.
-library(sf)
 distance_matrix <- st_as_sf(algae, coords = c("LONGITUDE", "LATITUDE")) |>
   st_set_crs(4326) |> # tell sf these are WGS84 lat/lon
   st_distance()
@@ -217,7 +240,6 @@ binary_matrix <- matrix(
 )
 
 
-library(igraph)
 g <- graph_from_adjacency_matrix(binary_matrix)
 
 # grouped algae sites
@@ -309,8 +331,13 @@ remove_patterns <- c(
   "Original Comment:",
   "Emission Source:",
   "rsøkelse",
-  "Vannmiljø Station"
+  "Vannmiljø Station",
+  "Station"
 )
+
+# Some keywords for source characterisation:
+# deponi
+# industri*
 
 # Example: combine and apply
 combined <- str_c(remove_patterns, collapse = "|")
@@ -340,14 +367,11 @@ algae_sites_groups <- algae_grouped |>
     condensed_site_subtypes = paste(
       unique(SITE_GEOGRAPHIC_FEATURE_SUB),
       collapse = ";"
-    )
+    ),
+    n_sites = n(),
+    n_samples = sum(MEASURED_N)
   )
 
-
-# R
-library(stringr)
-library(gridExtra)
-library(grid)
 
 # wrap long text in character columns
 df_wrap <- algae_sites_groups |>
@@ -361,6 +385,34 @@ grid::grid.draw(groups_table)
 groups_map / groups_table
 ```
 
+
+## Fucus vesiculosus
+a.k.a Bladderwrack
+![Bladderwrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AFucus_vesiculosus_closeup.jpg)
+
+Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdetails&id=145548#distributions) regions, but is it an arctic species? 
+
+## Ascophyllum nodosum
+a.k.a Knotted wrack
+![Knotted wrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AAscophyllum_nodosum.jpg)
+
+Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertain, but probably sufficient for our purposes.
+
+# Distribution of Copper Concentrations
+
+There's one improbably high outlier in the dataset. We'll remove anything over 50mg/kg dry weight. Black Angel (2017) results are reported with SDs, while Vannmiljø data is just points. But, we need to be careful about sites, dates, and especially campaigns.
+
+The below plot code uses the thresholds for coastal marine waters, since we don't have a background level for algae. We infer that seaweed bioaccumulate copper!
+
+Our standard workup should be something like:
+- Any temporal patterns?
+- Any spatial patterns?
+- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
+
+Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
+
+Finally, any time trends? We're unlikely to see much massively illuminating, because we don't have a great deal of data for any given site.
+
 # EPEQ Assessment
 
 We have a fairly disordered dataset here, but rather than wait for the perfect one we will attempt to do the assessment (badly) so we can continue to build the network.
@@ -373,13 +425,19 @@ We have a fairly disordered dataset here, but rather than wait for the perfect o
 algae_wet_weight <- algae |> filter(MEASURED_UNIT_STANDARD == "mg/kg (wet)")
 
 # mean +- SD
-algae_mean <- algae_wet_weight |> reframe(mean_value = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |> pull()
-algae_sd <- algae_wet_weight |> reframe(sd_value = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |> pull()
+algae_mean <- algae_wet_weight |>
+  reframe(mean_value = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
+algae_sd <- algae_wet_weight |>
+  reframe(sd_value = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
 # sample size
 algae_n = algae_wet_weight |> reframe(n = n()) |> pull()
 # lines of evidence
 # counting Vm as one feels wrong, but what can you do?
-algae_lines_of_evidence <- algae_wet_weight |> reframe(.by = REFERENCE_ID) |> nrow()
+algae_lines_of_evidence <- algae_wet_weight |>
+  reframe(.by = REFERENCE_ID) |>
+  nrow()
 # Essentiality (1-3)
 algae_essentiality_score = 3
 algae_essentiality_justification = "Copper is an essential component in photosynthesis (source?). Thus algae must have a system for the controlled uptake of copper."
@@ -396,22 +454,6 @@ algae_quantification_justification = "Copper kinetics and metabolism in algae ar
 # Plus justifications
 
 # so our evidence is shaped like (for nodes)
-
-epeq_table <- tibble(
-  matrix
-  mean,
-  sd,
-  n,
-  n_lines_of_evidence,
-  essentiality_score,
-  essentiality_justification,
-  plausibility_score,
-  plausibility_justification,
-  evidence_score,
-  evidence_justification,
-  quantification_score,
-  quantification_justification
-)
 # build long EPEQ table for algae
 epeq_algae_long <- tibble::tibble(
   parameter = c(
@@ -426,7 +468,7 @@ epeq_algae_long <- tibble::tibble(
     "quantification_score"
   ),
   value = c(
-    "Biota (Aquatic) - Seaweed",
+    "Biota (Aquatic) - Seaweed - Shoot Tips",
     as.character(algae_mean),
     as.character(algae_sd),
     as.character(algae_n),
@@ -447,11 +489,197 @@ epeq_algae_long <- tibble::tibble(
     algae_evidence_justification,
     algae_quantification_justification
   )
-) |> tibble::as_tibble()
+) |>
+  tibble::as_tibble()
 
 epeq_algae_long
 ```
 
+# Marine Water
+
+Obviously there's going to be loads of this. Some important questions:
+1. Is there actually any significant difference between fjords, estuaries, near and far ocean?
+(_some_ fjords are likely to be quite contaminated, but will that show up in our data?)
+
+In fact, our data is (currently) all fjords, because Vannmiljø doesn't monitor open ocean (as far as I know... but what about O&G monitoring?) 
+
+```{r}
+marine <- tar_read(load_literature_pqt) |>
+  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
+
+marine |>
+  group_by(
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB,
+    REFERENCE_ID
+  ) |>
+  reframe(n = n()) |>
+  arrange(n)
+```
+
+Marine water gets the same analysis as algae, although it's likely to be more complicated due to the greater amount of data. We won't show the full comments here, we simply don't have the space.
+
+```{r}
+# let's cluster our points based on proximity.
+distance_matrix <- st_as_sf(marine, coords = c("LONGITUDE", "LATITUDE")) |>
+  st_set_crs(4326) |> # tell sf these are WGS84 lat/lon
+  st_distance()
+
+# for the sake of argument, sites within 20km of each other
+# from https://stackoverflow.com/questions/77179007/group-spatial-points-by-distance-in-r-how-to-group-cluster-spatial-points-so-gr
+binary_matrix <- matrix(
+  as.numeric(
+    distance_matrix
+  ) <
+    20000,
+  nrow = nrow(distance_matrix)
+)
+
+
+g <- graph_from_adjacency_matrix(binary_matrix)
+
+# grouped marine sites
+marine_grouped <- marine
+marine_grouped$site_group <- factor(components(g)$membership)
+
+
+# create sf (keep original lon/lat columns)
+marine_sf <- st_as_sf(
+  marine_grouped,
+  coords = c("LONGITUDE", "LATITUDE"),
+  crs = 4326,
+  remove = FALSE
+)
+
+centroids <- marine_sf |>
+  st_transform(3857) |> # metric projection for accurate centroids
+  group_by(site_group) |>
+  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |> # combine points per group
+  st_centroid() |> # centroid of multipoint
+  st_transform(4326) # back to lon/lat (if needed)
+
+# centroids is an sf point layer with site_group and geometry
+centroids_xy <- centroids |>
+  mutate(
+    LONGITUDE = st_coordinates(geometry)[, 1],
+    LATITUDE = st_coordinates(geometry)[, 2]
+  )
+
+groups_map <- ggplot(
+  data = centroids_xy,
+  aes(x = LONGITUDE, y = LATITUDE)
+) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  geom_label_repel(
+    aes(colour = site_group, label = site_group),
+    max.overlaps = 100
+  ) +
+  theme_minimal() +
+
+  theme(legend.position = "none", axis.title = element_blank()) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+# strings to remove from comments:
+remove_patterns <- c(
+  # urls / emails / unicode quotes
+  "(?i)https?://\\S+|www\\.\\S+|\\S+@\\S+",
+  # parenthetical / bracket content
+  "\\s*\\([^)]*\\)|\\s*\\[[^]]*\\]",
+  # report codes like 01.01-385, 2021/09, 2290-12 etc.
+  "\\b\\d{1,4}(?:[\\.\\-/]\\d{1,4})+\\b",
+  # simple station / sample codes L1, L2, Stasjon 3, Station 4
+  "\\bL\\d+\\b|\\bStasjon\\s*\\d+\\b|\\bStation\\s*\\d+\\b",
+  # short code fragments like '01', '02' as standalone tokens (avoid years by requiring non-4-digit)
+  "\\b(?!\\d{4}\\b)\\d{1,3}\\b",
+  # report words (Norwegian / English) and common report prefixes
+  "(?i)rapport(?:\\s+nr\\.?|nr\\.?|nummer|:)?.*?\\b|(?i)report(?:\\s+no\\.?|\\s+nr\\.?|\\s+nr)?",
+  "(?i)rapporter?\\b|(?i)reference(?:\\s+site)?\\b|\\bref\\.?\\b",
+  # vannmiljø / vm markers and resipient/resipientundersøkelse noise
+  "(?i)vannmilj[oø]\\b|\\bvm\\b|(?i)resipient(?:unders[kq]økelse|unde)?",
+  # 'Vm Emission Source' and variants; Miljøgifter etc.
+  "(?i)vm\\s*emission\\s*source|(?i)miljøgifter\\b|(?i)miljøgifter\\s+i",
+  # contractor / org names (common Norwegian consultancies + generic ' AS' suffix)
+  "(?i)akvaplan-?niva|niva\\b|nina\\b|ramb[ao]ll\\b|norconsult\\b|asplan\\s+viak\\b|ngi\\b|ng\\&i\\b|APN|AS",
+  "\\b\\p{Lu}[\\p{L}'’\\-]+(?:\\s+\\p{Lu}[\\p{L}'’\\-]+)*\\s+AS\\b",
+  # page / folio / table refs
+  "\\bpg?\\.?\\s*\\d+\\b|\\bp\\.\\s*\\d+\\b",
+  # measurement / unit fragments that clutter comments
+  "\\bmg/kg\\b|\\bmg/kg\\s*dry\\b|\\bmg/kg\\s*wet\\b|\\bSD\\b|\\bStandard\\s+Deviat(?:ion|ions)\\b",
+  # stray punctuation sequences and repeated separators
+  "[,;:\\|]{2,}|--+|\\.\\.+",
+  # original comment
+  "Original Comment:",
+  "Emission Source:",
+  "rsøkelse",
+  "Vannmiljø Station",
+  "Station"
+)
+
+# Some keywords for source characterisation:
+# deponi
+# industri*
+
+# Example: combine and apply
+combined <- str_c(remove_patterns, collapse = "|")
+# then use: df |> mutate(SITE_COMMENT = str_remove_all(SITE_COMMENT, regex(combined, ignore_case=TRUE)) |> str_squish())
+
+marine_sites_groups <- marine_grouped |>
+  mutate(
+    SITE_COMMENT = str_remove_all(
+      SITE_COMMENT,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish(),
+    SITE_NAME = str_remove_all(
+      SITE_NAME,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish()
+  ) |>
+  reframe(
+    .by = "site_group",
+    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
+    # condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
+    condensed_site_types = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE),
+      collapse = ";"
+    ),
+    condensed_site_subtypes = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
+      collapse = ";"
+    ),
+    n_sites = n(),
+    n_samples = sum(MEASURED_N)
+  )
+
+
+# wrap long text in character columns
+df_wrap <- marine_sites_groups |>
+  mutate(across(where(is.character), ~ str_wrap(.x, width = 100)))
+
+groups_table <- tableGrob(df_wrap, rows = NULL)
+
+grid::grid.newpage()
+grid::grid.draw(groups_table)
+
+groups_map / groups_table
+```
 
 # Gap-Filling
 
