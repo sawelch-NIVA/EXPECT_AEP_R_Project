@@ -1,6 +1,15 @@
 ---
 title: "Algae"
-format: html
+execute:
+  output: true
+  echo: false
+  warning: false
+format: 
+  html: default 
+  docx: 
+    fig-width: 8
+    fig-height: 6
+    reference-doc: ../custom-reference-doc.docx
 ---
 
 ```{r}
@@ -20,7 +29,11 @@ library(grid)
 devtools::load_all(quiet = TRUE)
 ```
 
-If we want to build an AEP for algae, we need to start by working out what our relevant datasets are. Off the cuff, the most important are: - Marine (fjord and ocean) concentrations - Maybe marine sediment concentrations? - Algae concentrations
+If we want to build an AEP for algae, we need to start by working out what our relevant datasets are. Off the cuff, the most important are:
+
+ - Marine (fjord and ocean) concentrations
+ - Maybe marine sediment concentrations?
+ - Algae concentrations
 
 I don't actually know if free-living algae have all that much to do with copper, and I presume that macroalgae (which is all we have data for) doesn't directly uptake copper from sediment, because they don't have roots. So if we were to sketch out the required matrices:
 
@@ -852,7 +865,7 @@ epeq_marine_long
 
 # Freshwater - Rivers/Streams/Canals
 
-Next node we might expect is rivers as a source of copper. This is also a little tricky, because source characterisation for a long river is even harder (and we might generally expect them to be less homogenous than the ocean as a consequence of their hydrology). But we can try.
+Next node we might expect is rivers as a source of copper. This is also a little tricky, because source characterisation for a long river is even harder (and we might generally expect them to be less homogeneous than the ocean as a consequence of their hydrology). But we can try.
 
 ```{r}
 freshwater <- tar_read(load_literature_pqt) |>
@@ -1257,6 +1270,6 @@ Here's what we have evidence for so far:
 
 ![](/images/algae_aep_so_far.png)
 
-And here's what it might look like when it's done.
+We can link this up more or less to the emissions data we have from Norske Utslipp. This is more comprehensive, at the risk of being messy and not actually communicating much in the way of causality:
 
-![](/images/algae_aep_putitative.png)
+![Emissions data from Norske utslipp (whole country); concentrations from above Arctic Circle.](/images/algae_aep_emissions.png)
