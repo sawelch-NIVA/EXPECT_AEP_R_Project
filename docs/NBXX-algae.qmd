@@ -184,10 +184,10 @@ Finally, any time trends? We're unlikely to see much massively illuminating, bec
 algae_timetrend <- algae |>
   filter(MEASURED_VALUE <= 50) |>
   ggplot(aes(x = SAMPLING_DATE, y = MEASURED_VALUE, group = SITE_NAME)) +
-  geom_point(aes(colour = MEASURED_VALUE)) +
-  scale_colour_viridis_c() +
+  geom_point() +
   theme_minimal() +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
+  theme(legend.position = "none")
 
 algae_timetrend
 
@@ -351,7 +351,7 @@ library(grid)
 
 # wrap long text in character columns
 df_wrap <- algae_sites_groups |>
-  dplyr::mutate(dplyr::across(where(is.character), ~ str_wrap(.x, width = 100)))
+  mutate(across(where(is.character), ~ str_wrap(.x, width = 100)))
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
 
@@ -367,8 +367,89 @@ We have a fairly disordered dataset here, but rather than wait for the perfect o
 
 ```{r}
 #| label: epeq_assessment
+# So, our relevant data:
 
+# just based on wet weights right now
+algae_wet_weight <- algae |> filter(MEASURED_UNIT_STANDARD == "mg/kg (wet)")
 
+# mean +- SD
+algae_mean <- algae_wet_weight |> reframe(mean_value = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |> pull()
+algae_sd <- algae_wet_weight |> reframe(sd_value = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |> pull()
+# sample size
+algae_n = algae_wet_weight |> reframe(n = n()) |> pull()
+# lines of evidence
+# counting Vm as one feels wrong, but what can you do?
+algae_lines_of_evidence <- algae_wet_weight |> reframe(.by = REFERENCE_ID) |> nrow()
+# Essentiality (1-3)
+algae_essentiality_score = 3
+algae_essentiality_justification = "Copper is an essential component in photosynthesis (source?). Thus algae must have a system for the controlled uptake of copper."
+# Plausibility (1-3)
+algae_plausibility_score = 3
+algae_plausibility_justification = "As above, the role of copper in photosynthetic organisms (including algae) is well studied and understood."
+# Evidence (1-3)
+algae_evidence_score = 3
+algae_evidence_justification = "Although the studied dataset contains limited evidence on copper concentrations in algae, measured concentrations are well in excess of background water concentrations. Strong specific evidence is not considered necessarily in light of the overall scientific consensus."
+# Quantification (1-3)
+algae_quantification_score = 2
+algae_quantification_justification = "Copper kinetics and metabolism in algae are assumed to be well understood, although such literature was not included in the study criteria."
+
+# Plus justifications
+
+# so our evidence is shaped like (for nodes)
+
+epeq_table <- tibble(
+  matrix
+  mean,
+  sd,
+  n,
+  n_lines_of_evidence,
+  essentiality_score,
+  essentiality_justification,
+  plausibility_score,
+  plausibility_justification,
+  evidence_score,
+  evidence_justification,
+  quantification_score,
+  quantification_justification
+)
+# build long EPEQ table for algae
+epeq_algae_long <- tibble::tibble(
+  parameter = c(
+    "matrix",
+    "mean",
+    "sd",
+    "n",
+    "n_lines_of_evidence",
+    "essentiality_score",
+    "plausibility_score",
+    "evidence_score",
+    "quantification_score"
+  ),
+  value = c(
+    "Biota (Aquatic) - Seaweed",
+    as.character(algae_mean),
+    as.character(algae_sd),
+    as.character(algae_n),
+    as.character(algae_lines_of_evidence),
+    as.character(algae_essentiality_score),
+    as.character(algae_plausibility_score),
+    as.character(algae_evidence_score),
+    as.character(algae_quantification_score)
+  ),
+  justification = c(
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    algae_essentiality_justification,
+    algae_plausibility_justification,
+    algae_evidence_justification,
+    algae_quantification_justification
+  )
+) |> tibble::as_tibble()
+
+epeq_algae_long
 ```
 
 
