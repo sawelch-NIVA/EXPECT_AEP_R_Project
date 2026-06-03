@@ -10,6 +10,8 @@ How much algae data?
 library(tidyverse)
 library(targets)
 library(hexbin)
+library(ggrepel)
+library(stringr)
 devtools::load_all(quiet = TRUE)
 
 algae <- tar_read(load_literature_pqt) |> filter(SPECIES_GROUP == "Algae")
@@ -45,24 +47,6 @@ The below plot code uses the thresholds for coastal marine waters, since we don'
 threshold_data <- generate_copper_thresholds() |>
   filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
 
-# let's cluster our points based on proximity.
-library(sf)
-distance_matrix <- st_as_sf(algae, coords = c("LONGITUDE", "LATITUDE")) |>
-  st_distance()
-
-# for the sake of argument, sites within 20km of each other
-# from https://stackoverflow.com/questions/77179007/group-spatial-points-by-distance-in-r-how-to-group-cluster-spatial-points-so-gr
-binary_matrix <- matrix(
-  as.numeric(
-    distance_matrix
-  ) <
-    20000,
-  nrow = nrow(distance_matrix)
-)
-
-library(igraph)
-g <- graph_from_adjacency_matrix(binary_matrix)
-plot(g)
 
 algae_pointrange <- algae |>
   filter(MEASURED_VALUE <= 50) |>
@@ -212,6 +196,181 @@ algae_pointrange + (sample_size_map / mean_conc_map / algae_timetrend)
 ```
 
 Well, that's helpful.
+
+Can we be a bit more spatially intelligent without having to do lots more work?
+
+```{r}
+# let's cluster our points based on proximity.
+library(sf)
+distance_matrix <- st_as_sf(algae, coords = c("LONGITUDE", "LATITUDE")) |>
+  st_set_crs(4326) |> # tell sf these are WGS84 lat/lon
+  st_distance()
+
+# for the sake of argument, sites within 20km of each other
+# from https://stackoverflow.com/questions/77179007/group-spatial-points-by-distance-in-r-how-to-group-cluster-spatial-points-so-gr
+binary_matrix <- matrix(
+  as.numeric(
+    distance_matrix
+  ) <
+    20000,
+  nrow = nrow(distance_matrix)
+)
+
+
+library(igraph)
+g <- graph_from_adjacency_matrix(binary_matrix)
+
+# grouped algae sites
+algae_grouped <- algae
+algae_grouped$site_group <- factor(components(g)$membership)
+
+
+# create sf (keep original lon/lat columns)
+algae_sf <- st_as_sf(
+  algae_grouped,
+  coords = c("LONGITUDE", "LATITUDE"),
+  crs = 4326,
+  remove = FALSE
+)
+
+centroids <- algae_sf |>
+  st_transform(3857) |> # metric projection for accurate centroids
+  group_by(site_group) |>
+  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |> # combine points per group
+  st_centroid() |> # centroid of multipoint
+  st_transform(4326) # back to lon/lat (if needed)
+
+# centroids is an sf point layer with site_group and geometry
+centroids_xy <- centroids |>
+  mutate(
+    LONGITUDE = st_coordinates(geometry)[, 1],
+    LATITUDE = st_coordinates(geometry)[, 2]
+  )
+
+groups_map <- ggplot(
+  data = centroids_xy,
+  aes(x = LONGITUDE, y = LATITUDE)
+) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  geom_label_repel(
+    aes(colour = site_group, label = site_group),
+    max.overlaps = 100
+  ) +
+  theme_minimal() +
+
+  theme(legend.position = "none", axis.title = element_blank()) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+# strings to remove from comments:
+remove_patterns <- c(
+  # urls / emails / unicode quotes
+  "(?i)https?://\\S+|www\\.\\S+|\\S+@\\S+",
+  # parenthetical / bracket content
+  "\\s*\\([^)]*\\)|\\s*\\[[^]]*\\]",
+  # report codes like 01.01-385, 2021/09, 2290-12 etc.
+  "\\b\\d{1,4}(?:[\\.\\-/]\\d{1,4})+\\b",
+  # simple station / sample codes L1, L2, Stasjon 3, Station 4
+  "\\bL\\d+\\b|\\bStasjon\\s*\\d+\\b|\\bStation\\s*\\d+\\b",
+  # short code fragments like '01', '02' as standalone tokens (avoid years by requiring non-4-digit)
+  "\\b(?!\\d{4}\\b)\\d{1,3}\\b",
+  # report words (Norwegian / English) and common report prefixes
+  "(?i)rapport(?:\\s+nr\\.?|nr\\.?|nummer|:)?.*?\\b|(?i)report(?:\\s+no\\.?|\\s+nr\\.?|\\s+nr)?",
+  "(?i)rapporter?\\b|(?i)reference(?:\\s+site)?\\b|\\bref\\.?\\b",
+  # vannmiljø / vm markers and resipient/resipientundersøkelse noise
+  "(?i)vannmilj[oø]\\b|\\bvm\\b|(?i)resipient(?:unders[kq]økelse|unde)?",
+  # 'Vm Emission Source' and variants; Miljøgifter etc.
+  "(?i)vm\\s*emission\\s*source|(?i)miljøgifter\\b|(?i)miljøgifter\\s+i",
+  # contractor / org names (common Norwegian consultancies + generic ' AS' suffix)
+  "(?i)akvaplan-?niva|niva\\b|nina\\b|ramb[ao]ll\\b|norconsult\\b|asplan\\s+viak\\b|ngi\\b|ng\\&i\\b|APN|AS",
+  "\\b\\p{Lu}[\\p{L}'’\\-]+(?:\\s+\\p{Lu}[\\p{L}'’\\-]+)*\\s+AS\\b",
+  # page / folio / table refs
+  "\\bpg?\\.?\\s*\\d+\\b|\\bp\\.\\s*\\d+\\b",
+  # measurement / unit fragments that clutter comments
+  "\\bmg/kg\\b|\\bmg/kg\\s*dry\\b|\\bmg/kg\\s*wet\\b|\\bSD\\b|\\bStandard\\s+Deviat(?:ion|ions)\\b",
+  # stray punctuation sequences and repeated separators
+  "[,;:\\|]{2,}|--+|\\.\\.+",
+  # original comment
+  "Original Comment:",
+  "Emission Source:",
+  "rsøkelse",
+  "Vannmiljø Station"
+)
+
+# Example: combine and apply
+combined <- str_c(remove_patterns, collapse = "|")
+# then use: df |> mutate(SITE_COMMENT = str_remove_all(SITE_COMMENT, regex(combined, ignore_case=TRUE)) |> str_squish())
+
+algae_sites_groups <- algae_grouped |>
+  mutate(
+    SITE_COMMENT = str_remove_all(
+      SITE_COMMENT,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish(),
+    SITE_NAME = str_remove_all(
+      SITE_NAME,
+      regex(combined, ignore_case = TRUE)
+    ) |>
+      str_squish()
+  ) |>
+  reframe(
+    .by = "site_group",
+    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
+    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
+    condensed_site_types = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE),
+      collapse = ";"
+    ),
+    condensed_site_subtypes = paste(
+      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
+      collapse = ";"
+    )
+  )
+
+
+# R
+library(stringr)
+library(gridExtra)
+library(grid)
+
+# wrap long text in character columns
+df_wrap <- algae_sites_groups |>
+  dplyr::mutate(dplyr::across(where(is.character), ~ str_wrap(.x, width = 100)))
+
+groups_table <- tableGrob(df_wrap, rows = NULL)
+
+grid::grid.newpage()
+grid::grid.draw(groups_table)
+
+groups_map / groups_table
+```
+
+# EPEQ Assessment
+
+We have a fairly disordered dataset here, but rather than wait for the perfect one we will attempt to do the assessment (badly) so we can continue to build the network.
+
+```{r}
+#| label: epeq_assessment
+
+
+```
+
 
 # Gap-Filling
 
