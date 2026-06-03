@@ -1177,6 +1177,78 @@ groups_table
 
 As ever, we need to do a proper interpretation on it, and this will take time. For now:
 
+```{r}
+#| label: epeq_assessment-freshwater
+# mean +- SD
+freshwater_mean <- freshwater |>
+  reframe(mean_value = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
+freshwater_sd <- freshwater |>
+  reframe(sd_value = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE)) |>
+  pull()
+# sample size
+freshwater_n = freshwater |> reframe(n = n()) |> pull()
+# lines of evidence
+# counting Vm as one feels wrong, but what can you do?
+freshwater_lines_of_evidence <- freshwater |>
+  reframe(.by = REFERENCE_ID) |>
+  nrow()
+# Essentiality (1-3)
+freshwater_essentiality_score = 3
+freshwater_essentiality_justification = "Copper is known to be naturally present in the earth's crust and aquatic ecosystems."
+# Plausibility (1-3)
+freshwater_plausibility_score = 3
+freshwater_plausibility_justification = "As above."
+# Evidence (1-3)
+freshwater_evidence_score = 3
+freshwater_evidence_justification = "The studied dataset contains substantial evidence on copper concentrations in freshwater."
+# Quantification (1-3)
+freshwater_quantification_score = 3
+freshwater_quantification_justification = "Copper kinetics in freshwater environments are generally better understood than in marine envirionments. I can perhaps cite some papers here, but I'll have to get them via gap-filling."
+# TODO: could add CREED here as a measure of data quality?
+
+# so our evidence is shaped like (for nodes)
+# build long EPEQ table for freshwater
+epeq_freshwater_long <- tibble::tibble(
+  parameter = c(
+    "matrix",
+    "mean",
+    "sd",
+    # TODO: add unit
+    "n",
+    "n_lines_of_evidence",
+    "essentiality_score",
+    "plausibility_score",
+    "evidence_score",
+    "quantification_score"
+  ),
+  value = c(
+    "Aquatic (Freshwater, Rivers and Streams)",
+    as.character(freshwater_mean),
+    as.character(freshwater_sd),
+    as.character(freshwater_n),
+    as.character(freshwater_lines_of_evidence),
+    as.character(freshwater_essentiality_score),
+    as.character(freshwater_plausibility_score),
+    as.character(freshwater_evidence_score),
+    as.character(freshwater_quantification_score)
+  ),
+  justification = c(
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    NA_character_,
+    freshwater_essentiality_justification,
+    freshwater_plausibility_justification,
+    freshwater_evidence_justification,
+    freshwater_quantification_justification
+  )
+) |>
+  tibble::as_tibble()
+
+epeq_freshwater_long
+```
 
 
 # Gap-Filling
