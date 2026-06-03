@@ -20,18 +20,14 @@ library(grid)
 devtools::load_all(quiet = TRUE)
 ```
 
-If we want to build an AEP for algae, we need to start by working out what our relevant datasets are. Off the cuff, the most important are:
-- Marine (fjord and ocean) concentrations
-- Maybe marine sediment concentrations?
-- Algae concentrations
+If we want to build an AEP for algae, we need to start by working out what our relevant datasets are. Off the cuff, the most important are: - Marine (fjord and ocean) concentrations - Maybe marine sediment concentrations? - Algae concentrations
 
 I don't actually know if free-living algae have all that much to do with copper, and I presume that macroalgae (which is all we have data for) doesn't directly uptake copper from sediment, because they don't have roots. So if we were to sketch out the required matrices:
 
-1. Algae tissues (first degree)
-2. Algae habitat - marine water (second degree)
-3. Matrices adjacent to marine water - marine and freshwater sediment, freshwater, atmosphere
-4. Emissions/s
-
+1.  Algae tissues (first degree)
+2.  Algae habitat - marine water (second degree)
+3.  Matrices adjacent to marine water - marine and freshwater sediment, freshwater, atmosphere
+4.  Emissions/s
 
 Start in the middle and work out.
 
@@ -50,14 +46,18 @@ algae |>
 We have a lot of data for algae, but it's macroalgae rather than microalgae. We probably can't assume consistent internal concentrations across such a biodiverse set of taxa, but nevertheless it's a starting point. I can (and will) go looking for more papers, but I want to work with what I have first.
 
 ## Fucus vesiculosus
+
 a.k.a Bladderwrack
 
-Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdetails&id=145548#distributions) regions, but is it an arctic species? 
+Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdetails&id=145548#distributions) regions, but is it an arctic species?
 
 ## Ascophyllum nodosum
+
 a.k.a Knotted wrack
 
 Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertain, but probably sufficient for our purposes.
+
+Note: Currently we just consider algae as whole organisms. Do we need to make a distinction between intracellular and extracellular stuff?
 
 # Distribution of Copper Concentrations
 
@@ -106,10 +106,7 @@ algae_pointrange <- algae |>
   theme(legend.position = "none")
 ```
 
-Otherwise, our standard workup should be something like:
-- Any temporal patterns?
-- Any spatial patterns?
-- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
+Otherwise, our standard workup should be something like: - Any temporal patterns? - Any spatial patterns? - Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: algae-hexmaps
@@ -387,8 +384,8 @@ df_wrap <- algae_sites_groups |>
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
 
-grid::grid.newpage()
-grid::grid.draw(groups_table)
+grid.newpage()
+grid.draw(groups_table)
 
 groups_map / groups_table
 ```
@@ -399,10 +396,7 @@ There's one improbably high outlier in the dataset. We'll remove anything over 5
 
 The below plot code uses the thresholds for coastal marine waters, since we don't have a background level for algae. We infer that seaweed bioaccumulate copper!
 
-Our standard workup should be something like:
-- Any temporal patterns?
-- Any spatial patterns?
-- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
+Our standard workup should be something like: - Any temporal patterns? - Any spatial patterns? - Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
 
@@ -492,11 +486,9 @@ epeq_algae_long
 
 # Marine Water
 
-Obviously there's going to be loads of this. Some important questions:
-1. Is there actually any significant difference between fjords, estuaries, near and far ocean?
-(_some_ fjords are likely to be quite contaminated, but will that show up in our data?)
+Obviously there's going to be loads of this. Some important questions: 1. Is there actually any significant difference between fjords, estuaries, near and far ocean? (*some* fjords are likely to be quite contaminated, but will that show up in our data?)
 
-In fact, our data is (currently) all fjords, because Vannmiljø doesn't monitor open ocean (as far as I know... but what about O&G monitoring?) 
+In fact, our data is (currently) all fjords, because Vannmiljø doesn't monitor open ocean (as far as I know... but what about O&G monitoring?)
 
 ```{r}
 marine <- tar_read(load_literature_pqt) |>
@@ -632,12 +624,11 @@ df_wrap <- marine_sites_groups |>
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
 
-grid::grid.newpage()
-grid::grid.draw(groups_table)
+grid.newpage()
+grid.draw(groups_table)
 
 groups_map / groups_table
 ```
-
 
 ```{r}
 #| label: marine-comparison
@@ -680,10 +671,7 @@ marine_pointrange <- marine |>
   theme(legend.position = "none")
 ```
 
-Otherwise, our standard workup should be something like:
-- Any temporal patterns?
-- Any spatial patterns?
-- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
+Otherwise, our standard workup should be something like: - Any temporal patterns? - Any spatial patterns? - Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: marine-hexmaps
@@ -783,8 +771,7 @@ marine_timetrend
 marine_pointrange + (sample_size_map / mean_conc_map / marine_timetrend)
 ```
 
-We have a handful of sites in Nordfjorden with elevated copper concentrations (>5 mg/L), but most are in the background-Level II zone. It's probably safe to just take an average here, although it would be wise to drill down further spatially - but do we have the time to do that for each set of sites?
-
+We have a handful of sites in Nordfjorden with elevated copper concentrations (\>5 mg/L), but most are in the background-Level II zone. It's probably safe to just take an average here, although it would be wise to drill down further spatially - but do we have the time to do that for each set of sites?
 
 # EPEQ Assessment
 
@@ -885,7 +872,6 @@ freshwater |>
   arrange(n)
 ```
 
-
 ```{r}
 #| label: freshwater-comparison
 threshold_data <- generate_copper_thresholds() |>
@@ -927,10 +913,7 @@ freshwater_pointrange <- freshwater |>
   theme(legend.position = "none")
 ```
 
-Otherwise, our standard workup should be something like:
-- Any temporal patterns?
-- Any spatial patterns?
-- Any site selection rationale or nearby s we might expect to drive elevated concentrations?
+Otherwise, our standard workup should be something like: - Any temporal patterns? - Any spatial patterns? - Any site selection rationale or nearby s we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: freshwater-hexmaps
@@ -1031,8 +1014,6 @@ freshwater_timetrend
 
 freshwater_pointrange + (sample_size_map / mean_conc_map / freshwater_timetrend)
 ```
-
-
 
 ```{r}
 # let's cluster our points based on proximity.
@@ -1155,15 +1136,14 @@ df_wrap <- freshwater_sites_groups |>
 
 groups_table <- tableGrob(df_wrap, rows = NULL)
 
-grid::grid.newpage()
-grid::grid.draw(groups_table)
+grid.newpage()
+grid.draw(groups_table)
 
 groups_map
 groups_table
 ```
 
 As ever, we need to do a proper interpretation on it, and this will take time. For now:
-
 
 ```{r}
 #| label: epeq_assessment-freshwater
@@ -1195,7 +1175,6 @@ freshwater_quantification_score = 3
 freshwater_quantification_justification = "Copper kinetics in freshwater environments are generally better understood than in marine envirionments. I can perhaps cite some papers here, but I'll have to get them via gap-filling."
 # TODO: could add CREED here as a measure of data quality?
 
-# so our evidence is shaped like (for nodes)
 # build long EPEQ table for freshwater
 epeq_freshwater_long <- tibble::tibble(
   parameter = c(
@@ -1238,12 +1217,46 @@ epeq_freshwater_long <- tibble::tibble(
 epeq_freshwater_long
 ```
 
+TODO: Add linkage to Norske Utlsipp and REACH here.
 
 # Gap-Filling
 
 Initial research suggests it's difficult to say how much copper is "in algae". We can still do AEP stuff, but the evidence is necessarily going to be weak. Some key points:
 
-- Copper is also a stressor and essential nutrient in microalgae, but knowledge is spotty
-https://www.mdpi.com/2305-6304/10/9/527
+- Copper is also a stressor and essential nutrient in microalgae, but knowledge is spotty https://www.mdpi.com/2305-6304/10/9/527
 
 I guess we can start with the information we have and hopefull extend it if/when we get some more data...
+
+# Edges
+
+So far we've just done nodes, which is easy. Edges are harder. We hypothesise the following flows:
+
+- Marine Water -\> Algae
+- Freshwater -\> Marine Water
+- Atmosphere -\> Marine Water
+- Atmosphere -\> Fresh Water
+- Atmosphere -\> Soil
+- Soil -\> Fresh Water
+
+How do we store this data?
+
+```{r}
+#| label: flows-epeq
+flows_epeq <- tribble(
+  ~flow_name                                    , ~from               , ~to                    , ~magnitude , ~unit , ~n , ~sd , ~essentiality_score , ~essentiality_justification     , ~plausibility_score , ~plausibility_justification                                 , ~evidence_score , ~evidence_justification                           , ~quantification_score , ~quantification_justification                        , ~comments                                                                                                                                                         ,
+  "Algal Uptake"                                , "Marine/Salt Water" , "Algae Whole Organism" , NA         , NA    , NA , NA  ,                   3 , "it's got to get there somehow" ,                   3 , "cu is a micronutrient and thus must be controlled somehow" ,               1 , "evidence exists but I haven't gapfilled it yet." ,                     1 , "evidence may exist but I haven't gap-filled it yet" , "Copper uptake by organisms is known to be active regulated. A simple magnitude of uptake (e.g. BCF) is unlikely to capture the relationship in a meaningul way." ,
+  "Riverine Copper Inputs to Marine/Salt Water" , "Freshwater"        , "Marine/Salt Water"    , NA         , NA    , NA , NA  ,                   3 , "rivers aren't the only input"  ,                   3 , "rivers carry crust material towards the sea"               ,               1 , "evidence exists but I haven't gapfilled it yet." ,                     1 , "evidence may exist but I haven't gap-filled it yet" , "This is also tricky to represnt just as a simple node, but I think Comber et al has some estimates in terms of kg/year we can use."
+)
+```
+
+# Constructing the AEP
+
+Ideallty I want to be able to make the AEPs dynamically using network visualisation software. I don't know if this is realistic. In any case, I don't want to spend a bunch of time making "pretty" AEPs before we agree on all the details and methods. Here's a manual version of the algal AEP, with the data from above filled in.
+
+Here's what we have evidence for so far:
+
+![](/images/algae_aep_so_far.png)
+
+And here's what it might look like when it's done.
+
+![](/images/algae_aep_putitative.png)
