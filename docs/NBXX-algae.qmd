@@ -38,7 +38,8 @@ Start in the middle and work out.
 # Algae
 
 ```{r}
-algae <- tar_read(load_literature_pqt) |> filter(SPECIES_GROUP == "Algae")
+algae <- tar_read(load_literature_pqt) |>
+  filter(SPECIES_GROUP == "Algae")
 
 algae |>
   group_by(SAMPLE_SPECIES, REFERENCE_ID) |>
@@ -113,11 +114,6 @@ Otherwise, our standard workup should be something like:
 
 ```{r}
 #| label: algae-hexmaps
-library(ggplot2)
-library(dplyr)
-library(viridis)
-library(patchwork)
-
 world_map <- map_data("world")
 # reduce bbox size
 get_study_area_bbox <- function() {
@@ -504,7 +500,7 @@ In fact, our data is (currently) all fjords, because Vannmiljø doesn't monitor 
 
 ```{r}
 marine <- tar_read(load_literature_pqt) |>
-  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
+  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water", LATITUDE >= 66.5)
 
 marine |>
   group_by(
@@ -594,49 +590,8 @@ groups_map <- ggplot(
     )
   )
 
-# strings to remove from comments:
-remove_patterns <- c(
-  # urls / emails / unicode quotes
-  "(?i)https?://\\S+|www\\.\\S+|\\S+@\\S+",
-  # parenthetical / bracket content
-  "\\s*\\([^)]*\\)|\\s*\\[[^]]*\\]",
-  # report codes like 01.01-385, 2021/09, 2290-12 etc.
-  "\\b\\d{1,4}(?:[\\.\\-/]\\d{1,4})+\\b",
-  # simple station / sample codes L1, L2, Stasjon 3, Station 4
-  "\\bL\\d+\\b|\\bStasjon\\s*\\d+\\b|\\bStation\\s*\\d+\\b",
-  # short code fragments like '01', '02' as standalone tokens (avoid years by requiring non-4-digit)
-  "\\b(?!\\d{4}\\b)\\d{1,3}\\b",
-  # report words (Norwegian / English) and common report prefixes
-  "(?i)rapport(?:\\s+nr\\.?|nr\\.?|nummer|:)?.*?\\b|(?i)report(?:\\s+no\\.?|\\s+nr\\.?|\\s+nr)?",
-  "(?i)rapporter?\\b|(?i)reference(?:\\s+site)?\\b|\\bref\\.?\\b",
-  # vannmiljø / vm markers and resipient/resipientundersøkelse noise
-  "(?i)vannmilj[oø]\\b|\\bvm\\b|(?i)resipient(?:unders[kq]økelse|unde)?",
-  # 'Vm Emission Source' and variants; Miljøgifter etc.
-  "(?i)vm\\s*emission\\s*source|(?i)miljøgifter\\b|(?i)miljøgifter\\s+i",
-  # contractor / org names (common Norwegian consultancies + generic ' AS' suffix)
-  "(?i)akvaplan-?niva|niva\\b|nina\\b|ramb[ao]ll\\b|norconsult\\b|asplan\\s+viak\\b|ngi\\b|ng\\&i\\b|APN|AS",
-  "\\b\\p{Lu}[\\p{L}'’\\-]+(?:\\s+\\p{Lu}[\\p{L}'’\\-]+)*\\s+AS\\b",
-  # page / folio / table refs
-  "\\bpg?\\.?\\s*\\d+\\b|\\bp\\.\\s*\\d+\\b",
-  # measurement / unit fragments that clutter comments
-  "\\bmg/kg\\b|\\bmg/kg\\s*dry\\b|\\bmg/kg\\s*wet\\b|\\bSD\\b|\\bStandard\\s+Deviat(?:ion|ions)\\b",
-  # stray punctuation sequences and repeated separators
-  "[,;:\\|]{2,}|--+|\\.\\.+",
-  # original comment
-  "Original Comment:",
-  "Emission Source:",
-  "rsøkelse",
-  "Vannmiljø Station",
-  "Station"
-)
 
-# Some keywords for source characterisation:
-# deponi
-# industri*
-
-# Example: combine and apply
 combined <- str_c(remove_patterns, collapse = "|")
-# then use: df |> mutate(SITE_COMMENT = str_remove_all(SITE_COMMENT, regex(combined, ignore_case=TRUE)) |> str_squish())
 
 marine_sites_groups <- marine_grouped |>
   mutate(
@@ -677,8 +632,160 @@ groups_table <- tableGrob(df_wrap, rows = NULL)
 grid::grid.newpage()
 grid::grid.draw(groups_table)
 
-groups_map / groups_table
+groups_map
+groups_table
 ```
+
+
+```{r}
+#| label: marine-comparison
+threshold_data <- generate_copper_thresholds() |>
+  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
+
+
+marine_pointrange <- marine |>
+  filter(MEASURED_VALUE <= 50) |>
+  mutate(
+    SITE_COMMENT = SITE_COMMENT |>
+      stringr::str_remove("^.*?\\."),
+    SITE_NAME = SITE_NAME |> stringr::str_remove("Vannmiljø Station")
+  ) |>
+  ggplot(aes(y = SITE_NAME, x = MEASURED_VALUE, colour = MEASURED_VALUE)) +
+  scale_colour_viridis_c() +
+  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
+  ggnewscale::new_scale_color() +
+  geom_vline(
+    # TODO: Fix cvolours, add labels to lines.
+    data = threshold_data,
+    aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
+    linetype = "dashed",
+    linewidth = 0.8,
+    alpha = 0.6
+  ) +
+  geom_text(
+    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
+    colour = "black",
+    hjust = 0
+  ) +
+  labs(y = "Site Code", x = "Measured Value (mg/L)") +
+  facet_wrap(
+    facets = vars(MEASURED_UNIT_STANDARD),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Otherwise, our standard workup should be something like:
+- Any temporal patterns?
+- Any spatial patterns?
+- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
+
+```{r}
+#| label: marine-hexmaps
+world_map <- map_data("world")
+# reduce bbox size
+get_study_area_bbox <- function() {
+  st_bbox(c(xmin = -65, xmax = 40, ymin = 55, ymax = 75))
+}
+
+marine_hex <- marine |>
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
+
+sample_size_map <- marine_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_bin_hex(
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "magma",
+    trans = "sqrt",
+    name = "Sample count"
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sample Size",
+  ) +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+
+mean_conc_map <- marine_hex |>
+  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE)) +
+  geom_polygon(
+    data = world_map,
+    aes(x = long, y = lat, group = group),
+    fill = "grey95",
+    colour = "grey80",
+    inherit.aes = FALSE
+  ) +
+  stat_summary_hex(
+    fun = function(x) mean(x, na.rm = TRUE),
+    bins = 100,
+    colour = NA
+  ) +
+  scale_fill_viridis_c(
+    option = "viridis",
+    name = "Mean concentration\n(mg/kg dry & wet)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.title = element_blank()) +
+  labs(
+    title = "Mean marine concentration by hexbin",
+  ) +
+  coord_fixed(
+    ratio = 2,
+    xlim = c(
+      get_study_area_bbox()[[1]],
+      get_study_area_bbox()[[3]]
+    ),
+    ylim = c(
+      get_study_area_bbox()[[2]],
+      get_study_area_bbox()[[4]]
+    )
+  )
+```
+
+Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
+
+Finally, any time trends? We're unlikely to see much massively illuminating, because we don't have a great deal of data for any given site.
+
+```{r}
+#| label: marine-time-trends
+marine_timetrend <- marine |>
+  filter(MEASURED_VALUE <= 50) |>
+  ggplot(aes(x = SAMPLING_DATE, y = MEASURED_VALUE, group = SITE_NAME)) +
+  geom_point() +
+  theme_minimal() +
+  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
+  theme(legend.position = "none")
+
+marine_timetrend
+
+
+marine_pointrange + (sample_size_map / mean_conc_map / marine_timetrend)
+```
+
+This is a nightmare. We could reduce our data load to everything inside the arctic circle?
 
 # Gap-Filling
 
