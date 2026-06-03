@@ -371,7 +371,7 @@ algae_sites_groups <- algae_grouped |>
       unique(SITE_GEOGRAPHIC_FEATURE_SUB),
       collapse = ";"
     ),
-    _characterisation = case_when(
+    site_characterisation = case_when(
       str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
       .default = NA_character_
     ),
@@ -392,19 +392,6 @@ grid::grid.draw(groups_table)
 
 groups_map / groups_table
 ```
-
-
-## Fucus vesiculosus
-a.k.a Bladderwrack
-![Bladderwrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AFucus_vesiculosus_closeup.jpg)
-
-Via Worms is found in [Arctic](https://www.marinespecies.org/aphia.php?p=taxdetails&id=145548#distributions) regions, but is it an arctic species? 
-
-## Ascophyllum nodosum
-a.k.a Knotted wrack
-![Knotted wrack via Wikipedia.](https://en.wikipedia.org/wiki/File%3AAscophyllum_nodosum.jpg)
-
-Generally cosmopolitan distribution across the Atlantic. Cold tolerance uncertain, but probably sufficient for our purposes.
 
 # Distribution of Copper Concentrations
 
@@ -1176,6 +1163,7 @@ groups_table
 ```
 
 As ever, we need to do a proper interpretation on it, and this will take time. For now:
+
 
 ```{r}
 #| label: epeq_assessment-freshwater
