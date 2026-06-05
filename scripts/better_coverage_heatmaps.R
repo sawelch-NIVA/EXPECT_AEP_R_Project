@@ -69,7 +69,8 @@ sub_compartment_coverage <- literature_merged_data |>
     panel.grid.minor.x = element_line(linewidth = 0.1, colour = "lightgrey"),
     strip.placement = "outside",
     panel.background = element_blank(),
-    strip.background = element_blank()
+    strip.background = element_blank(),
+    panel.grid.major.y = element_line(linewidth = 0.1, colour = "lightgrey")
   )
 
 
@@ -156,6 +157,7 @@ org_coverage <- literature_merged_data |>
   ) +
   theme(
     panel.grid.minor.x = element_line(linewidth = 0.1, colour = "lightgrey"),
+    panel.grid.major.y = element_line(linewidth = 0.1, colour = "lightgrey"),
     axis.text.y = element_markdown(),
     axis.title.y = element_blank(),
     strip.placement = "outside",
@@ -238,6 +240,9 @@ source_coverage_image <- source_coverage |>
   # theme_minimal(base_size = 11) +
   theme(
     axis.title = element_blank(),
+    axis.text.x = element_text(angle = 90),
+    axis.ticks.x = element_blank(),
+
     axis.text.y = element_markdown(), # TODO: Failing because of the theme_minimal call?
     panel.background = element_blank(),
     legend.position = "none",
@@ -249,5 +254,28 @@ left_panel <- (sub_compartment_coverage / org_coverage) +
   plot_layout(guides = "collect", axis_titles = "collect")
 
 (left_panel | source_coverage_image) +
-  plot_layout(widths = c(1, 0.1)) +
+  plot_layout(widths = c(1, 0.15)) +
   plot_annotation(tag_levels = "a", tag_suffix = ")")
+
+ggsave(
+  height = 30,
+  width = 60,
+  units = "cm",
+  dpi = 300,
+  filename = "full_data_workup.png"
+)
+
+# TODO:
+# Fix some LoE numbers not appearing
+# Add an LoE explanation to the legend
+# fix bold on strip text
+# reduce overlap of points
+# reduce overlap on fig c
+# work out how to add more spatial data...?
+# Fix wrapping on fig a
+# Bold sp groups on fig b
+# add x gridlines
+# ensure text is never covered by points
+# Reduce distance betweent top axis and plot text on fig c
+# Find a less judgemental colour scheme for fig c
+# Replace sample size with interval sizes
