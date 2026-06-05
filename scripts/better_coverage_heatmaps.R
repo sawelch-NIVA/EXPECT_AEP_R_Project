@@ -1,63 +1,14 @@
-options(repr.plot.res = 600)
-
-# Helper: parse REFERENCE_ID into a two-line y-axis label ----
-format_ref_label <- function(id) {
-  if (str_detect(id, "\\d{4}(-\\d{4})?")) {
-    year_part <- str_extract(id, "\\d{4}(-\\d{4})?")
-    remainder <- str_remove(id, "\\d{4}(-\\d{4})?")
-    glue("**{remainder}**<br>{year_part}")
-  } else {
-    str_wrap(id, width = 40)
-  }
-}
-
-# Prepare data for plotting ----
-plot_data <- literature_merged_data |>
-  group_by(REFERENCE_ID, ENVIRON_COMPARTMENT_SUB) |>
-  distinct() |>
-  reframe(count = sum(MEASURED_N, na.rm = TRUE)) |>
-  left_join(
-    literature_merged_data |> distinct(REFERENCE_ID, YEAR),
-    by = "REFERENCE_ID"
-  ) |>
-  filter(!is.na(ENVIRON_COMPARTMENT_SUB), ENVIRON_COMPARTMENT_SUB != "") |>
-  mutate(label_2line = map_chr(REFERENCE_ID, format_ref_label))
-
-# Calculate text color threshold (on log10 scale) ----
-threshold_value <- mean(
-  log10(plot_data$count[plot_data$count > 0]),
-  na.rm = TRUE
-)
-
-# Calculate total samples per reference for ordering (y-axis) ----
-reference_order <- plot_data |>
-  group_by(REFERENCE_ID) |>
-  summarise(total = sum(count)) |>
-  arrange(total) |>
-  pull(REFERENCE_ID)
-
-# Derive label order from reference_order ----
-label_order <- map_chr(reference_order, format_ref_label)
-
-# Calculate total samples per compartment for ordering (x-axis) ----
-compartment_order <- plot_data |>
-  group_by(ENVIRON_COMPARTMENT_SUB) |>
-  summarise(total = sum(count)) |>
-  arrange(desc(total)) |>
-  pull(ENVIRON_COMPARTMENT_SUB)
-
-# helper
-wrap_at_slash <- function(x, width = 15) {
-  x |>
-    stringr::str_replace_all("/", " /") |>
-    stringr::str_wrap(width = width)
-}
-
-
 # Part 1 ----
 sub_compartment_coverage <- literature_merged_data |>
   filter(!str_detect("Biota", ENVIRON_COMPARTMENT)) |>
-  mutate(year_sampled = year(SAMPLING_DATE)) |>
+  mutate(
+    year_sampled = year(SAMPLING_DATE),
+    ENVIRON_COMPARTMENT_SUB = str_replace_all(
+      ENVIRON_COMPARTMENT_SUB,
+      "/",
+      " /"
+    )
+  ) |>
   group_by(year_sampled, ENVIRON_COMPARTMENT_SUB, ENVIRON_COMPARTMENT) |>
   reframe(
     sum_MEASURED_N = sum(MEASURED_N),
@@ -84,7 +35,7 @@ sub_compartment_coverage <- literature_merged_data |>
     n.breaks = 5,
     transform = "log10"
   ) +
-  scale_y_discrete(labels = wrap_at_slash) +
+  scale_y_discrete(labels = ENVIRON_COMPARTMENT_SUB) +
   ggnewscale::new_scale_colour() +
   geom_text(aes(
     label = sum_lines_of_evidence,
@@ -114,10 +65,11 @@ sub_compartment_coverage <- literature_merged_data |>
     colour = "Sample size",
     size = "Sample size"
   ) +
-  theme_minimal(base_size = 11) +
   theme(
     panel.grid.minor.x = element_line(linewidth = 0.1, colour = "lightgrey"),
-    strip.placement = "outside"
+    strip.placement = "outside",
+    panel.background = element_blank(),
+    strip.background = element_blank()
   )
 # Part 2 ----
 
@@ -126,8 +78,10 @@ SPECIES_GROUP_n_tbl <- literature_merged_data |>
   filter(!is.na(SPECIES_GROUP)) |>
   reframe(
     SPECIES_GROUP_n = glue(
-      "{SPECIES_GROUP}<br>({n_distinct(SAMPLE_SPECIES)} spp.)"
-    ),
+      "{SPECIES_GROUP} <br> ({n_distinct(SAMPLE_SPECIES)} spp.)"
+    ) |>
+      # line break doesn't work... why!?
+      as.character(),
     .by = SPECIES_GROUP
   ) |>
   distinct()
@@ -159,7 +113,7 @@ org_coverage <- literature_merged_data |>
   )) +
   geom_point(aes(colour = sum_MEASURED_N, size = sum_MEASURED_N)) +
   scale_x_continuous(minor_breaks = 1985:2025, limits = c(1985, 2025)) +
-  scale_y_discrete(labels = wrap_at_slash) +
+  scale_y_discrete() +
   scale_size_binned_area(
     max_size = 15,
     name = "Sample size",
@@ -183,12 +137,11 @@ org_coverage <- literature_merged_data |>
   scale_colour_stepsn(
     colours = c("white", "black"),
     guide = "none",
-    values = c(0.6, 1)
+    values = c(0, 1),
+    n.breaks = 5
   ) +
-  theme_minimal(base_size = 11) +
   labs(
     x = "Sampling Date (year)",
-    y = "",
     colour = "Sample size",
     size = "Sample size"
   ) +
@@ -202,11 +155,93 @@ org_coverage <- literature_merged_data |>
   theme(
     panel.grid.minor.x = element_line(linewidth = 0.1, colour = "lightgrey"),
     axis.text.y = element_markdown(),
-    strip.placement = "outside"
+    axis.title.y = element_blank(),
+    strip.placement = "outside",
+    panel.background = element_blank(),
+    strip.background = element_blank()
   )
 
 
-sub_compartment_coverage /
-  org_coverage +
-  plot_layout(guides = "collect", axis_titles = "collect") +
+# And then, papers
+# per paper we maybe want to check:
+# does it cover a lot of years?
+# does it cover a lot of compartments
+# does it cover a lot of species groups?
+# is it, after CREED, a good paper?
+# TODO: Get CREED scores for all papers
+literature_reference_data <- tar_read(reference_data)
+# x axis label lookup ----
+col_labels <- c(
+  years_coverage = "Years\ncoverage",
+  n_samples = "N samples",
+  n_matrices = "N matrices",
+  n_species_groups = "N species\ngroups",
+  CREED_score = "CREED\nscore"
+)
+
+# ref ordering by n_samples ----
+ref_order <- source_coverage |>
+  filter(name == "n_samples") |>
+  arrange(value) |>
+  pull(ref_id_short)
+
+source_coverage_image <- source_coverage |>
+  mutate(
+    # bold author, line break before year
+    ref_id_short = str_replace(
+      ref_id_short,
+      "^(\\w+) \\((\\d+)\\)$",
+      "**\\1**<br>(\\2)"
+    ),
+    # apply ordering
+    ref_id_short = factor(
+      ref_id_short,
+      levels = str_replace(
+        ref_order,
+        "^(\\w+) \\((\\d+)\\)$",
+        "**\\1**<br>(\\2)"
+      )
+    )
+  ) |>
+  group_by(name) |>
+  mutate(
+    value_scaled = scales::rescale(log1p(value), to = c(0, 1))
+  ) |>
+  ggplot(aes(x = name, y = ref_id_short, fill = value_scaled)) +
+  geom_label(
+    aes(label = value, fill = value_scaled),
+    size = 3,
+    colour = "black",
+    hjust = 0.5,
+    label.padding = unit(0.5, "lines"),
+    border.colour = NA,
+    label.r = unit(0.5, "lines")
+  ) +
+  scale_x_discrete(labels = col_labels, expand = FALSE, position = "top") +
+  scale_fill_binned(
+    palette = "RdYlGn",
+    name = "Scaled value",
+    breaks = c(0, 0.25, 0.5, 0.75, 1)
+  ) +
+  scale_colour_stepsn(
+    colours = c("white", "black"),
+    guide = "none",
+    values = c(0, 1),
+    n.breaks = 5
+  ) +
+  # theme_minimal(base_size = 11) +
+  theme(
+    axis.title = element_blank(),
+    axis.text.y = element_markdown(), # TODO: Failing because of the theme_minimal call?
+    panel.background = element_blank(),
+    axis.text.x.top = legend.position = "none",
+    strip.background = element_blank()
+  )
+
+
+left_panel <- (sub_compartment_coverage / org_coverage) +
+  plot_layout(guides = "collect", axis_titles = "collect")
+
+(left_panel | source_coverage_image) +
+  plot_layout(widths = c(1, 0.1)) +
   plot_annotation(tag_levels = "a", tag_suffix = ")")
