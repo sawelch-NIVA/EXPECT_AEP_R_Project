@@ -35,7 +35,7 @@ sub_compartment_coverage <- literature_merged_data |>
     n.breaks = 5,
     transform = "log10"
   ) +
-  scale_y_discrete(labels = ENVIRON_COMPARTMENT_SUB) +
+  scale_y_discrete() +
   ggnewscale::new_scale_colour() +
   geom_text(aes(
     label = sum_lines_of_evidence,
@@ -71,6 +71,8 @@ sub_compartment_coverage <- literature_merged_data |>
     panel.background = element_blank(),
     strip.background = element_blank()
   )
+
+
 # Part 2 ----
 
 # calculate number of spp. across each group for the whole period separately
@@ -161,7 +163,7 @@ org_coverage <- literature_merged_data |>
     strip.background = element_blank()
   )
 
-
+# Part 3 ---
 # And then, papers
 # per paper we maybe want to check:
 # does it cover a lot of years?
@@ -217,7 +219,11 @@ source_coverage_image <- source_coverage |>
     border.colour = NA,
     label.r = unit(0.5, "lines")
   ) +
-  scale_x_discrete(labels = col_labels, expand = FALSE, position = "top") +
+  scale_x_discrete(
+    labels = col_labels,
+    expand = expansion(add = 1),
+    position = "top"
+  ) +
   scale_fill_binned(
     palette = "RdYlGn",
     name = "Scaled value",
@@ -234,7 +240,7 @@ source_coverage_image <- source_coverage |>
     axis.title = element_blank(),
     axis.text.y = element_markdown(), # TODO: Failing because of the theme_minimal call?
     panel.background = element_blank(),
-    axis.text.x.top = legend.position = "none",
+    legend.position = "none",
     strip.background = element_blank()
   )
 
