@@ -23,7 +23,6 @@ SNL has a better historical summary than Wikipedia (https://snl.no/Repparfjorden
 #| label: setup
 #| warning: false
 #| output: false
-
 # ============================================================================
 # Libraries ----
 # ============================================================================
@@ -81,6 +80,8 @@ norway_map <- map_data(
   "world",
   region = "Norway(?!:Svalbard)"
 )
+
+here::i_am("README.md")
 ```
 
 According to Wikipedia the coordinates of the fjord are (70.5, 24.17) (https://geohack.toolforge.org/geohack.php?pagename=Repparfjorden&params=70.5_N_24.17_E_type:waterbody_region:NO_dim:50000). We'll use this as a starting point for our map. It's apparently 14km long, so to get an appropriate amount of its surroundings we'll project it out by 30 km. (actually we won't yet).
@@ -96,7 +97,6 @@ We grab our big dataset and crop to a bounding box: (23, 25, 70, 71)
 ```{r}
 #| label: fig-literature-data
 #| fig-caption: All currently imported and processed data from literature + vannmiljø within the bounding box (23, 25, 70, 71), binned by sampling frequency 1990 - 2025.
-
 literature_merged_data <- tar_read(load_literature_pqt)
 tar_load(copper_toxicity_thresholds)
 
@@ -182,7 +182,6 @@ Not in Zotero (somehow), but in spreadsheet: https://docs.google.com/spreadsheet
 Or, more accurately, submarine tailing disposal sites as of 2013 (via [@kvassnesWasteSitesMines2013])
 ```{r}
 #| label: load-mining-sites
-
 mining_sites_sf <- mine_tailings_coords() |>
   st_as_sf(
     coords = c("LONGITUDE", "LATITUDE"),
@@ -200,7 +199,6 @@ mining_sites_sf |>
 We also have data on aquaculture sites @norwegiandirectorateoffisheriesAquacultureLocationsNorway2025. Rather than filter these spatially I've just selected everything in Finnmark. I haven't spent a lot of time inspecting this data; I don't know what "Clearance date" actually means.
 ```{r}
 #| label: load-aquaculture
-
 # ============================================================================
 # Load and prepare aquaculture data ----
 # ============================================================================
@@ -331,7 +329,7 @@ library(dplyr)
 
 # Get all Excel files in the directory
 excel_files <- dir_ls(
-  here::here("data", "raw", "norske_utslipp"),
+  here::here("inst", "extdata", "emissions"),
   glob = "*.xlsx"
 )
 
@@ -433,7 +431,6 @@ The main takeaway is actually, we don't have a lot of data for the Repparfjord i
 ```{r}
 #| label: repparfjord-map
 #| warning: false
-
 # ============================================================================
 # Crop mining and aquaculture to same bbox ----
 # ============================================================================
@@ -669,7 +666,6 @@ literature_sf |>
 Disappointing, since we know there are papers out there with relevant data. But a start.
 ```{r}
 #| label: literature_data
-
 # literature_sf |>
 #   ggplot2::ggplot(aes(
 #     x = ENVIRON_COMPARTMENT_SUB,

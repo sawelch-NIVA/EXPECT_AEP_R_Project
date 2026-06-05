@@ -35,7 +35,7 @@ library(here)
 library(targets)
 library(purrr)
 
-devtools::load_all(quiet = TRUE)
+pkgload::load_all(quiet = TRUE)
 ```
 
 ```{r}
@@ -46,7 +46,6 @@ literature_merged_data <- tar_read(load_literature_pqt)
 literature_reference_data <- tar_read(reference_data)
 literature_campaign_data <- tar_read(campaign_data)
 literature_sites_data <- tar_read(sites_data)
-literature_qc <- tar_read(data_quality_report)
 wgs84_geo <- tar_read(wgs84_geography)
 
 species_names <- eDataDRF::species_names_vocabulary()
