@@ -308,13 +308,7 @@ fish_outliers |>
   theme(legend.position = "none")
 ```
 
-10,000 mg/kg of copper
 
-Otherwise, our standard workup should be something like:
-
-- Any temporal patterns?
-- Any spatial patterns?
-- Any site selection rationale or nearby sources we might expect to drive elevated concentrations?
 
 ```{r}
 #| label: fig-fish-hexmaps
