@@ -223,7 +223,7 @@ nrow(fish_dry_normalised)
 fish_filtered <- fish |>
   filter(!is_outlier(MEASURED_VALUE_STANDARD))
 
-# TODO: 
+# TODO: Outliers seem to have disappeared. Why?
 fish_pointrange <- fish_dry_normalised |>
   mutate(
     SITE_COMMENT = SITE_COMMENT |> str_remove("^.*?\\."),
