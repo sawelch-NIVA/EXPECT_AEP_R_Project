@@ -22,3 +22,7 @@ docs/*_files/*
 *.zip
 *.pdf
 *.gpgk
+
+# Quarto detritus
+.vdoc.*
+site_libs/*
