@@ -1,0 +1,159 @@
+---
+title: "Outlier Detection"
+format: html
+---
+
+Some of our datasets include a lot of outliers. For example, let's take our fish data for *Gadus morhua* (excluding any measurements in dry weight for the sake of argument, and using liver measurements because they're the most data-rich).
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(targets)
+library(hexbin)
+library(ggrepel)
+library(viridis)
+library(patchwork)
+library(ggnewscale)
+library(igraph)
+library(sf)
+library(gridExtra)
+library(grid)
+library(knitr)
+library(ggtext)
+
+gadus_morhua <- tar_read(load_literature_pqt) |>
+  filter(
+    SAMPLE_SPECIES == "Gadus morhua",
+    MEASURED_UNIT_STANDARD == "mg/kg (wet)",
+    SAMPLE_TISSUE == "Liver"
+  )
+```
+
+If we make a density plot of the total distribution we can immediately see that something is off:
+
+```{r}
+#| label: fig-distribution
+no_filter <- gadus_morhua |>
+  ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
+  geom_density() +
+  labs(title = "Values not filtered")
+
+filter_5000 <- gadus_morhua |>
+  filter(MEASURED_VALUE_STANDARD <= 5000) |>
+  ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
+  geom_density() +
+  labs(title = "Values >5000 mg/kg removed")
+
+filter_1000 <- gadus_morhua |>
+  filter(MEASURED_VALUE_STANDARD <= 1000) |>
+  ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
+  geom_density() +
+  labs(title = "Values >1000 mg/kg removed")
+
+filter_500 <- gadus_morhua |>
+  filter(MEASURED_VALUE_STANDARD <= 500) |>
+  ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
+  geom_density() +
+  labs(title = "Values >500 mg/kg removed")
+
+no_filter /
+  filter_5000 /
+  filter_1000 /
+  filter_500 +
+  plot_annotation(
+    title = "Density distributions of copper concentrations in G. morhua livers when values above a certain threshold are removed."
+  )
+```
+
+Our plot peaks around 0 but extends beyond the 15,000 mg/kg wet weight (that is, 15g of copper per kg of wet liver). The most extreme of these values sufficiently improbable that we can remove, and as we do so our plot begins to resemble a left-censored normal distribution. However, where do we draw the line? 
+
+Expert judgement is generally sufficient to make this call, but we cannot draw on this expert judgement for each conceivable case of species, tissue, site type, etc. Vannmiljø data dominate our overall dataset, and this includes both sites monitored specifically because they are uncontaminated (e.g. reference rivers), as well as those monitored because they are known to be highly contaminated (e.g. sites affected by mining).   
+
+```{r}
+#| label: tbl-fish-variation-summary
+gadus_morhua |>
+  ggplot(aes(
+    y = factor(year(SAMPLING_DATE)),
+    x = MEASURED_VALUE_STANDARD
+  )) +
+  geom_boxplot(outlier.colour = "red") +
+  geom_text(
+    data = gadus_morhua |>
+      group_by(year = factor(year(SAMPLING_DATE))) |>
+      summarise(label = sum(MEASURED_N), .groups = "drop"),
+    aes(y = year, x = Inf, label = label),
+    hjust = 1.1
+  ) +
+  scale_x_log10() +
+  labs(
+    y = "Year",
+    x = "Measured Value (mg/kg (wet))",
+    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by reported sampling year",
+    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, n for whole year to right"
+  ) +
+  theme(legend.position = "none", title = element_markdown())
+```
+
+There's no immediately obvious pattern to the outliers. In the interest of scientific rigour we should investigate a number of possible patterns behind our more improbable outliers (analytical error, contamination, data entry error) and potential correlations with metadata (site, contractor, analytical technique). However, doing this for each set of outliers will quickly become prohibitively complicated. I believe (based on intutition and experience) that the most likely explanation for obvious, implausible outliers is transcription errors (either the wrong unit being used, or simply entering the right number), as much of the data in Vannmiljø (especially historically) is manually entered. 
+
+By site:
+
+```{r}
+#| label: sites-outliers
+gadus_morhua |>
+  ggplot(aes(
+    y = SITE_CODE,
+    x = MEASURED_VALUE_STANDARD
+  )) +
+  geom_boxplot(outlier.colour = "red") +
+  geom_text(
+    data = gadus_morhua |>
+      group_by(SITE_CODE) |>
+      summarise(label = sum(MEASURED_N), .groups = "drop"),
+    aes(y = SITE_CODE, x = Inf, label = label),
+    hjust = 1.1
+  ) +
+  scale_x_log10() +
+  labs(
+    y = "Site Code",
+    x = "Measured Value (mg/kg (wet))",
+    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by reported site code",
+    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, n for whole year to right"
+  ) +
+  theme(legend.position = "none", title = element_markdown())
+```
+
+What about 
+
+```{r}
+#| label: sites-outliers
+gadus_morhua |>
+  ggplot(aes(
+    y = SITE_CODE,
+    x = MEASURED_VALUE_STANDARD
+  )) +
+  geom_boxplot(outlier.colour = "red") +
+  geom_text(
+    data = gadus_morhua |>
+      group_by(SITE_CODE) |>
+      summarise(label = sum(MEASURED_N), .groups = "drop"),
+    aes(y = SITE_CODE, x = Inf, label = label),
+    hjust = 1.1
+  ) +
+  scale_x_log10() +
+  labs(
+    y = "Site Code",
+    x = "Measured Value (mg/kg (wet))",
+    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by reported site code",
+    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, n for whole year to right"
+  ) +
+  theme(legend.position = "none", title = element_markdown())
+```
+
+Under the circumstances, we need a simple, robust, defensible approach to filtering outliers that doesn't require this degree of fine attention. 
+
+Based on a cursory search of appropriate techniques, several online textbooks suggest the [*Generalized extreme studentized deviate*](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h3.htm) (G ESD) is the most appropriate approach for our problem. The simpler alternatives, the Grubbs test and Tietjen-Moore test require us to specify the number of outliers. Although we could perform this manually for each group, it would again be prohibitively slow. 
+
+The G-ESD requires normally distributed data and that we set an upper bound for the suspected number of outliers. We...
+
+Claude says:  Recommended primary screen: Robust modified z-score (MAD-based; Iglewicz & Hoaglin 1993)

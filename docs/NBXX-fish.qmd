@@ -257,8 +257,18 @@ fish_pointrange <- fish_dry_normalised |>
   theme_minimal() +
   theme(legend.position = "none")
 
+
+fish_pointrange
+```
+
+We have some improbably high values in some cases, all from Vannmiljø. Let's look at these by species/tissue also:
+
+```{r}
+#| label: fig-fish-outliers-boxplot
 fish_boxplot <- fish_dry_normalised |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD_NORMALISED, y = SAMPLE_SPECIES)) +
+  # geom_box uses > mean( + abs(IQR * 1.5)) as the cut-off
+  # TODO: This or z-score?
   geom_boxplot(outlier.colour = "red") +
   scale_x_log10() +
   facet_wrap(
@@ -266,12 +276,15 @@ fish_boxplot <- fish_dry_normalised |>
     ncol = 1,
     scales = "free_y",
     space = "free_y"
+  ) +
+  labs(
+    x = "Measured Value (standardised to mg/kg (wet))"
   )
 
-fish_pointrange
+fish_boxplot
 ```
 
-We have some improbably high values in some cases, all from Vannmiljø. Let's take a closer look:
+# TODO: Best approach for outlier removal?
 
 ```{r}
 #| label: fig-fish-outliers
