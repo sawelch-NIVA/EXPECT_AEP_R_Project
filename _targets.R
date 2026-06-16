@@ -345,10 +345,10 @@ list(
   tar_target(
     vm_edata_campaign,
     {
-      vm_create_edata_campaign_table(
+      vm_create_edata_campaigns_table(
         vm_data = vm_sites_split_clean,
-        campaign_name_short = "Vm_2010_2025",
-        campaign_name = "Vannmiljø Copper Monitoring 2010-2025",
+        campaign_prefix_short = "Vm_2010_2025",
+        campaign_prefix = "Vannmiljø Copper Monitoring 2010-2025",
         date_start = as.IDate("2010-01-01"),
         date_end = as.IDate("2025-12-05"),
         organisation = "Miljødirektoratet",

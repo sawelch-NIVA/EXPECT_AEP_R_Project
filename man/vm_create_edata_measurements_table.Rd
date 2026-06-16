@@ -7,12 +7,12 @@
 vm_create_edata_measurements_table(
   vm_edata_intermediate,
   vm_lookup_methods,
-  campaign_name_short,
+  campaign_prefix_short,
   reference_id
 )
 }
 \arguments{
-\item{campaign_name_short}{Short campaign identifier}
+\item{campaign_prefix_short}{Short campaign identifier (vannmiljo activity name will be appended)}
 
 \item{reference_id}{Reference ID for the data source}
 

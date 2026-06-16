@@ -2,18 +2,18 @@
 
 # # Create eData tables ----
 
-#' Create eData campaign table from Vannmiljø data
+#' Create eData campaigns table from Vannmiljø data
 #'
 #' Generates a standardised eData campaign table using processed Vannmiljø data.
-#' Creates campaign metadata including date range, organization, and descriptive
-#' comments about the data scope.
+#' Creates campaigns metadata including date range, organisation, and descriptive
+#' comments about the data scope. One campaign per Vannmiljo activity.
 #'
 #' @param vm_data Processed Vannmiljø data frame (e.g., vm_sites_split_clean)
-#' @param campaign_name_short Short campaign identifier
-#' @param campaign_name Full campaign name
+#' @param campaign_prefix_short Short campaign identifier
+#' @param campaign_prefix Full campaign name
 #' @param date_start Campaign start date (Date object or character YYYY-MM-DD)
 #' @param date_end Campaign end date (Date object or character YYYY-MM-DD)
-#' @param organisation Organization name
+#' @param organisation Organisation name
 #' @param entered_by Person/entity who entered the data
 #'
 #' @return A tibble conforming to eData campaign schema with one row containing
@@ -25,34 +25,45 @@
 #' @importFrom data.table as.IDate
 #' @importFrom glue glue
 #' @export
-vm_create_edata_campaign_table <- function(
+vm_create_edata_campaigns_table <- function(
   vm_data,
-  campaign_name_short,
-  campaign_name,
+  campaign_prefix_short,
+  campaign_prefix,
   date_start,
   date_end,
   organisation,
   entered_by
 ) {
-  edata_campaign <- initialise_campaign_tibble() |>
-    mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
+  edata_campaigns <- initialise_campaign_tibble() |>
+    mutate(across(.cols = contains("DATE"), .fns = as.IDate))
+
+  edata_campaigns <- edata_campaigns |>
     add_row(
-      CAMPAIGN_NAME_SHORT = campaign_name_short,
-      CAMPAIGN_NAME = campaign_name,
-      CAMPAIGN_START_DATE = as.IDate(date_start),
-      CAMPAIGN_END_DATE = as.IDate(date_end),
-      ORGANISATION = organisation,
-      ENTERED_BY = entered_by,
-      ENTERED_DATE = as.IDate(Sys.Date()),
-      CAMPAIGN_COMMENT = glue(
-        "Copper and copper pyrithione measurements from Vannmiljø database ",
-        "covering all Norwegian municipalities and media types. ",
-        "{nrow(vm_data)} measurements from {date_start} to {date_end}."
-      )
+      vm_data |>
+        group_by(Name_EN_Short) |>
+        mutate(across(.cols = contains("DATE"), .fns = as.IDate)) |>
+        reframe(
+          CAMPAIGN_NAME_SHORT = glue(
+            "{campaign_prefix_short} ({Name_EN_Short})"
+          ),
+          CAMPAIGN_NAME = glue("{campaign_prefix} ({Name_EN_Short})"),
+          CAMPAIGN_START_DATE = as.IDate(date_start),
+          CAMPAIGN_END_DATE = as.IDate(date_end),
+          ORGANISATION = organisation,
+          ENTERED_BY = entered_by,
+          ENTERED_DATE = as.IDate(Sys.Date()),
+          CAMPAIGN_COMMENT = glue(
+            "Copper and copper pyrithione measurements from Vannmiljø database, activity {Name_EN_Short} ",
+            "covering all Norwegian municipalities and media types. ",
+            "{nrow(vm_data)} measurements from {date_start} to {date_end}."
+          )
+        ) |>
+        select(-Name_EN_Short) |>
+        distinct()
     )
 
-  message(glue("Created campaign table with {nrow(edata_campaign)} row\n"))
-  edata_campaign
+  message(glue("Created campaigns table with {nrow(edata_campaigns)} row(s)\n"))
+  return(edata_campaigns)
 }
 
 
@@ -230,10 +241,14 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
         as.data.frame() |>
         bind_cols(st_drop_geometry(sites_sf))
 
-      cli_inform("Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84")
+      cli_inform(
+        "Successfully reprojected {nrow(sites_sf)} sites from UTM33 to WGS84"
+      )
     },
     error = function(e) {
-      cli_abort("Failed to reproject coordinates from UTM33 to WGS84: {e$message}")
+      cli_abort(
+        "Failed to reproject coordinates from UTM33 to WGS84: {e$message}"
+      )
     }
   )
 
@@ -294,7 +309,9 @@ vm_create_edata_sites_table <- function(vm_data, entered_by) {
       }
     },
     warning = function(w) {
-      cli_abort("Unexpected many-to-many relationship when joining sites table:\n{w}")
+      cli_abort(
+        "Unexpected many-to-many relationship when joining sites table:\n{w}"
+      )
     }
   )
 
@@ -684,7 +701,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 #'
 #' @param vm_intermediate Intermediate samples-biota table from
 #'   vm_create_intermediate_samples_biota_table()
-#' @param campaign_name_short Short campaign identifier
+#' @param campaign_prefix_short Short campaign identifier (vannmiljo activity name will be appended)
 #' @param reference_id Reference ID for the data source
 #'
 #' @return A tibble conforming to eData measurements schema containing:
@@ -716,7 +733,7 @@ vm_create_intermediate_samples_biota_table <- function(vm_data) {
 vm_create_edata_measurements_table <- function(
   vm_edata_intermediate,
   vm_lookup_methods,
-  campaign_name_short,
+  campaign_prefix_short,
   reference_id
 ) {
   # join methods lookup for sampling and analytical protocols
@@ -739,7 +756,9 @@ vm_create_edata_measurements_table <- function(
       SITE_CODE,
       PARAMETER_NAME,
       SAMPLING_DATE = as.IDate(SAMPLING_DATE),
-      CAMPAIGN_NAME_SHORT = campaign_name_short,
+      CAMPAIGN_NAME_SHORT = glue(
+        "{campaign_prefix_short} ({Name_EN_Short})"
+      ),
       REFERENCE_ID = reference_id,
 
       # Compartment information

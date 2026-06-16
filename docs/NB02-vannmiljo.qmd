@@ -65,7 +65,6 @@ Import required packages and set working directory to project root.
 #| label: setup-libraries
 #| warning: false
 #| message: false
-
 knitr::opts_chunk$set(dev = "svglite") # otherwise some SVGs cause problems in firefox?
 
 suppressMessages
@@ -91,7 +90,8 @@ suppressMessages
 })
 
 suppressMessages(
-load_all(quiet = TRUE))
+  load_all(quiet = TRUE)
+)
 
 # aesthetics
 theme_set(theme_minimal(base_size = 12))
@@ -106,7 +106,6 @@ See @tbl-vm_config-filters and @tbl-vm_config-metadata for a summary of the para
 ```{r}
 #| label: setup-configuration
 #| warning: false
-
 # this needs to be rationalised at some point
 vm_config <- list(
   # # File paths
@@ -158,15 +157,12 @@ vm_config <- list(
     organisation = "Miljødirektoratet"
   )
 )
-
-
 ```
 
 Load in raw vannmiljø data and lookups (which are a mixture of raw data from vannmiljø and data I've processed myself) from the `targets` workflow.
 
 ```{r}
 #| label: load-raw-data
-
 tar_load(c(
   vm_raw_copper,
   vm_raw_sites,
@@ -199,7 +195,6 @@ tar_load(c(
 
 ```{r}
 #| label: tbl-vm_config-filters
-
 vm_config$filters |>
   enframe(name = "Parameter", value = "Value") |>
   kable()
@@ -207,7 +202,6 @@ vm_config$filters |>
 
 ```{r}
 #| label: tbl-vm_config-metadata
-
 vm_config$metadata |>
   enframe(name = "Parameter", value = "Value") |>
   kable()
@@ -287,13 +281,11 @@ Some of the lookups are actually direct from Vannmiljø though - they're the xls
 
 ```{r}
 #| label: lookups
-
 lookups <- grepv("vm_lookup", ls())
 
 message(glue(
   "Loaded {length(lookups)} lookup tables: {paste(lookups, collapse = ', ')}"
 ))
-
 ```
 
 # Data Processing
@@ -310,7 +302,6 @@ Note that we only use four lookups at this stage: `vm_lookup_medium`, `vm_lookup
 ```{r}
 #| label: processing-merge-datasets
 #| echo: false
-
 message(glue(
   "Joined vm_raw_copper and vm_raw_sites by Vannlokalitetskode. Output: vm_join_sites_measurements ({nrow(vm_join_sites_measurements)} x {ncol(vm_join_sites_measurements)})"
 ))
@@ -339,7 +330,6 @@ We don't yet have an oversight over the distribution of site types, biota, tissu
 #| fig-width: 12
 #| fig-height: 14
 #| warning: false
-
 wrap_x <- 30
 wrap_y <- 50
 
@@ -445,7 +435,6 @@ Rivers, lakes, and coastal waters are the majority of the dataset, which is appr
 #| fig-width: 12
 #| fig-height: 14
 #| warning: false
-
 # Create a summary of counts by the two variables
 vm_exploration_campaign_x_medium <- vm_join_sites_measurements_lookup |>
   mutate(
@@ -535,7 +524,6 @@ We also check reported water category by sampling medium, for the sake of comple
 #| fig-width: 12
 #| fig-height: 3
 #| warning: false
-
 # Create a summary of counts by the two variables
 vm_exploration_vkat_x_medium <- vm_join_sites_measurements_lookup |>
   group_by(Vannkategori_Description, MediumID_Name) |>
@@ -615,7 +603,6 @@ vm_exploration_vkat_x_medium_complete |>
 
 ```{r}
 #| label: tbl-sample-distribution
-
 # Calculate sample distribution with cumulative percentages
 sample_distribution <- vm_exploration_vkat_x_medium |>
   arrange(desc(n_samples)) |>
@@ -664,7 +651,6 @@ We also consider sample size of @fig-heatmap-campaign-biota by campaign. This in
 #| fig-width: 12
 #| fig-height: 25
 #| warning: false
-
 # todo: facet this by species group, it's too tall otherwise
 # Create a summary of counts by the two variables (filter to non-NA species)
 vm_exploration_species <- vm_join_sites_measurements_lookup |>
@@ -748,7 +734,6 @@ vm_exploration_species_complete |>
     legend.position = "none"
   ) +
   coord_flip()
-
 ```
 
 Finally, we check units by sampling medium @fig-heatmap-units-medium. We would expect mass/volume units to be used for water and air samples, and mass/mass (dry or wet) units to be used for biota, soil, sediment, and other largely solid matrices. Fortunately this is borne out by the data.
@@ -759,7 +744,6 @@ Finally, we check units by sampling medium @fig-heatmap-units-medium. We would e
 #| fig-width: 12
 #| fig-height: 3
 #| warning: false
-
 vm_exploration_units_x_medium <- vm_join_sites_measurements_lookup |>
   group_by(Unit_Name, MediumID_Name) |>
   summarise(n_samples = n(), .groups = "drop")
@@ -831,7 +815,6 @@ vm_exploration_units_x_medium_complete |>
     panel.border = element_blank(),
     legend.position = "none",
   )
-
 ```
 
 Let's check out methods (@tbl-methods-by-year). Anything with an eData Classification column has been matched with the lookup. Vannmiljø methods without this are either not able to be matched (e.g. UKJENT) or aren't included in our filtered dataset (see next section).
@@ -839,7 +822,6 @@ Let's check out methods (@tbl-methods-by-year). Anything with an eData Classific
 ```{r}
 #| label: tbl-methods-by-year
 #| tbl-cap: "Vannmiljø sampling and analysis method IDs reported by number of samples (rows), last year used, and corresponding eData Classification (if relevant)."
-
 vm_exploration_methods_x_year <- vm_join_sites_measurements_lookup |>
   select(Tid_provetak, Provetakmetode_id, Analysemetode_id, Medium_id) |>
   pivot_longer(
@@ -887,7 +869,6 @@ datatable(
     "eData Classification"
   )
 )
-
 ```
 
 ## Apply Filters
@@ -1001,7 +982,6 @@ exclusion_summary <- tibble(
 message(glue(
   "vm_join_sites_measurements_lookup ({nrow(vm_join_sites_measurements_lookup)} x {ncol(vm_join_sites_measurements_lookup)}) -> vm_filtered_dates ({nrow(vm_filtered_dates)} x {ncol(vm_filtered_dates)}, {round(100*nrow(vm_filtered_dates)/nrow(vm_join_sites_measurements_lookup), 1)}% of starting data)"
 ))
-
 ```
 
 For completeness, we also report on excluded groups (@tbl-processing-excluded-data)
@@ -1012,7 +992,6 @@ For completeness, we also report on excluded groups (@tbl-processing-excluded-da
 #| label: fig-filter-visualisation
 #| fig-cap: Vannmiljø copper sample size at different steps of filtration
 #| fig-width: 12
-
 # Create filtering summary for visualization
 # filter_flow <- exclusion_summary |>
 #   filter(Filter != "<b>Total</b>") |>
@@ -1051,7 +1030,6 @@ A Sankey diagram would be better, but @fig-filter-visualisation will do for now.
 ```{r}
 #| label: tbl-processing-excluded-data
 #| tbl-cap: "Summary of excluded data by filter criterion"
-
 datatable(
   exclusion_summary,
   colnames = c(
@@ -1088,7 +1066,6 @@ Note: It's not necessarily a problem that something turns up as a conflict - we 
 ```{r}
 #| label: tbl-compartment-conflicts
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for environmental compartments"
-
 # Check for conflicts between lookup sources
 conflict_check <- vm_filtered_dates |>
   group_by(
@@ -1152,7 +1129,6 @@ datatable(
 
 ```{r}
 #| label: resolve-compartment-conflicts
-
 test <- vm_filtered_dates |>
   filter(
     ENVIRON_COMPARTMENT_medium == "Biota",
@@ -1177,14 +1153,12 @@ vm_compartment_conflicts_resolved |>
     ENVIRON_COMPARTMENT_SUB_resolved
   ) |>
   reframe(Rows = n(), Mean = mean(Verdi))
-
 ```
 
 In some cases we're unable to resolve conflicts with recourse to the simple rules above. In these cases, we simply remove the rows, and create `vm_compartment_conflicts_resolved_removed`.
 
 ```{r}
 #| label: remove-compartment-conflicts
-
 vm_compartment_conflicts_resolved_removed |>
   # inspect data
   group_by(
@@ -1224,7 +1198,6 @@ vm_compartment_conflicts_resolved_removed |>
 message(glue(
   "vm_filtered_dates ({nrow(vm_filtered_dates)} x {ncol(vm_filtered_dates)}) -> vm_compartment_conflicts_resolved_removed ({nrow(vm_compartment_conflicts_resolved_removed)} x {ncol(vm_compartment_conflicts_resolved_removed)})"
 ))
-
 ```
 
 And let's take a look at anyting we failed to resolve: @tbl-unresolved-conflicts. At time of writing we have 1916 rows with unresolved conflicts, but this is a very small number and I don't (currently) judge it a good use of time to chase down these edge cases.
@@ -1232,7 +1205,6 @@ And let's take a look at anyting we failed to resolve: @tbl-unresolved-conflicts
 ```{r}
 #| label: tbl-unresolved-conflicts
 #| tbl-cap: "Remaining unresolved conflicts after applying resolution rules"
-
 # Check for unresolved conflicts
 unresolved_conflicts_summary <- vm_compartment_conflicts_resolved |>
   # Keep only rows where conflicts weren't resolved
@@ -1289,7 +1261,6 @@ datatable(
 ```{r}
 #| label: tbl-geographic-conflicts
 #| tbl-cap: "Conflicts between vannkategori and medium lookups for geographic features"
-
 # Check geographic feature consistency
 vm_geo_conflicts_flagged <- vm_compartment_conflicts_resolved_removed |>
   mutate(
@@ -1363,7 +1334,6 @@ Unlike environmental compartments we don't apply any special logic here. We just
 
 ```{r}
 #| label: resolve-feature-conflicts
-
 vm_compartment_geo_conflicts_resolved |>
   group_by(
     SITE_GEOGRAPHIC_FEATURE_resolved,
@@ -1410,7 +1380,6 @@ vm_compartment_geo_conflicts_resolved_removed |>
     c("Biota", "Aquatic"),
     label = "Check vm_compartment_geo_conflicts_resolved_removed has Biota & Aquatic"
   )
-
 ```
 
 We also have the issue that our higher level of site resolution means we need to split some of Vannmiljø's sites. Specifically, they may sample from the same longitude and latitude (one vannmiljø site) but sample different parts of the feature (e.g. sediment and the water column; two vannmiljø media/matrices). Because in our format this is two separate sites, we need to split any sites where this happens.
@@ -1421,7 +1390,6 @@ Unfortunately this is quite slow.
 
 ```{r}
 #| label: split-sites
-
 # split sites where different types of samples have been taken
 
 # Report on splitting
@@ -1463,7 +1431,6 @@ vm_sites_split |>
   reframe(Rows = n(), Mean = mean(Verdi))
 # does it have biota in it? it should.
 # col_vals_make_set(ENVIRON_COMPARTMENT_resolved, c("Biota", "Aquatic"))
-
 ```
 
 Let's update the not-Sankey now that we've removed some more rows (@fig-conflict-resolution-visualisation). Note the columns "Wrong compartment" and "Compartment Conflicts Removed" - these steps are pre- and post-transformation, which is why the samples are different.
@@ -1472,7 +1439,6 @@ Let's update the not-Sankey now that we've removed some more rows (@fig-conflict
 #| label: fig-conflict-resolution-visualisation
 #| fig-cap: Vannmiljø copper sample size at different steps of filtration and conflict removal.
 #| fig-width: 12
-
 # # Create filtering summary
 # conflict_flow <- filter_flow |>
 #   add_row(
@@ -1574,7 +1540,6 @@ Note: Only setup for copper copper, should probably be extended in case we accid
 
 ```{r}
 #| label: edata-parameters
-
 # TODO: See above
 
 ```
@@ -1599,7 +1564,6 @@ I swear there wasn't a site in Africa last time I checked...
 #| label: fig-sites-sanity-map
 #| fig-cap: Vannmiljø sampling sites binned into 50 hexagons, coloured by number of sites in area.
 #| fig-width: 12
-
 # Sanity check: plot sites on map
 world_map <- map_data("world")
 ggplot() +
@@ -1619,7 +1583,6 @@ ggplot() +
   scale_y_continuous(expand = c(0, 0)) +
   theme_minimal() +
   theme(axis.text = element_blank(), axis.title = element_blank())
-
 ```
 
 ## Methods
@@ -1664,7 +1627,6 @@ We also need to convert tissue types (stored as MediumID in Vannmiljø) into our
 ```{r}
 #| label: tbl-raw-tissue
 #| tbl-caption: Table of Vannmiljø MediumIDs corresponding to biota tissues, with sample size (n) and corresponding eData SAMPLE_TISSUE value.
-
 # tissue_frequency <- count(vm_edata_biota, MediumID_Name) |>
 #   arrange(desc(n)) |>
 #   mutate(
@@ -1719,7 +1681,6 @@ Disabled, there's better ways to do this...
 
 ```{r}
 #| label: export-create-zip
-
 # # Assemble datasets for export
 # export_datasets <- list(
 #   edata_sites = vm_edata_sites,
@@ -1769,7 +1730,6 @@ Are our compartments valid and reasonable? @tbl-validate-export-compartments giv
 #| label: tbl-validate-export-compartments
 count(vm_edata_measurements, ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
   datatable()
-
 ```
 
 @fig-vm-scatterplot is a basic plot of measured concentrations by year and unit. Without going into detailed analysis of campaigns, etc. the results are a little difficult to interpret, but it's reasonable to call some of the shapes we see down there suspicious.
@@ -1818,7 +1778,6 @@ We can pull out this data and take a closer look. We'll use the z-score method a
 
 ```{r}
 #| label: tbl-vm-outliers
-
 vm_edata_measurements |>
   group_by(MEASURED_UNIT, ENVIRON_COMPARTMENT_SUB) |>
   mutate(z_score = scale(MEASURED_VALUE)) |> # Calculate z-score

@@ -66,7 +66,10 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_warning(
         "Row {.val {x_row}} of {.var x} matches multiple rows in {.var y}"
       )
-      cli_inform(paste(format(x[x_row, join_keys, drop = FALSE]), collapse = "\n"))
+      cli_inform(paste(
+        format(x[x_row, join_keys, drop = FALSE]),
+        collapse = "\n"
+      ))
 
       # Find all y rows matching this x row
       x_key_vals <- x[x_row, join_keys, drop = FALSE]
@@ -86,7 +89,10 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_warning(
         "Row {.val {y_row}} of {.var y} matches multiple rows in {.var x}"
       )
-      cli_inform(paste(format(y[y_row, join_keys, drop = FALSE]), collapse = "\n"))
+      cli_inform(paste(
+        format(y[y_row, join_keys, drop = FALSE]),
+        collapse = "\n"
+      ))
 
       # Find all x rows matching this y row
       y_key_vals <- y[y_row, join_keys, drop = FALSE]
@@ -94,7 +100,10 @@ left_join_diagnostic <- function(x, y, by = NULL, ..., .report_n = 5) {
       cli_alert_info(
         "Found {.val {nrow(x_matches)}} matching rows in {.var x}:"
       )
-      cli_inform(paste(format(head(x_matches[, join_keys, drop = FALSE], .report_n)), collapse = "\n"))
+      cli_inform(paste(
+        format(head(x_matches[, join_keys, drop = FALSE], .report_n)),
+        collapse = "\n"
+      ))
       if (nrow(x_matches) > .report_n) {
         cli_text("{.emph ... and {nrow(x_matches) - .report_n} more}")
       }
@@ -251,7 +260,8 @@ join_all_literature_modules <- function(
     campaign_data,
     by = "CAMPAIGN_NAME_SHORT",
     suffix = c("", "_campaign"),
-    unmatched = "error",
+    # TODO: #11 None of joined_biota contains the Vm acidification campaign. I'm not really sure why this is, but I'm turning off unmatched = "error" for now
+    # unmatched = "error",
     relationship = "many-to-one"
   )
 

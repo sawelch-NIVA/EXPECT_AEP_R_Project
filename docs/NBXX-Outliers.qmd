@@ -123,7 +123,7 @@ gadus_morhua |>
   theme(legend.position = "none", title = element_markdown())
 ```
 
-What about 
+What about campaigns?
 
 ```{r}
 #| label: sites-outliers
@@ -157,3 +157,21 @@ Based on a cursory search of appropriate techniques, several online textbooks su
 The G-ESD requires normally distributed data and that we set an upper bound for the suspected number of outliers. We...
 
 Claude says:  Recommended primary screen: Robust modified z-score (MAD-based; Iglewicz & Hoaglin 1993)
+
+```{r}
+#| label: robust-modified-z-score
+# how to calculate
+# 1. for each point x_i, subtract the median of x from it
+# 2. multiply the resulting value by 0.6745 (why?)
+# 3. divide by the mediam absolute deviation
+
+robust_modified_z_score <- function(x) {
+  # add some defensiveness here
+  x_median <- median(x, na.rm = TRUE)
+  x_mad <- mad(x, na.rm = TRUE) # apparently already includes the reciprocal of 0.6745
+
+  modified_z_score <- (x - median_x) - x_mad
+}
+
+# let's try remaking one of the above plots with this new threshhold for outliers
+```
