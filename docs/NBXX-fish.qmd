@@ -257,7 +257,16 @@ fish_pointrange <- fish_dry_normalised |>
   theme_minimal() +
   theme(legend.position = "none")
 
-fish_histogram <- fish_dry_normalised |> ggplot(aes(x = ))
+fish_boxplot <- fish_dry_normalised |>
+  ggplot(aes(x = MEASURED_VALUE_STANDARD_NORMALISED, y = SAMPLE_SPECIES)) +
+  geom_boxplot(outlier.colour = "red") +
+  scale_x_log10() +
+  facet_wrap(
+    facets = vars(SAMPLE_TISSUE),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  )
 
 fish_pointrange
 ```
@@ -359,7 +368,6 @@ From a trophic perspective we'd like to have species that represent different pa
 
 Now, with that said - is there a significant difference between these species?
 
-
 ```{r}
 #| label: fish-species-variation
 fish_filtered |>
@@ -376,6 +384,7 @@ fish_filtered |>
     mapping = aes(x = MEASURED_VALUE_STANDARD_NORMALISED, y = SAMPLE_SPECIES)
   ) +
   geom_point() +
+  geom_boxplot() +
   facet_wrap(
     facets = vars(SAMPLE_TISSUE),
     ncol = 1,
