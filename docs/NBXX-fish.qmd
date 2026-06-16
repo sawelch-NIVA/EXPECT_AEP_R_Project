@@ -104,11 +104,10 @@ clean_regex <- str_c(remove_patterns, collapse = "|")
 
 As for algae, but for fish. There are a lot more or these, and there's a lot more tissue differentiation.
 
-
 # Fish
 
 ```{r}
-#| label: tbl-fish-species-summary
+#| label: tbl-fish-variation-summary
 fish <- tar_read(load_literature_pqt) |>
   filter(SPECIES_GROUP == "Fish")
 
@@ -124,21 +123,18 @@ fish |>
   kable()
 ```
 
-We have a great deal of fish data. Broadly speaking, we can group it by three factors:
-- Tissue (liver, gill, whole body, muscle, and in one case bile)
-- Site type (water ways, water bodies, coastal waters, and rarely, open ocean)
-- Species
+We have a great deal of fish data. Broadly speaking, we can group it by three factors: - Tissue (liver, gill, whole body, muscle, and in one case bile) - Site type (water ways, water bodies, coastal waters, and rarely, open ocean) - Species
 
-It would also be useful to know the rough size, trophic level, lifestyle, etc. of these fish. We will attend to that later, though. 
+It would also be useful to know the rough size, trophic level, lifestyle, etc. of these fish. We will attend to that later, though.
 
 # Distribution of Copper Concentrations
 
-No removal of outliers at this stage. We do need to check for unit types, though. 
+No removal of outliers at this stage. We do need to check for unit types, though.
 
 Two important questions:
 
-1. What units are used?
-2. Are they correlated with anything?
+1.  What units are used?
+2.  Are they correlated with anything?
 
 ```{r}
 #| label: tbl_fish_units
@@ -185,7 +181,6 @@ fish_units_lookup
 
 Roughly 10% of our samples (537) are dry, the remainder (3965) are wet weight. According to @cressonUnderestimationChemicalContamination2017, a conversion factor of 1:5 for dry:wet weight is typically used, but individual species vary considerably from this. Under the circumstances, we will use the calculated conversion factors for *G. morhua*, *Melanogrammus aeglefinus*, and *Pollachius pollachius*, and the default figure of 5 (despite its obvious flaws) for the rest.
 
-
 ```{r}
 #| label: fig-fish-pointrange
 threshold_data <- generate_copper_thresholds() |>
@@ -202,17 +197,21 @@ fish_dry_normalised <- fish |>
         SAMPLE_TISSUE == "Liver" ~ 1.34,
       .default = 5
     ),
+    # when unit is dry, multiply by the relevant ratio, otherwise leave untouched
     MEASURED_VALUE_STANDARD_NORMALISED = case_when(
       MEASURED_UNIT_STANDARD == "mg/kg (dry)" ~ MEASURED_VALUE_STANDARD *
-        SPECIES_DRY_WET_RATIO
+        SPECIES_DRY_WET_RATIO,
+      .default = MEASURED_VALUE_STANDARD
     ),
     UNCERTAINTY_UPPER_STANDARD_NORMALISED = case_when(
       MEASURED_UNIT_STANDARD == "mg/kg (dry)" ~ UNCERTAINTY_UPPER_STANDARD *
-        SPECIES_DRY_WET_RATIO
+        SPECIES_DRY_WET_RATIO,
+      .default = UNCERTAINTY_UPPER_STANDARD
     ),
     UNCERTAINTY_LOWER_STANDARD_NORMALISED = case_when(
       MEASURED_UNIT_STANDARD == "mg/kg (dry)" ~ UNCERTAINTY_LOWER_STANDARD *
-        SPECIES_DRY_WET_RATIO
+        SPECIES_DRY_WET_RATIO,
+      .default = SPECIES_DRY_WET_RATIO
     ),
     MEASURED_UNIT_STANDARD_NORMALISED = "mg/kg (wet)"
   )
@@ -220,10 +219,6 @@ fish_dry_normalised <- fish |>
 nrow(fish)
 nrow(fish_dry_normalised)
 
-fish_filtered <- fish |>
-  filter(!is_outlier(MEASURED_VALUE_STANDARD))
-
-# TODO: Outliers seem to have disappeared. Why?
 fish_pointrange <- fish_dry_normalised |>
   mutate(
     SITE_COMMENT = SITE_COMMENT |> str_remove("^.*?\\."),
@@ -257,10 +252,12 @@ fish_pointrange <- fish_dry_normalised |>
   ) +
   labs(
     y = "Site Code",
-    x = "Measured Value (standardised to unit and wet weight)"
+    x = "Measured Value (standardised to mg/kg (wet))"
   ) +
   theme_minimal() +
   theme(legend.position = "none")
+
+fish_histogram <- fish_dry_normalised |> ggplot(aes(x = ))
 
 fish_pointrange
 ```
@@ -283,7 +280,11 @@ fish_outliers |>
     colour = MEASURED_VALUE_STANDARD
   )) +
   scale_colour_viridis_c() +
-  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
+  geom_pointrange(aes(
+    xmin = UNCERTAINTY_LOWER,
+    xmax = UNCERTAINTY_UPPER,
+    shape = SAMPLE_TISSUE
+  )) +
   new_scale_color() +
   geom_vline(
     data = threshold_data,
@@ -293,853 +294,92 @@ fish_outliers |>
     alpha = 0.6
   ) +
   geom_text(
-    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
+    aes(
+      label = str_wrap(str_glue("{SAMPLE_SPECIES}, {SAMPLE_TISSUE}")),
+      x = 40000
+    ),
     colour = "black",
     hjust = 0
   ) +
-  labs(y = "Site Code", x = "Measured Value (standardised units)") +
+  labs(y = "Site Code", x = "Measured Value (mg/kg (wet))") +
   facet_wrap(
     facets = vars(MEASURED_UNIT_STANDARD),
     ncol = 1,
     scales = "free_y",
     space = "free_y"
   ) +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
+  theme_minimal()
 
-
-
-```{r}
-#| label: fig-fish-hexmaps
-algae_hex <- algae |>
-  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
-
-# NOTE: bins = 100 may be high relative to data density; adjust if hexes are too sparse.
-sample_size_map <- algae_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_bin_hex(bins = 100, colour = NA) +
-  scale_fill_viridis_c(
-    option = "magma",
-    trans = "sqrt",
-    name = "Sample count"
-  ) +
-  labs(title = "Sample Size") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
-
-mean_conc_map <- algae_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE_STANDARD)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_summary_hex(
-    fun = function(x) mean(x, na.rm = TRUE),
-    bins = 100,
-    colour = NA
-  ) +
-  scale_fill_viridis_c(
-    option = "viridis",
-    name = "Mean concentration\n(standardised units)"
-  ) +
-  labs(title = "Mean algae concentration by hexbin") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
-
-sample_size_map / mean_conc_map
-```
-
-Sample sizes are highest in the Oslofjord area, and concentrations are unusually high in mid-Norway (Tisler & Orkedalsfjorden). Why?
-
-```{r}
-#| label: fig-algae-timetrend
-algae_filtered |>
-  ggplot(aes(
-    x = SAMPLING_DATE,
-    y = MEASURED_VALUE_STANDARD,
-    group = SITE_NAME
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
-  labs(x = "Sampling date", y = "Measured value (standardised units)") +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
-
-Well, that's helpful.
-
-Can we be a bit more spatially intelligent without having to do lots more work?
-
-```{r}
-#| label: fig-algae-site-clusters
-# TODO: refactor distance-matrix clustering into a helper function;
-# this block is repeated identically for marine and freshwater.
-
-distance_matrix <- st_as_sf(algae, coords = c("LONGITUDE", "LATITUDE")) |>
-  st_set_crs(4326) |>
-  st_distance()
-
-binary_matrix <- matrix(
-  as.numeric(distance_matrix) < 20000,
-  nrow = nrow(distance_matrix)
-)
-
-g <- graph_from_adjacency_matrix(binary_matrix)
-
-algae_grouped <- algae
-algae_grouped$site_group <- factor(components(g)$membership)
-
-algae_sf <- st_as_sf(
-  algae_grouped,
-  coords = c("LONGITUDE", "LATITUDE"),
-  crs = 4326,
-  remove = FALSE
-)
-
-centroids_xy <- algae_sf |>
-  st_transform(3857) |>
-  group_by(site_group) |>
-  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |>
-  st_centroid() |>
-  st_transform(4326) |>
-  mutate(
-    LONGITUDE = st_coordinates(geometry)[, 1],
-    LATITUDE = st_coordinates(geometry)[, 2]
-  )
-
-ggplot(data = centroids_xy, aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  geom_label_repel(
-    aes(colour = site_group, label = site_group),
-    max.overlaps = 100
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none", axis.title = element_blank()) +
-  study_coords()
-```
-
-```{r}
-#| label: tbl-algae-site-groups
-algae_sites_groups <- algae_grouped |>
-  mutate(
-    SITE_COMMENT = str_remove_all(
-      SITE_COMMENT,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish(),
-    SITE_NAME = str_remove_all(
-      SITE_NAME,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish()
-  ) |>
-  reframe(
-    .by = "site_group",
-    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
-    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
-    condensed_site_types = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE),
-      collapse = ";"
-    ),
-    condensed_site_subtypes = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
-      collapse = ";"
-    ),
-    site_characterisation = case_when(
-      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
-      .default = NA_character_
-    ),
-    n_sites = n(),
-    n_samples = sum(MEASURED_N)
-  )
-
-algae_sites_groups |>
-  select(-condensed_comments) |>
-  kable()
-```
-
-# EPEQ Assessment — Algae
-
-We have a fairly disordered dataset here, but rather than wait for the perfect one we will attempt to do the assessment (badly) so we can continue to build the network. Based on Peng et al., for each node (and edge) we want to know how essential, plausible, evidence-based (or empirical) and quantified (understood mechanistically and quantitatively) it is.
-
-These criteria make a lot of sense for AOPs and anthropogenic pollutants (like microplastics), but are somewhat less informative for an essential trace nutrient and key ingredient of the earth's core.
-
-![Alt text](../images/peng_aep_diagram.png)
-
-```{r}
-#| label: tbl-epeq-algae
-algae_wet <- algae |> filter(MEASURED_UNIT_STANDARD == "mg/kg (wet)")
-
-algae_mean <- mean(algae_wet$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-algae_sd <- sd(algae_wet$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-algae_n <- nrow(algae_wet)
-algae_loe <- n_distinct(algae_wet$REFERENCE_ID)
-
-tibble(
-  parameter = c(
-    "matrix",
-    "mean",
-    "sd",
-    "n",
-    "n_lines_of_evidence",
-    "essentiality_score",
-    "plausibility_score",
-    "evidence_score",
-    "quantification_score"
-  ),
-  value = c(
-    "Biota (Aquatic) - Seaweed - Shoot Tips",
-    as.character(algae_mean),
-    as.character(algae_sd),
-    as.character(algae_n),
-    as.character(algae_loe),
-    "3",
-    "3",
-    "3",
-    "2"
-  ),
-  justification = c(
-    NA,
-    NA,
-    NA,
-    NA,
-    NA,
-    "Copper is an essential component in photosynthesis (?). Thus algae must have a system for the controlled uptake of copper.",
-    "The role of copper in photosynthetic organisms (including algae) is well studied and understood.",
-    "Although the studied dataset contains limited evidence on copper concentrations in algae, measured concentrations are well in excess of background water concentrations. Strong specific evidence is not considered necessarily in light of the overall scientific consensus.",
-    "Copper kinetics and metabolism in algae are assumed to be well understood, although such literature was not included in the study criteria."
-  )
-) |>
-  kable()
-```
-
-# Marine Water
-
-Obviously there's going to be loads of this. Some important questions: 1. Is there actually any significant difference between fjords, estuaries, near and far ocean? (*some* fjords are likely to be quite contaminated, but will that show up in our data?)
-
-In fact, our data is (currently) all fjords, because Vannmiljø doesn't monitor open ocean (as far as I know... but what about O&G monitoring?)
-
-```{r}
-#| label: tbl-marine-species-summary
-marine <- tar_read(load_literature_pqt) |>
-  filter(
-    ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water",
-    LATITUDE >= 66.5
-  )
-
-marine |>
-  group_by(
-    SITE_GEOGRAPHIC_FEATURE,
-    SITE_GEOGRAPHIC_FEATURE_SUB,
-    REFERENCE_ID
-  ) |>
-  reframe(n = n()) |>
-  arrange(n) |>
-  kable()
-```
-
-Marine water gets the same analysis as algae, although it's likely to be more complicated due to the greater amount of data. We won't show the full comments here, we simply don't have the space.
-
-```{r}
-#| label: fig-marine-site-clusters
-# TODO: refactor distance-matrix clustering into a helper function;
-# this block is repeated identically for algae and freshwater.
-
-distance_matrix <- st_as_sf(marine, coords = c("LONGITUDE", "LATITUDE")) |>
-  st_set_crs(4326) |>
-  st_distance()
-
-binary_matrix <- matrix(
-  as.numeric(distance_matrix) < 20000,
-  nrow = nrow(distance_matrix)
-)
-
-g <- graph_from_adjacency_matrix(binary_matrix)
-
-marine_grouped <- marine
-marine_grouped$site_group <- factor(components(g)$membership)
-
-marine_sf <- st_as_sf(
-  marine_grouped,
-  coords = c("LONGITUDE", "LATITUDE"),
-  crs = 4326,
-  remove = FALSE
-)
-
-centroids_xy <- marine_sf |>
-  st_transform(3857) |>
-  group_by(site_group) |>
-  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |>
-  st_centroid() |>
-  st_transform(4326) |>
-  mutate(
-    LONGITUDE = st_coordinates(geometry)[, 1],
-    LATITUDE = st_coordinates(geometry)[, 2]
-  )
-
-ggplot(data = centroids_xy, aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  geom_label_repel(
-    aes(colour = site_group, label = site_group),
-    max.overlaps = 100
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none", axis.title = element_blank()) +
-  study_coords()
-```
-
-```{r}
-#| label: tbl-marine-site-groups
-marine_sites_groups <- marine_grouped |>
-  mutate(
-    SITE_COMMENT = str_remove_all(
-      SITE_COMMENT,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish(),
-    SITE_NAME = str_remove_all(
-      SITE_NAME,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish()
-  ) |>
-  reframe(
-    .by = "site_group",
-    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
-    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
-    condensed_site_types = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE),
-      collapse = ";"
-    ),
-    condensed_site_subtypes = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
-      collapse = ";"
-    ),
-    n_sites = n(),
-    n_samples = sum(MEASURED_N),
-    site_characterisation = case_when(
-      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
-      .default = NA_character_
-    )
-  )
-
-marine_sites_groups |>
-  select(-condensed_comments) |>
-  kable()
-```
-
-```{r}
-#| label: fig-marine-pointrange
-threshold_data <- generate_copper_thresholds() |>
-  filter(ENVIRON_COMPARTMENT_SUB == "Marine/Salt Water")
-
-marine_filtered <- marine |>
+fish_filtered <- fish_dry_normalised |>
   filter(!is_outlier(MEASURED_VALUE_STANDARD))
 
-marine_pointrange <- marine_filtered |>
-  mutate(
-    SITE_COMMENT = SITE_COMMENT |> str_remove("^.*?\\."),
-    SITE_NAME = SITE_NAME |> str_remove("Vannmiljø Station")
-  ) |>
-  ggplot(aes(
-    y = SITE_NAME,
-    x = MEASURED_VALUE_STANDARD,
-    colour = MEASURED_VALUE_STANDARD
-  )) +
-  scale_colour_viridis_c() +
-  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
-  new_scale_color() +
-  geom_vline(
-    data = threshold_data,
-    aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
-    linetype = "dashed",
-    linewidth = 0.8,
-    alpha = 0.6
-  ) +
-  geom_text(
-    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
-    colour = "black",
-    hjust = 0
-  ) +
-  labs(y = "Site Code", x = "Measured Value (mg/L)") +
-  facet_wrap(
-    facets = vars(MEASURED_UNIT_STANDARD),
-    ncol = 1,
-    scales = "free_y",
-    space = "free_y"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-marine_pointrange
+nrow(fish_filtered)
 ```
 
-```{r}
-#| label: fig-marine-hexmaps
-marine_hex <- marine |>
-  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
+10,000 mg of copper is 10 g copper per kg of liver. The most likely explanation here is that values were mistakenly entered with the wrong unit. However, since only a small proportion (17 rows) of data points show such irregularly high values, the most pragmatic option is to simply exclude them.
 
-# NOTE: bins = 100 may be high relative to data density; adjust if hexes are too sparse.
-sample_size_map <- marine_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_bin_hex(bins = 100, colour = NA) +
-  scale_fill_viridis_c(
-    option = "magma",
-    trans = "sqrt",
-    name = "Sample count"
-  ) +
-  labs(title = "Sample Size") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
+# Lumping and Splitting
 
-mean_conc_map <- marine_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE_STANDARD)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_summary_hex(
-    fun = function(x) mean(x, na.rm = TRUE),
-    bins = 100,
-    colour = NA
-  ) +
-  scale_fill_viridis_c(
-    option = "viridis",
-    name = "Mean concentration\n(mg/L)"
-  ) +
-  labs(title = "Mean marine concentration by hexbin") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
-
-sample_size_map / mean_conc_map
-```
+We have a lot of fish data, and a lot of different species and tissues. However, data are significantly biased towards a small number of species.
 
 ```{r}
-#| label: fig-marine-timetrend
-marine_filtered |>
-  ggplot(aes(
-    x = SAMPLING_DATE,
-    y = MEASURED_VALUE_STANDARD,
-    group = SITE_NAME
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
-  labs(x = "Sampling date", y = "Measured value (mg/L)") +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
-
-We have a handful of sites in Nordfjorden with elevated copper concentrations (\>5 mg/L), but most are in the background-Level II zone. It's probably safe to just take an average here, although it would be wise to drill down further spatially - but do we have the time to do that for each set of sites?
-
-# EPEQ Assessment — Marine Water
-
-We can do the same assessment with the marine data; again, it's not going to be great.
-
-```{r}
-#| label: tbl-epeq-marine
-marine_mean <- mean(marine$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-marine_sd <- sd(marine$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-marine_n <- nrow(marine)
-marine_loe <- n_distinct(marine$REFERENCE_ID)
-
-tibble(
-  parameter = c(
-    "matrix",
-    "mean",
-    "sd",
-    "n",
-    "n_lines_of_evidence",
-    "essentiality_score",
-    "plausibility_score",
-    "evidence_score",
-    "quantification_score"
-  ),
-  value = c(
-    "Aquatic (Marine/Sea Water)",
-    as.character(marine_mean),
-    as.character(marine_sd),
-    as.character(marine_n),
-    as.character(marine_loe),
-    "3",
-    "3",
-    "3",
-    "2"
-  ),
-  justification = c(
-    NA,
-    NA,
-    NA,
-    NA,
-    NA,
-    "Copper is known to be naturally present in the earth's crust and aquatic ecosystems.",
-    "As above.",
-    "The studied dataset contains substantial evidence on copper concentrations in marine water.",
-    "Copper kinetics in marine environments are generally well studied and modelled. I can perhaps cite some papers here, but I'll have to get them via gap-filling."
-    # TODO: could add CREED here as a measure of data quality?
-  )
-) |>
-  kable()
-```
-
-# Freshwater — Rivers/Streams/Canals
-
-Next node we might expect is rivers as a source of copper. This is also a little tricky, because source characterisation for a long river is even harder (and we might generally expect them to be less homogeneous than the ocean as a consequence of their hydrology). But we can try.
-
-```{r}
-#| label: tbl-freshwater-species-summary
-freshwater <- tar_read(load_literature_pqt) |>
-  filter(
-    ENVIRON_COMPARTMENT_SUB == "Freshwater",
-    LATITUDE >= 66.5,
-    SITE_GEOGRAPHIC_FEATURE == "River, stream, canal"
-  )
-
-freshwater |>
+#| label: tbl-fish-species-summary
+fish_species_n <- fish_filtered |>
   group_by(
-    SITE_GEOGRAPHIC_FEATURE,
-    SITE_GEOGRAPHIC_FEATURE_SUB,
-    REFERENCE_ID
+    SAMPLE_SPECIES
   ) |>
   reframe(n = n()) |>
-  arrange(n) |>
-  kable()
+  arrange(desc(n))
+
+fish_species_n_sum <- sum(fish_species_n$n)
+
+fish_species_n <- fish_species_n |>
+  mutate(prop = n / fish_species_n_sum)
 ```
 
+From a trophic perspective we'd like to have species that represent different parts of the food web (although we wouldn't expect this to be important for copper). In practical terms, 72% of our dataset is *Gadus morhua* (Atlantic cod), while *Salmo trutta* (Brown trout), *Ctenolabrus rupestris* (Goldsinny-wrasse), and *Coregonus lavaretus* (Common whitefish) represent 3-5% of the total each. We collect some information on each species to determine their relevance to our case.
+
++--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
+| Species Name                               | n / proportion of total | Distribution                                                                                             | Trophic Level                                                                              | Notes                                                                  | Source                                                                       |
++============================================+=========================+==========================================================================================================+============================================================================================+========================================================================+==============================================================================+
+| *Gadus morhua* (Atlantic cod)              | 3146 (72%)              | High occurrence above Arctic circle. Found from shoreline to edge of continental slope.                  | Predators of small fish and inverts, consumed by larger fish, aquatic mammals, squid       | IUCN Red List Vulnerable. Important and overfished commercial species. | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=126436>\            |
+|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Gadus_morhua.html>                         |
++--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
+| *Salmo trutta* (Brown or Sea trout)        | 204 (5%)                | Found across Norwegian & Icelandic coasts, including above Arctic circle.. Freshwater/coastal lifecycle. | Larger (#72cm) predator of small fish and inverts. Consumed by some larger fish and seals. | IUCN Least Concern. Widely eaten.                                      | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=127187#attributes>\ |
+|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Salmo_trutta.html>                         |
++--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
+| *Ctenolabrus rupestris* (Goldsinny-wrasse) | 192 (4%)                | Present in Norwegian territorial waters, including above Arctic circle.                                  | Smaller (\>=18cm) predator of invertebrates.                                               | IUCN Least Concern. Used as a cleaner fish in salmon culture.          | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=126964>\            |
+|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Ctenolabrus_rupestris.html>                |
++--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
+| *Coregonus lavaretus* (Common whitefish)   | 139 (3%)                | Freshwater sites across Norway, including above Arctic circle                                            | Medium (#40cm) predator of planktonic and benthic crustaceans.                             | IUCN Vulnerable\                                                       | <https://artsdatabanken.no/arter/takson/26176>\                              |
+|                                            |                         |                                                                                                          |                                                                                            | Some ambiguity over species identification.                            | <https://www.fishbase.org/summary/Coregonus_lavaretus.html>                  |
++--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
+
+: Table of most common fish species in data.
+
+Now, with that said - is there a significant difference between these species?
+
+
 ```{r}
-#| label: fig-freshwater-pointrange
-threshold_data <- generate_copper_thresholds() |>
-  filter(ENVIRON_COMPARTMENT_SUB == "Freshwater")
-
-freshwater_filtered <- freshwater |>
-  filter(!is_outlier(MEASURED_VALUE_STANDARD))
-
-freshwater_pointrange <- freshwater_filtered |>
-  mutate(
-    SITE_COMMENT = SITE_COMMENT |> str_remove("^.*?\\."),
-    SITE_NAME = SITE_NAME |> str_remove("Vannmiljø Station")
+#| label: fish-species-variation
+fish_filtered |>
+  filter(
+    SAMPLE_SPECIES %in%
+      c(
+        "Gadus morhua",
+        "Salmo trutta",
+        "Coregonus lavaretus",
+        "Ctenolabrus rupestris"
+      )
   ) |>
-  ggplot(aes(
-    y = SITE_NAME,
-    x = MEASURED_VALUE_STANDARD,
-    colour = MEASURED_VALUE_STANDARD
-  )) +
-  scale_colour_viridis_c() +
-  geom_pointrange(aes(xmin = UNCERTAINTY_LOWER, xmax = UNCERTAINTY_UPPER)) +
-  new_scale_color() +
-  geom_vline(
-    data = threshold_data,
-    aes(xintercept = THRESHOLD_VALUE, color = TITLE_SHORT),
-    linetype = "dashed",
-    linewidth = 0.8,
-    alpha = 0.6
+  ggplot(
+    mapping = aes(x = MEASURED_VALUE_STANDARD_NORMALISED, y = SAMPLE_SPECIES)
   ) +
-  geom_text(
-    aes(label = str_wrap(SITE_COMMENT), x = UNCERTAINTY_UPPER + 0.5),
-    colour = "black",
-    hjust = 0
-  ) +
-  labs(y = "Site Code", x = "Measured Value (standardised units)") +
+  geom_point() +
   facet_wrap(
-    facets = vars(MEASURED_UNIT_STANDARD),
+    facets = vars(SAMPLE_TISSUE),
     ncol = 1,
     scales = "free_y",
     space = "free_y"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-freshwater_pointrange
-```
-
-```{r}
-#| label: fig-freshwater-hexmaps
-freshwater_hex <- freshwater |>
-  filter(!is.na(LONGITUDE), !is.na(LATITUDE))
-
-# NOTE: bins = 100 may be high relative to data density; adjust if hexes are too sparse.
-sample_size_map <- freshwater_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_bin_hex(bins = 100, colour = NA) +
-  scale_fill_viridis_c(
-    option = "magma",
-    trans = "sqrt",
-    name = "Sample count"
-  ) +
-  labs(title = "Sample Size") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
-
-mean_conc_map <- freshwater_hex |>
-  ggplot(aes(x = LONGITUDE, y = LATITUDE, z = MEASURED_VALUE_STANDARD)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  stat_summary_hex(
-    fun = function(x) mean(x, na.rm = TRUE),
-    bins = 100,
-    colour = NA
-  ) +
-  scale_fill_viridis_c(
-    option = "viridis",
-    name = "Mean concentration\n(standardised units)"
-  ) +
-  labs(title = "Mean freshwater concentration by hexbin") +
-  theme_minimal() +
-  theme(legend.position = "bottom", axis.title = element_blank()) +
-  study_coords()
-
-sample_size_map / mean_conc_map
-```
-
-We have lots of data for rivers/streams above the arctic circle, and some of it has super-high concentrations.
-
-```{r}
-#| label: fig-freshwater-site-clusters
-# TODO: refactor distance-matrix clustering into a helper function;
-# this block is repeated identically for algae and marine.
-
-distance_matrix <- st_as_sf(freshwater, coords = c("LONGITUDE", "LATITUDE")) |>
-  st_set_crs(4326) |>
-  st_distance()
-
-binary_matrix <- matrix(
-  as.numeric(distance_matrix) < 20000,
-  nrow = nrow(distance_matrix)
-)
-
-g <- graph_from_adjacency_matrix(binary_matrix)
-
-freshwater_grouped <- freshwater
-freshwater_grouped$site_group <- factor(components(g)$membership)
-
-freshwater_sf <- st_as_sf(
-  freshwater_grouped,
-  coords = c("LONGITUDE", "LATITUDE"),
-  crs = 4326,
-  remove = FALSE
-)
-
-centroids_xy <- freshwater_sf |>
-  st_transform(3857) |>
-  group_by(site_group) |>
-  summarize(geometry = st_combine(geometry), .groups = "drop", n = n()) |>
-  st_centroid() |>
-  st_transform(4326) |>
-  mutate(
-    LONGITUDE = st_coordinates(geometry)[, 1],
-    LATITUDE = st_coordinates(geometry)[, 2]
   )
-
-ggplot(data = centroids_xy, aes(x = LONGITUDE, y = LATITUDE)) +
-  geom_polygon(
-    data = world_map,
-    aes(x = long, y = lat, group = group),
-    fill = "grey95",
-    colour = "grey80",
-    inherit.aes = FALSE
-  ) +
-  geom_label_repel(
-    aes(colour = site_group, label = site_group),
-    max.overlaps = 100
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none", axis.title = element_blank()) +
-  study_coords()
 ```
-
-```{r}
-#| label: tbl-freshwater-site-groups
-freshwater_sites_groups <- freshwater_grouped |>
-  mutate(
-    SITE_COMMENT = str_remove_all(
-      SITE_COMMENT,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish(),
-    SITE_NAME = str_remove_all(
-      SITE_NAME,
-      regex(clean_regex, ignore_case = TRUE)
-    ) |>
-      str_squish()
-  ) |>
-  reframe(
-    .by = "site_group",
-    condensed_name = paste(unique(SITE_NAME), collapse = ";"),
-    condensed_comments = paste(unique(SITE_COMMENT), collapse = ";"),
-    condensed_site_types = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE),
-      collapse = ";"
-    ),
-    condensed_site_subtypes = paste(
-      unique(SITE_GEOGRAPHIC_FEATURE_SUB),
-      collapse = ";"
-    ),
-    site_characterisation = case_when(
-      str_detect(condensed_comments, "(?i)ndustr") ~ "Industrial",
-      .default = NA_character_
-    ),
-    n_sites = n(),
-    n_samples = sum(MEASURED_N)
-  )
-
-freshwater_sites_groups |>
-  select(-condensed_comments) |>
-  kable()
-```
-
-```{r}
-#| label: fig-freshwater-timetrend
-freshwater_filtered |>
-  ggplot(aes(
-    x = SAMPLING_DATE,
-    y = MEASURED_VALUE_STANDARD,
-    group = SITE_NAME
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(colour = SITE_NAME)) +
-  labs(x = "Sampling date", y = "Measured value (standardised units)") +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
-
-As ever, we need to do a proper interpretation on it, and this will take time. For now:
-
-```{r}
-#| label: tbl-epeq-freshwater
-freshwater_mean <- mean(freshwater$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-freshwater_sd <- sd(freshwater$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-freshwater_n <- nrow(freshwater)
-freshwater_loe <- n_distinct(freshwater$REFERENCE_ID)
-
-tibble(
-  parameter = c(
-    "matrix",
-    "mean",
-    "sd",
-    "n",
-    "n_lines_of_evidence",
-    "essentiality_score",
-    "plausibility_score",
-    "evidence_score",
-    "quantification_score"
-  ),
-  value = c(
-    "Aquatic (Freshwater, Rivers and Streams)",
-    as.character(freshwater_mean),
-    as.character(freshwater_sd),
-    as.character(freshwater_n),
-    as.character(freshwater_loe),
-    "3",
-    "3",
-    "3",
-    "3"
-  ),
-  justification = c(
-    NA,
-    NA,
-    NA,
-    NA,
-    NA,
-    "Copper is known to be naturally present in the earth's crust and aquatic ecosystems.",
-    "As above.",
-    "The studied dataset contains substantial evidence on copper concentrations in freshwater.",
-    "Copper kinetics in freshwater environments are generally better understood than in marine environments. I can perhaps cite some papers here, but I'll have to get them via gap-filling."
-  )
-) |>
-  kable()
-```
-
-TODO: Add linkage to Norske Utlsipp and REACH here.
-
-# Gap-Filling
-
-Initial research suggests it's difficult to say how much copper is "in algae". We can still do AEP stuff, but the evidence is necessarily going to be weak. Some key points:
-
-- Copper is also a stressor and essential nutrient in microalgae, but knowledge is spotty https://www.mdpi.com/2305-6304/10/9/527
-
-I guess we can start with the information we have and hopefully extend it if/when we get some more data...
-
-# Edges
-
-So far we've just done nodes, which is easy. Edges are harder. We hypothesise the following flows:
-
-- Marine Water -\> Algae
-- Freshwater -\> Marine Water
-- Atmosphere -\> Marine Water
-- Atmosphere -\> Fresh Water
-- Atmosphere -\> Soil
-- Soil -\> Fresh Water
-
-Here's the two most important ones:
-
-```{r}
-#| label: tbl-edges-epeq
-tribble(
-  ~flow_name                                    , ~from               , ~to                    , ~magnitude , ~unit , ~n , ~sd , ~essentiality_score , ~essentiality_justification     , ~plausibility_score , ~plausibility_justification                                 , ~evidence_score , ~evidence_justification                           , ~quantification_score , ~quantification_justification                        , ~comments                                                                                                                                                         ,
-  "Algal Uptake"                                , "Marine/Salt Water" , "Algae Whole Organism" , NA         , NA    , NA , NA  ,                   3 , "it's got to get there somehow" ,                   3 , "cu is a micronutrient and thus must be controlled somehow" ,               1 , "evidence exists but I haven't gapfilled it yet." ,                     1 , "evidence may exist but I haven't gap-filled it yet" , "Copper uptake by organisms is known to be active regulated. A simple magnitude of uptake (e.g. BCF) is unlikely to capture the relationship in a meaningul way." ,
-  "Riverine Copper Inputs to Marine/Salt Water" , "Freshwater"        , "Marine/Salt Water"    , NA         , NA    , NA , NA  ,                   3 , "rivers aren't the only input"  ,                   3 , "rivers carry crust material towards the sea"               ,               1 , "evidence exists but I haven't gapfilled it yet." ,                     1 , "evidence may exist but I haven't gap-filled it yet" , "This is also tricky to represent just as a simple node, but I think Comber et al has some estimates in terms of kg/year we can use."
-) |>
-  kable()
-```
-
-# Constructing the AEP
-
-Ideally I want to be able to make the AEPs dynamically using network visualisation software. I don't know if this is realistic. In any case, I don't want to spend a bunch of time making "pretty" AEPs before we agree on all the details and methods. Here's a manual version of the algal AEP, with the data from above filled in.
-
-Here's what we have evidence for so far:
-
-![](/images/algae_aep_so_far.png)
-
-We can link this up more or less to the emissions data we have from Norske Utslipp. This is more comprehensive, at the risk of being messy and not actually communicating much in the way of causality:
-
-![Emissions data from Norske utslipp (whole country); concentrations from above Arctic Circle.](/images/algae_aep_emissions.png)
-
