@@ -40,21 +40,45 @@ gadus_morhua <- tar_read(load_literature_pqt) |>
   )
 ```
 
+# Methods
+
+## Outlier detection
+
+We use two complementary approaches to flag potential outliers in each group.
+
+### Tukey fences (IQR method)
+
+The Tukey fence method flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
+
+$$\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR$$
+
+We apply fences to log-transformed values because concentrations are approximately log-normally distributed.
+
+### Robust Modified Z-Score
+
+The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is resistant to the influence of extreme values <!-- TODO: cite Iglewicz & Hoaglin 1993 -->. For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
+
+$$\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}$$
+
+where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute deviation. In R, `mad()` already scales MAD by a consistency factor ($\approx 1 / 0.6745$) to make it comparable to the standard deviation under normality <!-- TODO: cite R documentation / consistency factor source -->. Values with $|\text{RMZ}| > 3.5$ are considered outliers, following the threshold recommended by <!-- TODO: cite Iglewicz & Hoaglin 1993 -->.
+
+Points are coloured by how many flags they receive: unflagged (black), one flag (orange), or both flags (red).
+
+### Test for unimodality
+
+To identify groups whose distribution may be multimodal — which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution — we apply Hartigan's Dip Test <!-- TODO: cite Hartigan & Hartigan 1985 -->. The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as our threshold.
+
 ```{r}
 #| label: robust-modified-z-score
-# how to calculate
-# 1. for each point x_i, subtract the median of x from it
-# 2. multiply the resulting value by 0.6745 (why?)
-# 3. divide by the mediam absolute deviation
-
 robust_modified_z_score <- function(x) {
-  # add some defensiveness here
   x_median <- median(x, na.rm = TRUE)
-  x_mad <- mad(x, na.rm = TRUE) # apparently already includes the reciprocal of 0.6745
-
-  modified_z_score <- (x - x_median) / x_mad
+  # mad() in R already includes the 1/0.6745 consistency factor
+  x_mad <- mad(x, na.rm = TRUE)
+  (x - x_median) / x_mad
 }
 ```
+
+---
 
 If we make a density plot of the total distribution we can immediately see that something is off:
 
@@ -63,25 +87,29 @@ If we make a density plot of the total distribution we can immediately see that 
 no_filter <- gadus_morhua |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
   geom_density() +
-  labs(title = "Values not filtered")
+  labs(title = "Values not filtered") +
+  theme_minimal()
 
 filter_5000 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 5000) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
   geom_density() +
-  labs(title = "Values >5000 mg/kg removed")
+  labs(title = "Values >5000 mg/kg removed") +
+  theme_minimal()
 
 filter_1000 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 1000) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
   geom_density() +
-  labs(title = "Values >1000 mg/kg removed")
+  labs(title = "Values >1000 mg/kg removed") +
+  theme_minimal()
 
 filter_500 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 500) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
   geom_density() +
-  labs(title = "Values >500 mg/kg removed")
+  labs(title = "Values >500 mg/kg removed") +
+  theme_minimal()
 
 no_filter /
   filter_5000 /
@@ -108,12 +136,12 @@ Conversely, "artifact" outliers may be a product of:
 - Mistakes in data entry
 - Mistakes in data processing or manipulation
 
-Directly detecting the former is likely to be much easier than the latter. We can start by examining the distributions of concentrations by campaign, site, and sampling time:
+Directly detecting the former is likely to be much easier than the latter. We can start by examining the distributions of concentrations by year, site, and campaign.
 
-# TODO: Cite both approaches, include equations
+# Outliers by year
 
 ```{r}
-#| label: tbl-fish-variation-year
+#| label: outliers-year-flag
 gadus_morhua_by_year <- gadus_morhua |>
   group_by(SAMPLING_YEAR) |>
   mutate(
@@ -122,20 +150,22 @@ gadus_morhua_by_year <- gadus_morhua |>
     Q1 = quantile(log_val, 0.25),
     Q3 = quantile(log_val, 0.75),
     IQR = IQR(log_val) * 1.5,
-    outlier_RMZ = abs(RMZ) > 3.5, # standard recommended threshhold for robust MAD-adjusted z-score
+    outlier_RMZ = abs(RMZ) > 3.5,
     outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
     dot_fill = factor(outlier_RMZ + outlier_IQR),
-    year_and_n = glue("*{SAMPLING_YEAR}* <br> (n = {n()})")
+    year_and_n = glue::glue("**{SAMPLING_YEAR}** <br> (n = {n()})")
   )
 
-dip_results <- gadus_morhua_by_year |>
+dip_results_year <- gadus_morhua_by_year |>
   group_by(SAMPLING_YEAR) |>
   reframe(
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
   ) |>
   mutate(bimodal = dip_p < 0.05)
+```
 
-
+```{r}
+#| label: fig-outliers-year
 main_plot <- gadus_morhua_by_year |>
   ggplot(aes(
     y = year_and_n,
@@ -167,8 +197,8 @@ main_plot <- gadus_morhua_by_year |>
   labs(
     y = "Year",
     x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø by, reported sampling year",
-    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshhold 3.5)"
+    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported sampling year",
+    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
   ) +
   theme(
     plot.title = element_markdown(),
@@ -183,7 +213,7 @@ main_plot <- gadus_morhua_by_year |>
     axis.ticks = element_blank()
   )
 
-dip_panel <- dip_results |>
+dip_panel <- dip_results_year |>
   ggplot(aes(
     y = SAMPLING_YEAR,
     x = 0,
@@ -200,29 +230,50 @@ dip_panel <- dip_results |>
   )
 
 main_plot + dip_panel + plot_layout(widths = c(6, 1), guides = "collect")
+```
 
-# within our labelled single or double outliers, are there any clues in the campaign or comments?
+```{r}
+#| label: tbl-outliers-year-comments
 gadus_morhua_by_year |>
-  # we set dot_fill as a factor earlier, so we can't use >= here
   filter(dot_fill == 2 | dot_fill == 1) |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
   reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
   arrange(desc(mean))
-# TODO: What's the most logical way to display this?
 ```
 
-
-
-There's no immediately obvious pattern to the outliers. In the interest of scientific rigour we should investigate a number of possible patterns behind our more improbable outliers (analytical error, contamination, data entry error) and potential correlations with metadata (site, contractor, analytical technique). However, doing this for each set of outliers will quickly become prohibitively complicated. I believe (based on intutition and experience) that the most likely explanation for obvious, implausible outliers is transcription errors (either the wrong unit being used, or simply entering the right number), as much of the data in Vannmiljø (especially historically) is manually entered. 
-
-By site:
+# Outliers by site
 
 ```{r}
-#| label: sites-outliers
-gadus_morhua |>
+#| label: outliers-site-flag
+gadus_morhua_by_site <- gadus_morhua |>
   mutate(SITE_CODE = str_remove(SITE_CODE, "Vannmiljø_")) |>
+  group_by(SITE_CODE) |>
+  mutate(
+    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
+    log_val = log10(MEASURED_VALUE_STANDARD),
+    Q1 = quantile(log_val, 0.25),
+    Q3 = quantile(log_val, 0.75),
+    IQR = IQR(log_val) * 1.5,
+    outlier_RMZ = abs(RMZ) > 3.5,
+    outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
+    dot_fill = factor(outlier_RMZ + outlier_IQR),
+    site_and_n = glue::glue("**{SITE_CODE}**  (n = {n()})")
+  )
+
+# TODO: Warning here. What does it mean?
+dip_results_site <- gadus_morhua_by_site |>
+  group_by(SITE_CODE) |>
+  reframe(
+    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
+  ) |>
+  mutate(bimodal = dip_p < 0.05)
+```
+
+```{r}
+#| label: fig-outliers-site
+main_plot_site <- gadus_morhua_by_site |>
   ggplot(aes(
-    y = SITE_CODE,
+    y = site_and_n,
     x = MEASURED_VALUE_STANDARD
   )) +
   geom_boxplot(
@@ -231,16 +282,23 @@ gadus_morhua |>
     staple.colour = "darkgrey",
     box.colour = "darkgrey"
   ) +
-  geom_dotplot(dotsize = 0.5, binwidth = 0.01, stackdir = "centerwhole") +
-  geom_text(
-    data = gadus_morhua |>
-      mutate(SITE_CODE = str_remove(SITE_CODE, "Vannmiljø_")) |>
-      group_by(SITE_CODE, SITE_GEOGRAPHIC_FEATURE) |>
-      summarise(label = sum(MEASURED_N), .groups = "drop"),
-    aes(y = SITE_CODE, x = Inf, label = label),
-    hjust = 1.1
+  geom_dotplot(
+    dotsize = 0.7,
+    binwidth = 0.01,
+    stackdir = "centerwhole",
+    binpositions = "all",
+    aes(fill = dot_fill)
   ) +
-  scale_x_log10() +
+  scale_fill_manual(
+    values = c("0" = "black", "1" = "orange", "2" = "red"),
+    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
+    name = "Outlier flags"
+  ) +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
   facet_wrap(
     facets = vars(SITE_GEOGRAPHIC_FEATURE),
     ncol = 1,
@@ -250,73 +308,165 @@ gadus_morhua |>
   labs(
     y = "Site Code",
     x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by, reported site code",
-    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, site *n* to right"
+    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported site code",
+    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
   ) +
-  theme(legend.position = "none", title = element_markdown())
+  theme(
+    plot.title = element_markdown(),
+    axis.text.y.left = element_markdown(),
+    panel.background = element_blank(),
+    panel.grid.major = element_line(colour = "grey90"),
+    panel.grid.minor = element_line(colour = "grey95"),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    strip.background = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+dip_panel_site <- dip_results_site |>
+  ggplot(aes(
+    y = SITE_CODE,
+    x = 0,
+    label = format(round(dip_p, 3), nsmall = 3),
+    colour = bimodal
+  )) +
+  geom_text(size = 3) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+  labs(x = "p(not unimodal)", y = NULL) +
+  theme_void() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_text(size = 9)
+  )
+
+main_plot_site +
+  dip_panel_site +
+  plot_layout(widths = c(6, 1), guides = "collect")
 ```
 
-What about campaigns?
+```{r}
+#| label: tbl-outliers-site-comments
+gadus_morhua_by_site |>
+  filter(dot_fill == 2 | dot_fill == 1) |>
+  group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
+  reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
+  arrange(desc(mean))
+```
+
+# Outliers by campaign
 
 ```{r}
-#| label: campaign-outliers
-gadus_morhua |>
+#| label: outliers-campaign-flag
+gadus_morhua_by_campaign <- gadus_morhua |>
   mutate(
     CAMPAIGN_NAME = str_remove(
       CAMPAIGN_NAME,
       "Vannmiljø Copper Monitoring 2010-2025"
     )
   ) |>
+  group_by(CAMPAIGN_NAME) |>
+  mutate(
+    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
+    log_val = log10(MEASURED_VALUE_STANDARD),
+    Q1 = quantile(log_val, 0.25),
+    Q3 = quantile(log_val, 0.75),
+    IQR = IQR(log_val) * 1.5,
+    outlier_RMZ = abs(RMZ) > 3.5,
+    outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
+    dot_fill = factor(outlier_RMZ + outlier_IQR),
+    campaign_and_n = glue("**{CAMPAIGN_NAME}** <br> (n = {n()})") |>
+      as.character()
+  )
+
+# More errors here
+dip_results_campaign <- gadus_morhua_by_campaign |>
+  group_by(CAMPAIGN_NAME) |>
+  reframe(
+    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
+  ) |>
+  mutate(bimodal = dip_p < 0.05)
+```
+
+```{r}
+#| label: fig-outliers-campaign
+main_plot_campaign <- gadus_morhua_by_campaign |>
   ggplot(aes(
-    y = CAMPAIGN_NAME,
+    y = campaign_and_n,
     x = MEASURED_VALUE_STANDARD
   )) +
   geom_boxplot(
+    outliers = FALSE,
     whisker.colour = "darkgrey",
     staple.colour = "darkgrey",
     box.colour = "darkgrey"
   ) +
-  geom_dotplot(dotsize = 0.5, binwidth = 0.01, stackdir = "centerwhole") +
-  scale_x_log10() +
-  labs(
-    x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by reported monitoring campaign",
-    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, n for whole year to right"
+  geom_dotplot(
+    dotsize = 0.7,
+    binwidth = 0.01,
+    stackdir = "centerwhole",
+    binpositions = "all",
+    aes(fill = dot_fill)
   ) +
-  theme(legend.position = "none", title = element_markdown())
+  scale_fill_manual(
+    values = c("0" = "black", "1" = "orange", "2" = "red"),
+    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
+    name = "Outlier flags"
+  ) +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
+  labs(
+    y = "Campaign",
+    x = "Measured Value (mg/kg (wet))",
+    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by monitoring campaign",
+    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
+  ) +
+  theme(
+    plot.title = element_markdown(),
+    axis.text.y.left = element_markdown(),
+    panel.background = element_blank(),
+    panel.grid.major = element_line(colour = "grey90"),
+    panel.grid.minor = element_line(colour = "grey95"),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    strip.background = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+dip_panel_campaign <- dip_results_campaign |>
+  ggplot(aes(
+    y = CAMPAIGN_NAME,
+    x = 0,
+    label = format(round(dip_p, 3), nsmall = 3),
+    colour = bimodal
+  )) +
+  geom_text(size = 3) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+  labs(x = "p(not unimodal)", y = NULL) +
+  theme_void() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_text(size = 9)
+  )
+
+main_plot_campaign +
+  dip_panel_campaign +
+  plot_layout(widths = c(6, 1), guides = "collect")
 ```
-
-Under the circumstances, we need a simple, robust, defensible approach to filtering outliers that doesn't require this degree of fine attention. 
-
-Based on a cursory search of appropriate techniques, several online textbooks suggest the [*Generalized extreme studentised deviate*](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h3.htm) (G ESD) is the most appropriate approach for our problem. The simpler alternatives, the Grubbs test and Tietjen-Moore test require us to specify the number of outliers. Although we could perform this manually for each group, it would again be prohibitively slow. 
-
-The G-ESD requires normally distributed data and that we set an upper bound for the suspected number of outliers. We...
-`
-Claude says:  Recommended primary screen: Robust modified z-score (MAD-based; Iglewicz & Hoaglin 1993)
 
 ```{r}
-# let's try remaking one of the above plots with this new threshhold for outliers
-
-gadus_morhua |>
-  group_by(SITE_CODE) |>
-  mutate(
-    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
-    outlier = abs(RMZ) > 3
-  ) |>
-  ggplot(aes(
-    y = SITE_CODE,
-    x = MEASURED_VALUE_STANDARD,
-    colour = outlier
-  )) +
-  geom_point() +
-  scale_x_log10() +
-  labs(
-    y = "Site Code",
-    x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers published on Vannmiljø by reported site code",
-    subtitle = "Outliers (more than 1.95 * IQR from the mean) plotted as red points, n for whole year to right"
-  ) +
-  theme(legend.position = "none", title = element_markdown())
+#| label: tbl-outliers-campaign-comments
+gadus_morhua_by_campaign |>
+  filter(dot_fill == 2 | dot_fill == 1) |>
+  group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
+  reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
+  arrange(desc(mean))
 ```
 
-Everything looks more or less reasonable except for the Urban Fjord Contaminants reading, where there's clearly a bimodal distribution... and half of the points are in the "improbably large" category. 
+There's no immediately obvious pattern to the outliers. In the interest of scientific rigour we should investigate a number of possible patterns behind our more improbable outliers (analytical error, contamination, data entry error) and potential correlations with metadata (site, contractor, analytical technique). However, doing this for each set of outliers will quickly become prohibitively complicated. I believe (based on intuition and experience) that the most likely explanation for obvious, implausible outliers is transcription errors (either the wrong unit being used, or simply entering the wrong number), as much of the data in Vannmiljø (especially historically) is manually entered.
+
+Under the circumstances, we need a simple, robust, defensible approach to filtering outliers that doesn't require this degree of fine attention.
