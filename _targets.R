@@ -432,7 +432,7 @@ list(
       # TODO: Some cases where LOD/LOQ = ">", we ignore these.
       vm_edata_intermediate = vm_edata_intermediate |> filter(Operator != ">"),
       vm_lookup_methods = vm_lookup_methods,
-      campaign_name_short = "Vm_2010_2025",
+      campaign_prefix_short = "Vm_2010_2025",
       reference_id = "VannmiljøCopper2010-2025"
     )
   ),
