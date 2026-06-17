@@ -20,6 +20,7 @@ library(grid)
 library(knitr)
 library(ggtext)
 library(diptest)
+library(glue)
 
 gadus_morhua <- tar_read(load_literature_pqt) |>
   filter(
@@ -470,3 +471,4 @@ gadus_morhua_by_campaign |>
 There's no immediately obvious pattern to the outliers. In the interest of scientific rigour we should investigate a number of possible patterns behind our more improbable outliers (analytical error, contamination, data entry error) and potential correlations with metadata (site, contractor, analytical technique). However, doing this for each set of outliers will quickly become prohibitively complicated. I believe (based on intuition and experience) that the most likely explanation for obvious, implausible outliers is transcription errors (either the wrong unit being used, or simply entering the wrong number), as much of the data in Vannmiljø (especially historically) is manually entered.
 
 Under the circumstances, we need a simple, robust, defensible approach to filtering outliers that doesn't require this degree of fine attention.
+
