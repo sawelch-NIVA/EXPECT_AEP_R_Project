@@ -75,11 +75,50 @@ str_wrap_br <- function(string, width) {
 }
 
 ggplot_base_size <- 20
-theme_set(theme_minimal(base_size = ggplot_base_size))
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
 
+# Reusable plot layers
 common_dotsize <- 3
 common_binwidth <- 0.01
 common_group_height <- 0.5 # set the height of a single boxplot "row"
+
+outlier_boxplot <- geom_boxplot(
+  outliers = FALSE,
+  whisker.colour = "darkgrey",
+  staple.colour = "darkgrey",
+  box.colour = "darkgrey"
+)
+
+outlier_dots <- geom_dotplot(
+  aes(fill = dot_fill),
+  dotsize = common_dotsize,
+  binwidth = common_binwidth,
+  stackdir = "centerwhole",
+  binpositions = "all",
+  stroke = 0
+)
+
+outlier_fill_scale <- list(
+  scale_fill_manual(
+    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
+    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
+    name = "Outlier flags"
+  ),
+  guides(fill = guide_legend(override.aes = list(stroke = 0)))
+)
+
+outlier_plot_theme <- theme(
+  plot.title = element_markdown(),
+  axis.text.y.left = element_markdown(),
+  panel.background = element_blank(),
+  panel.grid.major = element_line(colour = "grey90"),
+  panel.grid.minor = element_line(colour = "grey95"),
+  plot.background = element_blank(),
+  legend.background = element_blank(),
+  legend.key = element_blank(),
+  strip.background = element_blank(),
+  axis.ticks = element_blank()
+)
 ```
 
 A simple density plot of measured value distributions immediately shows an extremely long right tail, a signal that some measurements are many orders of magnitude higher than the mean. Even when we simply filter out the highest values, the right tail remains extremely long.
@@ -243,25 +282,9 @@ main_plot <- gadus_morhua_by_year |>
     y = year_and_n,
     x = MEASURED_VALUE_STANDARD
   )) +
-  geom_boxplot(
-    outliers = FALSE,
-    whisker.colour = "darkgrey",
-    staple.colour = "darkgrey",
-    box.colour = "darkgrey"
-  ) +
-  geom_dotplot(
-    dotsize = common_dotsize,
-    binwidth = common_binwidth,
-    stackdir = "centerwhole",
-    binpositions = "all",
-    aes(fill = dot_fill),
-    stroke = 0
-  ) +
-  scale_fill_manual(
-    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
-    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
-    name = "Outlier flags"
-  ) +
+  outlier_boxplot +
+  outlier_dots +
+  outlier_fill_scale +
   scale_x_log10(
     breaks = 10^(-1:5),
     labels = scales::label_log(),
@@ -271,19 +294,7 @@ main_plot <- gadus_morhua_by_year |>
     y = "Year",
     x = "Measured Value (mg/kg (wet))"
   ) +
-  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
-  theme(
-    plot.title = element_markdown(),
-    axis.text.y.left = element_markdown(),
-    panel.background = element_blank(),
-    panel.grid.major = element_line(colour = "grey90"),
-    panel.grid.minor = element_line(colour = "grey95"),
-    plot.background = element_blank(),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
-    strip.background = element_blank(),
-    axis.ticks = element_blank()
-  )
+  outlier_plot_theme
 
 dip_panel <- dip_results_year |>
   ggplot(aes(
@@ -295,7 +306,7 @@ dip_panel <- dip_results_year |>
   geom_text(size = ggplot_base_size / .pt) +
   scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void(base_size = ggplot_base_size) +
+  theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
     legend.position = "none",
     axis.title.x = element_text()
@@ -370,25 +381,9 @@ main_plot_site <- gadus_morhua_by_site |>
     y = site_and_n,
     x = MEASURED_VALUE_STANDARD
   )) +
-  geom_boxplot(
-    outliers = FALSE,
-    whisker.colour = "darkgrey",
-    staple.colour = "darkgrey",
-    box.colour = "darkgrey"
-  ) +
-  geom_dotplot(
-    dotsize = common_dotsize,
-    binwidth = common_binwidth,
-    stackdir = "centerwhole",
-    binpositions = "all",
-    aes(fill = dot_fill),
-    stroke = 0
-  ) +
-  scale_fill_manual(
-    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
-    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
-    name = "Outlier flags"
-  ) +
+  outlier_boxplot +
+  outlier_dots +
+  outlier_fill_scale +
   scale_x_log10(
     breaks = 10^(-1:5),
     labels = scales::label_log(),
@@ -404,20 +399,9 @@ main_plot_site <- gadus_morhua_by_site |>
     y = "Site Code",
     x = "Measured Value (mg/kg (wet))"
   ) +
-  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
-  theme(
-    plot.title = element_markdown(),
-    axis.text.y.left = element_markdown(),
-    panel.background = element_blank(),
-    panel.grid.major = element_line(colour = "grey90"),
-    panel.grid.minor = element_line(colour = "grey95"),
-    plot.background = element_blank(),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
-    strip.background = element_blank(),
-    axis.ticks = element_blank()
-  )
+  outlier_plot_theme
 
+# TODO: Tweak height of text elements, as they become misaligned over taller graphs
 dip_panel_site <- dip_results_site |>
   ggplot(aes(
     y = SITE_CODE,
@@ -434,7 +418,7 @@ dip_panel_site <- dip_results_site |>
   ) +
   scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void(base_size = ggplot_base_size) +
+  theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
     legend.position = "none",
     strip.text = element_blank()
@@ -516,25 +500,9 @@ main_plot_campaign <- gadus_morhua_by_campaign |>
     y = campaign_and_n,
     x = MEASURED_VALUE_STANDARD
   )) +
-  geom_boxplot(
-    outliers = FALSE,
-    whisker.colour = "darkgrey",
-    staple.colour = "darkgrey",
-    box.colour = "darkgrey"
-  ) +
-  geom_dotplot(
-    dotsize = common_dotsize,
-    binwidth = common_binwidth,
-    stackdir = "centerwhole",
-    binpositions = "all",
-    aes(fill = dot_fill),
-    stroke = 0
-  ) +
-  scale_fill_manual(
-    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
-    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
-    name = "Outlier flags"
-  ) +
+  outlier_boxplot +
+  outlier_dots +
+  outlier_fill_scale +
   scale_x_log10(
     breaks = 10^(-1:5),
     labels = scales::label_log(),
@@ -544,19 +512,7 @@ main_plot_campaign <- gadus_morhua_by_campaign |>
     y = "Campaign",
     x = "Measured Value (mg/kg (wet))"
   ) +
-  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
-  theme(
-    plot.title = element_markdown(),
-    axis.text.y.left = element_markdown(),
-    panel.background = element_blank(),
-    panel.grid.major = element_line(colour = "grey90"),
-    panel.grid.minor = element_line(colour = "grey95"),
-    plot.background = element_blank(),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
-    strip.background = element_blank(),
-    axis.ticks = element_blank()
-  )
+  outlier_plot_theme
 
 dip_panel_campaign <- dip_results_campaign |>
   ggplot(aes(
@@ -568,7 +524,7 @@ dip_panel_campaign <- dip_results_campaign |>
   geom_text(size = ggplot_base_size / .pt) +
   scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void(base_size = ggplot_base_size) +
+  theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
     legend.position = "none",
     axis.title.x = element_text()
@@ -592,7 +548,7 @@ gadus_morhua_by_campaign |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
-  # TODO: Needed as table overflows due to the Polluted Seabed row. But why, honestly? How fix?
+  # TODO: Needed as table overflows due to the Polluted Seabed row. (note that you need this aaand the filters at the top)
   set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
@@ -622,7 +578,6 @@ Note: I haven't actually Winsorized the data yet. From what I've read it's not a
 # Is it valid to group across years/sites/campaigns?
 
 I believe so, but see above.
-
 
 # References
 
