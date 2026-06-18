@@ -1,13 +1,16 @@
 ---
 title: "Outlier Detection"
 format:
-  html: default
+  html: 
+    fig-width: 16
+    fig-height: 20
   docx:
     reference-doc: ../custom-reference-doc.docx    
     fig-width: 16
-    fig-height: 20
     fig-dpi: 300                     # high res
     fig-format: png                  # png is fine; svg not well supported in docx
+    link-citations: true
+    link-bibliography: true
 
 execute:
   echo: false
@@ -19,6 +22,11 @@ knitr:
   opts_chunk:
     dpi: 300                         # belt-and-suspenders for knitr devices
     dev: "ragg_png"                  # use ragg for better font rendering
+
+filters:
+  - flextable-qmd                    # needed, or the flextables render crazy 
+  - at: post-render
+    path: ../_extensions/flextable-qmd/unwrap-float.lua
 ---
 
 Some of our datasets include a lot of outliers. For example, let's take our fish data for *Gadus morhua* (excluding any measurements in dry weight for the sake of argument, and using liver measurements because they're the most data-rich).
@@ -55,11 +63,23 @@ gadus_morhua <- tar_read(load_literature_pqt) |>
 
 set_flextable_defaults(
   font.size = 10,
+  font.family = "Aptos",
+  digits = 2,
   theme_fun = theme_vanilla,
-  padding = 6
+  padding = 1
 )
 
-theme_set(theme(base_size = 40))
+
+str_wrap_br <- function(string, width) {
+  str_wrap(string) |> str_replace_all("//n", "<br>")
+}
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size))
+
+common_dotsize <- 1.7
+common_binwidth <- 0.01
+common_group_height <- 0.5 # set the height of a single boxplot "row"
 ```
 
 A simple density plot of measured value distributions immediately shows an extremely long right tail, a signal that some measurements are many orders of magnitude higher than the mean. Even when we simply filter out the highest values, the right tail remains extremely long.
@@ -68,40 +88,51 @@ A simple density plot of measured value distributions immediately shows an extre
 #| label: fig-distribution
 #| fig-width: 16
 #| fig-height: 16
+#| fig-cap: "Density distributions of copper concentrations in *G. morhua* livers when values above a certain threshold are removed."
 no_filter <- gadus_morhua |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
-  geom_density() +
-  labs(title = "Values not filtered") +
-  theme_minimal()
+  geom_density(colour = "#D55E00") +
+  labs(
+    title = "Values not filtered",
+    y = "Density",
+    x = "mg/kg Cu (wet weight)"
+  )
 
 filter_5000 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 5000) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
-  geom_density() +
-  labs(title = "Values >5000 mg/kg removed") +
-  theme_minimal()
+  geom_density(colour = "#D55E00") +
+  labs(
+    title = "Values >5000 mg/kg removed",
+    y = "Density",
+    x = "mg/kg Cu (wet weight)"
+  )
 
 filter_1000 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 1000) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
-  geom_density() +
-  labs(title = "Values >1000 mg/kg removed") +
-  theme_minimal()
+  geom_density(colour = "#D55E00") +
+  labs(
+    title = "Values >1000 mg/kg removed",
+    y = "Density",
+    x = "mg/kg Cu (wet weight)"
+  )
 
 filter_500 <- gadus_morhua |>
   filter(MEASURED_VALUE_STANDARD <= 500) |>
   ggplot(aes(x = MEASURED_VALUE_STANDARD)) +
-  geom_density() +
-  labs(title = "Values >500 mg/kg removed") +
-  theme_minimal()
+  geom_density(colour = "#D55E00") +
+  labs(
+    title = "Values >500 mg/kg removed",
+    y = "Density",
+    x = "mg/kg Cu (wet weight)"
+  )
 
 no_filter /
   filter_5000 /
   filter_1000 /
   filter_500 +
-  plot_annotation(
-    title = "Density distributions of copper concentrations in G. morhua livers when values above a certain threshold are removed."
-  )
+  plot_layout(axes = "keep")
 ```
 
 Our initial plot (@fig-distribution) peaks around 0 but extends beyond the 15,000 mg/kg wet weight (that is, 15g of copper per kg of wet liver). The most extreme of these values sufficiently improbable that we can remove, and as we do so our plot begins to resemble a log-normal distribution. However, where do we draw the line? Furthermore, we want our workflow to be as reusable and non-specific as possible.
@@ -132,7 +163,7 @@ As there is no single consensus test for outlier labelling (especially when the 
 
 ### Tukey fences (IQR method)
 
-The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally [@tukeyExploratoryDataAnalysis1977] but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
+The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally @tukeyExploratoryDataAnalysis1977 but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
 
 $$\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR$$
 
@@ -170,10 +201,11 @@ To identify groups whose distribution may be multimodal, which can indicate a mi
 
 The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. In the graphs below, p values below the threshold are highlighted in red.
 
+# Results
 
-# Outliers by year
+## Outliers by year
 
-@fig-outliers-year shows the distribution of individual measurements grouped by sampling year, with colours indicating the number of outlier flags received. @tbl-outliers-year-comments lists the flagged measurements alongside their associated campaign and sample metadata.
+@fig-outliers-year shows the distribution of individual measurements grouped by sampling year, with colours indicating the number of outlier flags received.
 
 ```{r}
 #| label: outliers-year-flag
@@ -191,16 +223,21 @@ gadus_morhua_by_year <- gadus_morhua |>
     year_and_n = glue::glue("**{SAMPLING_YEAR}** <br> (n = {n()})")
   )
 
+# TODO: Replace with standardised Z-dip with intepretation and avoid rendering stuff where n is too small
 dip_results_year <- gadus_morhua_by_year |>
   group_by(SAMPLING_YEAR) |>
   reframe(
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
   ) |>
   mutate(bimodal = dip_p < 0.05)
+
+n_rows_year <- n_distinct(gadus_morhua_by_year$SAMPLING_YEAR) # used for consistent plot heights
 ```
 
 ```{r}
 #| label: fig-outliers-year
+#| fig-cap: "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported sampling year. Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)."
+#| fig-height: !expr (n_rows_year * common_group_height + 3)
 main_plot <- gadus_morhua_by_year |>
   ggplot(aes(
     y = year_and_n,
@@ -213,14 +250,15 @@ main_plot <- gadus_morhua_by_year |>
     box.colour = "darkgrey"
   ) +
   geom_dotplot(
-    dotsize = 2,
-    binwidth = 0.01,
+    dotsize = common_dotsize,
+    binwidth = common_binwidth,
     stackdir = "centerwhole",
     binpositions = "all",
     aes(fill = dot_fill),
+    stroke = 0
   ) +
   scale_fill_manual(
-    values = c("0" = "black", "1" = "orange", "2" = "red"),
+    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
     labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
     name = "Outlier flags"
   ) +
@@ -231,10 +269,9 @@ main_plot <- gadus_morhua_by_year |>
   ) +
   labs(
     y = "Year",
-    x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported sampling year",
-    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
+    x = "Measured Value (mg/kg (wet))"
   ) +
+  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
   theme(
     plot.title = element_markdown(),
     axis.text.y.left = element_markdown(),
@@ -255,20 +292,23 @@ dip_panel <- dip_results_year |>
     label = format(round(dip_p, 3), nsmall = 3),
     colour = bimodal
   )) +
-  geom_text(size = 3) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+  geom_text(size = ggplot_base_size / .pt) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void() +
+  theme_void(base_size = ggplot_base_size) +
   theme(
     legend.position = "none",
-    axis.title.x = element_text(size = 9)
+    axis.title.x = element_text()
   )
 
 main_plot + dip_panel + plot_layout(widths = c(6, 1), guides = "collect")
 ```
 
+ @tbl-outliers-year-comments lists the flagged measurements alongside their associated campaign and sample metadata.
+
 ```{r}
 #| label: tbl-outliers-year-comments
+#| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by sampling year, with associated campaign and sample metadata."
 gadus_morhua_by_year |>
   filter(dot_fill == 2 | dot_fill == 1) |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
@@ -280,21 +320,17 @@ gadus_morhua_by_year |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
-  colformat_double(
-    j = "mean",
-    digits = 2
-  ) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
-    n,
+    n = "n",
     mean = "Mean (mg/kg wet weight, 2 d.p)",
     MEASUREMENT_COMMENT = "Sample Comment"
   )
 ```
 
-# Outliers by site
+## Outliers by site
 
-@fig-outliers-site shows the same measurements grouped by monitoring site, faceted by geographic feature type. @tbl-outliers-site-comments summarises the flagged measurements by site.
+@fig-outliers-site shows the same measurements grouped by monitoring site, faceted by geographic feature type. 
 
 ```{r}
 #| label: outliers-site-flag
@@ -315,15 +351,20 @@ gadus_morhua_by_site <- gadus_morhua |>
 
 # TODO: Warning here. What does it mean?
 dip_results_site <- gadus_morhua_by_site |>
-  group_by(SITE_CODE) |>
+  group_by(SITE_CODE, SITE_GEOGRAPHIC_FEATURE) |>
   reframe(
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
   ) |>
   mutate(bimodal = dip_p < 0.05)
+
+n_rows_site <- n_distinct(gadus_morhua_by_site$SITE_CODE)
 ```
 
 ```{r}
 #| label: fig-outliers-site
+#| fig-cap: "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported site code. Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)."
+#| fig-height: !expr (n_rows_site * common_group_height + 4)
+# sites height is biggger, to account for the gab between the two facets
 main_plot_site <- gadus_morhua_by_site |>
   ggplot(aes(
     y = site_and_n,
@@ -336,14 +377,15 @@ main_plot_site <- gadus_morhua_by_site |>
     box.colour = "darkgrey"
   ) +
   geom_dotplot(
-    dotsize = 0.7,
-    binwidth = 0.01,
+    dotsize = common_dotsize,
+    binwidth = common_binwidth,
     stackdir = "centerwhole",
     binpositions = "all",
-    aes(fill = dot_fill)
+    aes(fill = dot_fill),
+    stroke = 0
   ) +
   scale_fill_manual(
-    values = c("0" = "black", "1" = "orange", "2" = "red"),
+    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
     labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
     name = "Outlier flags"
   ) +
@@ -360,10 +402,9 @@ main_plot_site <- gadus_morhua_by_site |>
   ) +
   labs(
     y = "Site Code",
-    x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by reported site code",
-    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
+    x = "Measured Value (mg/kg (wet))"
   ) +
+  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
   theme(
     plot.title = element_markdown(),
     axis.text.y.left = element_markdown(),
@@ -384,13 +425,19 @@ dip_panel_site <- dip_results_site |>
     label = format(round(dip_p, 3), nsmall = 3),
     colour = bimodal
   )) +
-  geom_text(size = 3) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+  geom_text(size = ggplot_base_size / .pt) +
+  facet_wrap(
+    facets = vars(SITE_GEOGRAPHIC_FEATURE),
+    ncol = 1,
+    scales = "free_y",
+    space = "free_y"
+  ) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void() +
+  theme_void(base_size = ggplot_base_size) +
   theme(
     legend.position = "none",
-    axis.title.x = element_text(size = 9)
+    strip.text = element_blank()
   )
 
 main_plot_site +
@@ -398,8 +445,11 @@ main_plot_site +
   plot_layout(widths = c(6, 1), guides = "collect")
 ```
 
+@tbl-outliers-site-comments summarises the flagged measurements by site.
+
 ```{r}
 #| label: tbl-outliers-site-comments
+#| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by monitoring site, with associated campaign and sample metadata."
 gadus_morhua_by_site |>
   filter(dot_fill == 2 | dot_fill == 1) |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
@@ -408,21 +458,17 @@ gadus_morhua_by_site |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
-  colformat_double(
-    j = "mean",
-    digits = 2
-  ) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
-    n,
+    n = "n",
     mean = "Mean (mg/kg wet weight, 2 d.p)",
     MEASUREMENT_COMMENT = "Sample Comment"
   )
 ```
 
-# Outliers by campaign
+## Outliers by campaign
 
-@fig-outliers-campaign shows distributions grouped by monitoring campaign. @tbl-outliers-campaign-comments summarises the flagged measurements.
+@fig-outliers-campaign shows distributions grouped by monitoring campaign. 
 
 ```{r}
 #| label: outliers-campaign-flag
@@ -430,8 +476,9 @@ gadus_morhua_by_campaign <- gadus_morhua |>
   mutate(
     CAMPAIGN_NAME = str_remove(
       CAMPAIGN_NAME,
-      "Vannmiljø Copper Monitoring 2010-2025"
-    )
+      "Vannmiljø Copper Monitoring 2010-2025 \\("
+    ) |>
+      str_remove("\\)$")
   ) |>
   group_by(CAMPAIGN_NAME) |>
   mutate(
@@ -443,21 +490,27 @@ gadus_morhua_by_campaign <- gadus_morhua |>
     outlier_RMZ = abs(RMZ) > 3.5,
     outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
     dot_fill = factor(outlier_RMZ + outlier_IQR),
-    campaign_and_n = glue("**{CAMPAIGN_NAME}** <br> (n = {n()})") |>
+    campaign_and_n = glue(
+      "**{str_wrap_br(CAMPAIGN_NAME, width = 1)}** <br> (n = {n()})"
+    ) |>
       as.character()
   )
 
-# More errors here
+# More errors here - sample size too small, I think
 dip_results_campaign <- gadus_morhua_by_campaign |>
   group_by(CAMPAIGN_NAME, campaign_and_n) |>
   reframe(
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
   ) |>
   mutate(bimodal = dip_p < 0.05)
+
+n_rows_campaign <- n_distinct(gadus_morhua_by_campaign$CAMPAIGN_NAME)
 ```
 
 ```{r}
 #| label: fig-outliers-campaign
+#| fig-cap: "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by monitoring campaign. Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)."
+#| fig-height: !expr (n_rows_campaign * common_group_height + 3)
 main_plot_campaign <- gadus_morhua_by_campaign |>
   ggplot(aes(
     y = campaign_and_n,
@@ -470,14 +523,15 @@ main_plot_campaign <- gadus_morhua_by_campaign |>
     box.colour = "darkgrey"
   ) +
   geom_dotplot(
-    dotsize = 0.7,
-    binwidth = 0.01,
+    dotsize = common_dotsize,
+    binwidth = common_binwidth,
     stackdir = "centerwhole",
     binpositions = "all",
-    aes(fill = dot_fill)
+    aes(fill = dot_fill),
+    stroke = 0
   ) +
   scale_fill_manual(
-    values = c("0" = "black", "1" = "orange", "2" = "red"),
+    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
     labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
     name = "Outlier flags"
   ) +
@@ -488,10 +542,9 @@ main_plot_campaign <- gadus_morhua_by_campaign |>
   ) +
   labs(
     y = "Campaign",
-    x = "Measured Value (mg/kg (wet))",
-    title = "Measured copper concentration in *G. morhua* livers, published on Vannmiljø, by monitoring campaign",
-    subtitle = "Outlying points flagged by Tukey fences (IQR × 1.5) and Robust Modified Z-Score (threshold 3.5)"
+    x = "Measured Value (mg/kg (wet))"
   ) +
+  guides(fill = guide_legend(override.aes = list(stroke = 0))) +
   theme(
     plot.title = element_markdown(),
     axis.text.y.left = element_markdown(),
@@ -512,13 +565,13 @@ dip_panel_campaign <- dip_results_campaign |>
     label = format(round(dip_p, 3), nsmall = 3),
     colour = bimodal
   )) +
-  geom_text(size = 3) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+  geom_text(size = ggplot_base_size / .pt) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
   labs(x = "p(not unimodal)", y = NULL) +
-  theme_void() +
+  theme_void(base_size = ggplot_base_size) +
   theme(
     legend.position = "none",
-    axis.title.x = element_text(size = 9)
+    axis.title.x = element_text()
   )
 
 main_plot_campaign +
@@ -526,8 +579,11 @@ main_plot_campaign +
   plot_layout(widths = c(6, 1), guides = "collect")
 ```
 
+@tbl-outliers-campaign-comments summarises the flagged measurements.
+
 ```{r}
 #| label: tbl-outliers-campaign-comments
+#| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by monitoring campaign, with associated campaign and sample metadata."
 gadus_morhua_by_campaign |>
   filter(dot_fill == 2 | dot_fill == 1) |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
@@ -536,21 +592,34 @@ gadus_morhua_by_campaign |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
-  colformat_double(
-    j = "mean",
-    digits = 2
-  ) |>
+  # TODO: Needed as table overflows due to the Polluted Seabed row. But why, honestly? How fix?
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
-    n,
+    n = "n",
     mean = "Mean (mg/kg wet weight, 2 d.p)",
     MEASUREMENT_COMMENT = "Sample Comment"
   )
 ```
 
-# Handling Outliers
+## Handling Outliers
 
-What is the most statistically rigorous approach to handling these outliers? I don't really know. Can we just remove them?
+Winsorization - reducing extreme values to a given percentile or trimming - eliminating them entirely - are the most common approaches for dealing with outliers. High quality data treatment remains, as above, dependent on a thorough understanding of the causes of outliers, and is not practically scalable given the quanaity and provenance of the data in this analysis. 
+
+Under the circumstances, we elected to Winsorize all double-flagged outliers to 90%, that is, reduce any values beyond the 5 and 95-percentiles to these percentile values. Although this approach is somewhat crude, it is appropriate in this test case where large outliers are most likely a consequence of errors in data entry. In addition, robust summary statistics (median) will be used in addition to the less robust mean for interpretation of data. 
+
+Note that other datasets (other organisms, matrices, etc.) will also be inspected for outliers, and should available data suggest a different explanation for outliers in such cases, a variant strategy may be applied.
+
+Note: I haven't actually Winsorized the data yet. From what I've read it's not a great approach compared with more robust statistics, but I want to hurry up and get this done so I can go back to actually assembling the AEPs. I propose the following:
+
+- It doesn't look like there's any real difference between year/campaign/site groups. It's probably safe to merge them, but it would be good to have a test to back this up. Welch's ANOVA? We may need to Winsorise first
+- Once we have the single distribution for copper in fish livers, make sure we report it as a distribution (with mean, median, etc.) in the AEPs (maybe we can even show the whole distribution, Bayesian network-style) rather than just a mean
+- Repeat this exercise for all the most important compartments/tissues/species
+
+# Is it valid to group across years/sites/campaigns?
+
+I believe so, but see above.
+
 
 # References
 
