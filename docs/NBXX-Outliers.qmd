@@ -9,7 +9,7 @@ format:
     fig-width: 16
     fig-dpi: 300                     # high res
     fig-format: png                  # png is fine; svg not well supported in docx
-    link-citations: true
+    link-citations: true             # TODO: Not working... why?
     link-bibliography: true
 
 execute:
@@ -77,7 +77,7 @@ str_wrap_br <- function(string, width) {
 ggplot_base_size <- 20
 theme_set(theme_minimal(base_size = ggplot_base_size))
 
-common_dotsize <- 1.7
+common_dotsize <- 3
 common_binwidth <- 0.01
 common_group_height <- 0.5 # set the height of a single boxplot "row"
 ```
@@ -610,8 +610,11 @@ Under the circumstances, we elected to Winsorize all double-flagged outliers to 
 
 Note that other datasets (other organisms, matrices, etc.) will also be inspected for outliers, and should available data suggest a different explanation for outliers in such cases, a variant strategy may be applied.
 
+For review
+
 Note: I haven't actually Winsorized the data yet. From what I've read it's not a great approach compared with more robust statistics, but I want to hurry up and get this done so I can go back to actually assembling the AEPs. I propose the following:
 
+- In this case, I feel comfortable stating that we could both trim or Windsorise our massive outliers without affecting the quality of our analysis, because they're almost certainly transcription errors
 - It doesn't look like there's any real difference between year/campaign/site groups. It's probably safe to merge them, but it would be good to have a test to back this up. Welch's ANOVA? We may need to Winsorise first
 - Once we have the single distribution for copper in fish livers, make sure we report it as a distribution (with mean, median, etc.) in the AEPs (maybe we can even show the whole distribution, Bayesian network-style) rather than just a mean
 - Repeat this exercise for all the most important compartments/tissues/species

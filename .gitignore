@@ -24,5 +24,6 @@ docs/*_files/*
 *.gpgk
 
 # Quarto detritus
+*.docx
 .vdoc.*
 site_libs/*
