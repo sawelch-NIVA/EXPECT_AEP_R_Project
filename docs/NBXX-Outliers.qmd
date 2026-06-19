@@ -685,5 +685,167 @@ gadus_morhua |>
   )
 ```
 
+Going forwards, I think it'll make more sense to concentration distributions as violin plots, rather than dotplots, or else the sheer sample size of cod livers will drown things that come as smaller samples.
+
+Although this will also take some graphical tweaking.
+
+```{r}
+#| fig-cap: "Measured copper concentration in *G. morhua* livers, by sampling site feature. Points beyond the 1st and 99th percentiles per feature have been Windsorized to these values. Boxplots (Quartiles), and mean ± standard deviation (turquoise) also plotted."
+#| label: fig-winsorization-and-grouping-violin
+#| fig-height: !expr (3 * common_group_height + 8)
+gadus_morhua |>
+  mutate(
+    p01 = quantile(MEASURED_VALUE_STANDARD, 0.01),
+    p99 = quantile(MEASURED_VALUE_STANDARD, 0.99),
+    MEASURED_VALUE_STANDARD_windsor = case_when(
+      MEASURED_VALUE_STANDARD < p01 ~ p01,
+      MEASURED_VALUE_STANDARD > p99 ~ p99,
+      .default = MEASURED_VALUE_STANDARD
+    ),
+    dot_fill = factor(case_when(
+      MEASURED_VALUE_STANDARD < p01 |
+        MEASURED_VALUE_STANDARD > p99 ~ "Winsorized",
+      .default = "Original"
+    )),
+    geo_and_n = glue::glue(
+      "**{SITE_GEOGRAPHIC_FEATURE}**",
+      "<br>n = {n()}<br>{n_distinct(CAMPAIGN_NAME_SHORT)} campaigns<br>{n_distinct(REFERENCE_ID)} refs",
+      "<br>{format(min(SAMPLING_DATE), '%Y')}\u2013{format(max(SAMPLING_DATE), '%Y')}",
+      "<br>{str_flatten_comma(unique(COUNTRY_ISO))}",
+      "<br>{str_flatten_comma(unique(OCEAN_IHO))}",
+      .sep = ""
+    ),
+    .by = "SITE_GEOGRAPHIC_FEATURE"
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD_windsor,
+    y = geo_and_n
+  )) +
+  geom_violin(
+    scale = "count",
+    draw_quantiles = c(0.25, 0.5, 0.75),
+    aes(fill = SITE_GEOGRAPHIC_FEATURE),
+    colour = NA,
+    width = 2,
+    alpha = 0.75
+  ) +
+  scale_fill_brewer(palette = "BuGn") +
+  # TODO: Set alpha based for lines only
+  geom_boxplot(fill = NA, width = 0.05, alpha = 0.75) +
+  guides(fill = guide_legend(override.aes = list(colour = NULL))) +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
+  labs(
+    x = "Cu concentration (mg/kg wet weight)",
+    y = "Geographic feature type"
+  ) +
+  outlier_plot_theme +
+  theme(legend.position = "none")
+# TODO: Add a map?
+```
+
+# TODO: How much does the Windzorization actually change the summary stats - compared to Trimming?
+
+Looking at the whole population, the conclusions are:
+
+- Unprocessed is fine in terms of the main body of the distribution, but ends up with unacceptably long tails
+- Winsorized 90% is clearly ridiculous
+- 98% looks fine
+- Trimming double-flagged is probably also fine (TODO: What about single-flagged?)
+
+```{r}
+# Compute global flags and winsorization bounds on gadus_morhua
+base <- gadus_morhua |>
+  mutate(
+    # Outlier flags (global, not per-group)
+    log_val = log10(MEASURED_VALUE_STANDARD),
+    Q1 = quantile(log_val, 0.25),
+    Q3 = quantile(log_val, 0.75),
+    IQR_fence = IQR(log_val) * 1.5,
+    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
+    outlier_RMZ = abs(RMZ) > 3.5,
+    outlier_IQR = log_val < (Q1 - IQR_fence) | log_val > (Q3 + IQR_fence),
+    double_flagged = outlier_RMZ & outlier_IQR,
+    # Symmetric winsorization bounds
+    p05 = quantile(MEASURED_VALUE_STANDARD, 0.05),
+    p95 = quantile(MEASURED_VALUE_STANDARD, 0.95),
+    p01 = quantile(MEASURED_VALUE_STANDARD, 0.01),
+    p99 = quantile(MEASURED_VALUE_STANDARD, 0.99),
+    val_winsor_90 = pmax(pmin(MEASURED_VALUE_STANDARD, p95), p05),
+    val_winsor_98 = pmax(pmin(MEASURED_VALUE_STANDARD, p99), p01)
+  )
+
+n_double <- sum(base$double_flagged)
+n_total <- nrow(base)
+
+# Assemble long-format comparison dataset
+plot_data <- bind_rows(
+  base |> transmute(value = MEASURED_VALUE_STANDARD, treatment = "Unprocessed"),
+  base |> transmute(value = val_winsor_98, treatment = "Winsorized (98%)"),
+  base |> transmute(value = val_winsor_90, treatment = "Winsorized (90%)"),
+  base |>
+    filter(!double_flagged) |>
+    transmute(
+      value = MEASURED_VALUE_STANDARD,
+      treatment = glue::glue(
+        "Trimmed (double-flagged,\nn = {n_double} removed)"
+      ) |>
+        as.character()
+    )
+) |>
+  mutate(
+    treatment = factor(
+      treatment,
+      levels = c(
+        "Unprocessed",
+        "Winsorized (98%)",
+        "Winsorized (90%)",
+        # TODO: Fix this, add element_markdown below
+        glue::glue("Trimmed (double-flagged,\nn = {n_double} removed)") |>
+          as.character()
+      )
+    )
+  )
+
+plot_data |>
+  # TODO: Unprocessed at the top, add numerical values for summary stats - how robust are they?
+  # Better colour scheme?
+  ggplot(aes(x = value, y = treatment, fill = treatment)) +
+  geom_violin(
+    scale = "width",
+    colour = NA,
+    alpha = 0.65,
+    width = 0.8
+  ) +
+  geom_boxplot(
+    fill = NA,
+    width = 0.08,
+    outliers = FALSE,
+    whisker.colour = "grey40",
+    staple.colour = "grey40",
+    box.colour = "grey40"
+  ) +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
+  scale_fill_brewer(palette = "BuGn") +
+  labs(
+    x = "Cu concentration (mg/kg wet weight)",
+    y = NULL,
+    title = "Effect of outlier treatment on Cu distribution in *G. morhua* liver"
+  ) +
+  outlier_plot_theme +
+  theme(
+    legend.position = "none",
+    plot.title = element_markdown()
+  )
+```
+
 # References
+
 

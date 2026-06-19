@@ -1,19 +1,32 @@
 ---
 title: "Fish"
-execute:
-  output: true
-  echo: false
-  warning: false
-format: 
+format:
   html: 
     fig-width: 16
     fig-height: 20
-    dpi: 300 
-  docx: 
+  docx:
+    reference-doc: ../custom-reference-doc.docx    
     fig-width: 16
-    fig-height: 20
-    reference-doc: ../custom-reference-doc.docx
-    dpi: 300
+    fig-dpi: 300                     # high res
+    fig-format: png                  # png is fine; svg not well supported in docx
+    link-citations: true             # TODO: Not working... why?
+    link-bibliography: true
+
+execute:
+  echo: false
+  warning: false                     # suppresses warnings even when echo is off
+  message: false                     # suppresses package load messages (library() etc.)
+  error: false                       # prevents errors from stopping the render
+
+knitr:
+  opts_chunk:
+    dpi: 300                         # belt-and-suspenders for knitr devices
+    dev: "ragg_png"                  # use ragg for better font rendering
+
+filters:
+  - flextable-qmd                    # needed, or the flextables render crazy 
+  - at: post-render
+    path: ../_extensions/flextable-qmd/unwrap-float.lua
 ---
 
 ```{r}
@@ -31,10 +44,49 @@ library(sf)
 library(gridExtra)
 library(grid)
 library(knitr)
+library(ggtext)
+library(flextable)
+library(glue)
 
 opts_chunk$set(dev = "svglite")
 
 pkgload::load_all(quiet = TRUE)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.family = "Aptos",
+  digits = 2,
+  theme_fun = theme_vanilla,
+  padding = 1
+)
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
+
+# Reusable plot layers
+common_dotsize <- 3
+common_binwidth <- 0.01
+common_group_height <- 0.5 # height of a single boxplot "row"
+
+outlier_boxplot <- geom_boxplot(
+  outliers = FALSE,
+  whisker.colour = "darkgrey",
+  staple.colour = "darkgrey",
+  box.colour = "darkgrey"
+)
+
+outlier_plot_theme <- theme(
+  plot.title = element_markdown(),
+  axis.text.y.left = element_markdown(),
+  panel.background = element_blank(),
+  panel.grid.major = element_line(colour = "grey90"),
+  panel.grid.minor = element_line(colour = "grey95"),
+  plot.background = element_blank(),
+  legend.background = element_blank(),
+  legend.key = element_blank(),
+  strip.background = element_blank(),
+  axis.ticks = element_blank()
+)
 
 # == Shared map data ----
 world_map <- map_data("world")
@@ -120,7 +172,15 @@ fish |>
   ) |>
   reframe(n = n()) |>
   arrange(desc(n)) |>
-  kable()
+  flextable() |>
+  autofit() |>
+  set_header_labels(
+    SAMPLE_SPECIES = "Species",
+    REFERENCE_ID = "Reference",
+    SITE_GEOGRAPHIC_FEATURE = "Geographic Feature",
+    SAMPLE_TISSUE = "Tissue",
+    n = "n"
+  )
 ```
 
 We have a great deal of fish data. Broadly speaking, we can group it by three factors: - Tissue (liver, gill, whole body, muscle, and in one case bile) - Site type (water ways, water bodies, coastal waters, and rarely, open ocean) - Species
@@ -152,7 +212,19 @@ fish_units_exploration <- fish |>
   ) |>
   arrange(desc(n))
 
-fish_units_exploration
+fish_units_exploration |>
+  flextable() |>
+  colformat_double(j = c("mean", "sd"), digits = 2) |>
+  autofit() |>
+  set_header_labels(
+    MEASURED_UNIT_STANDARD = "Unit",
+    SAMPLE_SPECIES = "Species",
+    SAMPLE_TISSUE = "Tissue",
+    SITE_GEOGRAPHIC_FEATURE = "Geographic Feature",
+    mean = "Mean",
+    sd = "SD",
+    n = "n"
+  )
 ```
 
 For a subset of species/tissues/locations we have both dry and wet weights and can calculate some (rough) conversion factors.
@@ -176,7 +248,17 @@ fish_units_lookup <- fish_units_exploration |>
     n = NA
   )
 
-fish_units_lookup
+fish_units_lookup |>
+  flextable() |>
+  colformat_double(j = c("wet_over_dry"), digits = 2) |>
+  autofit() |>
+  set_header_labels(
+    SAMPLE_SPECIES = "Species",
+    SAMPLE_TISSUE = "Tissue",
+    SITE_GEOGRAPHIC_FEATURE = "Geographic Feature",
+    wet_over_dry = "Wet/Dry Ratio",
+    n = "n"
+  )
 ```
 
 Roughly 10% of our samples (537) are dry, the remainder (3965) are wet weight. According to @cressonUnderestimationChemicalContamination2017, a conversion factor of 1:5 for dry:wet weight is typically used, but individual species vary considerably from this. Under the circumstances, we will use the calculated conversion factors for *G. morhua*, *Melanogrammus aeglefinus*, and *Pollachius pollachius*, and the default figure of 5 (despite its obvious flaws) for the rest.
@@ -254,7 +336,7 @@ fish_pointrange <- fish_dry_normalised |>
     y = "Site Code",
     x = "Measured Value (standardised to mg/kg (wet))"
   ) +
-  theme_minimal() +
+  outlier_plot_theme +
   theme(legend.position = "none")
 
 
@@ -270,7 +352,11 @@ fish_boxplot <- fish_dry_normalised |>
   # geom_box uses > mean( + abs(IQR * 1.5)) as the cut-off
   # TODO: This or z-score?
   geom_boxplot(outlier.colour = "red") +
-  scale_x_log10() +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
   facet_wrap(
     facets = vars(SAMPLE_TISSUE),
     ncol = 1,
@@ -279,7 +365,8 @@ fish_boxplot <- fish_dry_normalised |>
   ) +
   labs(
     x = "Measured Value (standardised to mg/kg (wet))"
-  )
+  ) +
+  outlier_plot_theme
 
 fish_boxplot
 ```
@@ -330,7 +417,7 @@ fish_outliers |>
     scales = "free_y",
     space = "free_y"
   ) +
-  theme_minimal()
+  outlier_plot_theme
 
 fish_filtered <- fish_dry_normalised |>
   filter(!is_outlier(MEASURED_VALUE_STANDARD))
@@ -361,23 +448,54 @@ fish_species_n <- fish_species_n |>
 
 From a trophic perspective we'd like to have species that represent different parts of the food web (although we wouldn't expect this to be important for copper). In practical terms, 72% of our dataset is *Gadus morhua* (Atlantic cod), while *Salmo trutta* (Brown trout), *Ctenolabrus rupestris* (Goldsinny-wrasse), and *Coregonus lavaretus* (Common whitefish) represent 3-5% of the total each. We collect some information on each species to determine their relevance to our case.
 
-+--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
-| Species Name                               | n / proportion of total | Distribution                                                                                             | Trophic Level                                                                              | Notes                                                                  | Source                                                                       |
-+============================================+=========================+==========================================================================================================+============================================================================================+========================================================================+==============================================================================+
-| *Gadus morhua* (Atlantic cod)              | 3146 (72%)              | High occurrence above Arctic circle. Found from shoreline to edge of continental slope.                  | Predators of small fish and inverts, consumed by larger fish, aquatic mammals, squid       | IUCN Red List Vulnerable. Important and overfished commercial species. | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=126436>\            |
-|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Gadus_morhua.html>                         |
-+--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
-| *Salmo trutta* (Brown or Sea trout)        | 204 (5%)                | Found across Norwegian & Icelandic coasts, including above Arctic circle.. Freshwater/coastal lifecycle. | Larger (#72cm) predator of small fish and inverts. Consumed by some larger fish and seals. | IUCN Least Concern. Widely eaten.                                      | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=127187#attributes>\ |
-|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Salmo_trutta.html>                         |
-+--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
-| *Ctenolabrus rupestris* (Goldsinny-wrasse) | 192 (4%)                | Present in Norwegian territorial waters, including above Arctic circle.                                  | Smaller (\>=18cm) predator of invertebrates.                                               | IUCN Least Concern. Used as a cleaner fish in salmon culture.          | <https://www.marinespecies.org/aphia.php?p=taxdetails&id=126964>\            |
-|                                            |                         |                                                                                                          |                                                                                            |                                                                        | <https://www.fishbase.org/summary/Ctenolabrus_rupestris.html>                |
-+--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
-| *Coregonus lavaretus* (Common whitefish)   | 139 (3%)                | Freshwater sites across Norway, including above Arctic circle                                            | Medium (#40cm) predator of planktonic and benthic crustaceans.                             | IUCN Vulnerable\                                                       | <https://artsdatabanken.no/arter/takson/26176>\                              |
-|                                            |                         |                                                                                                          |                                                                                            | Some ambiguity over species identification.                            | <https://www.fishbase.org/summary/Coregonus_lavaretus.html>                  |
-+--------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------------+
-
-: Table of most common fish species in data.
+```{r}
+#| label: tbl-fish-species-info
+#| tbl-cap: "Most common fish species in data."
+tibble(
+  species = c(
+    "Gadus morhua (Atlantic cod)",
+    "Salmo trutta (Brown or Sea trout)",
+    "Ctenolabrus rupestris (Goldsinny-wrasse)",
+    "Coregonus lavaretus (Common whitefish)"
+  ),
+  n = c("3146 (72%)", "204 (5%)", "192 (4%)", "139 (3%)"),
+  distribution = c(
+    "High occurrence above Arctic circle. Found from shoreline to edge of continental slope.",
+    "Found across Norwegian & Icelandic coasts, including above Arctic circle. Freshwater/coastal lifecycle.",
+    "Present in Norwegian territorial waters, including above Arctic circle.",
+    "Freshwater sites across Norway, including above Arctic circle."
+  ),
+  trophic = c(
+    "Predators of small fish and inverts, consumed by larger fish, aquatic mammals, squid.",
+    "Larger (\u226572 cm) predator of small fish and inverts. Consumed by some larger fish and seals.",
+    "Smaller (\u226418 cm) predator of invertebrates.",
+    "Medium (~40 cm) predator of planktonic and benthic crustaceans."
+  ),
+  notes = c(
+    "IUCN Red List Vulnerable. Important and overfished commercial species.",
+    "IUCN Least Concern. Widely eaten.",
+    "IUCN Least Concern. Used as a cleaner fish in salmon culture.",
+    "IUCN Vulnerable. Some ambiguity over species identification."
+  ),
+  source = c(
+    "marinespecies.org; fishbase.org",
+    "marinespecies.org; fishbase.org",
+    "marinespecies.org; fishbase.org",
+    "artsdatabanken.no; fishbase.org"
+  )
+) |>
+  flextable() |>
+  italic(j = "species") |>
+  autofit() |>
+  set_header_labels(
+    species = "Species",
+    n = "n (% of total)",
+    distribution = "Distribution",
+    trophic = "Trophic Level",
+    notes = "Notes",
+    source = "Source"
+  )
+```
 
 Now, with that said - is there a significant difference between these species?
 
@@ -397,11 +515,21 @@ fish_filtered |>
     mapping = aes(x = MEASURED_VALUE_STANDARD_NORMALISED, y = SAMPLE_SPECIES)
   ) +
   geom_point() +
-  geom_boxplot() +
+  outlier_boxplot +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
   facet_wrap(
     facets = vars(SAMPLE_TISSUE),
     ncol = 1,
     scales = "free_y",
     space = "free_y"
-  )
+  ) +
+  labs(
+    x = "Measured Value (mg/kg (wet))",
+    y = "Species"
+  ) +
+  outlier_plot_theme
 ```
