@@ -194,6 +194,11 @@ Directly detecting the former is likely to be much easier than the latter. We ca
 
 # Methods
 
+TODO: Dot-binning method defaults: 
+
+- Wilkinson, L. (1999) Dot plots. The American Statistician, 53(3), 276-281. 
+- via https://ggplot2.tidyverse.org/reference/geom_dotplot.html
+
 ## Outlier detection
 
 Detection and labelling of outliers is a important part of quality controlling data, especially as we often lack the hollistic understanding of the many studies making up our dataset to confidently attribute an outlier to real variation or methodlogical error. A number of statistical techniques exist to flag outliers, and the choice of both which is most appropriate, and where to set any thresholds for outlier-ness is to an extent subjective.  
@@ -331,6 +336,7 @@ gadus_morhua_by_year |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
+  colformat_double(j = c("mean")) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
     n = "n",
@@ -442,6 +448,7 @@ gadus_morhua_by_site |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
+  colformat_double(j = c("mean")) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
     n = "n",
@@ -550,6 +557,7 @@ gadus_morhua_by_campaign |>
   autofit() |>
   # TODO: Needed as table overflows due to the Polluted Seabed row. (note that you need this aaand the filters at the top)
   set_table_properties(width = 1, layout = "autofit") |>
+  colformat_double(j = c("mean")) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
     n = "n",
@@ -562,7 +570,7 @@ gadus_morhua_by_campaign |>
 
 Winsorization - reducing extreme values to a given percentile or trimming - eliminating them entirely - are the most common approaches for dealing with outliers. High quality data treatment remains, as above, dependent on a thorough understanding of the causes of outliers, and is not practically scalable given the quanaity and provenance of the data in this analysis. 
 
-Under the circumstances, we elected to Winsorize all double-flagged outliers to 90%, that is, reduce any values beyond the 5 and 95-percentiles to these percentile values. Although this approach is somewhat crude, it is appropriate in this test case where large outliers are most likely a consequence of errors in data entry. In addition, robust summary statistics (median) will be used in addition to the less robust mean for interpretation of data. 
+Under the circumstances, we elected to Winsorize all double-flagged outliers to 98%, that is, reduce any values beyond the 1st and 99th-percentiles to these percentile values. Although this approach is somewhat crude, it is appropriate in this test case where large outliers are most likely a consequence of errors in data entry. In addition, robust summary statistics (median) will be used in addition to the less robust mean for interpretation of data. 
 
 Note that other datasets (other organisms, matrices, etc.) will also be inspected for outliers, and should available data suggest a different explanation for outliers in such cases, a variant strategy may be applied.
 
@@ -575,9 +583,107 @@ Note: I haven't actually Winsorized the data yet. From what I've read it's not a
 - Once we have the single distribution for copper in fish livers, make sure we report it as a distribution (with mean, median, etc.) in the AEPs (maybe we can even show the whole distribution, Bayesian network-style) rather than just a mean
 - Repeat this exercise for all the most important compartments/tissues/species
 
-# Is it valid to group across years/sites/campaigns?
+```{r}
+#| fig-cap: "Measured copper concentration in *G. morhua* livers, by sampling site feature. Points beyond the 1st and 99th percentiles per feature have been Windsorized to these values. Boxplots (Quartiles), and mean ± standard deviation (turquoise) also plotted."
+#| label: fig-winsorization-and-grouping
+#| fig-height: !expr (3 * common_group_height + 8)
+gadus_morhua |>
+  mutate(
+    p01 = quantile(MEASURED_VALUE_STANDARD, 0.01),
+    p99 = quantile(MEASURED_VALUE_STANDARD, 0.99),
+    MEASURED_VALUE_STANDARD_windsor = case_when(
+      MEASURED_VALUE_STANDARD < p01 ~ p01,
+      MEASURED_VALUE_STANDARD > p99 ~ p99,
+      .default = MEASURED_VALUE_STANDARD
+    ),
+    dot_fill = factor(case_when(
+      MEASURED_VALUE_STANDARD < p01 |
+        MEASURED_VALUE_STANDARD > p99 ~ "Winsorized",
+      .default = "Original"
+    )),
+    geo_and_n = glue::glue(
+      "**{SITE_GEOGRAPHIC_FEATURE}**",
+      "<br>n = {n()}<br>{n_distinct(CAMPAIGN_NAME_SHORT)} campaigns<br>{n_distinct(REFERENCE_ID)} refs",
+      "<br>{format(min(SAMPLING_DATE), '%Y')}\u2013{format(max(SAMPLING_DATE), '%Y')}",
+      "<br>{str_flatten_comma(unique(COUNTRY_ISO))}",
+      "<br>{str_flatten_comma(unique(OCEAN_IHO))}",
+      .sep = ""
+    ),
+    .by = "SITE_GEOGRAPHIC_FEATURE"
+  ) |>
+  ggplot(aes(
+    x = MEASURED_VALUE_STANDARD_windsor,
+    y = geo_and_n
+  )) +
+  outlier_boxplot +
+  geom_dotplot(
+    aes(fill = dot_fill),
+    dotsize = common_dotsize / 2,
+    binwidth = common_binwidth,
+    stackdir = "centerwhole",
+    binpositions = "all",
+    stroke = 0
+  ) +
+  stat_summary(
+    fun = mean,
+    fun.min = function(x) mean(x) - sd(x),
+    fun.max = function(x) mean(x) + sd(x),
+    geom = "pointrange",
+    colour = "#1baf59",
+    size = 0.8,
+    linewidth = 1
+  ) +
+  scale_fill_manual(
+    values = c("Original" = "black", "Winsorized" = "#0072B2"),
+    name = "Point status"
+  ) +
+  guides(fill = guide_legend(override.aes = list(colour = NULL))) +
+  scale_x_log10(
+    breaks = 10^(-1:5),
+    labels = scales::label_log(),
+    minor_breaks = outer(1:9, 10^(-1:4)) |> as.vector()
+  ) +
+  labs(
+    x = "Cu concentration (mg/kg wet weight)",
+    y = "Geographic feature type"
+  ) +
+  outlier_plot_theme
+```
 
-I believe so, but see above.
+And as a table:
+
+```{r}
+#| label: tbl-winsorization-summary
+#| tbl-cap: "Summary statistics for Cu concentrations in *G. morhua* livers, grouped by geographic feature type, prior to Winsorisation."
+gadus_morhua |>
+  reframe(
+    sample_n_sum = sum(MEASURED_N),
+    median = median(MEASURED_VALUE_STANDARD),
+    mean = mean(MEASURED_VALUE_STANDARD),
+    unit = unique(MEASURED_UNIT_STANDARD),
+    sd = sd(MEASURED_VALUE_STANDARD),
+    date_range = str_flatten(range(year(SAMPLING_DATE)), collapse = " \u2013 "),
+    distribution_country = str_flatten_comma(unique(COUNTRY_ISO)),
+    distribution_ocean = str_flatten_comma(unique(OCEAN_IHO)),
+    sources = str_flatten_comma(unique(campaign_name_pretty)),
+    .by = "SITE_GEOGRAPHIC_FEATURE"
+  ) |>
+  flextable() |>
+  colformat_double(j = c("median", "mean", "sd"), digits = 2) |>
+  autofit() |>
+  set_header_labels(
+    SITE_GEOGRAPHIC_FEATURE = "Geographic Feature",
+    sample_n_sum = "n",
+    median = "Median",
+    mean = "Mean",
+    sd = "SD",
+    date_range = "Date Range",
+    distribution_country = "Countries",
+    distribution_ocean = "Ocean Regions",
+    unit = "Unit",
+    sources = "Campaigns"
+  )
+```
 
 # References
 

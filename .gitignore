@@ -27,3 +27,4 @@ docs/*_files/*
 *.docx
 .vdoc.*
 site_libs/*
+/.luarc.json
