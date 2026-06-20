@@ -100,11 +100,21 @@ outlier_dots <- geom_dotplot(
 
 outlier_fill_scale <- list(
   scale_fill_manual(
-    values = c("0" = "black", "1" = "#E69F00", "2" = "#D55E00"),
-    labels = c("0" = "Neither", "1" = "One flag", "2" = "Both flags"),
+    values = c(
+      "neither" = "black",
+      "IQR" = "#0077BB",
+      "RMZ" = "#cc6811",
+      "both" = "#d51bcf"
+    ),
+    labels = c(
+      "neither" = "Neither",
+      "IQR" = "IQR only",
+      "RMZ" = "RMZ only",
+      "both" = "Both"
+    ),
     name = "Outlier flags"
   ),
-  guides(fill = guide_legend(override.aes = list(stroke = 0)))
+  guides(fill = guide_legend(override.aes = list(colour = NA, size = 5)))
 )
 
 outlier_plot_theme <- theme(
@@ -237,7 +247,7 @@ robust_modified_z_score <- function(x) {
 }
 ```
 
-In the graphs below, we flag points by how many flags they receive: none (black), one flag (orange), or both flags (red).
+In the graphs below, we flag points by which flags they receive: none (black), IQR only (blue), RMZ only (red), or both (purple).
 
 ### Test for unimodality
 
@@ -263,17 +273,25 @@ gadus_morhua_by_year <- gadus_morhua |>
     IQR = IQR(log_val) * 1.5,
     outlier_RMZ = abs(RMZ) > 3.5,
     outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
-    dot_fill = factor(outlier_RMZ + outlier_IQR),
-    year_and_n = glue::glue("**{SAMPLING_YEAR}** <br> (n = {n()})")
+    dot_fill = factor(case_when(
+      outlier_RMZ & outlier_IQR ~ "both",
+      outlier_RMZ ~ "RMZ",
+      outlier_IQR ~ "IQR",
+      .default = "neither",
+    )),
+    year_and_n = glue("**{SAMPLING_YEAR}**<br>(n = {n()})")
   )
 
 # TODO: Replace with standardised Z-dip with intepretation and avoid rendering stuff where n is too small
 dip_results_year <- gadus_morhua_by_year |>
   group_by(SAMPLING_YEAR) |>
   reframe(
-    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
+    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value,
+    draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
-  mutate(bimodal = dip_p < 0.05)
+  mutate(
+    bimodal = dip_p < 0.05
+  )
 
 n_rows_year <- n_distinct(gadus_morhua_by_year$SAMPLING_YEAR) # used for consistent plot heights
 ```
@@ -305,11 +323,12 @@ dip_panel <- dip_results_year |>
   ggplot(aes(
     y = SAMPLING_YEAR,
     x = 0,
-    label = format(round(dip_p, 3), nsmall = 3),
+    # draw only if n > 4 (functional min for dip test)
+    label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
     colour = bimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#CC3311")) +
   labs(x = "p(not unimodal)", y = NULL) +
   theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
@@ -326,7 +345,7 @@ main_plot + dip_panel + plot_layout(widths = c(6, 1), guides = "collect")
 #| label: tbl-outliers-year-comments
 #| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by sampling year, with associated campaign and sample metadata."
 gadus_morhua_by_year |>
-  filter(dot_fill == 2 | dot_fill == 1) |>
+  filter(dot_fill != "neither") |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
   reframe(
     n = n(),
@@ -362,15 +381,21 @@ gadus_morhua_by_site <- gadus_morhua |>
     IQR = IQR(log_val) * 1.5,
     outlier_RMZ = abs(RMZ) > 3.5,
     outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
-    dot_fill = factor(outlier_RMZ + outlier_IQR),
-    site_and_n = glue::glue("**{SITE_CODE}**  (n = {n()})")
+    dot_fill = factor(case_when(
+      outlier_RMZ & outlier_IQR ~ "both",
+      outlier_RMZ ~ "RMZ",
+      outlier_IQR ~ "IQR",
+      .default = "neither"
+    )),
+    site_and_n = glue("**{SITE_CODE}**  (n = {n()})")
   )
 
 # TODO: Warning here. What does it mean?
 dip_results_site <- gadus_morhua_by_site |>
   group_by(SITE_CODE, SITE_GEOGRAPHIC_FEATURE) |>
   reframe(
-    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
+    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value,
+    draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
   mutate(bimodal = dip_p < 0.05)
 
@@ -412,7 +437,7 @@ dip_panel_site <- dip_results_site |>
   ggplot(aes(
     y = SITE_CODE,
     x = 0,
-    label = format(round(dip_p, 3), nsmall = 3),
+    label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
     colour = bimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
@@ -422,7 +447,7 @@ dip_panel_site <- dip_results_site |>
     scales = "free_y",
     space = "free_y"
   ) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#CC3311")) +
   labs(x = "p(not unimodal)", y = NULL) +
   theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
@@ -441,7 +466,7 @@ main_plot_site +
 #| label: tbl-outliers-site-comments
 #| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by monitoring site, with associated campaign and sample metadata."
 gadus_morhua_by_site |>
-  filter(dot_fill == 2 | dot_fill == 1) |>
+  filter(dot_fill != "neither") |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
   reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
   arrange(desc(mean)) |>
@@ -480,9 +505,14 @@ gadus_morhua_by_campaign <- gadus_morhua |>
     IQR = IQR(log_val) * 1.5,
     outlier_RMZ = abs(RMZ) > 3.5,
     outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR),
-    dot_fill = factor(outlier_RMZ + outlier_IQR),
+    dot_fill = factor(case_when(
+      outlier_RMZ & outlier_IQR ~ "both",
+      outlier_RMZ ~ "RMZ",
+      outlier_IQR ~ "IQR",
+      .default = "neither"
+    )),
     campaign_and_n = glue(
-      "**{str_wrap_br(CAMPAIGN_NAME, width = 1)}** <br> (n = {n()})"
+      "**{str_wrap_br(CAMPAIGN_NAME, width = 1)}**<br>(n = {n()})"
     ) |>
       as.character()
   )
@@ -491,7 +521,8 @@ gadus_morhua_by_campaign <- gadus_morhua |>
 dip_results_campaign <- gadus_morhua_by_campaign |>
   group_by(CAMPAIGN_NAME, campaign_and_n) |>
   reframe(
-    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value
+    dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value,
+    draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
   mutate(bimodal = dip_p < 0.05)
 
@@ -525,11 +556,11 @@ dip_panel_campaign <- dip_results_campaign |>
   ggplot(aes(
     y = campaign_and_n,
     x = 0,
-    label = format(round(dip_p, 3), nsmall = 3),
+    label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
     colour = bimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
-  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#D55E00")) +
+  scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#CC3311")) +
   labs(x = "p(not unimodal)", y = NULL) +
   theme_void(base_size = ggplot_base_size, base_family = "Aptos") +
   theme(
@@ -548,7 +579,7 @@ main_plot_campaign +
 #| label: tbl-outliers-campaign-comments
 #| tbl-cap: "Flagged outlier measurements in *G. morhua* liver copper concentrations, grouped by monitoring campaign, with associated campaign and sample metadata."
 gadus_morhua_by_campaign |>
-  filter(dot_fill == 2 | dot_fill == 1) |>
+  filter(dot_fill != "neither") |>
   group_by(MEASUREMENT_COMMENT, campaign_name_pretty) |>
   reframe(n = n(), mean = mean(MEASURED_VALUE_STANDARD)) |>
   arrange(desc(mean)) |>
@@ -601,7 +632,7 @@ gadus_morhua |>
         MEASURED_VALUE_STANDARD > p99 ~ "Winsorized",
       .default = "Original"
     )),
-    geo_and_n = glue::glue(
+    geo_and_n = glue(
       "**{SITE_GEOGRAPHIC_FEATURE}**",
       "<br>n = {n()}<br>{n_distinct(CAMPAIGN_NAME_SHORT)} campaigns<br>{n_distinct(REFERENCE_ID)} refs",
       "<br>{format(min(SAMPLING_DATE), '%Y')}\u2013{format(max(SAMPLING_DATE), '%Y')}",
@@ -637,7 +668,7 @@ gadus_morhua |>
     values = c("Original" = "black", "Winsorized" = "#0072B2"),
     name = "Point status"
   ) +
-  guides(fill = guide_legend(override.aes = list(colour = NULL))) +
+  guides(fill = guide_legend(override.aes = list(colour = NA, size = 5))) +
   scale_x_log10(
     breaks = 10^(-1:5),
     labels = scales::label_log(),
@@ -707,7 +738,7 @@ gadus_morhua |>
         MEASURED_VALUE_STANDARD > p99 ~ "Winsorized",
       .default = "Original"
     )),
-    geo_and_n = glue::glue(
+    geo_and_n = glue(
       "**{SITE_GEOGRAPHIC_FEATURE}**",
       "<br>n = {n()}<br>{n_distinct(CAMPAIGN_NAME_SHORT)} campaigns<br>{n_distinct(REFERENCE_ID)} refs",
       "<br>{format(min(SAMPLING_DATE), '%Y')}\u2013{format(max(SAMPLING_DATE), '%Y')}",
@@ -732,7 +763,7 @@ gadus_morhua |>
   scale_fill_brewer(palette = "BuGn") +
   # TODO: Set alpha based for lines only
   geom_boxplot(fill = NA, width = 0.05, alpha = 0.75) +
-  guides(fill = guide_legend(override.aes = list(colour = NULL))) +
+  guides(fill = guide_legend(override.aes = list(colour = NA, size = 5))) +
   scale_x_log10(
     breaks = 10^(-1:5),
     labels = scales::label_log(),
@@ -790,7 +821,7 @@ plot_data <- bind_rows(
     filter(!double_flagged) |>
     transmute(
       value = MEASURED_VALUE_STANDARD,
-      treatment = glue::glue(
+      treatment = glue(
         "Trimmed (double-flagged,\nn = {n_double} removed)"
       ) |>
         as.character()
@@ -804,7 +835,7 @@ plot_data <- bind_rows(
         "Winsorized (98%)",
         "Winsorized (90%)",
         # TODO: Fix this, add element_markdown below
-        glue::glue("Trimmed (double-flagged,\nn = {n_double} removed)") |>
+        glue("Trimmed (double-flagged,\nn = {n_double} removed)") |>
           as.character()
       )
     )
