@@ -69,7 +69,7 @@ gadus_morhua <- tar_read(load_literature_pqt) |>
 
 set_flextable_defaults(
   font.size = 10,
-  font.family = "Arial",
+  font.family = "Aptos",
   digits = 2,
   theme_fun = theme_vanilla,
   padding = 1
