@@ -2,6 +2,7 @@
 title: "Notebook 01 - Pipeline"
 author: "Sam Welch"
 date: last-modified
+format: html
 ---
 
 ```{r}

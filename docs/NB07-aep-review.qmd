@@ -1,0 +1,26 @@
+---
+title: "Notebook - AEP Mini-Review"
+author: "Sam Welch"
+date: last-modified
+format: html
+---
+
+
+```{r}
+#| label: tbl-aep-review
+#| tbl-cap: Table condensed from the output of an mini literature review on the use of the AEP concept. Uncertain whether to keep it here in its current form, as it's rather bulky. May summarise in text and move to SI.
+suppressPackageStartupMessages({
+  library(readr)
+  library(gt)
+  library(dplyr)
+  library(here)
+})
+
+aep_literature_review_table <- read_csv(
+  here("data/clean/aep_literature_summary_claude.csv"),
+  show_col_types = FALSE
+) |>
+  select(-`Paper ID`)
+
+aep_literature_review_table |> gt::gt()
+```

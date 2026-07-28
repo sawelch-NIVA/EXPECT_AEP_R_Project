@@ -1,0 +1,617 @@
+---
+title: "Distributions: Birds"
+format:
+  html:
+    fig-width: 16
+    fig-height: 20
+  docx:
+    fig-width: 16
+    fig-height: 20
+
+execute:
+  echo: false
+
+knitr:
+  opts_chunk:
+    dpi: 300
+    dev: "ragg_png"
+
+filters:
+  - flextable-qmd
+  - at: post-render
+    path: ../_extensions/flextable-qmd/unwrap-float.lua
+---
+
+::: callout-note
+This notebook was scaffolded by `scripts/generate_distribution_notebooks.R`
+from the outlier-analysis targets factory (`_targets.R`,
+`R/fct_outlier_groups.R`, `R/fct_outlier_detection.R`,
+`R/fct_outlier_report.R`). The plots/tables below are generated, but
+analysis and interpretation are added by hand, section by section.
+Re-running the generator only appends sections for groups not yet present
+here -- it never rewrites or removes anything you have written.
+
+See [NBXX-Outliers.qmd](NBXX-Outliers.qmd) for the fully hand-authored
+*G. morhua* liver case study this workflow was built from, including
+year/site/campaign breakdowns and the reasoning behind the outlier flags.
+:::
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(targets)
+library(patchwork)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.family = "Arial",
+  digits = 2,
+  theme_fun = theme_vanilla,
+  padding = 1
+)
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
+```
+
+## Gulosus aristotelis: Egg
+
+Birds / Gulosus aristotelis / Egg. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Gulosus_aristotelis_Egg
+grp_Birds_Gulosus_aristotelis_Egg <- tar_read(outlier_biota_Birds_Gulosus_aristotelis_Egg)
+grp_Birds_Gulosus_aristotelis_Egg$data <- grp_Birds_Gulosus_aristotelis_Egg$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Gulosus_aristotelis_Egg_unit <- grp_Birds_Gulosus_aristotelis_Egg$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Gulosus_aristotelis_Egg
+#| fig-cap: "Birds / Gulosus aristotelis / Egg: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Gulosus_aristotelis_Egg$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Gulosus_aristotelis_Egg$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Gulosus_aristotelis_Egg_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Gulosus_aristotelis_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Gulosus_aristotelis_Egg$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Gulosus_aristotelis_Egg
+#| fig-cap: "Birds / Gulosus aristotelis / Egg: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Gulosus_aristotelis_Egg$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Gulosus_aristotelis_Egg$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Gulosus_aristotelis_Egg_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Gulosus_aristotelis_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Gulosus_aristotelis_Egg$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Gulosus_aristotelis_Egg
+#| fig-cap: "Birds / Gulosus aristotelis / Egg: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Gulosus_aristotelis_Egg$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Gulosus_aristotelis_Egg$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Gulosus_aristotelis_Egg_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Gulosus_aristotelis_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Gulosus_aristotelis_Egg$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Gulosus_aristotelis_Egg
+#| fig-cap: "Birds / Gulosus aristotelis / Egg: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Gulosus_aristotelis_Egg,
+  x_label = paste0("Measured value (", grp_Birds_Gulosus_aristotelis_Egg_unit, ")")
+)
+```
+
+## Larus argentatus: Egg
+
+Birds / Larus argentatus / Egg. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Larus_argentatus_Egg
+grp_Birds_Larus_argentatus_Egg <- tar_read(outlier_biota_Birds_Larus_argentatus_Egg)
+grp_Birds_Larus_argentatus_Egg$data <- grp_Birds_Larus_argentatus_Egg$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Larus_argentatus_Egg_unit <- grp_Birds_Larus_argentatus_Egg$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Larus_argentatus_Egg
+#| fig-cap: "Birds / Larus argentatus / Egg: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Larus_argentatus_Egg$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Larus_argentatus_Egg$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Larus_argentatus_Egg_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Larus_argentatus_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Larus_argentatus_Egg$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Larus_argentatus_Egg
+#| fig-cap: "Birds / Larus argentatus / Egg: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Larus_argentatus_Egg$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Larus_argentatus_Egg$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Larus_argentatus_Egg_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Larus_argentatus_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Larus_argentatus_Egg$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Larus_argentatus_Egg
+#| fig-cap: "Birds / Larus argentatus / Egg: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Larus_argentatus_Egg$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Larus_argentatus_Egg$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Larus_argentatus_Egg_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Larus_argentatus_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Larus_argentatus_Egg$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Larus_argentatus_Egg
+#| fig-cap: "Birds / Larus argentatus / Egg: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Larus_argentatus_Egg,
+  x_label = paste0("Measured value (", grp_Birds_Larus_argentatus_Egg_unit, ")")
+)
+```
+
+## Rissa tridactyla: Liver
+
+Birds / Rissa tridactyla / Liver. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Rissa_tridactyla_Liver
+grp_Birds_Rissa_tridactyla_Liver <- tar_read(outlier_biota_Birds_Rissa_tridactyla_Liver)
+grp_Birds_Rissa_tridactyla_Liver$data <- grp_Birds_Rissa_tridactyla_Liver$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Rissa_tridactyla_Liver_unit <- grp_Birds_Rissa_tridactyla_Liver$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Rissa_tridactyla_Liver
+#| fig-cap: "Birds / Rissa tridactyla / Liver: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Liver$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Liver$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Liver_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Rissa_tridactyla_Liver
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Liver$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Rissa_tridactyla_Liver
+#| fig-cap: "Birds / Rissa tridactyla / Liver: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Liver$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Liver$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Liver_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Rissa_tridactyla_Liver
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Liver$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Rissa_tridactyla_Liver
+#| fig-cap: "Birds / Rissa tridactyla / Liver: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Liver$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Liver$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Liver_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Rissa_tridactyla_Liver
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Liver$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Rissa_tridactyla_Liver
+#| fig-cap: "Birds / Rissa tridactyla / Liver: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Rissa_tridactyla_Liver,
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Liver_unit, ")")
+)
+```
+
+## Rissa tridactyla: Muscle
+
+Birds / Rissa tridactyla / Muscle. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Rissa_tridactyla_Muscle
+grp_Birds_Rissa_tridactyla_Muscle <- tar_read(outlier_biota_Birds_Rissa_tridactyla_Muscle)
+grp_Birds_Rissa_tridactyla_Muscle$data <- grp_Birds_Rissa_tridactyla_Muscle$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Rissa_tridactyla_Muscle_unit <- grp_Birds_Rissa_tridactyla_Muscle$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Rissa_tridactyla_Muscle
+#| fig-cap: "Birds / Rissa tridactyla / Muscle: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Muscle$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Muscle$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Muscle_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Rissa_tridactyla_Muscle
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Muscle$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Rissa_tridactyla_Muscle
+#| fig-cap: "Birds / Rissa tridactyla / Muscle: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Muscle$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Muscle$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Muscle_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Rissa_tridactyla_Muscle
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Muscle$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Rissa_tridactyla_Muscle
+#| fig-cap: "Birds / Rissa tridactyla / Muscle: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Rissa_tridactyla_Muscle$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Rissa_tridactyla_Muscle$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Muscle_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Rissa_tridactyla_Muscle
+outlier_flag_table(flag_by_facet(grp_Birds_Rissa_tridactyla_Muscle$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Rissa_tridactyla_Muscle
+#| fig-cap: "Birds / Rissa tridactyla / Muscle: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Rissa_tridactyla_Muscle,
+  x_label = paste0("Measured value (", grp_Birds_Rissa_tridactyla_Muscle_unit, ")")
+)
+```
+
+## Somateria mollissima: Blood
+
+Birds / Somateria mollissima / Blood. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Somateria_mollissima_Blood
+grp_Birds_Somateria_mollissima_Blood <- tar_read(outlier_biota_Birds_Somateria_mollissima_Blood)
+grp_Birds_Somateria_mollissima_Blood$data <- grp_Birds_Somateria_mollissima_Blood$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Somateria_mollissima_Blood_unit <- grp_Birds_Somateria_mollissima_Blood$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Somateria_mollissima_Blood
+#| fig-cap: "Birds / Somateria mollissima / Blood: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Blood$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Blood$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Blood_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Somateria_mollissima_Blood
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Blood$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Somateria_mollissima_Blood
+#| fig-cap: "Birds / Somateria mollissima / Blood: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Blood$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Blood$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Blood_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Somateria_mollissima_Blood
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Blood$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Somateria_mollissima_Blood
+#| fig-cap: "Birds / Somateria mollissima / Blood: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Blood$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Blood$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Blood_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Somateria_mollissima_Blood
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Blood$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Somateria_mollissima_Blood
+#| fig-cap: "Birds / Somateria mollissima / Blood: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Somateria_mollissima_Blood,
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Blood_unit, ")")
+)
+```
+
+## Somateria mollissima: Egg
+
+Birds / Somateria mollissima / Egg. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Somateria_mollissima_Egg
+grp_Birds_Somateria_mollissima_Egg <- tar_read(outlier_biota_Birds_Somateria_mollissima_Egg)
+grp_Birds_Somateria_mollissima_Egg$data <- grp_Birds_Somateria_mollissima_Egg$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Somateria_mollissima_Egg_unit <- grp_Birds_Somateria_mollissima_Egg$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Somateria_mollissima_Egg
+#| fig-cap: "Birds / Somateria mollissima / Egg: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Egg$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Egg$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Egg_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Somateria_mollissima_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Egg$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Somateria_mollissima_Egg
+#| fig-cap: "Birds / Somateria mollissima / Egg: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Egg$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Egg$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Egg_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Somateria_mollissima_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Egg$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Somateria_mollissima_Egg
+#| fig-cap: "Birds / Somateria mollissima / Egg: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Somateria_mollissima_Egg$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Somateria_mollissima_Egg$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Egg_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Somateria_mollissima_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Somateria_mollissima_Egg$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Somateria_mollissima_Egg
+#| fig-cap: "Birds / Somateria mollissima / Egg: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Somateria_mollissima_Egg,
+  x_label = paste0("Measured value (", grp_Birds_Somateria_mollissima_Egg_unit, ")")
+)
+```
+
+## Turdus pilaris: Egg
+
+Birds / Turdus pilaris / Egg. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Birds_Turdus_pilaris_Egg
+grp_Birds_Turdus_pilaris_Egg <- tar_read(outlier_biota_Birds_Turdus_pilaris_Egg)
+grp_Birds_Turdus_pilaris_Egg$data <- grp_Birds_Turdus_pilaris_Egg$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Birds_Turdus_pilaris_Egg_unit <- grp_Birds_Turdus_pilaris_Egg$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Birds_Turdus_pilaris_Egg
+#| fig-cap: "Birds / Turdus pilaris / Egg: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Turdus_pilaris_Egg$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Birds_Turdus_pilaris_Egg$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Birds_Turdus_pilaris_Egg_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Birds_Turdus_pilaris_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Turdus_pilaris_Egg$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Birds_Turdus_pilaris_Egg
+#| fig-cap: "Birds / Turdus pilaris / Egg: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Turdus_pilaris_Egg$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Birds_Turdus_pilaris_Egg$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Birds_Turdus_pilaris_Egg_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Birds_Turdus_pilaris_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Turdus_pilaris_Egg$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Birds_Turdus_pilaris_Egg
+#| fig-cap: "Birds / Turdus pilaris / Egg: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Birds_Turdus_pilaris_Egg$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Birds_Turdus_pilaris_Egg$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Birds_Turdus_pilaris_Egg_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Birds_Turdus_pilaris_Egg
+outlier_flag_table(flag_by_facet(grp_Birds_Turdus_pilaris_Egg$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Birds_Turdus_pilaris_Egg
+#| fig-cap: "Birds / Turdus pilaris / Egg: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Birds_Turdus_pilaris_Egg,
+  x_label = paste0("Measured value (", grp_Birds_Turdus_pilaris_Egg_unit, ")")
+)
+```

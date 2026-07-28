@@ -2,6 +2,7 @@
 title: "Notebook 08 - Ecology and Biota"
 author: "Sam Welch"
 date: last-modified
+format: html
 ---
 
 *A holding space for relevant data on biota diets and ADME*.

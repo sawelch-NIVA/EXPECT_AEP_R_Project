@@ -2,6 +2,7 @@
 title: "Appendix 03 - Project"
 author: "Sam Welch"
 date: last-modified
+format: html
 ---
 
 

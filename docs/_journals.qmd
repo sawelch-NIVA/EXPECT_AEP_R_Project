@@ -1,6 +1,7 @@
 ---
 title: "Journals"
 date: last-modified
+format: html
 ---
 
 I wanna aim for [ES&T](https://pubs.acs.org/journal/esthag), with IEAM as a backup. Honestly, I hate the IEAM submission experience.

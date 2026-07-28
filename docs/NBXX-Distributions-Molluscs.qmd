@@ -1,0 +1,1337 @@
+---
+title: "Distributions: Molluscs"
+format:
+  html:
+    fig-width: 16
+    fig-height: 20
+  docx:
+    fig-width: 16
+    fig-height: 20
+
+execute:
+  echo: false
+
+knitr:
+  opts_chunk:
+    dpi: 300
+    dev: "ragg_png"
+
+filters:
+  - flextable-qmd
+  - at: post-render
+    path: ../_extensions/flextable-qmd/unwrap-float.lua
+---
+
+::: callout-note
+This notebook was scaffolded by `scripts/generate_distribution_notebooks.R`
+from the outlier-analysis targets factory (`_targets.R`,
+`R/fct_outlier_groups.R`, `R/fct_outlier_detection.R`,
+`R/fct_outlier_report.R`). The plots/tables below are generated, but
+analysis and interpretation are added by hand, section by section.
+Re-running the generator only appends sections for groups not yet present
+here -- it never rewrites or removes anything you have written.
+
+See [NBXX-Outliers.qmd](NBXX-Outliers.qmd) for the fully hand-authored
+*G. morhua* liver case study this workflow was built from, including
+year/site/campaign breakdowns and the reasoning behind the outlier flags.
+:::
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(targets)
+library(patchwork)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.family = "Arial",
+  digits = 2,
+  theme_fun = theme_vanilla,
+  padding = 1
+)
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
+```
+
+## Acesta excavata: Total soft tissues
+
+Molluscs / Acesta excavata / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Acesta_excavata_Total_soft_tissues
+grp_Molluscs_Acesta_excavata_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Acesta_excavata_Total_soft_tissues)
+grp_Molluscs_Acesta_excavata_Total_soft_tissues$data <- grp_Molluscs_Acesta_excavata_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Acesta_excavata_Total_soft_tissues_unit <- grp_Molluscs_Acesta_excavata_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Acesta_excavata_Total_soft_tissues
+#| fig-cap: "Molluscs / Acesta excavata / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Acesta_excavata_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Acesta_excavata_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Acesta_excavata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Acesta_excavata_Total_soft_tissues
+#| fig-cap: "Molluscs / Acesta excavata / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Acesta_excavata_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Acesta_excavata_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Acesta_excavata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Acesta_excavata_Total_soft_tissues
+#| fig-cap: "Molluscs / Acesta excavata / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Acesta_excavata_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Acesta_excavata_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Acesta_excavata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Acesta_excavata_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Acesta_excavata_Total_soft_tissues
+#| fig-cap: "Molluscs / Acesta excavata / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Acesta_excavata_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Acesta_excavata_Total_soft_tissues_unit, ")")
+)
+```
+
+## Astarte borealis: Total soft tissues
+
+Molluscs / Astarte borealis / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Astarte_borealis_Total_soft_tissues
+grp_Molluscs_Astarte_borealis_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Astarte_borealis_Total_soft_tissues)
+grp_Molluscs_Astarte_borealis_Total_soft_tissues$data <- grp_Molluscs_Astarte_borealis_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Astarte_borealis_Total_soft_tissues_unit <- grp_Molluscs_Astarte_borealis_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Astarte_borealis_Total_soft_tissues
+#| fig-cap: "Molluscs / Astarte borealis / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Astarte_borealis_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Astarte_borealis_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Astarte_borealis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Astarte_borealis_Total_soft_tissues
+#| fig-cap: "Molluscs / Astarte borealis / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Astarte_borealis_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Astarte_borealis_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Astarte_borealis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Astarte_borealis_Total_soft_tissues
+#| fig-cap: "Molluscs / Astarte borealis / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Astarte_borealis_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Astarte_borealis_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Astarte_borealis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Astarte_borealis_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Astarte_borealis_Total_soft_tissues
+#| fig-cap: "Molluscs / Astarte borealis / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Astarte_borealis_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Astarte_borealis_Total_soft_tissues_unit, ")")
+)
+```
+
+## Buccinum undatum: Whole body
+
+Molluscs / Buccinum undatum / Whole body. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Buccinum_undatum_Whole_body
+grp_Molluscs_Buccinum_undatum_Whole_body <- tar_read(outlier_biota_Molluscs_Buccinum_undatum_Whole_body)
+grp_Molluscs_Buccinum_undatum_Whole_body$data <- grp_Molluscs_Buccinum_undatum_Whole_body$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Buccinum_undatum_Whole_body_unit <- grp_Molluscs_Buccinum_undatum_Whole_body$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Buccinum_undatum_Whole_body
+#| fig-cap: "Molluscs / Buccinum undatum / Whole body: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Buccinum_undatum_Whole_body$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Buccinum_undatum_Whole_body$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Buccinum_undatum_Whole_body_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Buccinum_undatum_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Buccinum_undatum_Whole_body$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Buccinum_undatum_Whole_body
+#| fig-cap: "Molluscs / Buccinum undatum / Whole body: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Buccinum_undatum_Whole_body$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Buccinum_undatum_Whole_body$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Buccinum_undatum_Whole_body_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Buccinum_undatum_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Buccinum_undatum_Whole_body$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Buccinum_undatum_Whole_body
+#| fig-cap: "Molluscs / Buccinum undatum / Whole body: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Buccinum_undatum_Whole_body$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Buccinum_undatum_Whole_body$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Buccinum_undatum_Whole_body_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Buccinum_undatum_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Buccinum_undatum_Whole_body$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Buccinum_undatum_Whole_body
+#| fig-cap: "Molluscs / Buccinum undatum / Whole body: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Buccinum_undatum_Whole_body,
+  x_label = paste0("Measured value (", grp_Molluscs_Buccinum_undatum_Whole_body_unit, ")")
+)
+```
+
+## Erginus: Total soft tissues
+
+Molluscs / Erginus / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Erginus_Total_soft_tissues
+grp_Molluscs_Erginus_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Erginus_Total_soft_tissues)
+grp_Molluscs_Erginus_Total_soft_tissues$data <- grp_Molluscs_Erginus_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Erginus_Total_soft_tissues_unit <- grp_Molluscs_Erginus_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Erginus_Total_soft_tissues
+#| fig-cap: "Molluscs / Erginus / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Erginus_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Erginus_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Erginus_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Erginus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Erginus_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Erginus_Total_soft_tissues
+#| fig-cap: "Molluscs / Erginus / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Erginus_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Erginus_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Erginus_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Erginus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Erginus_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Erginus_Total_soft_tissues
+#| fig-cap: "Molluscs / Erginus / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Erginus_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Erginus_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Erginus_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Erginus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Erginus_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Erginus_Total_soft_tissues
+#| fig-cap: "Molluscs / Erginus / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Erginus_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Erginus_Total_soft_tissues_unit, ")")
+)
+```
+
+## Gastropoda: Whole body
+
+Molluscs / Gastropoda / Whole body. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Gastropoda_Whole_body
+grp_Molluscs_Gastropoda_Whole_body <- tar_read(outlier_biota_Molluscs_Gastropoda_Whole_body)
+grp_Molluscs_Gastropoda_Whole_body$data <- grp_Molluscs_Gastropoda_Whole_body$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Gastropoda_Whole_body_unit <- grp_Molluscs_Gastropoda_Whole_body$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Gastropoda_Whole_body
+#| fig-cap: "Molluscs / Gastropoda / Whole body: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Gastropoda_Whole_body$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Gastropoda_Whole_body$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Gastropoda_Whole_body_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Gastropoda_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Gastropoda_Whole_body$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Gastropoda_Whole_body
+#| fig-cap: "Molluscs / Gastropoda / Whole body: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Gastropoda_Whole_body$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Gastropoda_Whole_body$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Gastropoda_Whole_body_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Gastropoda_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Gastropoda_Whole_body$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Gastropoda_Whole_body
+#| fig-cap: "Molluscs / Gastropoda / Whole body: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Gastropoda_Whole_body$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Gastropoda_Whole_body$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Gastropoda_Whole_body_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Gastropoda_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Gastropoda_Whole_body$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Gastropoda_Whole_body
+#| fig-cap: "Molluscs / Gastropoda / Whole body: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Gastropoda_Whole_body,
+  x_label = paste0("Measured value (", grp_Molluscs_Gastropoda_Whole_body_unit, ")")
+)
+```
+
+## Lepetella: Total soft tissues
+
+Molluscs / Lepetella / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Lepetella_Total_soft_tissues
+grp_Molluscs_Lepetella_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Lepetella_Total_soft_tissues)
+grp_Molluscs_Lepetella_Total_soft_tissues$data <- grp_Molluscs_Lepetella_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Lepetella_Total_soft_tissues_unit <- grp_Molluscs_Lepetella_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Lepetella_Total_soft_tissues
+#| fig-cap: "Molluscs / Lepetella / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Lepetella_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Lepetella_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Lepetella_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Lepetella_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Lepetella_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Lepetella_Total_soft_tissues
+#| fig-cap: "Molluscs / Lepetella / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Lepetella_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Lepetella_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Lepetella_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Lepetella_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Lepetella_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Lepetella_Total_soft_tissues
+#| fig-cap: "Molluscs / Lepetella / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Lepetella_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Lepetella_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Lepetella_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Lepetella_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Lepetella_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Lepetella_Total_soft_tissues
+#| fig-cap: "Molluscs / Lepetella / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Lepetella_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Lepetella_Total_soft_tissues_unit, ")")
+)
+```
+
+## Littorina: Total soft tissues
+
+Molluscs / Littorina / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Littorina_Total_soft_tissues
+grp_Molluscs_Littorina_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Littorina_Total_soft_tissues)
+grp_Molluscs_Littorina_Total_soft_tissues$data <- grp_Molluscs_Littorina_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Littorina_Total_soft_tissues_unit <- grp_Molluscs_Littorina_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Littorina_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Littorina_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Littorina_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Littorina_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Littorina_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Littorina_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Littorina_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Littorina_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_Total_soft_tissues_unit, ")")
+)
+```
+
+## Littorina littorea: Total soft tissues
+
+Molluscs / Littorina littorea / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Littorina_littorea_Total_soft_tissues
+grp_Molluscs_Littorina_littorea_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Littorina_littorea_Total_soft_tissues)
+grp_Molluscs_Littorina_littorea_Total_soft_tissues$data <- grp_Molluscs_Littorina_littorea_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Littorina_littorea_Total_soft_tissues_unit <- grp_Molluscs_Littorina_littorea_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Littorina_littorea_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina littorea / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_littorea_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_littorea_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Littorina_littorea_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Littorina_littorea_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina littorea / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_littorea_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_littorea_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Littorina_littorea_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Littorina_littorea_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina littorea / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_littorea_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_littorea_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Littorina_littorea_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_littorea_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Littorina_littorea_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina littorea / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Littorina_littorea_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_littorea_Total_soft_tissues_unit, ")")
+)
+```
+
+## Littorina rudis: Total soft tissues
+
+Molluscs / Littorina rudis / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Littorina_rudis_Total_soft_tissues
+grp_Molluscs_Littorina_rudis_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Littorina_rudis_Total_soft_tissues)
+grp_Molluscs_Littorina_rudis_Total_soft_tissues$data <- grp_Molluscs_Littorina_rudis_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Littorina_rudis_Total_soft_tissues_unit <- grp_Molluscs_Littorina_rudis_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Littorina_rudis_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina rudis / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_rudis_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_rudis_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Littorina_rudis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Littorina_rudis_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina rudis / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_rudis_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_rudis_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Littorina_rudis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Littorina_rudis_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina rudis / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Littorina_rudis_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_rudis_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Littorina_rudis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Littorina_rudis_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Littorina_rudis_Total_soft_tissues
+#| fig-cap: "Molluscs / Littorina rudis / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Littorina_rudis_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Littorina_rudis_Total_soft_tissues_unit, ")")
+)
+```
+
+## Modiolus modiolus: Total soft tissues
+
+Molluscs / Modiolus modiolus / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Modiolus_modiolus_Total_soft_tissues
+grp_Molluscs_Modiolus_modiolus_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Modiolus_modiolus_Total_soft_tissues)
+grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data <- grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Modiolus_modiolus_Total_soft_tissues_unit <- grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Modiolus_modiolus_Total_soft_tissues
+#| fig-cap: "Molluscs / Modiolus modiolus / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Modiolus_modiolus_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Modiolus_modiolus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Modiolus_modiolus_Total_soft_tissues
+#| fig-cap: "Molluscs / Modiolus modiolus / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Modiolus_modiolus_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Modiolus_modiolus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Modiolus_modiolus_Total_soft_tissues
+#| fig-cap: "Molluscs / Modiolus modiolus / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Modiolus_modiolus_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Modiolus_modiolus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Modiolus_modiolus_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Modiolus_modiolus_Total_soft_tissues
+#| fig-cap: "Molluscs / Modiolus modiolus / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Modiolus_modiolus_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Modiolus_modiolus_Total_soft_tissues_unit, ")")
+)
+```
+
+## Mya arenaria: Total soft tissues
+
+Molluscs / Mya arenaria / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Mya_arenaria_Total_soft_tissues
+grp_Molluscs_Mya_arenaria_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Mya_arenaria_Total_soft_tissues)
+grp_Molluscs_Mya_arenaria_Total_soft_tissues$data <- grp_Molluscs_Mya_arenaria_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Mya_arenaria_Total_soft_tissues_unit <- grp_Molluscs_Mya_arenaria_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Mya_arenaria_Total_soft_tissues
+#| fig-cap: "Molluscs / Mya arenaria / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Mya_arenaria_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Mya_arenaria_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Mya_arenaria_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Mya_arenaria_Total_soft_tissues
+#| fig-cap: "Molluscs / Mya arenaria / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Mya_arenaria_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Mya_arenaria_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Mya_arenaria_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Mya_arenaria_Total_soft_tissues
+#| fig-cap: "Molluscs / Mya arenaria / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Mya_arenaria_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Mya_arenaria_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Mya_arenaria_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mya_arenaria_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Mya_arenaria_Total_soft_tissues
+#| fig-cap: "Molluscs / Mya arenaria / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Mya_arenaria_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Mya_arenaria_Total_soft_tissues_unit, ")")
+)
+```
+
+## Mytilus edulis: Total soft tissues
+
+Molluscs / Mytilus edulis / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Mytilus_edulis_Total_soft_tissues
+grp_Molluscs_Mytilus_edulis_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Mytilus_edulis_Total_soft_tissues)
+grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data <- grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Mytilus_edulis_Total_soft_tissues_unit <- grp_Molluscs_Mytilus_edulis_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Mytilus_edulis_Total_soft_tissues
+#| fig-cap: "Molluscs / Mytilus edulis / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Mytilus_edulis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Mytilus_edulis_Total_soft_tissues
+#| fig-cap: "Molluscs / Mytilus edulis / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Mytilus_edulis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Mytilus_edulis_Total_soft_tissues
+#| fig-cap: "Molluscs / Mytilus edulis / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Mytilus_edulis_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Mytilus_edulis_Total_soft_tissues
+#| fig-cap: "Molluscs / Mytilus edulis / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Mytilus_edulis_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Total_soft_tissues_unit, ")")
+)
+```
+
+## Mytilus edulis: Whole body
+
+Molluscs / Mytilus edulis / Whole body. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Mytilus_edulis_Whole_body
+grp_Molluscs_Mytilus_edulis_Whole_body <- tar_read(outlier_biota_Molluscs_Mytilus_edulis_Whole_body)
+grp_Molluscs_Mytilus_edulis_Whole_body$data <- grp_Molluscs_Mytilus_edulis_Whole_body$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Mytilus_edulis_Whole_body_unit <- grp_Molluscs_Mytilus_edulis_Whole_body$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Mytilus_edulis_Whole_body
+#| fig-cap: "Molluscs / Mytilus edulis / Whole body: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Whole_body$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Whole_body$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Whole_body_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Mytilus_edulis_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Whole_body$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Mytilus_edulis_Whole_body
+#| fig-cap: "Molluscs / Mytilus edulis / Whole body: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Whole_body$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Whole_body$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Whole_body_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Mytilus_edulis_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Whole_body$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Mytilus_edulis_Whole_body
+#| fig-cap: "Molluscs / Mytilus edulis / Whole body: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Mytilus_edulis_Whole_body$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Mytilus_edulis_Whole_body$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Whole_body_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Mytilus_edulis_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Mytilus_edulis_Whole_body$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Mytilus_edulis_Whole_body
+#| fig-cap: "Molluscs / Mytilus edulis / Whole body: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Mytilus_edulis_Whole_body,
+  x_label = paste0("Measured value (", grp_Molluscs_Mytilus_edulis_Whole_body_unit, ")")
+)
+```
+
+## Nucella lapillus: Total soft tissues
+
+Molluscs / Nucella lapillus / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Nucella_lapillus_Total_soft_tissues
+grp_Molluscs_Nucella_lapillus_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Nucella_lapillus_Total_soft_tissues)
+grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data <- grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Nucella_lapillus_Total_soft_tissues_unit <- grp_Molluscs_Nucella_lapillus_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Nucella_lapillus_Total_soft_tissues
+#| fig-cap: "Molluscs / Nucella lapillus / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Nucella_lapillus_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Nucella_lapillus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Nucella_lapillus_Total_soft_tissues
+#| fig-cap: "Molluscs / Nucella lapillus / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Nucella_lapillus_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Nucella_lapillus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Nucella_lapillus_Total_soft_tissues
+#| fig-cap: "Molluscs / Nucella lapillus / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Nucella_lapillus_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Nucella_lapillus_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Nucella_lapillus_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Nucella_lapillus_Total_soft_tissues
+#| fig-cap: "Molluscs / Nucella lapillus / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Nucella_lapillus_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Nucella_lapillus_Total_soft_tissues_unit, ")")
+)
+```
+
+## Patella vulgata: Total soft tissues
+
+Molluscs / Patella vulgata / Total soft tissues. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Patella_vulgata_Total_soft_tissues
+grp_Molluscs_Patella_vulgata_Total_soft_tissues <- tar_read(outlier_biota_Molluscs_Patella_vulgata_Total_soft_tissues)
+grp_Molluscs_Patella_vulgata_Total_soft_tissues$data <- grp_Molluscs_Patella_vulgata_Total_soft_tissues$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Patella_vulgata_Total_soft_tissues_unit <- grp_Molluscs_Patella_vulgata_Total_soft_tissues$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Patella_vulgata_Total_soft_tissues
+#| fig-cap: "Molluscs / Patella vulgata / Total soft tissues: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Total_soft_tissues$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Total_soft_tissues_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Patella_vulgata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Patella_vulgata_Total_soft_tissues
+#| fig-cap: "Molluscs / Patella vulgata / Total soft tissues: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Total_soft_tissues$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Total_soft_tissues_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Patella_vulgata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Patella_vulgata_Total_soft_tissues
+#| fig-cap: "Molluscs / Patella vulgata / Total soft tissues: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Total_soft_tissues$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Total_soft_tissues_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Patella_vulgata_Total_soft_tissues
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Total_soft_tissues$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Patella_vulgata_Total_soft_tissues
+#| fig-cap: "Molluscs / Patella vulgata / Total soft tissues: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Patella_vulgata_Total_soft_tissues,
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Total_soft_tissues_unit, ")")
+)
+```
+
+## Patella vulgata: Whole body
+
+Molluscs / Patella vulgata / Whole body. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Molluscs_Patella_vulgata_Whole_body
+grp_Molluscs_Patella_vulgata_Whole_body <- tar_read(outlier_biota_Molluscs_Patella_vulgata_Whole_body)
+grp_Molluscs_Patella_vulgata_Whole_body$data <- grp_Molluscs_Patella_vulgata_Whole_body$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Molluscs_Patella_vulgata_Whole_body_unit <- grp_Molluscs_Patella_vulgata_Whole_body$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Molluscs_Patella_vulgata_Whole_body
+#| fig-cap: "Molluscs / Patella vulgata / Whole body: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Whole_body$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Whole_body$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Whole_body_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Molluscs_Patella_vulgata_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Whole_body$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Molluscs_Patella_vulgata_Whole_body
+#| fig-cap: "Molluscs / Patella vulgata / Whole body: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Whole_body$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Whole_body$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Whole_body_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Molluscs_Patella_vulgata_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Whole_body$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Molluscs_Patella_vulgata_Whole_body
+#| fig-cap: "Molluscs / Patella vulgata / Whole body: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Molluscs_Patella_vulgata_Whole_body$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Molluscs_Patella_vulgata_Whole_body$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Whole_body_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Molluscs_Patella_vulgata_Whole_body
+outlier_flag_table(flag_by_facet(grp_Molluscs_Patella_vulgata_Whole_body$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Molluscs_Patella_vulgata_Whole_body
+#| fig-cap: "Molluscs / Patella vulgata / Whole body: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Molluscs_Patella_vulgata_Whole_body,
+  x_label = paste0("Measured value (", grp_Molluscs_Patella_vulgata_Whole_body_unit, ")")
+)
+```

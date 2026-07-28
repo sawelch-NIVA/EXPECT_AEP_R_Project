@@ -3,6 +3,7 @@ title: "Notebook 04 - Maps of Sample Sites, Emission Zones, etc."
 author: "Sam Welch"
 date: last-modified
 lightbox: true
+format: html
 ---
 
 # Stupid map was taking 5 minutes just to render. Now it's cached. Will have to find a better solution in future. 

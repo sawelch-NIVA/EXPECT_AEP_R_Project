@@ -1,0 +1,217 @@
+---
+title: "Distributions: Biota Compartment"
+format:
+  html:
+    fig-width: 16
+    fig-height: 20
+  docx:
+    fig-width: 16
+    fig-height: 20
+
+execute:
+  echo: false
+
+knitr:
+  opts_chunk:
+    dpi: 300
+    dev: "ragg_png"
+
+filters:
+  - flextable-qmd
+  - at: post-render
+    path: ../_extensions/flextable-qmd/unwrap-float.lua
+---
+
+::: callout-note
+This notebook was scaffolded by `scripts/generate_distribution_notebooks.R`
+from the outlier-analysis targets factory (`_targets.R`,
+`R/fct_outlier_groups.R`, `R/fct_outlier_detection.R`,
+`R/fct_outlier_report.R`). The plots/tables below are generated, but
+analysis and interpretation are added by hand, section by section.
+Re-running the generator only appends sections for groups not yet present
+here -- it never rewrites or removes anything you have written.
+
+See [NBXX-Outliers.qmd](NBXX-Outliers.qmd) for the fully hand-authored
+*G. morhua* liver case study this workflow was built from, including
+year/site/campaign breakdowns and the reasoning behind the outlier flags.
+:::
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(targets)
+library(patchwork)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.family = "Arial",
+  digits = 2,
+  theme_fun = theme_vanilla,
+  padding = 1
+)
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
+```
+
+## Biota, Aquatic
+
+Biota / Biota, Aquatic. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Biota_Biota_Aquatic
+grp_Biota_Biota_Aquatic <- tar_read(outlier_compartment_Biota_Biota_Aquatic)
+grp_Biota_Biota_Aquatic$data <- grp_Biota_Biota_Aquatic$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Biota_Biota_Aquatic_unit <- grp_Biota_Biota_Aquatic$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Biota_Biota_Aquatic
+#| fig-cap: "Biota / Biota, Aquatic: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Aquatic$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Biota_Biota_Aquatic$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Aquatic_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Biota_Biota_Aquatic
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Aquatic$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Biota_Biota_Aquatic
+#| fig-cap: "Biota / Biota, Aquatic: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Aquatic$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Biota_Biota_Aquatic$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Aquatic_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Biota_Biota_Aquatic
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Aquatic$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Biota_Biota_Aquatic
+#| fig-cap: "Biota / Biota, Aquatic: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Aquatic$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Biota_Biota_Aquatic$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Aquatic_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Biota_Biota_Aquatic
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Aquatic$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Biota_Biota_Aquatic
+#| fig-cap: "Biota / Biota, Aquatic: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Biota_Biota_Aquatic,
+  x_label = paste0("Measured value (", grp_Biota_Biota_Aquatic_unit, ")")
+)
+```
+
+## Biota, Terrestrial
+
+Biota / Biota, Terrestrial. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Biota_Biota_Terrestrial
+grp_Biota_Biota_Terrestrial <- tar_read(outlier_compartment_Biota_Biota_Terrestrial)
+grp_Biota_Biota_Terrestrial$data <- grp_Biota_Biota_Terrestrial$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Biota_Biota_Terrestrial_unit <- grp_Biota_Biota_Terrestrial$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Biota_Biota_Terrestrial
+#| fig-cap: "Biota / Biota, Terrestrial: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Terrestrial$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Biota_Biota_Terrestrial$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Terrestrial_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Biota_Biota_Terrestrial
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Terrestrial$data, "SAMPLING_YEAR", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-site-Biota_Biota_Terrestrial
+#| fig-cap: "Biota / Biota, Terrestrial: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Terrestrial$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Biota_Biota_Terrestrial$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Terrestrial_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Biota_Biota_Terrestrial
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Terrestrial$data, "SITE_CODE", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Biota_Biota_Terrestrial
+#| fig-cap: "Biota / Biota, Terrestrial: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Biota_Biota_Terrestrial$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Biota_Biota_Terrestrial$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Biota_Biota_Terrestrial_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Biota_Biota_Terrestrial
+outlier_flag_table(flag_by_facet(grp_Biota_Biota_Terrestrial$data, "CAMPAIGN_NAME_SHORT", min_n = 10))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Biota_Biota_Terrestrial
+#| fig-cap: "Biota / Biota, Terrestrial: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Biota_Biota_Terrestrial,
+  x_label = paste0("Measured value (", grp_Biota_Biota_Terrestrial_unit, ")")
+)
+```

@@ -2,6 +2,7 @@
 title: "Notebook 01 - Quality Control"
 author: "Sam Welch"
 date: last-modified
+format: html
 ---
 Notebook 1 contains code for quality control of extracted data. This has been largely done with custom functions up until now but I want to try `pointblank`.
 

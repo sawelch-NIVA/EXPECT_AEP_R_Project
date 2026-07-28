@@ -1,22 +1,15 @@
 ---
 title: "Fish"
 format:
-  html: 
+  html:
     fig-width: 16
     fig-height: 20
   docx:
-    reference-doc: ../custom-reference-doc.docx    
     fig-width: 16
-    fig-dpi: 300                     # high res
-    fig-format: png                  # png is fine; svg not well supported in docx
-    link-citations: true             # TODO: Not working... why?
-    link-bibliography: true
+    fig-height: 20
 
 execute:
   echo: false
-  warning: false                     # suppresses warnings even when echo is off
-  message: false                     # suppresses package load messages (library() etc.)
-  error: false                       # prevents errors from stopping the render
 
 knitr:
   opts_chunk:
@@ -174,6 +167,7 @@ fish |>
   arrange(desc(n)) |>
   flextable() |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     SAMPLE_SPECIES = "Species",
     REFERENCE_ID = "Reference",
@@ -216,6 +210,7 @@ fish_units_exploration |>
   flextable() |>
   colformat_double(j = c("mean", "sd"), digits = 2) |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     MEASURED_UNIT_STANDARD = "Unit",
     SAMPLE_SPECIES = "Species",
@@ -252,6 +247,7 @@ fish_units_lookup |>
   flextable() |>
   colformat_double(j = c("wet_over_dry"), digits = 2) |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     SAMPLE_SPECIES = "Species",
     SAMPLE_TISSUE = "Tissue",
@@ -487,6 +483,7 @@ tibble(
   flextable() |>
   italic(j = "species") |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     species = "Species",
     n = "n (% of total)",

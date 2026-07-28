@@ -2,7 +2,7 @@
 title: "Notebook 08 - Emissions Data"
 author: "Sam Welch"
 date: last-modified
-bibliography: "../references.bib"
+format: html
 ---
 
 *Currently a holding space for data on sources.*. Cache = true, fyi.

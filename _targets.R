@@ -75,6 +75,114 @@ options(
   targets.verbose = TRUE # chatter from targets itself
 )
 
+# # Outlier analysis factory ----
+# Below min_n, outlier flags/dip test/Winsorization are considered too
+# unreliable to compute (see NBXX-Outliers.qmd); a distribution is still
+# produced regardless of group size.
+outlier_min_n <- 10
+
+# tar_map() needs its branch-defining `values` at *pipeline definition* time
+# (i.e. when this script is sourced), but those values (which
+# compartment/subcompartment and species/tissue combinations exist) are
+# themselves derived from data (load_literature_pqt). We read the
+# currently-materialised load_literature_pqt from the target store to
+# compute them.
+#
+# CAVEAT: this means that whenever a new compartment/subcompartment or
+# species/tissue combination first appears in the data, you need to run
+# tar_make() TWICE: once to rebuild load_literature_pqt itself, and a second
+# time so this script picks up the new combination and defines its branch
+# target. This is a known limitation of data-dependent static branching in
+# {targets} (there is no supported way around it without switching to
+# dynamic branching, which would lose the human-readable per-group target
+# names this factory is built around).
+if (tar_exist_objects("load_literature_pqt")) {
+  outlier_groups_compartment <- get_compartment_groups(
+    tar_read(load_literature_pqt)
+  )
+  outlier_groups_biota <- get_biota_groups(tar_read(load_literature_pqt))
+} else {
+  outlier_groups_compartment <- tibble::tibble(
+    .compartment = character(),
+    .subcompartment = character(),
+    .group_name = character()
+  )
+  outlier_groups_biota <- tibble::tibble(
+    .species_group = character(),
+    .species = character(),
+    .tissue = character(),
+    .group_name = character()
+  )
+}
+
+# One target per distinct ENVIRON_COMPARTMENT x ENVIRON_COMPARTMENT_SUB
+outlier_targets_compartment <- tar_map(
+  values = outlier_groups_compartment,
+  names = .group_name,
+  tar_target(
+    outlier_compartment,
+    outlier_group_analysis(
+      data = prepare_compartment_group_data(
+        load_literature_pqt,
+        compartment = .compartment,
+        subcompartment = .subcompartment
+      ),
+      group_label = paste(.compartment, .subcompartment, sep = " / "),
+      min_n = outlier_min_n
+    )
+  )
+)
+
+# One target per distinct SPECIES_GROUP x SAMPLE_SPECIES x SAMPLE_TISSUE
+outlier_targets_biota <- tar_map(
+  values = outlier_groups_biota,
+  names = .group_name,
+  tar_target(
+    outlier_biota,
+    outlier_group_analysis(
+      data = prepare_biota_group_data(
+        load_literature_pqt,
+        species_group = .species_group,
+        species = .species,
+        tissue = .tissue
+      ),
+      group_label = paste(.species_group, .species, .tissue, sep = " / "),
+      min_n = outlier_min_n
+    )
+  )
+)
+
+# One tar_quarto() render target per generated per-compartment /
+# per-species-group distribution notebook (docs/NBXX-Distributions-<Name>.qmd,
+# see scripts/generate_distribution_notebooks.R). File/target names are
+# derived the same way the generator names them, so a new
+# compartment/species-group value automatically gets a render target here
+# -- but only once its file has actually been scaffolded (a third pass on
+# top of the two-pass caveat above: rebuild data -> pick up the new branch
+# target -> run the generator script -> THEN this section defines its
+# render target). Until the file exists, it's silently skipped rather than
+# breaking the pipeline.
+outlier_notebook_specs <- dplyr::bind_rows(
+  tibble::tibble(label = unique(outlier_groups_compartment$.compartment)),
+  tibble::tibble(label = unique(outlier_groups_biota$.species_group))
+) |>
+  dplyr::mutate(
+    slug = slugify_name(label),
+    path = paste0("docs/NBXX-Distributions-", slug, ".qmd"),
+    target_name = paste0("render_nbxx_distributions_", tolower(slug))
+  ) |>
+  dplyr::filter(file.exists(path))
+
+outlier_notebook_targets <- purrr::pmap(
+  outlier_notebook_specs,
+  function(label, slug, path, target_name) {
+    tar_quarto_raw(
+      name = target_name,
+      path = path,
+      quiet = FALSE
+    )
+  }
+)
 
 # # Set target options ----
 tar_option_set(
@@ -996,6 +1104,10 @@ list(
     )
   ),
 
+  ## # Outlier Analysis ----
+  outlier_targets_compartment,
+  outlier_targets_biota,
+
   ## # Toxicity Thresholds ----
 
   ### # Copper toxicity thresholds ----
@@ -1096,6 +1208,9 @@ list(
     quiet = FALSE
   ),
 
+  #### # Outlier notebooks (per compartment / per biota species-group) ----
+  outlier_notebook_targets,
+
   ### # Appendices ----
 
   #### # Review protocol appendix ----
@@ -1123,40 +1238,40 @@ list(
     name = render_planning_notes,
     path = "docs/_planning.qmd",
     quiet = FALSE
-  ),
+  )
 
   ## # Deployment ----
 
   ### # Publish to Posit Connect Cloud ----
-  tar_target(
-    name = deploy_posit_connect_cloud,
-    command = {
-      quarto_publish_site(
-        server = "connect.posit.cloud",
-        account = "sawelch-niva",
-        render = "none"
-      )
+  # tar_target(
+  #   name = deploy_posit_connect_cloud,
+  #   command = {
+  #     quarto_publish_site(
+  #       server = "connect.posit.cloud",
+  #       account = "sawelch-niva",
+  #       render = "none"
+  #     )
 
-      # Create a deployment marker file with timestamp
-      marker_file <- "_targets/user/data/deploy_timestamp.txt"
-      dir.create(dirname(marker_file), showWarnings = FALSE, recursive = TRUE)
-      writeLines(as.character(Sys.time()), marker_file)
-      marker_file
+  #     # Create a deployment marker file with timestamp
+  #     marker_file <- "_targets/user/data/deploy_timestamp.txt"
+  #     dir.create(dirname(marker_file), showWarnings = FALSE, recursive = TRUE)
+  #     writeLines(as.character(Sys.time()), marker_file)
+  #     marker_file
 
-      # Dependencies to trigger redeployment
-      render_index.qmd
-      render_nb01_pipeline
-      render_nb02_vannmiljo
-      render_nb02_vannmiljo_qc
-      render_nb03_visualisation
-      render_nb04_map
-      render_nb05_network
-      render_nb07_emissions
-      render_nb08_ecology
-      render_nbxx_repparfjorden
-    },
-    format = "file"
-  )
+  #     # Dependencies to trigger redeployment
+  #     render_index.qmd
+  #     render_nb01_pipeline
+  #     render_nb02_vannmiljo
+  #     render_nb02_vannmiljo_qc
+  #     render_nb03_visualisation
+  #     render_nb04_map
+  #     render_nb05_network
+  #     render_nb07_emissions
+  #     render_nb08_ecology
+  #     render_nbxx_repparfjorden
+  #   },
+  #   format = "file"
+  # )
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

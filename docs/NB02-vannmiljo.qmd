@@ -2,8 +2,7 @@
 title: "Notebook 02 - Vannmiljo Conversion"
 author: "Sam Welch"
 date: last-modified
-html:
-  code-overflow: wrap
+format: html
 ---
 
 This notebook summarises and reports on the process of importing, cleaning, and reformatting data from the Norwegian Environmental Ministry's [Vannmiljø ](https://vannmiljo.miljodirektoratet.no/)database.

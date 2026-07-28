@@ -1,68 +1,45 @@
 ---
-title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability 
-execute:
-    freeze: auto
+title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability
 ---
 
 # Introduction
 
-Copper is a vital resource in both biology and engineering due to its useful chemical and biological properties. Demand for copper is likely to grow significantly in coming decades due to demand in manufacturing and infrastructure [@schipperEstimatingGlobalCopper2018].
+**Comment: Based on the eData manuscript I imagine a lot of this should be in the discussion. Would welcome your guidance on the most important messages here, I will summarise and move the rest. Language will be made more formal in time.**
 
-Biota sensitivity to copper is highly variable and depends on diverse factors including water chemistry, availability of biological material, salinity, pH, and individual organism physiology, metabolism, and behaviour. In addition to its natural occurence, copper is emitted to the environment in a wide range of products and forms, which may be of greater or lesser relevance to the environment depending on their transport in the environment.
+Copper is a vital nutrient across the tree of life (cite), a much needed raw resource in manufacturing and infrastructure (especially electrical), and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
 
-Norway's economically important Arctic region is likely to come under increased pressure in coming years. Demand for copper is likely to drive increased mining in mineral rich zones. Melting sea ice will increase the feasibility of cross-Arctic shipping [@smithNewTransArcticShipping2013], likely increasing exposure to copper from antifoulant paints, while a growing demand for aquaculture may also drive use of copper-based antifoulants. Terrestrial biocides, brake dust, and natural weathering will likely also continue to add to pollution. In addition, changes to ecology, nutrient cycling, organic material, and the overall stressor landscape are likely to add to the challenges faced by the wildlife of the Norwegian sea and the industries and people that rely on them.
+Copper is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years (cite), as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As Artic regions undergo rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.  
 
-## The Aggregate Exposure Pathway
+## Aggregate Exposure Pathways
 
-The Aggregate Exposure Pathway [@teeguardenCompletingLinkExposure2016] concept was developed in 2016 as an exposure, fate and behaviour-based counterpart to the Adverse Outcome Pathway [@ankleyAdverseOutcomePathways2010, @tanAggregateExposurePathways2018] for organising and analysing the total exposure of a given stressor to an organism of interest in a specific spatial and temporal context. AOPs are conceptualised as a directed acyclic graph (i.e a directional, non-looping network) connecting exposure to a toxicant (a Molecular Initiating Event, MIE) to a deleterious biological effect (Adverse Outcome, AO) through a series of mediating Key Events (KEs, network nodes) and Key Event Relationships (KERs, network edges).
+**A lot of background on AEPs *and* AOPs here. unnecessary? on the other hand, most people haven't heard of AEPs but probably have heard of AOPs. not sure how to balance audience between exposure scientists, ecotoxicologists**
+
+The Aggregate Exposure Pathway (AEP) [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] concept was developed in 2016 as an exposure-based counterpart to the Adverse Outcome Pathway. AOPs assemble evidence to causally link the biological effects of stressors in organisms. AEPs do the same for the emission, transport and fate of stressors in the environment, up until the point they reach sensitive tissues or organs in selected organisms [@fig-aep-intro].
+
+![Placeholder. Planned to be an image of a simple AEP (copper, fish) and AOP (one of the ROS ones) to introduce the concept and teach the readers what an AEP looks like](images/../images/peng_aep_diagram.png){#fig-aep-intro}
+
+AEPs consist of a series of Key Exposure States (KES, the state of a stressor in space and time) linked by Key Transitional Relationships (KTR, the transport or transformation of stressors) that link the source and Target Site Exposure (TSE), a biological entity (biomolecules, cells, tissues, etc.) where an MIE may occur. No specific set of WoE guidlines have been developed for AEP , but the modfied Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs [@pengAggregateExposurePathways2022].
 
 Linkages between nodes are created on from a putative relationship by applying a number of Weight of Evidence (WoE) criteria. [@beckerIncreasingScientificConfidence2015] advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism.
 
-The AEP then ends where the AOP begins, logically completing the chain of events that (potentially) caused the MIE to begin with. AEPs consist of a series of Key Exposure States (KES, the state of a stressor in space and time) linked by Key Transitional Relationships (KTR, the transport or transformation of stressors) that link the source and Target Site Exposure (TSE), a biological entity (biomolecules, cells, tissues, etc.) where an MIE may occur. No specific set of WoE guidlines have been developed for AEP , but the modfied Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs [@pengAggregateExposurePathways2022].
+<!-- Messy at the moment, needs rewrite -->
 
-![Placeholder. Put a picture of an AEP and AOP here.](images/paste-1.gif)
 
 A few key differences:
 
 -   AOPs are generally stressor-agnostic. AEPs aren't.
--   What else? ==KET - any comments?==
+-   Existing AEPs (cite sources from mini-review) are generally human-based and often focus on specific scenarios (e.g. Korean humidifier disinfectant case)
+-   Adapted-Bradford-Hill doesn't apply so well to environental dynamics as it does to cellular stuff
 
-AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date 561 AOPs are available on the AOP Wiki of which (42) have been endorsed (what does WHPA... endorsed mean?) [@societyforadvancementofaopsAOPwikiV272026]. The OECD offers a program for AOP creation (details needed), while the EU/Norwegian government does... what do they do?
+AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date 561 AOPs are available on the AOP Wiki of which (42) have been endorsed (what does WHPA... endorsed mean?) [@societyforadvancementofaopsAOPwikiV272026]. 
 
-By contrast, the AEP concept has seen less adoption, with 21 (?) papers mentioning and 15? employing the concept ([@tbl-aep-review]) found in 2025. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. Certainly the AEP is not the first conceptual model to treat the environment as a series of nodes and edges, and it may be a solution looking for a problem.
+By contrast, the AEP concept has seen less adoption, withn a mini-review in 2025 (see SI) finding 21 papers mentioning and 15 employing the concept. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. 
 
-```{r}
-#| label: tbl-aep-review
-#| tbl-cap: Table condensed from the output of an mini literature review on the use of the AEP concept. Uncertain whether to keep it here in its current form, as it's rather bulky. May summarise in text and move to SI.
-suppressPackageStartupMessages({
-  library(readr)
-  library(gt)
-  library(dplyr)
-})
+The Source to Outcome Pathway concept attempts to unify these two models by... 
 
-aep_literature_review_table <- read_csv(
-  "data/clean/aep_literature_summary_claude.csv",
-  show_col_types = FALSE
-) |>
-  select(-`Paper ID`)
+**KET: Please draft some bullet points on STOP**.
 
-aep_literature_review_table |> gt::gt()
-```
-
-The Source to Outcome Pathway concept attempts to unify these two models by... KET is probably best-placed to write this section.
-
-## Weight of Evidence and Uncertainty
-
-[See Notebook 6](/docs/NB06-WoE.qmd)
-
-## Copper's Environmental Chemistry
-
--   Speciation chemistry
--   Bioavailability
--   Dynamics in terrestrial, marine and freshwater environments
--   Air?
-
-## Copper as a Nutrient and Toxicant
+## Copper as a stressor
 
 Life on Earth has evolved alongside copper as both a stressor and potentially useful element, and a wide variety of both copper-containing proteins and copper-protective proteins have been found across the kingdoms of life [@festaCopperEssentialMetal2011]. Both its utility and toxicity stem from its oxidation and binding dynamics, which make it both a useful structural element in protein design, as well as a source of oxidative stress in the cell [@festaCopperEssentialMetal2011]. This long and consistent exposure has driven organisms to develop a diverese range of effective mechanisms for controlling internal copper concentrations in response to a changing external environment. By precise control of copper concentrations in different tissues or parts of the cell, organisms reduce oxidative stress in sensitive areas but increase it where a "hostile environment" can be useful, such as within bacteriacidal macrophages [@focarelliCopperMicroenvironmentsHuman2022]. This rich, nuanced and complex set of interactions make copper both an interesting and difficult object of study. Organisms have been shown to regulate copper uptake and detoxification to maintain homeostasis along a copper gradient [@vandenberghePosttranslationalRegulationCopper2010, @penaDelicateBalanceHomeostatic1999], which in a ecotoxicological context makes linear assumptions of bioaccumulation hard to justify.
 
@@ -76,107 +53,298 @@ However, the relative ease of sourcing, working with, and analysing copper has m
 
 -   Metallotheins [@amiardMetallothioneinsAquaticInvertebrates2006]
 
--   Interactions with other stressors e.g. @lealCopperPollutionExacerbates2018
+-   Brief mention of interactions with other stressors e.g. @lealCopperPollutionExacerbates2018
 
-## The Near Arctic
+Copper's biological properties are a consequence of its speciation/electrochemistry - this also makes its environmental behaviour very variable:
 
--   The Arctic has long been the home to relatively few people, terra nulla or w/e
--   How biodiverse is it?
--   Resource extraction - especially mining - has long been one of the key pillars of the arctic economy \[\@arcticcouncilEconomyNorthECONOR2025\]
+-   Speciation chemistry
+-   Bioavailability (dissolved, LLM fractions, etc.)
+-   Dynamics in terrestrial, marine and freshwater environments
+    - Average/background copper in oceans, rock
+    - Sedimentation as main sink for oceanic copper
 
-### Global Change in Arctic Regions
+## Global Change and Resource Use in Arctic Regions
 
--   <https://www.vannportalen.no/miljotiltak/nedlagte-gruver/>First technological development and now also climate change are opening arctic regions up to exploitation
--   Also more activity in near arctic
--   War?
-
-## Drivers of Copper Demand, Extraction, and Emission
-
--   Copper is very useful because it's very conductive and easy to extract
-    -   Also used in:
-    -   Pipes
-    -   Roofing
-    -   Antifoulants [@brooksCopperBiocidesMarine2009]
-    -   Fruit orchards
-    -   Cars
-    -   Old mine waste @nedlagte
-    -   Infrastructure
-    -   Also a naturally occuring nutrient in soil/rock & therefore in ocean
-    -   etc. (need to cite Stien's paper loads here)
--   How many tonnes of copper are embedded in our current stuff?
--   I've got to guess that recycling copper from microcircuitry is expensive
--   Cite that paper that uses LMs to extrapolate future copper demand
--   Electrification, more stupid gadgets
+- Arctic new geopolitical flashpoint, source of raw resources, open to transport
+-   Resource extraction - especially mining - has long been one of the key pillars of the arctic economy [@arcticcouncilEconomyNorthECONOR2025\]
+- Biodiverse, lots of species that are only found in this area, long generation times (cite some of the sources to EXPECT)
+- Copper crucial for green shift, potentially also transport, infrastructure, antifoulant [@schipperEstimatingGlobalCopper2018]
 -   Growing interest in indigenous copper resources as a strategic asset - c.f. horse trading over Nussir in Norway @nussirasaNUSSIRProjectOverview2024
--   Historically copper hasn't been mined in Norway since 1980s (?), but there's still a legacy of pollution
+
 
 # Materials and Methods
 
-An exhaustive version of the materials and methods are provided in the notebooks and appendices included. These are summarised below.
+An exhaustive version of the materials and methods are provided in the notebooks and appendices included. Materials and methods are summarised below.
 
-## Data Selection
+**Probably too many section headers. Will keep them for now as they help me organise my thoughts, and remove once closer to final version. Some sections copied from eData MS, will be written to avoid auto-plagiarism.**
+
+## Exposure Dataset
 
 ### Literature Review Protocol
 
-A systematic literature review framework was developed from the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment. For the full PRISMA checklist of this paper please consult (the relevant Notebook), but in summary: ...
+A systematic literature review framework was developed from the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment. 
 
-#### Databases and Search Terms
+### Databases and Search Terms
 
-| Source | Date Searched | Hits | Comments |
-|-----------------|-----------------------|-----------------|-----------------|
-| [Crossref](https://www.crossref.org/) | Excluded |  | Doesn't support Booleans. |
-| [Scopus](https://www.scopus.com/home.uri) | Excluded |  | No institutional access. |
-| [Web of Science](https://www.webofscience.com) | 2025.06.24 | 218 | [Query link](https://www.webofscience.com/wos/woscc/summary/9c9af98d-7ee8-4163-9d48-93dd4cb52b6f-0166a1b51b/relevance/1). Topic (title, abstract, keyword plus, and author keywords) search. Searching all fields returned 750 hits. |
-| [PubMed](https://pubmed.ncbi.nlm.nih.gov/26759916/) | 2025.06.24 | 284 | Keyword search [Query link](https://pubmed.ncbi.nlm.nih.gov/?term=((copper%20OR%20Cu%20OR%20copper%20OR%20cuprous%20OR%20cupric%20OR%20kobber%20OR%20coper%20OR%207440-50-8)%20%0D%0AAND%20(Barents%20OR%20Norwegian%20OR%20Arctic%20OR%20Svalbard%20OR%20Greenland*)%0D%0AAND%20(wildlife%20OR%20ecotox*%20OR%20biota%20OR%20environment*%20OR%20animal%20OR%20ecosystem*)%20%0D%0AAND%20(emission%20OR%20exposure%20OR%20fate%20OR%20behaviour%20OR%20concentration%20OR%20dose%20OR%20chem*%20OR%20bioaccumul*%20OR%20trophic)%20%0D%0AAND%20(aqua*%20OR%20water*%20OR%20marine%20OR%20river%20OR%20lake%20OR%20fjord%20OR%20estuary%20OR%20sea%20OR%20ocean%20OR%20sediment*%20OR%20soil)%0D%0A)%20AND%20((%222010%2F01%2F01%22%5BDate%20-%20Publication%5D%20%3A%20%223000%22%5BDate%20-%20Publication%5D))&sort) |
-| Semantic Scholar | Excluded | 1 | Issues with search, only returned 1 hit. Dropped as is unlikely to include papers not already covered by PubMed and Web of Science. |
-| OpenAlex | Excluded |  | Doesn't support OR Boolean. |
+The following search string was used in all open literature sources. The * character is a wildcard and is used to match against common prefixes. The software Publish or Perish 7 was used to assist in database searches. 
 
-: nb: not up to date
+```txt
+(copper OR Cu OR cuprous OR cupric OR kobber OR coper OR 7440-50-8) 
+AND (Barents OR Norwegian OR Arctic OR Svalbard OR North Atlantic OR Greenland*)
+AND (wildlife OR ecotox* OR biota OR environment* OR animal OR ecosystem*) 
+AND (emission OR exposure OR fate OR behaviour OR concentration OR dose OR chem* OR bioaccumul* OR trophic) 
+AND (aqua* OR water* OR marine OR river OR lake OR fjord OR estuary OR sea OR ocean OR sediment* OR soil)
+```
 
-#### Inclusion and Exclusion Criteria
+Web of Science returned 478 hits.
+PubMed returned 438 hits.
 
-Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers. Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as irrelevant based on abstract screening, and 46 studies were excluded after full text screening, resulting in a set of 214 manuscripts for data extraction. The decision was then taken to reduce this set of papers further to the most useful subset; papers were rated arbitrarily on a scale of 1 (least relevant) to 5 (most relevant) based on a single reviewer's holistic assessment of their relevance and utility to the research question. The reviewers then proceeded from the highest-ranked papers (ordered by score then alphabetically), began data extraction from all papers with a score of 4 or 5 (n in total, y% of ...).
+### Inclusion, Exclusion, Deduplication and Screening
 
-![Covidence PRISMA diagram.](images/paste-1.png){width="500"}
+**Text on explicit inclusion criteria/study area will go here.** The study area is shown in @fig-study-area.
 
-#### Screening
+![To do: Fix title overlaps](.images-raw/map-study-area.png){#fig-study-area}
 
-#### Data Extraction
+Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers. 
+
+1) 111 duplicates were automatically matched and removed
+2) 5 duplicates were manually matched and removed
+3) 800 studies were screened at the title and abstract level by two reviewers. 540 were excluded as irrelevant.
+4) 260 studies were screened at the full text level by one of two reviewers. 46 were excluded as irrelevant.
+5) The remaining 214 studies were ranked informally from 1-5 (5 being highest) based on their perceived quality and relevance. The 58 papers given a score of 4 or 5 were selected as an initial batch of studies for extraction.
+6) Of these 58 papers, 32 had data extracted. 18 were rejected based on missing data or irrelevance. 8 papers remain in the progress of extraction at the time of writing. 
+7) Extraction was carried out by one of three reviewers using the eData application. No blinding was conducted, and reviewers were free to discuss and reach consensus.
+
+The full PRISMA flow is shown in @fig-prisma. Study screening was conducted using the following exclusion criteria. Where a study met multiple criteria for inclusion, only the first criterion was recorded. Some criteria were based on the Criteria for Reporting and Evaluating Exposure Datasets (CREED) Gateway Criteria [@dipaoloImplementationCREEDApproach2024]. These have been coded as CREED-n. 
+
+1) CREED-1: sampling medium/matrix not specified
+2) CREED-2: copper-based analytes/chemistry parameters not specified
+3) CREED-3: spatial location not specified
+4) CREED-4: sampling period not specified
+5) CREED-5: measurement units not specified
+6) CREED-6: data source not specified
+7) out of geographical study area
+8) paper not in English
+9) full text not available
+
+![Covidence PRISMA diagram.](images/covidence_prisma.png){#fig-prisma width="500"}
+
+### Screening
+
+Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as irrelevant based on abstract screening, and 46 studies were excluded after full text screening, resulting in a set of 214 manuscripts for data extraction. The decision was then taken to reduce this set of papers further to the most useful subset; papers were rated arbitrarily on a scale of 1 (least relevant) to 5 (most relevant) based on a single reviewer's holistic assessment of their relevance and utility to the research question. The reviewers then proceeded from the highest-ranked papers (ordered by score then alphabetically), began data extraction from all papers with a score of 4 or 5 (n in total, y% of ...).
+
+### Data Extraction & Validation
+
+- Data were extracted from manuscripts using the *eData* shiny application (cite paper once ready)
+- LLM extraction, human validation
+- Raw data pointblank-validated to final version (cite eData MS), then manually QC'd by a review
+- All tables merged together into single one
+- organised as unique compartments and sites
+
+```{r}
+#| label: summary of groups
+literature_merged_data <- tar_read(load_literature_pqt)
+
+robust_modified_z_score <- function(x) {
+  x_median <- median(x, na.rm = TRUE)
+  # mad() in R already includes the 1/0.6745 consistency factor
+  x_mad <- mad(x, na.rm = TRUE)
+  (x - x_median) / x_mad
+}
+
+groups_summary <- literature_merged_data |>
+  group_by(
+    ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB,
+    SPECIES_GROUP,
+    SAMPLE_SPECIES,
+    SAMPLE_TISSUE,
+    SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB
+  ) |>
+  # ignore wet weight, there's less of it and scaling is complicated
+  filter(
+    MEASURED_UNIT_STANDARD %in% c("mg/L", "mg/kg (dry)"),
+    !is.na(MEASURED_VALUE_STANDARD)
+  ) |>
+  mutate(
+    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
+    log_val = log10(MEASURED_VALUE_STANDARD),
+    Q1 = quantile(log_val, 0.25),
+    Q3 = quantile(log_val, 0.75),
+    IQR = IQR(log_val) * 1.5,
+    outlier_RMZ = abs(RMZ) > 3.5,
+    outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR)
+  ) |>
+  reframe(
+    n = sum(MEASURED_N),
+    # we can't actually just take the mean, there's lots of other stuff to consider
+    mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
+    n_double_outliers = sum(outlier_RMZ & outlier_IQR),
+    median = median(MEASURED_VALUE_STANDARD),
+    unit = unique(MEASURED_UNIT_STANDARD)
+  ) |>
+  arrange(desc(n))
+
+# TODO Exclude irreg. units
+# TODO: Calculate distributions properly (with uncertainty)
+# Then pull mode, mean, whatever
+# Get number of outliers, do hartigan's dip test
+# Decide what to inspect based on that
+
+# for the sake of argument, flag any group with over 5% outliers
+groups_summary_flagged <- groups_summary |>
+  filter((n_double_outliers / n) > 0.05)
+
+groups_summary_flagged |> ggplot
+```
+
+### Data Post-Processing
+
+As there is no single consensus test for outlier labelling (especially when the number of potential outliers is unknown), we use two common, simple approaches to flag potential outliers in each group.
+
+Data were grouped by combinations of *Environmental compartment*, *environmental subcompartment*, location, Site geographical feature, date, study, and in the case of biotic samples, Species and tissue, and distributions plotted, in order to visually review data. 
+
+Ultimately, our goal was to find statistically reasonable, plausible groups of kinetically,  environmentally, and geographically similar/contiguous matrices that could be used as KES in our AEPs.
+
+### Tukey fences (IQR method)
+
+The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally @tukeyExploratoryDataAnalysis1977 but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
+
+$$\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR$$
+
+We apply fences to log-transformed values because concentrations are approximately log-normally distributed.
+
+Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
+
+### Robust Modified Z-Score
+
+The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distrubtions.
+
+For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
+
+$$\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}$$
+
+where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute deviation. In R, `mad()` already scales MAD by a consistency factor ($\approx 1 / 0.6745$) to make it comparable to the standard deviation under normality
+
+@iglewiczHowDetectHandle1993 recommends a threshold of $|\text{RMZ}| > 3.5$ for outliers, and we have no reason to depart from this recommendation.
+
+To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @hartiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
+
+The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. In the graphs below, p values below the threshold are highlighted in red.
+
+- Outliers were visually inspected
+- Metadata and comments were reviewed
+- Unless there was a convincing argument not to, outliers were removed
+- We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons 
+
+## Other Lines of Evidence
+
+- REACH emissions data
+- REACH PRTR
+- Background copper concentrations & thresholds
+- Potentially a table summarising sources and processing, depending on needs/table limits
+- Gap-filling evidence: ad hoc manuscript used to fill gaps where copper presence was suspected but not described in our dataset
 
 ### Weight of Evidence Assessment
 
-A need to compare diverse types of evidence was identified... @hardyGuidanceUseWeight2017.
+- A need to compare diverse types of evidence was identified... @hardyGuidanceUseWeight2017.
 
-### CREED Assessment
+- WoE allows integration of multiple lines of evidence
+  - Our primary one was our literature exposure dataset
+  - Secondaries: REACH emissions data, REACH product transfer registry, etc.
 
--   Cite CRED also @moermondCREDCriteriaReporting2016
--   Has anyone else cite CREED yet?
+- Ultimate question to answer: does a measured copper concentration distribution accurately represent the matrix in question?
+- Does that matrix represent "pollution"?
+  - both on the basis of: is it a natural occurence? and does it reach thresholds of concern (not the focus of this paper, but included)
+  - For KTRs: is this flow a relevant source of copper for the receiving matrix? is it a relevant sink of copper for the upstream matrix?
 
-### Other datasets
+We adapted [@pengAggregateExposurePathways2022]'s WoE criteria (based on [@oecdUsersHandbookSupplement2018; @hillEnvironmentDiseaseAssociation1965]) to score each of our putative KES and KTRs. CREED's in there somewhere, too. The criteria are summarised in @tbl-woe-criteria.
 
-Maybe a big table for these?
 
-#### Regional Geography & Boundaries
+```{r}
+#| label: tbl-woe-criteria
+#| tbl-cap: "Weight of Evidence criteria adapted from Peng et al. (2022), OECD (2018), CREED, and Bradford Hill (1965). **Work in progress.**"
+#| echo: false
 
--   IHO Oceans
--   RNatural Earth maps
-
-#### Copper Sources
-
--   Norske utslipp
--   Kværnes et al STP data
--   Fiskerdirektoriet data
-
-#### Ecosystems & Trophic Levels
-
-## Data Processing and Validation
-
-## Data Analysis
+tibble::tribble(
+  ~Criterion                    , ~Category , ~Description , ~`Strength levels`         ,
+  "Biological plausibility"     , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Empirical support"           , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Essentiality"                , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Dose/concentration response" , ""        , ""           , "Weak / Moderate / Strong" ,
+) |>
+  knitr::kable()
+```
 
 # Results
 
+## Distributions
+
+- Overall top-down view of dataset and general distribution patterns
+- More detailed, broken-down versions of plots will be in SI
+
+An example KTR plot is shown in @fig-ktr-example.
+
+![I don't have a proper version of this figure yet, but it'll be like this, but one row per KTR.](.images-raw/example-ktr-plot.png){#fig-ktr-example}
+
+## AEPs
+
+# Fish AEP
+
+- Depending on how the fish distributions look I may lump them all together
+- I assume there's not going to be a lot of variance between species, and we already know most of our data is cod livers
+- If it's relevant to distinguish between fish with different life styles/types of feeding I will cross that bridge when we get to it
+- What are the most important sources of copper to fish? Spatial, temporal patterns, etc (Based on cod liver data I don't expect to see anything interesting, but if we do there's plenty of room to discuss)
+
+The fish AEP is shown in @fig-fish-aep.
+
+![Fish AEP](images/algae_aep_emissions.png){#fig-fish-aep}
+
+# Invert AEP
+
+- I may lump or split zooplankton and filter feeders depending on how similar they are
+
+The invertebrate AEP is shown in @fig-invert-aep.
+
+![Invertebrate AEP](images/algae_aep_emissions.png){#fig-invert-aep}
+
+# Algae AEP
+
+- Algae aren't the most interesting, but they are key food chain species, and ecotox test species
+- Conversely, if we see something interesting for mammals they could go here instead
+
+The algae AEP is shown in @fig-algae-aep.
+
+![Algae AEP](images/algae_aep_emissions.png){#fig-algae-aep}
+
+## Geographical Case Studies
+
+- These are competing for space with the more ecological AEPs above
+- If the above turn out to be extremely boring, we can cut ecological AEPs and increase focus on geography
+- Sites will be Repparfjorden and, probably, Sørfjorden
+
+AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
+
+![Case Study Site 1: Reppardfjorden AEP](images/algae_aep_emissions.png){#fig-repparfjord-aep}
+
+![Case Study Site 2: Sørfjorden AEP](images/algae_aep_emissions.png){#fig-sorfjorden-aep}
+
+
 # Discussion
 
+- Lots of the detail currently in the introduction will need to be moved here
+- There are a few threads to address and wrap up:
+  - Is copper exposure important? My feeling is "probably not", and if this MS doesn't tip the balance either way I won't focus on this angle
+  - I think we'll find that even the highly copper-contaminated sites we already have (Repparfjorden) that copper's not a big deal, and is unlikely to be a big deal even if the mine re-opens
+  - AEP/LR angle - I feel that AEPs with proper WoE are going to turn out to be a good way to organise AEP results. but they're still a great deal of work, and we only scratched the surface of our dataset. we can make recommendations for future work.
+  - If any of the ecologic or site AEPs are interesting obviously we can focus on that
+  - How much do we want to tie in to our/others AOP work? This is a good idea in theory, but I fear doing it properly would require a bunch more methodological work 
+
 # Conclusion
+
+- Although this isn't going to be the strongest paper in the world, I think it can be an interestingly broad-ranging review of copper pollution with a good WoE approach and an intuitive conceptual model (the AEP) to make it a bit novel
+- We can decide how much to mention future modelling work here based on how it turns out (but I don't imagine we'll get a lot done on that by Sept 14th)
+- Likewise, we can tie into AOP work, or not.
 
 # References

@@ -1,22 +1,15 @@
 ---
 title: "Outlier Detection"
 format:
-  html: 
+  html:
     fig-width: 16
     fig-height: 20
   docx:
-    reference-doc: ../custom-reference-doc.docx    
     fig-width: 16
-    fig-dpi: 300                     # high res
-    fig-format: png                  # png is fine; svg not well supported in docx
-    link-citations: true             # TODO: Not working... why?
-    link-bibliography: true
+    fig-height: 20
 
 execute:
   echo: false
-  warning: false                     # suppresses warnings even when echo is off
-  message: false                     # suppresses package load messages (library() etc.)
-  error: false                       # prevents errors from stopping the render
 
 knitr:
   opts_chunk:
@@ -49,12 +42,15 @@ library(diptest)
 library(flextable)
 library(glue)
 
-gadus_morhua <- tar_read(load_literature_pqt) |>
-  filter(
-    SAMPLE_SPECIES == "Gadus morhua",
-    MEASURED_UNIT_STANDARD == "mg/kg (wet)",
-    SAMPLE_TISSUE == "Liver"
-  ) |>
+# This is one branch of the outlier-analysis targets factory (see
+# `outlier_targets_compartment` / `outlier_targets_biota` in _targets.R,
+# and R/fct_outlier_groups.R + R/fct_outlier_detection.R for the underlying
+# functions). It already contains group-wise RMZ/IQR flags, a dip test, and
+# Winsorized value columns computed on the whole Gadus morhua / Liver group,
+# restricted to its dominant unit (mg/kg wet weight).
+cod_liver <- tar_read(outlier_biota_Fish_Gadus_morhua_Liver)
+
+gadus_morhua <- cod_liver$data |>
   mutate(
     SAMPLING_YEAR = factor(year(SAMPLING_DATE)),
     campaign_name_pretty = case_when(
@@ -110,13 +106,16 @@ outlier_fill_scale <- list(
       "neither" = "black",
       "IQR" = "#0077BB",
       "RMZ" = "#cc6811",
-      "both" = "#d51bcf"
+      "both" = "#d51bcf",
+      "not tested" = "grey70"
     ),
     labels = c(
       "neither" = "Neither",
       "IQR" = "IQR only",
       "RMZ" = "RMZ only",
-      "both" = "Both"
+      "both" = "Both",
+      # matches outlier_min_n in _targets.R
+      "not tested" = "n < 10 (not tested)"
     ),
     name = "Outlier flags"
   ),
@@ -361,6 +360,7 @@ gadus_morhua_by_year |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   colformat_double(j = c("mean")) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
@@ -479,6 +479,7 @@ gadus_morhua_by_site |>
   select(campaign_name_pretty, mean, n, MEASUREMENT_COMMENT) |>
   flextable() |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   colformat_double(j = c("mean")) |>
   set_header_labels(
     campaign_name_pretty = "Campaign",
@@ -708,6 +709,7 @@ gadus_morhua |>
   flextable() |>
   colformat_double(j = c("median", "mean", "sd"), digits = 2) |>
   autofit() |>
+  set_table_properties(width = 1, layout = "autofit") |>
   set_header_labels(
     SITE_GEOGRAPHIC_FEATURE = "Geographic Feature",
     sample_n_sum = "n",
@@ -794,26 +796,12 @@ Looking at the whole population, the conclusions are:
 - Trimming double-flagged is probably also fine (TODO: What about single-flagged?)
 
 ```{r}
-# Compute global flags and winsorization bounds on gadus_morhua
+# Global flags and Winsorization bounds are already computed on the whole
+# group by the outlier-analysis factory (outlier_group_analysis()) -- see
+# `cod_liver`, read at the top of this document. We just relabel here for
+# the comparison plot below.
 base <- gadus_morhua |>
-  mutate(
-    # Outlier flags (global, not per-group)
-    log_val = log10(MEASURED_VALUE_STANDARD),
-    Q1 = quantile(log_val, 0.25),
-    Q3 = quantile(log_val, 0.75),
-    IQR_fence = IQR(log_val) * 1.5,
-    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
-    outlier_RMZ = abs(RMZ) > 3.5,
-    outlier_IQR = log_val < (Q1 - IQR_fence) | log_val > (Q3 + IQR_fence),
-    double_flagged = outlier_RMZ & outlier_IQR,
-    # Symmetric winsorization bounds
-    p05 = quantile(MEASURED_VALUE_STANDARD, 0.05),
-    p95 = quantile(MEASURED_VALUE_STANDARD, 0.95),
-    p01 = quantile(MEASURED_VALUE_STANDARD, 0.01),
-    p99 = quantile(MEASURED_VALUE_STANDARD, 0.99),
-    val_winsor_90 = pmax(pmin(MEASURED_VALUE_STANDARD, p95), p05),
-    val_winsor_98 = pmax(pmin(MEASURED_VALUE_STANDARD, p99), p01)
-  )
+  mutate(double_flagged = dot_fill == "both")
 
 n_double <- sum(base$double_flagged)
 n_total <- nrow(base)
@@ -821,8 +809,8 @@ n_total <- nrow(base)
 # Assemble long-format comparison dataset
 plot_data <- bind_rows(
   base |> transmute(value = MEASURED_VALUE_STANDARD, treatment = "Unprocessed"),
-  base |> transmute(value = val_winsor_98, treatment = "Winsorized (98%)"),
-  base |> transmute(value = val_winsor_90, treatment = "Winsorized (90%)"),
+  base |> transmute(value = value_winsor_98, treatment = "Winsorized (98%)"),
+  base |> transmute(value = value_winsor_90, treatment = "Winsorized (90%)"),
   base |>
     filter(!double_flagged) |>
     transmute(

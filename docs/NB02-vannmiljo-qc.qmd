@@ -1,5 +1,8 @@
 ---
 title: "NB02 3: Vannmiljø QC"
+author: "Sam Welch"
+date: last-modified
+format: html
 ---
 
 I am also confused over notebook numbering. We'll sort it out at some point. 

@@ -2,13 +2,7 @@
 title: "Notebook 06 - Weight of Evidence Assessment"
 author: "Sam Welch"
 date: last-modified
-format: 
-  html: default
-  docx: 
-    fig-width: 8
-    fig-height: 6
 execute:
-  output: true
   echo: false
 ---
 

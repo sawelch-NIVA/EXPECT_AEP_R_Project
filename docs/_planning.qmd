@@ -1,6 +1,7 @@
 ---
 title: "Planning and Comments"
 date: last-modified
+format: html
 ---
 
 # Timings

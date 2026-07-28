@@ -2,9 +2,7 @@
 title: "Notebook 03 - Visualisation"
 author: "Sam Welch"
 date: last-modified
-format:
-  html:
-    fig-format: svg
+format: html
 ---
 
 ```{r}
