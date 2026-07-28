@@ -1,9 +1,7 @@
 ---
 title: "Algae"
-execute:
-  echo: false
 format:
-  html:
+  html: 
     fig-width: 16
     fig-height: 20
   docx:

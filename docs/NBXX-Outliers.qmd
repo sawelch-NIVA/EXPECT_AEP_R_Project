@@ -9,17 +9,7 @@ format:
     fig-height: 20
 
 execute:
-  echo: false
-
-knitr:
-  opts_chunk:
-    dpi: 300                         # belt-and-suspenders for knitr devices
-    dev: "ragg_png"                  # use ragg for better font rendering
-
-filters:
-  - flextable-qmd                    # needed, or the flextables render crazy 
-  - at: post-render
-    path: ../_extensions/flextable-qmd/unwrap-float.lua
+  error: false                       # prevents errors from stopping the render
 ---
 
 Some of our datasets include a lot of outliers. For example, let's take our fish data for *Gadus morhua* (excluding any measurements in dry weight for the sake of argument, and using liver measurements because they're the most data-rich).

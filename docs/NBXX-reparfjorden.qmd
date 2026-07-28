@@ -1,6 +1,5 @@
 ---
 title: "Notebook XX - Repparfjorden Case Study"
-author: "Sam Welch"
 date: last-modified
 lightbox: true
 format: html
