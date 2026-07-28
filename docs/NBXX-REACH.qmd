@@ -1,10 +1,6 @@
 ---
 title: "Copper REACH Data for Norway"
-execute:
-  output: true
-  echo: false
-  warning: false
-format: 
+format:
   html: default 
   docx: 
     fig-width: 8

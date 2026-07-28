@@ -1,9 +1,6 @@
 ---
 title: "Copper Emissions Data for Norway"
-execute:
-  output: true
-  echo: false
-format: 
+format:
   html: default
   docx: 
     fig-width: 8

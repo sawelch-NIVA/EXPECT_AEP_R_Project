@@ -1,10 +1,6 @@
 ---
 title: "Algae"
-execute:
-  output: true
-  echo: false
-  warning: false
-format: 
+format:
   html: 
     fig-width: 16
     fig-height: 20
