@@ -13,20 +13,7 @@ format:
     link-bibliography: true
 
 execute:
-  echo: false
-  warning: false                     # suppresses warnings even when echo is off
-  message: false                     # suppresses package load messages (library() etc.)
   error: false                       # prevents errors from stopping the render
-
-knitr:
-  opts_chunk:
-    dpi: 300                         # belt-and-suspenders for knitr devices
-    dev: "ragg_png"                  # use ragg for better font rendering
-
-filters:
-  - flextable-qmd                    # needed, or the flextables render crazy 
-  - at: post-render
-    path: ../_extensions/flextable-qmd/unwrap-float.lua
 ---
 
 ```{r}
