@@ -32,11 +32,17 @@ library(ggtext)
 library(diptest)
 library(flextable)
 library(glue)
+pkgload::load_all(quiet = TRUE) # prettify_campaign_name() etc.
 
-# This is one branch of the outlier-analysis targets factory (see
-# `outlier_targets_compartment` / `outlier_targets_biota` in _targets.R,
-# and R/fct_outlier_groups.R + R/fct_outlier_detection.R for the underlying
-# functions). It already contains group-wise RMZ/IQR flags, a dip test, and
+# PARKED 2026-07-29. The outlier tar_map factory this notebook read from was
+# removed (PLAN.md P0.2) and its objects pruned, so the tar_read() below no
+# longer resolves. Rewiring it onto literature_analysis_ready is deferred; the
+# prose and the reasoning about outlier flags are still the reference for how
+# a group gets scrutinised by hand.
+#
+# This WAS one branch of the outlier-analysis targets factory (see
+# R/fct_outlier_detection.R for the underlying functions, which survive).
+# It already contains group-wise RMZ/IQR flags, a dip test, and
 # Winsorized value columns computed on the whole Gadus morhua / Liver group,
 # restricted to its dominant unit (mg/kg wet weight).
 cod_liver <- tar_read(outlier_biota_Fish_Gadus_morhua_Liver)
@@ -44,14 +50,11 @@ cod_liver <- tar_read(outlier_biota_Fish_Gadus_morhua_Liver)
 gadus_morhua <- cod_liver$data |>
   mutate(
     SAMPLING_YEAR = factor(year(SAMPLING_DATE)),
-    campaign_name_pretty = case_when(
-      str_detect(CAMPAIGN_NAME_SHORT, "Vm_2010_2025") ~ str_remove_all(
-        CAMPAIGN_NAME_SHORT,
-        "Vm_2010_2025 \\("
-      ) |>
-        str_remove_all("\\)$") # TODO: Prettier regex.
-    ),
-    .default = CAMPAIGN_NAME_SHORT
+    # Was a case_when() with no .default, so all 28 non-Vannmiljø campaign
+    # names became NA. The `.default =` below it was being passed to mutate(),
+    # not to case_when(), so it also created a spurious `.default` column.
+    # Both fixed by using the shared helper.
+    campaign_name_pretty = prettify_campaign_name(CAMPAIGN_NAME_SHORT)
   )
 
 str_wrap_br <- function(string, width) {

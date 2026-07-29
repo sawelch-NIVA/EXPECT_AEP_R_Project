@@ -3,6 +3,12 @@ title: "Sample Groups"
 format:
   html:
     lightbox: true
+    # Overrides the project-level embed-resources: true. With ~135 images the
+    # base64 inflation (+33%) and the up-front decode of every image, including
+    # those below the fold, make scrolling this contact sheet sluggish. Linked
+    # files load lazily instead. Cost: the HTML is no longer self-contained and
+    # needs triage/ alongside it.
+    embed-resources: false
 ---
 
 This is a top-but-one level notebook containing all sample groups.
@@ -80,7 +86,7 @@ captions <- c(
   a_density = "a) Overall distribution (all units)",
   b_date = "b) Concentration by date",
   c_campaign = "c) Distribution by campaign",
-  d_site_type = "d) Distribution by site type",
+  d_site_type = "d) Distribution by site type (all geographies)",
   e_spatial = "e) Spatial distribution"
 )
 
@@ -94,16 +100,29 @@ for (i in seq_len(nrow(groups))) {
     format(grp$n, big.mark = ","),
     " measurements across ",
     format(grp$n_rows, big.mark = ","),
-    " rows.\n\n",
+    " rows, from **",
+    grp$n_sources,
+    "** source",
+    if (grp$n_sources == 1) "" else "s",
+    " (distinct `REFERENCE_ID`).\n\n",
     sep = ""
   )
 
+  # Build the expected filename per view rather than pattern-matching the
+  # path list. Prefix matching broke when one slug was a string prefix of
+  # another, which make.unique() suffixes used to produce.
   # Paths are project-root-relative; this notebook renders from docs/
-  paths <- sort(plot_paths[startsWith(basename(plot_paths), paste0(slug, "_"))])
-
   cat("::: {layout-ncol=5 .column-screen-inset}\n\n")
-  for (p in paths) {
-    key <- sub("\\.png$", "", sub(paste0("^", slug, "_"), "", basename(p)))
+  for (key in names(captions)) {
+    p <- file.path("triage", paste0(slug, "_", key, ".png"))
+    # Checked against the target's own output rather than file.exists(): that
+    # keeps this chunk's tar_read(triage_pilot_plots) dependency live, so the
+    # render target rebuilds after the plots. Dropping that read once caused
+    # the notebook to render before the PNGs were written.
+    if (!p %in% plot_paths) {
+      cat("*", captions[[key]], " not available.*\n\n", sep = "")
+      next
+    }
     cat(
       "![",
       captions[[key]],

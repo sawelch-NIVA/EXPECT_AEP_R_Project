@@ -84,7 +84,15 @@ options(
 
 # # Set target options ----
 tar_option_set(
-  format = "qs"
+  format = "qs",
+  # Functions live in the STOPAEP package namespace (pkgload::load_all above),
+  # not the global environment. Without this, targets does not hash them, so
+  # editing any R/fct_*.R function invalidates NOTHING and tar_make() happily
+  # reuses stale results. This is very likely the cause of the long-standing
+  # "load_literature_pqt doesn't properly update" note.
+  # Verified 2026-07-29: before this line, changing sample_triage_groups()
+  # left tar_outdated() reporting "(none)".
+  imports = "STOPAEP"
 )
 
 # # Pipeline ----
@@ -1035,19 +1043,30 @@ list(
       summary_data = summarise_literature_data,
       data = literature_analysis_ready,
       min_n = 100,
-      n_sample = 5,
+      n_sample = 25,
       seed = 20260729 # fixed so the pilot selection is stable between runs
     )
   ),
 
+  # Shared value-axis limits, computed once over the whole dataset so panels
+  # are comparable within a group and across groups. Grouped by compartment;
+  # see compute_triage_scale_limits() for what that does and does not buy you.
+  tar_target(
+    name = triage_scale_limits,
+    command = compute_triage_scale_limits(literature_analysis_ready)
+  ),
+
   # format = "file" so targets caches the PNGs themselves. Never return the
   # ggplots: they capture their input data and redraw at print time anyway.
+  # Output dir has no leading underscore: Quarto skips underscore-prefixed
+  # directories as project resources, which would break linked images.
   tar_target(
     name = triage_pilot_plots,
     command = write_triage_plots(
       data = literature_analysis_ready,
       groups = triage_pilot_groups,
-      dir = "_triage"
+      dir = "triage",
+      scale_limits = triage_scale_limits
     ),
     format = "file"
   ),

@@ -40,8 +40,8 @@ triage_group_cols <- function() {
 #' @param min_n Minimum `n` (measurements) for a group to be considered.
 #' @param n_sample Number of groups to sample. `Inf` takes all of them.
 #' @param seed Random seed, so the pilot selection is reproducible.
-#' @return A tibble of group-defining columns plus `n`, `n_rows`, and a
-#'   filesystem-safe `group_slug`.
+#' @return A tibble of group-defining columns plus `n`, `n_sources` (distinct
+#'   REFERENCE_ID), `n_rows`, and a filesystem-safe `group_slug`.
 #' @export
 sample_triage_groups <- function(
   summary_data,
@@ -57,7 +57,7 @@ sample_triage_groups <- function(
 
   eligible <- summary_data |>
     dplyr::filter(.data$n >= min_n) |>
-    dplyr::select(dplyr::all_of(group_cols), "n") |>
+    dplyr::select(dplyr::all_of(group_cols), "n", "n_sources") |>
     dplyr::left_join(row_counts, by = group_cols)
 
   withr::with_seed(seed, {
@@ -99,6 +99,12 @@ triage_group_label <- function(grp, sep = " / ") {
   paste(
     dplyr::if_else(grp$ENVIRON_COMPARTMENT == "Biota", taxon, compartment),
     dplyr::coalesce(grp$SITE_GEOGRAPHIC_FEATURE, "Unknown site"),
+    # SITE_GEOGRAPHIC_FEATURE_SUB is part of the group key, so omitting it made
+    # distinct groups share a label. slugify_name() then disambiguated them
+    # with make.unique() suffixes (_1, _2), which (a) put two identically
+    # titled headings in the notebook and (b) left the unsuffixed slug as a
+    # string prefix of the suffixed one, breaking filename matching.
+    dplyr::coalesce(grp$SITE_GEOGRAPHIC_FEATURE_SUB, "Unknown sub-site"),
     grp$MEASURED_UNIT_STANDARD,
     sep = sep
   )
@@ -126,6 +132,101 @@ filter_to_group <- function(data, grp, exclude_cols = character(0)) {
       if (is.na(want)) is.na(have) else (!is.na(have) & have == want)
   }
   data[keep, , drop = FALSE]
+}
+
+# ---- Shared scales -----------------------------------------------------
+
+#' Compute Shared Value-Axis Limits
+#'
+#' Triage plots are only comparable if they share axes. Computing limits from
+#' each group's own data (the ggplot2 default) means every panel silently
+#' rescales, so two groups an order of magnitude apart can look identical.
+#' This derives limits once from the whole dataset and they are then passed
+#' into every plot.
+#'
+#' Grouped by `ENVIRON_COMPARTMENT` by default. Be aware of what that does and
+#' does not buy you: as of 2026-07-29 Aquatic alone spans 12.3 orders of
+#' magnitude, which is the entire global range, so for ~90% of the rows a
+#' per-compartment limit is a global limit. Adding `MEASURED_UNIT_STANDARD` to
+#' `by` only narrows Aquatic/mg-L to 9.8 orders; the spread is genuinely within
+#' unit, not an artefact of mixing them. Widen or narrow via `by` as needed.
+#'
+#' No epsilon is added for the log scale: `literature_analysis_ready` has
+#' already dropped zeros and negatives, so every value is strictly positive.
+#'
+#' @param data The `literature_analysis_ready` target.
+#' @param by Columns defining a scale group.
+#' The **date** range is deliberately global and never grouped. Time is the one
+#' axis where a per-group scale is always wrong: a group sampled only in 2019
+#' would otherwise fill the whole panel and look identical to one sampled over
+#' thirty years.
+#'
+#' @param pad Multiplicative padding applied to each end of the value axis, so
+#'   points do not sit exactly on the panel edge. Dates are not padded.
+#' @return A tibble of `by` columns plus `value_min`, `value_max`, and the
+#'   global `date_min` / `date_max`.
+#' @export
+compute_triage_scale_limits <- function(
+  data,
+  by = "ENVIRON_COMPARTMENT",
+  pad = 1.5
+) {
+  date_range <- range(data$SAMPLING_DATE, na.rm = TRUE)
+
+  data |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(by))) |>
+    dplyr::summarise(
+      value_min = min(.data$MEASURED_VALUE_STANDARD, na.rm = TRUE) / pad,
+      value_max = max(.data$MEASURED_VALUE_STANDARD, na.rm = TRUE) * pad,
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      date_min = as.Date(date_range[1]),
+      date_max = as.Date(date_range[2])
+    )
+}
+
+#' Global Date Limits from a Scale-Limits Table
+#'
+#' Constant across every row by construction; see
+#' [compute_triage_scale_limits()].
+#'
+#' @param limits Output of [compute_triage_scale_limits()].
+#' @return A length-2 Date vector, or `NULL`.
+#' @export
+triage_date_limits <- function(limits) {
+  if (is.null(limits) || !all(c("date_min", "date_max") %in% names(limits))) {
+    return(NULL)
+  }
+  c(limits$date_min[1], limits$date_max[1])
+}
+
+#' Look Up Shared Limits for One Group
+#'
+#' Falls back to `NULL` (i.e. let ggplot2 choose) when the group has no
+#' matching entry, so an unexpected compartment degrades to the old behaviour
+#' rather than erroring mid-batch.
+#'
+#' @param limits Output of [compute_triage_scale_limits()].
+#' @param grp A one-row tibble of group-defining columns.
+#' @return A length-2 numeric vector, or `NULL`.
+#' @export
+triage_limits_for <- function(limits, grp) {
+  if (is.null(limits)) {
+    return(NULL)
+  }
+  by <- setdiff(
+    names(limits),
+    c("value_min", "value_max", "date_min", "date_max")
+  )
+  row <- limits
+  for (col in by) {
+    row <- row[row[[col]] == grp[[col]][1], , drop = FALSE]
+  }
+  if (nrow(row) != 1) {
+    return(NULL)
+  }
+  c(row$value_min[1], row$value_max[1])
 }
 
 # ---- Presentation helpers ----------------------------------------------
@@ -202,9 +303,10 @@ prettify_campaign_name <- function(x) {
 #'
 #' @param data A group subset, retaining all units.
 #' @param label Group label for the subtitle.
+#' @param limits Shared value-axis limits from [triage_limits_for()].
 #' @return A ggplot.
 #' @export
-triage_plot_density <- function(data, label = NULL) {
+triage_plot_density <- function(data, label = NULL, limits = NULL) {
   p <- ggplot2::ggplot(
     data,
     ggplot2::aes(
@@ -221,11 +323,13 @@ triage_plot_density <- function(data, label = NULL) {
         binwidth = 0.05
       )
   } else {
-    p + ggplot2::geom_density() + ggplot2::geom_rug(alpha = 0.1)
+    p +
+      ggplot2::geom_density() +
+      ggplot2::geom_rug(alpha = 0.15, linewidth = 0.7)
   }
 
   p +
-    ggplot2::scale_x_log10() +
+    ggplot2::scale_x_log10(limits = limits) +
     ggplot2::labs(
       x = triage_unit_label(data),
       y = "Density",
@@ -240,9 +344,18 @@ triage_plot_density <- function(data, label = NULL) {
 
 #' Triage Plot: Concentration by Sampling Date
 #' @param data A group subset. @param label Group label for the subtitle.
+#' @param limits Shared value-axis limits from [triage_limits_for()].
+#' @param date_limits Global date-axis limits from [triage_date_limits()].
+#'   Always supply these: a per-group date axis makes a group sampled in one
+#'   year look like one sampled over thirty.
 #' @return A ggplot.
 #' @export
-triage_plot_by_date <- function(data, label = NULL) {
+triage_plot_by_date <- function(
+  data,
+  label = NULL,
+  limits = NULL,
+  date_limits = NULL
+) {
   p <- ggplot2::ggplot(
     data,
     ggplot2::aes(x = .data$SAMPLING_DATE, y = .data$MEASURED_VALUE_STANDARD)
@@ -258,7 +371,8 @@ triage_plot_by_date <- function(data, label = NULL) {
 
   p +
     ggplot2::geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
-    ggplot2::scale_y_log10() +
+    ggplot2::scale_x_date(limits = date_limits) +
+    ggplot2::scale_y_log10(limits = limits) +
     ggplot2::labs(
       x = "Sampling date",
       y = triage_unit_label(data),
@@ -277,10 +391,17 @@ triage_plot_by_date <- function(data, label = NULL) {
 #' @param facet_col Column name (string) to put on the y axis.
 #' @param title Plot title.
 #' @param label Group label for the subtitle.
-#' @param min_facet_n Drop categories with fewer than this many rows.
+#' No minimum category size is imposed. These panels answer "what campaigns and
+#' site types are represented, and do their values differ", which is a coverage
+#' question rather than a statistical one, so a category with two observations
+#' is still worth seeing. Cardinality is bounded in practice (at most 31
+#' campaigns and 5 site types per group), so this cannot produce the
+#' unreadably tall figures that sank the first attempt.
+#'
 #' @param wrap_width Width at which to wrap category labels.
 #' @param label_fn Function applied to the category labels before plotting,
 #'   e.g. [prettify_campaign_name()]. Defaults to leaving them alone.
+#' @param limits Shared value-axis limits from [triage_limits_for()].
 #' @return A ggplot.
 #' @export
 triage_plot_by_category <- function(
@@ -288,14 +409,12 @@ triage_plot_by_category <- function(
   facet_col,
   title,
   label = NULL,
-  min_facet_n = 10,
   wrap_width = 15,
-  label_fn = identity
+  label_fn = identity,
+  limits = NULL
 ) {
   plot_data <- data |>
     dplyr::filter(!is.na(.data[[facet_col]])) |>
-    dplyr::add_count(.data[[facet_col]], name = ".facet_n") |>
-    dplyr::filter(.data$.facet_n >= min_facet_n) |>
     dplyr::mutate(
       .facet = forcats::fct_reorder(
         label_fn(as.character(.data[[facet_col]])),
@@ -307,10 +426,7 @@ triage_plot_by_category <- function(
     )
 
   if (nrow(plot_data) == 0) {
-    return(triage_empty_plot(
-      title,
-      paste0("no category with n >= ", min_facet_n)
-    ))
+    return(triage_empty_plot(title, paste0("no non-missing ", facet_col)))
   }
 
   p <- ggplot2::ggplot(
@@ -327,19 +443,12 @@ triage_plot_by_category <- function(
   }
 
   p +
-    ggplot2::scale_x_log10() +
-    ggplot2::coord_cartesian(clip = "off") +
+    ggplot2::scale_x_log10(limits = limits) +
     ggplot2::labs(
       x = triage_unit_label(data),
       y = NULL,
       title = title,
-      subtitle = paste0(
-        label,
-        if (!is.null(label)) "  ",
-        "(n ≥ ",
-        min_facet_n,
-        " per row)"
-      )
+      subtitle = label
     ) +
     ggplot2::theme(
       axis.text.y = ggplot2::element_text(size = ggplot2::rel(0.6))
@@ -352,9 +461,10 @@ triage_plot_by_category <- function(
 #' points where there are too few sites to bin meaningfully.
 #'
 #' @param data A group subset. @param label Group label for the subtitle.
+#' @param limits Shared colour-scale limits from [triage_limits_for()].
 #' @return A ggplot.
 #' @export
-triage_plot_spatial <- function(data, label = NULL) {
+triage_plot_spatial <- function(data, label = NULL, limits = NULL) {
   spatial <- data |>
     dplyr::filter(!is.na(.data$LONGITUDE), !is.na(.data$LATITUDE))
 
@@ -401,10 +511,15 @@ triage_plot_spatial <- function(data, label = NULL) {
     )
   }
 
+  # Both branches binned, with the same limits and breaks, so a hex map and a
+  # points fallback remain visually comparable. Previously the points branch
+  # used a continuous scale and the hex branch a binned one.
   scale_layer <- if (triage_use_points(spatial)) {
-    ggplot2::scale_colour_viridis_c(
+    ggplot2::scale_colour_viridis_b(
       name = triage_unit_label(data),
       trans = "log10",
+      n.breaks = 6,
+      limits = limits,
       option = "rocket"
     )
   } else {
@@ -412,6 +527,7 @@ triage_plot_spatial <- function(data, label = NULL) {
       name = triage_unit_label(data),
       trans = "log10",
       n.breaks = 6,
+      limits = limits,
       option = "rocket"
     )
   }
@@ -463,6 +579,8 @@ triage_empty_plot <- function(title, reason) {
 #' @param data The `literature_analysis_ready` target.
 #' @param grp A one-row tibble from [sample_triage_groups()].
 #' @param dir Output directory.
+#' @param scale_limits Output of [compute_triage_scale_limits()], so every
+#'   panel and every group share a value axis.
 #' @param width,height,dpi PNG canvas. Fixed on purpose: a 40,000-row group and
 #'   a 150-row group must produce the same-sized artefact, or the contact sheet
 #'   becomes unreadable.
@@ -471,7 +589,8 @@ triage_empty_plot <- function(title, reason) {
 write_triage_plots_for_group <- function(
   data,
   grp,
-  dir = "_triage",
+  dir = "triage",
+  scale_limits = NULL,
   width = 8,
   height = 5,
   dpi = 150
@@ -480,34 +599,53 @@ write_triage_plots_for_group <- function(
 
   group_data <- filter_to_group(data, grp)
   # Plot (a) keeps every unit for the group on purpose; see
-  # triage_plot_density(). The other four stay unit-specific.
+  # triage_plot_density().
   group_data_all_units <- filter_to_group(
     data,
     grp,
     exclude_cols = "MEASURED_UNIT_STANDARD"
   )
+  # Plot (d) likewise relaxes geography. SITE_GEOGRAPHIC_FEATURE(_SUB) are part
+  # of the group key, so within a strict group there is exactly one site type
+  # and the panel is a single degenerate row. Relaxing them shows how the same
+  # species/compartment/unit varies across site types, which is the question
+  # the panel is actually for.
+  group_data_all_geography <- filter_to_group(
+    data,
+    grp,
+    exclude_cols = c("SITE_GEOGRAPHIC_FEATURE", "SITE_GEOGRAPHIC_FEATURE_SUB")
+  )
   label <- triage_group_label(grp)
   slug <- grp$group_slug[1]
+  lims <- triage_limits_for(scale_limits, grp)
+  date_lims <- triage_date_limits(scale_limits)
 
   # List names carry the a/b/c/d/e prefix so the written files sort into
   # reading order in a file browser.
   plots <- list(
-    a_density = triage_plot_density(group_data_all_units, label),
-    b_date = triage_plot_by_date(group_data, label),
+    a_density = triage_plot_density(group_data_all_units, label, limits = lims),
+    b_date = triage_plot_by_date(
+      group_data,
+      label,
+      limits = lims,
+      date_limits = date_lims
+    ),
     c_campaign = triage_plot_by_category(
       group_data,
       "CAMPAIGN_NAME_SHORT",
       "c) Distribution by campaign",
       label,
-      label_fn = prettify_campaign_name
+      label_fn = prettify_campaign_name,
+      limits = lims
     ),
     d_site_type = triage_plot_by_category(
-      group_data,
+      group_data_all_geography,
       "SITE_GEOGRAPHIC_FEATURE_SUB",
-      "d) Distribution by site type",
-      label
+      "d) Distribution by site type (all geographies)",
+      label,
+      limits = lims
     ),
-    e_spatial = triage_plot_spatial(group_data, label)
+    e_spatial = triage_plot_spatial(group_data, label, limits = lims)
   )
 
   paths <- character(0)
@@ -531,10 +669,11 @@ write_triage_plots_for_group <- function(
 #' @param data The `literature_analysis_ready` target.
 #' @param groups Output of [sample_triage_groups()].
 #' @param dir Output directory.
-#' @param ... Passed to [write_triage_plots_for_group()].
+#' @param ... Passed to [write_triage_plots_for_group()], notably
+#'   `scale_limits`.
 #' @return A character vector of all written file paths, for `format = "file"`.
 #' @export
-write_triage_plots <- function(data, groups, dir = "_triage", ...) {
+write_triage_plots <- function(data, groups, dir = "triage", ...) {
   paths <- purrr::map(
     seq_len(nrow(groups)),
     function(i) {

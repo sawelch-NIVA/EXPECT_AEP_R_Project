@@ -80,6 +80,33 @@ test_that("triage_group_label distinguishes biota from other compartments", {
   expect_false(grepl("Gadus", triage_group_label(water)))
 })
 
+test_that("triage_group_label distinguishes groups differing only by sub-site", {
+  # SITE_GEOGRAPHIC_FEATURE_SUB is part of the group key. If the label omits
+  # it, distinct groups collide and slugify_name() disambiguates with
+  # make.unique() suffixes, producing duplicate notebook headings and slugs
+  # that are string prefixes of one another.
+  a <- fake_group_data(n = 1)[1, , drop = FALSE]
+  b <- a
+  a$SITE_GEOGRAPHIC_FEATURE_SUB <- "Fjord"
+  b$SITE_GEOGRAPHIC_FEATURE_SUB <- "Open coast"
+
+  expect_false(triage_group_label(a) == triage_group_label(b))
+})
+
+test_that("distinct groups produce distinct slugs with no make.unique suffix", {
+  d <- fake_group_data(n = 2)
+  d$SITE_GEOGRAPHIC_FEATURE_SUB <- c("Fjord", "Open coast")
+  slugs <- slugify_name(triage_group_label(d, sep = "_"))
+
+  collisions <- sum(outer(slugs, slugs, function(x, y) {
+    x != y & startsWith(y, paste0(x, "_"))
+  }))
+
+  expect_equal(collisions, 0)
+  # No _1 / _2 disambiguation needed once the label carries the sub-site
+  expect_false(any(grepl("_[0-9]+$", slugs)))
+})
+
 test_that("triage_group_label fills missing taxonomy rather than returning NA", {
   grp <- fake_group_data(n = 1)[1, , drop = FALSE]
   grp$SAMPLE_SPECIES <- NA
@@ -124,13 +151,120 @@ test_that("triage_plot_spatial degrades gracefully without coordinates", {
   expect_no_error(ggplot2::ggplot_build(p))
 })
 
-test_that("triage_plot_by_category degrades when no category clears min_facet_n", {
+test_that("triage_plot_by_category degrades when the category is all missing", {
   d <- fake_group_data(n = 50)
+  d$CAMPAIGN_NAME_SHORT <- NA_character_
 
-  p <- triage_plot_by_category(d, "CAMPAIGN_NAME_SHORT", "c", min_facet_n = 1e6)
+  p <- triage_plot_by_category(d, "CAMPAIGN_NAME_SHORT", "c")
 
   expect_s3_class(p, "ggplot")
   expect_no_error(ggplot2::ggplot_build(p))
+})
+
+test_that("triage_plot_by_category keeps rare categories", {
+  # These panels answer a coverage question, not a statistical one: a campaign
+  # with a single observation still tells you it is represented.
+  d <- fake_group_data(n = 40)
+  d$CAMPAIGN_NAME_SHORT <- c("Solo", rep("Bulk", 39))
+
+  p <- triage_plot_by_category(d, "CAMPAIGN_NAME_SHORT", "c")
+  labels <- levels(ggplot2::ggplot_build(p)$plot$data$.facet)
+
+  expect_length(labels, 2)
+  expect_true("Solo" %in% labels)
+})
+
+test_that("compute_triage_scale_limits pads and groups by compartment", {
+  d <- rbind(fake_group_data(n = 10), fake_group_data(n = 10))
+  d$ENVIRON_COMPARTMENT <- rep(c("Biota", "Aquatic"), each = 10)
+  d$MEASURED_VALUE_STANDARD <- c(seq(1, 10, length.out = 10), seq(100, 1000, length.out = 10))
+
+  lims <- compute_triage_scale_limits(d, pad = 2)
+
+  expect_equal(nrow(lims), 2)
+  biota <- lims[lims$ENVIRON_COMPARTMENT == "Biota", ]
+  expect_equal(biota$value_min, 0.5)
+  expect_equal(biota$value_max, 20)
+})
+
+test_that("triage_limits_for finds the row for a group", {
+  d <- fake_group_data(n = 10)
+  lims <- compute_triage_scale_limits(d)
+
+  result <- triage_limits_for(lims, d[1, , drop = FALSE])
+
+  expect_length(result, 2)
+  expect_true(result[1] < min(d$MEASURED_VALUE_STANDARD))
+  expect_true(result[2] > max(d$MEASURED_VALUE_STANDARD))
+})
+
+test_that("triage_limits_for degrades to NULL rather than erroring", {
+  d <- fake_group_data(n = 10)
+  lims <- compute_triage_scale_limits(d)
+  unknown <- d[1, , drop = FALSE]
+  unknown$ENVIRON_COMPARTMENT <- "Atmosphere"
+
+  expect_null(triage_limits_for(lims, unknown))
+  expect_null(triage_limits_for(NULL, d[1, , drop = FALSE]))
+})
+
+test_that("shared limits are actually applied to the value axis", {
+  d <- fake_group_data(n = 50)
+  lims <- c(0.01, 1e5)
+
+  built <- ggplot2::ggplot_build(triage_plot_density(d, limits = lims))
+  rng <- built$layout$panel_params[[1]]$x.range
+
+  # Panel range is on the log10 scale
+  expect_lt(rng[1], log10(0.02))
+  expect_gt(rng[2], log10(1e4))
+})
+
+test_that("date limits are global, not per compartment", {
+  # Time is the one axis where a per-group scale is always wrong.
+  d <- rbind(fake_group_data(n = 10), fake_group_data(n = 10))
+  d$ENVIRON_COMPARTMENT <- rep(c("Biota", "Aquatic"), each = 10)
+  d$SAMPLING_DATE <- c(
+    seq(as.Date("1990-01-01"), by = "year", length.out = 10),
+    seq(as.Date("2015-01-01"), by = "year", length.out = 10)
+  )
+
+  lims <- compute_triage_scale_limits(d)
+
+  expect_equal(nrow(lims), 2)
+  # identical in every row, and spanning the whole dataset
+  expect_equal(length(unique(lims$date_min)), 1)
+  expect_equal(as.Date(lims$date_min[1]), as.Date("1990-01-01"))
+  expect_equal(as.Date(lims$date_max[1]), as.Date("2024-01-01"))
+})
+
+test_that("triage_date_limits extracts the global range", {
+  d <- fake_group_data(n = 10)
+  lims <- compute_triage_scale_limits(d)
+
+  expect_length(triage_date_limits(lims), 2)
+  expect_null(triage_date_limits(NULL))
+  expect_null(triage_date_limits(data.frame(a = 1)))
+})
+
+test_that("date columns are not mistaken for grouping keys", {
+  d <- fake_group_data(n = 10)
+  lims <- compute_triage_scale_limits(d)
+
+  # triage_limits_for() derives its keys by exclusion; date_min/date_max must
+  # be excluded or the lookup silently fails
+  expect_length(triage_limits_for(lims, d[1, , drop = FALSE]), 2)
+})
+
+test_that("triage_plot_by_date honours the global date axis", {
+  d <- fake_group_data(n = 50)
+  dl <- as.Date(c("1980-01-01", "2030-01-01"))
+
+  built <- ggplot2::ggplot_build(triage_plot_by_date(d, date_limits = dl))
+  rng <- built$layout$panel_params[[1]]$x.range
+
+  expect_lt(rng[1], as.numeric(as.Date("1985-01-01")))
+  expect_gt(rng[2], as.numeric(as.Date("2025-01-01")))
 })
 
 test_that("triage_unit_label reports the group unit", {

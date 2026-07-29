@@ -69,14 +69,12 @@ p2 <- grp |>
 # ---- c) Distribution by campaign --------------------------------------
 
 p3 <- grp |>
-  add_count(CAMPAIGN_NAME_SHORT) |>
-  filter(n >= 10) |>
   mutate(
-    campaign_name_pretty = case_when(
-      str_detect(CAMPAIGN_NAME_SHORT, "Vm_2010_2025") ~
-        str_remove_all(CAMPAIGN_NAME_SHORT, "Vm_2010_2025 \\(") |>
-          str_remove_all("\\)$") # TODO: Prettier regex.
-    ),
+    # Was a case_when() with no .default, which turned all 28 non-Vannmiljø
+    # campaign names into NA. Now handled by prettify_campaign_name() in
+    # R/fct_group_triage.R. The n >= 10 facet filter that used to sit here is
+    # also gone: these panels are about coverage, not statistical validity.
+    campaign_name_pretty = prettify_campaign_name(CAMPAIGN_NAME_SHORT),
     campaign_name_pretty = fct_reorder(
       campaign_name_pretty,
       MEASURED_VALUE_STANDARD,
@@ -92,8 +90,7 @@ p3 <- grp |>
   coord_cartesian(clip = "off") +
   labs(
     x = unit_label,
-    title = "c) Distribution by Campaign",
-    subtitle = "(n ≥ 10)"
+    title = "c) Distribution by Campaign"
   ) +
   theme(
     axis.title.y = element_blank(),

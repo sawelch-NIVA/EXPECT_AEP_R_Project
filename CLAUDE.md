@@ -106,6 +106,21 @@ sharing, via `custom-reference-doc.docx`). The docx format is declared in
 Word files. Project-level html settings still merge into it; verified with
 `quarto inspect`.
 
+### 2.2.2 targets must be told about the package (fixed 2026-07-29)
+
+`tar_option_set(imports = "STOPAEP")` is **load-bearing**. Project functions
+live in the `STOPAEP` package namespace, because `_targets.R` calls
+`pkgload::load_all()` rather than sourcing files into the global environment.
+targets only hashes objects in its own environment, so without `imports` it
+never sees those functions change: editing any `R/fct_*.R` file invalidated
+**nothing**, and `tar_make()` silently reused stale results.
+
+Verified: before the fix, changing `sample_triage_groups()` left
+`tar_outdated()` reporting `(none)`. This is almost certainly the cause of the
+`load_literature_pqt` "doesn't properly update" note in section 3.7.
+
+If results ever look stale again, check this line first.
+
 ### 2.3 The outlier / distributions machinery
 
 This is the newest and most intricate part, and the epicentre of the current
@@ -337,6 +352,40 @@ Learned the hard way (see `PLAN.md` section 1 for the full post-mortem):
   invalidates only that plot, not a whole composed panel.
 - The plots at the top of `docs/NBXX-Distributions-Aquatic-Sediment.qmd` are the
   reference implementation and follow these rules already.
+
+### 4.4.0 Group keys and plot scope
+
+`triage_group_cols()` defines a sample group on eight columns, including
+`MEASURED_UNIT_STANDARD` and `SITE_GEOGRAPHIC_FEATURE(_SUB)`. That has a
+consequence worth remembering: **any plot that facets on a column in the group
+key is degenerate**, because that column is constant within a group.
+
+Two triage panels therefore deliberately relax the key via
+`filter_to_group(..., exclude_cols = ...)`:
+
+- **(a) overall distribution** relaxes the unit, so dry and wet weight can be
+  compared. This is the entire point of the panel.
+- **(d) by site type** relaxes geography, so the same species/compartment/unit
+  can be compared across site types.
+
+The other three stay strictly within the group. Check this before adding any
+new faceted view.
+
+### 4.4.2 Two traps in the triage layer
+
+**Group labels must carry every group-key column.** `slugify_name()` ends with
+`make.unique()`, so any two groups sharing a label get `_1` / `_2` suffixes.
+That is bad twice over: the notebook shows two identically titled headings, and
+the unsuffixed slug becomes a string *prefix* of the suffixed one, so any
+`startsWith()` matching on filenames silently grabs the wrong files. If a new
+column joins `triage_group_cols()`, add it to `triage_group_label()` too.
+
+**A notebook chunk's `tar_read()` calls are its dependency declaration.**
+`tar_quarto()` scans the `.qmd` for `tar_read()` / `tar_load()` to work out what
+the render target depends on. Constructing file paths by hand instead of reading
+the file-target removes that link, and the notebook then renders *before* its
+inputs are built. If a chunk uses a target's output, read the target, even when
+you could derive the paths yourself.
 
 ### 4.4.1 Data hygiene
 
