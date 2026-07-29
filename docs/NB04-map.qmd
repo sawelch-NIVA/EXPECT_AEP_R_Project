@@ -4,6 +4,8 @@ author: "Sam Welch"
 date: last-modified
 lightbox: true
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 # Stupid map was taking 5 minutes just to render. Now it's cached. Will have to find a better solution in future. 

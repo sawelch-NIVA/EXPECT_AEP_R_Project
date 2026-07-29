@@ -3,6 +3,8 @@ title: "Notebook - AEP Mini-Review"
 author: "Sam Welch"
 date: last-modified
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 

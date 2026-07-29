@@ -75,114 +75,12 @@ options(
   targets.verbose = TRUE # chatter from targets itself
 )
 
-# # Outlier analysis factory ----
-# Below min_n, outlier flags/dip test/Winsorization are considered too
-# unreliable to compute (see NBXX-Outliers.qmd); a distribution is still
-# produced regardless of group size.
-outlier_min_n <- 10
-
-# tar_map() needs its branch-defining `values` at *pipeline definition* time
-# (i.e. when this script is sourced), but those values (which
-# compartment/subcompartment and species/tissue combinations exist) are
-# themselves derived from data (load_literature_pqt). We read the
-# currently-materialised load_literature_pqt from the target store to
-# compute them.
-#
-# CAVEAT: this means that whenever a new compartment/subcompartment or
-# species/tissue combination first appears in the data, you need to run
-# tar_make() TWICE: once to rebuild load_literature_pqt itself, and a second
-# time so this script picks up the new combination and defines its branch
-# target. This is a known limitation of data-dependent static branching in
-# {targets} (there is no supported way around it without switching to
-# dynamic branching, which would lose the human-readable per-group target
-# names this factory is built around).
-if (tar_exist_objects("load_literature_pqt")) {
-  outlier_groups_compartment <- get_compartment_groups(
-    tar_read(load_literature_pqt)
-  )
-  outlier_groups_biota <- get_biota_groups(tar_read(load_literature_pqt))
-} else {
-  outlier_groups_compartment <- tibble::tibble(
-    .compartment = character(),
-    .subcompartment = character(),
-    .group_name = character()
-  )
-  outlier_groups_biota <- tibble::tibble(
-    .species_group = character(),
-    .species = character(),
-    .tissue = character(),
-    .group_name = character()
-  )
-}
-
-# One target per distinct ENVIRON_COMPARTMENT x ENVIRON_COMPARTMENT_SUB
-outlier_targets_compartment <- tar_map(
-  values = outlier_groups_compartment,
-  names = .group_name,
-  tar_target(
-    outlier_compartment,
-    outlier_group_analysis(
-      data = prepare_compartment_group_data(
-        load_literature_pqt,
-        compartment = .compartment,
-        subcompartment = .subcompartment
-      ),
-      group_label = paste(.compartment, .subcompartment, sep = " / "),
-      min_n = outlier_min_n
-    )
-  )
-)
-
-# One target per distinct SPECIES_GROUP x SAMPLE_SPECIES x SAMPLE_TISSUE
-outlier_targets_biota <- tar_map(
-  values = outlier_groups_biota,
-  names = .group_name,
-  tar_target(
-    outlier_biota,
-    outlier_group_analysis(
-      data = prepare_biota_group_data(
-        load_literature_pqt,
-        species_group = .species_group,
-        species = .species,
-        tissue = .tissue
-      ),
-      group_label = paste(.species_group, .species, .tissue, sep = " / "),
-      min_n = outlier_min_n
-    )
-  )
-)
-
-# One tar_quarto() render target per generated per-compartment /
-# per-species-group distribution notebook (docs/NBXX-Distributions-<Name>.qmd,
-# see scripts/generate_distribution_notebooks.R). File/target names are
-# derived the same way the generator names them, so a new
-# compartment/species-group value automatically gets a render target here
-# -- but only once its file has actually been scaffolded (a third pass on
-# top of the two-pass caveat above: rebuild data -> pick up the new branch
-# target -> run the generator script -> THEN this section defines its
-# render target). Until the file exists, it's silently skipped rather than
-# breaking the pipeline.
-outlier_notebook_specs <- dplyr::bind_rows(
-  tibble::tibble(label = unique(outlier_groups_compartment$.compartment)),
-  tibble::tibble(label = unique(outlier_groups_biota$.species_group))
-) |>
-  dplyr::mutate(
-    slug = slugify_name(label),
-    path = paste0("docs/NBXX-Distributions-", slug, ".qmd"),
-    target_name = paste0("render_nbxx_distributions_", tolower(slug))
-  ) |>
-  dplyr::filter(file.exists(path))
-
-outlier_notebook_targets <- purrr::pmap(
-  outlier_notebook_specs,
-  function(label, slug, path, target_name) {
-    tar_quarto_raw(
-      name = target_name,
-      path = path,
-      quiet = FALSE
-    )
-  }
-)
+# NOTE: the per-group outlier tar_map() factory that used to live here was
+# removed 2026-07-29 (PLAN.md P0.2), together with the 14 generated
+# docs/NBXX-Distributions-*.qmd notebooks and their generator script. It is
+# replaced by the triage layer (PLAN.md Phase 1). The underlying statistics
+# survive in R/fct_outlier_detection.R and R/fct_statistics.R, and the group
+# enumeration helpers in R/fct_outlier_groups.R.
 
 # # Set target options ----
 tar_option_set(
@@ -1044,14 +942,38 @@ list(
     }
   ),
 
+  ### # Analysis-ready data ----
+  # The single data-hygiene step between the loaded data and the analysis:
+  # drop rows whose measured value is NA, zero, or negative. See
+  # R/fct_analysis_ready.R for the reasoning on each case (short version: a
+  # stored 0 is a non-detect that lost its censoring flag, and 0/negative
+  # values break the log10 scales used throughout the distribution plots).
+  #
+  # Filters on MEASURED_VALUE_STANDARD only -- deliberately NOT a whole-row
+  # drop_na(), which would gut the dataset since many eData columns are
+  # legitimately sparse.
+  tar_target(
+    name = literature_analysis_ready,
+    command = drop_nonpositive_measurements(load_literature_pqt)
+  ),
+
+  # Companion report: what the filter above removed, per group, worst first.
+  # Reads the *unfiltered* data on purpose -- it needs the rows that
+  # literature_analysis_ready throws away. Check this before letting any
+  # heavily-censored group become an AEP node.
+  tar_target(
+    name = literature_dropped_report,
+    command = report_dropped_measurements(load_literature_pqt)
+  ),
+
   ### # Calculate a summary table per group
   # - group by all categoricals, remove wet weight
-  # - calculate two outlier flags, dip-test for bimodality
+  # - calculate two outlier flags, dip-test for departure from unimodality
   # - TODO: Weighted means
   tar_target(
     name = summarise_literature_data,
     command = {
-      load_literature_pqt |>
+      literature_analysis_ready |>
         group_by(
           ENVIRON_COMPARTMENT,
           ENVIRON_COMPARTMENT_SUB,
@@ -1063,10 +985,10 @@ list(
           # we split by unit type for summary
           MEASURED_UNIT_STANDARD
         ) |>
-        # include wet weight
-        filter(
-          !is.na(MEASURED_VALUE_STANDARD)
-        ) |>
+        # NA/zero/negative measured values are now dropped upstream by
+        # literature_analysis_ready, so the filter that used to sit here is
+        # redundant. Left as a comment because its removal is the reason this
+        # target's results may shift slightly on the next rebuild.
         mutate(
           RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
           log_val = log10(MEASURED_VALUE_STANDARD),
@@ -1088,10 +1010,46 @@ list(
           unit = unique(MEASURED_UNIT_STANDARD),
           # Hartigan's dip test for unimodality (NA below dip_test_safe()'s min_n)
           dip_p = dip_test_safe(MEASURED_VALUE_STANDARD)$dip_p,
-          multimodal = dip_test_safe(MEASURED_VALUE_STANDARD)$bimodal
+          multimodal = dip_test_safe(MEASURED_VALUE_STANDARD)$multimodal
         ) |>
         arrange(desc(n))
     }
+  ),
+
+  ### # Sample-groups display table ----
+  # Shared by index.qmd and docs/NBXX-Sample-Groups.qmd. The reshaping lives
+  # here so the two documents cannot drift apart again; presentation lives in
+  # sample_groups_flextable(). index.qmd filters this to the large groups.
+  tar_target(
+    name = sample_groups_table,
+    command = build_sample_groups_table(summarise_literature_data)
+  ),
+
+  ## # Group Triage ----
+  # PILOT (PLAN.md P1.1): 5 randomly sampled groups, so the plot aesthetics can
+  # be shaken out before this is widened to all ~27 groups with n >= 100. Raise
+  # n_sample (or set it to Inf) once the plots look right.
+  tar_target(
+    name = triage_pilot_groups,
+    command = sample_triage_groups(
+      summary_data = summarise_literature_data,
+      data = literature_analysis_ready,
+      min_n = 100,
+      n_sample = 5,
+      seed = 20260729 # fixed so the pilot selection is stable between runs
+    )
+  ),
+
+  # format = "file" so targets caches the PNGs themselves. Never return the
+  # ggplots: they capture their input data and redraw at print time anyway.
+  tar_target(
+    name = triage_pilot_plots,
+    command = write_triage_plots(
+      data = literature_analysis_ready,
+      groups = triage_pilot_groups,
+      dir = "_triage"
+    ),
+    format = "file"
   ),
 
   ### # Data quality report ----
@@ -1154,9 +1112,7 @@ list(
     )
   ),
 
-  ## # Outlier Analysis ----
-  # outlier_targets_compartment,
-  # outlier_targets_biota,
+  # Outlier tar_map factory removed 2026-07-29 (PLAN.md P0.2); see note at top.
 
   ## # Toxicity Thresholds ----
 
@@ -1171,157 +1127,36 @@ list(
   ),
 
   ## # Quarto Reports ----
+  # Trimmed 2026-07-29 (PLAN.md P0.2 / Phase 0). Quarto rendering is by far the
+  # slowest part of this pipeline, so only documents under active work get a
+  # render target. Everything else is parked: the .qmd files still exist and can
+  # be rendered by hand, but the pipeline no longer rebuilds them, and
+  # `project: render:` in _quarto.yml excludes them from `quarto render` too.
+  #
+  # Parked: NB01-08, AP01-03, NBXX-{Outliers,REACH,algae,fish,norske-utslipp,
+  # reparfjorden}, _journals. (_planning.qmd was deleted as obsolete; PLAN.md
+  # at the repo root replaces it.)
+  #
+  # To un-park one: add it back here AND to the render list in _quarto.yml.
 
-  ### # Index ----
+  ### # Manuscript (html for review, docx for sharing) ----
   tar_quarto(
-    name = render_index.qmd,
+    name = render_index,
     path = "./index.qmd",
     quiet = FALSE, # generally we only need the first file complaining if something goes wrong
-    extra_files = "_quarto.yml" # watch quarto.yml so we rebuild the full quarto output if it changes
+    extra_files = "_quarto.yml" # watch quarto.yml so we rebuild if it changes
   ),
 
-  ### # Notebooks ----
-
-  #### # QC notebook ----
+  ### # Active working notebooks ----
+  # The group summary table driving the Phase 2 grouping decisions.
   tar_quarto(
-    name = render_nb01_pipeline,
-    path = "./docs/NB01-pipeline.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Vannmiljø notebook ----
-  tar_quarto(
-    name = render_nb02_vannmiljo,
-    path = "docs/NB02-vannmiljo.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Vannmiljø QC notebook ----
-  tar_quarto(
-    name = render_nb02_vannmiljo_qc,
-    path = "docs/NB02-vannmiljo-qc.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Visualisation notebook ----
-  tar_quarto(
-    name = render_nb03_qc,
-    path = "docs/NB03-qc.qmd",
-    quiet = FALSE
-  ),
-
-  tar_quarto(
-    name = render_nb03_visualisation,
-    path = "docs/NB03-visualisation.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Map notebook ----
-  tar_quarto(
-    name = render_nb04_map,
-    path = "docs/NB04-map.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Network notebook ----
-  tar_quarto(
-    name = render_nb05_network,
-    path = "docs/NB05-network.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Weight of Evidence notebook ----
-  tar_quarto(
-    name = render_nb06_woe,
-    path = "docs/NB06-WoE.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Emissions notebook ----
-  tar_quarto(
-    name = render_nb07_emissions,
-    path = "docs/NB07-emissions.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Ecology notebook ----
-  tar_quarto(
-    name = render_nb08_ecology,
-    path = "docs/NB08-ecology.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Repparfjorden notebook ----
-  tar_quarto(
-    name = render_nbxx_repparfjorden,
-    path = "docs/NBXX-reparfjorden.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Outlier notebooks (per compartment / per biota species-group) ----
-  # outlier_notebook_targets,
-
-  ### # Appendices ----
-
-  #### # Review protocol appendix ----
-  tar_quarto(
-    name = render_ap01_protocol,
-    path = "docs/AP01-review-protocol.qmd",
-    quiet = FALSE
-  ),
-
-  #### # Acknowledgements appendix ----
-  tar_quarto(
-    name = render_ap02_acknowledgements,
-    path = "docs/AP02-acknowledgements.qmd",
-    quiet = FALSE
-  ),
-
-  #### Background Documents
-  tar_quarto(
-    name = render_journal_notes,
-    path = "docs/_journals.qmd",
-    quiet = FALSE
-  ),
-
-  tar_quarto(
-    name = render_planning_notes,
-    path = "docs/_planning.qmd",
+    name = render_nbxx_sample_groups,
+    path = "docs/NBXX-Sample-Groups.qmd",
     quiet = FALSE
   )
 
-  ## # Deployment ----
-
-  ### # Publish to Posit Connect Cloud ----
-  # tar_target(
-  #   name = deploy_posit_connect_cloud,
-  #   command = {
-  #     quarto_publish_site(
-  #       server = "connect.posit.cloud",
-  #       account = "sawelch-niva",
-  #       render = "none"
-  #     )
-
-  #     # Create a deployment marker file with timestamp
-  #     marker_file <- "_targets/user/data/deploy_timestamp.txt"
-  #     dir.create(dirname(marker_file), showWarnings = FALSE, recursive = TRUE)
-  #     writeLines(as.character(Sys.time()), marker_file)
-  #     marker_file
-
-  #     # Dependencies to trigger redeployment
-  #     render_index.qmd
-  #     render_nb01_pipeline
-  #     render_nb02_vannmiljo
-  #     render_nb02_vannmiljo_qc
-  #     render_nb03_visualisation
-  #     render_nb04_map
-  #     render_nb05_network
-  #     render_nb07_emissions
-  #     render_nb08_ecology
-  #     render_nbxx_repparfjorden
-  #   },
-  #   format = "file"
-  # )
+  # TODO (Phase 2): add render_nbxx_triage for docs/NBXX-Triage.qmd once the
+  # triage contact sheet exists.
 
   # TODO: Are we allowed (statistically) to group similar compartments together?
   # i.e., if we do a t-test (or something) are our populations significantly different

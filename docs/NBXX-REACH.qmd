@@ -1,6 +1,7 @@
 ---
 title: "Copper REACH Data for Norway"
 execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
   echo: false
 ---
 

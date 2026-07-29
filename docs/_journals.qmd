@@ -2,6 +2,8 @@
 title: "Journals"
 date: last-modified
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 I wanna aim for [ES&T](https://pubs.acs.org/journal/esthag), with IEAM as a backup. Honestly, I hate the IEAM submission experience.

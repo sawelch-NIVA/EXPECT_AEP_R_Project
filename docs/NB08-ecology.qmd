@@ -3,6 +3,8 @@ title: "Notebook 08 - Ecology and Biota"
 author: "Sam Welch"
 date: last-modified
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 *A holding space for relevant data on biota diets and ADME*.

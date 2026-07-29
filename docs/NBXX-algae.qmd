@@ -7,6 +7,8 @@ format:
   docx:
     fig-width: 16
     fig-height: 20
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 ```{r}

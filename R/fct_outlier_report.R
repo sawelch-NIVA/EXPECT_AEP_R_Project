@@ -52,7 +52,7 @@ flag_by_facet <- function(data, facet_col, min_n = 10) {
 #' @param panel_facet Optional additional column name (string) to group by,
 #'   e.g. a geographic feature used to facet the plot into panels.
 #' @return A tibble: `facet_col` (and `panel_facet` if given), `n`, `dip_p`,
-#'   `bimodal`, `draw_dip_p` (whether n was large enough to plot a p-value).
+#'   `multimodal`, `draw_dip_p` (whether n was large enough to plot a p-value).
 #' @export
 dip_by_facet <- function(data, facet_col, min_n = 10, panel_facet = NULL) {
   group_cols <- c(facet_col, panel_facet)
@@ -64,7 +64,7 @@ dip_by_facet <- function(data, facet_col, min_n = 10, panel_facet = NULL) {
         tibble::tibble(
           n = nrow(.x),
           dip_p = dip$dip_p,
-          bimodal = isTRUE(dip$bimodal)
+          multimodal = isTRUE(dip$multimodal)
         )
       }
     ) |>
@@ -275,7 +275,7 @@ plot_outlier_distribution <- function(
       y = facet_label,
       x = 0,
       label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
-      colour = bimodal
+      colour = multimodal
     )) +
     ggplot2::geom_text(size = 14 / .pt) +
     ggplot2::scale_colour_manual(

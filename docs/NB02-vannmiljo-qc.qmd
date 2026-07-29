@@ -3,6 +3,8 @@ title: "NB02 3: Vannmiljø QC"
 author: "Sam Welch"
 date: last-modified
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 I am also confused over notebook numbering. We'll sort it out at some point. 

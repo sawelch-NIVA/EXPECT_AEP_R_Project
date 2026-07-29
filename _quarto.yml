@@ -1,66 +1,37 @@
 project:
   type: website
   output-dir: _site
-  
+  # Explicit render list, added 2026-07-29. Without this, `quarto render`
+  # rebuilds every .qmd in the project, which is the single biggest cost in the
+  # build. Only documents under active work belong here. Parked notebooks still
+  # exist on disk and can be rendered individually with
+  # `quarto render docs/<file>.qmd`; they are just not part of a project build.
+  render:
+    - index.qmd
+    - docs/NBXX-Sample-Groups.qmd
+    # - docs/NBXX-Triage.qmd   # Phase 2, once it exists
+
 website:
   title: "EXPECT Copper AEP"
   sidebar:
-    style: "docked"
+    style: "docked" 
     search: true
+    # Sidebar trimmed 2026-07-29 to match the render list above. Entries
+    # pointing at parked notebooks were removed: they would render as broken
+    # links, since those files are no longer built into _site.
     contents:
-      - section: "Planning & Admin"
-        contents:
-          - href: docs/_planning.qmd
-            text: "Planning and Todo"
-          - href: docs/_journals.qmd
-            text: "Target Journal"
       - section: "Article"
         contents:
           - href: index.qmd
             text: "Manuscript Draft"
       - section: "Notebooks"
         contents:
-          - href: docs/NB01-pipeline.qmd
-            text: "NB01 - Analysis Pipeline"
+          - href: docs/NBXX-Sample-Groups.qmd
+            text: "Sample Groups"
             icon: journal-code
-          - href: docs/NB02-vannmiljo.qmd
-            text: "NB02 - Vannmiljø"
-            icon: journal-code
-          - href: docs/NB02-vannmiljo-qc.qmd
-            text: "NB02 - Vannmiljø QC"
-            icon: journal-code
-          - href: docs/NB03-qc.qmd
-            text: "NB03 - QC"
-            icon: journal-code
-          - href: docs/NB03-visualisation.qmd
-            text: "NB03 - Visualisation"
-            icon: journal-code
-          - href: docs/NB04-map.qmd
-            text: "NB04 - Map"
-            icon: journal-code
-          - href: docs/NB05-network.qmd
-            text: "NB05 - Network Diagram"
-            icon: journal-code
-          - href: docs/NB06-WoE.qmd
-            text: "NB06 - Weight of Evidence"
-            icon: journal-code
-          - href: docs/NB07-emissions.qmd
-            text: "NB07 - Emissions"
-            icon: journal-code
-          - href: docs/NB08-ecology.qmd
-            text: "NB08 - Ecology"
-            icon: journal-code
-          - href: docs/NBXX-reparfjorden.qmd
-            text: "NBXX - Repparfjorden"
-            icon: journal-code
-      - section: "Appendices"
-        contents:
-          - href: docs/AP01-review-protocol.qmd
-            text: "AP01 - Review Protocol"
-            icon: file-earmark-plus
-          - href: docs/AP02-acknowledgements.qmd
-            text: "AP02 - Acknowledgements"
-            icon: file-earmark-plus
+          # - href: docs/NBXX-Triage.qmd   # Phase 2, once it exists
+          #   text: "Group Triage"
+          #   icon: journal-code
 
 # acronyms:
 #   keys:
@@ -93,7 +64,9 @@ format:
     grid:
       sidebar-width: 400px
     monofont: "Fira Code"
+    fig-height: 8
     fig-width: 12
+    embed-resources: true # experimental, avoids creating *_files folders
   # docx:
   #   reference-doc: custom-reference-doc.docx
   #   fig-width: 8

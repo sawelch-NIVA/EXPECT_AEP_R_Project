@@ -45,6 +45,7 @@ Imports:
     patchwork,
     pointblank,
     purrr,
+    ragg,
     readr,
     readxl,
     rlang,
@@ -60,7 +61,8 @@ Imports:
     tibble,
     tidygraph,
     tidyr,
-    viridis
+    viridis,
+    withr
 Remotes:
     NIVANorge/eDataDRF
 Config/roxygen2/version: 8.0.0

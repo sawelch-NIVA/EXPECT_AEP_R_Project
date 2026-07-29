@@ -9,6 +9,7 @@ format:
     fig-height: 20
 
 execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
   error: false                       # prevents errors from stopping the render
 ---
 
@@ -276,7 +277,7 @@ dip_results_year <- gadus_morhua_by_year |>
     draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
   mutate(
-    bimodal = dip_p < 0.05
+    multimodal = dip_p < 0.05
   )
 
 n_rows_year <- n_distinct(gadus_morhua_by_year$SAMPLING_YEAR) # used for consistent plot heights
@@ -311,7 +312,7 @@ dip_panel <- dip_results_year |>
     x = 0,
     # draw only if n > 4 (functional min for dip test)
     label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
-    colour = bimodal
+    colour = multimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
   scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#CC3311")) +
@@ -384,7 +385,7 @@ dip_results_site <- gadus_morhua_by_site |>
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value,
     draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
-  mutate(bimodal = dip_p < 0.05)
+  mutate(multimodal = dip_p < 0.05)
 
 n_rows_site <- n_distinct(gadus_morhua_by_site$SITE_CODE)
 ```
@@ -425,7 +426,7 @@ dip_panel_site <- dip_results_site |>
     y = SITE_CODE,
     x = 0,
     label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
-    colour = bimodal
+    colour = multimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
   facet_wrap(
@@ -512,7 +513,7 @@ dip_results_campaign <- gadus_morhua_by_campaign |>
     dip_p = dip.test(MEASURED_VALUE_STANDARD)$p.value,
     draw_dip_p = dip.test(MEASURED_VALUE_STANDARD)$nobs > 4
   ) |>
-  mutate(bimodal = dip_p < 0.05)
+  mutate(multimodal = dip_p < 0.05)
 
 n_rows_campaign <- n_distinct(gadus_morhua_by_campaign$CAMPAIGN_NAME)
 ```
@@ -545,7 +546,7 @@ dip_panel_campaign <- dip_results_campaign |>
     y = campaign_and_n,
     x = 0,
     label = ifelse(draw_dip_p, format(round(dip_p, 3), nsmall = 3), ""),
-    colour = bimodal
+    colour = multimodal
   )) +
   geom_text(size = ggplot_base_size / .pt) +
   scale_colour_manual(values = c("FALSE" = "grey40", "TRUE" = "#CC3311")) +

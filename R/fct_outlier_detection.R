@@ -50,19 +50,25 @@ flag_outliers <- function(x, min_n = 10) {
 
 #' Hartigan's Dip Test for Unimodality, Gated by Minimum Sample Size
 #'
+#' Tests the null hypothesis that `x` is drawn from a unimodal distribution.
+#' A significant result means unimodality is *rejected*; it does not identify
+#' how many modes there are, and in particular it is not a test for
+#' bimodality specifically. Hence `multimodal` rather than `bimodal`.
+#'
 #' Below `min_n`, the test is not run (it is unreliable, and errors outright
 #' below n = 4). TODO: Add citation
 #'
 #' @param x A numeric vector of measured values.
 #' @param min_n Minimum sample size required to run the test.
-#' @return A list with `dip_p` (p-value, or `NA`) and `bimodal` (logical,
-#'   `dip_p < 0.05`, or `NA`).
+#' @return A list with `dip_p` (p-value, or `NA`) and `multimodal` (logical:
+#'   `TRUE` where unimodality is rejected at `dip_p < 0.05`, or `NA` where the
+#'   test was not run).
 dip_test_safe <- function(x, min_n = 10) {
   if (length(x) < min_n) {
-    return(list(dip_p = NA_real_, bimodal = NA))
+    return(list(dip_p = NA_real_, multimodal = NA))
   }
   result <- diptest::dip.test(x)
-  list(dip_p = result$p.value, bimodal = result$p.value < 0.05)
+  list(dip_p = result$p.value, multimodal = result$p.value < 0.05)
 }
 
 #' Restrict Data to its Dominant Measured Unit
@@ -104,7 +110,7 @@ restrict_to_dominant_unit <- function(data) {
 #' @return A list: `group_label`, `data` (row-level data with flag and
 #'   Winsorized-value columns added), `n`, `n_dropped_unit` (rows excluded
 #'   for using a non-dominant unit), `min_n`, `stats_computed` (logical),
-#'   `dip_p`, `bimodal`, and `summary` (one-row tibble of descriptive stats).
+#'   `dip_p`, `multimodal`, and `summary` (one-row tibble of descriptive stats).
 #' @export
 outlier_group_analysis <- function(
   data,
@@ -161,7 +167,7 @@ outlier_group_analysis <- function(
     min_n = min_n,
     stats_computed = stats_computed,
     dip_p = dip$dip_p,
-    bimodal = dip$bimodal,
+    multimodal = dip$multimodal,
     summary = summary_stats
   )
 }

@@ -1,5 +1,18 @@
 ---
 title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability
+# Two outputs, added 2026-07-29: html for your own review, docx for sharing
+# with co-authors. Declared here rather than in _quarto.yml so that the docx
+# is only produced for the manuscript, not for every notebook in the project.
+format:
+  html: default
+  docx:
+    reference-doc: custom-reference-doc.docx
+    fig-width: 8
+    fig-height: 6
+    fig-dpi: 300
+    fig-format: png
+    link-citations: true
+    link-bibliography: true
 ---
 
 # Introduction
@@ -13,6 +26,7 @@ library(targets)
 library(here)
 library(tidyverse)
 library(flextable)
+pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
 
 here::i_am("index.qmd")
 ```
@@ -184,7 +198,7 @@ where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute dev
 
 #### Test for Non-Unimodal Distributions
 
-To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartiigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @HartiganiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
+To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartiigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @HartiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
 
 The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. 
 
@@ -245,71 +259,14 @@ tibble::tribble(
 
 ```{r}
 #| label: tbl-groups-summary
-#| tbl-caption: Summary statistics of datapoints grouped (sub-)compartment, species group, species, tissue, and geographical (sub-)feature. Groups where <= 100 have been excluded for reasons of space (81 groups, 1723 samples); please see supplementary information for full table. Outliers refers to proportion of data points flagged by both Tukey's Fences *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$); rows highlighted yellow when >=5% double-flagged. multimodal column gives p-value where Hartigans' dip test found significant non-unimodality (red text), empty row indicates non-significance, significantly unimodal, or insufficient n. At this point in the analysis, wet and dry weight means are calculated separately.
+#| tbl-caption: tbc
 
-summarised_literature_data <- tar_read(summarise_literature_data)
-
-# Flag groups with >5% outliers or non-unimodal distributions
-groups_summary_flagged <- summarised_literature_data |>
-  filter((n_double_outliers / n) > 0.05 | multimodal)
-
-summarised_literature_data_n_gt_100 <- summarised_literature_data |>
-  filter(n >= 100)
-
-# Build display table; stash flag columns so indices stay correct after arrange()
-tbl_data <- summarised_literature_data_n_gt_100 |>
-  mutate(
-    # Fold compartment + taxonomy into one column
-    Group = if_else(
-      ENVIRON_COMPARTMENT == "Biota",
-      paste(
-        coalesce(SPECIES_GROUP, "Unknown"),
-        coalesce(SAMPLE_SPECIES, "spp."),
-        coalesce(SAMPLE_TISSUE, "—"),
-        sep = " › "
-      ),
-      paste(ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB, sep = " › ")
-    ),
-    # Fold geographic feature columns
-    Location = paste(
-      SITE_GEOGRAPHIC_FEATURE,
-      SITE_GEOGRAPHIC_FEATURE_SUB,
-      sep = " › "
-    ),
-    Dates = paste0(format(date_min, "%Y"), "–", format(date_max, "%Y")),
-    N = as.integer(n),
-    # Fold mean, SD, and unit into one cell
-    `Mean ± SD` = sprintf("%.2g ± %.2g %s", mean, sd, unit),
-    Median = median,
-    Outliers = n_double_outliers,
-    `multimodal (p)` = if_else(
-      multimodal,
-      formatC(dip_p, digits = 2, format = "f"),
-      ""
-    ),
-    # Temp flags — recalculated after arrange() below
-    .is_multimodal = multimodal,
-    .is_outlier = (n_double_outliers / n) > 0.05,
-    .keep = "none"
-  ) |>
-  arrange(Group, Location)
-
-multimodal_idx <- which(tbl_data$.is_multimodal)
-outlier_idx <- which(tbl_data$.is_outlier)
-
-tbl_data |>
-  select(-.is_multimodal, -.is_outlier) |>
-  flextable() |>
-  theme_vanilla() |>
-  bold(part = "header") |>
-  colformat_double(j = "Median", digits = 2) |>
-  # Merge repeated values in grouping columns to reduce visual height
-  merge_v(j = c("Group", "Location", "Dates")) |>
-  color(i = multimodal_idx, j = "Multimodal (p)", color = "red") |>
-  bg(i = outlier_idx, bg = "#FFF3CD") |>
-  fontsize(size = 9, part = "all") |>
-  padding(padding = 2, part = "all") |>
-  autofit()
+# Same target as docs/NBXX-Sample-Groups.qmd, filtered to the large groups.
+# Highlight indices are recomputed inside sample_groups_flextable(), so they
+# stay aligned after this filter.
+tar_read(sample_groups_table) |>
+  filter(n >= 100) |>
+  sample_groups_flextable()
 ```
 
 

@@ -3,6 +3,8 @@ title: "Appendix 03 - CREED Criteria"
 author: "Sam Welch"
 date: last-modified
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 This text is transcripted from `STOPeData/inst/app/www/md/CREED_Copper_Purpose.yml`. Will make pretty at some point.

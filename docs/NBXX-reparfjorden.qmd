@@ -3,6 +3,8 @@ title: "Notebook XX - Repparfjorden Case Study"
 date: last-modified
 lightbox: true
 format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
 ---
 
 To do:
