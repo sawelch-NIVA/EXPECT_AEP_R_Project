@@ -42,26 +42,7 @@ qmd_header <- function(title) {
     .close = ">>",
     '---
 title: "<<title>>"
-format:
-  html:
-    fig-width: 16
-    fig-height: 20
-  docx:
-    fig-width: 16
-    fig-height: 20
-
-execute:
-  echo: false
-
-knitr:
-  opts_chunk:
-    dpi: 300
-    dev: "ragg_png"
-
-filters:
-  - flextable-qmd
-  - at: post-render
-    path: ../_extensions/flextable-qmd/unwrap-float.lua
+format: html
 ---
 
 ::: callout-note
@@ -207,7 +188,13 @@ write_or_append <- function(file_path, title, sections) {
       paste(c(qmd_header(title), sections), collapse = "\n\n"),
       file_path
     )
-    cat("Created", basename(file_path), "with", length(sections), "section(s)\n")
+    cat(
+      "Created",
+      basename(file_path),
+      "with",
+      length(sections),
+      "section(s)\n"
+    )
     return(invisible())
   }
 
@@ -223,15 +210,21 @@ write_or_append <- function(file_path, title, sections) {
   }
 
   cat(
-    "Appending", sum(missing), "new section(s) to", basename(file_path),
-    ":", paste(names(sections)[missing], collapse = ", "), "\n"
+    "Appending",
+    sum(missing),
+    "new section(s) to",
+    basename(file_path),
+    ":",
+    paste(names(sections)[missing], collapse = ", "),
+    "\n"
   )
   cat(
     paste(
       c(
         "",
         paste0(
-          "<!-- Sections appended ", Sys.Date(),
+          "<!-- Sections appended ",
+          Sys.Date(),
           " by scripts/generate_distribution_notebooks.R -->"
         ),
         sections[missing]

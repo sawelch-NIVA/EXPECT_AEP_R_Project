@@ -1044,6 +1044,56 @@ list(
     }
   ),
 
+  ### # Calculate a summary table per group
+  # - group by all categoricals, remove wet weight
+  # - calculate two outlier flags, dip-test for bimodality
+  # - TODO: Weighted means
+  tar_target(
+    name = summarise_literature_data,
+    command = {
+      load_literature_pqt |>
+        group_by(
+          ENVIRON_COMPARTMENT,
+          ENVIRON_COMPARTMENT_SUB,
+          SPECIES_GROUP,
+          SAMPLE_SPECIES,
+          SAMPLE_TISSUE,
+          SITE_GEOGRAPHIC_FEATURE,
+          SITE_GEOGRAPHIC_FEATURE_SUB,
+          # we split by unit type for summary
+          MEASURED_UNIT_STANDARD
+        ) |>
+        # include wet weight
+        filter(
+          !is.na(MEASURED_VALUE_STANDARD)
+        ) |>
+        mutate(
+          RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
+          log_val = log10(MEASURED_VALUE_STANDARD),
+          Q1 = quantile(log_val, 0.25),
+          Q3 = quantile(log_val, 0.75),
+          IQR = IQR(log_val) * 1.5,
+          outlier_RMZ = abs(RMZ) > 3.5,
+          outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR)
+        ) |>
+        reframe(
+          n = sum(MEASURED_N),
+          n_sources = length(unique(REFERENCE_ID)),
+          date_min = suppressWarnings(min(SAMPLING_DATE, na.rm = TRUE)),
+          date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
+          sd = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
+          mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
+          n_double_outliers = sum(outlier_RMZ & outlier_IQR),
+          median = median(MEASURED_VALUE_STANDARD),
+          unit = unique(MEASURED_UNIT_STANDARD),
+          # Hartigan's dip test for unimodality (NA below dip_test_safe()'s min_n)
+          dip_p = dip_test_safe(MEASURED_VALUE_STANDARD)$dip_p,
+          multimodal = dip_test_safe(MEASURED_VALUE_STANDARD)$bimodal
+        ) |>
+        arrange(desc(n))
+    }
+  ),
+
   ### # Data quality report ----
   # Check for missing data. Write a report for the Quarto.
   tar_target(
@@ -1105,8 +1155,8 @@ list(
   ),
 
   ## # Outlier Analysis ----
-  outlier_targets_compartment,
-  outlier_targets_biota,
+  # outlier_targets_compartment,
+  # outlier_targets_biota,
 
   ## # Toxicity Thresholds ----
 
@@ -1209,7 +1259,7 @@ list(
   ),
 
   #### # Outlier notebooks (per compartment / per biota species-group) ----
-  outlier_notebook_targets,
+  # outlier_notebook_targets,
 
   ### # Appendices ----
 

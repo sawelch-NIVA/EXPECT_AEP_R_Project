@@ -1,0 +1,130 @@
+---
+title: "Distributions: Aquatic > Aquatic Freshwater"
+format: html
+---
+
+::: callout-note
+This notebook was scaffolded by `scripts/generate_distribution_notebooks.R`
+from the outlier-analysis targets factory (`_targets.R`,
+`R/fct_outlier_groups.R`, `R/fct_outlier_detection.R`,
+`R/fct_outlier_report.R`). The plots/tables below are generated, but
+analysis and interpretation are added by hand, section by section.
+Re-running the generator only appends sections for groups not yet present
+here -- it never rewrites or removes anything you have written.
+
+See [NBXX-Outliers.qmd](NBXX-Outliers.qmd) for the fully hand-authored
+*G. morhua* liver case study this workflow was built from, including
+year/site/campaign breakdowns and the reasoning behind the outlier flags.
+:::
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(targets)
+library(patchwork)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.family = "Arial",
+  digits = 2,
+  theme_fun = theme_vanilla,
+  padding = 1
+)
+
+ggplot_base_size <- 20
+theme_set(theme_minimal(base_size = ggplot_base_size, base_family = "Aptos"))
+```
+
+## Freshwater
+
+Aquatic / Freshwater. Flags are computed separately within each year/site/campaign
+group below (Tukey fences x RMZ, `n < 10` not tested); the final
+figure compares Winsorization/trimming of the pooled distribution.
+
+TODO: add your own analysis/interpretation of this group here.
+
+```{r}
+#| label: read-Aquatic_Freshwater
+grp_Aquatic_Freshwater <- tar_read(outlier_compartment_Aquatic_Freshwater)
+grp_Aquatic_Freshwater$data <- grp_Aquatic_Freshwater$data |>
+  mutate(SAMPLING_YEAR = factor(year(SAMPLING_DATE)))
+grp_Aquatic_Freshwater_unit <- grp_Aquatic_Freshwater$summary$unit
+```
+
+```{r}
+#| label: fig-outlier-year-Aquatic_Freshwater
+#| fig-cap: "Aquatic / Freshwater: measured value by sampling year."
+#| fig-height: !expr outlier_fig_height(grp_Aquatic_Freshwater$data$SAMPLING_YEAR)
+plot_outlier_distribution(
+  grp_Aquatic_Freshwater$data,
+  facet_col = "SAMPLING_YEAR",
+  x_label = paste0("Measured value (", grp_Aquatic_Freshwater_unit, ")"),
+  y_label = "Year",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-year-Aquatic_Freshwater
+outlier_flag_table(flag_by_facet(
+  grp_Aquatic_Freshwater$data,
+  "SAMPLING_YEAR",
+  min_n = 10
+))
+```
+
+```{r}
+#| label: fig-outlier-site-Aquatic_Freshwater
+#| fig-cap: "Aquatic / Freshwater: measured value by site."
+#| fig-height: !expr outlier_fig_height(grp_Aquatic_Freshwater$data$SITE_CODE, base = 4)
+plot_outlier_distribution(
+  grp_Aquatic_Freshwater$data,
+  facet_col = "SITE_CODE",
+  x_label = paste0("Measured value (", grp_Aquatic_Freshwater_unit, ")"),
+  y_label = "Site",
+  panel_facet = "SITE_GEOGRAPHIC_FEATURE",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-site-Aquatic_Freshwater
+outlier_flag_table(flag_by_facet(
+  grp_Aquatic_Freshwater$data,
+  "SITE_CODE",
+  min_n = 10
+))
+```
+
+```{r}
+#| label: fig-outlier-campaign-Aquatic_Freshwater
+#| fig-cap: "Aquatic / Freshwater: measured value by campaign."
+#| fig-height: !expr outlier_fig_height(grp_Aquatic_Freshwater$data$CAMPAIGN_NAME_SHORT)
+plot_outlier_distribution(
+  grp_Aquatic_Freshwater$data,
+  facet_col = "CAMPAIGN_NAME_SHORT",
+  x_label = paste0("Measured value (", grp_Aquatic_Freshwater_unit, ")"),
+  y_label = "Campaign",
+  min_n = 10
+)
+```
+
+```{r}
+#| label: tbl-outlier-campaign-Aquatic_Freshwater
+outlier_flag_table(flag_by_facet(
+  grp_Aquatic_Freshwater$data,
+  "CAMPAIGN_NAME_SHORT",
+  min_n = 10
+))
+```
+
+```{r}
+#| label: fig-outlier-treatment-Aquatic_Freshwater
+#| fig-cap: "Aquatic / Freshwater: effect of outlier treatment on the pooled distribution."
+plot_outlier_treatment_comparison(
+  grp_Aquatic_Freshwater,
+  x_label = paste0("Measured value (", grp_Aquatic_Freshwater_unit, ")")
+)
+```

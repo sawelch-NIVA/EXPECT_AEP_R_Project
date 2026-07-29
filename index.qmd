@@ -4,6 +4,19 @@ title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Unders
 
 # Introduction
 
+```{r}
+#| label: setup
+#| include: false
+#| warning: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+
+here::i_am("index.qmd")
+```
+
 **Comment: Based on the eData manuscript I imagine a lot of this should be in the discussion. Would welcome your guidance on the most important messages here, I will summarise and move the rest. Language will be made more formal in time.**
 
 Copper is a vital nutrient across the tree of life (cite), a much needed raw resource in manufacturing and infrastructure (especially electrical), and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
@@ -141,97 +154,42 @@ Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as i
 - All tables merged together into single one
 - organised as unique compartments and sites
 
-```{r}
-#| label: summary of groups
-literature_merged_data <- tar_read(load_literature_pqt)
-
-robust_modified_z_score <- function(x) {
-  x_median <- median(x, na.rm = TRUE)
-  # mad() in R already includes the 1/0.6745 consistency factor
-  x_mad <- mad(x, na.rm = TRUE)
-  (x - x_median) / x_mad
-}
-
-groups_summary <- literature_merged_data |>
-  group_by(
-    ENVIRON_COMPARTMENT,
-    ENVIRON_COMPARTMENT_SUB,
-    SPECIES_GROUP,
-    SAMPLE_SPECIES,
-    SAMPLE_TISSUE,
-    SITE_GEOGRAPHIC_FEATURE,
-    SITE_GEOGRAPHIC_FEATURE_SUB
-  ) |>
-  # ignore wet weight, there's less of it and scaling is complicated
-  filter(
-    MEASURED_UNIT_STANDARD %in% c("mg/L", "mg/kg (dry)"),
-    !is.na(MEASURED_VALUE_STANDARD)
-  ) |>
-  mutate(
-    RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
-    log_val = log10(MEASURED_VALUE_STANDARD),
-    Q1 = quantile(log_val, 0.25),
-    Q3 = quantile(log_val, 0.75),
-    IQR = IQR(log_val) * 1.5,
-    outlier_RMZ = abs(RMZ) > 3.5,
-    outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR)
-  ) |>
-  reframe(
-    n = sum(MEASURED_N),
-    # we can't actually just take the mean, there's lots of other stuff to consider
-    mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
-    n_double_outliers = sum(outlier_RMZ & outlier_IQR),
-    median = median(MEASURED_VALUE_STANDARD),
-    unit = unique(MEASURED_UNIT_STANDARD)
-  ) |>
-  arrange(desc(n))
-
-# TODO Exclude irreg. units
-# TODO: Calculate distributions properly (with uncertainty)
-# Then pull mode, mean, whatever
-# Get number of outliers, do hartigan's dip test
-# Decide what to inspect based on that
-
-# for the sake of argument, flag any group with over 5% outliers
-groups_summary_flagged <- groups_summary |>
-  filter((n_double_outliers / n) > 0.05)
-
-groups_summary_flagged |> ggplot
-```
-
 ### Data Post-Processing
 
-As there is no single consensus test for outlier labelling (especially when the number of potential outliers is unknown), we use two common, simple approaches to flag potential outliers in each group.
+Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, and, in the case of biota, *species* and *tissue*. For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated.
 
-Data were grouped by combinations of *Environmental compartment*, *environmental subcompartment*, location, Site geographical feature, date, study, and in the case of biotic samples, Species and tissue, and distributions plotted, in order to visually review data. 
-
-Ultimately, our goal was to find statistically reasonable, plausible groups of kinetically,  environmentally, and geographically similar/contiguous matrices that could be used as KES in our AEPs.
-
-### Tukey fences (IQR method)
+#### Tests for Outliers
 
 The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally @tukeyExploratoryDataAnalysis1977 but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
 
-$$\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR$$
+$$
+\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR
+$${#eq-tukey}
 
-We apply fences to log-transformed values because concentrations are approximately log-normally distributed.
+We apply fences to log-transformed values because concentrations are approximately log-normally distributed (cite).
 
 Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
-
-### Robust Modified Z-Score
 
 The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distrubtions.
 
 For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
 
-$$\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}$$
+$$
+\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}
+$${#eq-rmz}
 
 where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute deviation. In R, `mad()` already scales MAD by a consistency factor ($\approx 1 / 0.6745$) to make it comparable to the standard deviation under normality
 
 @iglewiczHowDetectHandle1993 recommends a threshold of $|\text{RMZ}| > 3.5$ for outliers, and we have no reason to depart from this recommendation.
 
-To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @hartiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
+#### Test for Non-Unimodal Distributions
 
-The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. In the graphs below, p values below the threshold are highlighted in red.
+To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartiigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @HartiganiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
+
+The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. 
+
+Data were grouped by combinations of , date, study, and in the case of biotic samples, Species and tissue, and distributions plotted, in order to visually review data. 
+
 
 - Outliers were visually inspected
 - Metadata and comments were reviewed
@@ -278,6 +236,82 @@ tibble::tribble(
 ```
 
 # Results
+
+*Below table is obviously very big. Can be split into biota and non-biota? Or could summarise again? Also, do we need to add/remove any checks, e.g. AIC of normal vs. log-normal distributions*
+
+## Group Summary Statistics.
+
+<!-- TODO: n thresholds for Hartigans. Also dynamic update group/sample n slice reporting-->
+
+```{r}
+#| label: tbl-groups-summary
+#| tbl-caption: Summary statistics of datapoints grouped (sub-)compartment, species group, species, tissue, and geographical (sub-)feature. Groups where <= 100 have been excluded for reasons of space (81 groups, 1723 samples); please see supplementary information for full table. Outliers refers to proportion of data points flagged by both Tukey's Fences *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$); rows highlighted yellow when >=5% double-flagged. multimodal column gives p-value where Hartigans' dip test found significant non-unimodality (red text), empty row indicates non-significance, significantly unimodal, or insufficient n. At this point in the analysis, wet and dry weight means are calculated separately.
+
+summarised_literature_data <- tar_read(summarise_literature_data)
+
+# Flag groups with >5% outliers or non-unimodal distributions
+groups_summary_flagged <- summarised_literature_data |>
+  filter((n_double_outliers / n) > 0.05 | multimodal)
+
+summarised_literature_data_n_gt_100 <- summarised_literature_data |>
+  filter(n >= 100)
+
+# Build display table; stash flag columns so indices stay correct after arrange()
+tbl_data <- summarised_literature_data_n_gt_100 |>
+  mutate(
+    # Fold compartment + taxonomy into one column
+    Group = if_else(
+      ENVIRON_COMPARTMENT == "Biota",
+      paste(
+        coalesce(SPECIES_GROUP, "Unknown"),
+        coalesce(SAMPLE_SPECIES, "spp."),
+        coalesce(SAMPLE_TISSUE, "—"),
+        sep = " › "
+      ),
+      paste(ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB, sep = " › ")
+    ),
+    # Fold geographic feature columns
+    Location = paste(
+      SITE_GEOGRAPHIC_FEATURE,
+      SITE_GEOGRAPHIC_FEATURE_SUB,
+      sep = " › "
+    ),
+    Dates = paste0(format(date_min, "%Y"), "–", format(date_max, "%Y")),
+    N = as.integer(n),
+    # Fold mean, SD, and unit into one cell
+    `Mean ± SD` = sprintf("%.2g ± %.2g %s", mean, sd, unit),
+    Median = median,
+    Outliers = n_double_outliers,
+    `multimodal (p)` = if_else(
+      multimodal,
+      formatC(dip_p, digits = 2, format = "f"),
+      ""
+    ),
+    # Temp flags — recalculated after arrange() below
+    .is_multimodal = multimodal,
+    .is_outlier = (n_double_outliers / n) > 0.05,
+    .keep = "none"
+  ) |>
+  arrange(Group, Location)
+
+multimodal_idx <- which(tbl_data$.is_multimodal)
+outlier_idx <- which(tbl_data$.is_outlier)
+
+tbl_data |>
+  select(-.is_multimodal, -.is_outlier) |>
+  flextable() |>
+  theme_vanilla() |>
+  bold(part = "header") |>
+  colformat_double(j = "Median", digits = 2) |>
+  # Merge repeated values in grouping columns to reduce visual height
+  merge_v(j = c("Group", "Location", "Dates")) |>
+  color(i = multimodal_idx, j = "Multimodal (p)", color = "red") |>
+  bg(i = outlier_idx, bg = "#FFF3CD") |>
+  fontsize(size = 9, part = "all") |>
+  padding(padding = 2, part = "all") |>
+  autofit()
+```
+
 
 ## Distributions
 

@@ -53,15 +53,6 @@ gadus_morhua <- cod_liver$data |>
     .default = CAMPAIGN_NAME_SHORT
   )
 
-set_flextable_defaults(
-  font.size = 10,
-  font.family = "Arial",
-  digits = 2,
-  theme_fun = theme_vanilla,
-  padding = 1
-)
-
-
 str_wrap_br <- function(string, width) {
   str_wrap(string) |> str_replace_all("//n", "<br>")
 }

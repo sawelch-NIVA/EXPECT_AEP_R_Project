@@ -23,7 +23,10 @@ flag_by_facet <- function(data, facet_col, min_n = 10) {
     ) |>
     dplyr::group_by(dplyr::across(dplyr::all_of(facet_col))) |>
     dplyr::group_modify(
-      ~ dplyr::bind_cols(.x, flag_outliers(.x$MEASURED_VALUE_STANDARD, min_n = min_n))
+      ~ dplyr::bind_cols(
+        .x,
+        flag_outliers(.x$MEASURED_VALUE_STANDARD, min_n = min_n)
+      )
     ) |>
     dplyr::mutate(
       facet_label = paste0(
@@ -55,10 +58,16 @@ dip_by_facet <- function(data, facet_col, min_n = 10, panel_facet = NULL) {
   group_cols <- c(facet_col, panel_facet)
   data |>
     dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) |>
-    dplyr::group_modify(~ {
-      dip <- dip_test_safe(.x$MEASURED_VALUE_STANDARD, min_n = min_n)
-      tibble::tibble(n = nrow(.x), dip_p = dip$dip_p, bimodal = isTRUE(dip$bimodal))
-    }) |>
+    dplyr::group_modify(
+      ~ {
+        dip <- dip_test_safe(.x$MEASURED_VALUE_STANDARD, min_n = min_n)
+        tibble::tibble(
+          n = nrow(.x),
+          dip_p = dip$dip_p,
+          bimodal = isTRUE(dip$bimodal)
+        )
+      }
+    ) |>
     dplyr::ungroup() |>
     dplyr::mutate(draw_dip_p = n >= min_n)
 }
@@ -78,7 +87,12 @@ dip_by_facet <- function(data, facet_col, min_n = 10, panel_facet = NULL) {
 #' @param max_height Hard cap (inches) on the returned height.
 #' @return A single numeric value, for use as a `fig-height` chunk option.
 #' @export
-outlier_fig_height <- function(x, height_per_row = 0.5, base = 3, max_height = 80) {
+outlier_fig_height <- function(
+  x,
+  height_per_row = 0.5,
+  base = 3,
+  max_height = 80
+) {
   min(dplyr::n_distinct(x, na.rm = TRUE) * height_per_row + base, max_height)
 }
 
@@ -142,12 +156,12 @@ outlier_dotplot_binwidth <- function(x, bins = 40, min_binwidth = 0.005) {
   max(log_range / bins, min_binwidth)
 }
 
-#' Build a Flag-Coloured Distribution Plot with a Dip-Test Panel
+#' Build a Distribution Plot with a Dip-Test Panel
 #'
 #' Reproduces the "distribution by <facet>" figures used throughout the
-#' outlier notebooks: a box+dot plot coloured by outlier flag (computed
-#' within each level of `facet_col`), alongside a narrow panel of per-level
-#' dip-test p-values.
+#' outlier notebooks: a violin+box plot of values (computed within each
+#' level of `facet_col`), alongside a narrow panel of per-level dip-test
+#' p-values.
 #'
 #' @param data A data frame with a `MEASURED_VALUE_STANDARD` column.
 #' @param facet_col Column name (string) to group/facet the y-axis by, e.g.
@@ -173,47 +187,74 @@ plot_outlier_distribution <- function(
     dplyr::pick(dplyr::all_of(facet_col)),
     facet_label
   )
-  dip_results <- dip_by_facet(data, facet_col, min_n = min_n, panel_facet = panel_facet) |>
+  dip_results <- dip_by_facet(
+    data,
+    facet_col,
+    min_n = min_n,
+    panel_facet = panel_facet
+  ) |>
     dplyr::left_join(facet_label_map, by = facet_col)
 
-  fill_values <- c(
-    "neither" = "black",
-    "IQR" = "#0077BB",
-    "RMZ" = "#cc6811",
-    "both" = "#d51bcf",
-    "not tested" = "grey70"
-  )
-  fill_labels <- c(
-    "neither" = "Neither",
-    "IQR" = "IQR only",
-    "RMZ" = "RMZ only",
-    "both" = "Both",
-    "not tested" = "n < min_n (not tested)"
-  )
+  # --- Old dotplot representation (kept for reference) ---
+  # fill_values <- c(
+  #   "neither" = "black",
+  #   "IQR" = "#0077BB",
+  #   "RMZ" = "#cc6811",
+  #   "both" = "#d51bcf",
+  #   "not tested" = "grey70"
+  # )
+  # fill_labels <- c(
+  #   "neither" = "Neither",
+  #   "IQR" = "IQR only",
+  #   "RMZ" = "RMZ only",
+  #   "both" = "Both",
+  #   "not tested" = "n < min_n (not tested)"
+  # )
 
   main_plot <- flagged |>
-    ggplot2::ggplot(ggplot2::aes(y = facet_label, x = MEASURED_VALUE_STANDARD)) +
+    ggplot2::ggplot(ggplot2::aes(
+      y = facet_label,
+      x = MEASURED_VALUE_STANDARD
+    )) +
+    # ggplot2::geom_boxplot(
+    #   outliers = FALSE,
+    #   whisker.colour = "darkgrey",
+    #   staple.colour = "darkgrey",
+    #   box.colour = "darkgrey"
+    # ) +
+    # ggplot2::geom_dotplot(
+    #   ggplot2::aes(fill = dot_fill),
+    #   dotsize = 1,
+    #   binwidth = outlier_dotplot_binwidth(flagged$MEASURED_VALUE_STANDARD),
+    #   stackdir = "centerwhole",
+    #   binpositions = "all",
+    #   stroke = 0
+    # ) +
+    # ggplot2::scale_fill_manual(
+    #   values = fill_values,
+    #   labels = fill_labels,
+    #   name = "Outlier flags",
+    #   drop = FALSE
+    # ) +
+    # ggplot2::guides(
+    #   fill = ggplot2::guide_legend(override.aes = list(colour = NA, size = 5))
+    # ) +
+    # --- New violin + boxplot representation ---
+    ggplot2::geom_violin(
+      scale = "width",
+      fill = "grey85",
+      colour = "grey50",
+      alpha = 0.65,
+      width = 0.8
+    ) +
     ggplot2::geom_boxplot(
+      fill = NA,
+      width = 0.15,
       outliers = FALSE,
       whisker.colour = "darkgrey",
       staple.colour = "darkgrey",
       box.colour = "darkgrey"
     ) +
-    ggplot2::geom_dotplot(
-      ggplot2::aes(fill = dot_fill),
-      dotsize = 1,
-      binwidth = outlier_dotplot_binwidth(flagged$MEASURED_VALUE_STANDARD),
-      stackdir = "centerwhole",
-      binpositions = "all",
-      stroke = 0
-    ) +
-    ggplot2::scale_fill_manual(
-      values = fill_values,
-      labels = fill_labels,
-      name = "Outlier flags",
-      drop = FALSE
-    ) +
-    ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(colour = NA, size = 5))) +
     outlier_log10_scale(flagged$MEASURED_VALUE_STANDARD) +
     ggplot2::labs(y = y_label, x = x_label) +
     ggplot2::theme_minimal(base_size = 14) +
@@ -243,7 +284,10 @@ plot_outlier_distribution <- function(
     ) +
     ggplot2::labs(x = "p(not unimodal)", y = NULL) +
     ggplot2::theme_void(base_size = 14) +
-    ggplot2::theme(legend.position = "none", axis.title.x = ggplot2::element_text())
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x = ggplot2::element_text()
+    )
 
   if (!is.null(panel_facet)) {
     main_plot <- main_plot +
@@ -253,7 +297,9 @@ plot_outlier_distribution <- function(
       ggplot2::theme(strip.text = ggplot2::element_blank())
   }
 
-  main_plot + dip_panel + patchwork::plot_layout(widths = c(6, 1), guides = "collect")
+  main_plot +
+    dip_panel +
+    patchwork::plot_layout(widths = c(6, 1), guides = "collect")
 }
 
 #' Plot the Effect of Outlier Treatment on a Group's Distribution
@@ -267,7 +313,10 @@ plot_outlier_distribution <- function(
 #' @param x_label X-axis label for the concentration values.
 #' @return A ggplot object.
 #' @export
-plot_outlier_treatment_comparison <- function(result, x_label = "Measured value") {
+plot_outlier_treatment_comparison <- function(
+  result,
+  x_label = "Measured value"
+) {
   data <- result$data
   n_double <- sum(data$dot_fill == "both", na.rm = TRUE)
   trimmed_label <- paste0(
@@ -277,23 +326,48 @@ plot_outlier_treatment_comparison <- function(result, x_label = "Measured value"
   )
 
   plot_data <- dplyr::bind_rows(
-    dplyr::transmute(data, value = MEASURED_VALUE_STANDARD, treatment = "Unprocessed"),
-    dplyr::transmute(data, value = value_winsor_98, treatment = "Winsorized (98%)"),
-    dplyr::transmute(data, value = value_winsor_90, treatment = "Winsorized (90%)"),
+    dplyr::transmute(
+      data,
+      value = MEASURED_VALUE_STANDARD,
+      treatment = "Unprocessed"
+    ),
+    dplyr::transmute(
+      data,
+      value = value_winsor_98,
+      treatment = "Winsorized (98%)"
+    ),
+    dplyr::transmute(
+      data,
+      value = value_winsor_90,
+      treatment = "Winsorized (90%)"
+    ),
     data |>
       dplyr::filter(is.na(dot_fill) | dot_fill != "both") |>
-      dplyr::transmute(value = MEASURED_VALUE_STANDARD, treatment = trimmed_label)
+      dplyr::transmute(
+        value = MEASURED_VALUE_STANDARD,
+        treatment = trimmed_label
+      )
   ) |>
     dplyr::mutate(
       treatment = factor(
         treatment,
-        levels = c("Unprocessed", "Winsorized (98%)", "Winsorized (90%)", trimmed_label)
+        levels = c(
+          "Unprocessed",
+          "Winsorized (98%)",
+          "Winsorized (90%)",
+          trimmed_label
+        )
       )
     )
 
   plot_data |>
     ggplot2::ggplot(ggplot2::aes(x = value, y = treatment, fill = treatment)) +
-    ggplot2::geom_violin(scale = "width", colour = NA, alpha = 0.65, width = 0.8) +
+    ggplot2::geom_violin(
+      scale = "width",
+      colour = NA,
+      alpha = 0.65,
+      width = 0.8
+    ) +
     ggplot2::geom_boxplot(
       fill = NA,
       width = 0.08,

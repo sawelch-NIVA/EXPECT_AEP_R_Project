@@ -1,25 +1,6 @@
 ---
 title: "Distributions: Biota Compartment"
-format:
-  html:
-    fig-width: 16
-    fig-height: 20
-  docx:
-    fig-width: 16
-    fig-height: 20
-
-execute:
-  echo: false
-
-knitr:
-  opts_chunk:
-    dpi: 300
-    dev: "ragg_png"
-
-filters:
-  - flextable-qmd
-  - at: post-render
-    path: ../_extensions/flextable-qmd/unwrap-float.lua
+format: html
 ---
 
 ::: callout-note
