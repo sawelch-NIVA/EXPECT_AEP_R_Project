@@ -131,10 +131,95 @@ The goal is a contact sheet you can read in one sitting.
       2. Constructing filenames by hand removed the chunk's `tar_read(triage_pilot_plots)` call, which was the **only thing giving the render target its dependency on the plots** — so Quarto rendered before the PNGs existed and every image came out "not available". The chunk now validates against the target's own output, keeping the dependency live.
       112 tests passing.
 
-- [ ] **P1.2** `write_triage_plot(plot, group_slug, plot_name, dir)` returning a file path. Fixed canvas size, PNG via ragg, so a 40,000-row group and a 150-row group produce the same-sized artefact.
-- [ ] **P1.3** `tar_map()` over groups with **`n >= 100`**, `format = "file"`, writing `_triage/<slug>-<plot_name>.png`. Groups below 100 are decided from the summary table alone and never get a panel.
-- [ ] **P1.4** Add a triage ranking to `summarise_literature_data`. Keep it dumb: **sort by `n` descending**, and show flag columns alongside (`n_references == 1`, outlier fraction \> 5%, `multimodal`, CV, number of distinct units, plus the P1.0 drop count). Do not build a composite score. The flags are for your eye, not for arithmetic.
-- [ ] **P1.5** **Fix the outlier-fraction denominator.** In `summarise_literature_data`, `n = sum(MEASURED_N)` (total measurements) but `n_double_outliers = sum(outlier_RMZ & outlier_IQR)` (count of **rows**). The ratio `n_double_outliers / n` therefore divides a row count by a measurement count, so the flag systematically under-fires wherever `MEASURED_N > 1`. It currently trips on 20 of 245 groups; the true figure is higher. **Not fixed in Phase 0 because it changes a reported statistic, which is your call, not mine.** Options: divide by row count instead, or weight the outlier count by `MEASURED_N`. Cheap either way, but decide before the Phase 2 decisions rest on it.
+- [x] **P1.1g** ✅ **2026-07-30. Thresholds, headings, table links, layout.**
+      `R/fct_threshold_match.R` (new) matches `copper_toxicity_thresholds` to a
+      group by compartment, unit and taxon. Read its header before interpreting
+      any line: the comparators are borrowed across compartments, species and
+      tissues, deliberately, and are a sanity check rather than an assessment.
+      Mapping: all non-marine water to the freshwater classes, marine and
+      brackish to coastal, sediment to (marine) sediment, terrestrial blank;
+      vertebrates to *G. morhua*, invertebrates to *M. edulis*, algae and the
+      catch-all groups blank. Units are **matched, never converted**, so
+      wet-weight biota get PROREF, dry-weight invertebrates fall through to the
+      ICES BAC, and dry-weight vertebrates get nothing.
+      **Corrected the threshold data itself.** Freshwater and sediment boundaries
+      were misaligned by one row against their own comments (sediment had two
+      classes sharing an upper boundary of 20). Copper has no Class III in
+      either: M-608 runs Class II into Class IV. Now
+      `c(0.3, 7.8, 15.6, NA)` and `c(20, 84, 147, NA)` over four classes.
+      **Presentation, second attempt.** The first put rotated labels beside each
+      line; with the shared axis spanning up to 12.3 orders and the boundaries
+      inside about one, three labels landed within 7% of the panel width and
+      stacked illegibly. Class names now sit on a **secondary axis** and the
+      panels carry no text at all. Colour and linetype are keyed on the class
+      *number* (muted MD blue-green-ochre-orange-red, dotted through to solid),
+      so Poor stays orange despite Class III being absent, and a dataset that
+      does have a Class III picks up the third style with nothing reordered.
+      **Two bugs worth remembering:** (1) `stat_bin2d()` takes its binning range
+      from the *shared scale*, not its own layer, so a label at `y = Inf` pushed
+      that range to infinity, the stat asked for over a million bins and failed
+      outright, drawing no heatmap. Panels (c) and (d) now count explicitly and
+      draw `geom_tile(height = 1)`, which also fixed the band-height gaps (0.179
+      of a row pitch of 1.0). (2) A class-number regex `(I{1,3}|IV|V)` matched the
+      bare `I` inside `(IV)`, styling Poor as Background. Ordered alternation is
+      load-bearing. Caught by eye on a prototype, not by any numeric check.
+      Also: hierarchical headings (six levels, unit not a level, unit variants
+      share a heading and an anchor), siblings ordered by summed `MEASURED_N`,
+      summary-table hyperlinks into the 24 sections (opt-in per document, so the
+      manuscript does not carry dead anchors into its docx), `theme_minimal()` via
+      a shared `triage_theme()`, dotted grey60 trendline over a solid white halo,
+      and `docs/_metadata.yml` for notebook-wide `page-layout: full` /
+      `toc-depth: 6`. 237 tests passing, up from 112.
+      **Come back to:** panel (b) draws threshold lines but omits the class axis,
+      because on a vertical axis the numerals collide (II and IV are 0.24 orders
+      apart on a 10.7-order axis) and the rotated title crowds the legend. No
+      better idea yet, and these are triage plots.
+
+- [x] **P1.2** ✅ **2026-07-30.** Delivered as `write_triage_plots_for_group()`: fixed 8x5in / 150dpi canvas, PNG via `ragg::agg_png`, returning the written paths.
+- [x] **P1.3** ✅ **2026-07-30, by a different design.** One `triage_pilot_plots` target with `format = "file"` writing all 125 PNGs to `triage/`, rather than a `tar_map()` over groups. Ticked off as-is on Sam's call.
+      **Known cost, so it is not a surprise later:** invalidation is all-or-nothing. Editing any plot function redraws all 125 PNGs, measured at 1m 20s to 2m 20s. A `tar_map()` would redraw only the affected group's five. Revisit only if that wait starts to bite.
+      Note the directory is `triage/`, not `_triage/` as this item originally said: Quarto skips underscore-prefixed directories as project resources, which broke every linked image.
+- [x] **P1.4** ✅ **2026-07-30.** Ranked by `n` descending, no composite score.
+      `R/fct_triage_flags.R` holds `add_triage_flags()`, which the
+      `summarise_literature_data` target now ends with, plus `group_flag_text()`
+      and `group_summary_line()`. The summary table and the per-group text under
+      each triage heading read the **same** function, and a test walks every
+      group asserting the highlighting and the prose agree.
+      **Scope pulled back from what this item originally listed**, on Sam's call
+      2026-07-30, and the reasoning is worth keeping because it will recur:
+      - `n_references == 1` **dropped as a flag.** It fired on 234 of 245 groups.
+        Vannmiljø is one `REFERENCE_ID` covering monitoring for the whole of
+        Norway, so a single source is the normal state of this dataset, not an
+        exception. Flagging the baseline left 236 of 245 groups flagged and
+        buried the signals that discriminate. `n_sources` is still reported.
+      - **CV removed entirely, and no replacement added.** Measured on this data,
+        CV correlated **0.96** (Spearman) with max/median across the 51 groups
+        with `n >= 20`: it tracked the single largest value, not the spread.
+        Dropping one row of 4,969 from Marine/Salt Water moved CV from 40.7 to
+        4.7, while a log-scale spread measure moved 2.9 to 2.8. It was also
+        redundant, being exactly `sd / mean` with both already reported.
+        Geometric SD and the interquartile ratio were offered as defensible
+        log-scale alternatives and **declined**: a spread statistic that cannot be
+        justified in the methods section is worse than none.
+      - Drop proportion and unit count are **columns, not flags**, which is what
+        this item asked for. A 90% drop rate is reported and not warned about.
+      **The flag set is now exactly two**, both predating this work: outlier
+      fraction > 5% and the dip test. `triage_flag_limits()` carries a note that
+      adding a third is Sam's call, and a test asserts the set has not grown.
+      287 tests passing.
+- [x] **P1.5** ✅ **2026-07-30. Weighted by `MEASURED_N`**, per Sam's decision.
+      `n_double_outliers` is now `sum((outlier_RMZ & outlier_IQR) * MEASURED_N)`,
+      so numerator and denominator are both measurement counts. The old row count
+      is retained as `n_outlier_rows` so the change stays auditable.
+      **Measured effect:** 20 groups flagged before, **22** after; nothing
+      un-flagged. Small in count because most groups have `MEASURED_N == 1`
+      throughout, but large where it bites: an Aquatic Sediment group went 3.7% to
+      **15.9%** (6 outlier rows carrying 26 measurements) and a *G. morhua* group
+      3.9% to **11.8%**. `na.rm = TRUE` because `robust_modified_z_score()`
+      returns `NA` where the MAD is zero, so untested rows count as
+      non-outliers, which is the conservative direction.
+
+- [ ] ~~**P1.5** **Fix the outlier-fraction denominator.**~~ Superseded above. In `summarise_literature_data`, `n = sum(MEASURED_N)` (total measurements) but `n_double_outliers = sum(outlier_RMZ & outlier_IQR)` (count of **rows**). The ratio `n_double_outliers / n` therefore divides a row count by a measurement count, so the flag systematically under-fires wherever `MEASURED_N > 1`. It currently trips on 20 of 245 groups; the true figure is higher. **Not fixed in Phase 0 because it changes a reported statistic, which is your call, not mine.** Options: divide by row count instead, or weight the outlier count by `MEASURED_N`. Cheap either way, but decide before the Phase 2 decisions rest on it.
 
 **Budget check:** at `n >= 100`, expect roughly **30-50 groups** rather than the 60-100 at `n >= 30`. At 2-3s x 5 plots that is 8-13 min single-threaded, a few minutes across crew workers. Runs once, then targets caches each PNG independently, so editing one plot function only invalidates that plot across groups.
 
@@ -148,11 +233,29 @@ The goal is a contact sheet you can read in one sitting.
 
 **This is the Friday deliverable, and it is the only thing that matters this week.**
 
-- [ ] **P2.1** `docs/NBXX-Triage.qmd`: a contact sheet embedding the panels as images in rank order, each above its summary-table row. This is a working document, not a publication artefact. It replaces all 14 distributions notebooks for now.
-- [ ] **P2.2** Scaffold `data/clean/group_decisions.csv` with one row per group, pre-filled with the group key, `n`, and flags, and an empty `decision` column.
+- [x] **P2.1** ✅ **2026-07-30, satisfied by `docs/NBXX-Sample-Groups.qmd`** rather than by a new file. It already embeds the panels as linked images, one row of five views per group, under a hierarchical heading tree, above a summary table that links into each section. A second near-identical notebook would be duplication, and the 14 distributions notebooks it was meant to replace are already gone (P0.2).
+      Also widened from a 25-group sample to **all 27 groups with `n >= 100`** (`n_sample = Inf`). At 25 there were two eligible groups with no panels and nothing on the page to say they were missing rather than absent.
+      **Difference from this item as written:** ordering is hierarchical with siblings ranked by `sum(MEASURED_N)`, not flat rank order. Nesting is what makes 27 groups navigable, and the summary table above is already strictly rank-ordered, so rank order is available where it is useful.
+- [x] **P2.2** ✅ **2026-07-30.** `R/fct_group_decisions.R` plus `scripts/scaffold_group_decisions.R`, which writes `data/clean/group_decisions.csv`: 245 rows, the full group key, `species_common_name`, `rank`, `n`, `n_sources`, `cum_pct`, `tier`, both flags, and empty `decision` / `lump_into` / `notes`.
+      **Scaffolding is a hand-run script, not a target.** The pipeline reads the file (`group_decisions` target, which also warns when groups in the data are absent from the file) and never writes it. Writing a hand-edited file from a target is how an afternoon of judgement gets silently overwritten by a rebuild.
+      **The scaffold is an idempotent merge**, so it is safe to re-run whenever new data arrives: machine context (`n`, coverage, flags) refreshes, `decision` / `lump_into` / `notes` are never touched, new groups append as undecided, and a *decided* group that has vanished warns rather than disappearing quietly. Same cache-versus-curation split as section 10. `read_group_decisions()` validates the vocabulary and warns on a `lump` with no `lump_into`. 24 tests.
 - [ ] **P2.3** **You read the contact sheet and fill in the decisions.** No automation. Work down from largest n.
 
-**Definition of done for Friday:** every group covering the top 90% of total measurements has a `decision`. In practice that is probably the top 30-50 rows, not all 300. Everything below the line defaults to `lump` or `drop` and can be revisited if a specific system needs it.
+**Definition of done, revised 2026-07-30 after measuring it.** The original wording was "every group covering the top 90% of total measurements", guessed at "probably the top 30-50 rows". The real distribution is far more skewed than that:
+
+| Coverage | Groups needed |
+|---|---|
+| 50% | **2** |
+| 75% | 3 |
+| 90% | **7** |
+| 95% | 17 |
+| 99% | 85 |
+
+183 of 245 groups have `n < 30`. So the literal Friday criterion is **7 decisions**, which is an hour, not two days. All 7 already have panels, as do all 17 of the top 95%.
+
+**The criterion is also aimed at the wrong thing, and this matters more than the count.** Measurement volume is dominated by Vannmiljø water and sediment monitoring, so the top 90% is 4 abiotic groups plus 3 biota groups (two of them the same *Mytilus edulis* / soft tissue group in different site types). That gives almost no biota diversity. The biota groups an AEP needs as nodes are nearly all small: **62 of the 68 `top99` groups are Biota**, sitting between `n = 20` and `n = 218`. Algae, one of the systems P3.5 names, does not appear until well below the 95% line (*Ascophyllum nodosum* 75 rows, *Fucus vesiculosus* 71).
+
+**Recommended replacement:** decide all **17** groups down to 95% coverage, *plus* every group needed for AEP node coverage regardless of `n`, driven by the systems chosen in P3.5. Ranking by `n` is the right way to order the work; it is the wrong way to decide where to stop.
 
 **Explicitly not this week:** report cards, EPEQ scoring, edges, any AEP rendering, any repo cleanup beyond Phase 0.
 
@@ -211,6 +314,54 @@ Real problems (see `CLAUDE.md` section 3) that must not eat working days before 
 - Half-migrated frontmatter between commits `9134762` and `8ad2d1f`.
 - `DESCRIPTION` placeholder license, missing imports, one test file.
 - 4.6 MB `references.bib`, 770 KB `manifest.json`, \~190 orphaned `.quarto/quarto-session-temp*` directories.
+
+### Split the species-name cache from the curation layer
+
+Noted 2026-07-30 while the reasoning was fresh. **An important pattern, not an
+important task right now.** Roughly 30-45 minutes including tests, and the
+current state works (94 of 128 species named, 99% of biota rows by volume).
+
+`data/clean/species_common_names_cache.csv` currently does two jobs with
+different lifecycles: it stores what the API said (reproducible, disposable,
+regenerable) *and* it is the only place a hand correction could live
+(irreplaceable). Because they share one file, the cache cannot safely be deleted
+to force a refresh, which is the opposite of what a cache is for. Hand edits
+survive today only because `get_common_names()` never re-queries a species
+already present, i.e. by accident rather than by design.
+
+The pattern, if and when it is worth doing:
+
+1. **Machine cache**, append-only, never hand-edited, safe to delete. One row per
+   (query, source) **including negative results**, so a species with genuinely no
+   English name is not re-queried forever and "never asked" stays distinguishable
+   from "asked, no answer".
+2. **Override file**, hand-written, never machine-written, committed, with a
+   `reason` column so a decision is reviewable later and defensible in the
+   methods.
+3. **One resolver** owning the precedence `override > source[1] > source[2] > NA`,
+   emitting a `name_source` column.
+
+Plus the piece that actually closes the loop: a **curation-todo target** listing
+unresolved species by data volume, *with the candidate names the APIs returned*.
+New data repopulates it automatically; the negative cache stops it re-proposing
+what has already been rejected. Same shape as `group_decisions.csv`: pipeline
+proposes, human decides in a CSV, pipeline reads and never writes.
+
+Two traps worth recording:
+
+- **Name resolution and attribute lookup are different problems.** `Eukronia
+  hamata` in the data is a misspelling of `Eukrohnia hamata`, which resolves
+  fine. Fuzzy name resolution belongs upstream, with its own overrides;
+  otherwise every typo looks like a missing common name and the same organism
+  gets curated twice.
+- **Not everything unnamed is a species.** `Bunndyr` (Norwegian for benthic
+  fauna) and `Zooplankton epilimnion` should fail validation on the way in, not
+  sit in a curation queue. Wants a `not_a_species` bucket.
+
+Rejected alternatives: a database (loses reviewable diffs, which is the whole
+point at this scale); `memoise`/`cachem` (opaque binary, cannot be a curation
+surface); the `targets` store (disposable by design, so human decisions must not
+live there).
 
 **One exception worth doing if the pipeline is genuinely costing you time:** cut the number of rendered notebooks. Roughly 34 `.qmd` files currently render on every full build, of which \~20 are unreachable from the sidebar anyway. Phase 0.2 plus Phase 2.1 removes 14 of them on their own. Render cost is the main pipeline slowness; repo size is mostly not.
 

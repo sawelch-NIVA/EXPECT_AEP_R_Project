@@ -1,0 +1,28 @@
+# Shared frontmatter for every notebook under docs/.
+#
+# Added 2026-07-30. Quarto applies _metadata.yml to all documents in its
+# directory and below, and nothing above it. That is the property we want:
+# these settings suit the contact-sheet notebooks and would be wrong for
+# index.qmd, which is the manuscript and sits in the project root.
+#
+# The name is fixed by Quarto. A file called anything else (_docs.yml, say) is
+# ignored silently, with no warning.
+
+format:
+  html:
+    # Wide plot rows need width more than they need a floating table of
+    # contents. In the default article layout the TOC occupies the right
+    # gutter, so any content outset to the right collided with it; full layout
+    # gives the body the width instead and removes the collision at source.
+    page-layout: full
+    lightbox: true
+    # Group headings run to six levels (see triage_heading_cols()), and the
+    # project default of 3 hid everything below species group.
+    toc-depth: 6
+    toc-expand: 2
+    # Overrides the project-level embed-resources: true. With ~135 images the
+    # base64 inflation (+33%) and the up-front decode of every image, including
+    # those below the fold, make the contact sheet sluggish to scroll. Linked
+    # files load lazily instead. Cost: the HTML is no longer self-contained and
+    # needs triage/ alongside it.
+    embed-resources: false

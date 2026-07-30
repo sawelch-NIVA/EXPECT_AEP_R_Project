@@ -21,12 +21,22 @@
 #' document applies (e.g. the manuscript showing only large groups) stays
 #' consistent with the highlighting.
 #'
+#' `.anchor` is computed for every row, but nothing is linked unless a document
+#' asks: see the `link_sections` argument of [sample_groups_flextable()]. The
+#' anchors only resolve in the triage notebook, and the manuscript reads this
+#' same target, so linking by default would put dead anchors into `index.qmd` and
+#' from there into the docx.
+#'
 #' @param summary_data The `summarise_literature_data` target.
 #' @return A tibble sorted by `group`, `location`, with columns `group`,
 #'   `location`, `dates`, `n`, `mean_sd`, `median`, `n_outliers`,
-#'   `dip_p_label`, `.is_multimodal`, `.is_outlier`.
+#'   `dip_p_label`, `.is_multimodal`, `.is_outlier`, `.anchor`.
 #' @export
 build_sample_groups_table <- function(summary_data) {
+  # Computed before the .keep = "none" mutate below, which discards the key
+  # columns the anchor is derived from.
+  anchors <- heading_anchor(summary_data)
+
   summary_data |>
     dplyr::mutate(
       # Fold compartment + taxonomy into one column
@@ -50,14 +60,23 @@ build_sample_groups_table <- function(summary_data) {
         .data$SITE_GEOGRAPHIC_FEATURE_SUB,
         sep = " › "
       ),
-      dates = paste0(
+      # A range of one year collapses to that year: "2005" not "2005–2005".
+      # 165 of 245 groups are single-year, so this is the common case.
+      dates = dplyr::if_else(
+        format(.data$date_min, "%Y") == format(.data$date_max, "%Y"),
         format(.data$date_min, "%Y"),
-        "–",
-        format(.data$date_max, "%Y")
+        paste0(format(.data$date_min, "%Y"), "–", format(.data$date_max, "%Y"))
       ),
       n = as.integer(.data$n),
-      # Fold mean, SD, and unit into one cell
-      mean_sd = sprintf("%.2g ± %.2g %s", .data$mean, .data$sd, .data$unit),
+      # Fold mean, SD, and unit into one cell. The SD is dropped where it is NA,
+      # which is any group with a single measurement: sd() of one value is NA, and
+      # "3.2 ± NA mg/kg (dry)" claims a failed calculation rather than an absent
+      # one. 67 of 245 groups are in this position.
+      mean_sd = dplyr::if_else(
+        is.na(.data$sd),
+        sprintf("%.2g %s", .data$mean, .data$unit),
+        sprintf("%.2g ± %.2g %s", .data$mean, .data$sd, .data$unit)
+      ),
       median = .data$median,
       n_outliers = .data$n_double_outliers,
       # Blank rather than NA where the dip test was not run (n below min_n)
@@ -66,13 +85,20 @@ build_sample_groups_table <- function(summary_data) {
         formatC(.data$dip_p, digits = 2, format = "f"),
         ""
       ),
-      # `%in% TRUE` keeps untested (NA) groups out of the highlight sets
-      .is_multimodal = .data$multimodal %in% TRUE,
-      # NOTE: n is sum(MEASURED_N) but n_double_outliers counts rows, so this
-      # ratio is not apples-to-apples and under-fires where MEASURED_N > 1.
-      # See PLAN.md P1.5 -- deliberately left as-is pending a decision.
-      .is_outlier = (.data$n_double_outliers / .data$n) > 0.05 &
-        !is.na(.data$n_double_outliers),
+      n_units = .data$n_units,
+      # "<1%" rather than a rounded "0%", which reads as "none dropped" when it
+      # means "a few dropped". Blank only where nothing was dropped at all.
+      dropped_label = dplyr::case_when(
+        is.na(.data$prop_dropped) | .data$prop_dropped == 0 ~ "",
+        .data$prop_dropped < 0.005 ~ "<1%",
+        .default = paste0(round(100 * .data$prop_dropped), "%")
+      ),
+      # Flags come from add_triage_flags(), the same source the notebook's
+      # per-group warning text reads, so the highlighting here and the prose
+      # there cannot disagree about what is flagged.
+      .is_multimodal = .data$flag_multimodal,
+      .is_outlier = .data$flag_outliers,
+      .anchor = anchors,
       .keep = "none"
     ) |>
     # `.keep = "none"` leaves columns that already existed in the input (n,
@@ -87,10 +113,17 @@ build_sample_groups_table <- function(summary_data) {
       "median",
       "n_outliers",
       "dip_p_label",
+      "n_units",
+      "dropped_label",
       ".is_multimodal",
-      ".is_outlier"
+      ".is_outlier",
+      ".anchor"
     ) |>
-    dplyr::arrange(.data$group, .data$location)
+    # Ranked by n descending (PLAN.md P1.4), not alphabetically: the point of the
+    # table is to work down from the groups carrying the most data. Note this
+    # scatters repeated group labels, so merge_v() in the formatter collapses
+    # fewer runs than it did under the old group/location ordering.
+    dplyr::arrange(dplyr::desc(.data$n))
 }
 
 #' Render the Sample-Groups Table as a flextable
@@ -100,15 +133,27 @@ build_sample_groups_table <- function(summary_data) {
 #' table before calling this (as the manuscript does, to show only large
 #' groups) keeps the highlighting aligned.
 #'
+#' Linking is opt-in. Pass `link_sections` the heading anchors that actually
+#' exist as sections in the calling document (from
+#' `sample_triage_groups()$heading_slug`) and those rows get their `group` cell
+#' rendered as an internal link; every other row stays plain text, so the
+#' 220-odd untriaged groups do not advertise dead anchors. The default of `NULL`
+#' links nothing, which is what `index.qmd` needs: it reads the same target but
+#' contains none of the sections, and its docx output would carry the dead links
+#' outward.
+#'
 #' @param tbl Output of [build_sample_groups_table()], optionally filtered.
+#' @param link_sections Character vector of anchors present in this document, or
+#'   `NULL` to link nothing.
 #' @return A `flextable` object.
 #' @export
-sample_groups_flextable <- function(tbl) {
+sample_groups_flextable <- function(tbl, link_sections = NULL) {
   multimodal_idx <- which(tbl$.is_multimodal)
   outlier_idx <- which(tbl$.is_outlier)
+  linked_idx <- which(!is.na(tbl$.anchor) & tbl$.anchor %in% link_sections)
 
-  tbl |>
-    dplyr::select(-".is_multimodal", -".is_outlier") |>
+  ft <- tbl |>
+    dplyr::select(-".is_multimodal", -".is_outlier", -".anchor") |>
     flextable::flextable() |>
     flextable::set_header_labels(
       group = "Group",
@@ -118,16 +163,49 @@ sample_groups_flextable <- function(tbl) {
       mean_sd = "Mean ± SD",
       median = "Median",
       n_outliers = "Outliers",
-      dip_p_label = "Multimodal (p)"
+      dip_p_label = "Multimodal (p)",
+      n_units = "Units",
+      dropped_label = "Dropped"
     ) |>
     flextable::theme_vanilla() |>
     flextable::bold(part = "header") |>
     flextable::colformat_double(j = "median", digits = 2) |>
     # Merge repeated values in grouping columns to reduce visual height
     flextable::merge_v(j = c("group", "location", "dates")) |>
+    # Exactly two highlights, matching the two flags. `Units` and `Dropped` are
+    # informational columns and are deliberately not highlighted.
     flextable::color(i = multimodal_idx, j = "dip_p_label", color = "red") |>
     flextable::bg(i = outlier_idx, bg = "#FFF3CD") |>
     flextable::fontsize(size = 9, part = "all") |>
-    flextable::padding(padding = 2, part = "all") |>
-    flextable::autofit()
+    flextable::padding(padding = 2, part = "all")
+
+  # Link the triaged rows only. compose() replaces the cell content wholesale,
+  # so it has to be handed the label as well as the href.
+  #
+  # `props` is load-bearing, not decoration. flextable emits
+  # `<a href><span class="cl-..."></span></a>`, putting its own inline colour on
+  # the span INSIDE the anchor, so the span wins over any link styling the page
+  # supplies. Without explicit props the links render as ordinary black text,
+  # identical to the 200-odd unlinked rows: they work, but nothing tells you
+  # which 27 cells are clickable. This sets the colour and underline on the span
+  # itself, which is the only level that survives.
+  if (length(linked_idx) > 0) {
+    ft <- flextable::compose(
+      ft,
+      i = linked_idx,
+      j = "group",
+      value = flextable::as_paragraph(
+        flextable::hyperlink_text(
+          x = tbl$group[linked_idx],
+          url = paste0("#", tbl$.anchor[linked_idx]),
+          props = flextable::fp_text_default(
+            color = "#1A6FA8",
+            underlined = TRUE
+          )
+        )
+      )
+    )
+  }
+
+  flextable::autofit(ft)
 }

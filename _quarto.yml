@@ -46,7 +46,7 @@ execute:
 
 knitr:
   opts_chunk:
-    dpi: 300                         # belt-and-suspenders for knitr devices
+    dpi: 300                         # belt-and-braces for knitr devices
     dev: "ragg_png"                  # use ragg for better font rendering
 
 filters:

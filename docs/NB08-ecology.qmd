@@ -103,8 +103,11 @@ species_have_trophic <- biota_data_summary |>
   filter(!is.na(Functional_Group)) |>
   nrow()
 
+# nrow(), not the data frame itself: {biota_data_summary} interpolated the whole
+# tibble into the sentence rather than a count.
 message(glue(
-  "Trophic data available for {species_have_trophic} of {biota_data_summary} species."
+  "Trophic data available for {species_have_trophic} of ",
+  "{nrow(biota_data_summary)} species."
 ))
 ```
 

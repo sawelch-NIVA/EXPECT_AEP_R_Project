@@ -813,7 +813,18 @@ list(
   ),
 
   ### # Get biota common names ----
-  # Get common names from taxize if there are any new ones. Uses an API call.
+  # English common names, so a reader has some intuition for whether a value is
+  # plausible for the organism. Cached to CSV, so the APIs are hit once per
+  # species and only for species not already there.
+  #
+  # WoRMS first, NCBI second (changed 2026-07-30). NCBI only carries common names
+  # for taxa it happens to have annotated, which left 55 of 126 species unnamed
+  # including Fucus vesiculosus and Littorina littorea. WoRMS is the authoritative
+  # register for marine species and this dataset is overwhelmingly marine; adding
+  # it took coverage from 71 to 94 of 128 species in about 12 seconds.
+  #
+  # The cache is hand-editable and a species already in it is never re-queried,
+  # so a name that reads badly can simply be corrected in the CSV.
   tar_target(
     name = API_biota_common_names,
     command = {
@@ -824,7 +835,7 @@ list(
         cache_path = here(
           "data/clean/species_common_names_cache.csv"
         ),
-        db = "ncbi",
+        dbs = c("worms", "ncbi"),
         verbose = FALSE
       )
     }
@@ -978,6 +989,10 @@ list(
   # - group by all categoricals, remove wet weight
   # - calculate two outlier flags, dip-test for departure from unimodality
   # - TODO: Weighted means
+  #
+  # Ranking and flag derivation are bolted on by add_triage_flags() at the end
+  # (PLAN.md P1.4), so this reframe() stays a plain set of per-group statistics
+  # and the interpretation lives somewhere testable.
   tar_target(
     name = summarise_literature_data,
     command = {
@@ -1013,14 +1028,36 @@ list(
           date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
           sd = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
           mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
-          n_double_outliers = sum(outlier_RMZ & outlier_IQR),
+          # FIXED 2026-07-30 (PLAN.md P1.5). This was sum(outlier_RMZ &
+          # outlier_IQR), a count of *rows*, while n is sum(MEASURED_N), a count
+          # of *measurements*. The ratio therefore divided a row count by a
+          # measurement count and systematically under-fired wherever
+          # MEASURED_N > 1. Sam's call: weight the outlier count by MEASURED_N so
+          # numerator and denominator are the same quantity.
+          #
+          # na.rm because robust_modified_z_score() returns NA where the MAD is
+          # zero, and a single NA would otherwise blank the whole group's count.
+          # Untested rows therefore count as non-outliers, which is the
+          # conservative direction.
+          n_double_outliers = sum(
+            (outlier_RMZ & outlier_IQR) * MEASURED_N,
+            na.rm = TRUE
+          ),
+          # The old row-count version, kept alongside so the two are comparable
+          # and the change is auditable rather than silent.
+          n_outlier_rows = sum(outlier_RMZ & outlier_IQR, na.rm = TRUE),
           median = median(MEASURED_VALUE_STANDARD),
           unit = unique(MEASURED_UNIT_STANDARD),
+          # Constant within a group by construction: the group key includes
+          # SAMPLE_SPECIES and the common name is a function of the species.
+          # Carried through so the triage notebook can print it as an
+          # aide-memoire under each heading.
+          species_common_name = SPECIES_COMMON_NAME[1],
           # Hartigan's dip test for unimodality (NA below dip_test_safe()'s min_n)
           dip_p = dip_test_safe(MEASURED_VALUE_STANDARD)$dip_p,
           multimodal = dip_test_safe(MEASURED_VALUE_STANDARD)$multimodal
         ) |>
-        arrange(desc(n))
+        add_triage_flags(literature_dropped_report)
     }
   ),
 
@@ -1034,17 +1071,22 @@ list(
   ),
 
   ## # Group Triage ----
-  # PILOT (PLAN.md P1.1): 5 randomly sampled groups, so the plot aesthetics can
-  # be shaken out before this is widened to all ~27 groups with n >= 100. Raise
-  # n_sample (or set it to Inf) once the plots look right.
+  # No longer a pilot as of 2026-07-30: n_sample = Inf takes ALL groups with
+  # n >= 100, which is the PLAN.md P1.3 cutoff. At 25 sampled, two eligible
+  # groups had no panels, which would have left holes in the Phase 2 contact
+  # sheet with nothing to indicate they were missing rather than absent.
+  #
+  # The `triage_pilot_*` target names are vestigial. Renaming them would churn
+  # the notebook's tar_read() calls for no gain; the plot filenames come from
+  # group slugs, not target names.
   tar_target(
     name = triage_pilot_groups,
     command = sample_triage_groups(
       summary_data = summarise_literature_data,
       data = literature_analysis_ready,
       min_n = 100,
-      n_sample = 25,
-      seed = 20260729 # fixed so the pilot selection is stable between runs
+      n_sample = Inf,
+      seed = 20260729 # irrelevant at Inf, kept so lowering n_sample stays stable
     )
   ),
 
@@ -1066,9 +1108,33 @@ list(
       data = literature_analysis_ready,
       groups = triage_pilot_groups,
       dir = "triage",
-      scale_limits = triage_scale_limits
+      scale_limits = triage_scale_limits,
+      # Reference lines. Borrowed across compartments, species and tissues on
+      # purpose; read the header of R/fct_threshold_match.R before reading
+      # anything into them.
+      thresholds = copper_toxicity_thresholds
     ),
     format = "file"
+  ),
+
+  ## # Grouping decisions ----
+  # PLAN.md P2.2. The pipeline READS this file and never writes it. Scaffolding
+  # and refreshing is scripts/scaffold_group_decisions.R, run by hand: writing a
+  # hand-edited file from a target is how an afternoon of judgement gets silently
+  # overwritten by a rebuild.
+  #
+  # `summarise_literature_data` is passed so read_group_decisions() can warn when
+  # groups exist in the data but not in the file, which is how a stale decisions
+  # file gets caught after new data arrives.
+  #
+  # Nothing downstream of this runs until the decisions exist. That is deliberate:
+  # it stops the pipeline generating work that has not been asked for.
+  tar_target(
+    name = group_decisions,
+    command = read_group_decisions(
+      path = here("data/clean/group_decisions.csv"),
+      summary_data = summarise_literature_data
+    )
   ),
 
   ### # Data quality report ----

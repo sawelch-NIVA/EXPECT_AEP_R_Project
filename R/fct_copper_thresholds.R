@@ -24,8 +24,9 @@
 #'     \item MEASURED_CATEGORY: Measurement category (External, Internal, Surface)
 #'     \item SAMPLE_SPECIES: Species name (for biota only)
 #'     \item SAMPLE_TISSUE: Tissue type (for biota only)
-#'     \item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Moderate (III), Poor (IV), Very Poor (V))
-#'     \item THRESHOLD_VALUE: Numeric threshold value
+#'     \item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Poor (IV), Very Poor (V))
+#'     \item THRESHOLD_VALUE: Numeric **upper** boundary of the named class. `NA`
+#'       for open-ended classes (Very Poor).
 #'     \item MEASURED_UNIT: Unit of measurement with basis (e.g., mg/kg (wet), μg/L)
 #'     \item THRESHOLD_FRACTION: Fraction measured (dissolved, bioavailable, total, etc.)
 #'     \item THRESHOLD_COMMENT: Additional context or notes
@@ -48,6 +49,11 @@
 #'   \item Klasse IV - Dårlig (Poor)
 #'   \item Klasse V - Svært dårlig (Very Poor)
 #' }
+#'
+#' **Copper has no Klasse III** in either freshwater or sediment: Klasse II runs
+#' straight into Klasse IV. M-608 does not explain the omission. The coded rows
+#' therefore carry four classes, not five. See the inline comments for the
+#' 2026-07-30 correction that established this.
 #'
 #' @export
 #' @importFrom tibble tibble
@@ -81,6 +87,20 @@ generate_copper_thresholds <- function() {
   )
 
   # M-608 Freshwater classifications ----
+  #
+  # CORRECTED 2026-07-30. The previous coding was misaligned by one row: it
+  # listed five classes I-V against the boundaries c(0.15, 0.3, 7.8, 15.6, NA),
+  # and its own comments contradicted themselves (the Class II row was labelled
+  # "upper boundary" while quoting the range as 0.3-7.8, i.e. 0.3 as the lower).
+  #
+  # M-608 defines no Class III for copper in freshwater: Class II (Good) runs
+  # 0.3-7.8 and the scale then skips to Class IV. The source document does not
+  # explain why. Dropping Class III leaves four classes and three finite
+  # boundaries, which is what the numbers 0.3 / 7.8 / 15.6 actually are. The
+  # stray 0.15 has no place under that reading and is removed.
+  #
+  # THRESHOLD_VALUE is the UPPER boundary of the named class throughout. Class V
+  # is open-ended, hence NA.
   freshwater <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
@@ -88,7 +108,6 @@ generate_copper_thresholds <- function() {
     TITLE_SHORT = c(
       "M-608: Freshwater Background (I)",
       "M-608: Freshwater Good (II)",
-      "M-608: Freshwater Moderate (III)",
       "M-608: Freshwater Poor (IV)",
       "M-608: Freshwater Very Poor (V)"
     ),
@@ -106,23 +125,29 @@ generate_copper_thresholds <- function() {
     THRESHOLD_CLASS = c(
       "Background (I)",
       "Good (II)",
-      "Moderate (III)",
       "Poor (IV)",
       "Very Poor (V)"
     ),
-    THRESHOLD_VALUE = c(0.15, 0.3, 7.8, 15.6, NA_real_),
+    THRESHOLD_VALUE = c(0.3, 7.8, 15.6, NA_real_),
     MEASURED_UNIT = "μg/L",
     THRESHOLD_FRACTION = "Dissolved",
     THRESHOLD_COMMENT = c(
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.15)",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.3)",
       "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-7.8)",
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class III (Moderate: 7.8-15.6)",
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: >15.6)",
-      "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor). Open-ended"
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 7.8-15.6). No Class III is defined for copper",
+      "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor: >15.6). Open-ended"
     )
   )
 
   # M-608 Coastal water classifications ----
+  #
+  # Left as-is 2026-07-30, unlike freshwater and sediment above: these three
+  # boundaries and their comments already agree with each other. Note the class
+  # labelling style differs (a merged "Good - Moderate (II-III)" rather than
+  # dropping III outright), which is the same underlying fact expressed
+  # differently. Downstream plotting keys on a simplified band rather than on
+  # THRESHOLD_CLASS verbatim, so the inconsistency does not leak into figures.
+  # Class V (>5.2) is deliberately not coded, being open-ended.
   coastal <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
@@ -162,6 +187,15 @@ generate_copper_thresholds <- function() {
   )
 
   # M-608 Sediment classifications ----
+  #
+  # CORRECTED 2026-07-30, same fault as freshwater above. The previous coding
+  # was c(20, 20, 84, 147) against classes I-IV, which gave two different
+  # classes the same upper boundary while its own comments described distinct
+  # ranges (0-20, 20-84, 84-147, >147). As with freshwater, M-608 defines no
+  # Class III for copper: Class II (Good) runs 20-84 and the scale skips to
+  # Class IV. Three finite boundaries, four classes.
+  #
+  # THRESHOLD_VALUE is the UPPER boundary of the named class throughout.
   sediment <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
@@ -169,9 +203,8 @@ generate_copper_thresholds <- function() {
     TITLE_SHORT = c(
       "M-608: Sediment Background (I)",
       "M-608: Sediment Good (II)",
-      "M-608: Sediment Moderate (III)",
-      "M-608: Sediment Poor (IV)"
-      # "M-608: Sediment Very Poor (V)"
+      "M-608: Sediment Poor (IV)",
+      "M-608: Sediment Very Poor (V)"
     ),
     DOCUMENT_NUMBER = "M-608|2016",
     YEAR = 2016L,
@@ -187,19 +220,17 @@ generate_copper_thresholds <- function() {
     THRESHOLD_CLASS = c(
       "Background (I)",
       "Good (II)",
-      "Moderate (III)",
-      "Poor (IV)"
-      # "Very Poor (V)"
+      "Poor (IV)",
+      "Very Poor (V)"
     ),
-    THRESHOLD_VALUE = c(20, 20, 84, 147),
+    THRESHOLD_VALUE = c(20, 84, 147, NA_real_),
     MEASURED_UNIT = "mg/kg (dry)",
     THRESHOLD_FRACTION = "Total",
     THRESHOLD_COMMENT = c(
       "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-20)",
       "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class II (Good: 20-84)",
-      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class III (Moderate: 84-147)",
-      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: >147)"
-      # "Norwegian sediment classification. Revised 30.10.2020. Class V (Very Poor). Open-ended"
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 84-147). No Class III is defined for copper",
+      "Norwegian sediment classification. Revised 30.10.2020. Class V (Very Poor: >147). Open-ended"
     )
   )
 
