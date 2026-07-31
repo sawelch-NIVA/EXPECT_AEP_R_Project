@@ -107,7 +107,7 @@ add_coverage_columns <- function(summary_data) {
 #' @export
 scaffold_group_decisions <- function(
   summary_data,
-  path = here::here("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/group_decisions.csv"),
   verbose = TRUE
 ) {
   key <- triage_group_cols()
@@ -199,7 +199,7 @@ scaffold_group_decisions <- function(
 #' @return A tibble of decisions.
 #' @export
 read_group_decisions <- function(
-  path = here::here("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/group_decisions.csv"),
   summary_data = NULL
 ) {
   if (!file.exists(path)) {

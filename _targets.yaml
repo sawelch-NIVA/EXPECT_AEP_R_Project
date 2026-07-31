@@ -1,2 +1,12 @@
+# Store path is RELATIVE, and must stay that way.
+#
+# It used to be an absolute C:/Users/SAW/... path, which pinned the repo to one
+# machine: a second checkout (or a renamed profile, or a moved folder) pointed at
+# a directory that did not exist, and every tar_read() failed. Changed to a
+# relative path 2026-07-31.
+#
+# Resolved against the working directory, which for a pipeline run is the project
+# root. The sibling docs/_targets.yaml carries the same setting expressed from
+# docs/; see the note there.
 main:
-  store: C:/Users/SAW/Local Documents/EXPECT AEP/EXPECT_AEP_R_Project/_targets
+  store: _targets

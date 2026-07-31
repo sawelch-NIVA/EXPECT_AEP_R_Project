@@ -15,6 +15,7 @@ Imports:
     arrow,
     bslib,
     cli,
+    crew,
     data.table,
     diptest,
     dplyr,
@@ -43,8 +44,11 @@ Imports:
     networkD3,
     oce,
     patchwork,
+    pkgload,
     pointblank,
     purrr,
+    qs2,
+    quarto,
     ragg,
     readr,
     readxl,
@@ -52,6 +56,7 @@ Imports:
     rnaturalearth,
     scales,
     sf,
+    shadowtext,
     shiny,
     stringr,
     svglite,
@@ -61,8 +66,11 @@ Imports:
     tibble,
     tidygraph,
     tidyr,
+    tidyverse,
     viridis,
-    withr
+    withr,
+    worrms
 Remotes:
     NIVANorge/eDataDRF
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3

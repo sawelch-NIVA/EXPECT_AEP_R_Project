@@ -8,38 +8,51 @@ get_common_names(
   biota_data,
   input_col = "SAMPLE_SPECIES",
   output_col = "SPECIES_COMMON_NAME",
-  cache_path = here("data/clean/species_common_names_cache.csv"),
-  db = "ncbi",
+  cache_path = here_rel("data/clean/species_common_names_cache.csv"),
+  dbs = c("worms", "ncbi"),
   verbose = TRUE
 )
 }
 \arguments{
-\item{biota_data}{A data frame containing scientific species names}
+\item{biota_data}{A data frame containing scientific species names.}
 
-\item{input_col}{Name of the column containing scientific names. Default is "SAMPLE_SPECIES"}
+\item{input_col}{Column holding scientific names.}
 
-\item{output_col}{Name of the column to store common names. Default is "SPECIES_COMMON_NAME"}
+\item{output_col}{Column to write common names into.}
 
-\item{cache_path}{Path to the cache CSV file. Defaults to "data/clean/species_common_names_cache.csv"}
+\item{cache_path}{Path to the cache CSV.}
 
-\item{db}{Database to query for common names. One of "ncbi", "itis", "tropicos", "eol", or "worms". Default is "ncbi"}
+\item{dbs}{Databases to try, in preference order. WoRMS first: see the note at
+the top of this file.}
 
-\item{verbose}{Logical. Print progress messages? Default is TRUE}
+\item{verbose}{Print progress?}
 }
 \value{
-A data frame with common names joined to the input data
+\code{biota_data} with \code{output_col} added.
 }
 \description{
-Get Common Names for Scientific Species Names
+Looks up an English common name per species, caching results to CSV so the
+APIs are hit once per species per database. Databases are tried in the order
+given and the first hit wins.
 }
-\examples{
-\dontrun{
-biota_with_names <- get_common_names(biota_data)
-biota_with_names <- get_common_names(biota_data, db = "worms", verbose = FALSE)
-biota_with_names <- get_common_names(
-  biota_data,
-  input_col = "scientific_name",
-  output_col = "common_name"
-)
+\details{
+Fixes carried out 2026-07-30, all of which were live faults:
+\itemize{
+\item \strong{\code{NA} species were queried.} \code{unique()} on the input column includes \code{NA},
+which was sent to the API and cached as a row that could never match, so it
+was re-queried on every run.
+\item \strong{The join could silently duplicate rows.} Nothing guaranteed one cache row
+per species, and a left join against a duplicated cache multiplies the
+measurement data. Now de-duplicated before joining, and the row count is
+asserted afterwards.
+\item \strong{One API failure lost the whole batch.} \code{sci2comm()} was called on the
+full vector, so a single error returned nothing and nothing was cached.
+Queries are now per species, and a failure caches an \code{NA} rather than
+aborting.
+\item \strong{A short or reordered API response mismatched the input.} Building a
+tibble from \code{new_species} alongside \code{sapply()} over the response assumed
+both were the same length and order; \code{sci2comm()} does not guarantee that.
+\item \strong{An existing \code{output_col} was silently overwritten}, so re-running on
+already-named data destroyed the names.
 }
 }

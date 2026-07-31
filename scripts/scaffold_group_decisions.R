@@ -22,7 +22,7 @@ summary_data <- tar_read(summarise_literature_data)
 
 decisions <- scaffold_group_decisions(
   summary_data,
-  path = here("data/clean/group_decisions.csv")
+  path = here_rel("data/clean/group_decisions.csv")
 )
 
 message("\nWhat is left to decide, by coverage tier:")

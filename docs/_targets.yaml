@@ -1,2 +1,12 @@
+# This file exists ONLY so notebooks can find the target store: Quarto renders
+# with docs/ as the working directory, targets looks for _targets.yaml there, and
+# without this it would not find the store at all.
+#
+# Hence "../_targets" and not "_targets". The path is resolved against the
+# working directory, which here is docs/, so it must climb one level. Copying the
+# root file verbatim would point at docs/_targets, which does not exist.
+#
+# Was an absolute C:/Users/SAW/... path until 2026-07-31, which pinned the repo to
+# a single machine. Keep both this and the root _targets.yaml relative.
 main:
-  store: C:/Users/SAW/Local Documents/EXPECT AEP/EXPECT_AEP_R_Project/_targets
+  store: ../_targets

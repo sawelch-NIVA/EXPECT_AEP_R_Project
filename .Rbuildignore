@@ -12,3 +12,4 @@
 ^README\.qmd$
 ^images$
 ^.images-raw$
+^dev$

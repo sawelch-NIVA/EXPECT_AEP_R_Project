@@ -24,8 +24,9 @@ A tibble with columns matching standard eData DRF formats:
 \item MEASURED_CATEGORY: Measurement category (External, Internal, Surface)
 \item SAMPLE_SPECIES: Species name (for biota only)
 \item SAMPLE_TISSUE: Tissue type (for biota only)
-\item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Moderate (III), Poor (IV), Very Poor (V))
-\item THRESHOLD_VALUE: Numeric threshold value
+\item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Poor (IV), Very Poor (V))
+\item THRESHOLD_VALUE: Numeric \strong{upper} boundary of the named class. \code{NA}
+for open-ended classes (Very Poor).
 \item MEASURED_UNIT: Unit of measurement with basis (e.g., mg/kg (wet), μg/L)
 \item THRESHOLD_FRACTION: Fraction measured (dissolved, bioavailable, total, etc.)
 \item THRESHOLD_COMMENT: Additional context or notes
@@ -54,4 +55,9 @@ Norwegian classification system uses five classes:
 \item Klasse IV - Dårlig (Poor)
 \item Klasse V - Svært dårlig (Very Poor)
 }
+
+\strong{Copper has no Klasse III} in either freshwater or sediment: Klasse II runs
+straight into Klasse IV. M-608 does not explain the omission. The coded rows
+therefore carry four classes, not five. See the inline comments for the
+2026-07-30 correction that established this.
 }

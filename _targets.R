@@ -60,6 +60,11 @@
 {
   starttime <- Sys.time()
   here::i_am("Readme.md") # set wd to project root
+  # Deliberately here::here(), not here_rel(): here_rel() is a STOPAEP function
+  # and does not exist until this load_all() call has finished. This path is also
+  # never recorded in tar_meta, so absoluteness costs nothing here. Every here()
+  # call that DOES reach the store went to here_rel() on 2026-07-31; see
+  # R/fct_paths.R for why.
   pkgload::load_all(path = here::here())
   message(paste(
     "Loaded local functions in",
@@ -85,6 +90,7 @@ options(
 # # Set target options ----
 tar_option_set(
   format = "qs",
+  workspace_on_error = TRUE,
   # Functions live in the STOPAEP package namespace (pkgload::load_all above),
   # not the global environment. Without this, targets does not hash them, so
   # editing any R/fct_*.R function invalidates NOTHING and tar_make() happily
@@ -832,7 +838,7 @@ list(
         biota_data,
         input_col = "SAMPLE_SPECIES",
         output_col = "SPECIES_COMMON_NAME",
-        cache_path = here(
+        cache_path = here_rel(
           "data/clean/species_common_names_cache.csv"
         ),
         dbs = c("worms", "ncbi"),
@@ -1132,7 +1138,7 @@ list(
   tar_target(
     name = group_decisions,
     command = read_group_decisions(
-      path = here("data/clean/group_decisions.csv"),
+      path = here_rel("data/clean/group_decisions.csv"),
       summary_data = summarise_literature_data
     )
   ),
