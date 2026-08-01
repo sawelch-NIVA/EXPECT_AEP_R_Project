@@ -759,8 +759,7 @@ triage_plot_by_date <- function(
       method = "lm",
       se = FALSE,
       formula = y ~ x,
-      colour = "white",
-      alpha = 0.35,
+      colour = "#ffffff48",
       linewidth = 1.5
     ) +
     # Dotted and mid-grey on purpose. A solid coloured trend line reads as a
