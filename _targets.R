@@ -1123,6 +1123,77 @@ list(
     format = "file"
   ),
 
+  ### # Parent-level overviews ----
+  # Panels f and g, one level up from the five per-group panels above. The
+  # per-group panels cannot answer "should these groups be one group", because
+  # each is drawn strictly inside one group key and the comparison is in the
+  # panel next door. These sit at the sub-compartment and compare the levels
+  # below it, which is the view the lump/split decision actually needs.
+  #
+  # One node per compartment x sub-compartment x UNIT. The unit is part of the
+  # node because sub-compartments genuinely split on it, and a mixed panel would
+  # show a units artefact three orders of magnitude wide that reads as a real
+  # biological split.
+  #
+  # min_n matches triage_pilot_groups above, deliberately, and the groups
+  # themselves are passed so a node with no *displayed* group beneath it is
+  # dropped. The notebook only opens a heading for groups it is showing, and an
+  # overview is emitted when its heading is emitted, so an unreachable node is a
+  # PNG written and never referenced. Clearing min_n is not enough on its own:
+  # a node's total sums over groups that may each be well under the bar.
+  tar_target(
+    name = triage_overview_node_table,
+    command = triage_overview_nodes(
+      literature_analysis_ready,
+      min_n = 100,
+      groups = triage_pilot_groups
+    )
+  ),
+
+  # Same file-target treatment as triage_pilot_plots, and the same shared axis,
+  # so an overview and the per-group panels beneath it can be read together.
+  tar_target(
+    name = triage_overview_plots,
+    command = write_triage_overviews(
+      data = literature_analysis_ready,
+      nodes = triage_overview_node_table,
+      dir = "triage",
+      scale_limits = triage_scale_limits,
+      thresholds = copper_toxicity_thresholds
+    ),
+    format = "file"
+  ),
+
+  ### # By-species panels ----
+  # The innermost overview tier: one panel per species group, bands being
+  # species x tissue. Tissue is in the band rather than pooled because it moves
+  # the value further than species does (Fish / mg/kg (wet): median 5.20 in
+  # liver against 0.228 in muscle), so pooling would dress tissue variation up
+  # as species variation.
+  #
+  # Adding this tier is also why the sub-compartment overview stops at
+  # SPECIES_GROUP; see triage_overview_stop_cols().
+  tar_target(
+    name = triage_species_node_table,
+    command = triage_species_nodes(
+      literature_analysis_ready,
+      min_n = 100,
+      groups = triage_pilot_groups
+    )
+  ),
+
+  tar_target(
+    name = triage_species_plots,
+    command = write_species_overviews(
+      data = literature_analysis_ready,
+      nodes = triage_species_node_table,
+      dir = "triage",
+      scale_limits = triage_scale_limits,
+      thresholds = copper_toxicity_thresholds
+    ),
+    format = "file"
+  ),
+
   ## # Grouping decisions ----
   # PLAN.md P2.2. The pipeline READS this file and never writes it. Scaffolding
   # and refreshing is scripts/scaffold_group_decisions.R, run by hand: writing a

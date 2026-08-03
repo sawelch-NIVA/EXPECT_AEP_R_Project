@@ -117,16 +117,165 @@ numerals collide. Noted as `PLAN.md` P1.1g.
 
 groups <- tar_read(triage_pilot_groups)
 plot_paths <- tar_read(triage_pilot_plots)
+overview_nodes <- tar_read(triage_overview_node_table)
+overview_paths <- tar_read(triage_overview_plots)
+species_nodes <- tar_read(triage_species_node_table)
+species_paths <- tar_read(triage_species_plots)
 
-# Filename suffix -> caption. Keys match the list names in
+# Panels f and g sit at the sub-compartment heading, above the groups they
+# compare. They exist because panels a-e cannot answer the lump/split question:
+# each is drawn strictly inside one group key, so the comparison you need is
+# always in the panel next door.
+#
+# One overview per unit. The unit is part of the node (triage_overview_node_cols())
+# because sub-compartments genuinely split on it, so a sub-compartment holding
+# both dry and wet weight gets one overview each rather than a mixed panel whose
+# three-order-of-magnitude gap reads as a real split.
+emit_overviews <- function(compartment, sub) {
+  rows <- overview_nodes[
+    overview_nodes$ENVIRON_COMPARTMENT == compartment &
+      overview_nodes$ENVIRON_COMPARTMENT_SUB == sub, ,
+    drop = FALSE
+  ]
+  if (nrow(rows) == 0) {
+    return(invisible(NULL))
+  }
+
+  for (i in seq_len(nrow(rows))) {
+    node <- rows[i, , drop = FALSE]
+    levels <- c(node$level_1[1], node$level_2[1])
+    levels <- levels[!is.na(levels)]
+    # a, b: this is its own figure with its own caption and cross-reference, not
+    # a continuation of the five per-group panels, so the lettering restarts.
+    prefixes <- c("a", "b")[seq_along(levels)]
+
+    # Counts above the figure, name in the caption. Same division as the
+    # per-group blocks, where group_summary_line() carries the counts and the
+    # figure caption carries the group name.
+    cat(
+      "\n**Overview, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
+      format(node$n[1], big.mark = ","), " measurements across ",
+      format(node$n_rows[1], big.mark = ","), " rows, in ",
+      node$n_groups[1], " groups below this sub-compartment.\n\n",
+      sep = ""
+    )
+    cat(
+      "::: {#", fig_id(paste0("overview_", node$node_slug[1])),
+      " layout-ncol=2}\n\n",
+      sep = ""
+    )
+    for (j in seq_along(levels)) {
+      # Rebuilt from the node table rather than pattern-matched against the path
+      # list, for the same reason as the per-group panels below: prefix matching
+      # broke when one slug was a string prefix of another.
+      p <- file.path(
+        "triage",
+        paste0(
+          node$node_slug[1], "_", prefixes[j],
+          "_overview_", tolower(levels[j]), ".png"
+        )
+      )
+      # No "a) " prefix: Quarto supplies "(a)", "(b)" for subfigures inside a
+      # #fig- div, and the letter is already in the PNG title.
+      caption <- paste0("Distribution by ", triage_level_label(levels[j]))
+      # Checked against the target's own output rather than file.exists(), so
+      # this chunk's tar_read(triage_overview_plots) stays a live dependency and
+      # the notebook cannot render before the PNGs are written.
+      if (!p %in% overview_paths) {
+        cat("*", caption, " not available.*\n\n", sep = "")
+        next
+      }
+      cat(
+        "![", caption, "](", file.path("..", p), ")",
+        "{group=\"", node$node_slug[1], "\"}\n\n",
+        sep = ""
+      )
+    }
+    cat(
+      node$node_label[1],
+      ", compared across the levels below it.\n\n",
+      sep = ""
+    )
+    cat(":::\n\n")
+  }
+  invisible(NULL)
+}
+
+# One panel per species group, bands being species x tissue. Hangs off the
+# SPECIES_GROUP heading the same way the overviews hang off the sub-compartment
+# one, and loops over units for the same reason: the heading tree has no unit
+# level, so a species group holding both dry and wet weight has two nodes.
+emit_species_panel <- function(compartment, sub, species_group) {
+  rows <- species_nodes[
+    species_nodes$ENVIRON_COMPARTMENT == compartment &
+      species_nodes$ENVIRON_COMPARTMENT_SUB == sub &
+      species_nodes$SPECIES_GROUP == species_group, ,
+    drop = FALSE
+  ]
+  if (nrow(rows) == 0) {
+    return(invisible(NULL))
+  }
+
+  for (i in seq_len(nrow(rows))) {
+    node <- rows[i, , drop = FALSE]
+    p <- file.path("triage", paste0(node$node_slug[1], "_a_species.png"))
+
+    cat(
+      "\n**By species, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
+      format(node$n[1], big.mark = ","), " measurements across ",
+      format(node$n_rows[1], big.mark = ","), " rows, in ",
+      node$n_species[1], " species and ",
+      node$n_tissues[1], " tissues.\n\n",
+      sep = ""
+    )
+    # Read against the target's own output, not file.exists(), so this chunk's
+    # tar_read(triage_species_plots) stays a live dependency.
+    if (!p %in% species_paths) {
+      cat("*By-species panel not available.*\n\n")
+      next
+    }
+    cat(
+      "::: {#", fig_id(paste0("species_", node$node_slug[1])), "}\n\n",
+      sep = ""
+    )
+    cat(
+      "![](", file.path("..", p), ")",
+      "{group=\"", node$node_slug[1], "\"}\n\n",
+      sep = ""
+    )
+    cat(
+      node$node_label[1],
+      ", by species and tissue. Tissue is part of the band because it moves ",
+      "the value further than species does.\n\n",
+      sep = ""
+    )
+    cat(":::\n\n")
+  }
+  invisible(NULL)
+}
+
+# Filename suffix -> subcaption. Keys match the list names in
 # write_triage_plots_for_group(), which also drive the a/b/c/d/e file ordering.
+#
+# No "a) " prefix here, deliberately. The div below carries a #fig- id, which
+# makes Quarto treat these as subfigures and prepend its own "(a)", "(b)" ...
+# in the same order. The letter is already burned into each PNG's title, so a
+# manual prefix as well would render "(a) a) Overall distribution".
 captions <- c(
-  a_density = "a) Overall distribution (all units)",
-  b_date = "b) Concentration by date",
-  c_campaign = "c) Distribution by campaign",
-  d_site_type = "d) Distribution by site type (all geographies)",
-  e_spatial = "e) Spatial distribution"
+  a_density = "Overall distribution (all units)",
+  b_date = "Concentration by date",
+  c_campaign = "Distribution by campaign",
+  d_site_type = "Distribution by site type (all geographies)",
+  e_spatial = "Spatial distribution"
 )
+
+# Quarto cross-reference ids must start with "fig-" and are safest lowercase
+# with dashes. group_slug (not heading_slug) is the basis: heading_slug is
+# shared across the unit variants of a group by design, so it would put a
+# duplicate id on every second variant and break the reference.
+fig_id <- function(slug) {
+  paste0("fig-", tolower(gsub("_", "-", slug)))
+}
 
 # Columns forming the heading tree, outermost first. Unit is absent by design:
 # see triage_heading_cols(). The last two share the leaf heading because
@@ -179,6 +328,22 @@ for (i in seq_len(nrow(groups))) {
     for (d in seq_along(present)) {
       if (d < from) next
       cat("\n\n", strrep("#", d), " ", current[present[d]], "\n", sep = "")
+      # Hooked onto the heading emission rather than tested separately, so an
+      # unchanged sub-compartment (which emits no heading) also emits no second
+      # copy of its overviews.
+      if (identical(present[d], "ENVIRON_COMPARTMENT_SUB")) {
+        emit_overviews(
+          current[["ENVIRON_COMPARTMENT"]],
+          current[["ENVIRON_COMPARTMENT_SUB"]]
+        )
+      }
+      if (identical(present[d], "SPECIES_GROUP")) {
+        emit_species_panel(
+          current[["ENVIRON_COMPARTMENT"]],
+          current[["ENVIRON_COMPARTMENT_SUB"]],
+          current[["SPECIES_GROUP"]]
+        )
+      }
     }
 
     # The leaf carries an explicit id so the summary table can link to it. The
@@ -208,7 +373,10 @@ for (i in seq_len(nrow(groups))) {
   # path list. Prefix matching broke when one slug was a string prefix of
   # another, which make.unique() suffixes used to produce.
   # Paths are project-root-relative; this notebook renders from docs/
-  cat("::: {layout-ncol=5}\n\n")
+  cat(
+    "::: {#", fig_id(grp$group_slug[1]), " layout-ncol=5}\n\n",
+    sep = ""
+  )
   for (key in names(captions)) {
     p <- file.path("triage", paste0(grp$group_slug[1], "_", key, ".png"))
     # Checked against the target's own output rather than file.exists(): that
@@ -231,6 +399,10 @@ for (i in seq_len(nrow(groups))) {
       sep = ""
     )
   }
+  # The final paragraph inside a #fig- div is the figure's own caption. Repeats
+  # the group name so the figure stands alone if it is scrolled to, quoted, or
+  # cross-referenced from elsewhere in the site.
+  cat(triage_group_label(grp), "\n\n", sep = "")
   cat(":::\n\n")
 }
 ```

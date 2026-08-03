@@ -1,12 +1,12 @@
 ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SPECIES_GROUP,SAMPLE_SPECIES,SAMPLE_TISSUE,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,MEASURED_UNIT_STANDARD,species_common_name,rank,n,n_sources,cum_pct,tier,flag_multimodal,flag_outliers,decision,lump_into,notes
-Aquatic,Freshwater,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,1,41831,1,0.4373,top90,TRUE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Water benthos,mg/kg (dry),,2,25024,2,0.6989,top90,TRUE,FALSE,,,
-Aquatic,Freshwater,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/L,,3,6847,1,0.7704,top90,TRUE,FALSE,,,
-Aquatic,Marine/Salt Water,,,,"Coastal, fjord","Water column, pelagic zone",mg/L,,4,4969,1,0.8224,top90,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,5,3048,1,0.8542,top90,TRUE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,6,2796,1,0.8835,top90,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord","Water column, pelagic zone",mg/kg (wet),Blue mussel,7,2450,2,0.9091,top90,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"River, stream, canal",Water benthos,mg/kg (dry),,8,857,1,0.918,top95,FALSE,FALSE,,,
+Aquatic,Freshwater,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,1,41831,1,0.4373,top90,TRUE,FALSE,own_notebook,"distinct diff between road traff, poll monitoring and measured monitoring distributions",
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Water benthos,mg/kg (dry),,2,25024,2,0.6989,top90,TRUE,FALSE,own_notebook,"most signal in aqfac, but lots of variation and big right tail",
+Aquatic,Freshwater,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/L,,3,6847,1,0.7704,top90,TRUE,FALSE,own_notebook,,
+Aquatic,Marine/Salt Water,,,,"Coastal, fjord","Water column, pelagic zone",mg/L,,4,4969,1,0.8224,top90,TRUE,FALSE,own_notebook,,
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,5,3048,1,0.8542,top90,TRUE,TRUE,own_notebook,,
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,6,2796,1,0.8835,top90,TRUE,FALSE,own_notebook,,
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord","Water column, pelagic zone",mg/kg (wet),Blue mussel,7,2450,2,0.9091,top90,FALSE,FALSE,lump,,keep with other blue mussels
+Aquatic,Aquatic Sediment,,,,"River, stream, canal",Water benthos,mg/kg (dry),,8,857,1,0.918,top95,FALSE,FALSE,own_notebook,,much more variable than fjords
 Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir",Water benthos,mg/kg (dry),,9,573,1,0.924,top95,FALSE,FALSE,,,
 Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (dry),Atlantic dog whelk,10,480,1,0.929,top95,FALSE,FALSE,,,
 Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,11,337,1,0.9326,top95,FALSE,TRUE,,,

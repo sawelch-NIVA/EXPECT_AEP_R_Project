@@ -162,7 +162,8 @@ group_flag_text <- function(row) {
 #' here is gone.
 #'
 #' @param row A one-row data frame carrying the columns from
-#'   [add_triage_flags()] plus `n_rows`.
+#'   [add_triage_flags()] plus `n_rows` and, optionally, `reference_ids` (a
+#'   comma-separated string from [sample_triage_groups()]).
 #' @return A single markdown string.
 #' @export
 group_summary_line <- function(row) {
@@ -188,7 +189,24 @@ group_summary_line <- function(row) {
     row$n_sources[1],
     "** source",
     if (isTRUE(row$n_sources[1] == 1)) "" else "s",
-    " (distinct `REFERENCE_ID`). Unit: `",
+    # Named rather than described. "(distinct REFERENCE_ID)" said what the count
+    # was of, which you already know; the names say whether a group rests on two
+    # Vannmiljø campaigns or two independent papers, which is what a lump/split
+    # judgement actually turns on. Falls back to the old wording where the
+    # column is absent, so callers with a bare summary row still work.
+    # names() rather than row$reference_ids: on a tibble the $ form warns
+    # ("Unknown or uninitialised column") for every group lacking the column,
+    # which is pure noise in a render, and on a data frame it partial-matches.
+    if (
+      "reference_ids" %in% names(row) &&
+        !is.na(row[["reference_ids"]][1]) &&
+        nzchar(row[["reference_ids"]][1])
+    ) {
+      paste0(" (", row[["reference_ids"]][1], ")")
+    } else {
+      " (distinct `REFERENCE_ID`)"
+    },
+    ". Unit: `",
     row$MEASURED_UNIT_STANDARD[1],
     "`."
   )

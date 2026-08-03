@@ -55,8 +55,24 @@ sample_triage_groups <- function(
 ) {
   group_cols <- triage_group_cols()
 
+  # n_rows and the reference list come from the same pass over `data`.
+  #
+  # The references are named, not just counted. "from 2 sources (distinct
+  # REFERENCE_ID)" tells you the shape of the evidence but not whose it is, and
+  # whether a group is two Vannmiljø campaigns or two independent papers is
+  # exactly the thing a lump/split judgement turns on. Naming them is affordable:
+  # across the 27 pilot groups the maximum is 3 references and the longest
+  # rendered list is 88 characters.
   row_counts <- data |>
-    dplyr::count(dplyr::across(dplyr::all_of(group_cols)), name = "n_rows")
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) |>
+    dplyr::summarise(
+      n_rows = dplyr::n(),
+      reference_ids = paste(
+        sort(unique(stats::na.omit(.data$REFERENCE_ID))),
+        collapse = ", "
+      ),
+      .groups = "drop"
+    )
 
   eligible <- summary_data |>
     dplyr::filter(.data$n >= min_n) |>
@@ -599,12 +615,97 @@ triage_theme <- function() {
   list(
     ggplot2::theme_minimal(),
     ggplot2::theme(
-      # The panel is busy enough with tiles, thresholds and their labels.
+      # The panel is busy enough with tiles, thresholds and their labels. Blanked
+      # in both directions here and then re-enabled on the **concentration axis
+      # only**, by triage_minor_grid_theme(), because a decade grid is what makes
+      # a wide log axis readable while a minor grid on the date or category axis
+      # is just clutter.
       panel.grid.minor = ggplot2::element_blank(),
       plot.title = ggplot2::element_text(face = "bold"),
       plot.subtitle = ggplot2::element_text(size = ggplot2::rel(0.85))
     )
   )
+}
+
+#' Minor Breaks at Every Power of Ten
+#'
+#' The concentration axes span up to 12 orders of magnitude, and ggplot2's
+#' default log breaks thin out accordingly: panels a-d were labelling 1e-4, 1e0,
+#' 1e4 and nothing between, so a point could only be placed to within four
+#' decades by eye.
+#'
+#' The fix keeps those sparse **major** breaks (adding labels at every decade
+#' would overrun the axis) and puts an unlabelled gridline at each intervening
+#' power of ten. Reading a value is then "two lines right of 1e0".
+#'
+#' Deliberately **not** the 1:9-per-decade grid used by
+#' [outlier_log10_scale()]: at ~96 lines across a 12-decade axis that fights the
+#' threshold lines and the secondary axis rather than helping.
+#'
+#' Returned as a plain vector covering far more range than any real axis, rather
+#' than as a function of the limits. ggplot2 silently drops breaks outside the
+#' scale range, so a fixed vector needs no knowledge of the limits and avoids the
+#' data-space-versus-transformed-space ambiguity in `minor_breaks` functions.
+#'
+#' @return A numeric vector of powers of ten.
+#' @export
+triage_log_minor_breaks <- function() {
+  10^(-12:12)
+}
+
+#' Re-enable the Minor Grid on the Concentration Axis
+#'
+#' Must be added **after** [triage_theme()], which blanks the minor grid in both
+#' directions. Colour and linewidth are given explicitly rather than inherited:
+#' the parent `panel.grid.minor` is an `element_blank()` at that point, and
+#' relying on what a child inherits from a blanked parent is exactly the kind of
+#' silent no-op that is hard to spot in a written PNG.
+#'
+#' Lighter and thinner than the major grid so it reads as subordinate. Minor
+#' lines are drawn before major ones, so a minor break coinciding with a major
+#' break is painted over and needs no special handling.
+#'
+#' **Minor tick marks are added as well, and they are the part that matters on
+#' the category panels.** Those panels are wall-to-wall `geom_tile()`, and a
+#' geom draws over the panel grid, so inside the data region the gridlines are
+#' invisible however dark they are: the first attempt at grey95 read as no
+#' change at all. Ticks sit outside the panel where nothing can cover them.
+#'
+#' @param axis `"x"` where the measured value is on x (panels a, c, d), `"y"`
+#'   where it is on y (panel b).
+#' @return A ggplot2 theme.
+#' @export
+triage_minor_grid_theme <- function(axis = c("x", "y")) {
+  axis <- match.arg(axis)
+  grid <- ggplot2::element_line(colour = "grey88", linewidth = 0.3)
+  # The tick ELEMENTS have to be set, not just their lengths. theme_minimal()
+  # blanks axis.ticks outright, so setting only axis.minor.ticks.length gives a
+  # length to something that is never drawn: the first attempt looked identical
+  # to no change at all.
+  major <- ggplot2::element_line(colour = "grey30", linewidth = 0.3)
+  minor <- ggplot2::element_line(colour = "grey60", linewidth = 0.25)
+  len <- ggplot2::unit(3, "pt")
+
+  if (axis == "x") {
+    ggplot2::theme(
+      panel.grid.minor.x = grid,
+      # Bottom only. The top axis on panels a, c and d is the threshold-class
+      # secondary axis, whose breaks are threshold values; ticking it at every
+      # decade would imply a structure it does not have.
+      axis.ticks.x.bottom = major,
+      axis.minor.ticks.x.bottom = minor,
+      axis.ticks.length.x.bottom = len,
+      axis.minor.ticks.length.x.bottom = ggplot2::rel(0.6)
+    )
+  } else {
+    ggplot2::theme(
+      panel.grid.minor.y = grid,
+      axis.ticks.y.left = major,
+      axis.minor.ticks.y.left = minor,
+      axis.ticks.length.y.left = len,
+      axis.minor.ticks.length.y.left = ggplot2::rel(0.6)
+    )
+  }
 }
 
 # ---- The five plots ----------------------------------------------------
@@ -667,6 +768,7 @@ triage_plot_density <- function(
     triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
     ggplot2::scale_x_log10(
       limits = limits,
+      minor_breaks = triage_log_minor_breaks(),
       sec.axis = triage_threshold_sec_axis(thr, limits = limits)
     ) +
     ggplot2::labs(
@@ -679,6 +781,7 @@ triage_plot_density <- function(
     ) +
     ggplot2::coord_cartesian(clip = "off") +
     triage_theme() +
+    triage_minor_grid_theme("x") +
     triage_sec_axis_theme("top") +
     ggplot2::theme(legend.position = "bottom")
 }
@@ -784,14 +887,18 @@ triage_plot_by_date <- function(
       limits = limits
     ) +
     ggplot2::scale_x_date(limits = date_limits) +
-    ggplot2::scale_y_log10(limits = limits) +
+    ggplot2::scale_y_log10(
+      limits = limits,
+      minor_breaks = triage_log_minor_breaks()
+    ) +
     ggplot2::labs(
       x = "Sampling date",
       y = triage_unit_label(data),
       title = "b) Concentration by date",
       subtitle = label
     ) +
-    triage_theme()
+    triage_theme() +
+    triage_minor_grid_theme("y")
 }
 
 #' Triage Plot: Distribution by a Categorical Facet
@@ -883,7 +990,23 @@ triage_plot_by_category <- function(
         height = 1,
         inherit.aes = FALSE
       ) +
-      ggplot2::scale_fill_viridis_b(name = "Count")
+      # Log fill, not linear. Counts span roughly four orders of magnitude
+      # within a single panel (1 to 6,616 on Aquatic Sediment), so a linear
+      # scale puts everything except the modal bin of the largest category into
+      # the bottom colour and the panel degrades to presence/absence. On a log
+      # scale each row's distribution shape is legible, which is the whole
+      # question these panels exist to answer.
+      #
+      # Continuous rather than binned: the gradient carries more of the
+      # distribution, and a binned scale's bands implied count thresholds that
+      # mean nothing. Safe under log10 because count_by_category_bin() omits
+      # empty bins rather than zero-filling them, so the minimum count is 1.
+      ggplot2::scale_fill_viridis_c(
+        name = "Count",
+        transform = "log10",
+        breaks = scales::breaks_log(n = 5),
+        labels = scales::label_log()
+      )
   }
 
   thr <- thresholds_for_group(thresholds, grp)
@@ -892,6 +1015,7 @@ triage_plot_by_category <- function(
     triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
     ggplot2::scale_x_log10(
       limits = limits,
+      minor_breaks = triage_log_minor_breaks(),
       sec.axis = triage_threshold_sec_axis(thr, limits = limits)
     ) +
     # Additive 0.5 makes the outermost bands sit flush with the panel edge. The
@@ -905,9 +1029,14 @@ triage_plot_by_category <- function(
       subtitle = label
     ) +
     triage_theme() +
+    triage_minor_grid_theme("x") +
     triage_sec_axis_theme("top") +
     ggplot2::theme(
-      axis.text.y = ggplot2::element_text(size = ggplot2::rel(0.6))
+      axis.text.y = ggplot2::element_text(
+        size = ggplot2::rel(0.6),
+        # campaign names are often quite long, we don't want text to overlap
+        lineheight = 0.75
+      )
       # Category bands are contiguous, so a horizontal grid line inside them adds
       # nothing and shows through the lighter viridis fills.
       # panel.grid.major.y = ggplot2::element_blank()
@@ -1025,7 +1154,11 @@ triage_plot_spatial <- function(data, label = NULL, limits = NULL) {
       data = world_map,
       ggplot2::aes(x = .data$long, y = .data$lat, group = .data$group),
       fill = "lightgray",
-      colour = "white"
+      colour = "white",
+      # A quarter of the ggplot2 default of 0.5. At panel size the default
+      # coastline reads as a thick white band that eats the fjords, which is
+      # most of the Norwegian coast and most of where the data is.
+      linewidth = 0.125
     )
 
   layer <- if (triage_use_points(spatial)) {

@@ -72,6 +72,32 @@ test_that("nothing is linked unless the document asks", {
   expect_true(grepl(paste0("#", tbl$.anchor), linked_html, fixed = TRUE))
 })
 
+test_that("linked cells are the same font size as the rest of the table", {
+  # compose() replaces a cell's content wholesale, and fp_text_default() takes
+  # its size from get_flextable_defaults() (11pt) rather than from the
+  # fontsize() already applied, so the linked cells rendered two points larger
+  # than every other row until font.size was passed explicitly.
+  #
+  # Checked on both code paths because they are genuinely different: uncomposed
+  # cells carry their size in the styles slot, composed ones per chunk.
+  tbl <- build_sample_groups_table(fake_summary())
+  ft <- sample_groups_flextable(tbl, link_sections = tbl$.anchor)
+
+  styled <- unique(as.vector(as.matrix(ft$body$styles$text$font.size$data)))
+  # NA here means "inherit from the styles slot", which is what every
+  # uncomposed cell does and is correct. Only an explicitly set chunk size can
+  # disagree with the table, so those are what must match.
+  composed <- unlist(lapply(ft$body$content$data, `[[`, "font.size"))
+  composed <- unique(composed[!is.na(composed)])
+
+  expect_length(styled, 1)
+  expect_setequal(composed, styled)
+  expect_equal(
+    unique(as.vector(as.matrix(ft$header$styles$text$font.size$data))),
+    styled
+  )
+})
+
 test_that("a group with no matching section stays plain text", {
   tbl <- build_sample_groups_table(fake_summary())
   html <- sample_groups_flextable(tbl, link_sections = "grp-something-else") |>

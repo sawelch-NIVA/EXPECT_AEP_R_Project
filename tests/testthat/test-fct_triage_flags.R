@@ -255,6 +255,33 @@ test_that("group_summary_line singularises a lone source", {
   expect_false(grepl("1\\*\\* sources", line))
 })
 
+test_that("group_summary_line names the references when it has them", {
+  # Whether a group is two Vannmiljø campaigns or two independent papers is what
+  # a lump/split judgement turns on, and the old "(distinct REFERENCE_ID)"
+  # wording could not say.
+  row <- cbind(
+    add_triage_flags(flag_summary(n_sources = 2L)),
+    n_rows = 4L,
+    reference_ids = "2003ZaukeHeavyMetalsOf, VannmiljoCopper2010-2025"
+  )
+  line <- group_summary_line(row)
+  expect_match(line, "2003ZaukeHeavyMetalsOf, VannmiljoCopper2010-2025", fixed = TRUE)
+  expect_false(grepl("distinct", line, fixed = TRUE))
+})
+
+test_that("group_summary_line falls back when reference_ids is missing", {
+  # A caller holding a bare summary row, with no join against the measurements,
+  # must still get a sentence rather than an empty "()".
+  bare <- cbind(add_triage_flags(flag_summary(n_sources = 2L)), n_rows = 4L)
+  expect_match(group_summary_line(bare), "distinct")
+
+  empty <- cbind(bare, reference_ids = "")
+  expect_match(group_summary_line(empty), "distinct")
+
+  na_row <- cbind(bare, reference_ids = NA_character_)
+  expect_match(group_summary_line(na_row), "distinct")
+})
+
 test_that("group_summary_line emits a callout only when something is flagged", {
   clean <- group_summary_line(
     cbind(add_triage_flags(flag_summary()), n_rows = 10L)

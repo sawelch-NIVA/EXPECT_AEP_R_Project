@@ -315,7 +315,11 @@ test_that("the date panel has a haloed trendline and no secondary axis", {
   expect_equal(sum(smooths), 2)
   halo <- p$layers[which(smooths)[1]][[1]]
   top <- p$layers[which(smooths)[2]][[1]]
-  expect_equal(halo$aes_params$colour, "white")
+  # RGBA rather than "white" plus an alpha argument: geom_smooth() passes alpha
+  # to the ribbon, not the line, so with se = FALSE it has nothing to act on and
+  # the halo stayed fully opaque. Baking the alpha into the colour is the only
+  # thing that dims it.
+  expect_equal(halo$aes_params$colour, "#ffffff48")
   expect_equal(top$aes_params$colour, "grey60")
   # The halo must be solid: R dash lengths scale with line width, so a matched
   # linetype on a wider line drifts out of phase with the dots on top.

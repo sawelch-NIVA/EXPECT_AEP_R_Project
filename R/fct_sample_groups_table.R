@@ -152,6 +152,14 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
   outlier_idx <- which(tbl$.is_outlier)
   linked_idx <- which(!is.na(tbl$.anchor) & tbl$.anchor %in% link_sections)
 
+  # One constant for both the table-wide fontsize() below and the composed link
+  # chunks further down. They have to be set separately: compose() replaces a
+  # cell's content wholesale, and fp_text_default() takes its size from
+  # get_flextable_defaults() (11pt) rather than from the fontsize() already
+  # applied to the table, so the linked cells rendered two points larger than
+  # every other row.
+  font_size <- 9
+
   ft <- tbl |>
     dplyr::select(-".is_multimodal", -".is_outlier", -".anchor") |>
     flextable::flextable() |>
@@ -176,7 +184,7 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
     # informational columns and are deliberately not highlighted.
     flextable::color(i = multimodal_idx, j = "dip_p_label", color = "red") |>
     flextable::bg(i = outlier_idx, bg = "#FFF3CD") |>
-    flextable::fontsize(size = 9, part = "all") |>
+    flextable::fontsize(size = font_size, part = "all") |>
     flextable::padding(padding = 2, part = "all")
 
   # Link the triaged rows only. compose() replaces the cell content wholesale,
@@ -200,7 +208,8 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
           url = paste0("#", tbl$.anchor[linked_idx]),
           props = flextable::fp_text_default(
             color = "#1A6FA8",
-            underlined = TRUE
+            underlined = TRUE,
+            font.size = font_size
           )
         )
       )
