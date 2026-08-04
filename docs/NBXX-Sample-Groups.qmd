@@ -298,7 +298,7 @@ emit_species_panel <- function(compartment, sub, species_group) {
 captions <- c(
   a_density = "Overall distribution (all units)",
   b_date = "Concentration by date",
-  c_campaign = "Distribution by campaign",
+  c_source = "Distribution by campaign or reference",
   d_site_type = "Distribution by site type (all geographies)",
   e_spatial = "Spatial distribution"
 )

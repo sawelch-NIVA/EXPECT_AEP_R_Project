@@ -116,7 +116,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_b_date.png){#fig-g012-b group="G012"}
 
-![Distribution by campaign](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_c_campaign.png){#fig-g012-c group="G012"}
+![Distribution by campaign or reference](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_c_source.png){#fig-g012-c group="G012"}
 
 ![Distribution by site type (all geographies)](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_d_site_type.png){#fig-g012-d group="G012"}
 
@@ -139,7 +139,7 @@ G012: Mammals / Ursus maritimus / Liver / Coastal, fjord / Other / mg/kg (dry)
 
 ![Concentration by date](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_b_date.png){#fig-g025-b group="G025"}
 
-![Distribution by campaign](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_campaign.png){#fig-g025-c group="G025"}
+![Distribution by campaign or reference](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_source.png){#fig-g025-c group="G025"}
 
 ![Distribution by site type (all geographies)](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_d_site_type.png){#fig-g025-d group="G025"}
 
@@ -162,7 +162,7 @@ G025: Birds / Somateria mollissima / Egg / Ocean, sea, territorial waters / Not 
 
 ![Concentration by date](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_b_date.png){#fig-g026-b group="G026"}
 
-![Distribution by campaign](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_campaign.png){#fig-g026-c group="G026"}
+![Distribution by campaign or reference](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_source.png){#fig-g026-c group="G026"}
 
 ![Distribution by site type (all geographies)](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_d_site_type.png){#fig-g026-d group="G026"}
 

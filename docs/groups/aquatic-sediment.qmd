@@ -68,7 +68,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_b_date.png){#fig-g002-b group="G002"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g002-c group="G002"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_c_source.png){#fig-g002-c group="G002"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g002-d group="G002"}
 
@@ -91,7 +91,7 @@ G002: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_b_date.png){#fig-g008-b group="G008"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g008-c group="G008"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_c_source.png){#fig-g008-c group="G008"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g008-d group="G008"}
 
@@ -114,7 +114,7 @@ G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg 
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_b_date.png){#fig-g009-b group="G009"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g009-c group="G009"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_c_source.png){#fig-g009-c group="G009"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g009-d group="G009"}
 
@@ -137,7 +137,7 @@ G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos /
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g013-b group="G013"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g013-c group="G013"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_c_source.png){#fig-g013-c group="G013"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g013-d group="G013"}
 
@@ -160,7 +160,7 @@ G013: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone /
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_b_date.png){#fig-g016-b group="G016"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g016-c group="G016"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_c_source.png){#fig-g016-c group="G016"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g016-d group="G016"}
 
@@ -188,7 +188,7 @@ G016: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water bentho
 
 ![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_b_date.png){#fig-g019-b group="G019"}
 
-![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_c_campaign.png){#fig-g019-c group="G019"}
+![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_c_source.png){#fig-g019-c group="G019"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_d_site_type.png){#fig-g019-d group="G019"}
 

@@ -91,7 +91,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g033-b group="G033"}
 
-![Distribution by campaign](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g033-c group="G033"}
+![Distribution by campaign or reference](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g033-c group="G033"}
 
 ![Distribution by site type (all geographies)](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g033-d group="G033"}
 
@@ -114,7 +114,7 @@ G033: Algae / Ascophyllum nodosum / Shoot tip / Coastal, fjord / Not reported / 
 
 ![Concentration by date](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g036-b group="G036"}
 
-![Distribution by campaign](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g036-c group="G036"}
+![Distribution by campaign or reference](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g036-c group="G036"}
 
 ![Distribution by site type (all geographies)](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g036-d group="G036"}
 

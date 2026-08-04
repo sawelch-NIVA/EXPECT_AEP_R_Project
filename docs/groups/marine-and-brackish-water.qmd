@@ -54,7 +54,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g004-b group="G004"}
 
-![Distribution by campaign](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_c_campaign.png){#fig-g004-c group="G004"}
+![Distribution by campaign or reference](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_c_source.png){#fig-g004-c group="G004"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g004-d group="G004"}
 

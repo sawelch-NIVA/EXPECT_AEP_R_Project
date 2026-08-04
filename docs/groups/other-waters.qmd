@@ -52,7 +52,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_b_date.png){#fig-g015-b group="G015"}
 
-![Distribution by campaign](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_c_campaign.png){#fig-g015-c group="G015"}
+![Distribution by campaign or reference](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_c_source.png){#fig-g015-c group="G015"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_d_site_type.png){#fig-g015-d group="G015"}
 
@@ -81,7 +81,7 @@ G015: Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / 
 
 ![Concentration by date](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_b_date.png){#fig-g020-b group="G020"}
 
-![Distribution by campaign](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_c_campaign.png){#fig-g020-c group="G020"}
+![Distribution by campaign or reference](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_c_source.png){#fig-g020-c group="G020"}
 
 ![Distribution by site type (all geographies)](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_d_site_type.png){#fig-g020-d group="G020"}
 

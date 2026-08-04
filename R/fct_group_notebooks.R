@@ -81,7 +81,7 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
   captions <- captions %||% c(
     a_density = "Overall distribution (all units)",
     b_date = "Concentration by date",
-    c_campaign = "Distribution by campaign",
+    c_source = "Distribution by campaign or reference",
     d_site_type = "Distribution by site type (all geographies)",
     e_spatial = "Spatial distribution"
   )

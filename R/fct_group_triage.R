@@ -503,6 +503,93 @@ prettify_campaign_name <- function(x) {
   )
 }
 
+#' Shorten an eData Reference Id for Display
+#'
+#' `REFERENCE_ID` is a run-on of year, first author and title
+#' (`2019SimonsenLabilityOfToxic`), up to 36 characters with no spaces in it.
+#' As a category label that is unwrappable and unreadable at the size these
+#' panels are drawn; as "Simonsen 2019" it is both, and the full id is one grep
+#' away in the data.
+#'
+#' The author is taken as everything before the next capitalised word, which
+#' clips a double-barrelled surname to its first element
+#' (`2021LehmannKonEffectsOf` becomes "Lehmann 2021"). That is accepted: these
+#' are axis labels, not citations.
+#'
+#' Two ids shortening to the same label would silently merge two studies into
+#' one band, so where that happens **both** keep their full id rather than being
+#' quietly conflated. Ids not matching the year-then-author shape are returned
+#' unchanged.
+#'
+#' @param x A character vector of reference ids.
+#' @return A character vector the same length as `x`.
+#' @export
+prettify_reference_id <- function(x) {
+  x <- as.character(x)
+  if (length(x) == 0) {
+    return(character(0))
+  }
+
+  year <- stringr::str_extract(x, "^\\d{4}")
+  rest <- stringr::str_remove(x, "^\\d{4}")
+  # Split at the first lower-to-upper transition, i.e. where the title starts.
+  author <- stringr::str_split_i(rest, "(?<=[a-z])(?=[A-Z])", 1)
+  # A few ids drop a Norwegian initial letter and start lower case
+  # (2015verjordetToxicAndEssential, from Overjordet), which reads as a typo
+  # unless it is capitalised here.
+  author <- sub("^(.)", "\\U\\1", author, perl = TRUE)
+
+  short <- ifelse(
+    is.na(year) | is.na(author) | author == "",
+    x,
+    paste(author, year)
+  )
+
+  # Collision check on the distinct ids, not on the vector, so a reference
+  # appearing 13,000 times does not count as clashing with itself.
+  pairs <- unique(data.frame(id = x, short = short))
+  clashing <- pairs$short[duplicated(pairs$short)]
+  ifelse(short %in% clashing, x, short)
+}
+
+#' Label a Row by Its Campaign or Its Reference
+#'
+#' Neither column alone works as the category for panel c. Vannmiljø is a single
+#' `REFERENCE_ID` covering 44 campaigns and ~90% of the rows, so keying on the
+#' reference collapses almost the whole dataset into one band. Literature data is
+#' the mirror image: one campaign per study, named by an internal code
+#' (`ARKIXb1993FramGrnld`) that says nothing about whose data it is, so keying on
+#' the campaign hides the thing a lump/split judgement turns on.
+#'
+#' So: campaign where the row is Vannmiljø, reference otherwise. A group drawing
+#' on both shows both kinds of band, which is correct, because for a mixed group
+#' "which source is this" genuinely has two different answers.
+#'
+#' Vannmiljø rows are detected on the `Vm_` campaign prefix rather than on the
+#' reference id, which contains a non-ASCII character.
+#'
+#' @param campaign `CAMPAIGN_NAME_SHORT`.
+#' @param reference `REFERENCE_ID`.
+#' @return A character vector the same length as `campaign`.
+#' @export
+triage_source_label <- function(campaign, reference) {
+  campaign <- as.character(campaign)
+  reference <- as.character(reference)
+  if (length(campaign) == 0) {
+    return(character(0))
+  }
+
+  is_vm <- !is.na(campaign) & stringr::str_starts(campaign, "Vm_")
+  out <- ifelse(
+    is_vm,
+    prettify_campaign_name(campaign),
+    prettify_reference_id(reference)
+  )
+  # A row with no reference falls back to its campaign rather than becoming NA,
+  # which triage_plot_by_category() would drop from the panel without saying so.
+  ifelse(is.na(out), campaign, out)
+}
+
 # ---- Threshold reference lines -----------------------------------------
 #
 # v2, 2026-07-30. The first attempt annotated each line with rotated in-panel
@@ -1180,6 +1267,41 @@ triage_plot_by_category <- function(
     )
 }
 
+#' Triage Plot: Distribution by Source
+#'
+#' Panel c. A thin wrapper on [triage_plot_by_category()] that derives the
+#' category with [triage_source_label()]: Vannmiljø campaign where the row is
+#' Vannmiljø, reference where it is not. See that function for why neither
+#' column works on its own.
+#'
+#' @param data A group subset.
+#' @param label Group label for the subtitle.
+#' @param ... Passed to [triage_plot_by_category()], notably `limits`,
+#'   `thresholds` and `grp`.
+#' @return A ggplot.
+#' @export
+triage_plot_by_source <- function(data, label = NULL, ...) {
+  if (!"REFERENCE_ID" %in% names(data)) {
+    stop("triage_plot_by_source() needs a REFERENCE_ID column.")
+  }
+  data$.source <- triage_source_label(
+    data$CAMPAIGN_NAME_SHORT,
+    data$REFERENCE_ID
+  )
+
+  triage_plot_by_category(
+    data,
+    ".source",
+    "c) Distribution by campaign or reference",
+    label,
+    # Already prettified by triage_source_label(), and the two kinds of label
+    # need different treatment, so there is nothing left for a single label_fn
+    # to do here.
+    label_fn = identity,
+    ...
+  )
+}
+
 #' Count Observations per Value Bin per Category
 #'
 #' The counting half of the categorical heatmap. Bins are computed in log10
@@ -1269,9 +1391,27 @@ category_x_binwidth <- function(data, limits = NULL, bins = 40) {
 #'
 #' @param data A group subset. @param label Group label for the subtitle.
 #' @param limits Shared colour-scale limits from [triage_limits_for()].
+#' @param bins Hex bins. Doubled from 60 to 120 on 2026-08-04: at 60 the cells
+#'   were wide enough to average a fjord together with the open coast beside it,
+#'   so several groups read as spatially uniform when whether they are is the
+#'   question the panel exists to answer. Halving the cell quarters the rows
+#'   behind each median, so read sparse groups with care; below
+#'   `triage_use_points()` the panel drops to raw points anyway.
+#'
+#'   **`bins` is not bins across the visible map.** ggplot2 takes the hex width
+#'   as `diff(scale range) / bins`, and the scale here is shared with the world
+#'   basemap, which spans the globe. So 120 gives 360/120 = 3 degrees of
+#'   longitude, not a 120-cell grid over Norway, and the visible extent set by
+#'   `coord_fixed()` below has no effect on it. Two consequences: cell size is
+#'   identical across every group, which is what makes the panels comparable,
+#'   and the latitude width comes out at roughly half the longitude width, which
+#'   `ratio = 2` happens to draw as a regular hexagon. Pass an explicit
+#'   `binwidth` to `stat_summary_hex()`
+#'   if a genuinely fine grid is ever wanted; `bins` cannot get there without
+#'   absurd numbers.
 #' @return A ggplot.
 #' @export
-triage_plot_spatial <- function(data, label = NULL, limits = NULL) {
+triage_plot_spatial <- function(data, label = NULL, limits = NULL, bins = 120) {
   spatial <- data |>
     dplyr::filter(!is.na(.data$LONGITUDE), !is.na(.data$LATITUDE))
 
@@ -1317,7 +1457,7 @@ triage_plot_spatial <- function(data, label = NULL, limits = NULL) {
         z = .data$MEASURED_VALUE_STANDARD
       ),
       fun = "median",
-      bins = 60,
+      bins = bins,
       alpha = 0.75
     )
   }
@@ -1455,12 +1595,14 @@ write_triage_plots_for_group <- function(
       thresholds = thresholds,
       grp = grp
     ),
-    c_campaign = triage_plot_by_category(
+    # Renamed from c_campaign on 2026-08-04, when the panel stopped being about
+    # campaigns alone; see triage_plot_by_source(). The letter prefix is what the
+    # notebooks key their subfigure ids on, so those are unaffected, but the
+    # written filename changes and the image links in docs/groups/*.qmd were
+    # updated to match by hand (the generator is append-only and will not do it).
+    c_source = triage_plot_by_source(
       group_data,
-      "CAMPAIGN_NAME_SHORT",
-      "c) Distribution by campaign",
       label,
-      label_fn = prettify_campaign_name,
       limits = lims,
       thresholds = thresholds,
       grp = grp

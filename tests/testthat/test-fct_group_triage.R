@@ -14,6 +14,10 @@ fake_group_data <- function(n = 50, unit = "mg/kg (dry)", coords = TRUE) {
     MEASURED_VALUE_STANDARD = seq(1, 100, length.out = n),
     SAMPLING_DATE = seq(as.Date("2000-01-01"), by = "month", length.out = n),
     CAMPAIGN_NAME_SHORT = rep(c("Camp A", "Camp B"), length.out = n),
+    REFERENCE_ID = rep(
+      c("2019SimonsenLabilityOfToxic", "2011CaiContentAndDistribution"),
+      length.out = n
+    ),
     LONGITUDE = if (coords) seq(5, 30, length.out = n) else NA_real_,
     LATITUDE = if (coords) seq(60, 80, length.out = n) else NA_real_
   )
@@ -358,6 +362,83 @@ test_that("triage_plot_by_category applies label_fn to categories", {
   expect_true(any(grepl("NorSeal1988", labels)))
 })
 
+test_that("prettify_reference_id shortens to author and year", {
+  expect_equal(
+    prettify_reference_id("2019SimonsenLabilityOfToxic"),
+    "Simonsen 2019"
+  )
+  # Single-syllable author, and a title starting with a one-letter word
+  expect_equal(prettify_reference_id("2009SonneAStudyOf"), "Sonne 2009")
+  # Ids that drop a Norwegian initial letter start lower case
+  expect_equal(
+    prettify_reference_id("2015verjordetToxicAndEssential"),
+    "Verjordet 2015"
+  )
+})
+
+test_that("prettify_reference_id keeps full ids where shortening collides", {
+  # Two studies rendering as one label would silently merge two bands.
+  x <- c("2003ZaukeHeavyMetalsOf", "2003ZaukeSomethingElse", "2006ZaukeHeavyMetalsIn")
+
+  result <- prettify_reference_id(x)
+
+  expect_equal(result[1:2], x[1:2])
+  expect_equal(result[3], "Zauke 2006")
+})
+
+test_that("prettify_reference_id leaves unrecognised ids alone", {
+  expect_equal(prettify_reference_id("VannmiljoCopper2010-2025"), "VannmiljoCopper2010-2025")
+  expect_equal(prettify_reference_id(character(0)), character(0))
+  expect_true(is.na(prettify_reference_id(NA_character_)))
+})
+
+test_that("triage_source_label uses campaign for Vannmiljo and reference otherwise", {
+  campaign <- c("Vm_2010_2025 (Mine Impact)", "Bokfjorden2016", "Vm_2025")
+  reference <- c(
+    "VannmiljoCopper2010-2025",
+    "2019SimonsenLabilityOfToxic",
+    "VannmiljoCopper2010-2025"
+  )
+
+  result <- triage_source_label(campaign, reference)
+
+  expect_equal(result, c("Mine Impact", "Simonsen 2019", "Vm_2025"))
+})
+
+test_that("triage_source_label falls back rather than returning NA", {
+  # An NA category is dropped from the panel without saying so, which is worse
+  # than an ugly label.
+  expect_equal(
+    triage_source_label("Bokfjorden2016", NA_character_),
+    "Bokfjorden2016"
+  )
+  expect_equal(triage_source_label(character(0), character(0)), character(0))
+})
+
+test_that("triage_plot_by_source labels literature bands by reference", {
+  d <- fake_group_data(n = 40)
+  d$CAMPAIGN_NAME_SHORT <- rep(
+    c("Vm_2010_2025 (Mine Impact)", "Bokfjorden2016"),
+    length.out = 40
+  )
+  d$REFERENCE_ID <- rep(
+    c("VannmiljoCopper2010-2025", "2019SimonsenLabilityOfToxic"),
+    length.out = 40
+  )
+
+  p <- triage_plot_by_source(d)
+  labels <- levels(ggplot2::ggplot_build(p)$plot$data$.facet)
+
+  expect_setequal(labels, c("Mine Impact", "Simonsen 2019"))
+})
+
+test_that("triage_plot_by_source refuses data without a reference column", {
+  d <- fake_group_data(n = 10)
+  d$REFERENCE_ID <- NULL
+
+  expect_error(triage_plot_by_source(d), "REFERENCE_ID")
+})
+
 test_that("write_triage_plots_for_group writes one PNG per view", {
   d <- fake_group_data(n = 40)
   grp <- d[1, , drop = FALSE]
@@ -374,7 +455,7 @@ test_that("write_triage_plots_for_group writes one PNG per view", {
     basename(paths),
     paste0(
       "test_group_",
-      c("a_density", "b_date", "c_campaign", "d_site_type", "e_spatial"),
+      c("a_density", "b_date", "c_source", "d_site_type", "e_spatial"),
       ".png"
     )
   )

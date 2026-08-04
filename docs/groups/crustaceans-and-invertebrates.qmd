@@ -140,7 +140,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g011-b group="G011"}
 
-![Distribution by campaign](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g011-c group="G011"}
+![Distribution by campaign or reference](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g011-c group="G011"}
 
 ![Distribution by site type (all geographies)](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g011-d group="G011"}
 
@@ -163,7 +163,7 @@ G011: Crustaceans / Cancer pagurus / Muscle / Coastal, fjord / Not reported / mg
 
 ![Concentration by date](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g014-b group="G014"}
 
-![Distribution by campaign](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g014-c group="G014"}
+![Distribution by campaign or reference](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g014-c group="G014"}
 
 ![Distribution by site type (all geographies)](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g014-d group="G014"}
 
@@ -186,7 +186,7 @@ G014: Crustaceans / Cancer pagurus / Total soft tissues / Coastal, fjord / Not r
 
 ![Concentration by date](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g022-b group="G022"}
 
-![Distribution by campaign](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g022-c group="G022"}
+![Distribution by campaign or reference](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_source.png){#fig-g022-c group="G022"}
 
 ![Distribution by site type (all geographies)](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g022-d group="G022"}
 
@@ -209,7 +209,7 @@ G022: Crustaceans / Pandalus borealis / Whole body / Ocean, sea, territorial wat
 
 ![Concentration by date](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_b_date.png){#fig-g023-b group="G023"}
 
-![Distribution by campaign](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g023-c group="G023"}
+![Distribution by campaign or reference](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_c_source.png){#fig-g023-c group="G023"}
 
 ![Distribution by site type (all geographies)](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g023-d group="G023"}
 
@@ -232,7 +232,7 @@ G023: Crustaceans / Gammarus oceanicus / Whole body / Coastal, fjord / Water ben
 
 ![Concentration by date](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g024-b group="G024"}
 
-![Distribution by campaign](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g024-c group="G024"}
+![Distribution by campaign or reference](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_source.png){#fig-g024-c group="G024"}
 
 ![Distribution by site type (all geographies)](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g024-d group="G024"}
 

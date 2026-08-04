@@ -169,7 +169,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g006-b group="G006"}
 
-![Distribution by campaign](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g006-c group="G006"}
+![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g006-c group="G006"}
 
 ![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g006-d group="G006"}
 
@@ -196,7 +196,7 @@ Fig 1b shows that more recent concentrations are strongly normal. Outliers in 20
 
 ![Concentration by date](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_b_date.png){#fig-g017-b group="G017"}
 
-![Distribution by campaign](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_c_campaign.png){#fig-g017-c group="G017"}
+![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_c_source.png){#fig-g017-c group="G017"}
 
 ![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_d_site_type.png){#fig-g017-d group="G017"}
 
@@ -224,7 +224,7 @@ G017: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
 
 ![Concentration by date](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g018-b group="G018"}
 
-![Distribution by campaign](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g018-c group="G018"}
+![Distribution by campaign or reference](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g018-c group="G018"}
 
 ![Distribution by site type (all geographies)](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g018-d group="G018"}
 

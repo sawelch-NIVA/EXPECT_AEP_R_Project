@@ -104,7 +104,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Concentration by date](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g005-b group="G005"}
 
-![Distribution by campaign](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g005-c group="G005"}
+![Distribution by campaign or reference](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g005-c group="G005"}
 
 ![Distribution by site type (all geographies)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g005-d group="G005"}
 
@@ -127,7 +127,7 @@ G005: Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not repo
 
 ![Concentration by date](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_b_date.png){#fig-g007-b group="G007"}
 
-![Distribution by campaign](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_c_campaign.png){#fig-g007-c group="G007"}
+![Distribution by campaign or reference](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_c_source.png){#fig-g007-c group="G007"}
 
 ![Distribution by site type (all geographies)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_d_site_type.png){#fig-g007-d group="G007"}
 
@@ -150,7 +150,7 @@ G007: Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water co
 
 ![Concentration by date](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_b_date.png){#fig-g010-b group="G010"}
 
-![Distribution by campaign](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_c_campaign.png){#fig-g010-c group="G010"}
+![Distribution by campaign or reference](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_c_source.png){#fig-g010-c group="G010"}
 
 ![Distribution by site type (all geographies)](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_d_site_type.png){#fig-g010-d group="G010"}
 
@@ -179,7 +179,7 @@ G010: Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not re
 
 ![Concentration by date](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g021-b group="G021"}
 
-![Distribution by campaign](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g021-c group="G021"}
+![Distribution by campaign or reference](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g021-c group="G021"}
 
 ![Distribution by site type (all geographies)](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g021-d group="G021"}
 
