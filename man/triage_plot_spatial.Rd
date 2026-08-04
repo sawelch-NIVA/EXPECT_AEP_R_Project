@@ -4,12 +4,31 @@
 \alias{triage_plot_spatial}
 \title{Triage Plot: Spatial Distribution}
 \usage{
-triage_plot_spatial(data, label = NULL, limits = NULL)
+triage_plot_spatial(data, label = NULL, limits = NULL, bins = 120)
 }
 \arguments{
 \item{data}{A group subset. @param label Group label for the subtitle.}
 
 \item{limits}{Shared colour-scale limits from \code{\link[=triage_limits_for]{triage_limits_for()}}.}
+
+\item{bins}{Hex bins. Doubled from 60 to 120 on 2026-08-04: at 60 the cells
+were wide enough to average a fjord together with the open coast beside it,
+so several groups read as spatially uniform when whether they are is the
+question the panel exists to answer. Halving the cell quarters the rows
+behind each median, so read sparse groups with care; below
+\code{triage_use_points()} the panel drops to raw points anyway.
+
+\strong{\code{bins} is not bins across the visible map.} ggplot2 takes the hex width
+as \verb{diff(scale range) / bins}, and the scale here is shared with the world
+basemap, which spans the globe. So 120 gives 360/120 = 3 degrees of
+longitude, not a 120-cell grid over Norway, and the visible extent set by
+\code{coord_fixed()} below has no effect on it. Two consequences: cell size is
+identical across every group, which is what makes the panels comparable,
+and the latitude width comes out at roughly half the longitude width, which
+\code{ratio = 2} happens to draw as a regular hexagon. Pass an explicit
+\code{binwidth} to \code{stat_summary_hex()}
+if a genuinely fine grid is ever wanted; \code{bins} cannot get there without
+absurd numbers.}
 }
 \value{
 A ggplot.

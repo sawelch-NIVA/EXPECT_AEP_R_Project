@@ -11,13 +11,20 @@ A character vector of permitted values.
 }
 \description{
 \itemize{
-\item \code{own_notebook} -- big or interesting enough to get its own analysis and
-become a candidate AEP node.
-\item \code{lump} -- merge into another group, named in \code{lump_into}.
+\item \code{keep} -- reviewed, usable as it stands.
+\item \code{lump} -- merge with another \strong{group}, named by its \code{group_id} in
+\code{lump_into}. This is a group-to-group merge \emph{within} a notebook; which
+notebook a group belongs to is the separate \code{notebook} column.
 \item \code{split} -- the group key is too coarse; needs subdividing before use.
 \item \code{drop} -- not usable, with the reason in \code{notes}.
 }
 }
 \details{
-An empty string means undecided, which is the initial state of every row.
+An empty string means undecided. \code{keep} therefore means "looked at it, it is
+fine", which is a different and more useful statement than silence.
+
+\strong{\code{own_notebook} was removed on 2026-07-30}, when \code{notebook} became its own
+column and made it redundant. It had also become actively ambiguous: eleven
+rows carried \code{own_notebook} \emph{and} a \code{lump_into} value, which are opposite
+instructions under a single-column schema.
 }

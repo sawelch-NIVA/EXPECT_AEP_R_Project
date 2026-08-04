@@ -699,9 +699,13 @@ triage_threshold_sec_axis <- function(thresholds, limits = NULL) {
   ggplot2::dup_axis(
     breaks = thresholds$THRESHOLD_VALUE_STANDARD,
     labels = threshold_axis_label(thresholds),
-    # Several sources can coexist on the unit-agnostic overall-distribution
-    # panel, so this is a set rather than a single name.
-    name = paste(unique(thresholds$REFERENCE_ID), collapse = " / ")
+    # Source AND matrix, via threshold_source_title(). The bare REFERENCE_ID
+    # said which document the boundaries came from but not what they were set
+    # for, and the match is loose enough (genus-level for biota, many-to-one for
+    # compartments) that the reader cannot infer it. Several sources can coexist
+    # on the unit-agnostic overall-distribution panel, so this is a set rather
+    # than a single name.
+    name = threshold_source_title(thresholds)
   )
 }
 
@@ -1002,6 +1006,7 @@ triage_plot_density <- function(
     # No triage_minor_grid_theme() here any more: powers of ten are major breaks
     # now, so the value axis has no minor breaks and there is nothing for it to
     # style.
+    triage_value_text_theme("x") +
     triage_sec_axis_theme("top") +
     ggplot2::theme(legend.position = "bottom")
 }
@@ -1115,12 +1120,260 @@ triage_plot_by_date <- function(
       subtitle = label
     ) +
     triage_theme() +
+    triage_value_text_theme("y") +
     # "x", not "y". The minor breaks moved: the value axis (y here) now labels
     # every power of ten as a MAJOR break and has no minor breaks at all, while
     # the date axis (x) gained a minor break per year. Left on "y" this would
     # have styled a grid with nothing to draw and silently dropped the yearly
     # lines Sam asked for.
     triage_minor_grid_theme("x")
+}
+
+#' De-emphasise the Concentration-Axis Labels
+#'
+#' The shared per-compartment limits put up to 13 decade labels on the value
+#' axis (see [triage_value_scale()]), and at full weight that row of `1e-07`,
+#' `1e-06`, ... competes with the panel for attention when it is really just a
+#' ruler. Smaller and greyer, so it reads as scale furniture.
+#'
+#' Font size rather than shortening the labels. Dropping the mantissa to leave
+#' `-07`, `-06` was the other option Sam offered and is fewer characters, but a
+#' bare exponent is not a concentration and the axis title does not say
+#' "log10", so it invites a reader to take -07 as a value. The labels stay as
+#' [triage_value_scale()] writes them.
+#'
+#' Applied to one axis only. The category axis on panels c and d already sets
+#' its own size, and the two must not fight.
+#'
+#' @param axis `"x"` where the measured value is on x (panels a, c, d), `"y"`
+#'   where it is on y (panel b).
+#' @return A ggplot2 theme.
+#' @export
+triage_value_text_theme <- function(axis = c("x", "y")) {
+  axis <- match.arg(axis)
+  el <- ggplot2::element_text(size = ggplot2::rel(0.7), colour = "grey45")
+  if (axis == "x") {
+    # .bottom, not the bare axis.text.x: the top axis on these panels is the
+    # threshold-class secondary axis, which triage_sec_axis_theme() deliberately
+    # makes bolder and larger. Setting axis.text.x would fight it, and which one
+    # won would depend on the order the themes were added.
+    ggplot2::theme(axis.text.x.bottom = el)
+  } else {
+    ggplot2::theme(axis.text.y.left = el)
+  }
+}
+
+#' Per-Category Outlier Flags for a Triage Panel
+#'
+#' Recomputes the two outlier criteria **within each category of the panel**
+#' (each campaign or reference on panels c and d), rather than reusing the
+#' sample-group flags that `summarise_literature_data` puts in the triage table.
+#'
+#' Why the difference is deliberate, and why both are right (Sam, 2026-08-04:
+#' "we're doing the same operation here but at a different level of grouping"):
+#'
+#' * The sample-group fence pools every campaign in the group. Measured on
+#'   Aquatic / Freshwater / River, that made **one** mining campaign produce 998
+#'   of the group's 1,316 flags, purely by being a mining campaign. Its values
+#'   are unremarkable for a mine and extreme for the group.
+#' * The per-campaign fence asks whether a value is unusual *for its own
+#'   campaign*. On the same group it flags 687 rows, Mine Impact drops to 0, and
+#'   dispersed campaigns that the pooled fence hid (Reference Rivers, 2 to 53)
+#'   become visible.
+#'
+#' Neither subsumes the other, and this does **not** change
+#' `n_double_outliers` or anything the triage table ranks on.
+#'
+#' Categories below `min_n` are not tested at all, and are reported as
+#' `tested = FALSE` rather than as zero. A fence fitted to a handful of points
+#' is noise: Urban Fjord Contaminants has 7 rows in this group, two of which are
+#' the 1e3 block, and no fence fitted to that sample can call 29% of itself an
+#' outlier. Such rows say so in their label; see [triage_category_labels()].
+#'
+#' @param data A plot subset carrying `MEASURED_VALUE_STANDARD` and `.facet`.
+#' @param min_n Minimum category size for the flags to be computed.
+#' @return `data` with `.outlier` (logical, `FALSE` where untested) and
+#'   `.tested` (logical) added.
+#' @export
+triage_flag_by_category <- function(data, min_n = 10) {
+  if (nrow(data) == 0) {
+    data$.outlier <- logical(0)
+    data$.tested <- logical(0)
+    return(data)
+  }
+  data |>
+    dplyr::group_by(.data$.facet) |>
+    dplyr::mutate(
+      .dot_fill = flag_outliers(.data$MEASURED_VALUE_STANDARD, min_n = min_n)$
+        dot_fill,
+      # `%in%` rather than `==`: dot_fill is a factor and an untested category
+      # yields "not tested", which must read as FALSE here and not as NA.
+      .outlier = .data$.dot_fill %in% "both",
+      .tested = !(.data$.dot_fill %in% "not tested")
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select(-".dot_fill")
+}
+
+#' Right-Margin Count Labels for the Categorical Panels
+#'
+#' `"1,193 (53)"`: rows in the category, and how many of them the per-category
+#' fences flagged. Sam's call, 2026-08-04, and it earns its place because the
+#' shared value axis leaves a wide empty margin on the right of most panels.
+#'
+#' Untested categories read `"7 (n < 10)"` rather than `"7 (0)"`, which would
+#' claim a test that did not run. The threshold is interpolated from `min_n`
+#' rather than written into the string, so the label cannot drift if the default
+#' changes.
+#'
+#' @param data Output of [triage_flag_by_category()].
+#' @param min_n The same `min_n` passed to [triage_flag_by_category()].
+#' @return A tibble of `.facet`, `n`, `k`, `tested`, `label`.
+#' @export
+triage_category_labels <- function(data, min_n = 10) {
+  data |>
+    dplyr::group_by(.data$.facet) |>
+    dplyr::summarise(
+      n = dplyr::n(),
+      # all(), not any(): flag_outliers() decides per category, so the value is
+      # constant within a group and all() simply picks it up.
+      tested = all(.data$.tested),
+      k = sum(.data$.outlier),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      label = dplyr::if_else(
+        .data$tested,
+        paste0(format(.data$n, big.mark = ",", trim = TRUE), " (", .data$k, ")"),
+        paste0(
+          format(.data$n, big.mark = ",", trim = TRUE),
+          " (n < ",
+          min_n,
+          ")"
+        )
+      )
+    )
+}
+
+#' Distribution Overlay for the Categorical Panels
+#'
+#' The layers drawn on top of the heatmap: a boxplot per category, tick marks at
+#' the per-category outliers, and the count labels in the right margin.
+#'
+#' **These layers must be added before [triage_threshold_layers()].** The
+#' threshold lines have to draw last or the boxplot covers them, which was the
+#' first thing wrong with this overlay.
+#'
+#' Design notes, all settled by rendering against the real data on 2026-08-04:
+#'
+#' * **`outlier.shape = NA` is mandatory.** The boxplot's own outlier points are
+#'   one mark per row, which on a 42,000-row group is precisely the thing
+#'   CLAUDE.md 4.4 forbids. Suppressed here; the tick layer draws the outliers
+#'   that survive the stricter two-criteria test instead.
+#' * **The box is drawn twice**, a dark halo under a white line. The viridis
+#'   fill is light at the modal bins, which is exactly where the box sits, so a
+#'   dark line alone is swallowed there; the reverse pairing (white halo, dark
+#'   line) was tried and put fat white whiskers through the tile rows.
+#' * **Ticks, not points.** Points overplot into solid runs on the dense
+#'   categories; ticks read as texture, and the density of the fringe is itself
+#'   informative. White, not red: red over-dramatised what is mostly ordinary
+#'   distribution tail, and white borrows the language the box already set.
+#' * **`width = 0.45`** leaves a visible sliver of the tile band above and below,
+#'   so the row still reads as a heatmap row rather than as a broken boxplot.
+#'
+#' Box statistics are computed in log10 space, because [triage_value_scale()]
+#' transforms before the stat runs. Quartiles are unaffected (quantiles are
+#' equivariant under a monotone transform) but the whiskers are 1.5 x IQR **in
+#' log units**, which is the same fence [flag_outliers()] uses and is the right
+#' definition for data spanning this many decades.
+#'
+#' @param data Output of [triage_flag_by_category()].
+#' @param limits Shared value-axis limits, used to place the right-margin
+#'   labels. Falls back to the data's own maximum where absent.
+#' @param min_n Passed to [triage_category_labels()] for the untested wording.
+#' @param ticks Draw the outlier ticks. `FALSE` on the small-n panels, where
+#'   every observation is already drawn as a point and ticks would be clutter.
+#' @return A list of ggplot2 layers.
+#' @export
+triage_category_overlay <- function(
+  data,
+  limits = NULL,
+  min_n = 10,
+  ticks = TRUE
+) {
+  if (nrow(data) == 0) {
+    return(list())
+  }
+
+  box <- function(colour, linewidth) {
+    ggplot2::geom_boxplot(
+      data = data,
+      ggplot2::aes(x = .data$MEASURED_VALUE_STANDARD, y = .data$.facet),
+      inherit.aes = FALSE,
+      fill = NA,
+      colour = colour,
+      linewidth = linewidth,
+      outlier.shape = NA,
+      width = 0.45
+    )
+  }
+  layers <- list(box("grey15", 0.7), box("white", 0.3))
+
+  flagged <- data[data$.outlier, , drop = FALSE]
+  if (ticks && nrow(flagged) > 0) {
+    # Lower half of each band, clear of the box (width 0.45, so the box occupies
+    # +/- 0.225). as.numeric() on the factor gives the row's position on the
+    # discrete scale, which is how ggplot2 places the tiles too.
+    tick <- function(colour, linewidth) {
+      ggplot2::geom_linerange(
+        data = flagged,
+        ggplot2::aes(
+          x = .data$MEASURED_VALUE_STANDARD,
+          ymin = as.numeric(.data$.facet) - 0.46,
+          ymax = as.numeric(.data$.facet) - 0.24
+        ),
+        inherit.aes = FALSE,
+        colour = colour,
+        linewidth = linewidth
+      )
+    }
+    layers <- c(layers, list(tick("grey15", 0.75), tick("white", 0.35)))
+  }
+
+  labels <- triage_category_labels(data, min_n = min_n)
+  x_at <- if (!is.null(limits) && all(is.finite(limits))) {
+    limits[2]
+  } else {
+    max(data$MEASURED_VALUE_STANDARD, na.rm = TRUE)
+  }
+  # Two layers rather than one with a colour mapping. A scale_colour_manual()
+  # here would be a second colour scale on a panel that may already have one,
+  # and ggplot2 resolves that by warning and replacing.
+  text_layer <- function(rows, colour) {
+    if (nrow(rows) == 0) {
+      return(NULL)
+    }
+    ggplot2::geom_text(
+      data = rows,
+      ggplot2::aes(x = x_at, y = .data$.facet, label = .data$label),
+      inherit.aes = FALSE,
+      colour = colour,
+      size = 2.1,
+      hjust = 1
+    )
+  }
+  c(
+    layers,
+    Filter(
+      Negate(is.null),
+      list(
+        text_layer(labels[labels$tested, , drop = FALSE], "grey15"),
+        # Greyer, so an untested row's label does not read with the same
+        # authority as a tested one.
+        text_layer(labels[!labels$tested, , drop = FALSE], "grey60")
+      )
+    )
+  )
 }
 
 #' Triage Plot: Distribution by a Categorical Facet
@@ -1148,6 +1401,11 @@ triage_plot_by_date <- function(
 #' @param grp The one-row group tibble, needed to match thresholds.
 #' @param x_bins Number of bins along the value axis. The category axis is always
 #'   binned at exactly one category per bin; see below.
+#' @param overlay Draw the boxplot, outlier ticks and count labels on top of the
+#'   heatmap. See [triage_category_overlay()]. `FALSE` gives the bare heatmap.
+#' @param outlier_min_n Minimum category size for the outlier flags to be
+#'   computed; smaller categories are reported as untested. See
+#'   [triage_flag_by_category()].
 #' @return A ggplot.
 #' @export
 triage_plot_by_category <- function(
@@ -1160,7 +1418,9 @@ triage_plot_by_category <- function(
   limits = NULL,
   thresholds = NULL,
   grp = NULL,
-  x_bins = 40
+  x_bins = 40,
+  overlay = TRUE,
+  outlier_min_n = 10
 ) {
   plot_data <- data |>
     dplyr::filter(!is.na(.data[[facet_col]])) |>
@@ -1177,6 +1437,8 @@ triage_plot_by_category <- function(
   if (nrow(plot_data) == 0) {
     return(triage_empty_plot(title, paste0("no non-missing ", facet_col)))
   }
+
+  plot_data <- triage_flag_by_category(plot_data, min_n = outlier_min_n)
 
   p <- ggplot2::ggplot(
     plot_data,
@@ -1233,6 +1495,21 @@ triage_plot_by_category <- function(
 
   thr <- thresholds_for_group(thresholds, grp)
 
+  # ORDER IS LOAD-BEARING. The overlay goes on before the threshold lines, so
+  # the lines draw last and stay readable; with the overlay added afterwards the
+  # boxplot sits on top of them and the class boundaries become hard to follow.
+  # Ticks are suppressed on the points branch, where every observation is
+  # already drawn.
+  if (overlay) {
+    p <- p +
+      triage_category_overlay(
+        plot_data,
+        limits = limits,
+        min_n = outlier_min_n,
+        ticks = !triage_use_points(plot_data)
+      )
+  }
+
   p +
     triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
     triage_value_scale(
@@ -1254,6 +1531,7 @@ triage_plot_by_category <- function(
     # No triage_minor_grid_theme() here any more: powers of ten are major breaks
     # now, so the value axis has no minor breaks and there is nothing for it to
     # style.
+    triage_value_text_theme("x") +
     triage_sec_axis_theme("top") +
     ggplot2::theme(
       axis.text.y = ggplot2::element_text(

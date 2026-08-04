@@ -14,7 +14,9 @@ triage_plot_by_category(
   limits = NULL,
   thresholds = NULL,
   grp = NULL,
-  x_bins = 40
+  x_bins = 40,
+  overlay = TRUE,
+  outlier_min_n = 10
 )
 }
 \arguments{
@@ -45,6 +47,13 @@ e.g. \code{\link[=prettify_campaign_name]{prettify_campaign_name()}}. Defaults t
 
 \item{x_bins}{Number of bins along the value axis. The category axis is always
 binned at exactly one category per bin; see below.}
+
+\item{overlay}{Draw the boxplot, outlier ticks and count labels on top of the
+heatmap. See \code{\link[=triage_category_overlay]{triage_category_overlay()}}. \code{FALSE} gives the bare heatmap.}
+
+\item{outlier_min_n}{Minimum category size for the outlier flags to be
+computed; smaller categories are reported as untested. See
+\code{\link[=triage_flag_by_category]{triage_flag_by_category()}}.}
 }
 \value{
 A ggplot.

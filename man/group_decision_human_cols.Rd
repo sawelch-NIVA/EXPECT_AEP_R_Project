@@ -12,3 +12,9 @@ A character vector of column names.
 \description{
 Never overwritten by \code{\link[=scaffold_group_decisions]{scaffold_group_decisions()}}.
 }
+\details{
+\code{notebook} is here rather than machine-derived because, although
+\code{\link[=apply_notebook_scheme]{apply_notebook_scheme()}} can fill it mechanically, the assignment is a
+judgement and Sam must be able to override any row without the next scaffold
+undoing it.
+}

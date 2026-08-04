@@ -9,7 +9,9 @@ sample_triage_groups(
   data,
   min_n = 100,
   n_sample = 5,
-  seed = 20260729
+  seed = 20260729,
+  ids = NULL,
+  must_include = character(0)
 )
 }
 \arguments{
@@ -22,6 +24,15 @@ sample_triage_groups(
 \item{n_sample}{Number of groups to sample. \code{Inf} takes all of them.}
 
 \item{seed}{Random seed, so the pilot selection is reproducible.}
+
+\item{ids}{The \code{group_ids} ledger, attached so each group carries its stable
+id into the notebook headings. \code{NULL} skips it.}
+
+\item{must_include}{Group ids to include whatever their size, and whatever the
+sampling does. For groups that matter for a reason unrelated to \code{n}: the two
+algae groups sit at 70 and 68 measurements, and no \code{min_n} reaches them
+without admitting seven unrelated groups as well. Unknown ids are an error,
+not a silent omission.}
 }
 \value{
 A tibble of group-defining columns plus \code{n}, \code{n_sources} (distinct

@@ -177,8 +177,16 @@ test_that("thresholds do not break the categorical panel", {
   )
   built <- ggplot2::ggplot_build(p)
   expect_gt(nrow(built$data[[1]]), 0) # tiles survived
-  # Tiles plus one line layer. No text layer any more.
-  expect_equal(length(built$data), 2)
+
+  # Asserted by geom rather than by layer count. The count was 2 until the
+  # distribution overlay landed (2026-08-04) and is now tiles + two boxplot
+  # layers + the count labels + the threshold line, with two more when any
+  # outlier ticks are drawn. Pinning the number means every future overlay
+  # tweak breaks this test for no reason; what actually matters is that the
+  # heatmap is still there and the threshold line is still last.
+  geoms <- vapply(p$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomTile" %in% geoms)
+  expect_equal(unname(utils::tail(geoms, 1)), "GeomVline")
 })
 
 test_that("count_by_category_bin anchors bins at the axis origin", {
@@ -265,7 +273,10 @@ test_that("the secondary axis carries the class numerals", {
   expect_s3_class(sec, "AxisSecondary")
   expect_equal(sec$breaks, c(20, 84, 147))
   expect_equal(sec$labels, c("I", "II", "IV"))
-  expect_equal(sec$name, "M-608|2016")
+  # Source AND matrix since 2026-08-04. The bare reference did not say what the
+  # boundaries were set for, and the compartment match is many-to-one so the
+  # reader cannot infer it.
+  expect_equal(sec$name, "M-608|2016 (Aquatic Sediment, total)")
 })
 
 test_that("the secondary axis is a waiver where nothing applies", {

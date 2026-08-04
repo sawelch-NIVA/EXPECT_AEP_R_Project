@@ -349,3 +349,87 @@ threshold_axis_label <- function(thresholds) {
   )[, 2]
   dplyr::coalesce(numeral, thresholds$THRESHOLD_TYPE)
 }
+
+#' Matrix a Threshold Was Set For
+#'
+#' Names the matrix each threshold applies to, for the secondary axis title.
+#'
+#' The match is deliberately loose (see the notes at the top of this file):
+#' `threshold_compartment_map()` sends several of our sub-compartments to one
+#' threshold matrix, and biota match at genus. So a line drawn on a panel is
+#' often a *borrowed* comparator, and which matrix it was actually set for is
+#' not recoverable from the class numeral alone. Sam, 2026-08-04: "though in
+#' most cases the matrix is obvious, it isn't always."
+#'
+#' The fraction is included for external thresholds because the Norwegian
+#' classification boundaries are set on **dissolved** copper while much of the
+#' measured data is total, which is a real comparability caveat and is otherwise
+#' invisible on the panel. Biota thresholds carry species and tissue instead,
+#' which is the same information in the form biota needs it.
+#'
+#' Columns are read defensively: [empty_threshold_match()] does not carry
+#' `ENVIRON_COMPARTMENT_SUB` or `THRESHOLD_FRACTION`, and callers may hand over
+#' a subset.
+#'
+#' @param thresholds Rows from a standardised threshold table.
+#' @return A character vector of matrix names, one per row.
+#' @export
+threshold_matrix_label <- function(thresholds) {
+  n <- nrow(thresholds)
+  if (n == 0) {
+    return(character(0))
+  }
+  col <- function(name) {
+    if (name %in% names(thresholds)) {
+      as.character(thresholds[[name]])
+    } else {
+      rep(NA_character_, n)
+    }
+  }
+
+  compartment <- col("ENVIRON_COMPARTMENT")
+  species <- col("SAMPLE_SPECIES")
+  tissue <- col("SAMPLE_TISSUE")
+  sub <- col("ENVIRON_COMPARTMENT_SUB")
+  fraction <- col("THRESHOLD_FRACTION")
+
+  biota <- paste0(
+    species,
+    dplyr::if_else(is.na(tissue), "", paste0(", ", tolower(tissue)))
+  )
+  external <- paste0(
+    sub,
+    dplyr::if_else(is.na(fraction), "", paste0(", ", tolower(fraction)))
+  )
+
+  out <- dplyr::if_else(
+    !is.na(compartment) & compartment == "Biota",
+    biota,
+    external
+  )
+  # A row with neither a sub-compartment nor a species yields "NA" from paste0,
+  # which would be drawn literally. Blank it instead so the caller can drop it.
+  dplyr::if_else(is.na(species) & is.na(sub), NA_character_, out)
+}
+
+#' Secondary-Axis Title Naming Source and Matrix
+#'
+#' `"M-608|2016 (Freshwater, dissolved)"` rather than a bare `"M-608|2016"`.
+#' Distinct source/matrix pairs are joined with `" / "`, because the
+#' unit-agnostic overall-distribution panel can carry more than one source.
+#'
+#' @param thresholds Rows from a standardised threshold table.
+#' @return A single string.
+#' @export
+threshold_source_title <- function(thresholds) {
+  if (nrow(thresholds) == 0) {
+    return("")
+  }
+  matrix_name <- threshold_matrix_label(thresholds)
+  parts <- dplyr::if_else(
+    is.na(matrix_name),
+    as.character(thresholds$REFERENCE_ID),
+    paste0(thresholds$REFERENCE_ID, " (", matrix_name, ")")
+  )
+  paste(unique(parts), collapse = " / ")
+}

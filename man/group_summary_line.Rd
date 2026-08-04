@@ -8,7 +8,8 @@ group_summary_line(row)
 }
 \arguments{
 \item{row}{A one-row data frame carrying the columns from
-\code{\link[=add_triage_flags]{add_triage_flags()}} plus \code{n_rows}.}
+\code{\link[=add_triage_flags]{add_triage_flags()}} plus \code{n_rows} and, optionally, \code{reference_ids} (a
+comma-separated string from \code{\link[=sample_triage_groups]{sample_triage_groups()}}).}
 }
 \value{
 A single markdown string.

@@ -4,15 +4,20 @@
 \alias{build_sample_groups_table}
 \title{Build the Sample-Groups Display Table}
 \usage{
-build_sample_groups_table(summary_data)
+build_sample_groups_table(summary_data, ids = NULL)
 }
 \arguments{
 \item{summary_data}{The \code{summarise_literature_data} target.}
+
+\item{ids}{The \code{group_ids} ledger, or \code{NULL}. When supplied, the stable group
+id becomes the table's first column: it is what you read off the page and
+type into \code{group_decisions.csv}, so it has to be visible here.}
 }
 \value{
-A tibble sorted by \code{group}, \code{location}, with columns \code{group},
+A tibble sorted by \code{n} descending, with columns \code{group_id}, \code{group},
 \code{location}, \code{dates}, \code{n}, \code{mean_sd}, \code{median}, \code{n_outliers},
-\code{dip_p_label}, \code{.is_multimodal}, \code{.is_outlier}, \code{.anchor}.
+\code{dip_p_label}, \code{n_units}, \code{dropped_label}, \code{.is_multimodal}, \code{.is_outlier},
+\code{.anchor}.
 }
 \description{
 Reshapes \code{summarise_literature_data} into the columns actually shown to a
