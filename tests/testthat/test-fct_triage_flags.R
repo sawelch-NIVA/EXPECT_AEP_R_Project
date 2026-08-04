@@ -341,3 +341,26 @@ test_that("group_summary_line omits the preamble when there is no common name", 
   row$species_common_name <- NULL
   expect_match(group_summary_line(row), "^`n` =")
 })
+
+test_that("flag text degrades gracefully when optional columns are absent", {
+  # Callers carry different subsets. The group decisions table has the flags but
+  # not dip_p, outlier_fraction or n_rows, and `row$missing[1]` is length zero,
+  # which used to error inside is.na() and is.finite() rather than degrade.
+  row <- data.frame(
+    group_id = "G001",
+    n = 100L,
+    n_sources = 2L,
+    MEASURED_UNIT_STANDARD = "mg/kg (wet)",
+    flag_multimodal = TRUE,
+    flag_outliers = TRUE
+  )
+  expect_no_error(txt <- group_flag_text(row))
+  expect_length(txt, 2)
+  expect_match(txt[1], "not run")
+  expect_match(txt[2], "?", fixed = TRUE)
+
+  expect_no_error(line <- group_summary_line(row))
+  # The rows clause is dropped rather than printing "character(0) rows".
+  expect_false(grepl("character", line, fixed = TRUE))
+  expect_match(line, "100 measurements")
+})

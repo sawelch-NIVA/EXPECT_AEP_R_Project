@@ -1,0 +1,292 @@
+---
+title: "Aquatic Sediment"
+---
+
+Working document for the **Aquatic Sediment** grouping: 16 groups, 27,306 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/kg (dry)`.** `n` = 27,288 measurements in 13 groups below this sub-compartment.
+
+::: {#fig-aquatic-aquatic-sediment-mg-kg-dry layout-ncol=2}
+
+![a) Distribution by site type](../../triage/Aquatic_Aquatic_Sediment_mg_kg_dry_a_overview_site_geographic_feature.png){#fig-aquatic-aquatic-sediment-mg-kg-dry-a}
+
+![b) Distribution by site subtype](../../triage/Aquatic_Aquatic_Sediment_mg_kg_dry_b_overview_site_geographic_feature_sub.png){#fig-aquatic-aquatic-sediment-mg-kg-dry-b}
+
+Aquatic / Aquatic Sediment / mg/kg (dry)
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G002](#grp-G002) | Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 25,024 | 94.1 | 19.7 | 20.6 |  3.6 | 2 | multimodal |
+| [G008](#grp-G008) | Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 857 |  152 |   19 | 20.5 | 3.85 | 1 |  |
+| [G009](#grp-G009) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 573 |  108 |   50 | 46.4 | 3.08 | 1 |  |
+| [G013](#grp-G013) | Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 314 |  137 |   86 | 88.6 | 2.45 | 1 |  |
+| [G016](#grp-G016) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 247 | 14.4 | 13.4 | 11.6 | 2.05 | 3 |  |
+| [G019](#grp-G019) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) | `mg/kg (dry)` | 164 | 31.7 |   30 |   25 | 4.07 | 2 | outliers |
+| [G034](#grp-G034) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 69 | 43.9 | 35.8 | 36.3 | 1.82 | 1 |  |
+| [G096](#grp-G096) | Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 17 |  216 |  216 |  216 |  | 1 |  |
+| [G128](#grp-G128) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 8 | 0.00268 | 0.00268 | 0.00268 |  | 1 |  |
+| [G133](#grp-G133) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 7 |  781 |  200 |  273 | 4.93 | 1 |  |
+| [G134](#grp-G134) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) | `mg/kg (wet)` | 7 | 0.053 | 0.053 | 0.0473 | 1.99 | 1 |  |
+| [G135](#grp-G135) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 7 |  1.6 | 0.00538 | 0.0234 | 39.7 | 1 |  |
+| [G155](#grp-G155) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.128 | 0.128 | 0.128 |  | 1 |  |
+| [G168](#grp-G168) | Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 3 | 45.2 | 39.1 | 39.6 | 1.89 | 1 |  |
+| [G169](#grp-G169) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 3 | 38.3 |   46 | 31.6 | 2.33 | 1 |  |
+| [G189](#grp-G189) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.6e+03 | 2.6e+03 | 2.6e+03 | 1.06 | 1 |  |
+
+: Groups in the Aquatic Sediment notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G002 Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G002}
+
+`G002` `n` = 25,024 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+::: {#fig-g002 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_a_density.png){#fig-g002-a group="G002"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_b_date.png){#fig-g002-b group="G002"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g002-c group="G002"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g002-d group="G002"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g002-e group="G002"}
+
+G002: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G008 Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) {#grp-G008}
+
+`G008` `n` = 857 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g008 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_a_density.png){#fig-g008-a group="G008"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_b_date.png){#fig-g008-b group="G008"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g008-c group="G008"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g008-d group="G008"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g008-e group="G008"}
+
+G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G009 Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) {#grp-G009}
+
+`G009` `n` = 573 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g009 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_a_density.png){#fig-g009-a group="G009"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_b_date.png){#fig-g009-b group="G009"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g009-c group="G009"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g009-d group="G009"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g009-e group="G009"}
+
+G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G013 Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) {#grp-G013}
+
+`G013` `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g013 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_a_density.png){#fig-g013-a group="G013"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g013-b group="G013"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g013-c group="G013"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g013-d group="G013"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_e_spatial.png){#fig-g013-e group="G013"}
+
+G013: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G016 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G016}
+
+`G016` `n` = 247 measurements, from **3** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g016 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_a_density.png){#fig-g016-a group="G016"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_b_date.png){#fig-g016-b group="G016"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g016-c group="G016"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g016-d group="G016"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g016-e group="G016"}
+
+G016: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G019 Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) {#grp-G019}
+
+`G019` `n` = 164 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+::: {#fig-g019 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_a_density.png){#fig-g019-a group="G019"}
+
+![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_b_date.png){#fig-g019-b group="G019"}
+
+![Distribution by campaign](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_c_campaign.png){#fig-g019-c group="G019"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_d_site_type.png){#fig-g019-d group="G019"}
+
+![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_e_spatial.png){#fig-g019-e group="G019"}
+
+G019: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G034 Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) {#grp-G034}
+
+`G034` `n` = 69 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G034` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G096 Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G096}
+
+`G096` `n` = 17 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G096` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G128 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G128}
+
+`G128` `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G128` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G133 Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) {#grp-G133}
+
+`G133` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G133` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G134 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) {#grp-G134}
+
+`G134` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G134` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G135 Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G135}
+
+`G135` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G135` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G155 Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) {#grp-G155}
+
+`G155` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G155` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G168 Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G168}
+
+`G168` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G168` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G169 Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) {#grp-G169}
+
+`G169` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G169` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G189 Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) {#grp-G189}
+
+`G189` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G189` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

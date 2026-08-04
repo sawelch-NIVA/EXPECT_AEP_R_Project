@@ -1034,6 +1034,21 @@ list(
           date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
           sd = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
           mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
+          # Geometric mean and geometric SD, added 2026-08-04 on Sam's call:
+          # "GSD is a reversal, you're right. but it clearly makes more sense
+          # than SD of non-normal data."
+          #
+          # These concentrations are log-normal over many orders of magnitude, so
+          # the arithmetic mean sits above almost every observation and the
+          # arithmetic sd is dominated by the largest value. GSD is a
+          # MULTIPLICATIVE factor: 3 means roughly threefold either side of the
+          # geometric mean, and that is the sentence the methods section needs.
+          #
+          # log10 throughout, matching every plot axis in the project.
+          # literature_analysis_ready has already dropped zeros and negatives, so
+          # the logs are all finite.
+          geo_mean = 10^mean(log10(MEASURED_VALUE_STANDARD), na.rm = TRUE),
+          gsd = 10^sd(log10(MEASURED_VALUE_STANDARD), na.rm = TRUE),
           # FIXED 2026-07-30 (PLAN.md P1.5). This was sum(outlier_RMZ &
           # outlier_IQR), a count of *rows*, while n is sum(MEASURED_N), a count
           # of *measurements*. The ratio therefore divided a row count by a
@@ -1073,7 +1088,7 @@ list(
   # sample_groups_flextable(). index.qmd filters this to the large groups.
   tar_target(
     name = sample_groups_table,
-    command = build_sample_groups_table(summarise_literature_data)
+    command = build_sample_groups_table(summarise_literature_data, group_ids)
   ),
 
   ## # Group Triage ----
@@ -1092,7 +1107,19 @@ list(
       data = literature_analysis_ready,
       min_n = 100,
       n_sample = Inf,
-      seed = 20260729 # irrelevant at Inf, kept so lowering n_sample stays stable
+      seed = 20260729, # irrelevant at Inf, kept so lowering n_sample stays stable
+      ids = group_ids,
+      # Named because they matter for a reason unrelated to size, not because
+      # they are nearly big enough. Both algae groups: Ascophyllum nodosum
+      # (Egg wrack, n = 70) and Fucus vesiculosus (Bladder wrack, n = 68).
+      # Algae is one of the systems PLAN.md P3.5 names, and docs/NBXX-algae.qmd
+      # is the prototype the project is modelled on, so deciding it without
+      # panels would be deciding it blind.
+      #
+      # Lowering min_n to 68 instead would admit seven unrelated groups, because
+      # eight others are interleaved between 68 and 99. Add ids here as P3.5
+      # picks its systems.
+      must_include = c("G033", "G036")
     )
   ),
 
@@ -1192,6 +1219,17 @@ list(
       thresholds = copper_toxicity_thresholds
     ),
     format = "file"
+  ),
+
+  ## # Group identity ----
+  # Stable accession numbers, read from a hand-allocated ledger. Allocation is
+  # scripts/allocate_group_ids.R, run by hand: the ledger is the authority for
+  # what a reference means, and a target that rewrote it could silently re-point
+  # IDs already written into notes. Read the header of R/fct_group_ids.R for why
+  # anything rank-derived would be unstable.
+  tar_target(
+    name = group_ids,
+    command = read_group_ids(here_rel("data/clean/group_ids.csv")),
   ),
 
   ## # Grouping decisions ----

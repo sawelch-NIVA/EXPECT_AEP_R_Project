@@ -1,0 +1,140 @@
+---
+title: "Other Waters"
+---
+
+Working document for the **Other Waters** grouping: 7 groups, 486 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/L`.** `n` = 153 measurements in 2 groups below this sub-compartment.
+
+::: {#fig-aquatic-wastewater-mg-l layout-ncol=1}
+
+![a) Distribution by site subtype](../../triage/Aquatic_Wastewater_mg_L_a_overview_site_geographic_feature_sub.png){#fig-aquatic-wastewater-mg-l-a}
+
+Aquatic / Wastewater / mg/L
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G015](#grp-G015) | Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L | `mg/L` | 309 | 0.0247 | 0.0018 | 0.00163 | 2.72 | 1 |  |
+| [G020](#grp-G020) | Aquatic / Wastewater / WWTP / Not reported / mg/L | `mg/L` | 143 | 0.00173 | 0.0012 | 0.00133 | 1.81 | 1 | multimodal, outliers |
+| [G114](#grp-G114) | Aquatic / Sludge / WWTP / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 97.5 | 97.5 | 97.2 | 1.12 | 1 |  |
+| [G121](#grp-G121) | Aquatic / Wastewater / WWTP / Other / mg/L | `mg/L` | 10 | 0.067 | 0.0699 | 0.0624 | 1.58 | 1 |  |
+| [G136](#grp-G136) | Aquatic / Porewater / Ocean, sea, territorial waters / Other / mg/kg (wet) | `mg/kg (wet)` | 7 | 0.0085 | 0.0085 | 0.00837 | 1.29 | 1 |  |
+| [G157](#grp-G157) | Aquatic / Porewater / Coastal, fjord / Other / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.017 | 0.017 | 0.017 |  | 1 |  |
+| [G190](#grp-G190) | Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / mg/L | `mg/L` | 2 | 1.09 | 1.09 | 1.09 |  | 1 |  |
+
+: Groups in the Other Waters notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G015 Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L {#grp-G015}
+
+`G015` `n` = 309 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: {#fig-g015 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_a_density.png){#fig-g015-a group="G015"}
+
+![Concentration by date](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_b_date.png){#fig-g015-b group="G015"}
+
+![Distribution by campaign](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_c_campaign.png){#fig-g015-c group="G015"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_d_site_type.png){#fig-g015-d group="G015"}
+
+![Spatial distribution](../../triage/Aquatic_Stormwater_Drainage_sewer_artificial_water_Not_reported_mg_L_e_spatial.png){#fig-g015-e group="G015"}
+
+G015: Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G020 Aquatic / Wastewater / WWTP / Not reported / mg/L {#grp-G020}
+
+`G020` `n` = 143 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+- **? outliers**
+:::
+
+::: {#fig-g020 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_a_density.png){#fig-g020-a group="G020"}
+
+![Concentration by date](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_b_date.png){#fig-g020-b group="G020"}
+
+![Distribution by campaign](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_c_campaign.png){#fig-g020-c group="G020"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_d_site_type.png){#fig-g020-d group="G020"}
+
+![Spatial distribution](../../triage/Aquatic_Wastewater_WWTP_Not_reported_mg_L_e_spatial.png){#fig-g020-e group="G020"}
+
+G020: Aquatic / Wastewater / WWTP / Not reported / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G114 Aquatic / Sludge / WWTP / Other / mg/kg (wet) {#grp-G114}
+
+`G114` `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G114` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G121 Aquatic / Wastewater / WWTP / Other / mg/L {#grp-G121}
+
+`G121` `n` = 10 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G121` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G136 Aquatic / Porewater / Ocean, sea, territorial waters / Other / mg/kg (wet) {#grp-G136}
+
+`G136` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G136` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G157 Aquatic / Porewater / Coastal, fjord / Other / mg/kg (wet) {#grp-G157}
+
+`G157` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G157` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G190 Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / mg/L {#grp-G190}
+
+`G190` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G190` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

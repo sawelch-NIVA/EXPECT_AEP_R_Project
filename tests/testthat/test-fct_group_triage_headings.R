@@ -349,3 +349,141 @@ test_that("the date panel places labels on a real date, not -Inf", {
     )
   )
 })
+
+# ---- must_include (2026-07-30) -----------------------------------------
+
+must_include_summary <- function() {
+  data.frame(
+    ENVIRON_COMPARTMENT = "Biota",
+    ENVIRON_COMPARTMENT_SUB = "Biota, Aquatic",
+    SPECIES_GROUP = "Fish",
+    SAMPLE_SPECIES = LETTERS[1:4],
+    SAMPLE_TISSUE = "Liver",
+    SITE_GEOGRAPHIC_FEATURE = "Coastal, fjord",
+    SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported",
+    MEASURED_UNIT_STANDARD = "mg/kg (wet)",
+    n = c(900L, 500L, 60L, 10L),
+    n_sources = 2L
+  )
+}
+
+must_include_data <- function() {
+  summary <- must_include_summary()
+  rows <- summary[rep(seq_len(nrow(summary)), times = 3), ]
+  rows$REFERENCE_ID <- "REF1"
+  rows
+}
+
+must_include_ledger <- function() {
+  ledger <- must_include_summary()[triage_group_cols()]
+  ledger$group_id <- format_group_id(seq_len(nrow(ledger)))
+  ledger
+}
+
+test_that("a named group is included however small it is", {
+  # The two real algae groups sit at n = 70 and 68 against a min_n of 100, and no
+  # cutoff reaches them without admitting seven unrelated groups.
+  out <- sample_triage_groups(
+    must_include_summary(), must_include_data(),
+    min_n = 100, n_sample = Inf,
+    ids = must_include_ledger(), must_include = "G004"
+  )
+  expect_true("G004" %in% out$group_id)
+  expect_equal(out$n[out$group_id == "G004"], 10L)
+  # G001 and G002 clear min_n on their own; G003 does not and was not named.
+  expect_setequal(out$group_id, c("G001", "G002", "G004"))
+})
+
+test_that("a named group survives sampling", {
+  # Without this, must_include would be silently advisory whenever n_sample is
+  # finite: a named group could simply lose the coin toss.
+  out <- sample_triage_groups(
+    must_include_summary(), must_include_data(),
+    min_n = 0, n_sample = 1,
+    ids = must_include_ledger(), must_include = "G004"
+  )
+  expect_true("G004" %in% out$group_id)
+  expect_equal(nrow(out), 1)
+})
+
+test_that("an unknown must_include id is an error, not a silent omission", {
+  expect_error(
+    sample_triage_groups(
+      must_include_summary(), must_include_data(),
+      min_n = 100, n_sample = Inf,
+      ids = must_include_ledger(), must_include = "G999"
+    ),
+    "unknown group id"
+  )
+})
+
+test_that("must_include without ids errors rather than silently doing nothing", {
+  expect_error(
+    sample_triage_groups(
+      must_include_summary(), must_include_data(),
+      min_n = 100, n_sample = Inf, must_include = "G004"
+    ),
+    "needs group ids"
+  )
+})
+
+test_that("an empty must_include changes nothing", {
+  with_ids <- sample_triage_groups(
+    must_include_summary(), must_include_data(),
+    min_n = 100, n_sample = Inf, ids = must_include_ledger()
+  )
+  expect_setequal(with_ids$group_id, c("G001", "G002"))
+})
+
+# ---- Axis readability (2026-08-04) --------------------------------------
+
+test_that("the date axis labels every 5 years and ticks every year", {
+  # Sam: "I can't reliably read the relevant year from b)". Major break and label
+  # every five years, minor break every year. Over 1988-2025 that is 8 labels and
+  # ~38 minor divisions.
+  data <- fake_category_data()
+  p <- triage_plot_by_date(
+    data,
+    limits = c(1, 500),
+    date_limits = c(as.Date("1988-07-01"), as.Date("2025-11-18"))
+  )
+  params <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]
+  labels <- params$x$get_labels()
+  labels <- labels[!is.na(labels)]
+
+  expect_true(all(grepl("^[0-9]{4}$", labels)))
+  # Consecutive labels are five years apart.
+  yrs <- as.integer(labels)
+  expect_true(all(diff(yrs) == 5))
+  # A minor break per year between the majors.
+  expect_gt(length(params$x$break_positions_minor()), 30)
+})
+
+test_that("the date panel's minor grid is on the date axis, not the value axis", {
+  # It used to be on "y". When the value axis lost its minor breaks, leaving it
+  # there would have styled a grid with nothing to draw and silently dropped the
+  # yearly lines.
+  p <- triage_plot_by_date(
+    fake_category_data(),
+    limits = c(1, 500),
+    date_limits = c(as.Date("1988-07-01"), as.Date("2025-11-18"))
+  )
+  expect_false(
+    inherits(ggplot2::calc_element("panel.grid.minor.x", p$theme), "element_blank")
+  )
+  expect_true(
+    inherits(ggplot2::calc_element("panel.grid.minor.y", p$theme), "element_blank")
+  )
+})
+
+test_that("value axis labels use the 1e form at every power", {
+  p <- triage_plot_by_date(
+    fake_category_data(),
+    limits = c(1e-3, 1e3),
+    date_limits = c(as.Date("1988-07-01"), as.Date("2025-11-18"))
+  )
+  labels <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$y$get_labels()
+  labels <- labels[!is.na(labels)]
+  expect_equal(length(labels), 7)
+  expect_true(all(grepl("^1e[+-][0-9]+$", labels)))
+})

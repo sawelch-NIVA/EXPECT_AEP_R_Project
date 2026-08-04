@@ -14,27 +14,40 @@
 
 #' Permitted Decision Values
 #'
-#' * `own_notebook` -- big or interesting enough to get its own analysis and
-#'   become a candidate AEP node.
-#' * `lump` -- merge into another group, named in `lump_into`.
+#' * `keep` -- reviewed, usable as it stands.
+#' * `lump` -- merge with another **group**, named by its `group_id` in
+#'   `lump_into`. This is a group-to-group merge *within* a notebook; which
+#'   notebook a group belongs to is the separate `notebook` column.
 #' * `split` -- the group key is too coarse; needs subdividing before use.
 #' * `drop` -- not usable, with the reason in `notes`.
 #'
-#' An empty string means undecided, which is the initial state of every row.
+#' An empty string means undecided. `keep` therefore means "looked at it, it is
+#' fine", which is a different and more useful statement than silence.
+#'
+#' **`own_notebook` was removed on 2026-07-30**, when `notebook` became its own
+#' column and made it redundant. It had also become actively ambiguous: eleven
+#' rows carried `own_notebook` *and* a `lump_into` value, which are opposite
+#' instructions under a single-column schema.
 #'
 #' @return A character vector of permitted values.
 #' @export
 group_decision_levels <- function() {
-  c("own_notebook", "lump", "split", "drop")
+  c("keep", "lump", "split", "drop")
 }
 
 #' Columns Owned by the Human
 #'
 #' Never overwritten by [scaffold_group_decisions()].
+#'
+#' `notebook` is here rather than machine-derived because, although
+#' [apply_notebook_scheme()] can fill it mechanically, the assignment is a
+#' judgement and Sam must be able to override any row without the next scaffold
+#' undoing it.
+#'
 #' @return A character vector of column names.
 #' @export
 group_decision_human_cols <- function() {
-  c("decision", "lump_into", "notes")
+  c("notebook", "decision", "lump_into", "notes")
 }
 
 #' Add Measurement-Coverage Columns
@@ -108,18 +121,36 @@ add_coverage_columns <- function(summary_data) {
 scaffold_group_decisions <- function(
   summary_data,
   path = here_rel("data/clean/group_decisions.csv"),
+  ids = read_group_ids(),
   verbose = TRUE
 ) {
   key <- triage_group_cols()
 
   context <- summary_data |>
     add_coverage_columns() |>
+    attach_group_ids(ids) |>
     dplyr::transmute(
+      # First column, because it is the thing you look up and type.
+      group_id = .data$group_id,
       dplyr::across(dplyr::all_of(key)),
       species_common_name = .data$species_common_name,
       rank = .data$rank,
       n = .data$n,
       n_sources = .data$n_sources,
+      # Summary statistics are deliberately NOT carried here. They are
+      # machine-derived and live in summarise_literature_data; the glance tables
+      # join them at generation time. Keeping them out means this file stays
+      # about decisions, and adding a statistic does not require every user to
+      # re-scaffold a file they may have open.
+      #
+      # Carried so the flag text can quote the dip test p value. `any_of` because
+      # the test fixtures supply a bare summary without it.
+      #
+      # `n_rows` is deliberately NOT here: it is computed against
+      # literature_analysis_ready in sample_triage_groups(), not by
+      # summarise_literature_data, and group_summary_line() drops the rows clause
+      # when it is absent.
+      dplyr::across(dplyr::any_of("dip_p")),
       cum_pct = round(.data$cum_pct, 4),
       tier = .data$tier,
       flag_multimodal = .data$flag_multimodal,
@@ -139,7 +170,7 @@ scaffold_group_decisions <- function(
 
   if (is.null(existing)) {
     out <- context |>
-      dplyr::mutate(decision = "", lump_into = "", notes = "")
+      dplyr::mutate(notebook = "", decision = "", lump_into = "", notes = "")
     added <- nrow(out)
     orphaned <- 0L
   } else {
@@ -237,6 +268,20 @@ read_group_decisions <- function(
     )
   }
 
+  # Controlled vocabulary on `notebook`, so a typo fails here rather than quietly
+  # creating a fifteenth notebook. This is not hypothetical: hand-typed
+  # "Birds & mammals" and scheme-written "Birds and Mammals" split one notebook in
+  # two on 2026-07-30, and nothing complained.
+  bad_nb <- setdiff(unique(decisions$notebook), c("", notebook_names()))
+  if (length(bad_nb) > 0) {
+    stop(
+      "Unrecognised notebook name(s): ",
+      paste(sQuote(bad_nb), collapse = ", "),
+      ". Permitted: ",
+      paste(notebook_names(), collapse = ", ")
+    )
+  }
+
   # A lump with nowhere to lump into is a half-finished thought, not a decision.
   incomplete <- decisions |>
     dplyr::filter(.data$decision == "lump", .data$lump_into == "")
@@ -244,6 +289,26 @@ read_group_decisions <- function(
     cli::cli_warn(
       "{nrow(incomplete)} row(s) marked {.val lump} with an empty {.field lump_into}."
     )
+  }
+
+  # lump_into now names a GROUP by its id, not a notebook and not free text. An id
+  # pointing at nothing is worse than a blank, because it looks decided.
+  if ("group_id" %in% names(decisions)) {
+    targets_named <- setdiff(unique(decisions$lump_into), "")
+    unknown <- setdiff(targets_named, decisions$group_id)
+    if (length(unknown) > 0) {
+      stop(
+        "lump_into names ", length(unknown),
+        " unknown group id(s): ",
+        paste(sQuote(utils::head(unknown, 5)), collapse = ", "),
+        ". It must be a group_id such as 'G042'."
+      )
+    }
+    self <- decisions$group_id[decisions$lump_into == decisions$group_id &
+      decisions$lump_into != ""]
+    if (length(self) > 0) {
+      stop("Group(s) lumped into themselves: ", paste(self, collapse = ", "))
+    }
   }
 
   if (!is.null(summary_data)) {
@@ -259,6 +324,159 @@ read_group_decisions <- function(
   }
 
   decisions
+}
+
+#' Notebook Assignment Scheme
+#'
+#' Sam's grouping decision, 2026-07-30, as data rather than as prose. Ten
+#' notebooks. Every one of the 245 groups lands in exactly one, and
+#' [assign_notebook()] errors if that stops being true.
+#'
+#' Abiotic groups map on `ENVIRON_COMPARTMENT_SUB`; biota map on `SPECIES_GROUP`
+#' and **ignore the `Biota, Aquatic` / `Biota, Terrestrial` split**. That split
+#' cannot be the biota axis because Mammals straddle it (17 groups aquatic, 6
+#' terrestrial), so "Birds and Mammals" would otherwise be cut across two parent
+#' notebooks. It is also a shaky label: *Ursus maritimus* is filed as Terrestrial,
+#' which is arguable for a marine mammal.
+#'
+#' The small abiotic compartments are lumped because a notebook for two
+#' measurements is not a notebook: Groundwater has 2 measurements, Porewater 11,
+#' Sludge 11.
+#'
+#' @return A named list with `abiotic` and `biota` lookups.
+#' @export
+notebook_scheme <- function() {
+  list(
+    abiotic = c(
+      "Freshwater" = "Freshwater",
+      "Aquatic Sediment" = "Aquatic Sediment",
+      # Brackish takes the marine classification thresholds too; see
+      # threshold_compartment_map().
+      "Marine/Salt Water" = "Marine and Brackish Water",
+      "Brackish/Transitional Water" = "Marine and Brackish Water",
+      "Stormwater" = "Other Waters",
+      "Wastewater" = "Other Waters",
+      "Groundwater" = "Other Waters",
+      "Porewater" = "Other Waters",
+      "Sludge" = "Other Waters",
+      "Soil O Horizon (Organic)" = "Terrestrial Soil"
+    ),
+    biota = c(
+      "Fish" = "Fish",
+      "Molluscs" = "Molluscs",
+      "Crustaceans" = "Crustaceans and Invertebrates",
+      "Invertebrates" = "Crustaceans and Invertebrates",
+      "Worms" = "Crustaceans and Invertebrates",
+      "Birds" = "Birds and Mammals",
+      "Mammals" = "Birds and Mammals",
+      "Algae" = "Algae and Plants",
+      "Moss/Hornworts" = "Algae and Plants",
+      # The fall-through: Zooplankton epilimnion, Bunndyr, and one group with no
+      # species group at all. Given a notebook rather than dropped, so the
+      # decision to exclude them (if that is the decision) is visible and
+      # justified rather than implicit.
+      "Ecosystem" = "Unclassified Biota",
+      "Other" = "Unclassified Biota"
+    )
+  )
+}
+
+#' Every Permitted Notebook Name
+#'
+#' The controlled vocabulary for the `notebook` column.
+#' @return A character vector, sorted.
+#' @export
+notebook_names <- function() {
+  scheme <- notebook_scheme()
+  sort(unique(c(scheme$abiotic, scheme$biota)))
+}
+
+#' Assign Each Group to a Notebook
+#'
+#' Errors rather than returning `NA` for an unmapped group. A silently unassigned
+#' group is a group that quietly vanishes from every notebook, which is exactly
+#' the failure this layer exists to prevent.
+#'
+#' @param data A data frame with the group-key columns.
+#' @return A character vector of notebook names, one per row.
+#' @export
+assign_notebook <- function(data) {
+  scheme <- notebook_scheme()
+  is_biota <- data$ENVIRON_COMPARTMENT == "Biota"
+
+  out <- ifelse(
+    is_biota,
+    unname(scheme$biota[as.character(data$SPECIES_GROUP)]),
+    unname(scheme$abiotic[as.character(data$ENVIRON_COMPARTMENT_SUB)])
+  )
+  # Biota with no species group at all: the lookup returns NA for an NA key, and
+  # that is a real group (9 measurements), not an error.
+  out[is_biota & is.na(data$SPECIES_GROUP)] <- "Unclassified Biota"
+
+  if (any(is.na(out))) {
+    unmapped <- unique(paste(
+      data$ENVIRON_COMPARTMENT[is.na(out)],
+      data$ENVIRON_COMPARTMENT_SUB[is.na(out)],
+      data$SPECIES_GROUP[is.na(out)],
+      sep = " / "
+    ))
+    stop(
+      "No notebook for ", sum(is.na(out)), " group(s): ",
+      paste(unmapped, collapse = "; "),
+      ". Add them to notebook_scheme()."
+    )
+  }
+  out
+}
+
+#' Apply the Notebook Scheme to the Decisions File
+#'
+#' Fills the `notebook` column mechanically from [notebook_scheme()]. It does not
+#' touch `decision`, `lump_into` or `notes`: those are judgement, and the notebook
+#' assignment is a filing question.
+#'
+#' **Only fills blank `notebook` cells** unless `overwrite = TRUE`, so running it
+#' after hand-editing cannot destroy an override.
+#'
+#' An earlier version keyed "should I fill this row?" on `decision` alone, and so
+#' overwrote the `lump_into` of a row that had a note but no decision. It now keys
+#' on the column it is actually writing.
+#'
+#' @param path The decisions CSV.
+#' @param overwrite Replace non-empty notebook assignments too?
+#' @param verbose Report what changed?
+#' @return The written tibble, invisibly.
+#' @export
+apply_notebook_scheme <- function(
+  path = here::here("data/clean/group_decisions.csv"),
+  overwrite = FALSE,
+  verbose = TRUE
+) {
+  decisions <- read_group_decisions(path)
+  notebook <- assign_notebook(decisions)
+
+  fillable <- if (overwrite) {
+    rep(TRUE, nrow(decisions))
+  } else {
+    decisions$notebook == ""
+  }
+  n_kept <- sum(!fillable)
+
+  decisions$notebook[fillable] <- notebook[fillable]
+  readr::write_csv(decisions, path, na = "")
+
+  if (verbose) {
+    message(
+      "Assigned ", sum(fillable), " group(s) across ",
+      length(unique(decisions$notebook)), " notebooks",
+      if (n_kept > 0) {
+        paste0("; left ", n_kept, " existing assignment(s) alone")
+      } else {
+        ""
+      }
+    )
+  }
+  invisible(decisions)
 }
 
 #' Progress Report on the Decisions

@@ -241,6 +241,12 @@ The goal is a contact sheet you can read in one sitting.
       **The scaffold is an idempotent merge**, so it is safe to re-run whenever new data arrives: machine context (`n`, coverage, flags) refreshes, `decision` / `lump_into` / `notes` are never touched, new groups append as undecided, and a *decided* group that has vanished warns rather than disappearing quietly. Same cache-versus-curation split as section 10. `read_group_decisions()` validates the vocabulary and warns on a `lump` with no `lump_into`. 24 tests.
 - [ ] **P2.3** **You read the contact sheet and fill in the decisions.** No automation. Work down from largest n.
 
+      **Revised 2026-07-30: the CSV is not enough, and the working documents are the answer.** `group_decisions.csv` is fine for a first pass, but a comparison between groups does not fit in a `notes` cell, and the verdict needs to sit next to the plot it is about. `scripts/generate_group_notebooks.R` scaffolds one markdown document per notebook into `docs/groups/`: 11 files, 245 group sections, a glance table per notebook for comparing its groups, and a `**Verdict:**` prompt under each group.
+      **The generator is append-only and that is the entire design.** Its predecessor, `scripts/generate_distribution_notebooks.R`, was deleted in P0.2 along with fourteen generated notebooks, and the lesson recorded in CLAUDE.md is that hand-written prose in generated files is reproducible from nowhere else. So it creates a file only if absent, appends sections only for groups not already present (detected by `{#grp-Gnnn}` anchor, so retitling a heading is safe), and never rewrites, reorders or removes anything. Verified byte-identical on re-run, and there is a test that writes prose, forces an append, and asserts the prose survives.
+      Output is deliberately **static**: counts are written into the markdown rather than computed by chunks, because these are documents to write in, not reports to re-run. The cost is that figures go stale if the data change, which is why every file is date-stamped and every group carries its stable id.
+      Not in the `_quarto.yml` render list, so a project build ignores them. Render one by hand with `quarto render docs/groups/<file>.qmd`.
+      Only 29 of 245 groups have triage panels; the rest carry a note naming the `must_include` remedy and their id.
+
 **Definition of done, revised 2026-07-30 after measuring it.** The original wording was "every group covering the top 90% of total measurements", guessed at "probably the top 30-50 rows". The real distribution is far more skewed than that:
 
 | Coverage | Groups needed |
@@ -265,9 +271,23 @@ The goal is a contact sheet you can read in one sitting.
 
 - [ ] **P3.1** `node_report_card(group)` returning a one-row tibble: mean, median, n, unit, n references, geographic range, temporal range.
 - [ ] **P3.2** Mini distribution PNG per node. Reuses P1.2 at a smaller canvas.
-- [ ] **P3.3** Scaffold `data/clean/aep_nodes.csv` from the groups marked `own_notebook`, with empty EPEQ score and justification columns.
+- [ ] **P3.3** Scaffold `data/clean/aep_nodes.csv` from the groups marked `own_notebook`, with empty EPEQ score and justification columns. **Note the vocabulary changed on 2026-07-30**: `own_notebook` was removed when `notebook` became its own column in `group_decisions.csv`. Scaffold from the `notebook` assignment plus `decision != "drop"` instead.
 - [ ] **P3.4** **You score the nodes.** Copy the reasoning style already in `NBXX-algae.qmd:tbl-epeq-algae`; it is good and it is yours.
 - [ ] **P3.5** Pick the systems to model. Target 3-5, likely fish, algae, shellfish, sediment, water. Driven by the Phase 2 decisions, not chosen in advance.
+
+      **A notebook is not a node** (clarified 2026-07-30). A notebook is a place to do exploratory work; **one or more nodes are an outcome of that work**. So the 11 notebooks from the P2.3 scheme and the 3-5 focused AEPs here were never in tension, and the question of "11 notebooks against a target of 3-5" does not need answering. The count to watch is nodes, and it is not known until the notebooks have been worked through.
+
+      Corollary for the Fish notebook, which at 89 groups is an order of magnitude larger than any other: **that is not a problem to solve before writing it.** The scrutiny (compare across tissues, then across species) is what the notebook is *for*, and it needs the notebook to exist first. Panels f and g already do exactly those two comparisons at the sub-compartment and species-group headings.
+
+- [ ] **P3.6** **Transcribe one source node and one source edge by hand, from assessments that already exist.** Added 2026-07-30.
+
+      A diagram whose top level is "marine water" is an occurrence summary with arrows on it. What makes it an *aggregate exposure* pathway is that it reaches from a release to a target site exposure. The minimum that is recognisably an AEP is roughly three levels: source, medium, organism.
+
+      **This is typing, not infrastructure, and that distinction is the whole point of this item.** `docs/NBXX-norske-utslipp.qmd` already carries a complete written WoE assessment under "Line of Evidence Assessment": Essentiality 1, Theoretical Plausibility 3, Empirical Support 1, Quantitative Understanding 1, each with a justification. `docs/NBXX-REACH.qmd` has the same for the tonnage side. `aep_nodes.csv` and `aep_edges.csv` are hand-edited CSVs, so those scores become rows in about half an hour with no code at all.
+
+      **Do not integrate the emissions data into the pipeline to do this.** See section 10.
+
+      Useful fact for when you get there: `copper_emissions_by_source_summarised` in the utslipp notebook is already `source_category × medium × emission_kg`, i.e. `from` / `to` / `magnitude` with a real unit. The Sankey chunk that consumes it is `eval: false`, but the table itself is an edge list in all but name. These are also among the few edges that can carry an **empirical magnitude in kg**, as opposed to the water-to-biota edges, which need paired observations that may not exist. The source end of the diagram may therefore end up better evidenced than the middle, which is a finding rather than an embarrassment.
 
 ------------------------------------------------------------------------
 
@@ -314,6 +334,38 @@ Real problems (see `CLAUDE.md` section 3) that must not eat working days before 
 - Half-migrated frontmatter between commits `9134762` and `8ad2d1f`.
 - `DESCRIPTION` placeholder license, missing imports, one test file.
 - 4.6 MB `references.bib`, 770 KB `manifest.json`, \~190 orphaned `.quarto/quarto-session-temp*` directories.
+
+### Integrate the emissions and REACH data into the pipeline
+
+Deferred 2026-07-30, deliberately and with a reason, after Sam asked whether to
+switch to this before finishing the concentration work. **His instinct to stay
+with concentrations was right**, and the earlier steer towards building this
+infrastructure now overstated what a complete AEP actually requires.
+
+Current state: neither `docs/NBXX-REACH.qmd` nor `docs/NBXX-norske-utslipp.qmd`
+is in the pipeline. Both are parked, and all the Excel reading happens inside the
+`.qmd`. Bringing them in properly means the two TODOs sitting in the utslipp
+notebook right now:
+
+```
+# Match emissions to fylke/site coordinates
+# Translate medium to ENVIRON_COMPARTMENT
+```
+
+The second is the compartment mismatch: emission media do not map cleanly onto
+`ENVIRON_COMPARTMENT_SUB`, and reconciling them is a judgement call per medium.
+
+**Why later is strictly better here.** Doing it now means mapping *every*
+medium. Doing it after the AEP exists means mapping the two or three the AEP
+actually uses. Same argument as the coverage tiers in P2.3: ranking orders the
+work, it does not decide where to stop.
+
+The thing that unblocks the first AEP is P3.6, which needs no pipeline work at
+all: the WoE assessments are already written as prose tables, and the AEP node
+and edge files are hand-edited CSVs. Transcription, not integration.
+
+Revisit once the AEP structure has proven itself and it is clear which media
+matter.
 
 ### Split the species-name cache from the curation layer
 

@@ -1,0 +1,433 @@
+---
+title: "Birds and Mammals"
+---
+
+Working document for the **Birds and Mammals** grouping: 31 groups, 912 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/kg (wet)`.** `n` = 10,904 measurements in 129 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-wet-a}
+
+Biota / Biota, Aquatic / mg/kg (wet)
+
+:::
+
+**Overview, `mg/kg (dry)`.** `n` = 2,374 measurements in 66 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
+
+Biota / Biota, Aquatic / mg/kg (dry)
+
+:::
+
+**Overview, `mg/kg (dry)`.** `n` = 376 measurements in 4 groups below this sub-compartment.
+
+::: {#fig-biota-biota-terrestrial-mg-kg-dry layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Terrestrial_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-terrestrial-mg-kg-dry-a}
+
+Biota / Biota, Terrestrial / mg/kg (dry)
+
+:::
+
+**Overview, `mg/kg (wet)`.** `n` = 293 measurements in 12 groups below this sub-compartment.
+
+::: {#fig-biota-biota-terrestrial-mg-kg-wet layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Terrestrial_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-terrestrial-mg-kg-wet-a}
+
+Biota / Biota, Terrestrial / mg/kg (wet)
+
+:::
+
+**By species, `mg/kg (wet)`.** `n` = 250 measurements across 4 species and 2 tissues.
+
+::: {#fig-species-biota-terrestrial-birds-mg-kg-wet}
+
+![By species and tissue](../../triage/Biota_Terrestrial_Birds_mg_kg_wet_a_species.png)
+
+Biota, Terrestrial / Birds / mg/kg (wet)
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G012](#grp-G012) | Mammals / Ursus maritimus / Liver / Coastal, fjord / Other / mg/kg (dry) | `mg/kg (dry)` | 317 | 0.0362 | 0.037 | 0.0357 | 1.19 | 1 |  |
+| [G025](#grp-G025) | Birds / Somateria mollissima / Egg / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 120 | 1.21 | 1.21 | 1.17 | 1.37 | 1 |  |
+| [G026](#grp-G026) | Birds / Somateria mollissima / Blood / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 119 | 0.472 | 0.46 | 0.465 | 1.19 | 1 |  |
+| [G029](#grp-G029) | Mammals / Phoca vitulina / Liver / Coastal, fjord / Not relevant / mg/L | `mg/L` | 79 | 8.07 |  7.1 | 7.81 | 1.36 | 1 |  |
+| [G059](#grp-G059) | Mammals / Vulpes vulpes / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 36 | 3.75e+03 | 13.7 | 80.7 | 24.6 | 1 |  |
+| [G062](#grp-G062) | Birds / Rissa tridactyla / Muscle / Bare land and lichen/moss / Other / mg/kg (dry) | `mg/kg (dry)` | 30 | 0.0174 | 0.017 | 0.0174 | 1.05 | 1 |  |
+| [G066](#grp-G066) | Birds / Rissa tridactyla / Liver / Bare land and lichen/moss / Other / mg/kg (dry) | `mg/kg (dry)` | 28 | 0.0236 | 0.0245 | 0.0235 | 1.09 | 1 |  |
+| [G070](#grp-G070) | Mammals / Odobenus rosmarus divergens / Lung / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 26 | 0.008 | 0.0107 | 0.00469 | 4.79 | 1 |  |
+| [G072](#grp-G072) | Mammals / Odobenus rosmarus divergens / Kidney / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 25 | 0.00303 | 0.00298 | 0.00291 | 1.41 | 1 |  |
+| [G078](#grp-G078) | Mammals / Odobenus rosmarus divergens / Liver / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 23 | 0.00749 | 0.00749 | 0.00685 | 1.84 | 1 |  |
+| [G080](#grp-G080) | Mammals / Odobenus rosmarus divergens / Muscle / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 22 | 0.000802 | 0.000802 | 0.000801 | 1.09 | 1 |  |
+| [G081](#grp-G081) | Mammals / Odobenus rosmarus divergens / Skin / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 22 | 0.000652 | 0.00074 | 0.000596 | 1.73 | 1 |  |
+| [G108](#grp-G108) | Mammals / Odobenus rosmarus rosmarus / Skin / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 13 | 0.00673 | 0.00588 | 0.00523 | 2.25 | 1 | outliers |
+| [G122](#grp-G122) | Mammals / Odobenus rosmarus divergens / Heart / Bare land and lichen/moss / Other / mg/kg (wet) | `mg/kg (wet)` | 10 | 0.00136 | 0.00174 | 0.00107 | 2.58 | 1 |  |
+| [G150](#grp-G150) | Mammals / Cystophora cristata / Kidney / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 5 | 0.0128 | 0.0128 | 0.0128 |  | 1 |  |
+| [G151](#grp-G151) | Mammals / Cystophora cristata / Liver / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 5 | 0.0105 | 0.0105 | 0.0105 |  | 1 |  |
+| [G152](#grp-G152) | Mammals / Phoca groenlandica / Kidney / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 5 | 0.00338 | 0.00338 | 0.00338 |  | 1 |  |
+| [G153](#grp-G153) | Mammals / Phoca groenlandica / Liver / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 5 | 0.0155 | 0.0155 | 0.0155 |  | 1 |  |
+| [G167](#grp-G167) | Birds / Larus argentatus / Egg / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.529 | 0.546 | 0.525 | 1.15 | 1 |  |
+| [G184](#grp-G184) | Mammals / Orcinus orca / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.14 | 0.155 | 0.133 | 1.53 | 1 |  |
+| [G186](#grp-G186) | Birds / Gulosus aristotelis / Egg / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.684 | 0.681 | 0.684 | 1.04 | 1 |  |
+| [G187](#grp-G187) | Birds / Somateria mollissima / Egg / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 |  1.4 | 1.33 | 1.39 | 1.11 | 1 |  |
+| [G229](#grp-G229) | Mammals / Balaenoptera physalus / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.245 | 0.245 | 0.245 |  | 1 |  |
+| [G230](#grp-G230) | Mammals / Lagenorhynchus albirostris / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 2.79 | 2.79 | 2.79 |  | 1 |  |
+| [G231](#grp-G231) | Mammals / Megaptera novaeangliae / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.242 | 0.242 | 0.242 |  | 1 |  |
+| [G232](#grp-G232) | Mammals / Physeter macrocephalus / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.0673 | 0.0673 | 0.0673 |  | 1 |  |
+| [G240](#grp-G240) | Birds / Turdus pilaris / Egg / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.443 | 0.443 | 0.443 |  | 1 |  |
+| [G241](#grp-G241) | Mammals / Capreolus capreolus / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 43.1 | 43.1 | 43.1 |  | 1 |  |
+| [G242](#grp-G242) | Mammals / Phocoena phocoena / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.241 | 0.241 | 0.241 |  | 1 |  |
+| [G243](#grp-G243) | Mammals / Phocoena phocoena / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 4.04 | 4.04 | 4.04 |  | 1 |  |
+| [G244](#grp-G244) | Mammals / Phocoena phocoena / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 1.72 | 1.72 | 1.72 |  | 1 |  |
+
+: Groups in the Birds and Mammals notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G012 Mammals / Ursus maritimus / Liver / Coastal, fjord / Other / mg/kg (dry) {#grp-G012}
+
+`G012` **Polar bear**. `n` = 317 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g012 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_a_density.png){#fig-g012-a group="G012"}
+
+![Concentration by date](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_b_date.png){#fig-g012-b group="G012"}
+
+![Distribution by campaign](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_c_campaign.png){#fig-g012-c group="G012"}
+
+![Distribution by site type (all geographies)](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_d_site_type.png){#fig-g012-d group="G012"}
+
+![Spatial distribution](../../triage/Mammals_Ursus_maritimus_Liver_Coastal_fjord_Other_mg_kg_dry_e_spatial.png){#fig-g012-e group="G012"}
+
+G012: Mammals / Ursus maritimus / Liver / Coastal, fjord / Other / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G025 Birds / Somateria mollissima / Egg / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G025}
+
+`G025` **Common eider**. `n` = 120 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: {#fig-g025 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_a_density.png){#fig-g025-a group="G025"}
+
+![Concentration by date](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_b_date.png){#fig-g025-b group="G025"}
+
+![Distribution by campaign](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_campaign.png){#fig-g025-c group="G025"}
+
+![Distribution by site type (all geographies)](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_d_site_type.png){#fig-g025-d group="G025"}
+
+![Spatial distribution](../../triage/Birds_Somateria_mollissima_Egg_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_e_spatial.png){#fig-g025-e group="G025"}
+
+G025: Birds / Somateria mollissima / Egg / Ocean, sea, territorial waters / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G026 Birds / Somateria mollissima / Blood / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G026}
+
+`G026` **Common eider**. `n` = 119 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: {#fig-g026 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_a_density.png){#fig-g026-a group="G026"}
+
+![Concentration by date](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_b_date.png){#fig-g026-b group="G026"}
+
+![Distribution by campaign](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_c_campaign.png){#fig-g026-c group="G026"}
+
+![Distribution by site type (all geographies)](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_d_site_type.png){#fig-g026-d group="G026"}
+
+![Spatial distribution](../../triage/Birds_Somateria_mollissima_Blood_Ocean_sea_territorial_waters_Not_reported_mg_kg_wet_e_spatial.png){#fig-g026-e group="G026"}
+
+G026: Birds / Somateria mollissima / Blood / Ocean, sea, territorial waters / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G029 Mammals / Phoca vitulina / Liver / Coastal, fjord / Not relevant / mg/L {#grp-G029}
+
+`G029` **Harbor seal**. `n` = 79 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G029` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G059 Mammals / Vulpes vulpes / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G059}
+
+`G059` **Red fox**. `n` = 36 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G059` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G062 Birds / Rissa tridactyla / Muscle / Bare land and lichen/moss / Other / mg/kg (dry) {#grp-G062}
+
+`G062` **Black-legged kittiwake**. `n` = 30 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G062` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G066 Birds / Rissa tridactyla / Liver / Bare land and lichen/moss / Other / mg/kg (dry) {#grp-G066}
+
+`G066` **Black-legged kittiwake**. `n` = 28 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G066` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G070 Mammals / Odobenus rosmarus divergens / Lung / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G070}
+
+`G070` **Pacific walrus**. `n` = 26 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G070` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G072 Mammals / Odobenus rosmarus divergens / Kidney / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G072}
+
+`G072` **Pacific walrus**. `n` = 25 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G072` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G078 Mammals / Odobenus rosmarus divergens / Liver / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G078}
+
+`G078` **Pacific walrus**. `n` = 23 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G078` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G080 Mammals / Odobenus rosmarus divergens / Muscle / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G080}
+
+`G080` **Pacific walrus**. `n` = 22 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G080` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G081 Mammals / Odobenus rosmarus divergens / Skin / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G081}
+
+`G081` **Pacific walrus**. `n` = 22 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G081` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G108 Mammals / Odobenus rosmarus rosmarus / Skin / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G108}
+
+`G108` **Atlantic walrus**. `n` = 13 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G108` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G122 Mammals / Odobenus rosmarus divergens / Heart / Bare land and lichen/moss / Other / mg/kg (wet) {#grp-G122}
+
+`G122` **Pacific walrus**. `n` = 10 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G122` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G150 Mammals / Cystophora cristata / Kidney / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G150}
+
+`G150` **Hooded seal**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G150` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G151 Mammals / Cystophora cristata / Liver / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G151}
+
+`G151` **Hooded seal**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G151` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G152 Mammals / Phoca groenlandica / Kidney / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G152}
+
+`G152` **Harp seal**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G152` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G153 Mammals / Phoca groenlandica / Liver / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G153}
+
+`G153` **Harp seal**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G153` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G167 Birds / Larus argentatus / Egg / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G167}
+
+`G167` **Herring gull**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G167` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G184 Mammals / Orcinus orca / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G184}
+
+`G184` **Killer whale**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G184` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G186 Birds / Gulosus aristotelis / Egg / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G186}
+
+`G186` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G186` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G187 Birds / Somateria mollissima / Egg / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G187}
+
+`G187` **Common eider**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G187` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G229 Mammals / Balaenoptera physalus / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G229}
+
+`G229` **Fin whale**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G229` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G230 Mammals / Lagenorhynchus albirostris / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G230}
+
+`G230` **White-beaked dolphin**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G230` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G231 Mammals / Megaptera novaeangliae / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G231}
+
+`G231` **Humpback whale**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G231` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G232 Mammals / Physeter macrocephalus / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G232}
+
+`G232` **Sperm whale**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G232` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G240 Birds / Turdus pilaris / Egg / River, stream, canal / Not reported / mg/kg (wet) {#grp-G240}
+
+`G240` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G240` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G241 Mammals / Capreolus capreolus / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G241}
+
+`G241` **Western roe deer**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G241` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G242 Mammals / Phocoena phocoena / Fat/Adipose / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G242}
+
+`G242` **Harbor porpoise**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G242` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G243 Mammals / Phocoena phocoena / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G243}
+
+`G243` **Harbor porpoise**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G243` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G244 Mammals / Phocoena phocoena / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G244}
+
+`G244` **Harbor porpoise**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G244` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

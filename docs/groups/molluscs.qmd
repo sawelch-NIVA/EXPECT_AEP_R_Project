@@ -1,0 +1,369 @@
+---
+title: "Molluscs"
+---
+
+Working document for the **Molluscs** grouping: 23 groups, 6,418 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/kg (wet)`.** `n` = 10,904 measurements in 129 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-wet-a}
+
+Biota / Biota, Aquatic / mg/kg (wet)
+
+:::
+
+**Overview, `mg/kg (dry)`.** `n` = 2,374 measurements in 66 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
+
+Biota / Biota, Aquatic / mg/kg (dry)
+
+:::
+
+**By species, `mg/kg (wet)`.** `n` = 5,788 measurements across 11 species and 2 tissues.
+
+::: {#fig-species-biota-aquatic-molluscs-mg-kg-wet}
+
+![By species and tissue](../../triage/Biota_Aquatic_Molluscs_mg_kg_wet_a_species.png)
+
+Biota, Aquatic / Molluscs / mg/kg (wet)
+
+:::
+
+**By species, `mg/kg (dry)`.** `n` = 630 measurements across 5 species and 1 tissues.
+
+::: {#fig-species-biota-aquatic-molluscs-mg-kg-dry}
+
+![By species and tissue](../../triage/Biota_Aquatic_Molluscs_mg_kg_dry_a_species.png)
+
+Biota, Aquatic / Molluscs / mg/kg (dry)
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G005](#grp-G005) | Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3,048 | 4.51 | 1.06 | 1.17 | 2.06 | 1 | multimodal, outliers |
+| [G007](#grp-G007) | Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 2,450 | 2.21 | 2.43 |  1.3 | 5.48 | 2 |  |
+| [G010](#grp-G010) | Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 480 | 0.0464 | 0.0365 | 0.0406 | 1.71 | 1 |  |
+| [G021](#grp-G021) | Molluscs / Patella vulgata / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 143 | 1.79 |  1.2 | 1.42 | 1.77 | 1 | multimodal, outliers |
+| [G044](#grp-G044) | Molluscs / Modiolus modiolus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 51 | 3.02 |  2.6 | 2.54 | 1.85 | 1 |  |
+| [G055](#grp-G055) | Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 39 |   56 |   56 | 55.1 | 1.29 | 1 |  |
+| [G057](#grp-G057) | Molluscs / Littorina rudis / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 38 | 35.5 | 35.5 | 35.3 | 1.15 | 1 |  |
+| [G061](#grp-G061) | Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 30 | 10.3 | 9.31 | 9.85 | 1.44 | 1 |  |
+| [G065](#grp-G065) | Molluscs / Littorina littorea / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 28 | 27.2 |   21 | 22.9 | 1.72 | 1 | outliers |
+| [G084](#grp-G084) | Molluscs / Mytilus edulis / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 21 | 1.13 |  1.1 | 1.04 | 1.54 | 1 |  |
+| [G088](#grp-G088) | Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 20 |  8.9 |  8.9 |  8.9 |  | 1 |  |
+| [G098](#grp-G098) | Molluscs / Mya arenaria / Total soft tissues / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 17 | 0.00902 | 0.00902 | 0.00789 | 2.12 | 1 |  |
+| [G100](#grp-G100) | Molluscs / Patella vulgata / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 16 | 1.93 |  1.6 | 1.77 | 1.52 | 1 |  |
+| [G126](#grp-G126) | Molluscs / Littorina / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 9 | 23.3 |   23 | 22.2 | 1.41 | 1 |  |
+| [G132](#grp-G132) | Molluscs / Mytilus edulis / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 8 | 1.21 |  0.8 | 1.03 | 1.77 | 1 |  |
+| [G145](#grp-G145) | Molluscs / Astarte borealis / Total soft tissues / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 6 | 0.00983 | 0.00983 | 0.00957 | 1.39 | 1 |  |
+| [G146](#grp-G146) | Molluscs / Mytilus edulis / Total soft tissues / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 2.76 | 1.79 |  2.1 | 2.25 | 1 |  |
+| [G185](#grp-G185) | Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 30.6 |   31 | 22.6 | 2.89 | 1 |  |
+| [G233](#grp-G233) | Molluscs / Acesta excavata / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |    5 |    5 |    5 |  | 1 |  |
+| [G234](#grp-G234) | Molluscs / Buccinum undatum / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |  8.9 |  8.9 |  8.9 |  | 1 |  |
+| [G235](#grp-G235) | Molluscs / Erginus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |    5 |    5 |    5 |  | 1 |  |
+| [G236](#grp-G236) | Molluscs / Gastropoda / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 10.6 | 10.6 | 10.6 |  | 1 |  |
+| [G237](#grp-G237) | Molluscs / Lepetella / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |    5 |    5 |    5 |  | 1 |  |
+
+: Groups in the Molluscs notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G005 Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G005}
+
+`G005` **Blue mussel**. `n` = 3,048 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+- **? outliers**
+:::
+
+::: {#fig-g005 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g005-a group="G005"}
+
+![Concentration by date](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g005-b group="G005"}
+
+![Distribution by campaign](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g005-c group="G005"}
+
+![Distribution by site type (all geographies)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g005-d group="G005"}
+
+![Spatial distribution](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g005-e group="G005"}
+
+G005: Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G007 Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water column, pelagic zone / mg/kg (wet) {#grp-G007}
+
+`G007` **Blue mussel**. `n` = 2,450 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: {#fig-g007 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_a_density.png){#fig-g007-a group="G007"}
+
+![Concentration by date](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_b_date.png){#fig-g007-b group="G007"}
+
+![Distribution by campaign](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_c_campaign.png){#fig-g007-c group="G007"}
+
+![Distribution by site type (all geographies)](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_d_site_type.png){#fig-g007-d group="G007"}
+
+![Spatial distribution](../../triage/Molluscs_Mytilus_edulis_Total_soft_tissues_Coastal_fjord_Water_column_pelagic_zone_mg_kg_wet_e_spatial.png){#fig-g007-e group="G007"}
+
+G007: Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water column, pelagic zone / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G010 Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G010}
+
+`G010` **Atlantic dog whelk**. `n` = 480 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g010 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_a_density.png){#fig-g010-a group="G010"}
+
+![Concentration by date](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_b_date.png){#fig-g010-b group="G010"}
+
+![Distribution by campaign](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_c_campaign.png){#fig-g010-c group="G010"}
+
+![Distribution by site type (all geographies)](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_d_site_type.png){#fig-g010-d group="G010"}
+
+![Spatial distribution](../../triage/Molluscs_Nucella_lapillus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_dry_e_spatial.png){#fig-g010-e group="G010"}
+
+G010: Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G021 Molluscs / Patella vulgata / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G021}
+
+`G021` **Common limpet**. `n` = 143 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+- **? outliers**
+:::
+
+::: {#fig-g021 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g021-a group="G021"}
+
+![Concentration by date](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g021-b group="G021"}
+
+![Distribution by campaign](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g021-c group="G021"}
+
+![Distribution by site type (all geographies)](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g021-d group="G021"}
+
+![Spatial distribution](../../triage/Molluscs_Patella_vulgata_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g021-e group="G021"}
+
+G021: Molluscs / Patella vulgata / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G044 Molluscs / Modiolus modiolus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G044}
+
+`G044` **Northern horsemussel**. `n` = 51 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G044` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G055 Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G055}
+
+`G055` **Atlantic dog whelk**. `n` = 39 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G055` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G057 Molluscs / Littorina rudis / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G057}
+
+`G057` `n` = 38 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G057` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G061 Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G061}
+
+`G061` **Blue mussel**. `n` = 30 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G061` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G065 Molluscs / Littorina littorea / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G065}
+
+`G065` **Common periwinkle**. `n` = 28 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G065` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G084 Molluscs / Mytilus edulis / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G084}
+
+`G084` **Blue mussel**. `n` = 21 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G084` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G088 Molluscs / Mytilus edulis / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G088}
+
+`G088` **Blue mussel**. `n` = 20 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G088` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G098 Molluscs / Mya arenaria / Total soft tissues / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G098}
+
+`G098` **Large-neck clam**. `n` = 17 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G098` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G100 Molluscs / Patella vulgata / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G100}
+
+`G100` **Common limpet**. `n` = 16 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G100` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G126 Molluscs / Littorina / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G126}
+
+`G126` `n` = 9 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G126` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G132 Molluscs / Mytilus edulis / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) {#grp-G132}
+
+`G132` **Blue mussel**. `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G132` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G145 Molluscs / Astarte borealis / Total soft tissues / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G145}
+
+`G145` **Boreal astarte**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G145` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G146 Molluscs / Mytilus edulis / Total soft tissues / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G146}
+
+`G146` **Blue mussel**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G146` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G185 Molluscs / Nucella lapillus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G185}
+
+`G185` **Atlantic dog whelk**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G185` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G233 Molluscs / Acesta excavata / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G233}
+
+`G233` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G233` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G234 Molluscs / Buccinum undatum / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G234}
+
+`G234` **Waved whelk**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G234` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G235 Molluscs / Erginus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G235}
+
+`G235` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G235` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G236 Molluscs / Gastropoda / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G236}
+
+`G236` **Gastropods**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G236` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G237 Molluscs / Lepetella / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G237}
+
+`G237` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G237` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

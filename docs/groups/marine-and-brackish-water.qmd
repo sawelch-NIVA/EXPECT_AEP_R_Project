@@ -1,0 +1,100 @@
+---
+title: "Marine and Brackish Water"
+---
+
+Working document for the **Marine and Brackish Water** grouping: 4 groups, 5,018 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/L`.** `n` = 4,970 measurements in 2 groups below this sub-compartment.
+
+::: {#fig-aquatic-marine-salt-water-mg-l layout-ncol=1}
+
+![a) Distribution by site subtype](../../triage/Aquatic_Marine_Salt_Water_mg_L_a_overview_site_geographic_feature_sub.png){#fig-aquatic-marine-salt-water-mg-l-a}
+
+Aquatic / Marine/Salt Water / mg/L
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G004](#grp-G004) | Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L | `mg/L` | 4,969 | 0.00418 | 0.000724 | 0.000848 | 2.86 | 1 | multimodal |
+| [G046](#grp-G046) | Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 44 |  178 |  120 |  138 | 2.03 | 1 |  |
+| [G156](#grp-G156) | Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 | 77.5 |   48 | 61.3 | 2.09 | 1 | outliers |
+| [G207](#grp-G207) | Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L | `mg/L` | 1 | 0.000305 | 0.000305 | 0.000305 |  | 1 |  |
+
+: Groups in the Marine and Brackish Water notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G004 Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L {#grp-G004}
+
+`G004` `n` = 4,969 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+::: {#fig-g004 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g004-a group="G004"}
+
+![Concentration by date](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g004-b group="G004"}
+
+![Distribution by campaign](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_c_campaign.png){#fig-g004-c group="G004"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g004-d group="G004"}
+
+![Spatial distribution](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g004-e group="G004"}
+
+G004: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G046 Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) {#grp-G046}
+
+`G046` `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G046` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G156 Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G156}
+
+`G156` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G156` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G207 Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L {#grp-G207}
+
+`G207` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G207` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

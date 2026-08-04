@@ -1,0 +1,246 @@
+ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SPECIES_GROUP,SAMPLE_SPECIES,SAMPLE_TISSUE,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,MEASURED_UNIT_STANDARD,group_id
+Aquatic,Freshwater,,,,"River, stream, canal","Water column, pelagic zone",mg/L,G001
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Water benthos,mg/kg (dry),G002
+Aquatic,Freshwater,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/L,G003
+Aquatic,Marine/Salt Water,,,,"Coastal, fjord","Water column, pelagic zone",mg/L,G004
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G005
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G006
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord","Water column, pelagic zone",mg/kg (wet),G007
+Aquatic,Aquatic Sediment,,,,"River, stream, canal",Water benthos,mg/kg (dry),G008
+Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir",Water benthos,mg/kg (dry),G009
+Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (dry),G010
+Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G011
+Biota,"Biota, Terrestrial",Mammals,Ursus maritimus,Liver,"Coastal, fjord",Other,mg/kg (dry),G012
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord","Water column, pelagic zone",mg/kg (dry),G013
+Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G014
+Aquatic,Stormwater,,,,"Drainage, sewer, artificial water",Not reported,mg/L,G015
+Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G016
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (dry),G017
+Biota,"Biota, Aquatic",Fish,Ctenolabrus rupestris,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G018
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (dry),G019
+Aquatic,Wastewater,,,,WWTP,Not reported,mg/L,G020
+Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G021
+Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G022
+Biota,"Biota, Aquatic",Crustaceans,Gammarus oceanicus,Whole body,"Coastal, fjord",Water benthos,mg/kg (dry),G023
+Biota,"Biota, Aquatic",Crustaceans,Calanus hyperboreus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G024
+Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G025
+Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Blood,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G026
+Aquatic,Freshwater,,,,"River, stream, canal",Other,mg/L,G027
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G028
+Biota,"Biota, Aquatic",Mammals,Phoca vitulina,Liver,"Coastal, fjord",Not relevant,mg/L,G029
+Biota,"Biota, Aquatic",Crustaceans,Themisto abyssorum,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G030
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Not reported,mg/kg (dry),G031
+Biota,"Biota, Aquatic",Crustaceans,Calanus finmarchicus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G032
+Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),G033
+Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/kg (dry),G034
+Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G035
+Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),G036
+Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Brown meat,"Ocean, sea, territorial waters",Other,mg/kg (dry),G037
+Biota,"Biota, Aquatic",Crustaceans,Themisto libellula,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G038
+Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Body wall,"Coastal, fjord",Water benthos,mg/kg (dry),G039
+Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Pyloric caeca,"Coastal, fjord",Water benthos,mg/kg (dry),G040
+Biota,"Biota, Aquatic",Fish,Platichthys flesus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G041
+Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G042
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Ocean, sea, territorial waters",Other,mg/kg (dry),G043
+Biota,"Biota, Aquatic",Molluscs,Modiolus modiolus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G044
+Biota,"Biota, Aquatic",Fish,Salmo salar,Gill,"River, stream, canal",Not reported,mg/kg (dry),G045
+Aquatic,Brackish/Transitional Water,,,,Estuary,Water benthos,mg/kg (dry),G046
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G047
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G048
+Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Muscle,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),G049
+Biota,"Biota, Aquatic",Crustaceans,Metridia longa,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G050
+Biota,"Biota, Aquatic",Worms,Polychaeta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G051
+Biota,"Biota, Aquatic",Crustaceans,Conchoecia borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G052
+Biota,"Biota, Aquatic",Crustaceans,Hymenodora glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G053
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G054
+Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),G055
+Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G056
+Biota,"Biota, Aquatic",Molluscs,Littorina rudis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),G057
+Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G058
+Biota,"Biota, Terrestrial",Mammals,Vulpes vulpes,Liver,"River, stream, canal",Not reported,mg/kg (wet),G059
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),G060
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not relevant,mg/kg (dry),G061
+Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Muscle,Bare land and lichen/moss,Other,mg/kg (dry),G062
+Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G063
+Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Gonad,"Coastal, fjord",Not relevant,mg/kg (dry),G064
+Biota,"Biota, Aquatic",Molluscs,Littorina littorea,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G065
+Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Liver,Bare land and lichen/moss,Other,mg/kg (dry),G066
+Biota,"Biota, Aquatic",Crustaceans,Euphausiacea,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G067
+Biota,"Biota, Aquatic",Crustaceans,Eukrohnia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G068
+Biota,"Biota, Aquatic",Crustaceans,Isobactrus setosus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G069
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Lung,Bare land and lichen/moss,Other,mg/kg (wet),G070
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G071
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Kidney,Bare land and lichen/moss,Other,mg/kg (wet),G072
+Biota,"Biota, Aquatic",Crustaceans,Meganyctiphanes norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G073
+Biota,"Biota, Aquatic",Worms,Alitta virens,Whole body,"Coastal, fjord",Other,mg/kg (dry),G074
+Terrestrial,Soil O Horizon (Organic),,,,"River, stream, canal",Water surface,mg/kg (dry),G075
+Biota,"Biota, Aquatic",Crustaceans,Euchaeta glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G076
+Biota,"Biota, Aquatic",Crustaceans,Euchaeta norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G077
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Liver,Bare land and lichen/moss,Other,mg/kg (wet),G078
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G079
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Muscle,Bare land and lichen/moss,Other,mg/kg (wet),G080
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Skin,Bare land and lichen/moss,Other,mg/kg (wet),G081
+Biota,"Biota, Aquatic",Fish,Clupea harengus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G082
+Biota,"Biota, Aquatic",Fish,Limanda limanda,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G083
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G084
+Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Gill,"River, stream, canal",Not reported,mg/kg (dry),G085
+Biota,"Biota, Aquatic",Fish,Lota lota,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G086
+Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Whole body,,,mg/kg (wet),G087
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),G088
+Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),G089
+Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),G090
+Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G091
+Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G092
+Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Total soft tissues minus gonads,"Coastal, fjord",Not relevant,mg/kg (dry),G093
+Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,,,mg/kg (wet),G094
+Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G095
+Aquatic,Aquatic Sediment,,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),G096
+Biota,"Biota, Aquatic",Crustaceans,Sabinea sarsi,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G097
+Biota,"Biota, Aquatic",Molluscs,Mya arenaria,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G098
+Biota,"Biota, Aquatic",Crustaceans,Carcinus maenas,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G099
+Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G100
+Terrestrial,Soil O Horizon (Organic),,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),G101
+Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G102
+Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Liver,"River, stream, canal",Not reported,mg/kg (wet),G103
+Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),G104
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"River, stream, canal",Not reported,mg/kg (wet),G105
+Biota,"Biota, Aquatic",Fish,Abramis brama,Gill,"River, stream, canal",Not reported,mg/kg (dry),G106
+Biota,"Biota, Aquatic",Fish,Abramis brama,Liver,"River, stream, canal",Not reported,mg/kg (wet),G107
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus rosmarus,Skin,Bare land and lichen/moss,Other,mg/kg (wet),G108
+Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G109
+Biota,"Biota, Aquatic",Crustaceans,Thysanoessa inermis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G110
+Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G111
+Biota,"Biota, Aquatic",Fish,Sander lucioperca,Gill,"River, stream, canal",Not reported,mg/kg (dry),G112
+Biota,"Biota, Aquatic",Fish,Symphodus melops,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G113
+Aquatic,Sludge,,,,WWTP,Other,mg/kg (wet),G114
+Biota,"Biota, Aquatic",Crustaceans,Euchaeta barbata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G115
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),G116
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Other,mg/kg (wet),G117
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Kidney,"River, stream, canal",Other,mg/kg (wet),G118
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"River, stream, canal",Other,mg/kg (wet),G119
+Biota,"Biota, Aquatic",Fish,Sander lucioperca,Liver,"River, stream, canal",Not reported,mg/kg (wet),G120
+Aquatic,Wastewater,,,,WWTP,Other,mg/L,G121
+Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Heart,Bare land and lichen/moss,Other,mg/kg (wet),G122
+Biota,"Biota, Aquatic",Worms,Arenicola marina,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),G123
+Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tips,"Coastal, fjord",Not relevant,mg/kg (dry),G124
+Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),G125
+Biota,"Biota, Aquatic",Molluscs,Littorina,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G126
+Biota,"Biota, Aquatic",,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),G127
+Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),G128
+Biota,"Biota, Aquatic",Crustaceans,Calanus glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G129
+Biota,"Biota, Aquatic",Crustaceans,Eukronia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),G130
+Biota,"Biota, Aquatic",Fish,Salmo salar,Whole body,,,mg/kg (wet),G131
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),G132
+Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer",Water benthos,mg/kg (dry),G133
+Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),G134
+Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/L,G135
+Aquatic,Porewater,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),G136
+Biota,"Biota, Aquatic",Fish,Merlangius merlangus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),G137
+Biota,"Biota, Aquatic",Invertebrates,Heliometra glacialis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G138
+Biota,"Biota, Aquatic",Fish,Brosme brosme,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G139
+Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G140
+Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G141
+Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Gill,"River, stream, canal",Not reported,mg/kg (dry),G142
+Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Liver,"River, stream, canal",Not reported,mg/kg (wet),G143
+Biota,"Biota, Aquatic",Invertebrates,Ctenodiscus crispatus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G144
+Biota,"Biota, Aquatic",Molluscs,Astarte borealis,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G145
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G146
+Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Plant tissue,"Coastal, fjord",Not reported,mg/kg (wet),G147
+Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G148
+Biota,"Biota, Aquatic",Invertebrates,Urasterias lincki,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G149
+Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),G150
+Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),G151
+Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),G152
+Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),G153
+Biota,"Biota, Aquatic",Worms,Arenicola marina,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G154
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (wet),G155
+Aquatic,Brackish/Transitional Water,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G156
+Aquatic,Porewater,,,,"Coastal, fjord",Other,mg/kg (wet),G157
+Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G158
+Biota,"Biota, Aquatic",Fish,Brosme brosme,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G159
+Biota,"Biota, Aquatic",Fish,Labrus bergylta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G160
+Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Muscle,"River, stream, canal",Not reported,mg/kg (wet),G161
+Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G162
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Gill,"River, stream, canal",Not reported,mg/kg (dry),G163
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"River, stream, canal",Not reported,mg/kg (wet),G164
+Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus arcticus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G165
+Biota,"Biota, Aquatic",Invertebrates,Pontaster tenuispinus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G166
+Biota,"Biota, Terrestrial",Birds,Larus argentatus,Egg,"Coastal, fjord",Not reported,mg/kg (wet),G167
+Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Not relevant,mg/kg (dry),G168
+Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/kg (dry),G169
+Aquatic,Freshwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,G170
+Biota,"Biota, Aquatic",Crustaceans,Mysis relicta,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G171
+Biota,"Biota, Aquatic",Ecosystem,Zooplankton epilimnion,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G172
+Biota,"Biota, Aquatic",Fish,Centrolabrus exoletus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G173
+Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"River, stream, canal",Not reported,mg/kg (wet),G174
+Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"River, stream, canal",Not reported,mg/kg (wet),G175
+Biota,"Biota, Aquatic",Fish,Lamna nasus,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G176
+Biota,"Biota, Aquatic",Fish,Molva molva,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G177
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G178
+Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G179
+Biota,"Biota, Aquatic",Fish,Squalus acanthias,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G180
+Biota,"Biota, Aquatic",Invertebrates,Insecta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),G181
+Biota,"Biota, Aquatic",Invertebrates,Pteraster pulvillus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G182
+Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus pallidus,Echinoid corona,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G183
+Biota,"Biota, Aquatic",Mammals,Orcinus orca,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G184
+Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G185
+Biota,"Biota, Terrestrial",Birds,Gulosus aristotelis,Egg,"Coastal, fjord",Not reported,mg/kg (wet),G186
+Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Coastal, fjord",Not reported,mg/kg (wet),G187
+Biota,"Biota, Terrestrial",Moss/Hornworts,Fontinalis antipyretica,Plant tissue,"River, stream, canal",Not reported,mg/kg (wet),G188
+Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer","Water column, pelagic zone",mg/kg (dry),G189
+Aquatic,Groundwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,G190
+Biota,"Biota, Aquatic",Fish,Actinopterygii,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G191
+Biota,"Biota, Aquatic",Fish,Actinopterygii,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G192
+Biota,"Biota, Aquatic",Fish,Esox lucius,Whole body,"River, stream, canal",Not reported,mg/kg (wet),G193
+Biota,"Biota, Aquatic",Fish,Gadidae,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G194
+Biota,"Biota, Aquatic",Fish,Gadidae,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G195
+Biota,"Biota, Aquatic",Fish,Leuciscus idus,Gill,"River, stream, canal",Not reported,mg/kg (dry),G196
+Biota,"Biota, Aquatic",Fish,Leuciscus idus,Liver,"River, stream, canal",Not reported,mg/kg (wet),G197
+Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"River, stream, canal",Not reported,mg/kg (wet),G198
+Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (dry),G199
+Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G200
+Biota,"Biota, Aquatic",Invertebrates,Chironomidae,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G201
+Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus lamarckii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G202
+Biota,"Biota, Aquatic",Invertebrates,Ophiopleura borealis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G203
+Biota,"Biota, Aquatic",Invertebrates,Ophiura sarsii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G204
+Biota,"Biota, Aquatic",Invertebrates,Pteraster obscurus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G205
+Biota,"Biota, Aquatic",Other,Bunndyr,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G206
+Aquatic,Marine/Salt Water,,,,"Coastal, fjord",Not relevant,mg/L,G207
+Biota,"Biota, Aquatic",Crustaceans,Lithodidae,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G208
+Biota,"Biota, Aquatic",Crustaceans,Nephrops norvegicus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G209
+Biota,"Biota, Aquatic",Crustaceans,Palaemon adspersus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G210
+Biota,"Biota, Aquatic",Fish,Esox lucius,Gill,"River, stream, canal",Not reported,mg/kg (dry),G211
+Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G212
+Biota,"Biota, Aquatic",Fish,Labrus bergylta,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G213
+Biota,"Biota, Aquatic",Fish,Labrus bergylta,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G214
+Biota,"Biota, Aquatic",Fish,Labrus mixtus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G215
+Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Whole body,"River, stream, canal",Not reported,mg/kg (wet),G216
+Biota,"Biota, Aquatic",Fish,Limanda limanda,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G217
+Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),G218
+Biota,"Biota, Aquatic",Fish,Platichthys flesus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),G219
+Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G220
+Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G221
+Biota,"Biota, Aquatic",Fish,Sander lucioperca,Bile,"River, stream, canal",Not reported,mg/kg (wet),G222
+Biota,"Biota, Aquatic",Fish,Somniosus microcephalus,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G223
+Biota,"Biota, Aquatic",Fish,Trisopterus minutus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G224
+Biota,"Biota, Aquatic",Invertebrates,Astacus astacus,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G225
+Biota,"Biota, Aquatic",Invertebrates,Crossaster papposus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G226
+Biota,"Biota, Aquatic",Invertebrates,Hippasteria phrygiana,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G227
+Biota,"Biota, Aquatic",Invertebrates,Icasterias panopla,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),G228
+Biota,"Biota, Aquatic",Mammals,Balaenoptera physalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G229
+Biota,"Biota, Aquatic",Mammals,Lagenorhynchus albirostris,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G230
+Biota,"Biota, Aquatic",Mammals,Megaptera novaeangliae,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G231
+Biota,"Biota, Aquatic",Mammals,Physeter macrocephalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G232
+Biota,"Biota, Aquatic",Molluscs,Acesta excavata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G233
+Biota,"Biota, Aquatic",Molluscs,Buccinum undatum,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),G234
+Biota,"Biota, Aquatic",Molluscs,Erginus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G235
+Biota,"Biota, Aquatic",Molluscs,Gastropoda,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),G236
+Biota,"Biota, Aquatic",Molluscs,Lepetella,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),G237
+Biota,"Biota, Aquatic",Worms,Eisenia hortensis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),G238
+Biota,"Biota, Aquatic",Worms,Lumbricus,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),G239
+Biota,"Biota, Terrestrial",Birds,Turdus pilaris,Egg,"River, stream, canal",Not reported,mg/kg (wet),G240
+Biota,"Biota, Terrestrial",Mammals,Capreolus capreolus,Liver,"River, stream, canal",Not reported,mg/kg (wet),G241
+Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G242
+Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G243
+Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G244
+Biota,"Biota, Terrestrial",Moss/Hornworts,Hylocomium splendens,Plant tissue,"Coastal, fjord",Not reported,mg/kg (dry),G245

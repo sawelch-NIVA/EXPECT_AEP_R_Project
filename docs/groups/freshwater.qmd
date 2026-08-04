@@ -1,0 +1,130 @@
+---
+title: "Freshwater"
+---
+
+Working document for the **Freshwater** grouping: 4 groups, 48,787 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/L`.** `n` = 48,787 measurements in 4 groups below this sub-compartment.
+
+::: {#fig-aquatic-freshwater-mg-l layout-ncol=2}
+
+![a) Distribution by site type](../../triage/Aquatic_Freshwater_mg_L_a_overview_site_geographic_feature.png){#fig-aquatic-freshwater-mg-l-a}
+
+![b) Distribution by site subtype](../../triage/Aquatic_Freshwater_mg_L_b_overview_site_geographic_feature_sub.png){#fig-aquatic-freshwater-mg-l-b}
+
+Aquatic / Freshwater / mg/L
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G001](#grp-G001) | Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 41,831 | 0.33 | 0.0012 | 0.00152 | 4.88 | 1 | multimodal |
+| [G003](#grp-G003) | Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L | `mg/L` | 6,847 | 0.0119 | 0.001 | 0.00105 | 4.14 | 1 | multimodal |
+| [G027](#grp-G027) | Aquatic / Freshwater / River, stream, canal / Other / mg/L | `mg/L` | 106 | 0.00615 | 0.00163 | 0.00059 | 23.3 | 2 |  |
+| [G170](#grp-G170) | Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L | `mg/L` | 3 | 0.797 | 0.797 | 0.797 |  | 1 |  |
+
+: Groups in the Freshwater notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G001 Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G001}
+
+`G001` `n` = 41,831 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+::: {#fig-g001 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g001-a group="G001"}
+
+![Concentration by date](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g001-b group="G001"}
+
+![Distribution by campaign](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_c_campaign.png){#fig-g001-c group="G001"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g001-d group="G001"}
+
+![Spatial distribution](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g001-e group="G001"}
+
+G001: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G003 Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L {#grp-G003}
+
+`G003` `n` = 6,847 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+::: {#fig-g003 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g003-a group="G003"}
+
+![Concentration by date](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g003-b group="G003"}
+
+![Distribution by campaign](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_c_campaign.png){#fig-g003-c group="G003"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g003-d group="G003"}
+
+![Spatial distribution](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g003-e group="G003"}
+
+G003: Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G027 Aquatic / Freshwater / River, stream, canal / Other / mg/L {#grp-G027}
+
+`G027` `n` = 106 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+::: {#fig-g027 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_a_density.png){#fig-g027-a group="G027"}
+
+![Concentration by date](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_b_date.png){#fig-g027-b group="G027"}
+
+![Distribution by campaign](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_c_campaign.png){#fig-g027-c group="G027"}
+
+![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_d_site_type.png){#fig-g027-d group="G027"}
+
+![Spatial distribution](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_e_spatial.png){#fig-g027-e group="G027"}
+
+G027: Aquatic / Freshwater / River, stream, canal / Other / mg/L
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G170 Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L {#grp-G170}
+
+`G170` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G170` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

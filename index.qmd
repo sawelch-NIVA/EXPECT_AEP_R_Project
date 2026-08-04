@@ -105,6 +105,13 @@ An exhaustive version of the materials and methods are provided in the notebooks
 
 **Probably too many section headers. Will keep them for now as they help me organise my thoughts, and remove once closer to final version. Some sections copied from eData MS, will be written to avoid auto-plagiarism.**
 
+Lines of evidence:
+
+1. Literature search
+2. Vannmiljø
+3. Copper REACH Emissions
+4. Copper REACH PRTR 
+
 ## Exposure Dataset
 
 ### Literature Review Protocol
@@ -125,6 +132,20 @@ AND (aqua* OR water* OR marine OR river OR lake OR fjord OR estuary OR sea OR oc
 
 Web of Science returned 478 hits.
 PubMed returned 438 hits.
+
+<!-- TODO: vannmiljø  - how many rows, etc? -->
+In addition, data were extracted from the Norwegian Environmental Ministry (Miljødirektoratet, MD) database Vannmiljø ("Aquatic Environment", Vm) based on the following search criteria:
+
+| Norwegian Term | English Translation | Selected Options | Comments |
+|------------------|-------------------|------------------|------------------|
+| Nedlastingsdato | Download Date | 2025-12-05 |  |
+| Datoperiode | Date Period | 2025-01-01 to 2025-12-05 |  |
+| Kommune | Municipality | All municipalities |  |
+| Medium | Medium/Matrix | All media |  |
+| Kampanje | Campaign | All campaigns |  |
+| Stressorer | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |  |
+
+Extracted data were processed and converted to the eData format (see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd)), and validated against the format. Data from Vm covers a variety of monitoring campaigns conducted by a variety of contractors and sub-contractors across Norwegian territory. Metadata on the campaign goal (for example, monitoring reference rivers, or sites known to be contaminated) was retained and is used as a grouping variable in downstream analysis in order to understand observed variation.
 
 ### Inclusion, Exclusion, Deduplication and Screening
 
@@ -154,6 +175,8 @@ The full PRISMA flow is shown in @fig-prisma. Study screening was conducted usin
 8) paper not in English
 9) full text not available
 
+
+
 ![Covidence PRISMA diagram.](images/covidence_prisma.png){#fig-prisma width="500"}
 
 ### Screening
@@ -170,7 +193,9 @@ Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as i
 
 ### Data Post-Processing
 
-Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, and, in the case of biota, *species* and *tissue*. For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated.
+Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded.
+
+For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated (@tbl-groups-summary).
 
 #### Tests for Outliers
 
@@ -202,8 +227,15 @@ To identify groups whose distribution may be multimodal, which can indicate a mi
 
 The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold. 
 
-Data were grouped by combinations of , date, study, and in the case of biotic samples, Species and tissue, and distributions plotted, in order to visually review data. 
+#### Visual Exploration of Data
 
+Sample groups were ordered based on sample size and flagged for inspection where they met one of the following criteria:
+
+1. The group represented a matrix that was essential for the construction of aqatic Arctic AEPs (e.g. matrices that are both receiving compartments for copper and habitats for organisms of interest, such as marine and freshwater water columns and sediment, or algae (due to their trophic position)
+2. The group's distribution was flagged as potentially multimodal (see above)
+3. Over 5% of the group's total sample size (based on `MEASURED_N`) was double-flagged as an outlier based on Tukey fences and Robust-Modified Z-Score
+
+In these cases, 
 
 - Outliers were visually inspected
 - Metadata and comments were reviewed
@@ -253,9 +285,12 @@ tibble::tribble(
 
 *Below table is obviously very big. Can be split into biota and non-biota? Or could summarise again? Also, do we need to add/remove any checks, e.g. AIC of normal vs. log-normal distributions*
 
-## Group Summary Statistics.
+## Group Summary Statistics
 
 <!-- TODO: n thresholds for Hartigans. Also dynamic update group/sample n slice reporting-->
+<!-- TODO: Add cumulative proportion to this v of table, use that for filtering rather than n-->
+
+@tbl-groups-summary displays all sample groups where $n >= 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped 
 
 ```{r}
 #| label: tbl-groups-summary

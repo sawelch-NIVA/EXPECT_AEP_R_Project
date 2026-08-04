@@ -5,7 +5,7 @@ title: "Sample Groups"
 # and embed-resources are all set there.
 ---
 
-This is a top-but-one level notebook containing all sample groups.
+Samples were grouped hierachically based on Environmental Compartment, Sub-Compartment, 
 
 ```{r}
 #| label: setup
@@ -23,8 +23,8 @@ here::i_am("index.qmd")
 
 
 ```{r}
-#| label: tbl-groups-summary
-#| tbl-caption: tbc
+#| label: tbl-groups-summary-full
+#| tbl-caption: Table of 
 
 # Reshaping lives in the sample_groups_table target (R/fct_sample_groups_table.R),
 # so this notebook and index.qmd cannot drift apart. All 245 groups shown here;
@@ -122,10 +122,14 @@ overview_paths <- tar_read(triage_overview_plots)
 species_nodes <- tar_read(triage_species_node_table)
 species_paths <- tar_read(triage_species_plots)
 
-# Panels f and g sit at the sub-compartment heading, above the groups they
-# compare. They exist because panels a-e cannot answer the lump/split question:
-# each is drawn strictly inside one group key, so the comparison you need is
-# always in the panel next door.
+# The overview and species panels sit at the sub-compartment and species-group
+# headings, above the groups they compare. They letter their own figures a) and
+# b), restarting rather than continuing the per-group a-e; calling them "f and g"
+# in prose matched nothing on screen and has been dropped.
+#
+# They exist because panels a-e cannot answer the lump/split question: each is
+# drawn strictly inside one group key, so the comparison you need is always in
+# the panel next door.
 #
 # One overview per unit. The unit is part of the node (triage_overview_node_cols())
 # because sub-compartments genuinely split on it, so a sub-compartment holding
@@ -134,7 +138,8 @@ species_paths <- tar_read(triage_species_plots)
 emit_overviews <- function(compartment, sub) {
   rows <- overview_nodes[
     overview_nodes$ENVIRON_COMPARTMENT == compartment &
-      overview_nodes$ENVIRON_COMPARTMENT_SUB == sub, ,
+      overview_nodes$ENVIRON_COMPARTMENT_SUB == sub,
+    ,
     drop = FALSE
   ]
   if (nrow(rows) == 0) {
@@ -153,14 +158,20 @@ emit_overviews <- function(compartment, sub) {
     # per-group blocks, where group_summary_line() carries the counts and the
     # figure caption carries the group name.
     cat(
-      "\n**Overview, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
-      format(node$n[1], big.mark = ","), " measurements across ",
-      format(node$n_rows[1], big.mark = ","), " rows, in ",
-      node$n_groups[1], " groups below this sub-compartment.\n\n",
+      "\n**Overview, `",
+      node$MEASURED_UNIT_STANDARD[1],
+      "`.** `n` = ",
+      format(node$n[1], big.mark = ","),
+      " measurements across ",
+      format(node$n_rows[1], big.mark = ","),
+      " rows, in ",
+      node$n_groups[1],
+      " groups below this sub-compartment.\n\n",
       sep = ""
     )
     cat(
-      "::: {#", fig_id(paste0("overview_", node$node_slug[1])),
+      "::: {#",
+      fig_id(paste0("overview_", node$node_slug[1])),
       " layout-ncol=2}\n\n",
       sep = ""
     )
@@ -171,8 +182,12 @@ emit_overviews <- function(compartment, sub) {
       p <- file.path(
         "triage",
         paste0(
-          node$node_slug[1], "_", prefixes[j],
-          "_overview_", tolower(levels[j]), ".png"
+          node$node_slug[1],
+          "_",
+          prefixes[j],
+          "_overview_",
+          tolower(levels[j]),
+          ".png"
         )
       )
       # No "a) " prefix: Quarto supplies "(a)", "(b)" for subfigures inside a
@@ -186,8 +201,14 @@ emit_overviews <- function(compartment, sub) {
         next
       }
       cat(
-        "![", caption, "](", file.path("..", p), ")",
-        "{group=\"", node$node_slug[1], "\"}\n\n",
+        "![",
+        caption,
+        "](",
+        file.path("..", p),
+        ")",
+        "{group=\"",
+        node$node_slug[1],
+        "\"}\n\n",
         sep = ""
       )
     }
@@ -209,7 +230,8 @@ emit_species_panel <- function(compartment, sub, species_group) {
   rows <- species_nodes[
     species_nodes$ENVIRON_COMPARTMENT == compartment &
       species_nodes$ENVIRON_COMPARTMENT_SUB == sub &
-      species_nodes$SPECIES_GROUP == species_group, ,
+      species_nodes$SPECIES_GROUP == species_group,
+    ,
     drop = FALSE
   ]
   if (nrow(rows) == 0) {
@@ -221,11 +243,17 @@ emit_species_panel <- function(compartment, sub, species_group) {
     p <- file.path("triage", paste0(node$node_slug[1], "_a_species.png"))
 
     cat(
-      "\n**By species, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
-      format(node$n[1], big.mark = ","), " measurements across ",
-      format(node$n_rows[1], big.mark = ","), " rows, in ",
-      node$n_species[1], " species and ",
-      node$n_tissues[1], " tissues.\n\n",
+      "\n**By species, `",
+      node$MEASURED_UNIT_STANDARD[1],
+      "`.** `n` = ",
+      format(node$n[1], big.mark = ","),
+      " measurements across ",
+      format(node$n_rows[1], big.mark = ","),
+      " rows, in ",
+      node$n_species[1],
+      " species and ",
+      node$n_tissues[1],
+      " tissues.\n\n",
       sep = ""
     )
     # Read against the target's own output, not file.exists(), so this chunk's
@@ -235,12 +263,18 @@ emit_species_panel <- function(compartment, sub, species_group) {
       next
     }
     cat(
-      "::: {#", fig_id(paste0("species_", node$node_slug[1])), "}\n\n",
+      "::: {#",
+      fig_id(paste0("species_", node$node_slug[1])),
+      "}\n\n",
       sep = ""
     )
     cat(
-      "![](", file.path("..", p), ")",
-      "{group=\"", node$node_slug[1], "\"}\n\n",
+      "![](",
+      file.path("..", p),
+      ")",
+      "{group=\"",
+      node$node_slug[1],
+      "\"}\n\n",
       sep = ""
     )
     cat(
@@ -326,7 +360,9 @@ for (i in seq_len(nrow(groups))) {
     from <- if (length(changed) == 0) length(present) + 1L else min(changed)
 
     for (d in seq_along(present)) {
-      if (d < from) next
+      if (d < from) {
+        next
+      }
       cat("\n\n", strrep("#", d), " ", current[present[d]], "\n", sep = "")
       # Hooked onto the heading emission rather than tested separately, so an
       # unchanged sub-compartment (which emits no heading) also emits no second
@@ -374,7 +410,9 @@ for (i in seq_len(nrow(groups))) {
   # another, which make.unique() suffixes used to produce.
   # Paths are project-root-relative; this notebook renders from docs/
   cat(
-    "::: {#", fig_id(grp$group_slug[1]), " layout-ncol=5}\n\n",
+    "::: {#",
+    fig_id(grp$group_slug[1]),
+    " layout-ncol=5}\n\n",
     sep = ""
   )
   for (key in names(captions)) {

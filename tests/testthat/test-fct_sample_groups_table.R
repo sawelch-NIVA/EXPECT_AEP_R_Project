@@ -36,7 +36,7 @@ test_that("build_sample_groups_table produces the expected columns", {
   expect_named(
     result,
     c(
-      "group", "location", "dates", "n", "mean_sd", "median",
+      "group_id", "group", "location", "dates", "n", "mean_sd", "median",
       "n_outliers", "dip_p_label", "n_units", "dropped_label",
       ".is_multimodal", ".is_outlier", ".anchor"
     )

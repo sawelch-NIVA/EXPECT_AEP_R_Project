@@ -1,0 +1,76 @@
+---
+title: "Unclassified Biota"
+---
+
+Working document for the **Unclassified Biota** grouping: 3 groups, 14 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/kg (wet)`.** `n` = 10,904 measurements in 129 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-wet-a}
+
+Biota / Biota, Aquatic / mg/kg (wet)
+
+:::
+
+**Overview, `mg/kg (dry)`.** `n` = 2,374 measurements in 66 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
+
+Biota / Biota, Aquatic / mg/kg (dry)
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G127](#grp-G127) | Unknown / spp. / whole / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 9 | 0.000911 | 0.000911 | 0.000911 |  | 1 |  |
+| [G172](#grp-G172) | Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.478 | 0.494 | 0.477 | 1.09 | 1 |  |
+| [G206](#grp-G206) | Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 15.5 | 15.5 | 14.8 | 1.53 | 1 |  |
+
+: Groups in the Unclassified Biota notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G127 Unknown / spp. / whole / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G127}
+
+`G127` `n` = 9 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G127` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G172 Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G172}
+
+`G172` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G172` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G206 Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G206}
+
+`G206` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G206` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

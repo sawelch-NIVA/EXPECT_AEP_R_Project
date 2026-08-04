@@ -28,17 +28,27 @@
 #' from there into the docx.
 #'
 #' @param summary_data The `summarise_literature_data` target.
-#' @return A tibble sorted by `group`, `location`, with columns `group`,
+#' @param ids The `group_ids` ledger, or `NULL`. When supplied, the stable group
+#'   id becomes the table's first column: it is what you read off the page and
+#'   type into `group_decisions.csv`, so it has to be visible here.
+#' @return A tibble sorted by `n` descending, with columns `group_id`, `group`,
 #'   `location`, `dates`, `n`, `mean_sd`, `median`, `n_outliers`,
-#'   `dip_p_label`, `.is_multimodal`, `.is_outlier`, `.anchor`.
+#'   `dip_p_label`, `n_units`, `dropped_label`, `.is_multimodal`, `.is_outlier`,
+#'   `.anchor`.
 #' @export
-build_sample_groups_table <- function(summary_data) {
+build_sample_groups_table <- function(summary_data, ids = NULL) {
   # Computed before the .keep = "none" mutate below, which discards the key
   # columns the anchor is derived from.
   anchors <- heading_anchor(summary_data)
+  group_ids <- if (is.null(ids)) {
+    rep(NA_character_, nrow(summary_data))
+  } else {
+    attach_group_ids(summary_data, ids)$group_id
+  }
 
   summary_data |>
     dplyr::mutate(
+      group_id = group_ids,
       # Fold compartment + taxonomy into one column
       group = dplyr::if_else(
         .data$ENVIRON_COMPARTMENT == "Biota",
@@ -105,6 +115,7 @@ build_sample_groups_table <- function(summary_data) {
     # median) sitting in their original positions, so without this the table
     # renders as N, Median, Group, Location, ... Order the columns explicitly.
     dplyr::select(
+      "group_id",
       "group",
       "location",
       "dates",
@@ -164,6 +175,7 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
     dplyr::select(-".is_multimodal", -".is_outlier", -".anchor") |>
     flextable::flextable() |>
     flextable::set_header_labels(
+      group_id = "ID",
       group = "Group",
       location = "Location",
       dates = "Dates",

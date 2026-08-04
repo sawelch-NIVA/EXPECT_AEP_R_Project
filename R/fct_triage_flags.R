@@ -121,8 +121,12 @@ add_triage_flags <- function(summary_data, dropped_report = NULL) {
 group_flag_text <- function(row) {
   # A small non-zero proportion must not round to a bare "0%", which reads as
   # "none" when it means "a few".
+  #
+  # length(x) == 0 is a real case, not defensiveness: callers carry different
+  # subsets of these columns, and `row$outlier_fraction[1]` on an absent column is
+  # length zero, which made `is.finite()` error rather than degrade.
   pct <- function(x) {
-    if (!is.finite(x)) {
+    if (length(x) == 0 || !is.finite(x)) {
       return("?")
     }
     if (x > 0 && x < 0.005) "<1%" else paste0(round(100 * x), "%")
@@ -132,7 +136,11 @@ group_flag_text <- function(row) {
   if (isTRUE(row$flag_multimodal[1])) {
     # The dip test returns p values that underflow to 0 on the large groups.
     # Printing a bare "0" claims more than the test can support.
-    p <- row$dip_p[1]
+    #
+    # `%||% NA` because callers do not all carry dip_p: the group decisions table
+    # has the flag but not the p value, and `row$dip_p[1]` on an absent column is
+    # length zero, which made `is.na()` error rather than degrade.
+    p <- opt_col(row, "dip_p")
     p_text <- if (is.na(p)) {
       "not run"
     } else if (p < 0.001) {
@@ -145,10 +153,32 @@ group_flag_text <- function(row) {
   if (isTRUE(row$flag_outliers[1])) {
     flags <- c(
       flags,
-      paste0("**", pct(row$outlier_fraction[1]), " outliers**")
+      paste0("**", pct(opt_col(row, "outlier_fraction")), " outliers**")
     )
   }
   flags
+}
+
+#' First Value of an Optional Column
+#'
+#' Callers of [group_flag_text()] and [group_summary_line()] carry different
+#' subsets of columns: the triage groups table has `n_rows` and `dip_p`, the group
+#' decisions table does not.
+#'
+#' Uses `names()` rather than `row$col`, because `$` on a tibble emits an
+#' "Unknown or uninitialised column" warning for every miss. At 245 groups that
+#' was fifty-plus warnings per run, which is exactly the noise that hides a real
+#' one.
+#'
+#' @param row A one-row data frame.
+#' @param col Column name.
+#' @return The first value, or `NA`.
+#' @export
+opt_col <- function(row, col) {
+  if (!col %in% names(row)) {
+    return(NA)
+  }
+  row[[col]][1]
 }
 
 #' One-Line Summary Sentence for a Triage Group
@@ -167,25 +197,43 @@ group_flag_text <- function(row) {
 #' @return A single markdown string.
 #' @export
 group_summary_line <- function(row) {
-  # Common name first, as an aide-memoire: the heading above carries the
-  # scientific name, which says nothing about what the organism is or what
-  # concentration would be plausible in it. Absent for non-biota groups and for
-  # the species with no English vernacular (mostly copepods and amphipods).
-  preamble <- if (
-    !is.null(row$species_common_name) && !is.na(row$species_common_name[1])
-  ) {
-    paste0("**", row$species_common_name[1], "**. ")
+  # The group id leads, because it is the thing you read off this page and type
+  # into group_decisions.csv. Per unit variant, not per heading: unit variants are
+  # separate groups and get separate ids.
+  id <- if (!is.na(opt_col(row, "group_id"))) {
+    paste0("`", opt_col(row, "group_id"), "` ")
   } else {
     ""
   }
 
+  # Common name next, as an aide-memoire: the heading above carries the
+  # scientific name, which says nothing about what the organism is or what
+  # concentration would be plausible in it. Absent for non-biota groups and for
+  # the species with no English vernacular (mostly copepods and amphipods).
+  preamble <- if (
+    !is.na(opt_col(row, "species_common_name"))
+  ) {
+    paste0("**", opt_col(row, "species_common_name"), "**. ")
+  } else {
+    ""
+  }
+
+  # Callers do not all carry n_rows; where it is absent the clause is dropped
+  # rather than printing "character(0) rows".
+  n_rows <- opt_col(row, "n_rows")
+  rows_clause <- if (is.na(n_rows)) {
+    ""
+  } else {
+    paste0(" measurements across ", format(n_rows, big.mark = ","), " rows")
+  }
+
   parts <- paste0(
+    id,
     preamble,
     "`n` = ",
     format(row$n[1], big.mark = ","),
-    " measurements across ",
-    format(row$n_rows[1], big.mark = ","),
-    " rows, from **",
+    if (nzchar(rows_clause)) rows_clause else " measurements",
+    ", from **",
     row$n_sources[1],
     "** source",
     if (isTRUE(row$n_sources[1] == 1)) "" else "s",

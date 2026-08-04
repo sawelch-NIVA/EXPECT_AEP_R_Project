@@ -1,0 +1,766 @@
+---
+title: "Crustaceans and Invertebrates"
+---
+
+Working document for the **Crustaceans and Invertebrates** grouping: 60 groups, 2,024 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Overview
+
+**Overview, `mg/kg (wet)`.** `n` = 10,904 measurements in 129 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-wet-a}
+
+Biota / Biota, Aquatic / mg/kg (wet)
+
+:::
+
+**Overview, `mg/kg (dry)`.** `n` = 2,374 measurements in 66 groups below this sub-compartment.
+
+::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol=1}
+
+![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
+
+Biota / Biota, Aquatic / mg/kg (dry)
+
+:::
+
+**By species, `mg/kg (dry)`.** `n` = 944 measurements across 19 species and 2 tissues.
+
+::: {#fig-species-biota-aquatic-crustaceans-mg-kg-dry}
+
+![By species and tissue](../../triage/Biota_Aquatic_Crustaceans_mg_kg_dry_a_species.png)
+
+Biota, Aquatic / Crustaceans / mg/kg (dry)
+
+:::
+
+**By species, `mg/kg (wet)`.** `n` = 780 measurements across 9 species and 4 tissues.
+
+::: {#fig-species-biota-aquatic-crustaceans-mg-kg-wet}
+
+![By species and tissue](../../triage/Biota_Aquatic_Crustaceans_mg_kg_wet_a_species.png)
+
+Biota, Aquatic / Crustaceans / mg/kg (wet)
+
+:::
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G011](#grp-G011) | Crustaceans / Cancer pagurus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 337 |   16 | 8.97 | 10.7 | 2.23 | 1 | outliers |
+| [G014](#grp-G014) | Crustaceans / Cancer pagurus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 314 | 70.3 | 41.5 | 47.5 | 2.21 | 1 |  |
+| [G022](#grp-G022) | Crustaceans / Pandalus borealis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 133 | 39.4 |   36 | 33.1 | 1.93 | 1 |  |
+| [G023](#grp-G023) | Crustaceans / Gammarus oceanicus / Whole body / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 132 | 20.7 |   20 | 19.9 | 1.41 | 1 |  |
+| [G024](#grp-G024) | Crustaceans / Calanus hyperboreus / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 122 | 5.33 |  5.6 | 5.29 | 1.18 | 2 |  |
+| [G030](#grp-G030) | Crustaceans / Themisto abyssorum / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 78 | 18.1 | 21.8 | 16.6 | 1.71 | 2 |  |
+| [G032](#grp-G032) | Crustaceans / Calanus finmarchicus / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 76 |  5.1 |  4.5 | 4.93 | 1.37 | 2 |  |
+| [G037](#grp-G037) | Crustaceans / Cancer pagurus / Brown meat / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 64 | 0.0314 | 0.0286 | 0.0298 | 1.42 | 1 |  |
+| [G038](#grp-G038) | Crustaceans / Themisto libellula / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 63 | 24.6 | 24.6 | 24.5 |  1.1 | 1 |  |
+| [G039](#grp-G039) | Invertebrates / Asterias rubens / Body wall / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 60 | 0.0176 | 0.004 | 0.00824 | 3.56 | 1 |  |
+| [G040](#grp-G040) | Invertebrates / Asterias rubens / Pyloric caeca / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 60 | 0.0325 | 0.0294 | 0.0182 | 3.68 | 1 |  |
+| [G050](#grp-G050) | Crustaceans / Metridia longa / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 42 |  6.8 |    7 | 6.77 | 1.13 | 2 |  |
+| [G051](#grp-G051) | Worms / Polychaeta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 42 | 2.78e+03 | 17.9 | 38.7 | 13.6 | 1 | outliers |
+| [G052](#grp-G052) | Crustaceans / Conchoecia borealis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 41 | 46.9 | 46.9 | 46.7 | 1.12 | 1 |  |
+| [G053](#grp-G053) | Crustaceans / Hymenodora glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 41 |   14 |   14 | 13.9 | 1.18 | 1 |  |
+| [G064](#grp-G064) | Invertebrates / Strongylocentrotus droebachiensis / Gonad / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 29 | 7.03 | 5.67 |  6.7 | 1.44 | 1 |  |
+| [G067](#grp-G067) | Crustaceans / Euphausiacea / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 27 | 4.73e+03 | 16.5 | 78.2 | 21.2 | 1 | outliers |
+| [G068](#grp-G068) | Crustaceans / Eukrohnia hamata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 26 |  3.2 |  3.2 |  3.2 |  | 1 |  |
+| [G069](#grp-G069) | Crustaceans / Isobactrus setosus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 26 | 6.22 |  5.7 |  6.1 | 1.22 | 1 |  |
+| [G073](#grp-G073) | Crustaceans / Meganyctiphanes norvegica / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 24 | 41.1 | 41.1 | 40.7 | 1.23 | 2 |  |
+| [G074](#grp-G074) | Worms / Alitta virens / Whole body / Coastal, fjord / Other / mg/kg (dry) | `mg/kg (dry)` | 24 |  113 | 96.5 |  107 | 1.44 | 1 |  |
+| [G076](#grp-G076) | Crustaceans / Euchaeta glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 23 |  4.7 |  4.7 |  4.7 |  | 1 |  |
+| [G077](#grp-G077) | Crustaceans / Euchaeta norvegica / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 23 | 6.75 | 6.75 | 6.36 | 1.63 | 2 |  |
+| [G093](#grp-G093) | Invertebrates / Strongylocentrotus droebachiensis / Total soft tissues minus gonads / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 19 | 10.2 | 8.68 | 9.79 |  1.4 | 1 |  |
+| [G094](#grp-G094) | Crustaceans / Pandalus borealis / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) | `mg/kg (wet)` | 18 |    5 |    5 |    5 |  | 1 |  |
+| [G097](#grp-G097) | Crustaceans / Sabinea sarsi / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 17 |   68 |   68 |   68 |  | 1 |  |
+| [G099](#grp-G099) | Crustaceans / Carcinus maenas / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 16 |   70 | 60.1 | 48.1 | 2.58 | 1 | multimodal |
+| [G102](#grp-G102) | Crustaceans / Pandalus borealis / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 15 | 3.08e+03 | 6.78 |  101 | 38.8 | 1 | multimodal |
+| [G109](#grp-G109) | Crustaceans / Pandalus borealis / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 12 | 6.07 | 5.79 | 6.01 | 1.16 | 1 |  |
+| [G110](#grp-G110) | Crustaceans / Thysanoessa inermis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 12 | 38.5 | 38.5 | 38.5 |  | 1 |  |
+| [G115](#grp-G115) | Crustaceans / Euchaeta barbata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 11 |  4.5 |  4.5 |  4.5 |  | 1 |  |
+| [G123](#grp-G123) | Worms / Arenicola marina / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 10 |  6.8 |  6.8 |  6.8 |  | 1 |  |
+| [G129](#grp-G129) | Crustaceans / Calanus glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 8 |    4 |    4 |    4 |  | 1 |  |
+| [G130](#grp-G130) | Crustaceans / Eukronia hamata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 8 |    4 |    4 |    4 |  | 1 |  |
+| [G138](#grp-G138) | Invertebrates / Heliometra glacialis / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 7 | 6.09 | 3.44 | 4.54 | 2.28 | 1 |  |
+| [G144](#grp-G144) | Invertebrates / Ctenodiscus crispatus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 6 | 25.1 | 27.1 | 24.1 | 1.44 | 1 |  |
+| [G148](#grp-G148) | Crustaceans / Cancer pagurus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 5 | 66.6 |   69 | 64.9 |  1.3 | 1 |  |
+| [G149](#grp-G149) | Invertebrates / Urasterias lincki / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 5 |    4 |    4 |    4 |  | 1 |  |
+| [G154](#grp-G154) | Worms / Arenicola marina / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 5 | 1.36 |  1.4 | 1.36 | 1.09 | 1 |  |
+| [G158](#grp-G158) | Crustaceans / Cancer pagurus / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 68.8 |   72 | 67.8 | 1.21 | 1 |  |
+| [G165](#grp-G165) | Invertebrates / Gorgonocephalus arcticus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 |  3.5 |  3.5 |  3.5 |  | 1 |  |
+| [G166](#grp-G166) | Invertebrates / Pontaster tenuispinus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 | 10.2 | 9.23 | 9.98 | 1.26 | 1 | outliers |
+| [G171](#grp-G171) | Crustaceans / Mysis relicta / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 2.29 | 2.31 | 2.23 | 1.32 | 1 |  |
+| [G181](#grp-G181) | Invertebrates / Insecta / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 8.85 | 8.75 | 8.72 | 1.23 | 1 |  |
+| [G182](#grp-G182) | Invertebrates / Pteraster pulvillus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 3 |   15 |   15 |   15 |  | 1 |  |
+| [G183](#grp-G183) | Invertebrates / Strongylocentrotus pallidus / Echinoid corona / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 3 |  3.3 |  3.3 |  3.3 |  | 1 |  |
+| [G201](#grp-G201) | Invertebrates / Chironomidae / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 5.11 | 5.11 | 5.06 | 1.23 | 1 |  |
+| [G202](#grp-G202) | Invertebrates / Gorgonocephalus lamarckii / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.04 | 2.04 | 2.04 | 1.08 | 1 |  |
+| [G203](#grp-G203) | Invertebrates / Ophiopleura borealis / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 2 | 6.43 | 6.43 | 6.34 | 1.28 | 1 |  |
+| [G204](#grp-G204) | Invertebrates / Ophiura sarsii / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 2 | 4.08 | 4.08 |  3.9 | 1.54 | 1 |  |
+| [G205](#grp-G205) | Invertebrates / Pteraster obscurus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 2 | 19.6 | 19.6 | 19.3 | 1.29 | 1 |  |
+| [G208](#grp-G208) | Crustaceans / Lithodidae / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |   34 |   34 |   34 |  | 1 |  |
+| [G209](#grp-G209) | Crustaceans / Nephrops norvegicus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |  3.6 |  3.6 |  3.6 |  | 1 |  |
+| [G210](#grp-G210) | Crustaceans / Palaemon adspersus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |   21 |   21 |   21 |  | 1 |  |
+| [G225](#grp-G225) | Invertebrates / Astacus astacus / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 |  6.2 |  6.2 |  6.2 |  | 1 |  |
+| [G226](#grp-G226) | Invertebrates / Crossaster papposus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 1 | 10.3 | 10.3 | 10.3 |  | 1 |  |
+| [G227](#grp-G227) | Invertebrates / Hippasteria phrygiana / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 1 | 5.51 | 5.51 | 5.51 |  | 1 |  |
+| [G228](#grp-G228) | Invertebrates / Icasterias panopla / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 1 | 7.71 | 7.71 | 7.71 |  | 1 |  |
+| [G238](#grp-G238) | Worms / Eisenia hortensis / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 3.52e+03 | 3.52e+03 | 3.52e+03 |  | 1 |  |
+| [G239](#grp-G239) | Worms / Lumbricus / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 2.89 | 2.89 | 2.89 |  | 1 |  |
+
+: Groups in the Crustaceans and Invertebrates notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G011 Crustaceans / Cancer pagurus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G011}
+
+`G011` **Edible crab**. `n` = 337 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+::: {#fig-g011 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g011-a group="G011"}
+
+![Concentration by date](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g011-b group="G011"}
+
+![Distribution by campaign](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g011-c group="G011"}
+
+![Distribution by site type (all geographies)](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g011-d group="G011"}
+
+![Spatial distribution](../../triage/Crustaceans_Cancer_pagurus_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g011-e group="G011"}
+
+G011: Crustaceans / Cancer pagurus / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G014 Crustaceans / Cancer pagurus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G014}
+
+`G014` **Edible crab**. `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: {#fig-g014 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g014-a group="G014"}
+
+![Concentration by date](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g014-b group="G014"}
+
+![Distribution by campaign](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_c_campaign.png){#fig-g014-c group="G014"}
+
+![Distribution by site type (all geographies)](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g014-d group="G014"}
+
+![Spatial distribution](../../triage/Crustaceans_Cancer_pagurus_Total_soft_tissues_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g014-e group="G014"}
+
+G014: Crustaceans / Cancer pagurus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G022 Crustaceans / Pandalus borealis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G022}
+
+`G022` **Northern shrimp**. `n` = 133 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g022 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_a_density.png){#fig-g022-a group="G022"}
+
+![Concentration by date](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g022-b group="G022"}
+
+![Distribution by campaign](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g022-c group="G022"}
+
+![Distribution by site type (all geographies)](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g022-d group="G022"}
+
+![Spatial distribution](../../triage/Crustaceans_Pandalus_borealis_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_e_spatial.png){#fig-g022-e group="G022"}
+
+G022: Crustaceans / Pandalus borealis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G023 Crustaceans / Gammarus oceanicus / Whole body / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G023}
+
+`G023` **Oceanic scud**. `n` = 132 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g023 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_a_density.png){#fig-g023-a group="G023"}
+
+![Concentration by date](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_b_date.png){#fig-g023-b group="G023"}
+
+![Distribution by campaign](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_c_campaign.png){#fig-g023-c group="G023"}
+
+![Distribution by site type (all geographies)](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g023-d group="G023"}
+
+![Spatial distribution](../../triage/Crustaceans_Gammarus_oceanicus_Whole_body_Coastal_fjord_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g023-e group="G023"}
+
+G023: Crustaceans / Gammarus oceanicus / Whole body / Coastal, fjord / Water benthos / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G024 Crustaceans / Calanus hyperboreus / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G024}
+
+`G024` `n` = 122 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g024 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_a_density.png){#fig-g024-a group="G024"}
+
+![Concentration by date](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g024-b group="G024"}
+
+![Distribution by campaign](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_c_campaign.png){#fig-g024-c group="G024"}
+
+![Distribution by site type (all geographies)](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g024-d group="G024"}
+
+![Spatial distribution](../../triage/Crustaceans_Calanus_hyperboreus_Whole_body_Ocean_sea_territorial_waters_Water_column_pelagic_zone_mg_kg_dry_e_spatial.png){#fig-g024-e group="G024"}
+
+G024: Crustaceans / Calanus hyperboreus / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry)
+
+:::
+
+**Verdict:** *(unwritten)*
+
+
+## G030 Crustaceans / Themisto abyssorum / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G030}
+
+`G030` `n` = 78 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G030` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G032 Crustaceans / Calanus finmarchicus / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G032}
+
+`G032` `n` = 76 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G032` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G037 Crustaceans / Cancer pagurus / Brown meat / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G037}
+
+`G037` **Edible crab**. `n` = 64 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G037` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G038 Crustaceans / Themisto libellula / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G038}
+
+`G038` `n` = 63 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G038` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G039 Invertebrates / Asterias rubens / Body wall / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G039}
+
+`G039` **European starfish**. `n` = 60 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G039` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G040 Invertebrates / Asterias rubens / Pyloric caeca / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G040}
+
+`G040` **European starfish**. `n` = 60 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G040` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G050 Crustaceans / Metridia longa / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G050}
+
+`G050` `n` = 42 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G050` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G051 Worms / Polychaeta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G051}
+
+`G051` **Polychaetes**. `n` = 42 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G051` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G052 Crustaceans / Conchoecia borealis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G052}
+
+`G052` `n` = 41 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G052` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G053 Crustaceans / Hymenodora glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G053}
+
+`G053` **Northern ambereye**. `n` = 41 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G053` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G064 Invertebrates / Strongylocentrotus droebachiensis / Gonad / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G064}
+
+`G064` **Green sea urchin**. `n` = 29 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G064` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G067 Crustaceans / Euphausiacea / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G067}
+
+`G067` **Krill**. `n` = 27 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G067` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G068 Crustaceans / Eukrohnia hamata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G068}
+
+`G068` **Arrow worm**. `n` = 26 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G068` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G069 Crustaceans / Isobactrus setosus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G069}
+
+`G069` `n` = 26 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G069` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G073 Crustaceans / Meganyctiphanes norvegica / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G073}
+
+`G073` **Nordic krill**. `n` = 24 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G073` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G074 Worms / Alitta virens / Whole body / Coastal, fjord / Other / mg/kg (dry) {#grp-G074}
+
+`G074` **Clam worm**. `n` = 24 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G074` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G076 Crustaceans / Euchaeta glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G076}
+
+`G076` `n` = 23 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G076` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G077 Crustaceans / Euchaeta norvegica / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G077}
+
+`G077` `n` = 23 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G077` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G093 Invertebrates / Strongylocentrotus droebachiensis / Total soft tissues minus gonads / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G093}
+
+`G093` **Green sea urchin**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G093` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G094 Crustaceans / Pandalus borealis / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) {#grp-G094}
+
+`G094` **Northern shrimp**. `n` = 18 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G094` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G097 Crustaceans / Sabinea sarsi / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G097}
+
+`G097` `n` = 17 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G097` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G099 Crustaceans / Carcinus maenas / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G099}
+
+`G099` **Green crab**. `n` = 16 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G099` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G102 Crustaceans / Pandalus borealis / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G102}
+
+`G102` **Northern shrimp**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+::: callout-warning
+## Flagged
+- **multimodal** (dip test not run)
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G102` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G109 Crustaceans / Pandalus borealis / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G109}
+
+`G109` **Northern shrimp**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G109` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G110 Crustaceans / Thysanoessa inermis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G110}
+
+`G110` `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G110` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G115 Crustaceans / Euchaeta barbata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G115}
+
+`G115` `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G115` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G123 Worms / Arenicola marina / Total soft tissues / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G123}
+
+`G123` **Lugworm**. `n` = 10 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G123` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G129 Crustaceans / Calanus glacialis / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G129}
+
+`G129` `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G129` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G130 Crustaceans / Eukronia hamata / Whole body / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (dry) {#grp-G130}
+
+`G130` `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G130` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G138 Invertebrates / Heliometra glacialis / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G138}
+
+`G138` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G138` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G144 Invertebrates / Ctenodiscus crispatus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G144}
+
+`G144` **Common mud star**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G144` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G148 Crustaceans / Cancer pagurus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G148}
+
+`G148` **Edible crab**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G148` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G149 Invertebrates / Urasterias lincki / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G149}
+
+`G149` `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G149` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G154 Worms / Arenicola marina / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G154}
+
+`G154` **Lugworm**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G154` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G158 Crustaceans / Cancer pagurus / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G158}
+
+`G158` **Edible crab**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G158` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G165 Invertebrates / Gorgonocephalus arcticus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G165}
+
+`G165` **Northern basket star**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G165` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G166 Invertebrates / Pontaster tenuispinus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G166}
+
+`G166` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: callout-warning
+## Flagged
+- **? outliers**
+:::
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G166` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G171 Crustaceans / Mysis relicta / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G171}
+
+`G171` **Common Northern European opossum shrimp**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G171` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G181 Invertebrates / Insecta / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G181}
+
+`G181` **Insects**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G181` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G182 Invertebrates / Pteraster pulvillus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G182}
+
+`G182` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G182` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G183 Invertebrates / Strongylocentrotus pallidus / Echinoid corona / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G183}
+
+`G183` **Pale sea urchin**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G183` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G201 Invertebrates / Chironomidae / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G201}
+
+`G201` **Nonbiting midges**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G201` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G202 Invertebrates / Gorgonocephalus lamarckii / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G202}
+
+`G202` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G202` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G203 Invertebrates / Ophiopleura borealis / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G203}
+
+`G203` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G203` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G204 Invertebrates / Ophiura sarsii / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G204}
+
+`G204` **Notched brittle star**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G204` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G205 Invertebrates / Pteraster obscurus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G205}
+
+`G205` **Obscure cushion star**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G205` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G208 Crustaceans / Lithodidae / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G208}
+
+`G208` **Stone and king crabs**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G208` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G209 Crustaceans / Nephrops norvegicus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G209}
+
+`G209` **Norway lobster**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G209` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G210 Crustaceans / Palaemon adspersus / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G210}
+
+`G210` **Baltic prawn**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G210` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G225 Invertebrates / Astacus astacus / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G225}
+
+`G225` **Noble crayfish**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G225` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G226 Invertebrates / Crossaster papposus / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G226}
+
+`G226` **Common sun star**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G226` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G227 Invertebrates / Hippasteria phrygiana / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G227}
+
+`G227` **Arctic cushion star**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G227` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G228 Invertebrates / Icasterias panopla / Disc skeleton / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G228}
+
+`G228` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G228` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G238 Worms / Eisenia hortensis / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) {#grp-G238}
+
+`G238` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G238` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G239 Worms / Lumbricus / Total soft tissues / River, stream, canal / Not reported / mg/kg (wet) {#grp-G239}
+
+`G239` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G239` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

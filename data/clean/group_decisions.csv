@@ -1,246 +1,246 @@
-ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SPECIES_GROUP,SAMPLE_SPECIES,SAMPLE_TISSUE,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,MEASURED_UNIT_STANDARD,species_common_name,rank,n,n_sources,cum_pct,tier,flag_multimodal,flag_outliers,decision,lump_into,notes
-Aquatic,Freshwater,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,1,41831,1,0.4373,top90,TRUE,FALSE,own_notebook,"distinct diff between road traff, poll monitoring and measured monitoring distributions",
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Water benthos,mg/kg (dry),,2,25024,2,0.6989,top90,TRUE,FALSE,own_notebook,"most signal in aqfac, but lots of variation and big right tail",
-Aquatic,Freshwater,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/L,,3,6847,1,0.7704,top90,TRUE,FALSE,own_notebook,,
-Aquatic,Marine/Salt Water,,,,"Coastal, fjord","Water column, pelagic zone",mg/L,,4,4969,1,0.8224,top90,TRUE,FALSE,own_notebook,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,5,3048,1,0.8542,top90,TRUE,TRUE,own_notebook,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,6,2796,1,0.8835,top90,TRUE,FALSE,own_notebook,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord","Water column, pelagic zone",mg/kg (wet),Blue mussel,7,2450,2,0.9091,top90,FALSE,FALSE,lump,,keep with other blue mussels
-Aquatic,Aquatic Sediment,,,,"River, stream, canal",Water benthos,mg/kg (dry),,8,857,1,0.918,top95,FALSE,FALSE,own_notebook,,much more variable than fjords
-Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir",Water benthos,mg/kg (dry),,9,573,1,0.924,top95,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (dry),Atlantic dog whelk,10,480,1,0.929,top95,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,11,337,1,0.9326,top95,FALSE,TRUE,,,
-Biota,"Biota, Terrestrial",Mammals,Ursus maritimus,Liver,"Coastal, fjord",Other,mg/kg (dry),Polar bear,12,317,1,0.9359,top95,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord","Water column, pelagic zone",mg/kg (dry),,13,314,1,0.9392,top95,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,14,314,1,0.9424,top95,FALSE,FALSE,,,
-Aquatic,Stormwater,,,,"Drainage, sewer, artificial water",Not reported,mg/L,,15,309,1,0.9457,top95,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,16,247,3,0.9483,top95,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Atlantic cod,17,218,1,0.9505,top95,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Ctenolabrus rupestris,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Goldsinny wrasse,18,192,1,0.9525,top99,TRUE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (dry),,19,164,2,0.9543,top99,FALSE,TRUE,,,
-Aquatic,Wastewater,,,,WWTP,Not reported,mg/L,,20,143,1,0.9558,top99,TRUE,TRUE,,,
-Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Common limpet,21,143,1,0.9572,top99,TRUE,TRUE,,,
-Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Northern shrimp,22,133,1,0.9586,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Gammarus oceanicus,Whole body,"Coastal, fjord",Water benthos,mg/kg (dry),Oceanic scud,23,132,1,0.96,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Calanus hyperboreus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,24,122,2,0.9613,top99,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Common eider,25,120,1,0.9625,top99,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Blood,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Common eider,26,119,1,0.9638,top99,FALSE,FALSE,,,
-Aquatic,Freshwater,,,,"River, stream, canal",Other,mg/L,,27,106,2,0.9649,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Atlantic cod,28,92,1,0.9659,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Phoca vitulina,Liver,"Coastal, fjord",Not relevant,mg/L,Harbor seal,29,79,1,0.9667,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Themisto abyssorum,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,30,78,2,0.9675,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Not reported,mg/kg (dry),River trout,31,78,1,0.9683,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Calanus finmarchicus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,32,76,2,0.9691,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),Egg wrack,33,70,1,0.9698,top99,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/kg (dry),,34,69,1,0.9706,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common whitefish,35,69,1,0.9713,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),Bladder wrack,36,68,1,0.972,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Brown meat,"Ocean, sea, territorial waters",Other,mg/kg (dry),Edible crab,37,64,1,0.9727,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Themisto libellula,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,38,63,1,0.9733,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Body wall,"Coastal, fjord",Water benthos,mg/kg (dry),European starfish,39,60,1,0.974,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Pyloric caeca,"Coastal, fjord",Water benthos,mg/kg (dry),European starfish,40,60,1,0.9746,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Platichthys flesus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),European flounder,41,56,1,0.9752,top99,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common whitefish,42,51,1,0.9757,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Ocean, sea, territorial waters",Other,mg/kg (dry),Atlantic cod,43,51,1,0.9762,top99,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Molluscs,Modiolus modiolus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Northern horsemussel,44,51,1,0.9768,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo salar,Gill,"River, stream, canal",Not reported,mg/kg (dry),Atlantic salmon,45,50,1,0.9773,top99,FALSE,FALSE,,,
-Aquatic,Brackish/Transitional Water,,,,Estuary,Water benthos,mg/kg (dry),,46,44,1,0.9777,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,47,44,1,0.9782,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,48,44,1,0.9787,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Muscle,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Greenland flounder,49,43,1,0.9791,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Metridia longa,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,50,42,2,0.9796,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Polychaeta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Polychaetes,51,42,1,0.98,top99,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Crustaceans,Conchoecia borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,52,41,1,0.9804,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Hymenodora glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Northern ambereye,53,41,1,0.9808,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,54,40,1,0.9813,top99,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Atlantic dog whelk,55,39,1,0.9817,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Northern pike,56,38,1,0.9821,top99,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Molluscs,Littorina rudis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),,57,38,1,0.9825,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Arctic char,58,36,1,0.9828,top99,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Mammals,Vulpes vulpes,Liver,"River, stream, canal",Not reported,mg/kg (wet),Red fox,59,36,1,0.9832,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),River trout,60,34,1,0.9836,top99,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not relevant,mg/kg (dry),Blue mussel,61,30,1,0.9839,top99,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Muscle,Bare land and lichen/moss,Other,mg/kg (dry),Black-legged kittiwake,62,30,1,0.9842,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Northern pike,63,29,1,0.9845,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Gonad,"Coastal, fjord",Not relevant,mg/kg (dry),Green sea urchin,64,29,1,0.9848,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Littorina littorea,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Common periwinkle,65,28,1,0.9851,top99,FALSE,TRUE,,,
-Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Liver,Bare land and lichen/moss,Other,mg/kg (dry),Black-legged kittiwake,66,28,1,0.9854,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Euphausiacea,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Krill,67,27,1,0.9857,top99,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Crustaceans,Eukrohnia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Arrow worm,68,26,1,0.986,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Isobactrus setosus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),,69,26,1,0.9862,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Lung,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,70,26,1,0.9865,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,71,25,1,0.9868,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Kidney,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,72,25,1,0.987,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Meganyctiphanes norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Nordic krill,73,24,2,0.9873,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Alitta virens,Whole body,"Coastal, fjord",Other,mg/kg (dry),Clam worm,74,24,1,0.9875,top99,FALSE,FALSE,,,
-Terrestrial,Soil O Horizon (Organic),,,,"River, stream, canal",Water surface,mg/kg (dry),,75,24,1,0.9878,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Euchaeta glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,76,23,1,0.988,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Euchaeta norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,77,23,2,0.9883,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Liver,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,78,23,1,0.9885,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,79,22,1,0.9887,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Muscle,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,80,22,1,0.989,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Skin,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,81,22,1,0.9892,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Clupea harengus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic herring,82,21,1,0.9894,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Limanda limanda,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Common dab,83,21,1,0.9896,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,84,21,1,0.9898,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Gill,"River, stream, canal",Not reported,mg/kg (dry),White bream,85,20,1,0.99,top99,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Lota lota,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Burbot,86,20,1,0.9903,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Whole body,,,mg/kg (wet),Greenland flounder,87,20,1,0.9905,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Blue mussel,88,20,1,0.9907,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Common whitefish,89,19,1,0.9909,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Grayling,90,19,1,0.9911,tail,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Grayling,91,19,1,0.9913,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Grayling,92,19,1,0.9915,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Total soft tissues minus gonads,"Coastal, fjord",Not relevant,mg/kg (dry),Green sea urchin,93,19,1,0.9917,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,,,mg/kg (wet),Northern shrimp,94,18,1,0.9919,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Arctic char,95,18,1,0.992,tail,FALSE,TRUE,,,
-Aquatic,Aquatic Sediment,,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),,96,17,1,0.9922,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Sabinea sarsi,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,97,17,1,0.9924,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mya arenaria,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Large-neck clam,98,17,1,0.9926,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Carcinus maenas,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Green crab,99,16,1,0.9927,tail,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Common limpet,100,16,1,0.9929,tail,FALSE,FALSE,,,
-Terrestrial,Soil O Horizon (Organic),,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),,101,16,1,0.9931,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Northern shrimp,102,15,1,0.9932,tail,TRUE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Liver,"River, stream, canal",Not reported,mg/kg (wet),White bream,103,15,1,0.9934,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Haddock,104,15,1,0.9936,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"River, stream, canal",Not reported,mg/kg (wet),River trout,105,15,1,0.9937,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Abramis brama,Gill,"River, stream, canal",Not reported,mg/kg (dry),Common bream,106,13,1,0.9938,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Abramis brama,Liver,"River, stream, canal",Not reported,mg/kg (wet),Common bream,107,13,1,0.994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus rosmarus,Skin,Bare land and lichen/moss,Other,mg/kg (wet),Atlantic walrus,108,13,1,0.9941,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Northern shrimp,109,12,1,0.9942,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Thysanoessa inermis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,110,12,1,0.9944,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Ruffe,111,12,1,0.9945,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Sander lucioperca,Gill,"River, stream, canal",Not reported,mg/kg (dry),Pikeperch,112,12,1,0.9946,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Symphodus melops,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Corkwing wrasse,113,12,1,0.9947,tail,TRUE,FALSE,,,
-Aquatic,Sludge,,,,WWTP,Other,mg/kg (wet),,114,11,1,0.9949,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Euchaeta barbata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,115,11,1,0.995,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),River trout,116,11,1,0.9951,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Other,mg/kg (wet),River trout,117,11,1,0.9952,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Kidney,"River, stream, canal",Other,mg/kg (wet),River trout,118,11,1,0.9953,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"River, stream, canal",Other,mg/kg (wet),River trout,119,11,1,0.9954,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Sander lucioperca,Liver,"River, stream, canal",Not reported,mg/kg (wet),Pikeperch,120,11,1,0.9955,tail,FALSE,FALSE,,,
-Aquatic,Wastewater,,,,WWTP,Other,mg/L,,121,10,1,0.9957,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Heart,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,122,10,1,0.9958,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Arenicola marina,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Lugworm,123,10,1,0.9959,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tips,"Coastal, fjord",Not relevant,mg/kg (dry),Bladder wrack,124,9,1,0.996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Arctic char,125,9,1,0.996,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Molluscs,Littorina,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,126,9,1,0.9961,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),,127,9,1,0.9962,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),,128,8,1,0.9963,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Calanus glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,129,8,1,0.9964,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Eukronia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,130,8,1,0.9965,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo salar,Whole body,,,mg/kg (wet),Atlantic salmon,131,8,1,0.9966,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),Blue mussel,132,8,1,0.9967,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer",Water benthos,mg/kg (dry),,133,7,1,0.9967,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),,134,7,1,0.9968,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,135,7,1,0.9969,tail,FALSE,FALSE,,,
-Aquatic,Porewater,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),,136,7,1,0.9969,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Merlangius merlangus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Whiting,137,7,1,0.997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Heliometra glacialis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,138,7,1,0.9971,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Brosme brosme,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Cusk,139,6,1,0.9972,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Liver,"Coastal, fjord",Not reported,mg/kg (wet),European plaice,140,6,1,0.9972,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),European plaice,141,6,1,0.9973,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Gill,"River, stream, canal",Not reported,mg/kg (dry),Roach minnow,142,6,1,0.9973,tail,FALSE,TRUE,,,
-Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Roach minnow,143,6,1,0.9974,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Ctenodiscus crispatus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Common mud star,144,6,1,0.9975,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Astarte borealis,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Boreal astarte,145,6,1,0.9975,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Blue mussel,146,6,1,0.9976,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Plant tissue,"Coastal, fjord",Not reported,mg/kg (wet),Egg wrack,147,5,1,0.9976,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,148,5,1,0.9977,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Urasterias lincki,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,149,5,1,0.9978,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Hooded seal,150,5,1,0.9978,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Hooded seal,151,5,1,0.9979,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Harp seal,152,5,1,0.9979,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Harp seal,153,5,1,0.998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Arenicola marina,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Lugworm,154,5,1,0.998,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (wet),,155,4,1,0.9981,tail,FALSE,FALSE,,,
-Aquatic,Brackish/Transitional Water,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,156,4,1,0.9981,tail,FALSE,TRUE,,,
-Aquatic,Porewater,,,,"Coastal, fjord",Other,mg/kg (wet),,157,4,1,0.9981,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,158,4,1,0.9982,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Brosme brosme,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Cusk,159,4,1,0.9982,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Labrus bergylta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,160,4,1,0.9983,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Muscle,"River, stream, canal",Not reported,mg/kg (wet),European chub,161,4,1,0.9983,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Haddock,162,4,1,0.9983,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Gill,"River, stream, canal",Not reported,mg/kg (dry),European perch,163,4,1,0.9984,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"River, stream, canal",Not reported,mg/kg (wet),European perch,164,4,1,0.9984,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus arcticus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Northern basket star,165,4,1,0.9985,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Pontaster tenuispinus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,166,4,1,0.9985,tail,FALSE,TRUE,,,
-Biota,"Biota, Terrestrial",Birds,Larus argentatus,Egg,"Coastal, fjord",Not reported,mg/kg (wet),Herring gull,167,4,1,0.9986,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Not relevant,mg/kg (dry),,168,3,1,0.9986,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/kg (dry),,169,3,1,0.9986,tail,FALSE,FALSE,,,
-Aquatic,Freshwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,,170,3,1,0.9987,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Mysis relicta,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common Northern European opossum shrimp,171,3,1,0.9987,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Ecosystem,Zooplankton epilimnion,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),,172,3,1,0.9987,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Centrolabrus exoletus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Rock cook,173,3,1,0.9987,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,174,3,1,0.9988,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,175,3,1,0.9988,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Lamna nasus,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),American porbeagle,176,3,1,0.9988,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Molva molva,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ling,177,3,1,0.9989,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,178,3,1,0.9989,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Pollack,179,3,1,0.9989,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Squalus acanthias,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Spiny dogfish,180,3,1,0.999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Insecta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),Insects,181,3,1,0.999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Pteraster pulvillus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,182,3,1,0.999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus pallidus,Echinoid corona,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Pale sea urchin,183,3,1,0.9991,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Orcinus orca,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Killer whale,184,3,1,0.9991,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic dog whelk,185,3,1,0.9991,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Gulosus aristotelis,Egg,"Coastal, fjord",Not reported,mg/kg (wet),,186,3,1,0.9992,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Coastal, fjord",Not reported,mg/kg (wet),Common eider,187,3,1,0.9992,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Moss/Hornworts,Fontinalis antipyretica,Plant tissue,"River, stream, canal",Not reported,mg/kg (wet),,188,3,1,0.9992,tail,FALSE,FALSE,,,
-Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer","Water column, pelagic zone",mg/kg (dry),,189,2,1,0.9992,tail,FALSE,FALSE,,,
-Aquatic,Groundwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,,190,2,1,0.9993,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Actinopterygii,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Ray-finned fishes,191,2,1,0.9993,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Actinopterygii,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ray-finned fishes,192,2,1,0.9993,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Whole body,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,193,2,1,0.9993,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadidae,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Cods,194,2,1,0.9993,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gadidae,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Cods,195,2,1,0.9994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Leuciscus idus,Gill,"River, stream, canal",Not reported,mg/kg (dry),Ide,196,2,1,0.9994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Leuciscus idus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Ide,197,2,1,0.9994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"River, stream, canal",Not reported,mg/kg (wet),European perch,198,2,1,0.9994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Pollack,199,2,1,0.9994,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Pollack,200,2,1,0.9995,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Chironomidae,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Nonbiting midges,201,2,1,0.9995,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus lamarckii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,202,2,1,0.9995,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Ophiopleura borealis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,203,2,1,0.9995,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Ophiura sarsii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Notched brittle star,204,2,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Pteraster obscurus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Obscure cushion star,205,2,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Other,Bunndyr,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,206,2,1,0.9996,tail,FALSE,FALSE,,,
-Aquatic,Marine/Salt Water,,,,"Coastal, fjord",Not relevant,mg/L,,207,1,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Lithodidae,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Stone and king crabs,208,1,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Nephrops norvegicus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Norway lobster,209,1,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Crustaceans,Palaemon adspersus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Baltic prawn,210,1,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Esox lucius,Gill,"River, stream, canal",Not reported,mg/kg (dry),Northern pike,211,1,1,0.9996,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Ruffe,212,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Labrus bergylta,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,213,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Labrus bergylta,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,214,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Labrus mixtus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Cuckoo wrasse,215,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Whole body,"River, stream, canal",Not reported,mg/kg (wet),European chub,216,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Limanda limanda,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Common dab,217,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Haddock,218,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Platichthys flesus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),European flounder,219,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Roach minnow,220,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,221,1,1,0.9997,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Sander lucioperca,Bile,"River, stream, canal",Not reported,mg/kg (wet),Pikeperch,222,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Somniosus microcephalus,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Greenland sleeper shark,223,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Fish,Trisopterus minutus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Poor cod,224,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Astacus astacus,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Noble crayfish,225,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Crossaster papposus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Common sun star,226,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Hippasteria phrygiana,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Arctic cushion star,227,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Invertebrates,Icasterias panopla,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,228,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Balaenoptera physalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Fin whale,229,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Lagenorhynchus albirostris,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),White-beaked dolphin,230,1,1,0.9998,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Megaptera novaeangliae,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Humpback whale,231,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Mammals,Physeter macrocephalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Sperm whale,232,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Acesta excavata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,233,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Buccinum undatum,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Waved whelk,234,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Erginus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,235,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Gastropoda,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Gastropods,236,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Molluscs,Lepetella,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,237,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Eisenia hortensis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),,238,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Aquatic",Worms,Lumbricus,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),,239,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Birds,Turdus pilaris,Egg,"River, stream, canal",Not reported,mg/kg (wet),,240,1,1,0.9999,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Mammals,Capreolus capreolus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Western roe deer,241,1,1,1,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,242,1,1,1,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,243,1,1,1,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,244,1,1,1,tail,FALSE,FALSE,,,
-Biota,"Biota, Terrestrial",Moss/Hornworts,Hylocomium splendens,Plant tissue,"Coastal, fjord",Not reported,mg/kg (dry),,245,1,1,1,tail,FALSE,FALSE,,,
+group_id,ENVIRON_COMPARTMENT,ENVIRON_COMPARTMENT_SUB,SPECIES_GROUP,SAMPLE_SPECIES,SAMPLE_TISSUE,SITE_GEOGRAPHIC_FEATURE,SITE_GEOGRAPHIC_FEATURE_SUB,MEASURED_UNIT_STANDARD,species_common_name,rank,n,n_sources,cum_pct,tier,flag_multimodal,flag_outliers,decision,lump_into,notes,notebook
+G001,Aquatic,Freshwater,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,1,41831,1,0.4373,top90,TRUE,FALSE,,,"distinct diff between road traff, poll monitoring and measured monitoring distributions",Freshwater
+G002,Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Water benthos,mg/kg (dry),,2,25024,2,0.6989,top90,TRUE,FALSE,,,"most signal in aqfac, but lots of variation and big right tail",Aquatic Sediment
+G003,Aquatic,Freshwater,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/L,,3,6847,1,0.7704,top90,TRUE,FALSE,,,,Freshwater
+G004,Aquatic,Marine/Salt Water,,,,"Coastal, fjord","Water column, pelagic zone",mg/L,,4,4969,1,0.8224,top90,TRUE,FALSE,keep,,,Marine and Brackish Water
+G005,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,5,3048,1,0.8542,top90,TRUE,TRUE,keep,,,Molluscs
+G006,Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,6,2796,1,0.8835,top90,TRUE,FALSE,,,,Fish
+G007,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord","Water column, pelagic zone",mg/kg (wet),Blue mussel,7,2450,2,0.9091,top90,FALSE,FALSE,keep,,keep with other blue mussels,Molluscs
+G008,Aquatic,Aquatic Sediment,,,,"River, stream, canal",Water benthos,mg/kg (dry),,8,857,1,0.918,top95,FALSE,FALSE,,,much more variable than fjords,Aquatic Sediment
+G009,Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir",Water benthos,mg/kg (dry),,9,573,1,0.924,top95,FALSE,FALSE,,,,Aquatic Sediment
+G010,Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (dry),Atlantic dog whelk,10,480,1,0.929,top95,FALSE,FALSE,,,,Molluscs
+G011,Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,11,337,1,0.9326,top95,FALSE,TRUE,,,,Crustaceans and Invertebrates
+G012,Biota,"Biota, Terrestrial",Mammals,Ursus maritimus,Liver,"Coastal, fjord",Other,mg/kg (dry),Polar bear,12,317,1,0.9359,top95,FALSE,FALSE,,,,Birds and Mammals
+G013,Aquatic,Aquatic Sediment,,,,"Coastal, fjord","Water column, pelagic zone",mg/kg (dry),,13,314,1,0.9392,top95,FALSE,FALSE,keep,,,Aquatic Sediment
+G014,Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,14,314,1,0.9424,top95,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G015,Aquatic,Stormwater,,,,"Drainage, sewer, artificial water",Not reported,mg/L,,15,309,1,0.9457,top95,FALSE,FALSE,,,,Other Waters
+G016,Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,16,247,3,0.9483,top95,FALSE,FALSE,keep,,,Aquatic Sediment
+G017,Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Atlantic cod,17,218,1,0.9505,top95,FALSE,FALSE,,,,Fish
+G018,Biota,"Biota, Aquatic",Fish,Ctenolabrus rupestris,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Goldsinny wrasse,18,192,1,0.9525,top99,TRUE,FALSE,,,,Fish
+G019,Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (dry),,19,164,2,0.9543,top99,FALSE,TRUE,keep,,,Aquatic Sediment
+G020,Aquatic,Wastewater,,,,WWTP,Not reported,mg/L,,20,143,1,0.9558,top99,TRUE,TRUE,,,,Other Waters
+G021,Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Common limpet,21,143,1,0.9572,top99,TRUE,TRUE,,,,Molluscs
+G022,Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Northern shrimp,22,133,1,0.9586,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G023,Biota,"Biota, Aquatic",Crustaceans,Gammarus oceanicus,Whole body,"Coastal, fjord",Water benthos,mg/kg (dry),Oceanic scud,23,132,1,0.96,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G024,Biota,"Biota, Aquatic",Crustaceans,Calanus hyperboreus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,24,122,2,0.9613,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G025,Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Common eider,25,120,1,0.9625,top99,FALSE,FALSE,,,,Birds and Mammals
+G026,Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Blood,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Common eider,26,119,1,0.9638,top99,FALSE,FALSE,,,,Birds and Mammals
+G027,Aquatic,Freshwater,,,,"River, stream, canal",Other,mg/L,,27,106,2,0.9649,top99,FALSE,FALSE,,,,Freshwater
+G028,Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Atlantic cod,28,92,1,0.9659,top99,FALSE,FALSE,,,,Fish
+G029,Biota,"Biota, Aquatic",Mammals,Phoca vitulina,Liver,"Coastal, fjord",Not relevant,mg/L,Harbor seal,29,79,1,0.9667,top99,FALSE,FALSE,,,,Birds and Mammals
+G030,Biota,"Biota, Aquatic",Crustaceans,Themisto abyssorum,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,30,78,2,0.9675,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G031,Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Not reported,mg/kg (dry),River trout,31,78,1,0.9683,top99,FALSE,FALSE,,,,Fish
+G032,Biota,"Biota, Aquatic",Crustaceans,Calanus finmarchicus,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,32,76,2,0.9691,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G033,Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),Egg wrack,33,70,1,0.9698,top99,FALSE,FALSE,,,,Algae and Plants
+G034,Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/kg (dry),,34,69,1,0.9706,top99,FALSE,FALSE,,,,Aquatic Sediment
+G035,Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common whitefish,35,69,1,0.9713,top99,FALSE,FALSE,,,,Fish
+G036,Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tip,"Coastal, fjord",Not reported,mg/kg (wet),Bladder wrack,36,68,1,0.972,top99,FALSE,FALSE,,,,Algae and Plants
+G037,Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Brown meat,"Ocean, sea, territorial waters",Other,mg/kg (dry),Edible crab,37,64,1,0.9727,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G038,Biota,"Biota, Aquatic",Crustaceans,Themisto libellula,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,38,63,1,0.9733,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G039,Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Body wall,"Coastal, fjord",Water benthos,mg/kg (dry),European starfish,39,60,1,0.974,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G040,Biota,"Biota, Aquatic",Invertebrates,Asterias rubens,Pyloric caeca,"Coastal, fjord",Water benthos,mg/kg (dry),European starfish,40,60,1,0.9746,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G041,Biota,"Biota, Aquatic",Fish,Platichthys flesus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),European flounder,41,56,1,0.9752,top99,TRUE,FALSE,,,,Fish
+G042,Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common whitefish,42,51,1,0.9757,top99,FALSE,FALSE,,,,Fish
+G043,Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Ocean, sea, territorial waters",Other,mg/kg (dry),Atlantic cod,43,51,1,0.9762,top99,FALSE,TRUE,,,,Fish
+G044,Biota,"Biota, Aquatic",Molluscs,Modiolus modiolus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Northern horsemussel,44,51,1,0.9768,top99,FALSE,FALSE,,,,Molluscs
+G045,Biota,"Biota, Aquatic",Fish,Salmo salar,Gill,"River, stream, canal",Not reported,mg/kg (dry),Atlantic salmon,45,50,1,0.9773,top99,FALSE,FALSE,,,,Fish
+G046,Aquatic,Brackish/Transitional Water,,,,Estuary,Water benthos,mg/kg (dry),,46,44,1,0.9777,top99,FALSE,FALSE,,,,Marine and Brackish Water
+G047,Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic cod,47,44,1,0.9782,top99,FALSE,FALSE,,,,Fish
+G048,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,48,44,1,0.9787,top99,FALSE,FALSE,,,,Fish
+G049,Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Muscle,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Greenland flounder,49,43,1,0.9791,top99,FALSE,FALSE,,,,Fish
+G050,Biota,"Biota, Aquatic",Crustaceans,Metridia longa,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,50,42,2,0.9796,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G051,Biota,"Biota, Aquatic",Worms,Polychaeta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Polychaetes,51,42,1,0.98,top99,FALSE,TRUE,,,,Crustaceans and Invertebrates
+G052,Biota,"Biota, Aquatic",Crustaceans,Conchoecia borealis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,52,41,1,0.9804,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G053,Biota,"Biota, Aquatic",Crustaceans,Hymenodora glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Northern ambereye,53,41,1,0.9808,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G054,Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,54,40,1,0.9813,top99,FALSE,TRUE,,,,Fish
+G055,Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Atlantic dog whelk,55,39,1,0.9817,top99,FALSE,FALSE,,,,Molluscs
+G056,Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Northern pike,56,38,1,0.9821,top99,FALSE,TRUE,,,,Fish
+G057,Biota,"Biota, Aquatic",Molluscs,Littorina rudis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),,57,38,1,0.9825,top99,FALSE,FALSE,,,,Molluscs
+G058,Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Arctic char,58,36,1,0.9828,top99,FALSE,FALSE,,,,Fish
+G059,Biota,"Biota, Terrestrial",Mammals,Vulpes vulpes,Liver,"River, stream, canal",Not reported,mg/kg (wet),Red fox,59,36,1,0.9832,top99,FALSE,FALSE,,,,Birds and Mammals
+G060,Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),River trout,60,34,1,0.9836,top99,TRUE,FALSE,,,,Fish
+G061,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Not relevant,mg/kg (dry),Blue mussel,61,30,1,0.9839,top99,FALSE,FALSE,,,,Molluscs
+G062,Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Muscle,Bare land and lichen/moss,Other,mg/kg (dry),Black-legged kittiwake,62,30,1,0.9842,top99,FALSE,FALSE,,,,Birds and Mammals
+G063,Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Northern pike,63,29,1,0.9845,top99,FALSE,FALSE,,,,Fish
+G064,Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Gonad,"Coastal, fjord",Not relevant,mg/kg (dry),Green sea urchin,64,29,1,0.9848,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G065,Biota,"Biota, Aquatic",Molluscs,Littorina littorea,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Common periwinkle,65,28,1,0.9851,top99,FALSE,TRUE,,,,Molluscs
+G066,Biota,"Biota, Terrestrial",Birds,Rissa tridactyla,Liver,Bare land and lichen/moss,Other,mg/kg (dry),Black-legged kittiwake,66,28,1,0.9854,top99,FALSE,FALSE,,,,Birds and Mammals
+G067,Biota,"Biota, Aquatic",Crustaceans,Euphausiacea,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Krill,67,27,1,0.9857,top99,FALSE,TRUE,,,,Crustaceans and Invertebrates
+G068,Biota,"Biota, Aquatic",Crustaceans,Eukrohnia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Arrow worm,68,26,1,0.986,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G069,Biota,"Biota, Aquatic",Crustaceans,Isobactrus setosus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),,69,26,1,0.9862,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G070,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Lung,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,70,26,1,0.9865,top99,FALSE,FALSE,,,,Birds and Mammals
+G071,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,71,25,1,0.9868,top99,FALSE,FALSE,,,,Fish
+G072,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Kidney,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,72,25,1,0.987,top99,FALSE,FALSE,,,,Birds and Mammals
+G073,Biota,"Biota, Aquatic",Crustaceans,Meganyctiphanes norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),Nordic krill,73,24,2,0.9873,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G074,Biota,"Biota, Aquatic",Worms,Alitta virens,Whole body,"Coastal, fjord",Other,mg/kg (dry),Clam worm,74,24,1,0.9875,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G075,Terrestrial,Soil O Horizon (Organic),,,,"River, stream, canal",Water surface,mg/kg (dry),,75,24,1,0.9878,top99,FALSE,FALSE,,,,Terrestrial Soil
+G076,Biota,"Biota, Aquatic",Crustaceans,Euchaeta glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,76,23,1,0.988,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G077,Biota,"Biota, Aquatic",Crustaceans,Euchaeta norvegica,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,77,23,2,0.9883,top99,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G078,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Liver,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,78,23,1,0.9885,top99,FALSE,FALSE,,,,Birds and Mammals
+G079,Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,79,22,1,0.9887,top99,FALSE,FALSE,,,,Fish
+G080,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Muscle,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,80,22,1,0.989,top99,FALSE,FALSE,,,,Birds and Mammals
+G081,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Skin,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,81,22,1,0.9892,top99,FALSE,FALSE,,,,Birds and Mammals
+G082,Biota,"Biota, Aquatic",Fish,Clupea harengus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic herring,82,21,1,0.9894,top99,FALSE,FALSE,,,,Fish
+G083,Biota,"Biota, Aquatic",Fish,Limanda limanda,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Common dab,83,21,1,0.9896,top99,FALSE,FALSE,,,,Fish
+G084,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Blue mussel,84,21,1,0.9898,top99,FALSE,FALSE,,,,Molluscs
+G085,Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Gill,"River, stream, canal",Not reported,mg/kg (dry),White bream,85,20,1,0.99,top99,FALSE,FALSE,,,,Fish
+G086,Biota,"Biota, Aquatic",Fish,Lota lota,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Burbot,86,20,1,0.9903,tail,FALSE,FALSE,,,,Fish
+G087,Biota,"Biota, Aquatic",Fish,Reinhardtius hippoglossoides,Whole body,,,mg/kg (wet),Greenland flounder,87,20,1,0.9905,tail,FALSE,FALSE,,,,Fish
+G088,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Blue mussel,88,20,1,0.9907,tail,FALSE,FALSE,,,,Molluscs
+G089,Biota,"Biota, Aquatic",Fish,Coregonus lavaretus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Common whitefish,89,19,1,0.9909,tail,FALSE,FALSE,,,,Fish
+G090,Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Grayling,90,19,1,0.9911,tail,TRUE,FALSE,,,,Fish
+G091,Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Grayling,91,19,1,0.9913,tail,FALSE,TRUE,,,,Fish
+G092,Biota,"Biota, Aquatic",Fish,Thymallus thymallus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Grayling,92,19,1,0.9915,tail,FALSE,FALSE,,,,Fish
+G093,Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus droebachiensis,Total soft tissues minus gonads,"Coastal, fjord",Not relevant,mg/kg (dry),Green sea urchin,93,19,1,0.9917,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G094,Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Whole body,,,mg/kg (wet),Northern shrimp,94,18,1,0.9919,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G095,Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Muscle,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Arctic char,95,18,1,0.992,tail,FALSE,TRUE,,,,Fish
+G096,Aquatic,Aquatic Sediment,,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),,96,17,1,0.9922,tail,FALSE,FALSE,,,,Aquatic Sediment
+G097,Biota,"Biota, Aquatic",Crustaceans,Sabinea sarsi,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,97,17,1,0.9924,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G098,Biota,"Biota, Aquatic",Molluscs,Mya arenaria,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Large-neck clam,98,17,1,0.9926,tail,FALSE,FALSE,,,,Molluscs
+G099,Biota,"Biota, Aquatic",Crustaceans,Carcinus maenas,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Green crab,99,16,1,0.9927,tail,TRUE,FALSE,,,,Crustaceans and Invertebrates
+G100,Biota,"Biota, Aquatic",Molluscs,Patella vulgata,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Common limpet,100,16,1,0.9929,tail,FALSE,FALSE,,,,Molluscs
+G101,Terrestrial,Soil O Horizon (Organic),,,,"Drainage, sewer, artificial water",Water surface,mg/kg (dry),,101,16,1,0.9931,tail,FALSE,FALSE,,,,Terrestrial Soil
+G102,Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Northern shrimp,102,15,1,0.9932,tail,TRUE,FALSE,,,,Crustaceans and Invertebrates
+G103,Biota,"Biota, Aquatic",Fish,Blicca bjoerkna,Liver,"River, stream, canal",Not reported,mg/kg (wet),White bream,103,15,1,0.9934,tail,FALSE,FALSE,,,,Fish
+G104,Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Haddock,104,15,1,0.9936,tail,FALSE,TRUE,,,,Fish
+G105,Biota,"Biota, Aquatic",Fish,Salmo trutta,Muscle,"River, stream, canal",Not reported,mg/kg (wet),River trout,105,15,1,0.9937,tail,FALSE,TRUE,,,,Fish
+G106,Biota,"Biota, Aquatic",Fish,Abramis brama,Gill,"River, stream, canal",Not reported,mg/kg (dry),Common bream,106,13,1,0.9938,tail,FALSE,FALSE,,,,Fish
+G107,Biota,"Biota, Aquatic",Fish,Abramis brama,Liver,"River, stream, canal",Not reported,mg/kg (wet),Common bream,107,13,1,0.994,tail,FALSE,FALSE,,,,Fish
+G108,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus rosmarus,Skin,Bare land and lichen/moss,Other,mg/kg (wet),Atlantic walrus,108,13,1,0.9941,tail,FALSE,TRUE,,,,Birds and Mammals
+G109,Biota,"Biota, Aquatic",Crustaceans,Pandalus borealis,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Northern shrimp,109,12,1,0.9942,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G110,Biota,"Biota, Aquatic",Crustaceans,Thysanoessa inermis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,110,12,1,0.9944,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G111,Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Liver,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Ruffe,111,12,1,0.9945,tail,FALSE,FALSE,,,,Fish
+G112,Biota,"Biota, Aquatic",Fish,Sander lucioperca,Gill,"River, stream, canal",Not reported,mg/kg (dry),Pikeperch,112,12,1,0.9946,tail,FALSE,FALSE,,,,Fish
+G113,Biota,"Biota, Aquatic",Fish,Symphodus melops,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Corkwing wrasse,113,12,1,0.9947,tail,TRUE,FALSE,,,,Fish
+G114,Aquatic,Sludge,,,,WWTP,Other,mg/kg (wet),,114,11,1,0.9949,tail,FALSE,FALSE,,,,Other Waters
+G115,Biota,"Biota, Aquatic",Crustaceans,Euchaeta barbata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,115,11,1,0.995,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G116,Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),River trout,116,11,1,0.9951,tail,FALSE,TRUE,,,,Fish
+G117,Biota,"Biota, Aquatic",Fish,Salmo trutta,Gill,"River, stream, canal",Other,mg/kg (wet),River trout,117,11,1,0.9952,tail,FALSE,FALSE,,,,Fish
+G118,Biota,"Biota, Aquatic",Fish,Salmo trutta,Kidney,"River, stream, canal",Other,mg/kg (wet),River trout,118,11,1,0.9953,tail,FALSE,FALSE,,,,Fish
+G119,Biota,"Biota, Aquatic",Fish,Salmo trutta,Liver,"River, stream, canal",Other,mg/kg (wet),River trout,119,11,1,0.9954,tail,FALSE,FALSE,,,,Fish
+G120,Biota,"Biota, Aquatic",Fish,Sander lucioperca,Liver,"River, stream, canal",Not reported,mg/kg (wet),Pikeperch,120,11,1,0.9955,tail,FALSE,FALSE,,,,Fish
+G121,Aquatic,Wastewater,,,,WWTP,Other,mg/L,,121,10,1,0.9957,tail,FALSE,FALSE,,,,Other Waters
+G122,Biota,"Biota, Aquatic",Mammals,Odobenus rosmarus divergens,Heart,Bare land and lichen/moss,Other,mg/kg (wet),Pacific walrus,122,10,1,0.9958,tail,FALSE,FALSE,,,,Birds and Mammals
+G123,Biota,"Biota, Aquatic",Worms,Arenicola marina,Total soft tissues,"Coastal, fjord",Water benthos,mg/kg (dry),Lugworm,123,10,1,0.9959,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G124,Biota,"Biota, Aquatic",Algae,Fucus vesiculosus,Shoot tips,"Coastal, fjord",Not relevant,mg/kg (dry),Bladder wrack,124,9,1,0.996,tail,FALSE,FALSE,,,,Algae and Plants
+G125,Biota,"Biota, Aquatic",Fish,Salvelinus alpinus,Gill,"Lake, pond, pool, reservoir",Not reported,mg/kg (dry),Arctic char,125,9,1,0.996,tail,FALSE,TRUE,,,,Fish
+G126,Biota,"Biota, Aquatic",Molluscs,Littorina,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,126,9,1,0.9961,tail,FALSE,FALSE,,,,Molluscs
+G127,Biota,"Biota, Aquatic",,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),,127,9,1,0.9962,tail,FALSE,FALSE,,,,Unclassified Biota
+G128,Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (dry),,128,8,1,0.9963,tail,FALSE,FALSE,,,,Aquatic Sediment
+G129,Biota,"Biota, Aquatic",Crustaceans,Calanus glacialis,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,129,8,1,0.9964,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G130,Biota,"Biota, Aquatic",Crustaceans,Eukronia hamata,Whole body,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (dry),,130,8,1,0.9965,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G131,Biota,"Biota, Aquatic",Fish,Salmo salar,Whole body,,,mg/kg (wet),Atlantic salmon,131,8,1,0.9966,tail,FALSE,FALSE,,,,Fish
+G132,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),Blue mussel,132,8,1,0.9967,tail,FALSE,FALSE,,,,Molluscs
+G133,Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer",Water benthos,mg/kg (dry),,133,7,1,0.9967,tail,FALSE,FALSE,,,,Aquatic Sediment
+G134,Aquatic,Aquatic Sediment,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),,134,7,1,0.9968,tail,FALSE,FALSE,,,,Aquatic Sediment
+G135,Aquatic,Aquatic Sediment,,,,"River, stream, canal","Water column, pelagic zone",mg/L,,135,7,1,0.9969,tail,FALSE,FALSE,,,,Aquatic Sediment
+G136,Aquatic,Porewater,,,,"Ocean, sea, territorial waters",Other,mg/kg (wet),,136,7,1,0.9969,tail,FALSE,FALSE,,,,Other Waters
+G137,Biota,"Biota, Aquatic",Fish,Merlangius merlangus,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Whiting,137,7,1,0.997,tail,FALSE,FALSE,,,,Fish
+G138,Biota,"Biota, Aquatic",Invertebrates,Heliometra glacialis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,138,7,1,0.9971,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G139,Biota,"Biota, Aquatic",Fish,Brosme brosme,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Cusk,139,6,1,0.9972,tail,FALSE,FALSE,,,,Fish
+G140,Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Liver,"Coastal, fjord",Not reported,mg/kg (wet),European plaice,140,6,1,0.9972,tail,FALSE,FALSE,,,,Fish
+G141,Biota,"Biota, Aquatic",Fish,Pleuronectes platessa,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),European plaice,141,6,1,0.9973,tail,FALSE,TRUE,,,,Fish
+G142,Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Gill,"River, stream, canal",Not reported,mg/kg (dry),Roach minnow,142,6,1,0.9973,tail,FALSE,TRUE,,,,Fish
+G143,Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Roach minnow,143,6,1,0.9974,tail,FALSE,FALSE,,,,Fish
+G144,Biota,"Biota, Aquatic",Invertebrates,Ctenodiscus crispatus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Common mud star,144,6,1,0.9975,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G145,Biota,"Biota, Aquatic",Molluscs,Astarte borealis,Total soft tissues,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Boreal astarte,145,6,1,0.9975,tail,FALSE,FALSE,,,,Molluscs
+G146,Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Blue mussel,146,6,1,0.9976,tail,FALSE,FALSE,,,,Molluscs
+G147,Biota,"Biota, Aquatic",Algae,Ascophyllum nodosum,Plant tissue,"Coastal, fjord",Not reported,mg/kg (wet),Egg wrack,147,5,1,0.9976,tail,FALSE,FALSE,,,,Algae and Plants
+G148,Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,148,5,1,0.9977,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G149,Biota,"Biota, Aquatic",Invertebrates,Urasterias lincki,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,149,5,1,0.9978,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G150,Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Hooded seal,150,5,1,0.9978,tail,FALSE,FALSE,,,,Birds and Mammals
+G151,Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Hooded seal,151,5,1,0.9979,tail,FALSE,FALSE,,,,Birds and Mammals
+G152,Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Kidney,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Harp seal,152,5,1,0.9979,tail,FALSE,FALSE,,,,Birds and Mammals
+G153,Biota,"Biota, Aquatic",Mammals,Phoca groenlandica,Liver,"Ocean, sea, territorial waters","Water column, pelagic zone",mg/kg (wet),Harp seal,153,5,1,0.998,tail,FALSE,FALSE,,,,Birds and Mammals
+G154,Biota,"Biota, Aquatic",Worms,Arenicola marina,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Lugworm,154,5,1,0.998,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G155,Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Other,mg/kg (wet),,155,4,1,0.9981,tail,FALSE,FALSE,,,,Aquatic Sediment
+G156,Aquatic,Brackish/Transitional Water,,,,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,156,4,1,0.9981,tail,FALSE,TRUE,,,,Marine and Brackish Water
+G157,Aquatic,Porewater,,,,"Coastal, fjord",Other,mg/kg (wet),,157,4,1,0.9981,tail,FALSE,FALSE,,,,Other Waters
+G158,Biota,"Biota, Aquatic",Crustaceans,Cancer pagurus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Edible crab,158,4,1,0.9982,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G159,Biota,"Biota, Aquatic",Fish,Brosme brosme,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Cusk,159,4,1,0.9982,tail,FALSE,FALSE,,,,Fish
+G160,Biota,"Biota, Aquatic",Fish,Labrus bergylta,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,160,4,1,0.9983,tail,FALSE,FALSE,,,,Fish
+G161,Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Muscle,"River, stream, canal",Not reported,mg/kg (wet),European chub,161,4,1,0.9983,tail,FALSE,FALSE,,,,Fish
+G162,Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Haddock,162,4,1,0.9983,tail,FALSE,FALSE,,,,Fish
+G163,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Gill,"River, stream, canal",Not reported,mg/kg (dry),European perch,163,4,1,0.9984,tail,FALSE,FALSE,,,,Fish
+G164,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Liver,"River, stream, canal",Not reported,mg/kg (wet),European perch,164,4,1,0.9984,tail,FALSE,FALSE,,,,Fish
+G165,Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus arcticus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Northern basket star,165,4,1,0.9985,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G166,Biota,"Biota, Aquatic",Invertebrates,Pontaster tenuispinus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,166,4,1,0.9985,tail,FALSE,TRUE,,,,Crustaceans and Invertebrates
+G167,Biota,"Biota, Terrestrial",Birds,Larus argentatus,Egg,"Coastal, fjord",Not reported,mg/kg (wet),Herring gull,167,4,1,0.9986,tail,FALSE,FALSE,,,,Birds and Mammals
+G168,Aquatic,Aquatic Sediment,,,,"Coastal, fjord",Not relevant,mg/kg (dry),,168,3,1,0.9986,tail,FALSE,FALSE,,,,Aquatic Sediment
+G169,Aquatic,Aquatic Sediment,,,,"Lake, pond, pool, reservoir","Water column, pelagic zone",mg/kg (dry),,169,3,1,0.9986,tail,FALSE,FALSE,,,,Aquatic Sediment
+G170,Aquatic,Freshwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,,170,3,1,0.9987,tail,FALSE,FALSE,,,,Freshwater
+G171,Biota,"Biota, Aquatic",Crustaceans,Mysis relicta,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Common Northern European opossum shrimp,171,3,1,0.9987,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G172,Biota,"Biota, Aquatic",Ecosystem,Zooplankton epilimnion,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),,172,3,1,0.9987,tail,FALSE,FALSE,,,,Unclassified Biota
+G173,Biota,"Biota, Aquatic",Fish,Centrolabrus exoletus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Rock cook,173,3,1,0.9987,tail,FALSE,FALSE,,,,Fish
+G174,Biota,"Biota, Aquatic",Fish,Esox lucius,Liver,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,174,3,1,0.9988,tail,FALSE,FALSE,,,,Fish
+G175,Biota,"Biota, Aquatic",Fish,Esox lucius,Muscle,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,175,3,1,0.9988,tail,FALSE,FALSE,,,,Fish
+G176,Biota,"Biota, Aquatic",Fish,Lamna nasus,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),American porbeagle,176,3,1,0.9988,tail,FALSE,FALSE,,,,Fish
+G177,Biota,"Biota, Aquatic",Fish,Molva molva,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ling,177,3,1,0.9989,tail,FALSE,FALSE,,,,Fish
+G178,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),European perch,178,3,1,0.9989,tail,FALSE,FALSE,,,,Fish
+G179,Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Pollack,179,3,1,0.9989,tail,FALSE,FALSE,,,,Fish
+G180,Biota,"Biota, Aquatic",Fish,Squalus acanthias,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Spiny dogfish,180,3,1,0.999,tail,FALSE,FALSE,,,,Fish
+G181,Biota,"Biota, Aquatic",Invertebrates,Insecta,Whole body,"River, stream, canal",Not reported,mg/kg (wet),Insects,181,3,1,0.999,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G182,Biota,"Biota, Aquatic",Invertebrates,Pteraster pulvillus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,182,3,1,0.999,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G183,Biota,"Biota, Aquatic",Invertebrates,Strongylocentrotus pallidus,Echinoid corona,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Pale sea urchin,183,3,1,0.9991,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G184,Biota,"Biota, Aquatic",Mammals,Orcinus orca,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Killer whale,184,3,1,0.9991,tail,FALSE,FALSE,,,,Birds and Mammals
+G185,Biota,"Biota, Aquatic",Molluscs,Nucella lapillus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Atlantic dog whelk,185,3,1,0.9991,tail,FALSE,FALSE,,,,Molluscs
+G186,Biota,"Biota, Terrestrial",Birds,Gulosus aristotelis,Egg,"Coastal, fjord",Not reported,mg/kg (wet),,186,3,1,0.9992,tail,FALSE,FALSE,,,,Birds and Mammals
+G187,Biota,"Biota, Terrestrial",Birds,Somateria mollissima,Egg,"Coastal, fjord",Not reported,mg/kg (wet),Common eider,187,3,1,0.9992,tail,FALSE,FALSE,,,,Birds and Mammals
+G188,Biota,"Biota, Terrestrial",Moss/Hornworts,Fontinalis antipyretica,Plant tissue,"River, stream, canal",Not reported,mg/kg (wet),,188,3,1,0.9992,tail,FALSE,FALSE,,,,Algae and Plants
+G189,Aquatic,Aquatic Sediment,,,,"Groundwater, aquifer","Water column, pelagic zone",mg/kg (dry),,189,2,1,0.9992,tail,FALSE,FALSE,,,,Aquatic Sediment
+G190,Aquatic,Groundwater,,,,"Drainage, sewer, artificial water",Water surface,mg/L,,190,2,1,0.9993,tail,FALSE,FALSE,,,,Other Waters
+G191,Biota,"Biota, Aquatic",Fish,Actinopterygii,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Ray-finned fishes,191,2,1,0.9993,tail,FALSE,FALSE,,,,Fish
+G192,Biota,"Biota, Aquatic",Fish,Actinopterygii,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ray-finned fishes,192,2,1,0.9993,tail,FALSE,FALSE,,,,Fish
+G193,Biota,"Biota, Aquatic",Fish,Esox lucius,Whole body,"River, stream, canal",Not reported,mg/kg (wet),Northern pike,193,2,1,0.9993,tail,FALSE,FALSE,,,,Fish
+G194,Biota,"Biota, Aquatic",Fish,Gadidae,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Cods,194,2,1,0.9993,tail,FALSE,FALSE,,,,Fish
+G195,Biota,"Biota, Aquatic",Fish,Gadidae,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Cods,195,2,1,0.9994,tail,FALSE,FALSE,,,,Fish
+G196,Biota,"Biota, Aquatic",Fish,Leuciscus idus,Gill,"River, stream, canal",Not reported,mg/kg (dry),Ide,196,2,1,0.9994,tail,FALSE,FALSE,,,,Fish
+G197,Biota,"Biota, Aquatic",Fish,Leuciscus idus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Ide,197,2,1,0.9994,tail,FALSE,FALSE,,,,Fish
+G198,Biota,"Biota, Aquatic",Fish,Perca fluviatilis,Muscle,"River, stream, canal",Not reported,mg/kg (wet),European perch,198,2,1,0.9994,tail,FALSE,FALSE,,,,Fish
+G199,Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (dry),Pollack,199,2,1,0.9994,tail,FALSE,FALSE,,,,Fish
+G200,Biota,"Biota, Aquatic",Fish,Pollachius pollachius,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Pollack,200,2,1,0.9995,tail,FALSE,FALSE,,,,Fish
+G201,Biota,"Biota, Aquatic",Invertebrates,Chironomidae,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Nonbiting midges,201,2,1,0.9995,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G202,Biota,"Biota, Aquatic",Invertebrates,Gorgonocephalus lamarckii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,202,2,1,0.9995,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G203,Biota,"Biota, Aquatic",Invertebrates,Ophiopleura borealis,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,203,2,1,0.9995,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G204,Biota,"Biota, Aquatic",Invertebrates,Ophiura sarsii,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Notched brittle star,204,2,1,0.9996,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G205,Biota,"Biota, Aquatic",Invertebrates,Pteraster obscurus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Obscure cushion star,205,2,1,0.9996,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G206,Biota,"Biota, Aquatic",Other,Bunndyr,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,206,2,1,0.9996,tail,FALSE,FALSE,,,,Unclassified Biota
+G207,Aquatic,Marine/Salt Water,,,,"Coastal, fjord",Not relevant,mg/L,,207,1,1,0.9996,tail,FALSE,FALSE,,,,Marine and Brackish Water
+G208,Biota,"Biota, Aquatic",Crustaceans,Lithodidae,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Stone and king crabs,208,1,1,0.9996,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G209,Biota,"Biota, Aquatic",Crustaceans,Nephrops norvegicus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Norway lobster,209,1,1,0.9996,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G210,Biota,"Biota, Aquatic",Crustaceans,Palaemon adspersus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),Baltic prawn,210,1,1,0.9996,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G211,Biota,"Biota, Aquatic",Fish,Esox lucius,Gill,"River, stream, canal",Not reported,mg/kg (dry),Northern pike,211,1,1,0.9996,tail,FALSE,FALSE,,,,Fish
+G212,Biota,"Biota, Aquatic",Fish,Gymnocephalus cernuus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Ruffe,212,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G213,Biota,"Biota, Aquatic",Fish,Labrus bergylta,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,213,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G214,Biota,"Biota, Aquatic",Fish,Labrus bergylta,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Ballan wrasse,214,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G215,Biota,"Biota, Aquatic",Fish,Labrus mixtus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Cuckoo wrasse,215,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G216,Biota,"Biota, Aquatic",Fish,Leuciscus cephalus,Whole body,"River, stream, canal",Not reported,mg/kg (wet),European chub,216,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G217,Biota,"Biota, Aquatic",Fish,Limanda limanda,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),Common dab,217,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G218,Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Not reported,mg/kg (wet),Haddock,218,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G219,Biota,"Biota, Aquatic",Fish,Platichthys flesus,Muscle,"Coastal, fjord",Not reported,mg/kg (wet),European flounder,219,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G220,Biota,"Biota, Aquatic",Fish,Rutilus rutilus,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Roach minnow,220,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G221,Biota,"Biota, Aquatic",Fish,Salmo trutta,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),River trout,221,1,1,0.9997,tail,FALSE,FALSE,,,,Fish
+G222,Biota,"Biota, Aquatic",Fish,Sander lucioperca,Bile,"River, stream, canal",Not reported,mg/kg (wet),Pikeperch,222,1,1,0.9998,tail,FALSE,FALSE,,,,Fish
+G223,Biota,"Biota, Aquatic",Fish,Somniosus microcephalus,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Greenland sleeper shark,223,1,1,0.9998,tail,FALSE,FALSE,,,,Fish
+G224,Biota,"Biota, Aquatic",Fish,Trisopterus minutus,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Poor cod,224,1,1,0.9998,tail,FALSE,FALSE,,,,Fish
+G225,Biota,"Biota, Aquatic",Invertebrates,Astacus astacus,Total soft tissues,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Noble crayfish,225,1,1,0.9998,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G226,Biota,"Biota, Aquatic",Invertebrates,Crossaster papposus,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Common sun star,226,1,1,0.9998,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G227,Biota,"Biota, Aquatic",Invertebrates,Hippasteria phrygiana,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),Arctic cushion star,227,1,1,0.9998,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G228,Biota,"Biota, Aquatic",Invertebrates,Icasterias panopla,Disc skeleton,"Ocean, sea, territorial waters",Water benthos,mg/kg (dry),,228,1,1,0.9998,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G229,Biota,"Biota, Aquatic",Mammals,Balaenoptera physalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Fin whale,229,1,1,0.9998,tail,FALSE,FALSE,,,,Birds and Mammals
+G230,Biota,"Biota, Aquatic",Mammals,Lagenorhynchus albirostris,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),White-beaked dolphin,230,1,1,0.9998,tail,FALSE,FALSE,,,,Birds and Mammals
+G231,Biota,"Biota, Aquatic",Mammals,Megaptera novaeangliae,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Humpback whale,231,1,1,0.9999,tail,FALSE,FALSE,,,,Birds and Mammals
+G232,Biota,"Biota, Aquatic",Mammals,Physeter macrocephalus,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Sperm whale,232,1,1,0.9999,tail,FALSE,FALSE,,,,Birds and Mammals
+G233,Biota,"Biota, Aquatic",Molluscs,Acesta excavata,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,233,1,1,0.9999,tail,FALSE,FALSE,,,,Molluscs
+G234,Biota,"Biota, Aquatic",Molluscs,Buccinum undatum,Whole body,"Coastal, fjord",Not reported,mg/kg (wet),Waved whelk,234,1,1,0.9999,tail,FALSE,FALSE,,,,Molluscs
+G235,Biota,"Biota, Aquatic",Molluscs,Erginus,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,235,1,1,0.9999,tail,FALSE,FALSE,,,,Molluscs
+G236,Biota,"Biota, Aquatic",Molluscs,Gastropoda,Whole body,"Lake, pond, pool, reservoir",Not reported,mg/kg (wet),Gastropods,236,1,1,0.9999,tail,FALSE,FALSE,,,,Molluscs
+G237,Biota,"Biota, Aquatic",Molluscs,Lepetella,Total soft tissues,"Coastal, fjord",Not reported,mg/kg (wet),,237,1,1,0.9999,tail,FALSE,FALSE,,,,Molluscs
+G238,Biota,"Biota, Aquatic",Worms,Eisenia hortensis,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),,238,1,1,0.9999,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G239,Biota,"Biota, Aquatic",Worms,Lumbricus,Total soft tissues,"River, stream, canal",Not reported,mg/kg (wet),,239,1,1,0.9999,tail,FALSE,FALSE,,,,Crustaceans and Invertebrates
+G240,Biota,"Biota, Terrestrial",Birds,Turdus pilaris,Egg,"River, stream, canal",Not reported,mg/kg (wet),,240,1,1,0.9999,tail,FALSE,FALSE,,,,Birds and Mammals
+G241,Biota,"Biota, Terrestrial",Mammals,Capreolus capreolus,Liver,"River, stream, canal",Not reported,mg/kg (wet),Western roe deer,241,1,1,1,tail,FALSE,FALSE,,,,Birds and Mammals
+G242,Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Fat/Adipose,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,242,1,1,1,tail,FALSE,FALSE,,,,Birds and Mammals
+G243,Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,243,1,1,1,tail,FALSE,FALSE,,,,Birds and Mammals
+G244,Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),Harbor porpoise,244,1,1,1,tail,FALSE,FALSE,,,,Birds and Mammals
+G245,Biota,"Biota, Terrestrial",Moss/Hornworts,Hylocomium splendens,Plant tissue,"Coastal, fjord",Not reported,mg/kg (dry),,245,1,1,1,tail,FALSE,FALSE,,,,Algae and Plants

@@ -1,0 +1,164 @@
+# Tests ----
+#
+# One property dominates: the generator must never destroy hand-written prose.
+# Its predecessor was deleted in PLAN.md P0.2 along with fourteen notebooks, and
+# the lesson in CLAUDE.md is that prose in generated files is reproducible from
+# nowhere else.
+
+nb_decisions <- function(notebooks = c("Fish", "Fish", "Molluscs"),
+                         ids = c("G001", "G002", "G003"),
+                         n = c(900, 60, 30)) {
+  data.frame(
+    group_id = ids,
+    ENVIRON_COMPARTMENT = "Biota",
+    ENVIRON_COMPARTMENT_SUB = "Biota, Aquatic",
+    SPECIES_GROUP = "Fish",
+    SAMPLE_SPECIES = paste("Species", seq_along(ids)),
+    SAMPLE_TISSUE = "Liver",
+    SITE_GEOGRAPHIC_FEATURE = "Coastal, fjord",
+    SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported",
+    MEASURED_UNIT_STANDARD = "mg/kg (wet)",
+    n = n,
+    n_rows = n,
+    n_sources = 2L,
+    species_common_name = NA_character_,
+    flag_multimodal = FALSE,
+    flag_outliers = FALSE,
+    notebook = notebooks
+  )
+}
+
+nb_groups <- function(ids = "G001", slugs = "some_slug") {
+  data.frame(group_id = ids, group_slug = slugs)
+}
+
+test_that("slugs are filesystem-safe and lower case", {
+  expect_equal(notebook_slug("Crustaceans and Invertebrates"), "crustaceans-and-invertebrates")
+  expect_equal(notebook_slug("Marine and Brackish Water"), "marine-and-brackish-water")
+  expect_false(grepl("[^a-z0-9-]", notebook_slug("Algae and Plants")))
+})
+
+test_that("one file is created per notebook", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+
+  expect_true(file.exists(file.path(dir, "fish.qmd")))
+  expect_true(file.exists(file.path(dir, "molluscs.qmd")))
+  expect_length(list.files(dir, pattern = "\\.qmd$"), 2)
+})
+
+test_that("every group gets a section, anchored on its id", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+
+  expect_setequal(existing_group_sections(file.path(dir, "fish.qmd")), c("G001", "G002"))
+  expect_equal(existing_group_sections(file.path(dir, "molluscs.qmd")), "G003")
+})
+
+test_that("re-running changes nothing at all", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  before <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  again <- generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  after <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  expect_identical(before, after)
+  expect_equal(sum(again$appended), 0)
+  expect_false(any(again$created))
+})
+
+test_that("hand-written prose survives regeneration", {
+  # THE property. If this fails, an afternoon of judgement is gone and there is
+  # nowhere to recover it from.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  path <- file.path(dir, "fish.qmd")
+
+  edited <- readLines(path, warn = FALSE)
+  edited <- sub(
+    "\\*\\*Verdict:\\*\\* \\*\\(unwritten\\)\\*",
+    "**Verdict:** lump with G002, same fishery, different reporting year.",
+    edited
+  )
+  edited <- c(edited, "", "A trailing thought I added by hand.")
+  writeLines(edited, path)
+
+  # A new group appears, forcing an append.
+  grown <- nb_decisions(
+    notebooks = c("Fish", "Fish", "Molluscs", "Fish"),
+    ids = c("G001", "G002", "G003", "G004"),
+    n = c(900, 60, 30, 15)
+  )
+  generate_group_notebooks(grown, nb_groups(), dir = dir, verbose = FALSE)
+  after <- readLines(path, warn = FALSE)
+
+  expect_true(any(grepl("same fishery, different reporting year", after)))
+  expect_true(any(grepl("A trailing thought I added by hand", after)))
+  expect_true("G004" %in% existing_group_sections(path))
+  # Nothing removed: every original line is still present.
+  expect_true(all(edited %in% after))
+})
+
+test_that("a renamed heading does not cause a duplicate section", {
+  # Sections are detected by anchor, not by heading text, so Sam can retitle a
+  # heading freely.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  path <- file.path(dir, "fish.qmd")
+
+  edited <- readLines(path, warn = FALSE)
+  edited <- sub("^## G001 .*\\{#grp-G001\\}$", "## My own title {#grp-G001}", edited)
+  writeLines(edited, path)
+
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  after <- readLines(path, warn = FALSE)
+  expect_equal(sum(grepl("\\{#grp-G001\\}", after)), 1)
+  expect_true(any(grepl("My own title", after)))
+})
+
+test_that("groups with panels link them and groups without say so", {
+  dir <- withr::local_tempdir()
+  # G001 has a slug, G002 does not.
+  generate_group_notebooks(nb_decisions(), nb_groups("G001", "my_slug"), dir = dir, verbose = FALSE)
+  txt <- paste(readLines(file.path(dir, "fish.qmd"), warn = FALSE), collapse = "\n")
+
+  expect_true(grepl("my_slug_a_density.png", txt, fixed = TRUE))
+  expect_true(grepl("No triage panels", txt, fixed = TRUE))
+  # The remedy is named, with the id to add.
+  expect_true(grepl("must_include", txt, fixed = TRUE))
+})
+
+test_that("the glance table lists every group and links to its section", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  txt <- paste(readLines(file.path(dir, "fish.qmd"), warn = FALSE), collapse = "\n")
+
+  expect_true(grepl("[G001](#grp-G001)", txt, fixed = TRUE))
+  expect_true(grepl("[G002](#grp-G002)", txt, fixed = TRUE))
+  expect_true(grepl("# Comparison", txt, fixed = TRUE))
+})
+
+test_that("groups are ordered by n descending within a notebook", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(notebooks = rep("Fish", 3), n = c(30, 900, 60)),
+    nb_groups(), dir = dir, verbose = FALSE
+  )
+  expect_equal(
+    existing_group_sections(file.path(dir, "fish.qmd")),
+    c("G002", "G003", "G001")
+  )
+})
+
+test_that("unassigned groups are skipped rather than making a blank notebook", {
+  dir <- withr::local_tempdir()
+  d <- nb_decisions()
+  d$notebook[3] <- ""
+  generate_group_notebooks(d, nb_groups(), dir = dir, verbose = FALSE)
+  expect_length(list.files(dir, pattern = "\\.qmd$"), 1)
+})
+
+test_that("existing_group_sections copes with an absent file", {
+  expect_length(existing_group_sections(tempfile(fileext = ".qmd")), 0)
+})

@@ -270,28 +270,50 @@ test_that("a node with one level writes one panel", {
   expect_true(file.exists(paths))
 })
 
-test_that("the concentration axis carries a minor break at every decade", {
-  # The point of the change: majors stay sparse (1e-4, 1e0, 1e4) and every
-  # intervening power of ten gets an unlabelled gridline.
+test_that("every decade on the concentration axis is LABELLED", {
+  # Changed 2026-08-04 on Sam's instruction: "I can't reliably read the
+  # concentration from a)". Powers of ten used to be unlabelled MINOR breaks, so
+  # the axis had a gridline per decade and a number against almost none of them,
+  # because ggplot2's default log breaks label only two or three points across a
+  # span this wide. They are now major breaks, and therefore labelled.
   p <- triage_plot_by_category(
     overview_rows(n = 60),
     "SITE_GEOGRAPHIC_FEATURE",
-    "f) test",
+    "test",
     limits = c(1e-5, 1e5)
   )
   params <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]
-  expect_equal(length(params$x$break_positions_minor()), 11)
-  el <- ggplot2::calc_element("panel.grid.minor.x", p$theme)
-  expect_false(inherits(el, "element_blank"))
+  labels <- params$x$get_labels()
+  labels <- labels[!is.na(labels)]
+
+  # 1e-05 through 1e+05 inclusive.
+  expect_equal(length(labels), 11)
+  expect_true(all(grepl("^1e[+-][0-9]+$", labels)))
+  expect_true("1e+00" %in% labels)
+  expect_true("1e-05" %in% labels)
 })
 
-test_that("the minor grid is enabled only on the concentration axis", {
-  # A minor grid on the category or date axis is clutter, and triage_theme()
-  # blanks both directions precisely so this stays deliberate.
+test_that("the concentration axis has no minor breaks left to draw", {
+  # The 1:9-per-decade grid is ~96 lines across a 12-decade axis and fights the
+  # threshold lines and the class axis. Promoting the decades to major breaks is
+  # what made the axis readable; adding a second tier back would undo it.
   p <- triage_plot_by_category(
     overview_rows(n = 60),
     "SITE_GEOGRAPHIC_FEATURE",
-    "f) test"
+    "test",
+    limits = c(1e-5, 1e5)
+  )
+  params <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]
+  expect_length(params$x$break_positions_minor(), 0)
+})
+
+test_that("no minor grid is drawn on the category axis", {
+  # A minor grid on a discrete axis is clutter, and triage_theme() blanks both
+  # directions precisely so any exception stays deliberate.
+  p <- triage_plot_by_category(
+    overview_rows(n = 60),
+    "SITE_GEOGRAPHIC_FEATURE",
+    "test"
   )
   expect_true(
     inherits(ggplot2::calc_element("panel.grid.minor.y", p$theme), "element_blank")

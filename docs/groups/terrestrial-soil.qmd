@@ -1,0 +1,44 @@
+---
+title: "Terrestrial Soil"
+---
+
+Working document for the **Terrestrial Soil** grouping: 2 groups, 40 measurements.
+
+Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
+
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+
+# Groups at a glance
+
+| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [G075](#grp-G075) | Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) | `mg/kg (dry)` | 24 |  100 |  100 | 63.8 | 4.23 | 1 |  |
+| [G101](#grp-G101) | Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 16 |  105 |  105 |  105 |  | 1 |  |
+
+: Groups in the Terrestrial Soil notebook. {#tbl-glance}
+
+# Comparison
+
+*(Notes on how these groups relate: what should be lumped, split, or
+dropped, and why. This is the question the document exists to answer.)*
+
+# Groups
+
+
+## G075 Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) {#grp-G075}
+
+`G075` `n` = 24 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G075` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+
+
+## G101 Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G101}
+
+`G101` `n` = 16 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G101` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+**Verdict:** *(unwritten)*
+

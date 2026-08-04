@@ -4,6 +4,15 @@
 # a decision, because that is what makes the file safe to regenerate when new data
 # arrives.
 
+# A ledger matching the fixture, so the scaffold does not warn about missing IDs.
+# Built from the same keys rather than hard-coded, so it stays in step.
+decision_ids <- function(species = LETTERS[1:4]) {
+  ledger <- decision_summary(n = rep(1, length(species)), species = species)
+  ledger <- ledger[triage_group_cols()]
+  ledger$group_id <- format_group_id(seq_along(species))
+  ledger
+}
+
 decision_summary <- function(n = c(900, 60, 30, 10), species = LETTERS[1:4]) {
   data.frame(
     ENVIRON_COMPARTMENT = "Biota",
@@ -45,7 +54,7 @@ test_that("coverage columns sort by n descending regardless of input order", {
 
 test_that("scaffolding a fresh file leaves every group undecided", {
   path <- tempfile(fileext = ".csv")
-  out <- scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  out <- scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
 
   expect_true(file.exists(path))
   expect_equal(nrow(out), 4)
@@ -57,38 +66,38 @@ test_that("re-scaffolding never destroys a decision", {
   # THE property. A scaffold that clobbered decisions would make the file unsafe
   # to regenerate, which makes it unsafe to add new data.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
 
   edited <- readr::read_csv(path, show_col_types = FALSE)
-  edited$decision[edited$SAMPLE_SPECIES == "A"] <- "own_notebook"
+  edited$decision[edited$SAMPLE_SPECIES == "A"] <- "keep"
   edited$notes[edited$SAMPLE_SPECIES == "A"] <- "carries most of the data"
   edited$decision[edited$SAMPLE_SPECIES == "B"] <- "lump"
-  edited$lump_into[edited$SAMPLE_SPECIES == "B"] <- "A"
+  edited$lump_into[edited$SAMPLE_SPECIES == "B"] <- "G001"
   readr::write_csv(edited, path, na = "")
 
-  again <- scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
-  expect_equal(again$decision[again$SAMPLE_SPECIES == "A"], "own_notebook")
+  again <- scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
+  expect_equal(again$decision[again$SAMPLE_SPECIES == "A"], "keep")
   expect_equal(again$notes[again$SAMPLE_SPECIES == "A"], "carries most of the data")
-  expect_equal(again$lump_into[again$SAMPLE_SPECIES == "B"], "A")
+  expect_equal(again$lump_into[again$SAMPLE_SPECIES == "B"], "G001")
 })
 
 test_that("machine context refreshes while decisions persist", {
   # n changes as data is added; that must flow through. The decision must not.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
-  edited$decision[edited$SAMPLE_SPECIES == "A"] <- "own_notebook"
+  edited$decision[edited$SAMPLE_SPECIES == "A"] <- "keep"
   readr::write_csv(edited, path, na = "")
 
   grown <- decision_summary(n = c(5000, 60, 30, 10))
-  again <- scaffold_group_decisions(grown, path, verbose = FALSE)
+  again <- scaffold_group_decisions(grown, path, ids = decision_ids(), verbose = FALSE)
   expect_equal(again$n[again$SAMPLE_SPECIES == "A"], 5000)
-  expect_equal(again$decision[again$SAMPLE_SPECIES == "A"], "own_notebook")
+  expect_equal(again$decision[again$SAMPLE_SPECIES == "A"], "keep")
 })
 
 test_that("new groups are appended as undecided", {
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
   edited$decision <- "drop"
   readr::write_csv(edited, path, na = "")
@@ -97,7 +106,7 @@ test_that("new groups are appended as undecided", {
     n = c(900, 60, 30, 10, 500),
     species = c(LETTERS[1:4], "E")
   )
-  again <- scaffold_group_decisions(wider, path, verbose = FALSE)
+  again <- scaffold_group_decisions(wider, path, ids = decision_ids(c(LETTERS[1:4], "E")), verbose = FALSE)
   expect_equal(nrow(again), 5)
   expect_equal(again$decision[again$SAMPLE_SPECIES == "E"], "")
   expect_true(all(again$decision[again$SAMPLE_SPECIES != "E"] == "drop"))
@@ -107,14 +116,14 @@ test_that("losing a decided group warns rather than passing silently", {
   # A group vanishing usually means an upstream key changed: a species rename or a
   # unit fix. The decision attached to it is still worth re-reading.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
-  edited$decision[edited$SAMPLE_SPECIES == "D"] <- "own_notebook"
+  edited$decision[edited$SAMPLE_SPECIES == "D"] <- "keep"
   readr::write_csv(edited, path, na = "")
 
   shrunk <- decision_summary(n = c(900, 60, 30), species = LETTERS[1:3])
   expect_warning(
-    scaffold_group_decisions(shrunk, path, verbose = FALSE),
+    scaffold_group_decisions(shrunk, path, ids = decision_ids(), verbose = FALSE),
     "no longer exist"
   )
 })
@@ -122,9 +131,9 @@ test_that("losing a decided group warns rather than passing silently", {
 test_that("losing an UNdecided group does not warn", {
   # Groups come and go as filters change; only lost judgement is worth a warning.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   shrunk <- decision_summary(n = c(900, 60, 30), species = LETTERS[1:3])
-  expect_no_warning(scaffold_group_decisions(shrunk, path, verbose = FALSE))
+  expect_no_warning(scaffold_group_decisions(shrunk, path, ids = decision_ids(), verbose = FALSE))
 })
 
 # ---- Reading and validating --------------------------------------------
@@ -133,7 +142,7 @@ test_that("read_group_decisions rejects an unrecognised decision", {
   # The file is hand-edited, so a typo must fail here rather than silently produce
   # an empty group downstream.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
   edited$decision[1] <- "own_notebok"
   readr::write_csv(edited, path, na = "")
@@ -143,10 +152,10 @@ test_that("read_group_decisions rejects an unrecognised decision", {
 
 test_that("read_group_decisions accepts every permitted value plus blank", {
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
   edited$decision <- group_decision_levels()
-  edited$lump_into[edited$decision == "lump"] <- "A"
+  edited$lump_into[edited$decision == "lump"] <- "G001"
   readr::write_csv(edited, path, na = "")
 
   expect_no_error(read_group_decisions(path))
@@ -154,7 +163,7 @@ test_that("read_group_decisions accepts every permitted value plus blank", {
 
 test_that("a lump with no target warns", {
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
   edited$decision[1] <- "lump"
   readr::write_csv(edited, path, na = "")
@@ -165,7 +174,7 @@ test_that("a lump with no target warns", {
 test_that("read_group_decisions reports groups missing from the file", {
   # This is how a stale decisions file is caught after new data arrives.
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   wider <- decision_summary(
     n = c(900, 60, 30, 10, 500),
     species = c(LETTERS[1:4], "E")
@@ -182,7 +191,7 @@ test_that("a missing file errors with the fix in the message", {
 
 test_that("a decisions file missing a human column errors", {
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   readr::read_csv(path, show_col_types = FALSE) |>
     dplyr::select(-"notes") |>
     readr::write_csv(path, na = "")
@@ -193,9 +202,9 @@ test_that("a decisions file missing a human column errors", {
 
 test_that("progress counts decided and undecided per tier", {
   path <- tempfile(fileext = ".csv")
-  scaffold_group_decisions(decision_summary(), path, verbose = FALSE)
+  scaffold_group_decisions(decision_summary(), path, ids = decision_ids(), verbose = FALSE)
   edited <- readr::read_csv(path, show_col_types = FALSE)
-  edited$decision[edited$tier == "top90"] <- "own_notebook"
+  edited$decision[edited$tier == "top90"] <- "keep"
   readr::write_csv(edited, path, na = "")
 
   progress <- group_decision_progress(read_group_decisions(path))

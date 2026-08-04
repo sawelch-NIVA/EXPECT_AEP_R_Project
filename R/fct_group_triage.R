@@ -40,6 +40,13 @@ triage_group_cols <- function() {
 #' @param min_n Minimum `n` (measurements) for a group to be considered.
 #' @param n_sample Number of groups to sample. `Inf` takes all of them.
 #' @param seed Random seed, so the pilot selection is reproducible.
+#' @param ids The `group_ids` ledger, attached so each group carries its stable
+#'   id into the notebook headings. `NULL` skips it.
+#' @param must_include Group ids to include whatever their size, and whatever the
+#'   sampling does. For groups that matter for a reason unrelated to `n`: the two
+#'   algae groups sit at 70 and 68 measurements, and no `min_n` reaches them
+#'   without admitting seven unrelated groups as well. Unknown ids are an error,
+#'   not a silent omission.
 #' @return A tibble of group-defining columns plus `n`, `n_sources` (distinct
 #'   REFERENCE_ID), `n_rows`, a filesystem-safe `group_slug`, a heading-anchor
 #'   `heading_slug` shared by every unit variant of the same group, and
@@ -51,9 +58,29 @@ sample_triage_groups <- function(
   data,
   min_n = 100,
   n_sample = 5,
-  seed = 20260729
+  seed = 20260729,
+  ids = NULL,
+  must_include = character(0)
 ) {
   group_cols <- triage_group_cols()
+  # Attached before filtering so the id travels with the group into the notebook
+  # headings. NULL is allowed so the tests can build groups without a ledger.
+  if (!is.null(ids)) {
+    summary_data <- attach_group_ids(summary_data, ids)
+  }
+
+  if (length(must_include) > 0 && !"group_id" %in% names(summary_data)) {
+    stop("must_include needs group ids; pass `ids` as well.")
+  }
+  # A must_include id that matches nothing is a typo, and a silent one would leave
+  # a group Sam explicitly asked for quietly missing from the contact sheet.
+  unknown <- setdiff(must_include, summary_data$group_id)
+  if (length(unknown) > 0) {
+    stop(
+      "must_include names unknown group id(s): ",
+      paste(sQuote(unknown), collapse = ", ")
+    )
+  }
 
   # n_rows and the reference list come from the same pass over `data`.
   #
@@ -74,8 +101,18 @@ sample_triage_groups <- function(
       .groups = "drop"
     )
 
+  # Two independent routes in: big enough, or named explicitly. `must_include`
+  # exists because "this group matters for a reason unrelated to its size" is a
+  # judgement, and encoding it as a threshold catches bystanders. Concretely: the
+  # two algae groups sit at n = 70 and n = 68, and no cutoff reaches them without
+  # also admitting seven unrelated groups, because eight others are interleaved
+  # between 68 and 99.
+  #
+  # Named by group id rather than by key, which is the whole point of the ids
+  # existing (R/fct_group_ids.R).
+  forced <- summary_data$group_id %in% must_include
   eligible <- summary_data |>
-    dplyr::filter(.data$n >= min_n) |>
+    dplyr::filter(.data$n >= min_n | forced) |>
     dplyr::select(
       dplyr::all_of(group_cols),
       "n",
@@ -85,6 +122,7 @@ sample_triage_groups <- function(
       # rather than all_of(): sample_triage_groups() is also called in tests with
       # a bare summary fixture that has none of these.
       dplyr::any_of(c(
+        "group_id",
         "species_common_name",
         "n_units",
         "dip_p",
@@ -97,13 +135,28 @@ sample_triage_groups <- function(
     ) |>
     dplyr::left_join(row_counts, by = group_cols)
 
+  # Sampling applies only to the size-eligible groups. A named group is named
+  # because it is wanted, so it must not be able to lose a coin toss; without this
+  # split, `must_include` would be silently advisory whenever n_sample is finite.
+  if ("group_id" %in% names(eligible)) {
+    kept <- eligible[eligible$group_id %in% must_include, , drop = FALSE]
+    poolable <- eligible[!eligible$group_id %in% must_include, , drop = FALSE]
+  } else {
+    kept <- eligible[0, , drop = FALSE]
+    poolable <- eligible
+  }
+
   withr::with_seed(seed, {
-    picked <- if (is.infinite(n_sample) || n_sample >= nrow(eligible)) {
-      eligible
+    room <- n_sample - nrow(kept)
+    sampled <- if (is.infinite(n_sample) || room >= nrow(poolable)) {
+      poolable
+    } else if (room <= 0) {
+      poolable[0, , drop = FALSE]
     } else {
-      dplyr::slice_sample(eligible, n = n_sample)
+      dplyr::slice_sample(poolable, n = room)
     }
   })
+  picked <- dplyr::bind_rows(kept, sampled)
 
   picked |>
     dplyr::mutate(
@@ -595,6 +648,84 @@ triage_sec_axis_theme <- function(position = c("top", "right")) {
   }
 }
 
+#' Log Value Axis, Labelled at Every Power of Ten
+#'
+#' A shared replacement for bare `scale_x_log10()` / `scale_y_log10()` on the
+#' triage panels, so every value axis is read the same way.
+#'
+#' Every power of ten gets a label and a major gridline; the 2 to 9 subdivisions
+#' get minor ticks. Sam's requirement: it was impossible to read a concentration
+#' off the panels, because ggplot2's default log breaks label only two or three
+#' points across an axis this wide.
+#'
+#' **Known limitation.** The Aquatic value axis spans 12.6 orders of magnitude
+#' (9.3e-08 to 405,000), so this puts 13 labels on it. At full size, which is what
+#' the lightbox shows, that reads fine. In a `layout-ncol=5` grid each panel is
+#' about a fifth of page width and the labels will be dense. That span is a
+#' consequence of sharing limits per compartment (P1.1d) so panels are comparable,
+#' and comparability was the more valuable property. Drop the grid to 3 across if
+#' the thumbnails need to be readable too.
+#'
+#' @param limits Shared value-axis limits, or `NULL`.
+#' @param axis `"x"` or `"y"`.
+#' @return A ggplot2 scale.
+#' @export
+triage_value_scale <- function(limits = NULL, axis = c("x", "y"), ...) {
+  axis <- match.arg(axis)
+  scale_fn <- if (axis == "x") ggplot2::scale_x_log10 else ggplot2::scale_y_log10
+
+  scale_fn(
+    limits = limits,
+    # Powers of ten are now MAJOR breaks, so they are labelled. They used to be
+    # minor breaks (triage_log_minor_breaks()), which drew a gridline at each
+    # power but no number against it, and left the axis unreadable: ggplot2's
+    # default log breaks label only two or three points across a span this wide.
+    #
+    # A fixed vector rather than a function of the limits, for the reason given
+    # at triage_log_minor_breaks(): ggplot2 silently drops breaks outside the
+    # range, so this needs no knowledge of the limits and avoids the
+    # data-space-versus-transformed-space ambiguity in break functions.
+    breaks = triage_log_minor_breaks(),
+    # No minor breaks on the value axis. The 1:9-per-decade grid is ~96 lines
+    # across a 12-decade axis and fights the threshold lines and the secondary
+    # class axis, which is the judgement already recorded at
+    # triage_log_minor_breaks(). Promoting the powers of ten to major breaks is
+    # what makes the axis readable; adding a second tier back would undo it.
+    minor_breaks = NULL,
+    # "1e-07" rather than 10^-7, per Sam's phrasing, and it stays legible when
+    # the labels are dense.
+    #
+    # The NA guard is load-bearing. `breaks` is a fixed vector spanning far more
+    # range than any real axis, so ggplot2 hands the labeller an NA for every
+    # break outside the limits. formatC() renders those as the literal string
+    # "NA", which ggplot2 then draws: without this, an axis limited to 1e-3..1e3
+    # came back with seven real labels and eighteen reading "NA".
+    labels = function(x) {
+      ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
+    },
+    ...
+  )
+}
+
+#' Date Axis with a Tick and Gridline per Year
+#'
+#' Major break and label every five years, minor break every year, minor ticks
+#' drawn. The sampling window is 1988 to 2025, so that is 8 labels and 38 minor
+#' divisions, which is comfortable.
+#'
+#' @param limits Global date limits from [triage_date_limits()].
+#' @return A ggplot2 scale.
+#' @export
+triage_date_scale <- function(limits = NULL) {
+  ggplot2::scale_x_date(
+    limits = limits,
+    date_breaks = "5 years",
+    date_minor_breaks = "1 year",
+    date_labels = "%Y",
+    guide = ggplot2::guide_axis(minor.ticks = TRUE)
+  )
+}
+
 #' Shared Theme for the Triage Panels
 #'
 #' `theme_minimal()` plus the tweaks every panel wants. One function so the look
@@ -766,9 +897,9 @@ triage_plot_density <- function(
 
   p +
     triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
-    ggplot2::scale_x_log10(
+    triage_value_scale(
       limits = limits,
-      minor_breaks = triage_log_minor_breaks(),
+      axis = "x",
       sec.axis = triage_threshold_sec_axis(thr, limits = limits)
     ) +
     ggplot2::labs(
@@ -781,7 +912,9 @@ triage_plot_density <- function(
     ) +
     ggplot2::coord_cartesian(clip = "off") +
     triage_theme() +
-    triage_minor_grid_theme("x") +
+    # No triage_minor_grid_theme() here any more: powers of ten are major breaks
+    # now, so the value axis has no minor breaks and there is nothing for it to
+    # style.
     triage_sec_axis_theme("top") +
     ggplot2::theme(legend.position = "bottom")
 }
@@ -886,11 +1019,8 @@ triage_plot_by_date <- function(
       orientation = "horizontal",
       limits = limits
     ) +
-    ggplot2::scale_x_date(limits = date_limits) +
-    ggplot2::scale_y_log10(
-      limits = limits,
-      minor_breaks = triage_log_minor_breaks()
-    ) +
+    triage_date_scale(limits = date_limits) +
+    triage_value_scale(limits = limits, axis = "y") +
     ggplot2::labs(
       x = "Sampling date",
       y = triage_unit_label(data),
@@ -898,7 +1028,12 @@ triage_plot_by_date <- function(
       subtitle = label
     ) +
     triage_theme() +
-    triage_minor_grid_theme("y")
+    # "x", not "y". The minor breaks moved: the value axis (y here) now labels
+    # every power of ten as a MAJOR break and has no minor breaks at all, while
+    # the date axis (x) gained a minor break per year. Left on "y" this would
+    # have styled a grid with nothing to draw and silently dropped the yearly
+    # lines Sam asked for.
+    triage_minor_grid_theme("x")
 }
 
 #' Triage Plot: Distribution by a Categorical Facet
@@ -1013,9 +1148,9 @@ triage_plot_by_category <- function(
 
   p +
     triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
-    ggplot2::scale_x_log10(
+    triage_value_scale(
       limits = limits,
-      minor_breaks = triage_log_minor_breaks(),
+      axis = "x",
       sec.axis = triage_threshold_sec_axis(thr, limits = limits)
     ) +
     # Additive 0.5 makes the outermost bands sit flush with the panel edge. The
@@ -1029,7 +1164,9 @@ triage_plot_by_category <- function(
       subtitle = label
     ) +
     triage_theme() +
-    triage_minor_grid_theme("x") +
+    # No triage_minor_grid_theme() here any more: powers of ten are major breaks
+    # now, so the value axis has no minor breaks and there is nothing for it to
+    # style.
     triage_sec_axis_theme("top") +
     ggplot2::theme(
       axis.text.y = ggplot2::element_text(
