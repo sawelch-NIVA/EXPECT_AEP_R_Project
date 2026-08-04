@@ -69,10 +69,11 @@ G001: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone /
 
 **Verdict:**
 
- 1. Investigate Mine Impact
+1.  Investigate Mine Impact
 
 2.  Lump *Water surface* and *Other into Water column, pelagic zone*
-3.  Finer spatial resolution
+
+3.  Investigate high-value hex- does it correspond to a specific campaign?
 
 ## G003 Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L {#grp-G003}
 
