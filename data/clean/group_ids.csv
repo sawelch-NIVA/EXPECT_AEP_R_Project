@@ -244,3 +244,9 @@ Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Fat/Adipose,"Ocean, sea, te
 Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Liver,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G243
 Biota,"Biota, Terrestrial",Mammals,Phocoena phocoena,Muscle,"Ocean, sea, territorial waters",Not reported,mg/kg (wet),G244
 Biota,"Biota, Terrestrial",Moss/Hornworts,Hylocomium splendens,Plant tissue,"Coastal, fjord",Not reported,mg/kg (dry),G245
+Biota,"Biota, Aquatic",Mammals,Pagophilus groenlandicus,Kidney,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G246
+Biota,"Biota, Aquatic",Mammals,Pagophilus groenlandicus,Liver,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G247
+Biota,"Biota, Aquatic",Mammals,Pagophilus groenlandicus,Muscle,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G248
+Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Kidney,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G249
+Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Liver,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G250
+Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Muscle,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G251

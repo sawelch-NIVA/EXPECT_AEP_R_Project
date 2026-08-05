@@ -299,6 +299,75 @@ test_that("axis labels use the numeral, or the type where there is no class", {
   proref <- labels[thr$THRESHOLD_TYPE == "PROREF"]
   expect_true(all(proref == "PROREF"))
   expect_true(all(labels[thr$THRESHOLD_TYPE == "BAC"] == "BAC"))
+
+  # CHANGED 2026-08-05: a boundary is named for the class it OPENS, not the one
+  # it closes, so the sediment ladder reads II / IV / V up its three finite
+  # boundaries (20, 84, 147). Class I has no line, its lower bound being zero.
+  # The fourth row is open-ended Class V itself: it has no successor and no line,
+  # so it labels NA rather than falling back to its threshold type.
   sed <- thr$ENVIRON_COMPARTMENT_SUB %in% "Aquatic Sediment"
-  expect_equal(labels[sed], c("I", "II", "IV", "V"))
+  expect_equal(labels[sed], c("II", "IV", "V", NA_character_))
+})
+
+test_that("a boundary opens the next class PRESENT, skipping the absent III", {
+  # M-608 defines no Class III for copper. Deriving the successor by adding one
+  # to the numeral would invent a boundary the source does not have, so it is
+  # taken from the next row in the ladder instead.
+  thr <- standardise_threshold_units(generate_copper_thresholds())
+  sed <- thr[thr$ENVIRON_COMPARTMENT_SUB %in% "Aquatic Sediment", ]
+  expect_equal(sed$THRESHOLD_CLASS[2], "Good (II)")
+  expect_equal(sed$THRESHOLD_OPENS_CLASS[2], "IV")
+})
+
+test_that("ladders are not pooled across compartments sharing a reference", {
+  # Freshwater and sediment are both M-608|2016 and both run I to V. A ladder key
+  # omitting the compartment would interleave 0.3 ug/L with 20 mg/kg and shift
+  # the labels onto the wrong lines.
+  thr <- standardise_threshold_units(generate_copper_thresholds())
+  # Classification boundaries only. Freshwater also carries the EU bioavailable
+  # EQS, which has no class and so is not part of any ladder.
+  classes <- thr[thr$THRESHOLD_TYPE == "Classification boundary", ]
+  fresh <- classes[classes$ENVIRON_COMPARTMENT_SUB %in% "Freshwater", ]
+  sed <- classes[classes$ENVIRON_COMPARTMENT_SUB %in% "Aquatic Sediment", ]
+  expect_equal(fresh$THRESHOLD_OPENS_CLASS, c("II", "IV", "V", NA_character_))
+  expect_equal(sed$THRESHOLD_OPENS_CLASS, c("II", "IV", "V", NA_character_))
+  # And the EQS, being classless, stays out of the ladder entirely.
+  eqs <- thr[thr$THRESHOLD_TYPE == "EQS", ]
+  expect_true(all(is.na(eqs$THRESHOLD_OPENS_CLASS)))
+})
+
+test_that("coastal carries an open-ended Class V so its top line is named", {
+  # Added 2026-08-05. Without a Class V row the 5.2 ug/L line had no successor to
+  # take its name from and drew unlabelled.
+  thr <- generate_copper_thresholds()
+  grp <- tibble::tibble(
+    ENVIRON_COMPARTMENT = "Aquatic",
+    ENVIRON_COMPARTMENT_SUB = "Marine/Salt Water",
+    SPECIES_GROUP = NA_character_,
+    SAMPLE_SPECIES = NA_character_,
+    SAMPLE_TISSUE = NA_character_,
+    MEASURED_UNIT_STANDARD = "mg/L"
+  )
+  m <- thresholds_for_group(thr, grp)
+  expect_equal(threshold_axis_label(m), c("II", "IV", "V"))
+  # The open-ended row itself never plots.
+  expect_equal(nrow(m), 3)
+})
+
+test_that("boundary styling keys on the class opened, so the top line is worst", {
+  thr <- generate_copper_thresholds()
+  grp <- tibble::tibble(
+    ENVIRON_COMPARTMENT = "Aquatic",
+    ENVIRON_COMPARTMENT_SUB = "Aquatic Sediment",
+    SPECIES_GROUP = NA_character_,
+    SAMPLE_SPECIES = NA_character_,
+    SAMPLE_TISSUE = NA_character_,
+    MEASURED_UNIT_STANDARD = "mg/kg (dry)"
+  )
+  m <- thresholds_for_group(thr, grp)
+  cls <- as.character(threshold_boundary_class_number(m))
+  expect_equal(cls, c("II", "IV", "V"))
+  # Highest boundary draws in the Very Poor colour and solid, not Poor-orange.
+  expect_equal(unname(threshold_class_colours()[cls[3]]), "#B04A4A")
+  expect_equal(unname(threshold_class_linetypes()[cls[3]]), "solid")
 })

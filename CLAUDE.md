@@ -353,6 +353,57 @@ Learned the hard way (see `PLAN.md` section 1 for the full post-mortem):
 - The plots at the top of `docs/NBXX-Distributions-Aquatic-Sediment.qmd` are the
   reference implementation and follow these rules already.
 
+### 4.4.-2 Two data traps, learned 2026-08-05
+
+Both cost a day between them. Both are cheap to check and expensive to miss.
+
+**Never write a micro sign you do not have to.** `µ` reaches this project as at
+least four things: `U+03BC` (Greek mu), `U+00B5` (micro sign), plain `u`, and
+`U+FFFD` (a micro sign already destroyed by an encoding round-trip). CSV plus
+Windows plus Excel will mangle it eventually, and the failure is silent: an
+unmatched unit becomes `NA`, the row is dropped, and a whole reference can vanish
+without a message. 18 rows of `2000JulshamnTraceElementLevels` were lost this way
+for months.
+
+Prefer `ug` in anything hand-entered. Where a micro sign is unavoidable,
+`normalise_unit_string()` maps every variant onto `u` before matching, and
+`standardise_measured_units()` warns rather than dropping silently. Do not add a
+new unit-matching regex that assumes one spelling.
+
+**A foothill three orders of magnitude off the main mode is a unit error until
+proven otherwise.** Sam's own note on the sediment distribution ("many samples at
+extremely high concentrations, which suggests unit errors") was right, and the
+same reasoning finds the low tail. Copper in a given matrix spans maybe two to
+three orders in reality; anything sitting a clean 10^3 away from the mode is
+almost always mg/kg against ug/kg, or ug/g against ug/kg. Check the unit before
+reaching for a statistical explanation. Two separate 1000x faults were found this
+way, one in the extraction and one in the pipeline (`PLAN.md` section 9b).
+
+### 4.4.-1 Sample size means `MEASURED_N` (rule set 2026-08-05)
+
+Project-wide, and it is a rule because breaking it is invisible rather than
+noisy:
+
+- **Anywhere a sample size is reported, it is `sum(MEASURED_N)`**, a count of
+  measurements.
+- **Anywhere rows are counted, the label says so** ("n rows", "Rows").
+
+A Vannmiljø row carries one measurement; a literature row can report an
+aggregate of fifty. So the two counts diverge by whatever mix of sources a group
+happens to have, and a figure reporting one next to a heading reporting the other
+looks like a bug in the data rather than a difference in definition. That is
+exactly what happened on the fish overview, where a heading said 2,374 and the
+panel beside it said 500-odd, with nothing on the page explaining the gap.
+
+Where a count is weighted, **anything divided by it must be weighted too**. The
+outlier counts in the panel margins and `n_double_outliers` in
+`summarise_literature_data` are both `sum(flag * MEASURED_N)` for this reason
+(PLAN.md P1.5).
+
+The deliberate exceptions are counts of *marks drawn*: the categorical heatmap
+fill counts rows in a bin, and the outlier ticks are one per flagged row. Both
+say "rows" where they are named.
+
 ### 4.4.0 Group keys and plot scope
 
 `triage_group_cols()` defines a sample group on eight columns, including

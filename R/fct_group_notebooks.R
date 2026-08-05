@@ -99,6 +99,32 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
   )
 
   if (!is.na(plot_slug)) {
+    # One empty bullet per panel, ABOVE the figure div, carrying the
+    # cross-reference already written out. Sam's request 2026-08-05: he was
+    # typing "- @fig-g013-a:" by hand for every panel of every group before
+    # writing anything, which is 5 references x 245 groups of clerical work, and
+    # a mistyped id fails silently as an unresolved reference.
+    #
+    # Placed before the div because that is where the hand-written ones already
+    # sit (see the G008 and G013 sections of docs/groups/aquatic-sediment.qmd),
+    # so appended sections read the same as written ones.
+    #
+    # SAFE UNDER APPEND-ONLY without any special handling: sections are only
+    # emitted for groups whose anchor is absent from the file, so a group that
+    # already has hand-written bullets is never revisited. That is also why this
+    # is not backfilled into the 29 sections that already have panels; doing so
+    # would mean rewriting existing sections, which this generator does not do.
+    out <- c(
+      out,
+      vapply(
+        names(captions),
+        function(key) paste0("- @", fig, "-", substr(key, 1, 1), ":"),
+        character(1),
+        USE.NAMES = FALSE
+      ),
+      ""
+    )
+
     # A div id plus a per-image id makes these Quarto subfigures, so the whole
     # row is @fig-g006 and a single panel is @fig-g006-a. The closing caption
     # line is required: without it the div is a plain layout and none of the

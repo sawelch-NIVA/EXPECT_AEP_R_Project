@@ -162,3 +162,80 @@ test_that("unassigned groups are skipped rather than making a blank notebook", {
 test_that("existing_group_sections copes with an absent file", {
   expect_length(existing_group_sections(tempfile(fileext = ".qmd")), 0)
 })
+
+# ---- Figure-reference bullets (2026-08-05) ------------------------------
+
+test_that("a section with panels gets one empty bullet per figure", {
+  # Sam was typing "- @fig-g013-a:" by hand for five panels of every group before
+  # writing anything, and a mistyped id fails silently as an unresolved
+  # reference.
+  md <- group_section_markdown(
+    nb_decisions(notebooks = "Fish", ids = "G013", n = 314)[1, , drop = FALSE],
+    plot_slug = "some_slug"
+  )
+
+  bullets <- grep("^- @fig-", md, value = TRUE)
+  expect_equal(
+    bullets,
+    c(
+      "- @fig-g013-a:",
+      "- @fig-g013-b:",
+      "- @fig-g013-c:",
+      "- @fig-g013-d:",
+      "- @fig-g013-e:"
+    )
+  )
+})
+
+test_that("the bullets sit above the figure div, where hand-written ones do", {
+  md <- group_section_markdown(
+    nb_decisions(notebooks = "Fish", ids = "G013", n = 314)[1, , drop = FALSE],
+    plot_slug = "some_slug"
+  )
+  first_bullet <- min(grep("^- @fig-", md))
+  div <- min(grep("^::: \\{#fig-", md))
+  expect_lt(first_bullet, div)
+})
+
+test_that("a section without panels gets no bullets", {
+  md <- group_section_markdown(
+    nb_decisions(notebooks = "Fish", ids = "G013", n = 12)[1, , drop = FALSE],
+    plot_slug = NA_character_
+  )
+  expect_length(grep("^- @fig-", md), 0)
+  expect_true(any(grepl("No triage panels", md)))
+})
+
+test_that("bullet ids match the subfigure ids actually emitted", {
+  # The bullets and the images derive their letters from the same `captions`
+  # vector, so a caption rename cannot leave the two pointing at different
+  # things. Asserted rather than assumed, because an unresolved cross-reference
+  # renders as literal text and is easy to miss on a 245-section page.
+  md <- group_section_markdown(
+    nb_decisions(notebooks = "Fish", ids = "G008", n = 500)[1, , drop = FALSE],
+    plot_slug = "some_slug"
+  )
+  bullet_ids <- sub("^- @([a-z0-9-]+):.*$", "\\1", grep("^- @fig-", md, value = TRUE))
+  image_ids <- sub("^.*\\{#(fig-[a-z0-9-]+) .*$", "\\1", grep("^!\\[", md, value = TRUE))
+  expect_equal(sort(bullet_ids), sort(image_ids))
+})
+
+test_that("adding bullets does not disturb the append-only guarantee", {
+  # The bullets are emitted inside a section, and sections are only emitted for
+  # absent anchors, so a group that already carries hand-written bullets is never
+  # revisited. This is the property that matters most in this file.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  path <- file.path(dir, "fish.qmd")
+
+  written <- readLines(path, warn = FALSE)
+  written[grep("^- @fig-g001-a:", written)] <- "- @fig-g001-a: clear bimodality, two campaigns"
+  writeLines(written, path)
+  before <- readLines(path, warn = FALSE)
+
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  after <- readLines(path, warn = FALSE)
+
+  expect_identical(before, after)
+  expect_true(any(grepl("clear bimodality, two campaigns", after, fixed = TRUE)))
+})

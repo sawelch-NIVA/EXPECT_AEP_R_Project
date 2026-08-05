@@ -272,7 +272,10 @@ test_that("the secondary axis carries the class numerals", {
   sec <- triage_threshold_sec_axis(thr, limits = c(1, 1000))
   expect_s3_class(sec, "AxisSecondary")
   expect_equal(sec$breaks, c(20, 84, 147))
-  expect_equal(sec$labels, c("I", "II", "IV"))
+  # Named for the class each boundary OPENS since 2026-08-05, so 147 reads V
+  # ("above here is Very Poor") rather than IV. Class I never appears: its lower
+  # bound is zero.
+  expect_equal(sec$labels, c("II", "IV", "V"))
   # Source AND matrix since 2026-08-04. The bare reference did not say what the
   # boundaries were set for, and the compartment match is many-to-one so the
   # reader cannot infer it.
@@ -304,7 +307,12 @@ test_that("a categorical panel builds with a secondary axis", {
   built <- ggplot2::ggplot_build(p)
   # The secondary axis reached the built plot, not just the spec.
   labels <- built$layout$panel_params[[1]]$x.sec$get_labels()
-  expect_true(all(c("I", "II", "IV") %in% labels))
+  expect_true(all(c("II", "IV") %in% labels))
+  # V sits at 147, outside this panel's limits of c(0.5, 500)? No: it is inside,
+  # so it must be present. Asserted separately from the pair above so a
+  # regression that drops the top class is not masked.
+  expect_true("V" %in% labels)
+  expect_false("I" %in% labels)
 })
 
 test_that("the date panel has a haloed trendline and no secondary axis", {
@@ -338,9 +346,33 @@ test_that("the date panel has a haloed trendline and no secondary axis", {
   expect_equal(top$aes_params$linetype, "dotted")
   expect_gt(halo$aes_params$linewidth, top$aes_params$linewidth)
 
+  # CHANGED 2026-08-05: panel (b) now DOES carry the threshold class axis. It was
+  # left off since P1.1g because the numerals collide on a vertical axis (II and
+  # IV are 0.24 orders apart on an axis spanning up to 12.6). Sam's call after
+  # reading the panels without it: "just print the numerals even if they collide
+  # for now" - a collided pair still says a boundary is there, which is more than
+  # an unlabelled line does.
+  #
   # Asserted on the scale spec, not on panel_params$y.sec: ggplot2 always builds
   # a secondary ViewScale (a mirror of the primary) whether or not a sec.axis was
-  # requested, so the built object is never a waiver.
+  # requested, so the built object is never a waiver either way.
+  expect_s3_class(p$scales$get_scales("y")$secondary.axis, "AxisSecondary")
+  expect_equal(
+    p$scales$get_scales("y")$secondary.axis$breaks,
+    c(20, 84, 147)
+  )
+  expect_equal(
+    p$scales$get_scales("y")$secondary.axis$labels,
+    c("II", "IV", "V")
+  )
+})
+
+test_that("panel b has no secondary axis where no threshold applies", {
+  # The waiver path still has to work: a group with no matching threshold must
+  # not acquire an empty axis.
+  data <- fake_category_data()
+  grp <- data[1, triage_group_cols()]
+  p <- triage_plot_by_date(data, thresholds = NULL, grp = grp)
   expect_s3_class(p$scales$get_scales("y")$secondary.axis, "waiver")
 })
 

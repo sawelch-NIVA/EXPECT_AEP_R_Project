@@ -124,7 +124,96 @@ standardise_threshold_units <- function(thresholds) {
       THRESHOLD_VALUE_STANDARD = .data$THRESHOLD_VALUE *
         unname(factors[.data$MEASURED_UNIT])
     ) |>
-    dplyr::filter(!is.na(.data$MEASURED_UNIT_STANDARD))
+    dplyr::filter(!is.na(.data$MEASURED_UNIT_STANDARD)) |>
+    # Must happen HERE, before anything drops the open-ended top class. See
+    # add_threshold_boundary_class(): a boundary takes its name from the row
+    # above it, so the Class V row has to still be present when the naming runs,
+    # even though it never plots.
+    add_threshold_boundary_class()
+}
+
+#' Name Each Boundary by the Class it Opens
+#'
+#' Adds `THRESHOLD_OPENS_CLASS`: the classification class a value enters when it
+#' rises **above** this boundary, rather than the class the boundary closes.
+#'
+#' **Why, 2026-08-05.** `THRESHOLD_VALUE` throughout this project is the *upper*
+#' boundary of the class named in `THRESHOLD_CLASS`. Labelling the lines that way
+#' made every panel read one class low: the sediment line at 147 was labelled
+#' `IV`, when the fact a reader wants is that everything above it is `V`. It also
+#' meant Class V never appeared anywhere, because its own boundary is open-ended
+#' and there is no line to draw for it. Sam, 2026-08-05: "it makes more sense to
+#' use the lower bounds of the thresholds, because we're interested in knowing
+#' when concentrations exceed it."
+#'
+#' Under the new reading the sediment ladder labels 20 / 84 / 147 as `II` / `IV`
+#' / `V`, Class I loses its line (its lower bound is zero, which is off a log
+#' axis anyway), and Class V gains one.
+#'
+#' **The successor is taken from the row above in the same ladder, not by adding
+#' one to the numeral.** Copper has no Class III in M-608, so the boundary above
+#' Class II opens Class IV; arithmetic on the numeral would invent a III that the
+#' source does not define. Ordering is by class rank rather than by value so that
+#' the open-ended top class, whose value is `NA`, still sorts last.
+#'
+#' Rows with no class (PROREF, BAC, EQS) are left `NA` and fall back to their
+#' threshold type at the label. Those are single levels rather than ladders, and
+#' "exceeds PROREF" is already the natural reading of such a line.
+#'
+#' @param thresholds A threshold table, ideally before any filtering that could
+#'   remove the open-ended top class.
+#' @return The same tibble with a `THRESHOLD_OPENS_CLASS` character column.
+#' @export
+add_threshold_boundary_class <- function(thresholds) {
+  n <- nrow(thresholds)
+  if (n == 0) {
+    return(dplyr::mutate(thresholds, THRESHOLD_OPENS_CLASS = character(0)))
+  }
+
+  col <- function(name) {
+    if (name %in% names(thresholds)) {
+      as.character(thresholds[[name]])
+    } else {
+      rep(NA_character_, n)
+    }
+  }
+
+  numeral <- stringr::str_match(col("THRESHOLD_CLASS"), "\\((IV|V|I{1,3})")[, 2]
+  rank <- match(numeral, c("I", "II", "III", "IV", "V"))
+
+  # One ladder per source per matrix per unit. Ladders must not be pooled: the
+  # freshwater and sediment classes share a REFERENCE_ID and both run I-V, so a
+  # key omitting the compartment would interleave 0.3 ug/L with 20 mg/kg.
+  ladder <- paste(
+    col("REFERENCE_ID"),
+    col("THRESHOLD_TYPE"),
+    col("ENVIRON_COMPARTMENT"),
+    col("ENVIRON_COMPARTMENT_SUB"),
+    col("SAMPLE_SPECIES"),
+    col("SAMPLE_TISSUE"),
+    col("MEASURED_UNIT_STANDARD"),
+    sep = "\r"
+  )
+
+  full <- col("THRESHOLD_CLASS")
+  opens <- rep(NA_character_, n)
+  opens_full <- rep(NA_character_, n)
+  for (key in unique(ladder[!is.na(numeral)])) {
+    i <- which(ladder == key & !is.na(numeral))
+    i <- i[order(rank[i])]
+    # Shift up by one. The top class has nothing above it, hence the trailing NA;
+    # its own boundary is open-ended and never drawn in any case.
+    opens[i] <- c(numeral[i][-1], NA_character_)
+    # The full class string as well as the numeral, so the long-form
+    # threshold_label() can name the class rather than just number it.
+    opens_full[i] <- c(full[i][-1], NA_character_)
+  }
+
+  dplyr::mutate(
+    thresholds,
+    THRESHOLD_OPENS_CLASS = opens,
+    THRESHOLD_OPENS_CLASS_FULL = opens_full
+  )
 }
 
 # ---- Matching ----------------------------------------------------------
@@ -222,6 +311,7 @@ empty_threshold_match <- function() {
   tibble::tibble(
     THRESHOLD_VALUE_STANDARD = numeric(0),
     THRESHOLD_CLASS = character(0),
+    THRESHOLD_OPENS_CLASS = character(0),
     THRESHOLD_TYPE = character(0),
     SAMPLE_SPECIES = character(0),
     SAMPLE_TISSUE = character(0),
@@ -244,10 +334,25 @@ empty_threshold_match <- function() {
 #' panel. The line is still *positioned* on the standardised value; only the text
 #' uses the original.
 #'
+#' **Reads as a lower bound since 2026-08-05**, matching the secondary axis: a
+#' boundary is named for the class it opens, and the value is prefixed with `>`.
+#' So the sediment line at 147 is `Very Poor (V) > 147 mg/kg (dry)`, not
+#' `Poor (IV) 147 mg/kg (dry)`. Where the class above cannot be determined (a
+#' subset that has lost its ladder) the class part is dropped rather than
+#' guessed, leaving a bare `> value unit`.
+#'
+#' Not currently drawn on any panel: the v2 threshold design moved the naming to
+#' the secondary axis and the panels carry no text. Kept because it is the only
+#' human-readable description of a matched threshold, and updated here so it
+#' cannot contradict the axis if it is ever rendered again.
+#'
 #' @param thresholds Rows from a standardised threshold table.
 #' @return A character vector of labels.
 #' @export
 threshold_label <- function(thresholds) {
+  if (nrow(thresholds) == 0) {
+    return(character(0))
+  }
   biota_part <- paste0(
     thresholds$SAMPLE_SPECIES,
     dplyr::if_else(
@@ -256,14 +361,25 @@ threshold_label <- function(thresholds) {
       paste0(", ", thresholds$SAMPLE_TISSUE)
     )
   )
-  what <- dplyr::if_else(
-    is.na(thresholds$THRESHOLD_CLASS),
-    paste0(thresholds$THRESHOLD_TYPE, " (", biota_part, ")"),
-    thresholds$THRESHOLD_CLASS
+  opens <- if ("THRESHOLD_OPENS_CLASS_FULL" %in% names(thresholds)) {
+    as.character(thresholds$THRESHOLD_OPENS_CLASS_FULL)
+  } else {
+    as.character(
+      add_threshold_boundary_class(thresholds)$THRESHOLD_OPENS_CLASS_FULL
+    )
+  }
+  what <- dplyr::case_when(
+    is.na(thresholds$THRESHOLD_CLASS) ~
+      paste0(thresholds$THRESHOLD_TYPE, " (", biota_part, ")"),
+    !is.na(opens) ~ opens,
+    # A classification boundary whose successor is unknown. Better a bare
+    # "> 147 mg/kg (dry)" than a class name that is off by one.
+    .default = ""
   )
   paste0(
     what,
-    " ",
+    dplyr::if_else(nzchar(what), " ", ""),
+    "> ",
     format(thresholds$THRESHOLD_VALUE, trim = TRUE, drop0trailing = TRUE),
     " ",
     thresholds$MEASURED_UNIT
@@ -335,19 +451,79 @@ threshold_class_linetypes <- function() {
 
 #' Short Axis Label for a Threshold
 #'
-#' What goes on the secondary axis: the class numeral where there is one, and the
-#' threshold type otherwise. PROREF and BAC are *styled* as class I but must not
-#' be *labelled* `I`, since neither is a Norwegian classification class.
+#' What goes on the secondary axis: the numeral of the class the boundary
+#' **opens** where there is one, and the threshold type otherwise. PROREF and BAC
+#' are *styled* as class I but must not be *labelled* `I`, since neither is a
+#' Norwegian classification class.
+#'
+#' Reads `THRESHOLD_OPENS_CLASS` (see [add_threshold_boundary_class()]) so that a
+#' line reads as "above here you are in class X", which is the question a
+#' concentration is being compared against. Falls back to deriving it where the
+#' column is absent, so a hand-built table still labels sensibly.
 #'
 #' @param thresholds Rows from a standardised threshold table.
 #' @return A character vector of short labels.
 #' @export
 threshold_axis_label <- function(thresholds) {
-  numeral <- stringr::str_match(
-    thresholds$THRESHOLD_CLASS,
-    "\\((IV|V|I{1,3})"
-  )[, 2]
-  dplyr::coalesce(numeral, thresholds$THRESHOLD_TYPE)
+  if (nrow(thresholds) == 0) {
+    return(character(0))
+  }
+  numeral <- threshold_opens_numeral(thresholds)
+  # The type is the fallback ONLY for rows that carry no class at all, i.e.
+  # PROREF and BAC. A classification boundary with no successor is the
+  # open-ended top of a ladder; it has no line to label (its value is NA and
+  # thresholds_for_group() drops it), and labelling it "Classification boundary"
+  # would put that string on an axis if it ever reached one.
+  dplyr::if_else(
+    is.na(thresholds$THRESHOLD_CLASS),
+    as.character(thresholds$THRESHOLD_TYPE),
+    numeral
+  )
+}
+
+#' Numeral of the Class a Boundary Opens
+#'
+#' The shared accessor behind [threshold_axis_label()] and
+#' [threshold_boundary_class_number()]. Prefers the `THRESHOLD_OPENS_CLASS`
+#' column, deriving it on the fly where a caller has passed a table that never
+#' went through [standardise_threshold_units()].
+#'
+#' The fallback is **not** equivalent: derivation needs the whole ladder, and a
+#' subset that has already lost its open-ended top class cannot name its own
+#' highest boundary. It returns `NA` there rather than guessing, which shows up
+#' as an unlabelled line rather than a wrong one.
+#'
+#' @param thresholds Rows from a threshold table.
+#' @return A character vector of numerals, `NA` where there is no class.
+#' @export
+threshold_opens_numeral <- function(thresholds) {
+  if (nrow(thresholds) == 0) {
+    return(character(0))
+  }
+  if ("THRESHOLD_OPENS_CLASS" %in% names(thresholds)) {
+    return(as.character(thresholds$THRESHOLD_OPENS_CLASS))
+  }
+  as.character(add_threshold_boundary_class(thresholds)$THRESHOLD_OPENS_CLASS)
+}
+
+#' Classification Class a Boundary Opens, as a Styling Key
+#'
+#' The severity a line marks the entry to, for colour and linetype. Distinct from
+#' [threshold_class_number()], which reports the class a boundary *closes* and is
+#' kept for anything reasoning about the classes themselves rather than about the
+#' lines drawn between them.
+#'
+#' Classless rows (PROREF, BAC) take `I`, as they did before: both are background
+#' values and are styled as such.
+#'
+#' @param thresholds Rows from a standardised threshold table.
+#' @return A factor with levels `I` to `V`.
+#' @export
+threshold_boundary_class_number <- function(thresholds) {
+  factor(
+    dplyr::coalesce(threshold_opens_numeral(thresholds), "I"),
+    levels = c("I", "II", "III", "IV", "V")
+  )
 }
 
 #' Matrix a Threshold Was Set For

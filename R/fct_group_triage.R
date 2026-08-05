@@ -674,6 +674,19 @@ triage_source_label <- function(campaign, reference) {
 #
 # The class names now go on a secondary axis and the panel carries no text at
 # all. Severity reads off colour and linetype, both keyed on the class number.
+#
+# v3, 2026-08-05. Lines are named for the class they OPEN rather than the class
+# they close, on Sam's call: "we're interested in knowing when concentrations
+# exceed it". THRESHOLD_VALUE is an upper boundary in the source data, so this is
+# a shift of one rung up the ladder, done once in
+# add_threshold_boundary_class(). Three consequences visible on the panels:
+#
+#   - Class V appears for the first time. It was previously invisible everywhere,
+#     because its own boundary is open-ended and there is no line to draw at
+#     infinity. Sam queried exactly this on the sediment panel.
+#   - Class I loses its line. Its lower bound is zero, which is off a log axis.
+#   - Colours and linetypes shift up with the labels, so the topmost line on a
+#     panel is now the most severe rather than the second most severe.
 
 #' Thresholds Visible Within the Axis Limits
 #'
@@ -726,7 +739,11 @@ triage_threshold_layers <- function(
     return(list())
   }
 
-  cls <- as.character(threshold_class_number(thresholds$THRESHOLD_CLASS))
+  # Styled on the class the boundary OPENS, not the one it closes, so that the
+  # highest line on a panel is the most severe one. Before 2026-08-05 the top
+  # sediment line drew as Poor-orange when what it actually marks is entry to
+  # Very Poor. See add_threshold_boundary_class().
+  cls <- as.character(threshold_boundary_class_number(thresholds))
   colours <- unname(threshold_class_colours()[cls])
   linetypes <- unname(threshold_class_linetypes()[cls])
 
@@ -752,10 +769,13 @@ triage_threshold_layers <- function(
 
 #' Secondary Axis Naming the Threshold Classes
 #'
-#' Breaks at the threshold values, labelled with the class numeral (or the
-#' threshold type where there is no class, since PROREF and BAC are styled as
-#' class I but are not Norwegian classification classes). The axis title names
-#' the source.
+#' Breaks at the threshold values, labelled with the numeral of the class the
+#' boundary **opens** (or the threshold type where there is no class, since
+#' PROREF and BAC are styled as class I but are not Norwegian classification
+#' classes). The axis title names the source.
+#'
+#' A label therefore reads "above this line you are in class X". See the section
+#' comment above for why that changed on 2026-08-05.
 #'
 #' Returns a `waiver()` where nothing applies, which is what `sec.axis` expects
 #' when there is no secondary axis, so call sites need no branching.
@@ -865,7 +885,26 @@ triage_value_scale <- function(limits = NULL, axis = c("x", "y"), ...) {
     # "NA", which ggplot2 then draws: without this, an axis limited to 1e-3..1e3
     # came back with seven real labels and eighteen reading "NA".
     labels = function(x) {
-      ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
+      out <- ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
+      # Nothing labelled beyond the data limits. The categorical panels reserve a
+      # right-hand strip for their count labels
+      # (triage_category_x_expansion()), and expansion widens the drawn range
+      # without widening the limits, so ggplot2 stopped censoring the next decade
+      # up and drew "1e+06" against empty margin. A number on an axis implies
+      # data reaches it. The strip stays blank instead.
+      if (!is.null(limits) && all(is.finite(limits))) {
+        # EMPTY STRING, not NA. Where the *break* is NA ggplot2 drops it and the
+        # NA_character_ above never reaches the axis, but these breaks are real
+        # values inside the expanded range: only their labels are unwanted. An
+        # NA label at a real break draws as the literal text "NA", which is the
+        # same trap the guard above was written for and which duly reappeared at
+        # 1e+06 on the first render of this change.
+        #
+        # Tolerance so a break sitting exactly on the limit is not lost to
+        # floating point.
+        out[!is.na(x) & x > max(limits) * (1 + 1e-9)] <- ""
+      }
+      out
     },
     ...
   )
@@ -1142,7 +1181,9 @@ triage_plot_by_date <- function(
   } else {
     p +
       ggplot2::geom_bin2d(bins = 60) +
-      ggplot2::scale_fill_viridis_b(option = "plasma", name = "Count")
+      # "Rows" for the same reason as the categorical panels: a bin counts rows
+      # falling in it, not measurements. See CLAUDE.md 4.4.-1.
+      ggplot2::scale_fill_viridis_b(option = "plasma", name = "Rows")
   }
 
   p +
@@ -1174,18 +1215,27 @@ triage_plot_by_date <- function(
       colour = "grey60",
       linewidth = 0.8
     ) +
-    # Lines but no secondary axis on this panel. The classes would land on a
-    # secondary *y* axis, where vertical space is far tighter than horizontal:
-    # II and IV collide, and the rotated title sits awkwardly between the labels
-    # and the legend. The classes are legible on panels a, c and d, and these are
-    # triage plots. Flagged in PLAN.md P1.1g to revisit.
+    # The secondary axis IS drawn here as of 2026-08-05, having been left off
+    # since P1.1g because the class numerals collide on a vertical axis: II and
+    # IV are 0.24 orders apart on an axis spanning up to 12.6. Sam's call, having
+    # read the panels without it: "just print the numerals even if they collide
+    # for now." A collided pair still says a boundary is there, which is more
+    # than a bare unlabelled line does, and the exact values are on panels a, c
+    # and d. Revisit properly at figure-preparation time (PLAN.md P5.4).
     triage_threshold_layers(
       thresholds_for_group(thresholds, grp),
       orientation = "horizontal",
       limits = limits
     ) +
     triage_date_scale(limits = date_limits) +
-    triage_value_scale(limits = limits, axis = "y") +
+    triage_value_scale(
+      limits = limits,
+      axis = "y",
+      sec.axis = triage_threshold_sec_axis(
+        thresholds_for_group(thresholds, grp),
+        limits = limits
+      )
+    ) +
     ggplot2::labs(
       x = "Sampling date",
       y = triage_unit_label(data),
@@ -1194,6 +1244,7 @@ triage_plot_by_date <- function(
     ) +
     triage_theme() +
     triage_value_text_theme("y") +
+    triage_sec_axis_theme("right") +
     # "x", not "y". The minor breaks moved: the value axis (y here) now labels
     # every power of ten as a MAJOR break and has no minor breaks at all, while
     # the date axis (x) gained a minor break per year. Left on "y" this would
@@ -1290,34 +1341,70 @@ triage_flag_by_category <- function(data, min_n = 10) {
 
 #' Right-Margin Count Labels for the Categorical Panels
 #'
-#' `"1,193 (53)"`: rows in the category, and how many of them the per-category
-#' fences flagged. Sam's call, 2026-08-04, and it earns its place because the
-#' shared value axis leaves a wide empty margin on the right of most panels.
+#' `"1,193 (53)"`: the sample size of the category, and how much of it the
+#' per-category fences flagged. Sam's call, 2026-08-04, and it earns its place
+#' because the shared value axis leaves a wide empty margin on the right of most
+#' panels. Headed in-panel by [triage_category_header()] so the reader is not
+#' left to infer what the bracket means.
+#'
+#' **Both figures are measurement counts, `sum(MEASURED_N)`, not row counts, as
+#' of 2026-08-05.** This is the project-wide rule Sam set that day: *anywhere we
+#' report a sample size it is `MEASURED_N`; where we mean rows we say "n rows"*.
+#' Before this, the labels counted rows while the group heading above them
+#' reported measurements, and the two disagreed by a factor of five on the fish
+#' overview without anything on the page explaining why. A literature row can
+#' carry an aggregated `MEASURED_N` of 50; a Vannmiljø row carries 1.
+#'
+#' The outlier count is weighted the same way, matching the treatment
+#' `summarise_literature_data` already gives `n_double_outliers` (PLAN.md P1.5):
+#' numerator and denominator have to be the same currency or the fraction means
+#' nothing.
+#'
+#' **What stays a row count**, deliberately, because it is a count of marks
+#' drawn rather than a sample size: the heatmap fill (one tile counts the rows in
+#' its bin) and the outlier ticks (one tick per flagged row). The fill legend
+#' says "Rows" for that reason. A category can therefore show a label of 2,450
+#' over 45 ticks' worth of data, which is honest: 45 rows reporting 2,450
+#' measurements between them.
 #'
 #' Untested categories read `"7 (n < 10)"` rather than `"7 (0)"`, which would
-#' claim a test that did not run. The threshold is interpolated from `min_n`
-#' rather than written into the string, so the label cannot drift if the default
-#' changes.
+#' claim a test that did not run. Note the gate is on **rows**, since that is
+#' what the statistics are computed over; a category of 3 rows carrying 300
+#' measurements is still untested.
 #'
 #' @param data Output of [triage_flag_by_category()].
 #' @param min_n The same `min_n` passed to [triage_flag_by_category()].
-#' @return A tibble of `.facet`, `n`, `k`, `tested`, `label`.
+#' @return A tibble of `.facet`, `n` (measurements), `n_rows`, `k`
+#'   (measurements), `tested`, `label`.
 #' @export
 triage_category_labels <- function(data, min_n = 10) {
+  # A subset with no MEASURED_N would silently weight everything to NA. Falling
+  # back to 1 per row makes the labels revert to row counts, which is wrong but
+  # visibly wrong, rather than blanking every label on the panel.
+  if (!"MEASURED_N" %in% names(data)) {
+    data$MEASURED_N <- 1L
+  }
+
   data |>
     dplyr::group_by(.data$.facet) |>
     dplyr::summarise(
-      n = dplyr::n(),
+      n = sum(.data$MEASURED_N, na.rm = TRUE),
+      n_rows = dplyr::n(),
       # all(), not any(): flag_outliers() decides per category, so the value is
       # constant within a group and all() simply picks it up.
       tested = all(.data$.tested),
-      k = sum(.data$.outlier),
+      k = sum(.data$.outlier * .data$MEASURED_N, na.rm = TRUE),
       .groups = "drop"
     ) |>
     dplyr::mutate(
       label = dplyr::if_else(
         .data$tested,
-        paste0(format(.data$n, big.mark = ",", trim = TRUE), " (", .data$k, ")"),
+        paste0(
+          format(.data$n, big.mark = ",", trim = TRUE),
+          " (",
+          format(.data$k, big.mark = ",", trim = TRUE),
+          ")"
+        ),
         paste0(
           format(.data$n, big.mark = ",", trim = TRUE),
           " (n < ",
@@ -1326,6 +1413,40 @@ triage_category_labels <- function(data, min_n = 10) {
         )
       )
     )
+}
+
+#' Header for the Right-Margin Count Column
+#'
+#' `"n (n outliers)"`, sitting above the topmost category label. Sam's call,
+#' 2026-08-05: the bracketed second figure was unexplained, and a reader had no
+#' way to tell it from a second sample size.
+#'
+#' Placed at a fractional position above the last discrete level. Discrete scales
+#' carry a continuous range alongside the discrete one, which is what lets the
+#' outlier ticks sit at `as.numeric(.facet) - 0.46`; the same mechanism puts this
+#' half a band above the top row. [triage_plot_by_category()] widens the upper
+#' expansion to make the room.
+#'
+#' @param data Output of [triage_flag_by_category()].
+#' @param x_at Value-axis position, shared with the labels themselves.
+#' @return A ggplot2 layer, or `NULL` where there is nothing to head.
+#' @export
+triage_category_header <- function(data, x_at) {
+  n_levels <- nlevels(data$.facet)
+  if (n_levels == 0 || !is.finite(x_at)) {
+    return(NULL)
+  }
+  ggplot2::annotate(
+    "text",
+    x = x_at,
+    y = n_levels + 0.75,
+    label = "n (n outliers)",
+    colour = "grey30",
+    size = 2.1,
+    fontface = "italic",
+    # Aligned with the labels it heads; see the note there.
+    hjust = 0
+  )
 }
 
 #' Distribution Overlay for the Categorical Panels
@@ -1414,11 +1535,20 @@ triage_category_overlay <- function(
   }
 
   labels <- triage_category_labels(data, min_n = min_n)
-  x_at <- if (!is.null(limits) && all(is.finite(limits))) {
-    limits[2]
-  } else {
-    max(data$MEASURED_VALUE_STANDARD, na.rm = TRUE)
-  }
+  # Labels go in the RESERVED MARGIN beyond the data limits, not at limits[2].
+  #
+  # Sam, 2026-08-05: "Polluted seabed's very high right conc covers up sample
+  # size", and again on another panel, "not visible when high concentrations".
+  # Right-aligning at limits[2] put the text directly on top of the rightmost
+  # tiles, and those are the darkest end of the viridis fill precisely when a
+  # category reaches the top of the axis. A halo (shadowtext) was the obvious
+  # patch; moving the text off the data is the better one, since it also stops
+  # the label hiding the observations it is counting.
+  #
+  # triage_category_x_expansion() reserves the strip and this puts the text just
+  # inside it. Both are fractions of the axis span in log10 space, so the gap is
+  # the same fraction of panel width whether the group spans 12 orders or one.
+  x_at <- triage_label_x(data, limits)
   # Two layers rather than one with a colour mapping. A scale_colour_manual()
   # here would be a second colour scale on a panel that may already have one,
   # and ggplot2 resolves that by warning and replacing.
@@ -1432,7 +1562,12 @@ triage_category_overlay <- function(
       inherit.aes = FALSE,
       colour = colour,
       size = 2.1,
-      hjust = 1
+      # LEFT-aligned at the top of the axis, so the text runs outward into the
+      # margin reserved by triage_category_x_expansion() instead of back over the
+      # data. hjust = 1 put it on top of the rightmost tiles, which is the
+      # complaint this is fixing. The margin is inside the panel, so nothing is
+      # clipped and no coord change is needed.
+      hjust = 0
     )
   }
   c(
@@ -1443,10 +1578,64 @@ triage_category_overlay <- function(
         text_layer(labels[labels$tested, , drop = FALSE], "grey15"),
         # Greyer, so an untested row's label does not read with the same
         # authority as a tested one.
-        text_layer(labels[!labels$tested, , drop = FALSE], "grey60")
+        text_layer(labels[!labels$tested, , drop = FALSE], "grey60"),
+        triage_category_header(data, x_at)
       )
     )
   )
+}
+
+#' Reserved Right Margin for the Category Count Labels
+#'
+#' A fraction of the value axis, in log10 space, kept clear of data so the count
+#' labels have somewhere to sit. See [triage_category_overlay()] for why they are
+#' no longer drawn over the data.
+#'
+#' Multiplicative rather than additive, so the reserved strip is a constant
+#' fraction of **panel width** regardless of how many orders of magnitude the
+#' group spans. At 8 inches wide, 0.14 is a little over an inch, against roughly
+#' half an inch for the widest label seen in practice (`"41,831 (2,057)"` at
+#' size 2.1).
+#'
+#' The left side keeps a small expansion rather than zero: a tile centred on the
+#' lowest bin is half a bin wide to the left of the limit, and would be clipped.
+#'
+#' @return A ggplot2 expansion specification.
+#' @export
+triage_category_x_expansion <- function() {
+  ggplot2::expansion(mult = c(0.02, 0.14))
+}
+
+#' Value-Axis Anchor for the Category Count Labels
+#'
+#' The top of the value axis. The labels are drawn from here **rightwards**
+#' (`hjust = 0`) into the strip reserved by [triage_category_x_expansion()], so
+#' they start where the data stops and never sit over a tile.
+#'
+#' **The anchor must stay inside the scale limits, and this is the whole reason
+#' the function exists rather than the arithmetic being inlined.** These panels
+#' set `limits` explicitly for cross-group comparability, and a continuous scale
+#' with explicit limits censors out-of-bounds values to `NA` by default. A first
+#' attempt placed the anchor 0.13 of a span *beyond* `limits[2]`, which put it
+#' out of bounds: every label was silently dropped and the only trace was a
+#' `geom_text()` "removed N rows" warning. Expansion adds drawing room but does
+#' not widen the limits, so the anchor is in bounds and the *text* overhangs.
+#'
+#' Falls back to the subset's own maximum where no shared limits are supplied.
+#'
+#' @param data A plot subset.
+#' @param limits Shared value-axis limits, or `NULL`.
+#' @return A single positive value on the data scale, within `limits`.
+#' @export
+triage_label_x <- function(data, limits = NULL) {
+  if (!is.null(limits) && all(is.finite(limits)) && all(limits > 0)) {
+    return(limits[2])
+  }
+  hi <- suppressWarnings(max(data$MEASURED_VALUE_STANDARD, na.rm = TRUE))
+  if (!is.finite(hi) || hi <= 0) {
+    return(NA_real_)
+  }
+  hi
 }
 
 #' Triage Plot: Distribution by a Categorical Facet
@@ -1559,7 +1748,12 @@ triage_plot_by_category <- function(
       # mean nothing. Safe under log10 because count_by_category_bin() omits
       # empty bins rather than zero-filling them, so the minimum count is 1.
       ggplot2::scale_fill_viridis_c(
-        name = "Count",
+        # "Rows", not "Count", since 2026-08-05. A tile counts the rows falling
+        # in its bin, while the margin labels report measurements
+        # (sum(MEASURED_N)). Naming the legend for what it counts is the whole of
+        # Sam's rule: a sample size is measurements, and anything counting rows
+        # says so.
+        name = "Rows",
         transform = "log10",
         breaks = scales::breaks_log(n = 5),
         labels = scales::label_log()
@@ -1588,12 +1782,18 @@ triage_plot_by_category <- function(
     triage_value_scale(
       limits = limits,
       axis = "x",
-      sec.axis = triage_threshold_sec_axis(thr, limits = limits)
+      sec.axis = triage_threshold_sec_axis(thr, limits = limits),
+      # Reserves the right-hand strip the count labels sit in.
+      expand = triage_category_x_expansion()
     ) +
     # Additive 0.5 makes the outermost bands sit flush with the panel edge. The
     # ggplot2 default for discrete scales is 0.6, which leaves a sliver of dead
     # space above the top band and below the bottom one.
-    ggplot2::scale_y_discrete(expand = ggplot2::expansion(add = 0.5)) +
+    #
+    # Asymmetric since 2026-08-05: the top gets 1.2 rather than 0.5 to clear the
+    # "n (n outliers)" header, which sits 0.75 of a band above the last row. The
+    # bottom stays flush.
+    ggplot2::scale_y_discrete(expand = ggplot2::expansion(add = c(0.5, 1.2))) +
     ggplot2::labs(
       x = triage_unit_label(data),
       y = NULL,
@@ -1735,10 +1935,110 @@ category_x_binwidth <- function(data, limits = NULL, bins = 40) {
   span / bins
 }
 
+#' Colour-Scale Breaks for the Spatial Panel
+#'
+#' One bin per order of magnitude across the shared limits, with the threshold
+#' boundaries inserted as extra breaks and named in the legend.
+#'
+#' **Two requests from Sam, 2026-08-05.** First, `n.breaks = 6` across the
+#' Aquatic limits gave a bin every two orders of magnitude, which is far too
+#' coarse to distinguish a contaminated fjord from a clean one: "we definitely
+#' need more bins if so (e.g. 1 per order of magnitude)". Second, the M-608
+#' classes should be visible here as they are on the other panels. He predicted
+#' the difficulty exactly, and was right: "drawing threshold lines over the top
+#' of that will be technically difficult and methodologically wobbly, but I still
+#' want to try."
+#'
+#' **Why there are no threshold lines on this panel, and cannot be.** The panel's
+#' axes are longitude and latitude; concentration is the *fill*. A threshold is a
+#' value of the fill, so it has no position in the panel and cannot be drawn as a
+#' line. It can only appear on the legend, as a labelled bin edge. That is what
+#' this does, and it is the honest version of the request rather than a
+#' reinterpretation of it.
+#'
+#' **The wobble, stated plainly.** Mixing decade breaks with threshold breaks
+#' gives bins of unequal width, so equal colour steps no longer mean equal
+#' ratios. A threshold landing near a decade would also draw as a hairline band,
+#' so one within `tol` orders of a decade *replaces* it and the label carries
+#' both. The alternative, snapping every bin to the classification classes, was
+#' rejected: the classes span barely one order while the data spans twelve, so
+#' the map would collapse to two colours outside the class range.
+#'
+#' @param limits Shared value limits, `c(lo, hi)`, both positive.
+#' @param thresholds Matched thresholds from [thresholds_for_group()], or `NULL`.
+#' @param tol Distance in log10 units within which a threshold absorbs a decade
+#'   break rather than sitting beside it.
+#' @return A list of `breaks` and `labels`, or `NULL` where limits are unusable.
+#' @export
+spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15) {
+  if (is.null(limits) || !all(is.finite(limits)) || any(limits <= 0)) {
+    return(NULL)
+  }
+  lo <- log10(min(limits))
+  hi <- log10(max(limits))
+  if (!is.finite(lo) || !is.finite(hi) || hi <= lo) {
+    return(NULL)
+  }
+
+  decades <- seq(ceiling(lo), floor(hi))
+  # Values and their logs are carried in parallel, and the VALUES are what gets
+  # returned. Deriving the breaks as 10^log at the end instead loses the exact
+  # threshold: 10^log10(147) is 147.00000000000003, which is not the number the
+  # classification boundary is defined at and does not compare equal to it.
+  # The logs exist only for the proximity test below.
+  breaks_val <- 10^decades
+  breaks_log <- decades
+  labels <- formatC(breaks_val, format = "e", digits = 0)
+
+  thr <- thresholds_in_limits(thresholds %||% empty_threshold_match(), limits)
+  if (nrow(thr) > 0) {
+    thr_val <- thr$THRESHOLD_VALUE_STANDARD
+    thr_log <- log10(thr_val)
+    thr_lab <- threshold_axis_label(thr)
+    # Two significant figures for a threshold, one for a decade. A decade is
+    # exact and needs no mantissa; a boundary is a specific number, and rounding
+    # 1.56e-02 to "2e-02" would misstate the value the class actually starts at.
+    thr_text <- function(i) {
+      paste0(
+        formatC(thr_val[i], format = "e", digits = 1),
+        " (", thr_lab[i], ")"
+      )
+    }
+    for (i in order(thr_log)) {
+      v <- thr_log[i]
+      if (!is.finite(v) || v <= lo || v >= hi || is.na(thr_lab[i])) {
+        next
+      }
+      near <- which(abs(breaks_log - v) < tol)
+      if (length(near) > 0) {
+        # Absorb the decade rather than draw a hairline band beside it. The
+        # threshold's own value goes in the label, so the scale still reads
+        # correctly at that edge.
+        j <- near[which.min(abs(breaks_log[near] - v))]
+        labels[j] <- thr_text(i)
+        breaks_val[j] <- thr_val[i]
+        breaks_log[j] <- v
+      } else {
+        breaks_val <- c(breaks_val, thr_val[i])
+        breaks_log <- c(breaks_log, v)
+        labels <- c(labels, thr_text(i))
+      }
+    }
+  }
+
+  ord <- order(breaks_val)
+  list(breaks = breaks_val[ord], labels = labels[ord])
+}
+
 #' Triage Plot: Spatial Distribution
 #'
 #' Median concentration per hex cell over a coastline base map. Falls back to
 #' points where there are too few sites to bin meaningfully.
+#'
+#' Binned on both branches at one step per order of magnitude, with the
+#' classification boundaries marked in the legend. See
+#' [spatial_colour_breaks()], including why the thresholds cannot be drawn as
+#' lines on this panel.
 #'
 #' @param data A group subset. @param label Group label for the subtitle.
 #' @param limits Shared colour-scale limits from [triage_limits_for()].
@@ -1760,9 +2060,18 @@ category_x_binwidth <- function(data, limits = NULL, bins = 40) {
 #'   `binwidth` to `stat_summary_hex()`
 #'   if a genuinely fine grid is ever wanted; `bins` cannot get there without
 #'   absurd numbers.
+#' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
+#' @param grp The one-row group tibble, needed to match thresholds.
 #' @return A ggplot.
 #' @export
-triage_plot_spatial <- function(data, label = NULL, limits = NULL, bins = 120) {
+triage_plot_spatial <- function(
+  data,
+  label = NULL,
+  limits = NULL,
+  bins = 120,
+  thresholds = NULL,
+  grp = NULL
+) {
   spatial <- data |>
     dplyr::filter(!is.na(.data$LONGITUDE), !is.na(.data$LATITUDE))
 
@@ -1816,22 +2125,39 @@ triage_plot_spatial <- function(data, label = NULL, limits = NULL, bins = 120) {
   # Both branches binned, with the same limits and breaks, so a hex map and a
   # points fallback remain visually comparable. Previously the points branch
   # used a continuous scale and the hex branch a binned one.
-  scale_layer <- if (triage_use_points(spatial)) {
-    ggplot2::scale_colour_viridis_b(
-      name = triage_unit_label(data),
-      trans = "log10",
-      n.breaks = 6,
-      limits = limits,
-      option = "rocket"
-    )
+  #
+  # Explicit breaks since 2026-08-05: one per order of magnitude, plus the
+  # threshold boundaries. n.breaks = 6 let ggplot2 choose, and across the Aquatic
+  # limits it chose a step of two orders. See spatial_colour_breaks().
+  thr_matched <- thresholds_for_group(thresholds, grp)
+  brk <- spatial_colour_breaks(limits, thr_matched)
+  strokes <- if (is.null(brk)) {
+    NULL
   } else {
-    ggplot2::scale_fill_viridis_b(
-      name = triage_unit_label(data),
-      trans = "log10",
-      n.breaks = 6,
-      limits = limits,
-      option = "rocket"
-    )
+    spatial_bin_strokes(brk$breaks, thresholds_in_limits(thr_matched, limits))
+  }
+  scale_args <- list(
+    name = triage_unit_label(data),
+    trans = "log10",
+    limits = limits,
+    option = "rocket"
+  )
+  scale_args <- c(
+    scale_args,
+    if (is.null(brk)) {
+      list(n.breaks = 6)
+    } else {
+      # show.limits is set on the guide, not here: the outermost bins are
+      # open-ended, and labelling them with the limit values would imply the data
+      # stops there.
+      list(breaks = brk$breaks, labels = brk$labels)
+    }
+  )
+
+  scale_layer <- if (triage_use_points(spatial)) {
+    do.call(ggplot2::scale_colour_viridis_b, scale_args)
+  } else {
+    do.call(ggplot2::scale_fill_viridis_b, scale_args)
   }
 
   base +
@@ -1848,8 +2174,136 @@ triage_plot_spatial <- function(data, label = NULL, limits = NULL, bins = 120) {
       title = "e) Spatial distribution",
       subtitle = paste0(label, if (!is.null(label)) "  ", "(median per cell)")
     ) +
+    ggplot2::guides(
+      fill = spatial_colour_guide(strokes),
+      colour = spatial_colour_guide(strokes)
+    ) +
     triage_theme() +
-    ggplot2::theme(legend.position = "right")
+    ggplot2::theme(
+      legend.position = "right",
+      legend.text = ggplot2::element_text(size = ggplot2::rel(0.6)),
+      legend.title = ggplot2::element_text(size = ggplot2::rel(0.8)),
+      # Short keys, so 15 bins occupy a fraction of the panel height instead of
+      # the near-full-height bar the steps guide needed. Set here as well as on
+      # the guide because the theme setting is what the guide falls back to.
+      legend.key.height = ggplot2::unit(0.42, "lines"),
+      legend.key.spacing.y = ggplot2::unit(0, "pt")
+    )
+}
+
+#' Per-Bin Stroke Styling for the Spatial Legend
+#'
+#' Gives each legend bin a border in the **same colour and linetype the threshold
+#' lines use on the other panels**, so a reader who has learned "orange dashed
+#' means entering Poor" from panel (c) reads the same thing off this key.
+#'
+#' Sam's request, 2026-08-05: "re-use the vline styling but apply it to the bin
+#' stroke." A `guide_colorsteps()` bar cannot do this, since it draws the bins as
+#' one continuous strip with no per-bin styling. A **binned scale rendered
+#' through `guide_legend()`** can: it emits one key per bin, and `override.aes`
+#' accepts a vector, so each key takes its own border.
+#'
+#' **One entry per break, not per band, and that is measured rather than
+#' assumed.** A binned scale rendered through `guide_legend()` emits exactly
+#' `length(breaks)` keys, each labelled with its break value: verified at 3, 5
+#' and 15 breaks. An earlier version of this function returned
+#' `length(breaks) + 1` on the reasoning that k breaks bound k + 1 bands, and
+#' ggplot2 rejected the `override.aes` outright ("replacement has 16 rows, data
+#' has 15").
+#'
+#' Stroking the key that carries the threshold's own label is also the
+#' unambiguous choice: it marks the boundary itself, so it is correct whichever
+#' adjacent band that key's fill happens to show.
+#'
+#' Keys with no threshold get `NA`, which draws no border at all rather than a
+#' black one.
+#'
+#' @param breaks The break vector from [spatial_colour_breaks()].
+#' @param thresholds Matched thresholds from [thresholds_for_group()], or `NULL`.
+#' @return A list of `colour`, `linetype` and `linewidth` vectors, one element
+#'   per break.
+#' @export
+spatial_bin_strokes <- function(breaks, thresholds = NULL) {
+  n_bins <- length(breaks)
+  colour <- rep(NA_character_, n_bins)
+  linetype <- rep("blank", n_bins)
+  linewidth <- rep(0, n_bins)
+
+  if (is.null(thresholds) || nrow(thresholds) == 0 || length(breaks) == 0) {
+    return(list(colour = colour, linetype = linetype, linewidth = linewidth))
+  }
+
+  cls <- as.character(threshold_boundary_class_number(thresholds))
+  cols <- threshold_class_colours()
+  ltys <- threshold_class_linetypes()
+
+  for (i in seq_len(nrow(thresholds))) {
+    v <- thresholds$THRESHOLD_VALUE_STANDARD[i]
+    # Matched on value rather than on position, because
+    # spatial_colour_breaks() may have absorbed a decade break and reordered.
+    # Tolerance is relative: these values span many orders of magnitude.
+    j <- which(abs(breaks - v) <= abs(v) * 1e-9)
+    if (length(j) != 1) {
+      next
+    }
+    colour[j] <- unname(cols[cls[i]])
+    linetype[j] <- unname(ltys[cls[i]])
+    linewidth[j] <- 0.9
+  }
+
+  list(colour = colour, linetype = linetype, linewidth = linewidth)
+}
+
+#' Colour Guide for the Spatial Panel
+#'
+#' One key per bin, at one bin per order of magnitude, with the threshold bands
+#' outlined in the threshold line styling. Shared between the hex and points
+#' branches so the two remain visually comparable, which is the same reason both
+#' branches are binned at all.
+#'
+#' **`guide_legend`, not `guide_colorsteps`.** The steps guide draws a single
+#' continuous bar and cannot stroke individual bins. It also forced the tall
+#' legend that made the first attempt at one-bin-per-order unreadable: 15 labels
+#' against a bar sized in inches. Discrete keys take their height from
+#' `legend.key.height`, so the whole key shrinks to fit (Sam, 2026-08-05: "can we
+#' reduce the height of each key cell via themeing").
+#'
+#' Keys run **top to bottom, high to low**, matching the bar it replaces.
+#'
+#' @param strokes Output of [spatial_bin_strokes()], or `NULL` for no borders.
+#' @return A ggplot2 guide.
+#' @export
+spatial_colour_guide <- function(strokes = NULL) {
+  override <- if (is.null(strokes)) {
+    list()
+  } else {
+    # REVERSED to match `reverse = TRUE` below. `override.aes` is applied in the
+    # order the keys are DRAWN, not in the scale's own break order, so with the
+    # legend reversed an unreversed vector puts every stroke on the wrong key.
+    # Observed directly: the three sediment strokes landed on 1e-02, 1e-03 and
+    # 1e-04 instead of on 20, 84 and 147, which is the same distance from the
+    # other end of the key.
+    #
+    # spatial_bin_strokes() deliberately returns ascending break order, which is
+    # the order everything else in this file works in and the order the tests
+    # assert; the flip belongs here, next to the `reverse` that causes it.
+    list(
+      colour = rev(strokes$colour),
+      linetype = rev(strokes$linetype),
+      linewidth = rev(strokes$linewidth)
+    )
+  }
+  ggplot2::guide_legend(
+    # High values at the top, matching the colour bar this replaced and the
+    # vertical axes on the other panels.
+    reverse = TRUE,
+    override.aes = override,
+    # No gap between keys, so the column of bins reads as one scale rather than
+    # as a list of unrelated categories.
+    keyheight = ggplot2::unit(0.42, "lines"),
+    keywidth = ggplot2::unit(1.1, "lines"),
+    byrow = TRUE
+  )
 }
 
 #' Placeholder Plot for Groups a Given View Cannot Describe
@@ -1969,7 +2423,13 @@ write_triage_plots_for_group <- function(
     ),
     # No thresholds on the spatial panel: the measured value is a colour there,
     # not a position, so there is no line to draw.
-    e_spatial = triage_plot_spatial(group_data, label, limits = lims)
+    e_spatial = triage_plot_spatial(
+      group_data,
+      label,
+      limits = lims,
+      thresholds = thresholds,
+      grp = grp
+    )
   )
 
   paths <- character(0)

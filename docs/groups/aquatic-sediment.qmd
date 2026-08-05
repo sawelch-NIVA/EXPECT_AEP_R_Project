@@ -20,6 +20,12 @@ Variation in other *Site Geographical Feature* types covers a substantially smal
 
 TODO: THe highest threshold is V, according to comments. Why isn't it here?
 
+> **Answered and fixed 2026-08-05.** `THRESHOLD_VALUE` in the source data is the **upper** boundary of the class it names, and the lines were labelled that way, so every line read one class low and Class V could never appear: its own upper boundary is open-ended and there is no line to draw at infinity.
+>
+> Lines are now named for the class they **open**, which is also the reading you asked for ("we're interested in knowing when concentrations exceed it"). The sediment ladder now labels 20 / 84 / 147 as **II / IV / V**. Class I loses its line, its lower bound being zero. Colour and linetype shifted with the labels, so the topmost line is now Very Poor red and solid rather than Poor orange.
+>
+> Coastal water needed a data fix to go with it: it had no Class V row at all, so its 5.2 μg/L line had nothing to take a name from. Added as an open-ended row, matching freshwater and sediment.
+
 - @fig-aquatic-aquatic-sediment-mg-kg-dry-b - coding here not entirely clear, might be artifacts but minded to drop other and not relevant
 
 - Some sediment also sampled from column - seems to have a slightly lower mean than benthos (which seems reasonable)
@@ -73,15 +79,50 @@ Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Se
 
 Distribution here (\@fig-g002-a) is normal-ish and centered slightly above the background concentration, but there's clearly at least one sub-peak at \~1e+00.5. Large right tail, and many samples at extremely high concentrations, which suggests unit errors. @fig-g002-b shows no clear temporal pattern, but central tendency around the aquatic sediment background (I) threshold from 2016 onwards. A few big outliers in specific years are perhaps errors rather than true variation. @fig-g002-c shows that with a handful of exceptions, campaigns have similar medians, but different patterns of outliers. @coteurFieldContaminationStarfish2003's concentrations have a median around 1e-03 and are several orders of magnitude lower than those from @norwegianenvironmentagencyVannmiljo2026. Some campaigns have slightly higher medians (Urban Fjord Contaminants), while Screening New Contaminants has a surprisingly low median with a lot of spread (but small sample size). No campaigns are explicitly and only focused on non-contaminated sites (e.g. Reference sites), so it is difficult to determine if there's a real difference between contaminated and uncontaminated sites. Probably inconclusive without looking at sampling depth, more detailed site information, and fractionation. @fig-g002-d mainly shows site coding atefacts, in any case, there seems to be no substantial difference between settled and suspended sediment. @fig-g002-e shows that most areas (at the current resolution) fall between 1e01 and 1e04, which isn't enough concentration resolution.
 
-TODO: Figure b is missing a secondary axis for thresholds
+TODO: Figure b is missing a secondary axis for thresholds *(still open, 2026-08-05: the class numerals collide on a vertical axis, II and IV being 0.24 orders apart on a 10.7-order scale. No better idea yet. PLAN.md P1.1g.)*
 
 TODO: Have I made a unit error with Coteur
 
-TODO: Looks like outliers aren't using abs, so only highlighted on the right
+> **CONFIRMED against the paper, 2026-08-05: Coteur reports μg g⁻¹ dry weight, and the source file records μg/kg (dry). Still to fix in `data/raw/eData/`.**
+>
+> Chasing it turned up a **second and larger fault in the pipeline**, which was silently dividing every genuine `μg/g` row by 1000: 93 rows across 11 other references, all now corrected. It also recovered 18 rows of Julshamn seal data whose micro sign had been destroyed by an encoding round-trip. See PLAN.md section 9b.
+>
+> The original evidence follows.
+>
+> **Note to self, checked 2026-08-05. Almost certainly yes, and it looks like μg/g read as μg/kg.**
+>
+> All 28 Coteur rows are stored as `μg/kg (dry)` and standardised by ×1e-3. Against every other source in the same compartment and unit:
+>
+> |   | Coteur geo. mean | Others geo. mean | Ratio |
+> |----|---:|---:|---:|
+> | Aquatic Sediment, mg/kg (dry) | 0.034 | 21.3 | 619× (2.79 orders) |
+> | Biota, Aquatic, mg/kg (dry) | 0.012 | 2.80 | 229× (2.36 orders) |
+>
+> The raw numbers as entered are 8 to 100 for sediment and 2.7 to 92 for *A. rubens* tissue. Read as **mg/kg** those are entirely ordinary values for both matrices; read as μg/kg they are implausible, since 0.03 mg/kg dry sediment is below crustal abundance. **μg/g = mg/kg**, so a source reporting μg/g transcribed as μg/kg gives exactly this 1000× error. The observed ratios are 619× and 229× rather than 1000× only because the comparison is against a different population of sites, not the same samples.
+>
+> Fix belongs in the extraction, not the pipeline. Until then Coteur will keep appearing as the lowest campaign on every sediment and echinoderm panel.
 
-TODO: Polluted seabed's very high right conc covers up sample size
+TODO: Looks like outliers aren't using abs, so only highlighted on the right *(FIXED 2026-08-05. The `abs()` was there; the RMZ ran on the raw scale while the Tukey fences ran on log10, which made it an upper-tail test in practice. Both are on log10 now: low-side flags across all groups went from 5 to 359, and flagged groups from 22 to 14.)*
 
-TODO: More concentration resolution for fig-e. COuld we add thresholds to the key here?
+TODO: Polluted seabed's very high right conc covers up sample size *(FIXED 2026-08-05. The count labels now sit in a reserved right-hand margin outside the data, rather than right-aligned on top of the highest tiles.)*
+
+TODO: More concentration resolution for fig-e. COuld we add thresholds to the key here? *(PART DONE 2026-08-05. The key is now one bin per order of magnitude with the M-608 boundaries inserted and named, instead of ggplot2 choosing 6 breaks over 12.6 orders. Thresholds cannot be drawn as lines on this panel: its axes are lon/lat and concentration is the fill, so a threshold has no position in the panel. **The remaining resolution problem is the shared scale, and it is your call** — see the note below.)*
+
+> **Why fig-e still looks flat, measured 2026-08-05. Three separate causes, and the biggest one is the data, not the plot.**
+>
+> The colour scale spans the whole `Aquatic` compartment, which is 12.3 orders of magnitude, so a sediment group occupying 3 of them uses a quarter of the palette however many bins there are.
+>
+> | Change                              |               Aquatic span |
+> |-------------------------------------|---------------------------:|
+> | now (limits per compartment)        |                12.3 orders |
+> | limits per compartment **and unit** | 8.3 orders for mg/kg (dry) |
+> | 1st to 99th percentile of that      |             **2.8 orders** |
+>
+> So splitting the limits by unit buys 4 orders and is a one-line change to `compute_triage_scale_limits(by = ...)`. **It costs the property P1.1d was built for**: dry and wet weight would no longer share an axis, so panel (a), whose entire purpose is comparing them, would need its own limits.
+>
+> The larger finding is the third row. **99% of sediment rows sit within 2.8 orders**; the full 8.3 comes from about 1% at the two tails. The bottom is the Coteur unit error noted above (0.0013 mg/kg dry) and the top is the 270,000 mg/kg dry value flagged in PLAN.md P1.1d, which is 27% copper by mass, i.e. ore rather than sediment. Fixing those two does more for the resolution of this panel than any scale change.
+>
+> Three options, in the order I would take them: (1) chase the two tails, since they are data errors that will distort means and thresholds too; (2) split the limits by unit and give panel (a) its own; (3) clip the colour scale to a percentile range and mark out-of-range cells. Not doing any of them unilaterally because all three change a figure the manuscript may use.
 
 ::: {#fig-g002 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_a_density.png){#fig-g002-a group="G002"}
@@ -141,9 +182,9 @@ G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg 
 
 - @fig-g009-d: as with other sediment sampling groups, suspended sediment appears to be slightly more contaminated, but displays far less variation
 
-- TODO: Not enough resolution
+- TODO: Not enough resolution *(see the note under G002 fig-e: the shared compartment scale costs 4 orders, but the two data-error tails cost more. Your call.)*
 
-- TODO: shadowtext sample size? not visible when high concentrations
+- TODO: shadowtext sample size? not visible when high concentrations *(FIXED 2026-08-05, without shadowtext. The labels now sit in a reserved margin outside the data rather than on top of it, which also stops them hiding the observations they count. A halo would have kept them legible over the tiles but left them covering data.)*
 
 ::: {#fig-g009 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_a_density.png){#fig-g009-a group="G009"}
@@ -170,6 +211,10 @@ G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos /
 `G013` `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 TODO: Add bullet points with figure refs to scaffold (generate once then don't touch to avoid over-writing anything
+
+> **DONE 2026-08-05.** `group_section_markdown()` now emits one empty bullet per panel (`- @fig-gNNN-a:` through `-e:`) above the figure div, where you were writing them by hand.
+>
+> Append-only is safe by construction and needed no special handling: sections are only emitted for group anchors absent from the file, so any section you have already written in is never revisited. That is also why this is **not backfilled** into the 29 sections that already have panels, including this one. Backfilling would mean rewriting existing sections, which the generator does not do. New groups get the bullets; existing ones keep whatever you wrote.
 
 - @fig-g013-a: 2+ normal distributions with means at and below threshold II, plus foothills that suggest unit errors or sub-groups
 

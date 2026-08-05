@@ -1041,14 +1041,21 @@ list(
         # literature_analysis_ready, so the filter that used to sit here is
         # redundant. Left as a comment because its removal is the reason this
         # target's results may shift slightly on the next rebuild.
+        # REPLACED an inline copy of the outlier logic with the shared function,
+        # 2026-08-05. Two things were wrong with the copy beyond the duplication:
+        #
+        # 1. Its RMZ ran on the RAW scale while its Tukey fences ran on log10,
+        #    which made the RMZ criterion an upper-tail test in practice. See
+        #    flag_outliers() for the measurement. The plots called flag_outliers()
+        #    and this target did not, so moving one without the other would have
+        #    left the summary table disagreeing with the panels it ranks.
+        # 2. It was UNGATED, computing flags for groups of any size, while the
+        #    dip test below is gated at dip_test_safe()'s min_n. So a group of
+        #    four could be flagged for outliers but never tested for modality.
+        #    flag_outliers() applies the same min_n = 10, so the two flags now
+        #    abstain together and "untested" means the same thing for both.
         mutate(
-          RMZ = robust_modified_z_score(MEASURED_VALUE_STANDARD),
-          log_val = log10(MEASURED_VALUE_STANDARD),
-          Q1 = quantile(log_val, 0.25),
-          Q3 = quantile(log_val, 0.75),
-          IQR = IQR(log_val) * 1.5,
-          outlier_RMZ = abs(RMZ) > 3.5,
-          outlier_IQR = log_val < (Q1 - IQR) | log_val > (Q3 + IQR)
+          flag_outliers(MEASURED_VALUE_STANDARD)
         ) |>
         reframe(
           n = sum(MEASURED_N),
@@ -1079,10 +1086,10 @@ list(
           # MEASURED_N > 1. Sam's call: weight the outlier count by MEASURED_N so
           # numerator and denominator are the same quantity.
           #
-          # na.rm because robust_modified_z_score() returns NA where the MAD is
-          # zero, and a single NA would otherwise blank the whole group's count.
-          # Untested rows therefore count as non-outliers, which is the
-          # conservative direction.
+          # na.rm because flag_outliers() returns NA flags where the group is
+          # below min_n or the MAD is zero, and a single NA would otherwise blank
+          # the whole group's count. Untested rows therefore count as
+          # non-outliers, which is the conservative direction.
           n_double_outliers = sum(
             (outlier_RMZ & outlier_IQR) * MEASURED_N,
             na.rm = TRUE
@@ -1273,9 +1280,17 @@ list(
   # what a reference means, and a target that rewrote it could silently re-point
   # IDs already written into notes. Read the header of R/fct_group_ids.R for why
   # anything rank-derived would be unstable.
+  # The PATH is its own `format = "file"` target so that editing the ledger
+  # invalidates everything downstream. See the note on group_decisions_file
+  # below: this was not tracked at all until 2026-08-05.
+  tar_target(
+    name = group_ids_file,
+    command = here_rel("data/clean/group_ids.csv"),
+    format = "file"
+  ),
   tar_target(
     name = group_ids,
-    command = read_group_ids(here_rel("data/clean/group_ids.csv")),
+    command = read_group_ids(group_ids_file)
   ),
 
   ## # Grouping decisions ----
@@ -1290,11 +1305,98 @@ list(
   #
   # Nothing downstream of this runs until the decisions exist. That is deliberate:
   # it stops the pipeline generating work that has not been asked for.
+  #
+  # THE PATH IS A `format = "file"` TARGET, and that is load-bearing. Found
+  # 2026-08-05: the command took the path as a literal string, so targets hashed
+  # the *command* and never the file. Editing group_decisions.csv by hand, which
+  # is the entire decision workflow this file exists for, invalidated NOTHING.
+  # Confirmed directly: six rows were appended to the csv and `tar_outdated()`
+  # reported `(none)`.
+  #
+  # Same class of fault as the missing `imports = "STOPAEP"` (PLAN.md P1.1e), and
+  # the same symptom: work that appears to have been done and silently was not.
+  # It would have bitten hardest during Phase 2, where a day of judgement goes
+  # into this file and every downstream figure needs to see it.
+  tar_target(
+    name = group_decisions_file,
+    command = here_rel("data/clean/group_decisions.csv"),
+    format = "file"
+  ),
   tar_target(
     name = group_decisions,
     command = read_group_decisions(
-      path = here_rel("data/clean/group_decisions.csv"),
+      path = group_decisions_file,
       summary_data = summarise_literature_data
+    )
+  ),
+
+  ## # AEP nodes ----
+  # PLAN.md P3.1-P3.4, added 2026-08-05. Two hand-edited files, read and never
+  # written, on the same contract as group_decisions.csv. Scaffolding is
+  # scripts/scaffold_aep_nodes.R.
+  #
+  # A NODE IS NOT A SAMPLING GROUP. It may be one group, several, or a restricted
+  # slice of either; docs/NBXX-algae.qmd defines its marine node with a latitude
+  # cut that is not in the group key at all. Membership lives in
+  # aep_node_members.csv and the restrictions are fixed columns on
+  # aep_nodes.csv, rather than a filter expression in a cell that could not be
+  # validated. See the header of R/fct_aep_nodes.R.
+  #
+  # Both paths are `format = "file"` from the outset, having watched
+  # group_decisions.csv go untracked for a week (see above).
+  tar_target(
+    name = aep_nodes_file,
+    command = here_rel("data/clean/aep_nodes.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_nodes,
+    command = read_aep_nodes(aep_nodes_file)
+  ),
+  tar_target(
+    name = aep_node_members_file,
+    command = here_rel("data/clean/aep_node_members.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_node_members,
+    command = read_aep_node_members(
+      path = aep_node_members_file,
+      nodes = aep_nodes,
+      ids = group_ids
+    )
+  ),
+
+  ### # Node report cards ----
+  # PLAN.md P3.1. One row per node: the compact summary a node has to carry.
+  # Arctic coverage is REPORTED, not filtered (Sam's call 2026-08-05); a global
+  # 66.5 cut would drop 81% of measurements and leave the marine node on 258.
+  tar_target(
+    name = aep_node_cards,
+    command = {
+      cards <- aep_node_report_cards(
+        aep_nodes,
+        aep_node_members,
+        literature_analysis_ready,
+        group_ids
+      )
+      validate_aep_nodes(aep_nodes, aep_node_members, cards)
+      cards
+    }
+  ),
+
+  ### # Node coverage backlog ----
+  # What no node has claimed yet, ranked by measurements. This is the complement
+  # to Sam abandoning sequential notebook review on 2026-08-05: picking groups of
+  # interest needs a visible record of what was not picked, so stopping is a
+  # choice rather than an oversight.
+  tar_target(
+    name = aep_node_coverage,
+    command = node_coverage(
+      aep_node_members,
+      summarise_literature_data,
+      group_ids,
+      decisions = group_decisions
     )
   ),
 

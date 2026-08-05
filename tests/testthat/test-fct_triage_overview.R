@@ -284,13 +284,19 @@ test_that("every decade on the concentration axis is LABELLED", {
   )
   params <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]
   labels <- params$x$get_labels()
-  labels <- labels[!is.na(labels)]
+  # Empty strings as well as NA, since 2026-08-05. The panel reserves a strip
+  # beyond limits[2] for its count labels, and breaks falling in that strip are
+  # blanked rather than dropped: an NA label at a real break renders as the
+  # literal text "NA", so "" is what suppression looks like here.
+  labels <- labels[!is.na(labels) & nzchar(labels)]
 
   # 1e-05 through 1e+05 inclusive.
   expect_equal(length(labels), 11)
   expect_true(all(grepl("^1e[+-][0-9]+$", labels)))
   expect_true("1e+00" %in% labels)
   expect_true("1e-05" %in% labels)
+  # And nothing is labelled inside the reserved strip.
+  expect_true(all(as.numeric(labels) <= 1e5))
 })
 
 test_that("the concentration axis has no minor breaks left to draw", {

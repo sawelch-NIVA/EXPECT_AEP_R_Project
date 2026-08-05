@@ -269,9 +269,45 @@ The goal is a contact sheet you can read in one sitting.
 
 ## 6. Phase 3 — Report cards and nodes (Mon 3 – Fri 7 Aug)
 
-- [ ] **P3.1** `node_report_card(group)` returning a one-row tibble: mean, median, n, unit, n references, geographic range, temporal range.
+> **Process change, 2026-08-05.** Sam abandoned sequential review of all 245
+> groups: "going through all the notebooks sequentially is not a good idea.
+> Instead I need to start picking groups of interest and expand from there."
+> The 11 documents in `docs/groups/` become reference rather than the spine.
+> Sequential review optimises for coverage; selection needs the complement, a
+> ranked record of what has *not* been picked, which is `aep_node_coverage`.
+
+- [x] **P3.1** ✅ **2026-08-05.** `node_report_card()` in `R/fct_aep_nodes.R`:
+      measurements and rows separately, sources, unit, arithmetic and geometric
+      mean, SD and GSD, median, spatial and temporal range, plus `n_arctic` /
+      `pct_arctic`.
 - [ ] **P3.2** Mini distribution PNG per node. Reuses P1.2 at a smaller canvas.
-- [ ] **P3.3** Scaffold `data/clean/aep_nodes.csv` from the groups marked `own_notebook`, with empty EPEQ score and justification columns. **Note the vocabulary changed on 2026-07-30**: `own_notebook` was removed when `notebook` became its own column in `group_decisions.csv`. Scaffold from the `notebook` assignment plus `decision != "drop"` instead.
+- [x] **P3.3** ✅ **2026-08-05, by a different design.** Not scaffolded from the
+      `notebook` assignment: a node is **not** a sampling group, and Sam's own
+      prototype proves it. `docs/NBXX-algae.qmd` defines its marine node with
+      `LATITUDE >= 66.5`, which is not in `triage_group_cols()` at all, and drops
+      outliers a few lines later.
+      So the layer is **two hand-edited files**: `data/clean/aep_nodes.csv`
+      (identity, level, x/y, restrictions, EPEQ scores and justifications) and
+      `data/clean/aep_node_members.csv` (one row per node x group). One node can
+      be one group, several groups, or a restricted slice of either.
+      **Restrictions are fixed columns, not a filter expression in a cell**:
+      `lat_min`, `lat_max`, `date_min`, `date_max`, `exclude_references`,
+      `drop_outliers`. Arbitrary R in a spreadsheet cannot be validated, fails at
+      pipeline runtime rather than read time, and does not diff usefully. Anything
+      beyond these should become a named column, not an escape hatch.
+      `node_type` separates `empirical` (resolved from data) from `external`
+      (magnitude typed in from an assessment made elsewhere, which is what P3.6
+      needs for the emissions and REACH nodes).
+      **Mixed units are refused, not averaged.** Scaffolding is
+      `scripts/scaffold_aep_nodes.R`, append-only, and it does **not** propose
+      nodes. 47 tests.
+
+      **Arctic coverage is reported, never filtered** (Sam's call 2026-08-05).
+      Measured first: a global `LATITUDE >= 66.5` would drop **81% of
+      measurements** (95,816 to 17,900) and leave Marine/Salt Water on 258. So
+      the AEP is Norwegian, and Arctic representativeness is a stated property of
+      each node in the same spirit as `n_sources`. If the framing survives to
+      submission it needs a sentence in the methods.
 - [ ] **P3.4** **You score the nodes.** Copy the reasoning style already in `NBXX-algae.qmd:tbl-epeq-algae`; it is good and it is yours.
 - [ ] **P3.5** Pick the systems to model. Target 3-5, likely fish, algae, shellfish, sediment, water. Driven by the Phase 2 decisions, not chosen in advance.
 
@@ -320,6 +356,143 @@ You write. Noted as scheduled work so it is not treated as free.
 - [ ] **P6.2** Move introduction material to discussion, as anticipated in `_planning.qmd` on the basis of the eData paper experience.
 - [ ] **P6.3** Resolve the `**Comment:**` and `**KET:**` co-author prompts left inline in `index.qmd`.
 - [ ] **P6.4** Results and discussion from the AEPs.
+
+------------------------------------------------------------------------
+
+## 9a. Notebook-review fixes, 2026-08-05
+
+Worked from the TODOs Sam left in `docs/groups/` while reading the panels. Each
+is answered in place in the notebook it came from; recorded here so the reasoning
+survives the notebooks going stale. **690 tests passing, up from 600.**
+
+- **Outlier criteria both on log10.** The complaint was "outliers aren't using
+  abs, so only highlighted on the right". The `abs()` was there and the Tukey
+  fences were always two-sided; the RMZ ran on the **raw** scale, where MAD is
+  set by the bulk near the median, so nothing below the median could reach 3.5.
+  Measured over the 74 groups with n >= 10 rows, double-flagged rows split
+  low/high: **5 / 2,525** before, **359 / 1,637** after, and 2.2% of rows flagged
+  against 2.8%. Sam's literal instruction was to move to non-logged data; that
+  was measured too (**5 / 8,876**, 9.9% of rows) and rejected on the numbers,
+  since it worsens the exact symptom being fixed.
+  Group flags went **22 to 14**, of which 6 of the 11 losses were groups under 10
+  rows that `summarise_literature_data` had been flagging without gating.
+  That inline copy of the logic in `_targets.R` is gone; it now calls
+  `flag_outliers()` like everything else, so the summary table cannot drift from
+  the panels again. Added a MAD-zero guard: the criterion abstains rather than
+  flagging every value that is not exactly the median.
+- **Threshold lines named by lower bound.** `THRESHOLD_VALUE` is an upper
+  boundary in the source, so lines read one class low and Class V never appeared
+  anywhere. Now named for the class each boundary **opens**
+  (`add_threshold_boundary_class()`), so sediment reads II / IV / V up 20 / 84 /
+  147. The successor is taken from the next rung present, not by adding one to
+  the numeral, because copper has no Class III. Coastal water gained an
+  open-ended Class V row so its top line has a name.
+- **Sample-size rule.** A sample size is `sum(MEASURED_N)`; anything counting
+  rows says "rows". The category count labels were rows while the heading above
+  them was measurements, which is what made the fish overview unreadable. Both
+  the label and its bracketed outlier count are now measurement-weighted; the
+  heatmap legend is renamed "Rows". Panels carry an in-plot `n (n outliers)`
+  header.
+- **Count labels moved off the data** into a reserved right-hand margin, rather
+  than haloed in place. Fixes "polluted seabed's very high right conc covers up
+  sample size" and stops the label hiding what it counts.
+  **Regression worth remembering:** the first attempt anchored the labels beyond
+  `limits[2]`, and a continuous scale with explicit limits censors out-of-bounds
+  values, so every label silently vanished behind a "removed N rows" warning.
+  Expansion adds drawing room; it does not widen limits.
+- **Panel (e) rebinned** to one colour step per order of magnitude with the M-608
+  boundaries inserted and named in the key. Thresholds cannot be lines on that
+  panel: its axes are lon/lat and concentration is the fill. The finer binning
+  needed the legend bar stretched to most of the panel height, or 15 labels
+  overlap into an unreadable block.
+- **Figure-ref bullets in the scaffold**, append-safe by construction and
+  deliberately not backfilled into sections that already have prose.
+
+### 9b. The unit-standardisation audit, 2026-08-05
+
+Sam asked whether the Coteur discrepancy was his extraction or the pipeline,
+having found the paper reports μg g⁻¹. **It was both, and they are separate
+faults that happen to share the same 1000x signature.**
+
+**Fault 1, the pipeline, and the worse of the two.**
+`standardise_measured_units()` derived the standard unit from one rule (does the
+string contain dry / wet / L) and the conversion factor from an independent one
+(does it contain "ug"). Nothing checked that the two agreed. Reading only the
+numerator prefix means assuming the denominator is kg or L, and for **μg/g that
+assumption is wrong by exactly the factor that hides it**: μg/g *is* mg/kg, a 1:1
+conversion, but the code divided by 1000.
+
+**93 rows across 11 references** came out a thousandfold low. All biota and
+sediment: Ervik, Routti, Leung, Kryukova, Olsvik, Verjordet, Schaanning,
+Pempkowiak, Gillan, Sonne, Brooks. Corrected values are now 0.3 to 243 mg/kg,
+which is ordinary; before, they were 0.0003 to 0.243.
+
+Units are now **parsed**: numerator and denominator read separately, factor
+derived from both, standard unit derived from the denominator rather than
+guessed at a second time. Anything unparseable is reported by name and row count
+instead of silently becoming `NA`, because silence is how this survived.
+
+**Fault 2, the extraction.** Coteur itself is *not* in that 93. Its rows carry
+`μg/kg (dry)` in the source file, so the pipeline converted them correctly from a
+unit that was wrong on the way in. That one is a transcription fix in
+`data/raw/eData/`, and it is still outstanding.
+
+**Recovered as a side effect:** 18 rows of `2000JulshamnTraceElementLevels` whose
+micro sign had been destroyed by an encoding round-trip (`U+FFFD`). They matched
+neither μ nor µ, so they converted to `NA` and the whole reference was dropped in
+silence. Now repaired, with a warning naming the assumption. **This added six new
+groups** (hooded and harp seal, kidney/liver/muscle), which is why
+`group_ids.csv` and `group_decisions.csv` gained rows G246-G251.
+
+**Still dropped, and correctly:** `µM` (42 rows) needs a molar mass to convert
+and is a real conversion Sam could do for copper if those rows matter; `%`
+(11 rows); a bare `mg/kg` (1 row) refused rather than guessed, since dry and wet
+differ by a factor of four or five in biota.
+
+### The decisions file was not tracked at all
+
+Found while re-running after the scaffold. `group_decisions` and `group_ids`
+took their paths as literal strings, so targets hashed the **command** and never
+the file. **Editing `group_decisions.csv` by hand invalidated nothing.**
+Confirmed: six rows appended, `tar_outdated()` reported `(none)`.
+
+Same class as the missing `imports = "STOPAEP"` (P1.1e) and the same symptom,
+work that appears done and silently is not. It would have bitten hardest in
+Phase 2, where a day of judgement goes into that file and every downstream figure
+needs to see it. Both paths are now `format = "file"` targets.
+
+### Open, and Sam's call
+
+- ~~**Panel (b) still has no threshold class axis.**~~ **Added 2026-08-05** on
+  Sam's call: "just print the numerals even if they collide for now." They do
+  collide where boundaries are close, and that is accepted. Revisit at
+  figure-preparation time (P5.4), not before.
+- **Panel (e) resolution is mostly a data problem.** Limits shared per
+  compartment span 12.3 orders; per compartment *and unit* would be 8.3 for
+  sediment mg/kg (dry). But **99% of sediment rows sit within 2.8 orders** and
+  the rest of the span is two tails of bad data: the Coteur unit error at the
+  bottom and the 270,000 mg/kg ore-grade value at the top. Chasing those two
+  beats any scale change, and they distort means and threshold comparisons as
+  well as this panel. Splitting limits by unit also costs the dry-vs-wet
+  comparison that panel (a) exists for.
+- **Coteur 2003: confirmed by Sam against the paper**, which reports μg g⁻¹ dry
+  weight. The source file records `μg/kg (dry)`, so this one is a transcription
+  fix in `data/raw/eData/`, not a pipeline fix, and it is **still outstanding**.
+  See section 9b for the separate pipeline fault it led to.
+- **Molar units are excluded, and this is a standing decision (2026-08-05).**
+  42 rows carry `µM` and are dropped. They *are* convertible (1 µM Cu is
+  63.55 µg/L), so this is a choice rather than a limitation: a molar measurement
+  is not obviously comparable with the total/dissolved mix already in the data,
+  and 42 rows do not justify the methods-section paragraph that defending the
+  conversion would need. **Revisit only if a chosen AEP node depends on them.**
+  If the exclusion survives to submission it belongs in the methods as one
+  sentence, since it is a deliberate exclusion rather than an absence.
+
+### Nice to have, not before submission
+
+- **Correlation matrices per group** (`docs/groups/aquatic-sediment.qmd`, G013).
+  Agreed 2026-08-05 to defer: it is a new analysis rather than a fix to an
+  existing panel, and nothing in Phase 3 or 4 depends on it.
 
 ------------------------------------------------------------------------
 

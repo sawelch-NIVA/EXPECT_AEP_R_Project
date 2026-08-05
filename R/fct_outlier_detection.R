@@ -1,16 +1,46 @@
 #' Flag Outliers via Tukey Fences and Robust Modified Z-Score
 #'
-#' Flags are computed on the log10 scale (Tukey fences, IQR x 1.5) and on the
-#' raw scale (Robust Modified Z-Score, threshold 3.5). Below `min_n`, these
+#' Both criteria are computed on the **log10 scale**: Tukey fences (IQR x 1.5)
+#' and the Robust Modified Z-Score (threshold 3.5). Below `min_n`, these
 #' statistics are unreliable, so flag columns are returned as `NA` (and
 #' `dot_fill` as `"not tested"`) rather than computed.
 #'
-#' @param x A numeric vector of measured values (assumed positive; flagged
-#'   partly on the log10 scale).
+#' **The RMZ moved from the raw scale to log10 on 2026-08-05**, and the reason
+#' is worth keeping. Sam's observation was that outliers were "only highlighted
+#' on the right", read as a missing `abs()`. The `abs()` was always there and the
+#' Tukey fences were always two-sided; the asymmetry came from the *scale*. MAD
+#' on raw lognormal data is set by the bulk near the median, so a value ten times
+#' **below** the median sits well inside 3.5 MADs while a value ten times above
+#' blows straight through. The criterion was in practice an upper-tail test.
+#'
+#' Measured over the 74 groups with at least 10 rows, double-flagged rows split
+#' low/high as:
+#'
+#' | Scheme | low | high | % of rows |
+#' |---|---|---|---|
+#' | IQR log10, RMZ raw (old) | 5 | 2,525 | 2.8 |
+#' | both raw | 5 | 8,876 | 9.9 |
+#' | both log10 (this) | 359 | 1,637 | 2.2 |
+#'
+#' Moving the *fences* to raw instead was considered and rejected: it triples
+#' right-tail flagging and leaves the left tail at the same 5 rows. Copper
+#' concentrations here span roughly 12 orders of magnitude and are approximately
+#' lognormal, so log space is where a symmetric fence means anything.
+#'
+#' `mad()` returns 0 where more than half the values are identical, which makes
+#' every RMZ `Inf` or `NaN`. Guarded rather than left to propagate: `RMZ` comes
+#' back all-`NA` and the criterion abstains, leaving the Tukey fences to decide.
+#' Downstream code already treats an `NA` flag as "not an outlier"
+#' (`add_triage_flags()` sums with `na.rm = TRUE`), which is the conservative
+#' direction.
+#'
+#' @param x A numeric vector of measured values. Must be positive: non-positive
+#'   values are `NaN` under `log10()` and are dropped upstream by
+#'   [drop_nonpositive_measurements()].
 #' @param min_n Minimum sample size required to compute flags.
-#' @return A tibble with one row per element of `x`: `RMZ`, `outlier_RMZ`,
-#'   `outlier_IQR`, and `dot_fill` (factor: "neither", "IQR", "RMZ", "both",
-#'   "not tested").
+#' @return A tibble with one row per element of `x`: `RMZ` (on the log10 scale),
+#'   `outlier_RMZ`, `outlier_IQR`, and `dot_fill` (factor: "neither", "IQR",
+#'   "RMZ", "both", "not tested").
 flag_outliers <- function(x, min_n = 10) {
   dot_fill_levels <- c("neither", "IQR", "RMZ", "both", "not tested")
   n <- length(x)
@@ -28,7 +58,16 @@ flag_outliers <- function(x, min_n = 10) {
   Q1 <- stats::quantile(log_val, 0.25, na.rm = TRUE)
   Q3 <- stats::quantile(log_val, 0.75, na.rm = TRUE)
   fence <- stats::IQR(log_val, na.rm = TRUE) * 1.5
-  RMZ <- robust_modified_z_score(x)
+  # MAD of zero (more than half the values identical) makes every score Inf or
+  # NaN, and abs(Inf) > 3.5 is TRUE, so the criterion would flag every value that
+  # is not exactly the median. More likely on the log10 scale than it was on the
+  # raw one, since rounding to a reporting precision collapses more ties. Abstain
+  # instead and let the Tukey fences decide alone.
+  RMZ <- if (isTRUE(stats::mad(log_val, na.rm = TRUE) > 0)) {
+    robust_modified_z_score(log_val)
+  } else {
+    rep(NA_real_, n)
+  }
   outlier_RMZ <- abs(RMZ) > 3.5
   outlier_IQR <- log_val < (Q1 - fence) | log_val > (Q3 + fence)
 

@@ -147,7 +147,19 @@ generate_copper_thresholds <- function() {
   # dropping III outright), which is the same underlying fact expressed
   # differently. Downstream plotting keys on a simplified band rather than on
   # THRESHOLD_CLASS verbatim, so the inconsistency does not leak into figures.
-  # Class V (>5.2) is deliberately not coded, being open-ended.
+  # Class V (>5.2) IS now coded, as an open-ended row with THRESHOLD_VALUE = NA,
+  # matching freshwater and sediment above.
+  #
+  # CHANGED 2026-08-05, and the reason is presentational rather than scientific.
+  # Since the boundary lines are labelled by the class they OPEN rather than the
+  # class they close (see add_threshold_boundary_class()), the top line needs a
+  # row above it to take its name from. Without a Class V row, the 5.2 line on
+  # every coastal panel came out unlabelled, which is precisely the gap Sam
+  # queried for sediment on 2026-08-05 ("the highest threshold is V according to
+  # comments, why isn't it here").
+  #
+  # The row plots nothing on its own: thresholds_for_group() drops NA values,
+  # because there is no line to draw for "everything above the last boundary".
   coastal <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
@@ -155,8 +167,8 @@ generate_copper_thresholds <- function() {
     TITLE_SHORT = c(
       "M-608: Coastal Background (I)",
       "M-608: Coastal Good - Moderate (II-III)",
-      "M-608: Coastal Poor (IV)"
-      # "M-608: Coastal Very Poor (V)"
+      "M-608: Coastal Poor (IV)",
+      "M-608: Coastal Very Poor (V)"
     ),
     DOCUMENT_NUMBER = "M-608|2016",
     YEAR = 2016L,
@@ -172,17 +184,17 @@ generate_copper_thresholds <- function() {
     THRESHOLD_CLASS = c(
       "Background (I)",
       "Good - Moderate (II-III)",
-      "Poor (IV)"
-      # "Very Poor (V)"
+      "Poor (IV)",
+      "Very Poor (V)"
     ),
-    THRESHOLD_VALUE = c(0.3, 2.6, 5.2),
+    THRESHOLD_VALUE = c(0.3, 2.6, 5.2, NA_real_),
     MEASURED_UNIT = "μg/L",
     THRESHOLD_FRACTION = "Dissolved",
     THRESHOLD_COMMENT = c(
       "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.3)",
       "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-2.6)",
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 2.6 - 5.2)"
-      # "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor: >5.2)"
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 2.6 - 5.2)",
+      "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor: >5.2). Open-ended"
     )
   )
 
