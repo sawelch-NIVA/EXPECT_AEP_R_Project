@@ -45,10 +45,13 @@ if (file.exists(nodes_path)) {
     date_max = as.Date(NA),
     exclude_references = NA_character_,
     drop_outliers = FALSE,
-    value = NA_real_,
-    value_sd = NA_real_,
-    value_n = NA_real_,
-    value_unit = NA_character_,
+    # Blank, and they must stay blank on an empirical node: its magnitude is
+    # computed from its member groups. read_aep_nodes() stops if they are set
+    # here. See external_value_cols().
+    external_value = NA_real_,
+    external_sd = NA_real_,
+    external_n = NA_real_,
+    external_unit = NA_character_,
     essentiality_score = 3,
     essentiality_justification = paste(
       "Copper is known to be naturally present in the earth's crust and",

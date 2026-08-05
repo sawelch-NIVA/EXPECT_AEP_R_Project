@@ -331,9 +331,25 @@ The goal is a contact sheet you can read in one sitting.
 
 **Your stated highest risk. The mitigation is scope, not effort.**
 
-- [ ] **P4.1** Scaffold `data/clean/aep_edges.csv` for every plausible flow between chosen nodes, all defaulting to `status = "putative"`.
+- [x] **P4.1** ✅ **2026-08-05.** `scripts/scaffold_aep_edges.R` proposes every
+      **downward** flow between placed nodes, ordered by `level`
+      (source → medium → organism → tse), all `putative`. Upward flows (biota
+      returning copper to sediment) are real but are a judgement to make
+      deliberately, not to find pre-typed. Append-only: it never removes or
+      reverses anything.
+      Deliberately over-generous, because the time-box in P4.2 works by having
+      the candidate list in front of you and crossing edges off. **16 edges
+      proposed across your 7 nodes; expect to delete most of them.**
+      `read_aep_edges()` refuses unknown node ids, self-loops, duplicate ids and
+      out-of-range scores; `validate_aep_edges()` warns on an empirical edge with
+      no `evidence_justification`, a putative edge carrying a magnitude, a
+      magnitude with no unit, and nodes with no edges at all.
 - [ ] **P4.2** **Time-box gap-filling to 3 working days.** For each edge, spend at most \~30 minutes looking for empirical support. Found: score it, mark `empirical`, cite. Not found: leave `putative`, write one sentence on what evidence *would* settle it, move on.
-- [ ] **P4.3** Make `putative` visually distinct in the diagram (dashed, greyed, unlabelled magnitude).
+- [x] **P4.3** ✅ **2026-08-05.** `aep_edge_styles()` separates the two in
+      **four** channels at once (linetype, colour, linewidth, alpha), and a test
+      asserts they never collapse to the same styling. Magnitudes are labelled on
+      empirical edges only. This is the property the phase's whole argument rests
+      on, so it is enforced rather than trusted.
 
 The unfilled edges are a result. A regional-scale AEP that honestly marks its own gaps is a more defensible contribution than one that quietly implies completeness. This is also the argument that lets you stop on schedule.
 
@@ -341,7 +357,16 @@ The unfilled edges are a result. A regional-scale AEP that honestly marks its ow
 
 ## 8. Phase 5 — Assemble and render (Wed 26 – Fri 28 Aug)
 
-- [ ] **P5.1** `plot_aep(nodes, edges)`: ggraph with **manual** coordinates from `aep_nodes.csv`. Automatic layouts are wrong here because vertical position carries source-to-TSE meaning.
+- [x] **P5.1** ✅ **2026-08-05, first working version.** `plot_aep()` with manual
+      coordinates, as specified. **Plain ggplot2 rather than ggraph**: with
+      coordinates already fixed there is no layout algorithm left to want, and a
+      graph package would be a dependency added to draw segments and text. The
+      `aep_diagram` target writes `figures/aep.png` as a `format = "file"`
+      target, per CLAUDE.md 4.4.
+      **Known rough edge:** arrow ends are trimmed by a fixed fraction of the
+      segment, so against a wide node label they can stop visibly short. Fine for
+      a working diagram, wants per-label geometry for a manuscript figure. Revisit
+      at P5.4, not before.
 - [ ] **P5.2** Node cards placed with `ggimage::geom_image`.
 - [ ] **P5.4** **Composed multi-panel figures.** This is where patchwork comes back, deliberately and only for figures actually going into the manuscript. Triage plots stay as individual PNGs forever.
 - [ ] **P5.3** 3-5 focused system AEPs plus one holistic low-detail AEP (matching the `docs/_planning.qmd` Materials/Methods items 1 and 2, which are still the right targets even though its schedule is dead).
@@ -448,6 +473,82 @@ groups** (hooded and harp seal, kidney/liver/muscle), which is why
 and is a real conversion Sam could do for copper if those rows matter; `%`
 (11 rows); a bare `mg/kg` (1 row) refused rather than guessed, since dry and wet
 differ by a factor of four or five in biota.
+
+### 9c. The Vannmiljø unit review, 2026-08-05
+
+Asked for after G047 turned out to be the known Urban Fjord 1000x problem.
+
+**Our Vannmiljø conversion code is correct.** `vm_convert_unit()` maps the three
+units that reach it (`µg/l`, `mg/kg t.v.`, `mg/kg v.v.`) onto the right standard
+units, and **aborts on anything unrecognised** rather than guessing, which is
+better than the literature path was before today. Those then flow through the
+rewritten `standardise_measured_units()`, so µg/L to mg/L is a correct 1e-3 and
+the two mass units pass through at 1. LOQ and LOD take the measurement's unit,
+which is forced rather than assumed: the raw export has one `Enhet_id` per row
+and no separate limit-unit column.
+
+Two things worth knowing rather than fixing:
+
+- The raw copper export carries a **fourth** unit, `ng/m3` (1,123 rows, air
+  deposition). It never reaches `vm_convert_unit()` because
+  `vm_filter_compartments()` drops it first. So the abort is narrower than it
+  looks: it can only see units surviving the compartment filter. Acceptable,
+  since those rows are unwanted anyway, but the abort is not the whole guard it
+  appears to be.
+- `known_units` hardcodes `U+00B5` and the lookup supplies `U+00B5`, so they
+  agree today. If the export encoding ever shifts to `U+03BC`, the pipeline
+  aborts. Loud, which is right.
+
+**The error is in the source, and the source says so.** 33 rows across seven
+biota groups carry the comment *"Verdier oppgitt i µg/g (w.w.) og multiplisert
+med 1000"*: values given in µg/g wet weight and multiplied by 1000. **µg/g is
+mg/kg**, so the multiplication is the error. All are Urban Fjord Contaminants,
+sampled 2017-10-15.
+
+| Group | rows | geo. mean | ÷ 1000 |
+|---|---:|---:|---:|
+| *Gadus morhua* muscle | 15 | 3,670 | 3.67 |
+| *Euphausiacea* whole body | 3 | 18,600 | 18.6 |
+| *Polychaeta* whole body | 3 | 17,800 | 17.8 |
+| *Gadus morhua* liver | 3 | 14,400 | 14.4 |
+| *Pandalus borealis* soft tissue | 3 | 7,460 | 7.46 |
+| *Clupea harengus* muscle | 3 | 799 | 0.80 |
+| *Mytilus edulis* soft tissue | 5 | 66.7 | 0.067 |
+
+Every one is ordinary once divided. This is the **third** instance in one day of
+the same µg/g-is-mg/kg misconception, after Sam's Coteur extraction and the
+`standardise_measured_units()` fault (section 9b).
+
+**Detectors added** (`R/fct_unit_anomalies.R`, target `unit_anomaly_report`),
+because this class of error cannot be prevented, only found:
+
+- `scan_comment_unit_flags()` reads the comment field for submitters describing
+  their own unit arithmetic. Certain rather than inferential.
+- `scan_group_scale_offsets()` compares each campaign's geometric mean against
+  the **median of the other campaigns in the same sampling group**. Two earlier
+  reference statistics were wrong and the reasoning is recorded in the function:
+  a pooled-row reference let the 18 bad rows outvote the correct ones and flagged
+  the four **correct** campaigns instead.
+
+Both **report and never correct**. Rewriting a measured value on the strength of
+a free-text comment is Sam's judgement, not the pipeline's.
+
+**Deliberately not acted on, 2026-08-05 (Sam: "we won't touch those yet").**
+Logged here so they are not lost:
+
+1. **The 33 Urban Fjord rows.** Correct, exclude, or leave to the outlier
+   machinery. Correcting is well evidenced but means this pipeline overriding a
+   national database, which wants a methods sentence. Note one of them
+   (*M. edulis* at 1,420 mg/kg wet) sits inside AEP node N003, so the decision
+   reaches the AEP and not just the triage plots.
+2. **_Salmo trutta_ muscle**, flagged in three campaigns at 2.3 to 2.7 orders
+   apart (Measures Monitoring, Urban Fjord, MilFersk). Uninvestigated; looks like
+   the same family of problem.
+3. **Aquatic Sediment / Screening New Contaminants**, 2.0 orders low over 19
+   rows. Uninvestigated.
+
+`unit_anomaly_report` re-derives all three on every build, so they cannot go
+stale or be forgotten.
 
 ### The decisions file was not tracked at all
 

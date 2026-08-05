@@ -239,3 +239,103 @@ test_that("adding bullets does not disturb the append-only guarantee", {
   expect_identical(before, after)
   expect_true(any(grepl("clear bimodality, two campaigns", after, fixed = TRUE)))
 })
+
+# ---- Panels appearing after a section already exists (2026-08-05) -------
+
+test_that("a section gains panels once its group has them", {
+  # THE GAP. Adding a group to must_include and re-running the pipeline writes
+  # its PNGs, but the section keeps saying "No triage panels" because
+  # append-only skips any anchor already in the file. Sam hit this with G047
+  # after correctly editing the target and re-running twice.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  path <- file.path(dir, "fish.qmd")
+  before <- readLines(path, warn = FALSE)
+  expect_true(any(startsWith(before, "*No triage panels:")))
+
+  out <- refresh_group_panels(
+    nb_groups(ids = "G001", slugs = "some_slug"), dir = dir, verbose = FALSE
+  )
+  after <- readLines(path, warn = FALSE)
+
+  expect_equal(out$group_id, "G001")
+  expect_true(any(grepl("^::: \\{#fig-g001", after)))
+  expect_true(any(grepl("^- @fig-g001-a:", after)))
+  expect_false(any(grepl("G001` to `must_include`", after, fixed = TRUE)))
+})
+
+test_that("the repair is idempotent", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  groups <- nb_groups(ids = "G001", slugs = "some_slug")
+  refresh_group_panels(groups, dir = dir, verbose = FALSE)
+  once <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  out <- refresh_group_panels(groups, dir = dir, verbose = FALSE)
+  twice <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  expect_equal(nrow(out), 0)
+  expect_identical(once, twice)
+})
+
+test_that("the repair leaves a hand-edited placeholder alone", {
+  # THE SAFETY PROPERTY. The match is byte-for-byte against the machine-written
+  # boilerplate. One character of Sam's own and the section is untouched, which
+  # is what keeps append-only intact.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  path <- file.path(dir, "fish.qmd")
+  lines <- readLines(path, warn = FALSE)
+  i <- grep("G001` to `must_include`", lines, fixed = TRUE)[1]
+  lines[i] <- paste(lines[i], "I have decided this one does not need panels.")
+  writeLines(lines, path)
+  before <- readLines(path, warn = FALSE)
+
+  out <- refresh_group_panels(
+    nb_groups(ids = "G001", slugs = "some_slug"), dir = dir, verbose = FALSE
+  )
+  expect_equal(nrow(out), 0)
+  expect_identical(before, readLines(path, warn = FALSE))
+})
+
+test_that("the repair never touches prose or a verdict", {
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  path <- file.path(dir, "fish.qmd")
+  lines <- readLines(path, warn = FALSE)
+  v <- grep("^\\*\\*Verdict:\\*\\*", lines)[1]
+  lines[v] <- "**Verdict:** keep, clearly bimodal, see the 2019 campaign"
+  writeLines(lines, path)
+
+  refresh_group_panels(
+    nb_groups(ids = "G001", slugs = "some_slug"), dir = dir, verbose = FALSE
+  )
+  after <- readLines(path, warn = FALSE)
+  expect_true(any(grepl("clearly bimodal, see the 2019 campaign", after, fixed = TRUE)))
+})
+
+test_that("a repaired section matches one written fresh", {
+  # panel_block_markdown() is shared by both paths precisely so this holds.
+  fresh <- group_section_markdown(
+    nb_decisions(notebooks = "Fish", ids = "G001", n = 900)[1, , drop = FALSE],
+    plot_slug = "some_slug"
+  )
+  block <- panel_block_markdown(
+    "G001",
+    triage_group_label(nb_decisions(notebooks = "Fish", ids = "G001", n = 900)[1, ]),
+    "some_slug"
+  )
+  expect_true(all(block %in% fresh))
+})

@@ -70,6 +70,91 @@ existing_group_sections <- function(path) {
   unique(stats::na.omit(matches))
 }
 
+#' The Five Triage Panels, in Reading Order
+#'
+#' Suffix to caption. The letter prefix on each suffix is what the notebooks key
+#' their subfigure ids on, so `a_density` becomes `@fig-g006-a`.
+#'
+#' @return A named character vector.
+#' @export
+triage_panel_captions <- function() {
+  c(
+    a_density = "Overall distribution (all units)",
+    b_date = "Concentration by date",
+    c_source = "Distribution by campaign or reference",
+    d_site_type = "Distribution by site type (all geographies)",
+    e_spatial = "Spatial distribution"
+  )
+}
+
+#' The Placeholder Written Where a Group Has No Panels
+#'
+#' Generated in one place because [refresh_group_panels()] matches it
+#' **verbatim** to decide whether a section is safe to repair. If the two ever
+#' drifted apart, the repair would silently stop finding anything.
+#'
+#' @param id A `group_id`.
+#' @return A single markdown line.
+#' @export
+no_panels_placeholder <- function(id) {
+  paste0(
+    "*No triage panels: this group is below the `min_n` cutoff. ",
+    "Add `", id, "` to `must_include` in the ",
+    "`triage_pilot_groups` target if it needs them.*"
+  )
+}
+
+#' The Figure Block for One Group
+#'
+#' Empty cross-reference bullets, then the subfigure div. Shared by
+#' [group_section_markdown()] (writing a new section) and
+#' [refresh_group_panels()] (repairing one that has gained panels), so a section
+#' repaired later is byte-identical to one written fresh.
+#'
+#' One empty bullet per panel sits ABOVE the div, carrying the cross-reference
+#' already written out. Sam's request 2026-08-05: he was typing
+#' `- @fig-g013-a:` by hand for every panel of every group, which is five
+#' references x 245 groups of clerical work, and a mistyped id fails silently as
+#' an unresolved reference.
+#'
+#' @param id A `group_id`. @param label The group label, for the div caption.
+#' @param plot_slug The group's `group_slug`.
+#' @param captions Named vector of plot suffix to caption.
+#' @return A character vector of markdown lines.
+#' @export
+panel_block_markdown <- function(id, label, plot_slug, captions = NULL) {
+  captions <- captions %||% triage_panel_captions()
+  fig <- paste0("fig-", tolower(id))
+
+  out <- c(
+    vapply(
+      names(captions),
+      function(key) paste0("- @", fig, "-", substr(key, 1, 1), ":"),
+      character(1),
+      USE.NAMES = FALSE
+    ),
+    ""
+  )
+
+  # A div id plus a per-image id makes these Quarto subfigures, so the whole row
+  # is @fig-g006 and a single panel is @fig-g006-a. The closing caption line is
+  # required: without it the div is a plain layout and none of the references
+  # resolve.
+  out <- c(out, paste0("::: {#", fig, " layout-ncol=5}"), "")
+  for (key in names(captions)) {
+    out <- c(
+      out,
+      paste0(
+        "![", captions[[key]], "](",
+        file.path("..", "..", "triage", paste0(plot_slug, "_", key, ".png")),
+        "){#", fig, "-", substr(key, 1, 1), " group=\"", id, "\"}"
+      ),
+      ""
+    )
+  }
+  c(out, paste0(id, ": ", label), "", ":::", "")
+}
+
 #' Markdown for One Group's Section
 #'
 #' @param row One row of the joined decisions/summary table.
@@ -78,13 +163,7 @@ existing_group_sections <- function(path) {
 #' @return A character vector of markdown lines.
 #' @export
 group_section_markdown <- function(row, plot_slug = NA_character_, captions = NULL) {
-  captions <- captions %||% c(
-    a_density = "Overall distribution (all units)",
-    b_date = "Concentration by date",
-    c_source = "Distribution by campaign or reference",
-    d_site_type = "Distribution by site type (all geographies)",
-    e_spatial = "Spatial distribution"
-  )
+  captions <- captions %||% triage_panel_captions()
 
   id <- row$group_id[1]
   label <- triage_group_label(row)
@@ -98,62 +177,11 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
     ""
   )
 
-  if (!is.na(plot_slug)) {
-    # One empty bullet per panel, ABOVE the figure div, carrying the
-    # cross-reference already written out. Sam's request 2026-08-05: he was
-    # typing "- @fig-g013-a:" by hand for every panel of every group before
-    # writing anything, which is 5 references x 245 groups of clerical work, and
-    # a mistyped id fails silently as an unresolved reference.
-    #
-    # Placed before the div because that is where the hand-written ones already
-    # sit (see the G008 and G013 sections of docs/groups/aquatic-sediment.qmd),
-    # so appended sections read the same as written ones.
-    #
-    # SAFE UNDER APPEND-ONLY without any special handling: sections are only
-    # emitted for groups whose anchor is absent from the file, so a group that
-    # already has hand-written bullets is never revisited. That is also why this
-    # is not backfilled into the 29 sections that already have panels; doing so
-    # would mean rewriting existing sections, which this generator does not do.
-    out <- c(
-      out,
-      vapply(
-        names(captions),
-        function(key) paste0("- @", fig, "-", substr(key, 1, 1), ":"),
-        character(1),
-        USE.NAMES = FALSE
-      ),
-      ""
-    )
-
-    # A div id plus a per-image id makes these Quarto subfigures, so the whole
-    # row is @fig-g006 and a single panel is @fig-g006-a. The closing caption
-    # line is required: without it the div is a plain layout and none of the
-    # references resolve.
-    out <- c(out, paste0("::: {#", fig, " layout-ncol=5}"), "")
-    for (i in seq_along(captions)) {
-      key <- names(captions)[i]
-      out <- c(
-        out,
-        paste0(
-          "![", captions[[key]], "](",
-          file.path("..", "..", "triage", paste0(plot_slug, "_", key, ".png")),
-          "){#", fig, "-", substr(key, 1, 1), " group=\"", id, "\"}"
-        ),
-        ""
-      )
-    }
-    out <- c(out, paste0(id, ": ", label), "", ":::", "")
+  out <- c(out, if (!is.na(plot_slug)) {
+    panel_block_markdown(id, label, plot_slug, captions)
   } else {
-    out <- c(
-      out,
-      paste0(
-        "*No triage panels: this group is below the `min_n` cutoff. ",
-        "Add `", row$group_id[1], "` to `must_include` in the ",
-        "`triage_pilot_groups` target if it needs them.*"
-      ),
-      ""
-    )
-  }
+    c(no_panels_placeholder(id), "")
+  })
 
   # The point of the whole file. Left as a visible prompt rather than a blank, so
   # an unwritten verdict is obvious when skimming.
@@ -403,9 +431,23 @@ generate_group_notebooks <- function(
   species_nodes = NULL,
   overview_paths = character(0),
   species_paths = character(0),
+  refresh_panels = TRUE,
   verbose = TRUE
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+
+  # Bring existing sections up to date with panels that have since been built,
+  # BEFORE appending new ones. Without this, adding a group to `must_include` and
+  # re-running the pipeline leaves its section reading "No triage panels"
+  # forever, because append-only skips any anchor already in the file. Sam hit
+  # exactly that with G047 on 2026-08-05 after correctly editing the target and
+  # re-running twice.
+  #
+  # Narrowly scoped: see refresh_group_panels(). It replaces one machine-written
+  # line and cannot touch prose.
+  if (refresh_panels) {
+    refresh_group_panels(groups, dir = dir, decisions = decisions, verbose = verbose)
+  }
 
   decisions <- decisions |>
     dplyr::filter(!is.na(.data$notebook), .data$notebook != "")
@@ -496,6 +538,117 @@ generate_group_notebooks <- function(
       sum(out$appended), " section(s) appended, ",
       sum(out$already_present), " left untouched"
     )
+  }
+  invisible(out)
+}
+
+#' Give Panels to Sections That Have Since Gained Them
+#'
+#' **The gap this closes.** Adding a group to `must_include` and re-running the
+#' pipeline writes its five PNGs, but the notebook section still reads "No triage
+#' panels: this group is below the `min_n` cutoff". The pipeline never touches
+#' `docs/groups/*.qmd` at all, and [generate_group_notebooks()] cannot help
+#' either: it appends sections only for group anchors ABSENT from the file, so a
+#' section that already exists is skipped whatever has changed underneath it.
+#'
+#' Sam hit exactly this with G047 on 2026-08-05, having correctly edited the
+#' target and re-run the pipeline twice.
+#'
+#' **Append-only is not weakened, and the scoping is the whole argument.** This
+#' replaces one line, and only where that line is byte-identical to
+#' [no_panels_placeholder()] for the group whose section it sits in. That string
+#' is machine-written boilerplate that no one would type. If Sam has written a
+#' single character into it, the match fails and the section is left alone. It
+#' cannot touch prose, a verdict, or a section that already has a figure block.
+#'
+#' Idempotent: after a repair the placeholder is gone, so re-running does
+#' nothing.
+#'
+#' @param groups The `triage_pilot_groups` target, supplying `group_id` and
+#'   `group_slug`.
+#' @param dir Where the notebooks live.
+#' @param decisions Optional decisions table, used only for the group label in
+#'   the figure caption. Falls back to the label already in the heading.
+#' @param verbose Report what changed?
+#' @return A tibble of `file`, `group_id`, `repaired`, invisibly.
+#' @export
+refresh_group_panels <- function(
+  groups,
+  dir = here_rel("docs/groups"),
+  decisions = NULL,
+  verbose = TRUE
+) {
+  files <- list.files(dir, pattern = "[.]qmd$", full.names = TRUE)
+  log <- list()
+
+  for (path in files) {
+    lines <- readLines(path, warn = FALSE)
+    anchors <- stringr::str_match(lines, "\\{#grp-([A-Za-z0-9]+)")[, 2]
+    changed <- FALSE
+
+    # Walk backwards so earlier line numbers stay valid as the file grows.
+    placeholders <- rev(which(startsWith(lines, "*No triage panels:")))
+
+    for (i in placeholders) {
+      owner <- utils::tail(stats::na.omit(anchors[seq_len(i)]), 1)
+      if (length(owner) != 1) {
+        next
+      }
+      # Verbatim match against the placeholder for THIS group. A placeholder
+      # naming a different group id means the file has been hand-edited in a way
+      # this function must not second-guess.
+      if (!identical(lines[i], no_panels_placeholder(owner))) {
+        next
+      }
+      slug <- groups$group_slug[groups$group_id == owner]
+      if (length(slug) != 1 || is.na(slug)) {
+        next
+      }
+
+      label <- if (!is.null(decisions) && owner %in% decisions$group_id) {
+        triage_group_label(decisions[decisions$group_id == owner, ])
+      } else {
+        # From the heading itself: "## G047 Fish / Gadus morhua / ... {#grp-G047}"
+        heading <- utils::tail(
+          grep(paste0("\\{#grp-", owner, "\\}"), lines), 1
+        )
+        sub(
+          paste0("^## ", owner, " (.*) \\{#grp-", owner, "\\}$"), "\\1",
+          lines[heading]
+        )
+      }
+
+      lines <- append(
+        lines[-i],
+        panel_block_markdown(owner, label, slug),
+        after = i - 1
+      )
+      changed <- TRUE
+      log[[length(log) + 1]] <- tibble::tibble(
+        file = basename(path), group_id = owner, repaired = TRUE
+      )
+    }
+
+    if (changed) {
+      writeLines(lines, path)
+    }
+  }
+
+  out <- if (length(log)) purrr::list_rbind(log) else {
+    tibble::tibble(
+      file = character(0), group_id = character(0), repaired = logical(0)
+    )
+  }
+
+  if (verbose) {
+    if (nrow(out) == 0) {
+      message("No sections needed panels adding.")
+    } else {
+      message(
+        "Added panels to ", nrow(out), " section(s): ",
+        paste(out$group_id, collapse = ", ")
+      )
+    }
   }
   invisible(out)
 }

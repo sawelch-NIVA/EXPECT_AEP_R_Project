@@ -154,6 +154,28 @@ comments at `_targets.R:84-98`: `tar_map()` needs its `values` at pipeline
 then run the generator (scaffold the file) then `tar_make()` once more (define
 its render target). This is inherent to data-dependent static branching.
 
+### 2.3.1 Sam cannot see inline images (noted 2026-08-05)
+
+He works in VSCode / Positron through an unofficial Claude Code extension that
+does not render images. **Anything visual is invisible to him unless it is a
+file he can open himself.**
+
+Practical consequences, and they apply to every plotting task in this repo:
+
+- **Write visual output to a stable path inside the project**, not to a scratch
+  or temp directory, and **say the path**. A plot rendered only into a scratchpad
+  effectively does not exist.
+- **Describe what the image shows in words.** "N005's boxplot spans four orders
+  with two clusters and a void between them" is the part that survives; the
+  picture is not.
+- Reviewing a plot by eye is *my* job before handing it over, since he cannot do
+  it from the conversation. Render it, look at it, fix what is wrong, then report
+  what it looks like.
+
+`figures/` is the conventional destination: `figures/aep.png` for the diagram,
+`figures/node_cards/*.png` for the per-node cards, and `triage/` for the triage
+panels (which the notebooks link rather than embed).
+
 ### 2.4 Environment quirks
 
 - `here::i_am("Readme.md")` anchors the project root in `_targets.R` and in the

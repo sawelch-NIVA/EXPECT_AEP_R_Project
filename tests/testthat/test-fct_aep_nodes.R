@@ -5,76 +5,6 @@
 # (latitude, date, source, outliers). These tests cover each of those and the
 # ways the combination can go wrong.
 
-node_fixture <- function(...) {
-  base <- tibble::tibble(
-    node_id = "N001",
-    label = "Test node",
-    level = "medium",
-    node_type = "empirical",
-    x = 0, y = 1,
-    lat_min = NA_real_, lat_max = NA_real_,
-    date_min = as.Date(NA), date_max = as.Date(NA),
-    exclude_references = NA_character_,
-    drop_outliers = FALSE,
-    value = NA_real_, value_sd = NA_real_,
-    value_n = NA_real_, value_unit = NA_character_,
-    essentiality_score = 3, essentiality_justification = "x",
-    plausibility_score = 3, plausibility_justification = "x",
-    evidence_score = 2, evidence_justification = "x",
-    quantification_score = 2, quantification_justification = "x",
-    notes = NA_character_
-  )
-  args <- list(...)
-  for (nm in names(args)) base[[nm]] <- args[[nm]]
-  base
-}
-
-ids_fixture <- function() {
-  tibble::tibble(
-    ENVIRON_COMPARTMENT = c("Aquatic", "Aquatic", "Biota"),
-    ENVIRON_COMPARTMENT_SUB = c("Freshwater", "Freshwater", "Biota, Aquatic"),
-    SPECIES_GROUP = c(NA, NA, "Fish"),
-    SAMPLE_SPECIES = c(NA, NA, "Gadus morhua"),
-    SAMPLE_TISSUE = c(NA, NA, "Liver"),
-    SITE_GEOGRAPHIC_FEATURE = c("River, stream, canal", "Lake, pond, pool, reservoir", "Coastal, fjord"),
-    SITE_GEOGRAPHIC_FEATURE_SUB = c("Water column, pelagic zone", "Water column, pelagic zone", "Not reported"),
-    MEASURED_UNIT_STANDARD = c("mg/L", "mg/L", "mg/kg (wet)"),
-    group_id = c("G001", "G002", "G003")
-  )
-}
-
-data_fixture <- function() {
-  ids <- ids_fixture()
-  # 10 rows per group, latitudes straddling the Arctic Circle, two references.
-  purrr::list_rbind(purrr::map(seq_len(nrow(ids)), function(i) {
-    row <- ids[i, ]
-    tibble::tibble(
-      ENVIRON_COMPARTMENT = row$ENVIRON_COMPARTMENT,
-      ENVIRON_COMPARTMENT_SUB = row$ENVIRON_COMPARTMENT_SUB,
-      SPECIES_GROUP = row$SPECIES_GROUP,
-      SAMPLE_SPECIES = row$SAMPLE_SPECIES,
-      SAMPLE_TISSUE = row$SAMPLE_TISSUE,
-      SITE_GEOGRAPHIC_FEATURE = row$SITE_GEOGRAPHIC_FEATURE,
-      SITE_GEOGRAPHIC_FEATURE_SUB = row$SITE_GEOGRAPHIC_FEATURE_SUB,
-      MEASURED_UNIT_STANDARD = row$MEASURED_UNIT_STANDARD,
-      MEASURED_VALUE_STANDARD = seq(1, 10) * i,
-      MEASURED_N = 1L,
-      LATITUDE = seq(60, 78, length.out = 10),
-      LONGITUDE = 10,
-      SAMPLING_DATE = seq(as.Date("2010-01-01"), by = "year", length.out = 10),
-      REFERENCE_ID = rep(c("RefA", "RefB"), 5)
-    )
-  }))
-}
-
-members_fixture <- function(group_ids = "G001", node_id = "N001") {
-  tibble::tibble(
-    node_id = node_id,
-    group_id = group_ids,
-    notes = NA_character_
-  )
-}
-
 # ---- Resolution ---------------------------------------------------------
 
 test_that("a node resolves to exactly its member groups", {
@@ -189,7 +119,8 @@ test_that("Arctic coverage is reported, not filtered", {
 test_that("an external node's card carries the hand-entered magnitude", {
   d <- data_fixture()
   node <- node_fixture(
-    node_type = "external", value = 4200, value_unit = "kg/year", value_n = 1
+    node_type = "external", external_value = 4200,
+    external_unit = "kg/year", external_n = 1
   )
   card <- node_report_card(node, members_fixture("G001"), d, ids_fixture())
   expect_equal(card$mean, 4200)
@@ -241,20 +172,6 @@ test_that("a fully specified node layer validates silently", {
 })
 
 # ---- Coverage backlog ---------------------------------------------------
-
-summary_fixture <- function() {
-  ids <- ids_fixture()
-  dplyr::bind_cols(
-    ids |> dplyr::select(-"group_id"),
-    tibble::tibble(
-      n = c(1000, 500, 100),
-      n_sources = 1L,
-      species_common_name = NA_character_,
-      flag_multimodal = FALSE,
-      flag_outliers = FALSE
-    )
-  )
-}
 
 test_that("coverage names the node claiming each group, and flags the rest", {
   cov <- node_coverage(members_fixture("G001"), summary_fixture(), ids_fixture())
@@ -327,4 +244,223 @@ test_that("the membership reader rejects unknown ids", {
     read_aep_node_members(path, nodes = node_fixture(node_id = "N002")),
     "unknown node_id"
   )
+})
+
+# ---- external_* belongs to external nodes only (2026-08-05) --------------
+
+test_that("an empirical node with an external_* value is refused", {
+  # Sam's question: "why are we specifying these manually rather than
+  # calculating from constituent groups?" For empirical nodes we DO calculate
+  # them, and these columns are never read. A number typed here would be
+  # silently discarded, which is the same failure class as the untracked
+  # decisions file. So it stops.
+  for (col in external_value_cols()) {
+    node <- node_fixture(node_type = "empirical")
+    node[[col]] <- if (col == "external_unit") "kg/year" else 42
+    path <- withr::local_tempfile(fileext = ".csv")
+    readr::write_csv(node, path, na = "")
+    expect_error(read_aep_nodes(path), "external_\\* values set", info = col)
+  }
+})
+
+test_that("an external node may set them, and an empirical node left blank passes", {
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(
+    node_fixture(node_type = "external", external_value = 4200,
+                 external_unit = "kg/year"),
+    path, na = ""
+  )
+  expect_no_error(read_aep_nodes(path))
+
+  path2 <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(node_fixture(), path2, na = "")
+  expect_no_error(read_aep_nodes(path2))
+})
+
+test_that("the refusal message names the offending nodes", {
+  nodes <- dplyr::bind_rows(
+    node_fixture(node_id = "N001"),
+    node_fixture(node_id = "N002", external_value = 10),
+    node_fixture(node_id = "N003", external_value = 20)
+  )
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(nodes, path, na = "")
+  expect_error(read_aep_nodes(path), "N002")
+  expect_error(read_aep_nodes(path), "N003")
+})
+
+test_that("an external node with no magnitude is warned about", {
+  # The converse half-finished state: nothing to compute from AND nothing typed
+  # in, so the card reports NA and nothing else says so.
+  d <- data_fixture()
+  nodes <- node_fixture(node_type = "external")
+  members <- members_fixture("G001")[0, ]
+  cards <- aep_node_report_cards(nodes, members, d, ids_fixture())
+  expect_warning(validate_aep_nodes(nodes, members, cards), "no external_value")
+})
+
+test_that("a single-row nodes table does not break the check", {
+  # apply() over a one-row matrix is a classic drop-to-vector trap.
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(node_fixture(), path, na = "")
+  expect_no_error(read_aep_nodes(path))
+  expect_equal(nrow(read_aep_nodes(path)), 1L)
+})
+
+# ---- Date bounds accept a bare year (2026-08-05) ------------------------
+
+test_that("a bare year expands to the inclusive end of its interval", {
+  # REGRESSION, and the third silent-emptying bug of the day. Sam typed
+  # date_min = 1900, date_max = 2100, readr made them numbers, and comparing a
+  # Date to 2100 reads it as days-since-1970: every node resolved to zero rows
+  # with no error anywhere.
+  expect_equal(parse_node_date("2010", "min"), as.Date("2010-01-01"))
+  expect_equal(parse_node_date("2010", "max"), as.Date("2010-12-31"))
+  expect_equal(parse_node_date(2100, "max"), as.Date("2100-12-31"))
+  expect_equal(parse_node_date(1900, "min"), as.Date("1900-01-01"))
+})
+
+test_that("full dates and blanks pass through", {
+  expect_equal(parse_node_date("2015-06-30", "min"), as.Date("2015-06-30"))
+  expect_true(is.na(parse_node_date(NA, "min")))
+  expect_true(is.na(parse_node_date("", "min")))
+  expect_equal(parse_node_date(character(0), "min"), as.Date(character(0)))
+})
+
+test_that("an unparseable date errors rather than becoming no restriction", {
+  # A restriction that quietly becomes "no restriction" changes what the node
+  # means without saying so.
+  expect_error(parse_node_date("30/06/2015", "min"), "Unparseable date_min")
+  expect_error(parse_node_date("last tuesday", "max"), "Unparseable date_max")
+})
+
+test_that("year bounds actually keep the data they should", {
+  d <- data_fixture()
+  path <- withr::local_tempfile(fileext = ".csv")
+  node <- node_fixture()
+  node$date_min <- "1900"
+  node$date_max <- "2100"
+  readr::write_csv(node, path, na = "")
+
+  nodes <- read_aep_nodes(path)
+  expect_s3_class(nodes$date_min, "Date")
+  out <- resolve_node_data(nodes, members_fixture("G001"), d, ids_fixture())
+  expect_equal(nrow(out), 10)
+})
+
+test_that("inverted bounds are refused", {
+  path <- withr::local_tempfile(fileext = ".csv")
+  node <- node_fixture()
+  node$date_min <- "2020"
+  node$date_max <- "2010"
+  readr::write_csv(node, path, na = "")
+  expect_error(read_aep_nodes(path), "date_min after date_max")
+
+  path2 <- withr::local_tempfile(fileext = ".csv")
+  node2 <- node_fixture(lat_min = 80, lat_max = 60)
+  readr::write_csv(node2, path2, na = "")
+  expect_error(read_aep_nodes(path2), "lat_min above lat_max")
+})
+
+test_that("the resolver refuses a numeric date bound outright", {
+  d <- data_fixture()
+  node <- node_fixture()
+  node$date_max <- 2100
+  expect_error(
+    resolve_node_data(node, members_fixture("G001"), d, ids_fixture()),
+    "not a Date"
+  )
+})
+
+test_that("empirical and external cards bind together despite IDate dates", {
+  # REGRESSION, found by the pipeline and not by these tests, whose fixtures use
+  # plain Dates. Real SAMPLING_DATE is an IDate via standardise_IDate_all(), and
+  # vctrs refuses to combine IDate with the as.Date(NA) the external branch
+  # returns: the whole node set failed to bind.
+  d <- data_fixture()
+  d$SAMPLING_DATE <- data.table::as.IDate(d$SAMPLING_DATE)
+  nodes <- dplyr::bind_rows(
+    node_fixture(node_id = "N001"),
+    node_fixture(node_id = "N002", node_type = "external",
+                 external_value = 1, external_unit = "kg/year")
+  )
+  members <- members_fixture("G001", "N001")
+
+  cards <- aep_node_report_cards(nodes, members, d, ids_fixture())
+  expect_equal(nrow(cards), 2)
+  expect_s3_class(cards$date_min, "Date")
+  expect_false(inherits(cards$date_min, "IDate"))
+})
+
+# ---- Weighting the centre but not the spread (2026-08-05) ---------------
+
+test_that("weighted_median respects the weights", {
+  expect_equal(weighted_median(c(1, 2, 3), c(1, 1, 1)), 2)
+  # 100 copies of 3 drag the median to 3.
+  expect_equal(weighted_median(c(1, 2, 3), c(1, 1, 100)), 3)
+  expect_true(is.na(weighted_median(c(NA, NA), c(1, 1))))
+  expect_true(is.na(weighted_median(numeric(0), numeric(0))))
+  # Zero weights are ignored rather than counted.
+  expect_equal(weighted_median(c(1, 999), c(1, 0)), 1)
+})
+
+test_that("the centre is weighted by MEASURED_N", {
+  # THE FIX. A literature row summarising 50 samples must not be outvoted by a
+  # single Vannmiljo observation, and the reported n must describe the same
+  # population as the reported mean.
+  d <- data_fixture()
+  d <- d[d$SITE_GEOGRAPHIC_FEATURE == "River, stream, canal", ]
+  d$MEASURED_VALUE_STANDARD <- c(rep(1, 9), 1000)
+  d$MEASURED_N <- c(rep(1L, 9), 91L)
+
+  card <- node_report_card(node_fixture(), members_fixture("G001"), d, ids_fixture())
+
+  expect_equal(card$n, 100)
+  expect_equal(card$n_rows, 10L)
+  # Unweighted this would be 10^(9*0 + 3)/10 = 10^0.3 = 2.0. Weighted, the
+  # 1000 carries 91 of the 100 measurements.
+  expect_equal(card$geo_mean, 10^stats::weighted.mean(
+    log10(d$MEASURED_VALUE_STANDARD), w = d$MEASURED_N
+  ))
+  expect_gt(card$geo_mean, 100)
+  expect_equal(card$median, 1000)
+})
+
+test_that("the spread stays per row", {
+  # Not weighted, and deliberately so: we hold study means, not study values, so
+  # weighting would treat 91 samples as 91 copies of one number and report the
+  # data as far tighter than it is.
+  d <- data_fixture()
+  d <- d[d$SITE_GEOGRAPHIC_FEATURE == "River, stream, canal", ]
+  d$MEASURED_VALUE_STANDARD <- c(rep(1, 9), 1000)
+  d$MEASURED_N <- c(rep(1L, 9), 91L)
+
+  card <- node_report_card(node_fixture(), members_fixture("G001"), d, ids_fixture())
+  expect_equal(card$gsd, 10^stats::sd(log10(d$MEASURED_VALUE_STANDARD)))
+  expect_equal(card$sd, stats::sd(d$MEASURED_VALUE_STANDARD))
+})
+
+test_that("every level of aggregation is reported", {
+  # Sam's requirement: a node spans groups, rows, measurements and references,
+  # and the card must say how many of each.
+  d <- data_fixture()
+  card <- node_report_card(
+    node_fixture(), members_fixture(c("G001", "G002")), d, ids_fixture()
+  )
+  for (col in c("n", "n_rows", "n_groups", "n_sources")) {
+    expect_true(col %in% names(card), info = col)
+    expect_false(is.na(card[[col]]), info = col)
+  }
+  expect_equal(card$n_groups, 2L)
+  expect_equal(card$n_rows, 20L)
+  expect_equal(card$n_sources, 2L)
+})
+
+test_that("weighting changes nothing where every row is one measurement", {
+  # Which is 94% of this dataset, so the change must be a no-op there.
+  d <- data_fixture()
+  card <- node_report_card(node_fixture(), members_fixture("G001"), d, ids_fixture())
+  v <- d$MEASURED_VALUE_STANDARD[d$SITE_GEOGRAPHIC_FEATURE == "River, stream, canal"]
+  expect_equal(card$geo_mean, 10^mean(log10(v)))
+  expect_equal(card$mean, mean(v))
 })

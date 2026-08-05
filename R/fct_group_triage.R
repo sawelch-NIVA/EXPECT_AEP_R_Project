@@ -1431,7 +1431,7 @@ triage_category_labels <- function(data, min_n = 10) {
 #' @param x_at Value-axis position, shared with the labels themselves.
 #' @return A ggplot2 layer, or `NULL` where there is nothing to head.
 #' @export
-triage_category_header <- function(data, x_at) {
+triage_category_header <- function(data, x_at, size = 2.1) {
   n_levels <- nlevels(data$.facet)
   if (n_levels == 0 || !is.finite(x_at)) {
     return(NULL)
@@ -1442,7 +1442,7 @@ triage_category_header <- function(data, x_at) {
     y = n_levels + 0.75,
     label = "n (n outliers)",
     colour = "grey30",
-    size = 2.1,
+    size = size,
     fontface = "italic",
     # Aligned with the labels it heads; see the note there.
     hjust = 0
@@ -1493,7 +1493,9 @@ triage_category_overlay <- function(
   data,
   limits = NULL,
   min_n = 10,
-  ticks = TRUE
+  ticks = TRUE,
+  header = TRUE,
+  label_size = 2.1
 ) {
   if (nrow(data) == 0) {
     return(list())
@@ -1561,7 +1563,7 @@ triage_category_overlay <- function(
       ggplot2::aes(x = x_at, y = .data$.facet, label = .data$label),
       inherit.aes = FALSE,
       colour = colour,
-      size = 2.1,
+      size = label_size,
       # LEFT-aligned at the top of the axis, so the text runs outward into the
       # margin reserved by triage_category_x_expansion() instead of back over the
       # data. hjust = 1 put it on top of the rightmost tiles, which is the
@@ -1579,7 +1581,9 @@ triage_category_overlay <- function(
         # Greyer, so an untested row's label does not read with the same
         # authority as a tested one.
         text_layer(labels[!labels$tested, , drop = FALSE], "grey60"),
-        triage_category_header(data, x_at)
+        # Omitted on node cards: the card's own header block already explains
+        # the counts, and at card width the strip is too narrow to hold it.
+        if (header) triage_category_header(data, x_at, size = label_size)
       )
     )
   )
@@ -2313,9 +2317,10 @@ spatial_colour_guide <- function(strokes = NULL) {
 #' contact sheet rather than silent.
 #'
 #' @param title Plot title. @param reason Short explanation.
+#' @param size Text size. Smaller on a node card than on a full triage panel.
 #' @return A ggplot.
 #' @export
-triage_empty_plot <- function(title, reason) {
+triage_empty_plot <- function(title, reason, size = 5) {
   ggplot2::ggplot() +
     ggplot2::annotate(
       "text",

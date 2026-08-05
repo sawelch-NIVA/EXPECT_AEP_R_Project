@@ -1,2 +1,8 @@
-node_id,label,level,node_type,x,y,lat_min,lat_max,date_min,date_max,exclude_references,drop_outliers,value,value_sd,value_n,value_unit,essentiality_score,essentiality_justification,plausibility_score,plausibility_justification,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-N001,Marine water,medium,empirical,0,3,,,,,,FALSE,,,,,3,Copper is known to be naturally present in the earth's crust and aquatic ecosystems.,3,As above.,3,The studied dataset contains substantial evidence on copper concentrations in marine water.,2,Copper kinetics in marine environments are generally well studied and modelled.,Example row transcribed from docs/NBXX-algae.qmd tbl-epeq-marine.
+node_id,label,level,node_type,x,y,lat_min,lat_max,date_min,date_max,exclude_references,drop_outliers,external_value,external_sd,external_n,external_unit,essentiality_score,essentiality_justification,plausibility_score,plausibility_justification,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+N001,Coastal benthic sediment,medium,empirical,1,1,,,1900,2100,,FALSE,,,,,,,3,Copper occurrence in sediment is consensus and uncontroversial.,,,,,
+N002,Coastal water,medium,empirical,1,2,,,1900,2100,,FALSE,,,,,,,3,Copper occurrence in coastal water is consensus and uncontroversial.,,,,,
+N003,Coastal mussels,organism,empirical,2,0,,,1900,2100,,FALSE,,,,,,,3,Copper is present in highly-conserved metabolic systems.,,,,,
+N004,Coastal cod livers,organism,empirical,2,1,,,1900,2100,,FALSE,,,,,,,3,"Copper is present in highly-conserved metabolic systems, and is particularly concentrated in livers.",,,,,
+N005,Coastal cod muscle,organism,empirical,2,2,,,1900,2100,,FALSE,,,,,,,3,Copper is present in highly-conserved metabolic systems.,,,,,
+N006,Natural copper occurrence,source,external,0,0,,,1900,2100,,FALSE,,,,,,,3,Copper occurrence in the earth's crust and downstream compartments is consensus and uncontroversial.,,,,,
+N007,Aquaculture copper application,source,empirical,0,1,,,1900,2100,,FALSE,,,,,,,3,Use of copper-based antifouling treatments is common practice in aquaculture.,,,,,

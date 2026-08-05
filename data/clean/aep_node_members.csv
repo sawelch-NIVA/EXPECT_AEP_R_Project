@@ -1,2 +1,7 @@
 node_id,group_id,notes
-N001,G004,Example membership row.
+N001,G002,Coastal sediment
+N002,G004,Coastal water
+N003,G005,Coastal mussels (SF not reported)
+N003,G007,Coastal mussels (SF benthos)
+N004,G006,Coastal cod livers
+N005,G047,Coastal cod muscle

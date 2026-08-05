@@ -1149,7 +1149,7 @@ list(
       # Lowering min_n to 68 instead would admit seven unrelated groups, because
       # eight others are interleaved between 68 and 99. Add ids here as P3.5
       # picks its systems.
-      must_include = c("G033", "G036")
+      must_include = c("G033", "G036", "G047")
     )
   ),
 
@@ -1398,6 +1398,88 @@ list(
       group_ids,
       decisions = group_decisions
     )
+  ),
+
+  ### # AEP edges ----
+  # PLAN.md Phase 4. Scaffolding is scripts/scaffold_aep_edges.R, which proposes
+  # every downward flow between placed nodes as `putative` and never removes
+  # anything. Marking one `empirical` is a positive act requiring a citation.
+  tar_target(
+    name = aep_edges_file,
+    command = here_rel("data/clean/aep_edges.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_edges,
+    command = {
+      e <- read_aep_edges(aep_edges_file, nodes = aep_nodes)
+      validate_aep_edges(e, aep_nodes)
+      e
+    }
+  ),
+
+  ### # Node report cards ----
+  # PLAN.md 4.3 and P3.2. One PNG per node into figures/node_cards/, as a
+  # `format = "file"` target so the store caches the images rather than the
+  # ggplot objects (CLAUDE.md 4.4).
+  #
+  # Badges render grey where a node is unscored, which is the honest state until
+  # aep_nodes.csv is filled in: grey means "not assessed" and is deliberately
+  # distinct from the colour for a score of 1.
+  tar_target(
+    name = node_cards,
+    command = write_node_cards(
+      nodes = aep_nodes,
+      cards = aep_node_cards,
+      members = aep_node_members,
+      data = literature_analysis_ready,
+      ids = group_ids,
+      thresholds = copper_toxicity_thresholds,
+      dir = here_rel("figures/node_cards")
+    ),
+    format = "file"
+  ),
+
+  ### # The AEP diagram ----
+  # PLAN.md P5.1. Manual coordinates from aep_nodes.csv, never an automatic
+  # layout: vertical position carries source-to-exposure meaning, so a layout
+  # algorithm optimising for edge crossings would destroy the one thing the axis
+  # is for. A file target, per CLAUDE.md 4.4: a ggplot object captures its whole
+  # input, so the store caches the image instead.
+  tar_target(
+    name = aep_diagram,
+    command = {
+      path <- here_rel("figures/aep.png")
+      dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
+      ggplot2::ggsave(
+        filename = path,
+        plot = plot_aep(aep_nodes, aep_edges, aep_node_cards),
+        width = 10,
+        height = 7,
+        dpi = 150,
+        device = ragg::agg_png
+      )
+      path
+    },
+    format = "file"
+  ),
+
+  ### # Source unit errors ----
+  # Added 2026-08-05, after three separate 1000x faults surfaced in one day from
+  # the same ug/g-is-mg/kg misconception. Two of them were ours and are fixed;
+  # this one is in data we do not control, so it can only be detected, not
+  # prevented. See R/fct_unit_anomalies.R.
+  #
+  # REPORTS, NEVER CORRECTS. Rewriting a measured value on the strength of a
+  # free-text comment is a scientific judgement.
+  tar_target(
+    name = unit_anomaly_report,
+    command = {
+      comments <- scan_comment_unit_flags(literature_analysis_ready)
+      offsets <- scan_group_scale_offsets(literature_analysis_ready)
+      report_unit_anomalies(comments, offsets)
+      list(comments = comments, offsets = offsets)
+    }
   ),
 
   ### # Data quality report ----

@@ -28,31 +28,15 @@ TODO: Explain what (n) (n) means on right hand side
 
 TODO: Why is n on right so different to n = 2,374. I should know this but I don't!
 
-> **Both answered 2026-08-05, and the second one was a real inconsistency rather
-> than you forgetting something.**
+> **Both answered 2026-08-05, and the second one was a real inconsistency rather than you forgetting something.**
 >
-> The right-hand column is now headed **`n (n outliers)`** in the panel itself,
-> so it no longer needs explaining from outside. The second figure is how much of
-> that category the two outlier criteria both flagged, or `(n < 10)` where the
-> category was too small to test.
+> The right-hand column is now headed **`n (n outliers)`** in the panel itself, so it no longer needs explaining from outside. The second figure is how much of that category the two outlier criteria both flagged, or `(n < 10)` where the category was too small to test.
 >
-> The numbers disagreed because they were **counting different things**. The
-> heading above ("n = 2,374 measurements") is `sum(MEASURED_N)`; the margin
-> labels were `nrow()`. A Vannmiljø row carries one measurement, but a literature
-> row can report an aggregate of fifty, so the two diverge by whatever mix of
-> sources a group happens to have. Nothing on the page said which was which.
+> The numbers disagreed because they were **counting different things**. The heading above ("n = 2,374 measurements") is `sum(MEASURED_N)`; the margin labels were `nrow()`. A Vannmiljø row carries one measurement, but a literature row can report an aggregate of fifty, so the two diverge by whatever mix of sources a group happens to have. Nothing on the page said which was which.
 >
-> Fixed by making it a rule rather than a patch, per your call: **a sample size is
-> always `sum(MEASURED_N)`, and anything counting rows says so.** The margin
-> labels and the outlier count in the bracket are now both measurement-weighted,
-> matching the treatment `n_double_outliers` already had (PLAN.md P1.5). The
-> heatmap fill still counts rows, because a tile counts marks drawn rather than
-> measurements represented, so its legend now reads **"Rows"** instead of
-> "Count".
+> Fixed by making it a rule rather than a patch, per your call: **a sample size is always `sum(MEASURED_N)`, and anything counting rows says so.** The margin labels and the outlier count in the bracket are now both measurement-weighted, matching the treatment `n_double_outliers` already had (PLAN.md P1.5). The heatmap fill still counts rows, because a tile counts marks drawn rather than measurements represented, so its legend now reads **"Rows"** instead of "Count".
 >
-> Consequence worth expecting: a category can show `2,450` over far fewer ticks
-> and a paler tile than that suggests. That is honest, and it is 45 rows
-> reporting 2,450 measurements between them.
+> Consequence worth expecting: a category can show `2,450` over far fewer ticks and a paler tile than that suggests. That is honest, and it is 45 rows reporting 2,450 measurements between them.
 
 ::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol="1"}
 ![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
@@ -330,7 +314,28 @@ G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported 
 
 `G047` **Atlantic cod**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G047` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+- @fig-g047-a:
+- @fig-g047-b:
+- @fig-g047-c:
+- @fig-g047-d:
+- @fig-g047-e:
+
+::: {#fig-g047 layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g047-a group="G047"}
+
+![Concentration by date](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g047-b group="G047"}
+
+![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g047-c group="G047"}
+
+![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g047-d group="G047"}
+
+![Spatial distribution](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g047-e group="G047"}
+
+G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
+
+:::
+
 
 **Verdict:** *(unwritten)*
 
