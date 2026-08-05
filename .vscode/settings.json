@@ -1,4 +1,10 @@
 {
+    // tar_group_by() is a single-target, tar_target()-like factory, but is not
+    // in tarborist's built-in list, so static pipeline analysis reports itself
+    // as partial without this.
+    "tarborist.additionalSingleTargetFactories": [
+        "tar_group_by"
+    ],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#fbed80",
         "activityBar.background": "#fbed80",

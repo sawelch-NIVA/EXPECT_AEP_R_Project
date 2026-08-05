@@ -1,3 +1,5 @@
+------------------------------------------------------------------------
+
 ---
 title: "Aquatic Sediment"
 ---
@@ -55,7 +57,7 @@ Aquatic / Aquatic Sediment / mg/kg (dry)
 
 # Comparison
 
-*(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
+Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Sediment from different site times probably are slightly different, because biogeochemistry, hydrology, etc. will be different, but this might not be a strong enough signal. We also have some very small sample sizes. My initial reaction is that we should drop any samples that correspond to suspended sediment (e.g. *Water column, pelagic zone* rather than *Water benthos*), because they're a small proportion of the overall group and they require a level of resolution that I don't think we can consistently provide with the data we have.
 
 # Groups
 
@@ -68,6 +70,18 @@ Aquatic / Aquatic Sediment / mg/kg (dry)
 
 - **multimodal** (dip test not run)
 :::
+
+Distribution here (\@fig-g002-a) is normal-ish and centered slightly above the background concentration, but there's clearly at least one sub-peak at \~1e+00.5. Large right tail, and many samples at extremely high concentrations, which suggests unit errors. @fig-g002-b shows no clear temporal pattern, but central tendency around the aquatic sediment background (I) threshold from 2016 onwards. A few big outliers in specific years are perhaps errors rather than true variation. @fig-g002-c shows that with a handful of exceptions, campaigns have similar medians, but different patterns of outliers. @coteurFieldContaminationStarfish2003's concentrations have a median around 1e-03 and are several orders of magnitude lower than those from @norwegianenvironmentagencyVannmiljo2026. Some campaigns have slightly higher medians (Urban Fjord Contaminants), while Screening New Contaminants has a surprisingly low median with a lot of spread (but small sample size). No campaigns are explicitly and only focused on non-contaminated sites (e.g. Reference sites), so it is difficult to determine if there's a real difference between contaminated and uncontaminated sites. Probably inconclusive without looking at sampling depth, more detailed site information, and fractionation. @fig-g002-d mainly shows site coding atefacts, in any case, there seems to be no substantial difference between settled and suspended sediment. @fig-g002-e shows that most areas (at the current resolution) fall between 1e01 and 1e04, which isn't enough concentration resolution.
+
+TODO: Figure b is missing a secondary axis for thresholds
+
+TODO: Have I made a unit error with Coteur
+
+TODO: Looks like outliers aren't using abs, so only highlighted on the right
+
+TODO: Polluted seabed's very high right conc covers up sample size
+
+TODO: More concentration resolution for fig-e. COuld we add thresholds to the key here?
 
 ::: {#fig-g002 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_a_density.png){#fig-g002-a group="G002"}
@@ -88,6 +102,16 @@ G002: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
 ## G008 Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) {#grp-G008}
 
 `G008` `n` = 857 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+- @fig-g008-a: at least two log-normal distributions with slightly different means (one below I, one above), plus characteristic 1e3 unit error slopes.
+
+- @fig-g008-b: no obvious time trend. highest concentration of samples in 2017, doesn't look log-normal but may be resolution artifact. some outlier noise apparent.
+
+- @fig-g008-c: little variation between campaigns, no reference rivers for comparison but noticable difference between the two biggest groups: Polluted Seabed and Measures Monitoring, probably makes sense to group into polluted and non-polluted. A handful of unit error outliers.
+
+- @fig-g008-d: as with other sediment sampling groups, suspended sediment concentrations appear to generally be higher than those taken from benthos (though this may be artefact of methodology). given the much wider spread of benthic samples, these could probably be lumped.
+
+- @fig-g008-e: TODO: Re-run with better resolution
 
 ::: {#fig-g008 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_a_density.png){#fig-g008-a group="G008"}

@@ -98,7 +98,26 @@ tar_option_set(
   # "load_literature_pqt doesn't properly update" note.
   # Verified 2026-07-29: before this line, changing sample_triage_groups()
   # left tar_outdated() reporting "(none)".
-  imports = "STOPAEP"
+  imports = "STOPAEP",
+  # STOPAEP is attached by load_all() but never installed, so a crew worker
+  # cannot library() it. Workers get it from .Rprofile instead. targets.qmd.
+  packages = setdiff(.packages(), "STOPAEP"),
+  # Drop target objects from memory once nothing needs them, and gc() between
+  # targets. Costs some re-reading from the store; buys headroom in the main
+  # process, which is the thing that has actually run out. targets.qmd section 4.
+  memory = "transient",
+  garbage_collection = TRUE,
+  # Workers are capped by RAM, not by the 22 cores: 22 cores but 15.5 GB, often
+  # ~3 GB free. Each worker is a full R process (~0.5 GB of package stack) that
+  # is also sent a 65 MB copy of literature_analysis_ready per branch, and
+  # geom_smooth() allocates heavily on top of that. workers = 6 exhausted memory
+  # mid-branch; 3 completed but coexisted badly with an open Positron session.
+  # targets.qmd section 4.
+  controller = crew_controller_local(
+    name = "local",
+    workers = 2,
+    seconds_idle = 60
+  )
 )
 
 # # Pipeline ----
@@ -1131,6 +1150,16 @@ list(
     command = compute_triage_scale_limits(literature_analysis_ready)
   ),
 
+  # One branch per group, so the 29 groups spread across crew workers and a
+  # changed plot function redraws only the groups it touches. Split into its own
+  # target because tar_group_by() adds a tar_group column, and the targets that
+  # consume the whole table should not inherit it. targets.qmd section 3.
+  tar_group_by(
+    name = triage_pilot_groups_split,
+    command = triage_pilot_groups,
+    group_slug
+  ),
+
   # format = "file" so targets caches the PNGs themselves. Never return the
   # ggplots: they capture their input data and redraw at print time anyway.
   # Output dir has no leading underscore: Quarto skips underscore-prefixed
@@ -1139,7 +1168,9 @@ list(
     name = triage_pilot_plots,
     command = write_triage_plots(
       data = literature_analysis_ready,
-      groups = triage_pilot_groups,
+      # One-row groups table per branch. write_triage_plots() maps over rows and
+      # needs no change.
+      groups = triage_pilot_groups_split,
       dir = "triage",
       scale_limits = triage_scale_limits,
       # Reference lines. Borrowed across compartments, species and tissues on
@@ -1147,6 +1178,7 @@ list(
       # anything into them.
       thresholds = copper_toxicity_thresholds
     ),
+    pattern = map(triage_pilot_groups_split),
     format = "file"
   ),
 

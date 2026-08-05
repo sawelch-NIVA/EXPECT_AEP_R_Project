@@ -1,0 +1,295 @@
+---
+title: "Pipeline notes: crew parallelism"
+subtitle: "Reasoning and test results behind the terse comments in `_targets.R`"
+date: 2026-08-05
+---
+
+Developer documentation for the pipeline itself, not website content. It is
+deliberately **not** in the `project: render:` list in `_quarto.yml`, so no
+project build touches it; read it as text, or render it by hand with
+`quarto render targets.qmd`. Code chunks are `eval: false` throughout: they
+record what was run, they are not meant to run again on render.
+
+This file exists because the comments in `_targets.R` had to stay short. Section
+numbers here are referenced from those comments.
+
+## 1. What changed
+
+Before: every triage PNG was written by one sequential target. 29 groups x 5
+panels = 145 plots in a single `tar_target()`, on one core.
+
+Three edits, plus one editor setting:
+
+| File | Change |
+|---|---|
+| `.Rprofile` | Guarded `pkgload::load_all()` for crew workers |
+| `_targets.R` | `packages` fix, memory settings, `crew_controller_local()` |
+| `_targets.R` | `tar_group_by()` + `pattern = map()` on `triage_pilot_plots` |
+| `.vscode/settings.json` | Register `tar_group_by` with the tarborist analyser |
+
+Two payoffs, and the second is probably the bigger one day to day:
+
+1. Branches run concurrently.
+2. Branches invalidate independently. Editing one plot function used to redraw
+   all 145 PNGs; now it redraws only the groups it affects.
+
+## 2. Why crew workers could not see `STOPAEP`
+
+This is the part that blocks everything else, and neither obvious fix works.
+
+crew workers are fresh R **processes**, not forks. `pkgload::load_all()` attaches
+`STOPAEP` without ever installing it into a library, so a worker has no way to
+reach it by default.
+
+### Attempt 1: change nothing, just add a controller
+
+```r
+#| eval: false
+tar_option_set(imports = "STOPAEP", controller = crew_controller_local(workers = 2))
+```
+
+Fails immediately:
+
+```
+could not find packages STOPAEP in library paths
+```
+
+`tar_option_set()` defaults `packages` to `.packages()` **evaluated at the moment
+it is called**. The `library()` block at the top of `_targets.R` has already run,
+and `load_all()` has already attached `STOPAEP`, so `"STOPAEP"` is captured into
+the package list. Workers then try to `library(STOPAEP)` and there is nothing to
+load.
+
+### Attempt 2: drop it from `packages`, rely on `imports`
+
+```r
+#| eval: false
+tar_option_set(
+  imports = "STOPAEP",
+  packages = setdiff(.packages(), "STOPAEP"),
+  controller = crew_controller_local(workers = 2)
+)
+```
+
+The pipeline now runs, branches genuinely land on a worker (worker pid differed
+from the main pid), and every branch fails:
+
+```
+branch 1 pid 3476 -> MISSING: could not find function "triage_use_points"
+branch 2 pid 3476 -> MISSING: could not find function "triage_use_points"
+```
+
+**`imports` governs hashing, not shipping.** It is what makes editing
+`R/fct_*.R` invalidate targets (CLAUDE.md 2.2.2). It does not place those
+functions on a worker. Globals in `envir` are sent to workers; objects living in
+a package namespace are not.
+
+### What actually works
+
+Workers are launched with `--no-echo --no-restore --no-save`, and critically
+**not** `--vanilla`, so they do read `.Rprofile`. They are also launched from the
+project root, so it is *this* project's `.Rprofile`. Confirmed by having a branch
+return its own `commandArgs()`:
+
+```
+C:\...\Rterm.exe || --no-echo || --no-restore || --no-save || -e ||
+  crew::crew_worker(settings = list(url = "tcp://127.0.0.1:58565", ...),
+  controller = "local", ...)
+```
+
+That gives both the hook and a reliable way to detect a worker:
+
+```r
+#| eval: false
+if (any(grepl("crew::crew_worker", commandArgs(), fixed = TRUE))) {
+  pkgload::load_all(quiet = TRUE)
+}
+```
+
+The guard matters. Without it, `load_all()` would run in every R session started
+in this directory, including the `tar_make()` process that already does it in
+`_targets.R`, and including any session you would want to use to *fix* a package
+that fails to parse.
+
+### The rejected alternative
+
+Installing `STOPAEP` properly (`R CMD INSTALL`) would also work and is arguably
+more conventional. It was rejected because the failure mode is silent and nasty:
+the main process hashes the `load_all()` version of a function while workers run
+the *installed* version. Forget to reinstall after editing `R/fct_*.R` and the
+plots are built from stale code with nothing marked outdated. The `.Rprofile`
+route cannot drift, because workers always load from source.
+
+## 3. Branching the plot target
+
+`write_triage_plots()` already maps over `seq_len(nrow(groups))`, so a one-row
+groups table is a valid input and **no function needed changing**.
+
+```r
+#| eval: false
+tar_group_by(
+  name = triage_pilot_groups_split,
+  command = triage_pilot_groups,
+  group_slug
+),
+
+tar_target(
+  name = triage_pilot_plots,
+  command = write_triage_plots(
+    data = literature_analysis_ready,
+    groups = triage_pilot_groups_split,
+    ...
+  ),
+  pattern = map(triage_pilot_groups_split),
+  format = "file"
+)
+```
+
+`group_slug` is the right branching key: `sample_triage_groups()` builds it via
+`slugify_name()` and it is already unique per row, which is the same property the
+PNG filenames depend on.
+
+**Why a separate `_split` target.** `tar_group_by()` adds a `tar_group` column.
+`triage_pilot_groups` is also consumed whole by `triage_overview_node_table`,
+`triage_species_node_table` and by `docs/NBXX-Sample-Groups.qmd`
+(`tar_read(triage_pilot_groups)$heading_slug`). Splitting into a second target
+keeps that extra column away from all of them.
+
+### Downstream compatibility, checked
+
+`tar_read(triage_pilot_plots)` still returns a flat character vector of all 145
+paths, so the notebook is unaffected:
+
+```
+class: character
+length: 145
+all exist on disk: TRUE
+membership check works: TRUE
+```
+
+One real difference: the vector is now **named** (`triage_pilot_plots_<hash>_1`
+etc.) where `unlist(..., use.names = FALSE)` previously returned it unnamed. All
+three consumers in `NBXX-Sample-Groups.qmd` use `p %in% plot_paths` membership
+tests, which ignore names. Anything added later that indexes positionally or
+pastes the vector into text should be aware of it.
+
+The `tar_read()`-as-dependency-declaration rule (CLAUDE.md 4.4.2) is preserved:
+the notebook still reads the target, not hand-built paths.
+
+## 4. Worker count is bound by RAM, not cores
+
+This machine reports **22 cores but only 15.5 GB of RAM**, and in practice
+3-6 GB free. Cores are the wrong thing to size on.
+
+Each worker costs roughly:
+
+- ~0.5 GB for a full R process with this package stack (data.table, ggplot2,
+  tidyverse, pointblank, eDataDRF)
+- **65 MB for a copy of `literature_analysis_ready`, sent per branch** (90,110
+  rows x 75 columns)
+- an unbounded amount for `geom_smooth()`, which allocates heavily
+
+`workers = 6` died mid-run:
+
+```
+✖ triage_pilot_plots_325c762a836da28b errored
+Caused by error in `ggplot2::geom_smooth()`:
+! Problem while computing stat.
+Caused by error in `rowSums()`:
+! 'R_Calloc' could not allocate memory (24826 of 16 bytes)
+```
+
+`workers = 3` completed all 29 branches, but Positron's R kernel then crashed
+(`exit code -1073740791`) during a full `tar_make()` run. Not proven to be the
+pipeline's fault, but the machine had ~3 GB free and a Positron session holding
+data of its own is easily another 1-2 GB.
+
+**`workers = 2` is what is committed**, together with two settings aimed at the
+main process, which is the thing that actually ran out:
+
+```r
+#| eval: false
+memory = "transient",      # drop target objects once nothing needs them
+garbage_collection = TRUE, # gc() between targets
+```
+
+`memory = "transient"` costs some re-reading from the store. On a pipeline where
+many targets depend on a 65 MB parent, that is a good trade.
+
+### Measured payoff
+
+| Measure | Value |
+|---|---|
+| Sum of branch seconds (sequential estimate) | 290.7 s |
+| Wall clock, `workers = 3` | 202.5 s |
+| Slowest single branch | 70.4 s |
+| Median branch | 6.7 s |
+
+About **1.5x**, which is well short of 3x, for two reasons worth knowing:
+
+1. **The work is extremely skewed.** Median branch 6.7 s, slowest 70.4 s. That
+   one branch alone sets a floor of 70 s no matter how many workers you add.
+2. **Serialisation overhead is real.** 65 MB is sent to a worker *per branch*,
+   29 times, roughly 1.9 GB of serialisation across the run. This is why wall
+   clock (202 s) is worse than the theoretical 3-worker floor (~97 s).
+
+Both point at the same fix, noted in section 6.
+
+### Incremental rebuilds, which matter more
+
+The headline speedup is modest. The invalidation win is not. Rebuilding three
+branches after invalidating them:
+
+```
+✔ triage_pilot_plots completed [15.6s, 708.88 kB]
+✔ ended pipeline [41.8s, 3 completed, 78 skipped]
+```
+
+Three groups redrawn, 26 skipped. Before branching, touching any plot function
+redrew all 145 PNGs.
+
+**PNG output is byte-identical on rebuild.** Verified: after rewriting three
+branches, `tar_outdated()` still returns `character(0)`, so
+`render_nbxx_sample_groups` did *not* go stale. Redrawing plots that do not
+actually change will not trigger the 78 s notebook render.
+
+## 5. How to re-run these checks
+
+```bash
+#| eval: false
+# Pipeline is valid and branching resolves
+Rscript -e "targets::tar_manifest(fields = c('name','pattern'), callr_function = NULL)"
+
+# Build just the plots, timed
+Rscript -e "t0 <- Sys.time(); targets::tar_make(names = c(triage_pilot_groups_split, triage_pilot_plots)); cat(difftime(Sys.time(), t0, units='secs'))"
+```
+
+```r
+#| eval: false
+# Per-branch timings and the sequential estimate
+m <- targets::tar_meta(fields = c("name", "parent", "seconds"))
+b <- subset(m, parent %in% "triage_pilot_plots" & !is.na(seconds))
+sum(b$seconds)   # sequential estimate
+max(b$seconds)   # critical path floor
+```
+
+The warnings surfaced by this run (`pointblank` regex exceedances on
+`PROTOCOL_ID` / `REFERENCE_ID` / `SAMPLE_ID`, unresolved (sub)compartments and
+geographic features, `geom_bin2d()` dropped rows) are all **pre-existing and
+upstream**. None of them are caused by crew.
+
+## 6. Open items
+
+- **Stop shipping the whole dataset per branch.** The single biggest available
+  win, for both speed and memory. `write_triage_plots()` receives all 90,110
+  rows and immediately filters to one group. Pre-filtering upstream, so each
+  branch is sent only its own rows, would cut the 1.9 GB of serialisation to
+  almost nothing. It is a function change, so it is flagged, not done
+  (CLAUDE.md: flag tempting refactors).
+- **The 70 s branch.** Worth finding out which group it is and whether
+  `geom_smooth()` is the cost. Capping or dropping the smooth on very large
+  groups would lower the floor for everyone.
+- **The other two plot targets** (`triage_overview_plots`,
+  `triage_species_plots`) are still unbranched. They now at least run
+  concurrently with the pilot target. Same `tar_group_by()` treatment applies via
+  their node tables; their key columns have not been checked.
