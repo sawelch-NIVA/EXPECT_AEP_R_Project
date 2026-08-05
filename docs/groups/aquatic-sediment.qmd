@@ -133,6 +133,18 @@ G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg 
 
 `G009` `n` = 573 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
+- @fig-g009-a: one normal distribution around 108 mg/kg dry, plus unit error foothills. Noticably higher mean than *Coastal, fjord* benthos (G002); lower mean but higher median than freshwater lotic (G008)
+
+- @fig-g009-b: no obvious temporal trend. most samples from 2023 and 2019.
+
+- @fig-g009-c: some variation between campaigns, suspected outliers in *Other* and *Mine Impact* not explicitly flagged as such due to small sample sizes. Campaigns suggest that e.g. mines are a bigger copper source than firing ranges, but very small sample sizes make WoE low.
+
+- @fig-g009-d: as with other sediment sampling groups, suspended sediment appears to be slightly more contaminated, but displays far less variation
+
+- TODO: Not enough resolution
+
+- TODO: shadowtext sample size? not visible when high concentrations
+
 ::: {#fig-g009 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_a_density.png){#fig-g009-a group="G009"}
 
@@ -147,11 +159,29 @@ G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg 
 G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry)
 :::
 
-**Verdict:** *(unwritten)*
+**Verdict:**
+
+- Drop outliers, split into contaminated and uncontaminated sites, use benthos group
+
+- Campaigns are good evidence of sources
 
 ## G013 Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) {#grp-G013}
 
 `G013` `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+TODO: Add bullet points with figure refs to scaffold (generate once then don't touch to avoid over-writing anything
+
+- @fig-g013-a: 2+ normal distributions with means at and below threshold II, plus foothills that suggest unit errors or sub-groups
+
+- @fig-g013-b: No obvious time trend, although mean seems to shift between 2010-2017 and 2019-2025 sampling periods
+
+- @fig-g013-c: Polluted Seabed and Measures Monitoring contribute majority of data, mean of latter above that of former suggests strong Polluted Seabed signal (but polluted by what not obvious from Campaign name). Other campaign (Pollution Monitoring, Industrial Impact, Dredging & Dumping) sample sizes so small as to preclude useful interpretation.
+
+- @fig-g013-d: same suspended vs. benthic variation as for other sediment (does site type and campaign correlate?)
+
+- @fig-g013-e: No enough resolution, but notable that no sites are actually in Arctic regions.\
+
+  TODO: Correlation matrices?
 
 ::: {#fig-g013 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_a_density.png){#fig-g013-a group="G013"}
@@ -167,7 +197,13 @@ G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos /
 G013: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry)
 :::
 
-**Verdict:** *(unwritten)*
+**Verdict:**
+
+- Weaker evidence for arctic stuff, because all sites are under Arctic circle
+
+- Polluted seabeds are actually polluted, but we don't know what they're polluted by
+
+- Split into reference/polluted, benthos/suspended?
 
 ## G016 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G016}
 

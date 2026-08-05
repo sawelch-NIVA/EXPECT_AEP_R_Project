@@ -18,20 +18,23 @@ numbers here are referenced from those comments.
 Before: every triage PNG was written by one sequential target. 29 groups x 5
 panels = 145 plots in a single `tar_target()`, on one core.
 
-Three edits, plus one editor setting:
-
 | File | Change |
 |---|---|
 | `.Rprofile` | Guarded `pkgload::load_all()` for crew workers |
 | `_targets.R` | `packages` fix, memory settings, `crew_controller_local()` |
-| `_targets.R` | `tar_group_by()` + `pattern = map()` on `triage_pilot_plots` |
-| `.vscode/settings.json` | Register `tar_group_by` with the tarborist analyser |
+| `_targets.R` | `triage_group_slices` + `pattern = map()` on `triage_pilot_plots` |
+| `R/fct_group_triage.R` | `triage_relaxed_cols()`, `triage_group_slice()`, `split_triage_data()` |
+| `tests/testthat/test-fct_group_triage_slice.R` | New, 25 assertions |
 
-Two payoffs, and the second is probably the bigger one day to day:
+Net effect: pipeline wall **175.6 s down to roughly 100-110 s**, using one fewer
+worker, with all 145 PNGs byte-identical to before.
+
+Three payoffs, and the second is probably the bigger one day to day:
 
 1. Branches run concurrently.
 2. Branches invalidate independently. Editing one plot function used to redraw
    all 145 PNGs; now it redraws only the groups it affects.
+3. Each branch is sent ~1/8th of the data it used to be sent.
 
 ## 2. Why crew workers could not see `STOPAEP`
 
@@ -122,38 +125,69 @@ route cannot drift, because workers always load from source.
 
 ## 3. Branching the plot target
 
-`write_triage_plots()` already maps over `seq_len(nrow(groups))`, so a one-row
-groups table is a valid input and **no function needed changing**.
+Each branch is one group. Rather than sending every branch the full 90,110-row
+table and letting it filter, the data is **sliced once** and each branch receives
+only its own rows.
 
 ```r
 #| eval: false
-tar_group_by(
-  name = triage_pilot_groups_split,
-  command = triage_pilot_groups,
-  group_slug
+tar_target(
+  name = triage_group_slices,
+  command = split_triage_data(literature_analysis_ready, triage_pilot_groups),
+  iteration = "list",
+  memory = "persistent"   # see section 4
 ),
 
 tar_target(
   name = triage_pilot_plots,
-  command = write_triage_plots(
-    data = literature_analysis_ready,
-    groups = triage_pilot_groups_split,
+  command = write_triage_plots_for_group(
+    data = triage_group_slices$data,
+    grp = triage_group_slices$grp,
     ...
   ),
-  pattern = map(triage_pilot_groups_split),
+  pattern = map(triage_group_slices),
   format = "file"
 )
 ```
 
-`group_slug` is the right branching key: `sample_triage_groups()` builds it via
-`slugify_name()` and it is already unique per row, which is the same property the
-PNG filenames depend on.
+### The slice has to be a superset, not the group
 
-**Why a separate `_split` target.** `tar_group_by()` adds a `tar_group` column.
-`triage_pilot_groups` is also consumed whole by `triage_overview_node_table`,
-`triage_species_node_table` and by `docs/NBXX-Sample-Groups.qmd`
-(`tar_read(triage_pilot_groups)$heading_slug`). Splitting into a second target
-keeps that extra column away from all of them.
+`write_triage_plots_for_group()` derives **three** subsets from its input, and
+two of them deliberately reach outside the strict group (CLAUDE.md 4.4.0):
+
+| Object | Matches on | Feeds |
+|---|---|---|
+| `group_data` | all 8 group columns | panels b, c, e |
+| `group_data_all_units` | 7 cols, **unit relaxed** | panel a, dry vs wet weight |
+| `group_data_all_geography` | 6 cols, **geography relaxed** | panel d, across site types |
+
+So slicing to the strict group would be wrong, and **would not error**. Panels
+(a) and (d) would render with a single unit and a single site type and still look
+entirely plausible.
+
+`triage_group_slice()` therefore matches on `triage_group_cols()` minus
+`triage_relaxed_cols()`, i.e. compartment, sub-compartment, species group,
+species, tissue. That is a superset of all three subsets.
+
+**Why this needs no plot code changes.** `filter_to_group()` still runs inside
+the plotting function, untouched. Filtering a superset with the same predicate
+returns exactly the same rows as filtering the full table. Output is provably
+unchanged; see section 5.
+
+### Two traps avoided
+
+**Do not slice in a branched target.** If the slicing target itself branches,
+every branch receives the full table and the transfer has been moved, not
+removed. `split_triage_data()` runs once, unbranched, and is consumed with
+`iteration = "list"`.
+
+**Do not zip two targets with `map()`.** Each list element carries its own `grp`,
+so nothing has to assume two targets share an order. This matters because
+`tar_group_by()` orders branches by the grouping column while
+`sort_triage_groups()` orders the groups table hierarchically, and the two need
+not agree. Pairing a group with another group's slice gives empty panels, not an
+error. The earlier `tar_group_by()` / `triage_pilot_groups_split` approach was
+dropped for exactly this reason.
 
 ### Downstream compatibility, checked
 
@@ -216,24 +250,63 @@ garbage_collection = TRUE, # gc() between targets
 `memory = "transient"` costs some re-reading from the store. On a pipeline where
 many targets depend on a 65 MB parent, that is a good trade.
 
-### Measured payoff
+### More workers made it slower
 
-| Measure | Value |
-|---|---|
-| Sum of branch seconds (sequential estimate) | 290.7 s |
-| Wall clock, `workers = 3` | 202.5 s |
-| Slowest single branch | 70.4 s |
-| Median branch | 6.7 s |
+Counter-intuitive but measured. After slicing, at `workers = 3`:
 
-About **1.5x**, which is well short of 3x, for two reasons worth knowing:
+| Measure | `workers = 2` | `workers = 3` |
+|---|---|---|
+| Aggregate branch seconds | 116.6 s | **197.0 s** |
+| Pipeline wall | 98.2 s | 110.2 s |
 
-1. **The work is extremely skewed.** Median branch 6.7 s, slowest 70.4 s. That
-   one branch alone sets a floor of 70 s no matter how many workers you add.
-2. **Serialisation overhead is real.** 65 MB is sent to a worker *per branch*,
-   29 times, roughly 1.9 GB of serialisation across the run. This is why wall
-   clock (202 s) is worse than the theoretical 3-worker floor (~97 s).
+The *aggregate* time going up is the tell. That is not scheduling overhead, it is
+the branches themselves running slower because three R processes contend for
+memory on a 15.5 GB machine. Cores are not the scarce resource.
 
-Both point at the same fix, noted in section 6.
+**Do not raise `workers` on wall clock alone.** Re-measure aggregate branch
+seconds; if that number rises, the extra worker is costing you.
+
+### The `memory = "transient"` trap
+
+`memory = "transient"` is right globally and wrong for `triage_group_slices`.
+That object is ~243 MB in memory and is the dependency of all 29 branches, so
+transient made the main process drop and re-read it once per branch. Dispatch
+serialised, and the run came out *slower than sequential*:
+
+| Configuration | Aggregate branch s | Pipeline wall |
+|---|---|---|
+| slices, transient | 154.0 s | 199 s |
+| slices, `memory = "persistent"` | 116.6 s | **98.2 s** |
+
+Hence the per-target override. The rule of thumb: a large object that every
+branch depends on should be persistent, whatever the global default.
+
+### Measured payoff, end to end
+
+All at `workers = 2` unless noted, pipeline wall (not including the ~14 s R
+startup):
+
+| Configuration | Aggregate branch s | Pipeline wall |
+|---|---|---|
+| Full table per branch, `workers = 3` | 290.7 s | 175.6 s |
+| Sliced, persistent, `workers = 2` | **117-137 s** | **98-111 s** |
+
+**Roughly 1.6-1.8x faster using one fewer worker**, and the aggregate work
+dropped by more than half.
+
+::: {.callout-note}
+## Run-to-run variance is about 15%
+
+Two runs of the identical committed configuration gave 116.6 s / 98.2 s and
+137.1 s / 111.3 s. This machine is shared with an IDE and whatever else is
+open, so treat single measurements as indicative. The `workers = 3` result was
+outside this band in both aggregate and wall, which is why it is treated as a
+real effect rather than noise.
+:::
+
+The skew that used to set the floor is also gone. The slowest branch was 70.4 s
+and is now 18.9 s, because that branch was dominated by receiving and filtering
+65 MB rather than by drawing anything.
 
 ### Incremental rebuilds, which matter more
 
@@ -253,6 +326,22 @@ branches, `tar_outdated()` still returns `character(0)`, so
 `render_nbxx_sample_groups` did *not* go stale. Redrawing plots that do not
 actually change will not trigger the 78 s notebook render.
 
+### What the slice actually saves
+
+```
+full data:   90,110 rows, 64.8 MB
+slice rows:  min 3, median 337, max 48,379
+
+transfer per full run
+  before : 29 x 64.8 MB = 1881 MB
+  after  : sum of slices =  243 MB   (87% less)
+
+worst single slice: 33.3 MB
+```
+
+The 243 MB of slices is stored as a target, but compresses to **8.9 MB on disk**
+under `qs`.
+
 ## 5. How to re-run these checks
 
 ```bash
@@ -266,12 +355,37 @@ Rscript -e "t0 <- Sys.time(); targets::tar_make(names = c(triage_pilot_groups_sp
 
 ```r
 #| eval: false
-# Per-branch timings and the sequential estimate
-m <- targets::tar_meta(fields = c("name", "parent", "seconds"))
-b <- subset(m, parent %in% "triage_pilot_plots" & !is.na(seconds))
-sum(b$seconds)   # sequential estimate
-max(b$seconds)   # critical path floor
+# Unit tests for the slice. Seconds, synthetic fixtures, no target store.
+pkgload::load_all(quiet = TRUE)
+testthat::test_file("tests/testthat/test-fct_group_triage_slice.R")
 ```
+
+```r
+#| eval: false
+# Per-branch timings. NOTE: tar_meta accumulates records from superseded branch
+# definitions, so filter by time or you will sum two runs together. This caught
+# me out once: 58 "branches" for a 29-group pipeline.
+m <- targets::tar_meta(fields = c("name", "parent", "seconds", "time"))
+b <- subset(m, parent %in% "triage_pilot_plots" & !is.na(seconds))
+cur <- subset(b, time >= subset(m, name == "triage_group_slices")$time)
+sum(cur$seconds)   # aggregate work; compare against pipeline wall
+max(cur$seconds)   # critical path floor
+```
+
+### The check that actually matters
+
+The slice is only safe if output is unchanged. Hash the PNGs, rebuild, compare:
+
+```r
+#| eval: false
+p <- sort(unname(targets::tar_read(triage_pilot_plots)))
+before <- vapply(p, function(f) as.character(tools::md5sum(f)), character(1))
+# ... change something, tar_make(), then re-hash and compare
+```
+
+Verified byte-identical across all 145 PNGs after the slice refactor, and again
+after the `memory = "persistent"` change. This works because `ragg` output is
+deterministic; rebuilding unchanged plots does not even mark the notebook stale.
 
 The warnings surfaced by this run (`pointblank` regex exceedances on
 `PROTOCOL_ID` / `REFERENCE_ID` / `SAMPLE_ID`, unresolved (sub)compartments and
@@ -280,15 +394,8 @@ upstream**. None of them are caused by crew.
 
 ## 6. Open items
 
-- **Stop shipping the whole dataset per branch.** The single biggest available
-  win, for both speed and memory. `write_triage_plots()` receives all 90,110
-  rows and immediately filters to one group. Pre-filtering upstream, so each
-  branch is sent only its own rows, would cut the 1.9 GB of serialisation to
-  almost nothing. It is a function change, so it is flagged, not done
-  (CLAUDE.md: flag tempting refactors).
-- **The 70 s branch.** Worth finding out which group it is and whether
-  `geom_smooth()` is the cost. Capping or dropping the smooth on very large
-  groups would lower the floor for everyone.
+- **Raising `workers` needs more RAM, not more cores.** 2 is the measured
+  optimum on this machine. See section 4 before changing it.
 - **The other two plot targets** (`triage_overview_plots`,
   `triage_species_plots`) are still unbranched. They now at least run
   concurrently with the pilot target. Same `tar_group_by()` treatment applies via

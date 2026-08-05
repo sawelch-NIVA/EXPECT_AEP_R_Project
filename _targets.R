@@ -115,6 +115,10 @@ tar_option_set(
   # targets.qmd section 4.
   controller = crew_controller_local(
     name = "local",
+    # 2 beats 3 here, measured, even after slicing cut the per-worker footprint.
+    # At 3 the aggregate branch time inflates from 117 s to 197 s: the workers
+    # contend for memory rather than for cores. Do not raise this without
+    # re-measuring aggregate branch seconds, not just wall clock.
     workers = 2,
     seconds_idle = 60
   )
@@ -1150,27 +1154,37 @@ list(
     command = compute_triage_scale_limits(literature_analysis_ready)
   ),
 
-  # One branch per group, so the 29 groups spread across crew workers and a
-  # changed plot function redraws only the groups it touches. Split into its own
-  # target because tar_group_by() adds a tar_group column, and the targets that
-  # consume the whole table should not inherit it. targets.qmd section 3.
-  tar_group_by(
-    name = triage_pilot_groups_split,
-    command = triage_pilot_groups,
-    group_slug
+  # One element per group, each carrying its own group row and only the rows
+  # that group's panels can need. Unbranched on purpose: slicing inside a
+  # branched target would send the whole 65 MB table to every branch, which is
+  # exactly the cost this removes. 1881 MB of serialisation per full run becomes
+  # 243 MB. targets.qmd section 3.
+  tar_target(
+    name = triage_group_slices,
+    command = split_triage_data(literature_analysis_ready, triage_pilot_groups),
+    iteration = "list",
+    # Overrides the global memory = "transient". This object is ~243 MB in
+    # memory and is the dependency of all 29 branches, so transient made the
+    # main process drop and re-read it once per branch, which serialised
+    # dispatch and cost more than the parallelism gained. targets.qmd section 4.
+    memory = "persistent"
   ),
 
+  # One branch per group, so groups spread across crew workers and a changed
+  # plot function redraws only the groups it touches.
+  #
   # format = "file" so targets caches the PNGs themselves. Never return the
   # ggplots: they capture their input data and redraw at print time anyway.
   # Output dir has no leading underscore: Quarto skips underscore-prefixed
   # directories as project resources, which would break linked images.
   tar_target(
     name = triage_pilot_plots,
-    command = write_triage_plots(
-      data = literature_analysis_ready,
-      # One-row groups table per branch. write_triage_plots() maps over rows and
-      # needs no change.
-      groups = triage_pilot_groups_split,
+    # Calls the singular _for_group() function directly. Each branch is one
+    # (grp, data) pair, so there is no groups table to map over and no second
+    # target to zip against. targets.qmd section 3 for why zipping was avoided.
+    command = write_triage_plots_for_group(
+      data = triage_group_slices$data,
+      grp = triage_group_slices$grp,
       dir = "triage",
       scale_limits = triage_scale_limits,
       # Reference lines. Borrowed across compartments, species and tissues on
@@ -1178,7 +1192,7 @@ list(
       # anything into them.
       thresholds = copper_toxicity_thresholds
     ),
-    pattern = map(triage_pilot_groups_split),
+    pattern = map(triage_group_slices),
     format = "file"
   ),
 

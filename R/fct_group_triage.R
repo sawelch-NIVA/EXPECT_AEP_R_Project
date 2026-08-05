@@ -347,6 +347,79 @@ filter_to_group <- function(data, grp, exclude_cols = character(0)) {
   data[keep, , drop = FALSE]
 }
 
+#' Group Columns Relaxed by Some Triage Panel
+#'
+#' The columns that at least one panel deliberately ignores. Panel (a) relaxes
+#' the unit so dry and wet weight can be compared; panel (d) relaxes geography so
+#' the same species can be compared across site types. See CLAUDE.md 4.4.0.
+#'
+#' This must stay the **union** of every `exclude_cols` argument used in
+#' [write_triage_plots_for_group()]. They are not shared literally, because each
+#' panel relaxes its own columns and no panel relaxes all of them. If a panel
+#' starts relaxing a new column and it is not added here, [triage_group_slice()]
+#' will be too small and that panel will silently lose rows. The test file asserts
+#' the two agree.
+#'
+#' @return A character vector of column names.
+#' @export
+triage_relaxed_cols <- function() {
+  c(
+    "MEASURED_UNIT_STANDARD",
+    "SITE_GEOGRAPHIC_FEATURE",
+    "SITE_GEOGRAPHIC_FEATURE_SUB"
+  )
+}
+
+#' Slice Data to Every Row One Group's Panels Could Need
+#'
+#' A minimal standalone input for [write_triage_plots_for_group()], so a crew
+#' worker can be sent one group's rows instead of the whole 90,110-row table.
+#'
+#' It matches on [triage_group_cols()] minus [triage_relaxed_cols()], which makes
+#' it a **superset** of all three subsets the plotting function derives. That
+#' superset property is the whole point: `filter_to_group()` still runs inside
+#' the plotting function unchanged, and filtering a superset with the same
+#' predicate returns exactly the same rows as filtering the full table. Output is
+#' therefore byte-identical, and no plot function needed changing.
+#'
+#' Filtering to the *strict* group instead would be wrong and would not error:
+#' panels (a) and (d) would render with a single unit and a single site type and
+#' still look plausible.
+#'
+#' @param data The `literature_analysis_ready` target.
+#' @param grp A one-row tibble of group-defining columns.
+#' @return A filtered data frame, a superset of every subset the panels derive.
+#' @export
+triage_group_slice <- function(data, grp) {
+  filter_to_group(data, grp, exclude_cols = triage_relaxed_cols())
+}
+
+#' Split Data into One Slice per Group
+#'
+#' Built once, in one target, and branched over with `iteration = "list"`. Doing
+#' the slicing in a *branched* target instead would send the full table to every
+#' branch, which is the cost this is meant to remove.
+#'
+#' Each element carries its own group row, so nothing downstream has to zip two
+#' targets together with `map()`. That matters: `tar_group_by()` orders branches
+#' by the grouping column while `sort_triage_groups()` orders the groups table
+#' hierarchically, and the two need not agree. Pairing a group with another
+#' group's slice would yield empty panels rather than an error.
+#'
+#' @param data The `literature_analysis_ready` target.
+#' @param groups Output of [sample_triage_groups()].
+#' @return A list with one element per group, each `list(grp = , data = )`.
+#' @export
+split_triage_data <- function(data, groups) {
+  purrr::map(
+    seq_len(nrow(groups)),
+    function(i) {
+      grp <- groups[i, , drop = FALSE]
+      list(grp = grp, data = triage_group_slice(data, grp))
+    }
+  )
+}
+
 # ---- Shared scales -----------------------------------------------------
 
 #' Compute Shared Value-Axis Limits
@@ -1916,6 +1989,10 @@ write_triage_plots_for_group <- function(
 }
 
 #' Write Triage Plots for Several Groups
+#'
+#' No longer used by the pipeline, which branches over [split_triage_data()] and
+#' calls [write_triage_plots_for_group()] once per branch. Kept because it is the
+#' convenient way to redraw several groups by hand in a console.
 #'
 #' @param data The `literature_analysis_ready` target.
 #' @param groups Output of [sample_triage_groups()].
