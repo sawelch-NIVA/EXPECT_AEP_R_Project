@@ -1,6 +1,3 @@
 name,lat,lon,poi_type,notes
-Sydvaranger mine (Kirkenes),69.7,30.0,Mining,Placeholder coordinate - verify. Iron mine with copper as trace/associated metal; check relevance.
+Sorfjorden,60.07,6.55,Industry,Placeholder coordinate - verify. Odda smelter site, historic heavy metal contamination incl. copper.
 Repparfjorden,70.5,24.1,Mining,Nussir ASA copper mine and planned tailings site; see docs/NBXX-reparfjorden.qmd.
-Longyearbyen,78.22,15.6,Settlement,Placeholder - largest Svalbard settlement, potential local source.
-Tromso,69.65,18.96,Settlement,Placeholder - major northern Norway port/urban centre.
-Hammerfest,70.66,23.68,Industry,Placeholder - LNG/industrial hub, see A002 node and PRTR kommune filter.
