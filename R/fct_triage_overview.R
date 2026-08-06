@@ -7,7 +7,7 @@
 #
 # These two panels sit one level up, at the sub-compartment, and compare
 # the children below it. That is the view the `lump` / `split` decision in
-# data/clean/group_decisions.csv actually needs.
+# data/clean/decisions/group_decisions.csv actually needs.
 #
 # They are deliberately NOT a new plot type. triage_plot_by_category() already
 # draws "distribution of value, split by some category", which is exactly this

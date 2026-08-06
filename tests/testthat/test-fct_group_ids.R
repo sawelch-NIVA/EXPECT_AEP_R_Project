@@ -136,8 +136,8 @@ test_that("the committed ledger pins its IDs to specific groups", {
   # Deliberately hard-coded. If a future refactor "helpfully" regenerates the
   # ledger, this fails rather than silently re-pointing every note Sam has
   # written. Update it only when the underlying group genuinely changes.
-  skip_if_not(file.exists(here_rel("data/clean/group_ids.csv")))
-  ids <- read_group_ids(here_rel("data/clean/group_ids.csv"))
+  skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
+  ids <- read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))
 
   g001 <- ids[ids$group_id == "G001", ]
   expect_equal(g001$ENVIRON_COMPARTMENT_SUB, "Freshwater")

@@ -404,7 +404,7 @@ clean_joined_columns <- function(data, columns_to_drop = character()) {
 #' @export
 save_literature_parquet <- function(
   data,
-  output_path = "data/clean",
+  output_path = "data/clean/derived",
   filename = "literature_data.parquet"
 ) {
   # Ensure output directory exists

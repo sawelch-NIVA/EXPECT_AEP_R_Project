@@ -31,7 +31,7 @@
 #' is recognisability.
 #'
 #' The register's order is not authoritative either, so a wrong-looking name here
-#' is a cache edit away: `data/clean/species_common_names_cache.csv` is
+#' is a cache edit away: `data/clean/lookups/species_common_names_cache.csv` is
 #' hand-editable and is never overwritten for a species already in it.
 #'
 #' @param x A character vector of candidate names, in source order.
@@ -132,7 +132,7 @@ get_common_names <- function(
   biota_data,
   input_col = "SAMPLE_SPECIES",
   output_col = "SPECIES_COMMON_NAME",
-  cache_path = here_rel("data/clean/species_common_names_cache.csv"),
+  cache_path = here_rel("data/clean/lookups/species_common_names_cache.csv"),
   dbs = c("worms", "ncbi"),
   verbose = TRUE
 ) {

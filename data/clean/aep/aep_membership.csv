@@ -1,0 +1,14 @@
+aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+A001,N001,,,,,,,Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones.
+A001,N002,,,,,,,
+A001,N003,,,,,,,
+A001,N004,,,,,,,
+A001,N005,,,,,,,
+A001,N006,,,,,,,
+A001,N007,,,,,,,
+A002,N001,,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
+A002,N002,,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
+A002,N003,,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
+A002,N004,,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
+A002,N006,,,,,,,"External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence."
+A002,N007,,,,,,,External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd.

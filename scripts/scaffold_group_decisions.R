@@ -1,4 +1,4 @@
-# Scaffold or refresh data/clean/group_decisions.csv (PLAN.md P2.2).
+# Scaffold or refresh data/clean/decisions/group_decisions.csv (PLAN.md P2.2).
 #
 # Run this by hand, not from the pipeline. The pipeline READS the decisions file
 # and must never write it; writing a hand-edited file from a target is how
@@ -22,7 +22,7 @@ summary_data <- tar_read(summarise_literature_data)
 
 decisions <- scaffold_group_decisions(
   summary_data,
-  path = here_rel("data/clean/group_decisions.csv")
+  path = here_rel("data/clean/decisions/group_decisions.csv")
 )
 
 message("\nWhat is left to decide, by coverage tier:")

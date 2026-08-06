@@ -165,7 +165,7 @@ list(
   tar_target(
     vm_lookup_medium,
     read_csv(
-      "data/clean/Vm_medium_lookup_matrix_filled.csv",
+      "data/clean/lookups/Vm_medium_lookup_matrix_filled.csv",
       guess_max = 100,
       show_col_types = FALSE
     ) |>
@@ -188,7 +188,7 @@ list(
   #### # Vannkategori lookup ----
   tar_target(
     vm_lookup_vannkategori,
-    read_csv("data/clean/vm_sites_codes_lookup.csv", show_col_types = FALSE) |>
+    read_csv("data/clean/lookups/vm_sites_codes_lookup.csv", show_col_types = FALSE) |>
       rename_with(
         ~ paste0(., "_vkat"),
         c(
@@ -210,7 +210,7 @@ list(
     vm_lookup_methods,
     {
       read_csv(
-        "data/clean/vm_methods_lookup_filled.csv",
+        "data/clean/lookups/vm_methods_lookup_filled.csv",
         show_col_types = FALSE
       ) |>
         group_by(PROTOCOL_CATEGORY, PROTOCOL_NAME) |>
@@ -230,7 +230,7 @@ list(
   #### # Campaigns lookup ----
   tar_target(
     vm_lookup_campaigns,
-    read_csv("data/clean/Vm_lookup_campaigns.csv", show_col_types = FALSE)
+    read_csv("data/clean/lookups/Vm_lookup_campaigns.csv", show_col_types = FALSE)
   ),
 
   #### # Units lookup ----
@@ -243,7 +243,7 @@ list(
   #### # Species lookup ----
   tar_target(
     vm_lookup_species,
-    read_csv("data/clean/Vm_species_lookup.csv", show_col_types = FALSE)
+    read_csv("data/clean/lookups/Vm_species_lookup.csv", show_col_types = FALSE)
   ),
 
   ### # Join Vannmiljø data ----
@@ -862,7 +862,7 @@ list(
         input_col = "SAMPLE_SPECIES",
         output_col = "SPECIES_COMMON_NAME",
         cache_path = here_rel(
-          "data/clean/species_common_names_cache.csv"
+          "data/clean/lookups/species_common_names_cache.csv"
         ),
         dbs = c("worms", "ncbi"),
         verbose = FALSE
@@ -1033,7 +1033,7 @@ list(
   # would be far worse here.
   tar_target(
     name = unit_corrections_file,
-    command = here_rel("data/clean/unit_corrections.csv"),
+    command = here_rel("data/clean/decisions/unit_corrections.csv"),
     format = "file"
   ),
 
@@ -1361,7 +1361,7 @@ list(
   # below: this was not tracked at all until 2026-08-05.
   tar_target(
     name = group_ids_file,
-    command = here_rel("data/clean/group_ids.csv"),
+    command = here_rel("data/clean/decisions/group_ids.csv"),
     format = "file"
   ),
   tar_target(
@@ -1395,7 +1395,7 @@ list(
   # into this file and every downstream figure needs to see it.
   tar_target(
     name = group_decisions_file,
-    command = here_rel("data/clean/group_decisions.csv"),
+    command = here_rel("data/clean/decisions/group_decisions.csv"),
     format = "file"
   ),
   tar_target(
@@ -1422,7 +1422,7 @@ list(
   # group_decisions.csv go untracked for a week (see above).
   tar_target(
     name = aep_nodes_file,
-    command = here_rel("data/clean/aep_nodes.csv"),
+    command = here_rel("data/clean/aep/aep_nodes.csv"),
     format = "file"
   ),
   tar_target(
@@ -1431,7 +1431,7 @@ list(
   ),
   tar_target(
     name = aep_node_members_file,
-    command = here_rel("data/clean/aep_node_members.csv"),
+    command = here_rel("data/clean/aep/aep_node_members.csv"),
     format = "file"
   ),
   tar_target(
@@ -1443,6 +1443,47 @@ list(
     )
   ),
 
+  ### # The AEP manifest and membership ----
+  # PLAN.md P5.3, added 2026-08-06. Several AEPs over ONE pool of nodes rather
+  # than a node set per AEP: a node carries four EPEQ scores and four written
+  # justifications, and copying those per AEP multiplies Sam's judgement work by
+  # the number of AEPs and then lets the copies drift. See the header of
+  # R/fct_aep_manifest.R for the full argument.
+  #
+  # What varies per AEP is membership, layout (x/y on the membership file) and
+  # SCOPE: a bounding box and date range on the manifest, intersected with each
+  # node's own restrictions.
+  tar_target(
+    name = aep_manifest_file,
+    command = here_rel("data/clean/aep/aep_manifest.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_manifest,
+    command = read_aep_manifest(aep_manifest_file)
+  ),
+  tar_target(
+    name = aep_membership_file,
+    command = here_rel("data/clean/aep/aep_membership.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_membership,
+    command = read_aep_membership(
+      path = aep_membership_file,
+      nodes = aep_nodes,
+      manifest = aep_manifest
+    )
+  ),
+
+  ### # One scoped node table per AEP ----
+  # The single place the loop over AEPs lives. Everything downstream takes an
+  # ordinary nodes table and does not know AEPs exist.
+  tar_target(
+    name = aep_scoped,
+    command = aep_scoped_nodes(aep_nodes, aep_membership, aep_manifest)
+  ),
+
   ### # Node grouping boxes ----
   # Sam 2026-08-05: "Having everything say 'coastal' at the start is clearly a
   # bit silly." A shared property repeated in five labels needs somewhere else to
@@ -1451,7 +1492,7 @@ list(
   # than declared, so it cannot drift out of step with the member lists.
   tar_target(
     name = aep_node_groups_file,
-    command = here_rel("data/clean/aep_node_groups.csv"),
+    command = here_rel("data/clean/aep/aep_node_groups.csv"),
     format = "file"
   ),
   tar_target(
@@ -1463,18 +1504,28 @@ list(
   # PLAN.md P3.1. One row per node: the compact summary a node has to carry.
   # Arctic coverage is REPORTED, not filtered (Sam's call 2026-08-05); a global
   # 66.5 cut would drop 81% of measurements and leave the marine node on 258.
+  #
+  # One row per node PER AEP since 2026-08-06: the same node resolves to
+  # different data under different scopes, so `aep_id` is part of the key.
   tar_target(
     name = aep_node_cards,
-    command = {
-      cards <- aep_node_report_cards(
-        aep_nodes,
-        aep_node_members,
-        literature_analysis_ready,
-        group_ids
-      )
-      validate_aep_nodes(aep_nodes, aep_node_members, cards)
-      cards
-    }
+    command = aep_all_report_cards(
+      aep_scoped,
+      aep_node_members,
+      literature_analysis_ready,
+      group_ids
+    )
+  ),
+
+  ### # Shared value limits, computed ONCE across the whole node pool ----
+  # Not per AEP. Limits derived from one AEP's nodes are that AEP's, and the
+  # same node drawn on two different axes cannot be compared between them, which
+  # is the whole reason a spatially restricted AEP is interesting.
+  tar_target(
+    name = aep_card_limits,
+    command = node_card_limits(
+      aep_nodes, aep_node_members, literature_analysis_ready, group_ids
+    )
   ),
 
   ### # Node coverage backlog ----
@@ -1498,7 +1549,7 @@ list(
   # anything. Marking one `empirical` is a positive act requiring a citation.
   tar_target(
     name = aep_edges_file,
-    command = here_rel("data/clean/aep_edges.csv"),
+    command = here_rel("data/clean/aep/aep_edges.csv"),
     format = "file"
   ),
   tar_target(
@@ -1518,16 +1569,20 @@ list(
   # Badges render grey where a node is unscored, which is the honest state until
   # aep_nodes.csv is filled in: grey means "not assessed" and is deliberately
   # distinct from the colour for a score of 1.
+  #
+  # One SUBDIRECTORY PER AEP since 2026-08-06. A node appears in several AEPs
+  # with different data behind it, so `N001.png` is not a unique name.
   tar_target(
     name = node_cards,
-    command = write_node_cards(
-      nodes = aep_nodes,
+    command = write_aep_node_cards(
+      scoped = aep_scoped,
       cards = aep_node_cards,
       members = aep_node_members,
       data = literature_analysis_ready,
       ids = group_ids,
       thresholds = copper_toxicity_thresholds,
-      dir = here_rel("figures/node_cards")
+      dir = here_rel("figures/node_cards"),
+      limits = aep_card_limits
     ),
     format = "file"
   ),
@@ -1538,14 +1593,15 @@ list(
   # count line, the row labels and the axis instead of shrinking them.
   tar_target(
     name = node_cards_compact,
-    command = write_node_cards(
-      nodes = aep_nodes,
+    command = write_aep_node_cards(
+      scoped = aep_scoped,
       cards = aep_node_cards,
       members = aep_node_members,
       data = literature_analysis_ready,
       ids = group_ids,
       thresholds = copper_toxicity_thresholds,
       dir = here_rel("figures/node_cards_compact"),
+      limits = aep_card_limits,
       width = 2.4,
       height = 1.8,
       dpi = 200,
@@ -1560,31 +1616,30 @@ list(
   # algorithm optimising for edge crossings would destroy the one thing the axis
   # is for. A file target, per CLAUDE.md 4.4: a ggplot object captures its whole
   # input, so the store caches the image instead.
+  #
+  # ONE FIGURE PER AEP since 2026-08-06: figures/aep_A001.png and so on. Edges
+  # and grouping boxes are narrowed to each AEP's nodes rather than declared per
+  # AEP, so they cannot disagree with the membership file.
+  #
+  # The device size is passed down to plot_aep() because arrow clipping needs it:
+  # ggimage sizes a card as a fraction of PANEL WIDTH, so its extent in data
+  # units depends on the shape of the canvas. See node_card_extent().
   tar_target(
     name = aep_diagram,
-    command = {
-      path <- here_rel("figures/aep.png")
-      dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
-      ggplot2::ggsave(
-        filename = path,
-        plot = plot_aep(
-          aep_nodes, aep_edges, aep_node_cards,
-          groups = aep_node_groups,
-          # Nodes drawn as their own report cards (PLAN.md P5.2), which is what
-          # makes this a report-card AEP rather than a labelled graph.
-          node_images = stats::setNames(
-            node_cards_compact,
-            tools::file_path_sans_ext(basename(node_cards_compact))
-          ),
-          image_size = 0.19
-        ),
-        width = 12,
-        height = 8,
-        dpi = 150,
-        device = ragg::agg_png
-      )
-      path
-    },
+    command = write_aep_diagrams(
+      scoped = aep_scoped,
+      edges = aep_edges,
+      cards = aep_node_cards,
+      groups = aep_node_groups,
+      # Nodes drawn as their own report cards (PLAN.md P5.2), which is what
+      # makes this a report-card AEP rather than a labelled graph.
+      card_paths = node_cards_compact,
+      dir = here_rel("figures"),
+      width = 12,
+      height = 8,
+      dpi = 150,
+      image_size = 0.19
+    ),
     format = "file"
   ),
 
@@ -1596,7 +1651,7 @@ list(
   #
   # REPORTS, NEVER CORRECTS. Rewriting a measured value on the strength of a
   # free-text comment is a scientific judgement. That judgement now has a home
-  # of its own in data/clean/unit_corrections.csv; this target stays a detector.
+  # of its own in data/clean/decisions/unit_corrections.csv; this target stays a detector.
   #
   # It reads literature_analysis_ready, which since 2026-08-06 sits DOWNSTREAM of
   # the corrections. That is deliberate and it changes what this target means: it

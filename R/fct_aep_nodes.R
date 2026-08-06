@@ -250,7 +250,7 @@ parse_node_date <- function(x, bound = c("min", "max")) {
 #' @param path Where the CSV lives.
 #' @return A tibble of nodes.
 #' @export
-read_aep_nodes <- function(path = here_rel("data/clean/aep_nodes.csv")) {
+read_aep_nodes <- function(path = here_rel("data/clean/aep/aep_nodes.csv")) {
   if (!file.exists(path)) {
     stop(
       "No nodes file at ", path,
@@ -375,7 +375,7 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep_nodes.csv")) {
 #' @return A tibble of `node_id`, `group_id`, `notes`.
 #' @export
 read_aep_node_members <- function(
-  path = here_rel("data/clean/aep_node_members.csv"),
+  path = here_rel("data/clean/aep/aep_node_members.csv"),
   nodes = NULL,
   ids = NULL
 ) {
@@ -528,6 +528,17 @@ resolve_node_data <- function(node, members, data, ids) {
   }
   if (!is.na(node$lat_max[1])) {
     out <- out[!is.na(out$LATITUDE) & out$LATITUDE <= node$lat_max[1], ]
+  }
+  # Longitude arrives only from an AEP's bounding box (see aep_scope_nodes()),
+  # so the columns are absent on a bare nodes table and their absence means "no
+  # restriction" rather than an error.
+  # `%in% names()`, not `$`: a tibble warns on `$` for a column it does not
+  # have, and this runs once per node per AEP.
+  if ("lon_min" %in% names(node) && !is.na(node$lon_min[1])) {
+    out <- out[!is.na(out$LONGITUDE) & out$LONGITUDE >= node$lon_min[1], ]
+  }
+  if ("lon_max" %in% names(node) && !is.na(node$lon_max[1])) {
+    out <- out[!is.na(out$LONGITUDE) & out$LONGITUDE <= node$lon_max[1], ]
   }
   # Dates, not numbers. Comparing a Date against a bare year silently reads the
   # year as days-since-1970 and empties the node; read_aep_nodes() converts, and

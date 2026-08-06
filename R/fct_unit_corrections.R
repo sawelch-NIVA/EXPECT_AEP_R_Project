@@ -6,7 +6,7 @@
 #   R/fct_unit_anomalies.R  detection of errors that arrived already made
 #   R/fct_unit_corrections.R (this)  the human decision to override them
 #
-# The decision layer is data, not code: data/clean/unit_corrections.csv is
+# The decision layer is data, not code: data/clean/decisions/unit_corrections.csv is
 # hand-edited, the pipeline reads it and never writes it. Same contract as
 # group_decisions.csv and aep_nodes.csv, and for the same reason -- overriding a
 # national monitoring database is a scientific judgement that has to be

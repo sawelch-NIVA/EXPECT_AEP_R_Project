@@ -1,4 +1,4 @@
-# Fill data/clean/group_decisions.csv from the notebook scheme (PLAN.md P2.3).
+# Fill data/clean/decisions/group_decisions.csv from the notebook scheme (PLAN.md P2.3).
 #
 #   Rscript scripts/apply_notebook_scheme.R
 #
@@ -17,7 +17,7 @@ suppressMessages({
 here::i_am("Readme.md")
 pkgload::load_all(quiet = TRUE)
 
-decisions <- apply_notebook_scheme(here("data/clean/group_decisions.csv"))
+decisions <- apply_notebook_scheme(here("data/clean/decisions/group_decisions.csv"))
 
 message("\nGroups and measurements per notebook:")
 decisions |>

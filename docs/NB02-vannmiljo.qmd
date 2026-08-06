@@ -116,20 +116,20 @@ vm_config <- list(
   #   vm_sites_1 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-1.xlsx"),
   #   vm_sites_2 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-2.xlsx"),
   #   vm_sites_3 = here("data/raw/vannmiljo/Vm_Copper_Sites_2025.12.05-3.xlsx"),
-  #   lookup_medium = here("data/clean/Vm_medium_lookup_matrix_filled.csv"),
-  #   lookup_vannkategori = here("data/clean/vm_sites_codes_lookup.csv"),
-  #   lookup_methods = here("data/clean/vm_methods_lookup_filled.csv"),
+  #   lookup_medium = here("data/clean/lookups/Vm_medium_lookup_matrix_filled.csv"),
+  #   lookup_vannkategori = here("data/clean/lookups/vm_sites_codes_lookup.csv"),
+  #   lookup_methods = here("data/clean/lookups/vm_methods_lookup_filled.csv"),
   #   methods_analysis = here(
   #     "data/raw/vannmiljo/Vannmiljø_Analysemetode_2025-12-15.xlsx"
   #   ),
   #   methods_sampling = here(
   #     "data/raw/vannmiljo/Vannmiljø_Prøvetakingsmetode_2025-12-15.xlsx"
   #   ),
-  #   lookup_campaigns = here("data/clean/Vm_lookup_campaigns.csv"),
+  #   lookup_campaigns = here("data/clean/lookups/Vm_lookup_campaigns.csv"),
   #   lookup_units = here(
   #     "data/raw/vannmiljo/Vannmiljø_Enhet_2025-12-30.xlsx"
   #   ),
-  #   lookup_species = here("data/clean/Vm_species_lookup.csv") # not actually used rn
+  #   lookup_species = here("data/clean/lookups/Vm_species_lookup.csv") # not actually used rn
   # ),
 
   # Filter criteria

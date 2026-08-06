@@ -46,10 +46,42 @@ long measurements table. Everything downstream reads from that.
 | `docs/*.qmd` | Notebooks, rendered into the website |
 | `index.qmd` | Manuscript draft |
 | `scripts/*.R` | Ad-hoc and one-shot scripts, **not** part of the pipeline |
-| `data/raw/`, `data/clean/` | Inputs and hand-maintained lookup tables |
+| `data/raw/` | Bulk inputs, untouched |
+| `data/clean/` | Split into subdirectories 2026-08-06, see 2.1.1 |
 | `_targets/` | Target store (`qs` format), gitignored |
 | `_site/`, `_freeze/`, `.quarto/` | Quarto build output and caches, gitignored |
 | `tests/testthat/` | One test file. Effectively unused. |
+
+### 2.1.1 `data/clean/` is organised by authority, not by topic (2026-08-06)
+
+It had grown to thirty files in one flat directory. The split is by **who owns
+the file**, because that is the distinction this project keeps relying on and the
+one a flat listing hid:
+
+| Directory | Contents | Contract |
+|---|---|---|
+| `aep/` | `aep_nodes`, `aep_node_members`, `aep_node_groups`, `aep_edges`, `aep_manifest`, `aep_membership` | Hand-edited. Pipeline reads, **never writes**. |
+| `decisions/` | `group_ids`, `group_decisions`, `unit_corrections` | Hand-edited. Same contract. |
+| `lookups/` | `Vm_*`/`vm_*` lookups, `species_common_names_cache`, `CREED_Copper_Purpose.yml` | Reference tables, occasionally hand-corrected. |
+| `spatial/` | `study_area_shapefile.*` | Static geometry. |
+| `derived/` | `prtr_emissions_summary`, `aep_literature_summary_claude`, `literature_data.parquet` | **Written by a script or the pipeline.** Safe to regenerate, never hand-edit. |
+| `archive/` | Seven files nothing reads | See `data/clean/archive/README.md`. |
+
+Two consequences worth knowing before touching it:
+
+- **Anything in `derived/` can be deleted and regenerated; nothing in `aep/` or
+  `decisions/` can.** That is the whole point of the split. Before 2026-08-06 a
+  hand-scored AEP node file and a script output sat side by side with nothing
+  distinguishing them.
+- **Moving a file here invalidates its `format = "file"` target and everything
+  downstream.** The 2026-08-06 move left 85 of 106 targets outdated, roughly a
+  35 minute rebuild, because the Vannmiljø lookups feed the whole chain. Budget
+  for it, or move only files outside that chain.
+
+`archive/` holds files no code path reads, verified by grep at the time of the
+move. They are archived rather than deleted because "unreferenced" is not
+"unwanted": several are raw exports, and one is the input to a step that was
+never wired up. Its README lists each with a date and a reason.
 
 ### 2.2 The pipeline
 
@@ -325,15 +357,15 @@ one holistic low-detail AEP".
 
 Not yet built. The direction agreed 2026-07-29:
 
-- **`data/clean/group_decisions.csv`** (hand-edited). The human judgement layer.
+- **`data/clean/decisions/group_decisions.csv`** (hand-edited). The human judgement layer.
   One row per group from `summarise_literature_data`, with a `decision` of
   `own_notebook` / `lump` / `split` / `drop`, a `lump_into` key, and free-text
   notes. The pipeline reads it; it never writes it. Grouping becomes reviewable
   data rather than logic buried in code.
-- **`data/clean/aep_nodes.csv`** (hand-edited). One row per AEP node: the group
+- **`data/clean/aep/aep_nodes.csv`** (hand-edited). One row per AEP node: the group
   key, the four EPEQ scores plus justifications, and manual `x` / `y` layout
   coordinates.
-- **`data/clean/aep_edges.csv`** (hand-edited). One row per edge: `from`, `to`,
+- **`data/clean/aep/aep_edges.csv`** (hand-edited). One row per edge: `from`, `to`,
   four EPEQ scores plus justifications, `magnitude` / `unit` where known, and a
   `status` of `empirical` or `putative`.
 
@@ -417,7 +449,7 @@ Three things that are easy to get wrong from cold:
   and the build aborts rather than falling back to a suffix. A positional id
   shifts under insertion and would let a hand-edited correction silently
   overwrite a different measurement.
-- **`data/clean/unit_corrections.csv` overrides measured values.** Pipeline reads,
+- **`data/clean/decisions/unit_corrections.csv` overrides measured values.** Pipeline reads,
   never writes. Every failure is an abort, not a warning. Each correction carries
   both a selector and the `row_id`s it matched, and the two must agree; that is
   what makes drift loud instead of silent. `scripts/scaffold_unit_corrections.R`

@@ -19,7 +19,7 @@ here::i_am("index.qmd")
 How this project handles units, how it finds units that arrived wrong, and how
 to correct one.
 
-The **single source of truth is `data/clean/unit_corrections.csv`**. Every
+The **single source of truth is `data/clean/decisions/unit_corrections.csv`**. Every
 correction shown on this page is read from it live, so nothing here can drift
 away from what the pipeline actually did. This document explains the file; it
 does not duplicate it.
@@ -160,7 +160,7 @@ anomalies$comments |>
 
 ```{r}
 #| label: tbl-corrections
-#| tbl-cap: "Live contents of `data/clean/unit_corrections.csv`."
+#| tbl-cap: "Live contents of `data/clean/decisions/unit_corrections.csv`."
 
 corrections <- tar_read(unit_corrections)
 
@@ -318,7 +318,7 @@ data automatically, and the check would detect nothing.
 
 ## 5. Review the diff, then rebuild
 
-`git diff data/clean/unit_corrections.csv` before `tar_make()`. A correction
+`git diff data/clean/decisions/unit_corrections.csv` before `tar_make()`. A correction
 invalidates everything downstream, including the triage panels, the node cards
 and the AEP.
 

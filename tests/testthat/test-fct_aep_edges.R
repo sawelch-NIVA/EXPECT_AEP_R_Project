@@ -228,3 +228,100 @@ test_that("progress copes with an empty edge set", {
   expect_equal(p$edges, 0)
   expect_equal(p$empirical, 0)
 })
+
+# ---- Clipping arrows to the node cards ----------------------------------
+# Added 2026-08-06, replacing the fractional trim recorded as a rough edge in
+# PLAN.md P5.1. The bug it fixes is that a fraction scales with edge length and
+# a card does not, so one trim value cannot clear cards on both a short edge and
+# a long one. Every edge in figures/aep.png was wrong in one direction or the
+# other.
+
+test_that("card extent scales with the coordinate range, not the node count", {
+  near <- edge_nodes()
+  far <- edge_nodes()
+  far$x <- far$x * 10
+
+  e_near <- node_card_extent(near, image_size = 0.2)
+  e_far <- node_card_extent(far, image_size = 0.2)
+
+  # A card is a fixed fraction of the panel, so ten times the x range is ten
+  # times the half-width in data units.
+  expect_equal(e_far$hw, e_near$hw * 10)
+})
+
+test_that("a degenerate axis falls back to a unit range rather than zero", {
+  # edge_nodes() has every y at 0. A zero half-height would clip nothing
+  # vertically and put horizontal arrows back under the cards.
+  ext <- node_card_extent(edge_nodes(), image_size = 0.2)
+  expect_gt(ext$hh, 0)
+  expect_true(is.finite(ext$hh))
+})
+
+test_that("clipping clears the card box by the requested gap", {
+  nodes <- edge_nodes()
+  hw <- 0.25
+  hh <- 0.25
+  gap <- 0.05
+  coords <- aep_edge_coords(
+    edge_fixture(), nodes, hw = hw, hh = hh, gap = gap
+  )
+
+  # N001 (0, 0) to N002 (1, 0): purely horizontal, so the segment leaves
+  # through the vertical side of the box at hw, plus the gap.
+  expect_equal(coords$x, hw + gap)
+  expect_equal(coords$xend, 1 - hw - gap)
+  expect_equal(coords$y, 0)
+  expect_equal(coords$yend, 0)
+})
+
+test_that("the gap is a constant distance, not a constant fraction", {
+  # THE WHOLE POINT. Under the old fractional trim the near edge cleared its
+  # card and the far edge stopped a long way short of one. Both must now stop
+  # the same distance from the card.
+  nodes <- edge_nodes()
+  short <- aep_edge_coords(
+    edge_fixture(from = "N001", to = "N002"), nodes, hw = 0.2, hh = 0.2
+  )
+  long <- aep_edge_coords(
+    edge_fixture(from = "N001", to = "N003"), nodes, hw = 0.2, hh = 0.2
+  )
+  expect_equal(short$x, long$x)
+})
+
+test_that("overlapping cards drop the edge rather than drawing it backwards", {
+  # A reversed arrow reads as a real flow in the wrong direction, which is
+  # worse than a missing one.
+  nodes <- edge_nodes()
+  expect_warning(
+    coords <- aep_edge_coords(
+      edge_fixture(), nodes, hw = 0.9, hh = 0.9
+    ),
+    "cards overlap"
+  )
+  expect_equal(nrow(coords), 0)
+})
+
+test_that("without card extents the fractional trim is unchanged", {
+  # Diagrams drawn with text labels have no box to clip to, and must keep
+  # working exactly as before.
+  coords <- aep_edge_coords(edge_fixture(), edge_nodes(), trim = 0.1)
+  expect_equal(coords$x, 0.1)
+  expect_equal(coords$xend, 0.9)
+})
+
+test_that("the diagram clips to cards only when cards are actually drawn", {
+  nodes <- edge_nodes()
+  edges <- edge_fixture()
+
+  # No images: text labels, fractional trim, must still build.
+  expect_s3_class(plot_aep(nodes, edges), "ggplot")
+
+  png <- withr::local_tempfile(fileext = ".png")
+  ggplot2::ggsave(
+    png, ggplot2::ggplot(), width = 2.4, height = 1.8, dpi = 72
+  )
+  imgs <- stats::setNames(rep(png, 3), nodes$node_id)
+  p <- plot_aep(nodes, edges, node_images = imgs, image_size = 0.15)
+  expect_s3_class(p, "ggplot")
+  expect_silent(invisible(ggplot2::ggplot_build(p)))
+})

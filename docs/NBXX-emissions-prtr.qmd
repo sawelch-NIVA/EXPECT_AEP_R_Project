@@ -1,0 +1,448 @@
+---
+title: "Notebook XX - Copper Sources: PRTR Releases and REACH Declarations"
+subtitle: "What the reported-emissions data can and cannot support as AEP source nodes"
+execute:
+  freeze: true
+---
+
+```{r}
+#| label: setup
+suppressMessages({
+  library(dplyr)
+  library(ggplot2)
+  library(scales)
+  library(flextable)
+  library(here)
+})
+here::i_am("README.md")
+suppressMessages(pkgload::load_all(here::here(), quiet = TRUE))
+
+prtr <- read_prtr_long(here("inst/extdata/emissions"))
+reach <- read_reach_declarations(here("inst/extdata/emissions/REACH_copper_prtd.xlsx"))
+
+sector_pal <- c(
+  "Land-based industry" = "#2B5F75",
+  "Waste water treatment" = "#5A9367",
+  "Offshore oil and gas" = "#B5876B",
+  "Landfills" = "#C9B458"
+)
+
+fmt <- function(x, digits = 3) {
+  formatC(x, format = "g", digits = digits, big.mark = ",")
+}
+
+tbl <- function(d, caption = NULL) {
+  flextable(d) |>
+    colformat_double(digits = 2) |>
+    autofit() |>
+    set_caption(caption)
+}
+```
+
+## Why this notebook exists
+
+Sam, 2026-08-06: *"If we're going to do source nodes we need to go to the REACH
+PRTR data and work with that rather than adding too much putative stuff that
+won't match up."* Agreed. This is that data, plotted, so the source nodes can be
+decided from something rather than asserted.
+
+**Read the two datasets as different kinds of number and never add them
+together.**
+
+| Dataset | What it measures | Unit | Geography |
+|---|---|---|---|
+| `norske_utslipp_*.xlsx` | **Releases** to air, water, subsurface | kg/yr | Facility, with fylke and kommune |
+| `REACH_copper_prtd.xlsx` | Copper **in commerce**: imported + produced − exported | tonnes/yr | National only |
+
+REACH sits upstream of any emission. A tonne declared is not a tonne released,
+and the ratio between them is the thing nobody in this project has estimated.
+
+::: {.callout-important}
+## Two traps, both hit while building this
+
+**Sum within a year, then average over years.** The first aggregate here was the
+mean of individual facility-year values, labelled as the sector release. For
+land-based industry to water that is 149 kg/yr against a true national annual
+total of 12,848: a factor of 25, in the direction that makes a source look
+negligible. `summarise_prtr_releases()` now returns both, named differently.
+
+**A blank cell is "not reported", not zero.** Facilities report only the media
+they are required to. Averaging an unreported medium in as a measured zero drags
+every sector mean down by however many facilities happen not to report it.
+:::
+
+## What is in the files
+
+```{r}
+#| label: tbl-coverage
+#| tbl-cap: "Coverage of the PRTR facility files."
+prtr |>
+  summarise(
+    `Facilities` = n_distinct(facility),
+    `Facility-years` = n(),
+    `First year` = min(year),
+    `Last year` = max(year),
+    `Media` = paste(sort(unique(medium)), collapse = ", "),
+    .by = source_category
+  ) |>
+  rename(`Source category` = source_category) |>
+  arrange(desc(`Facility-years`)) |>
+  tbl()
+```
+
+## National releases
+
+```{r}
+#| label: fig-national-totals
+#| fig-cap: "Annual national copper release by sector and medium. Points are years; the line is the reported total across all facilities in that year. Note the log y axis: the sectors span three orders of magnitude."
+#| fig-height: 6
+annual <- prtr_annual_totals(prtr)
+
+ggplot(annual, aes(year, total_kg, colour = source_category)) +
+  geom_line(linewidth = 0.7) +
+  geom_point(size = 1.1) +
+  scale_colour_manual(values = sector_pal, name = NULL) +
+  scale_y_log10(labels = label_number(big.mark = ",")) +
+  facet_wrap(~medium, ncol = 1, scales = "free_y") +
+  labs(
+    x = NULL, y = "Reported release (kg/yr)",
+    caption = "Norwegian PRTR (norske utslipp). Log y axis."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top", panel.grid.minor = element_blank())
+```
+
+::: {.callout-warning}
+## A falling line is not necessarily falling emissions
+
+Reporting completeness changes over time. A sector's total can drop because
+fewer facilities reported, not because less copper was released. The panel below
+puts facility count beside the total so the two can be told apart before anyone
+writes "copper releases have declined" in the manuscript.
+
+**Look at the last point on the land-based industry lines.** It falls roughly a
+hundredfold in a single year across a hundred-odd facilities. That is a
+submission deadline, not an environmental event: the most recent year is
+routinely partial because facilities report on a lag. The same thing happens at
+the *start* of the landfills series, where the reporting obligation was phasing
+in.
+
+Those years are **excluded** from every magnitude in this notebook, not merely
+flagged. A partial year enters a mean as a low-emission year, so leaving it in
+understates the source. This was found by plotting the series; it was invisible
+in the aggregate table.
+:::
+
+```{r}
+#| label: tbl-incomplete
+#| tbl-cap: "Years excluded as incomplete reporting. A year is flagged only where the group typically has at least five reporters, this year's reporter count fell below half the usual, and the total fell below a quarter of the usual. All three are required, so a genuinely clean year is not mistaken for a missing one."
+prtr_complete_years(prtr) |>
+  filter(!complete) |>
+  transmute(
+    `Source category` = source_category,
+    Medium = medium,
+    Year = year,
+    `Reported total (kg)` = total_kg,
+    `Facilities reporting` = n_facilities
+  ) |>
+  tbl()
+```
+
+::: {.callout-note}
+## The rule is gated on group size, and that gate matters
+
+The first version of this detector used only "is the total far below the
+median?", and applied to the four Hammerfest facilities it dropped **6 of 13
+years**. With that few reporters an individual facility *is* the series, so a low
+year is a low year rather than a missing report. `prtr_complete_years()` now
+refuses to judge completeness below five typical reporters, which is why nothing
+is dropped from the Repparfjorden figures below.
+:::
+
+```{r}
+#| label: fig-reporting-completeness
+#| fig-cap: "Number of facilities reporting, by sector and year. Compare against the totals above before reading any trend as a real change in release."
+#| fig-height: 5
+ggplot(annual, aes(year, n_facilities, colour = source_category)) +
+  geom_step(linewidth = 0.7) +
+  scale_colour_manual(values = sector_pal, name = NULL) +
+  facet_wrap(~medium, ncol = 1, scales = "free_y") +
+  labs(x = NULL, y = "Facilities reporting") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top", panel.grid.minor = element_blank())
+```
+
+```{r}
+#| label: tbl-national
+#| tbl-cap: "National releases. `total_kg_yr` is the annual national total averaged over reported years, and is the figure an AEP source node should carry. `mean_kg_yr` describes a typical facility and is much smaller."
+national <- summarise_prtr_releases(prtr, c("source_category", "medium"))
+
+national |>
+  transmute(
+    `Source category` = source_category,
+    Medium = medium,
+    `Total kg/yr` = total_kg_yr,
+    `sd (annual)` = sd_total_kg_yr,
+    Facilities = n_facilities,
+    Years = n_years,
+    Period = paste0(year_min, "-", year_max),
+    `Mean kg/yr per facility-year` = mean_kg_yr
+  ) |>
+  tbl()
+```
+
+## The distribution behind those totals
+
+```{r}
+#| label: fig-facility-spread
+#| fig-cap: "Distribution of individual facility-year releases, by sector. Binned density with a boxplot; the log axis spans nine orders of magnitude. This is why the mean facility-year and the sector total are so far apart."
+#| fig-height: 5
+prtr |>
+  filter(value_kg > 0) |>
+  ggplot(aes(value_kg, source_category)) +
+  geom_violin(fill = "grey85", colour = "grey55", linewidth = 0.3) +
+  geom_boxplot(width = 0.14, outlier.size = 0.4, fill = "white") +
+  # label_log(), NOT label_number(). Across nine orders of magnitude
+  # label_number() produces "0.000 / 0.010 / 100.000" and three labels for the
+  # whole axis, which is worse than no axis at all.
+  scale_x_log10(breaks = 10^(-4:5), labels = label_log(), minor_breaks = NULL) +
+  facet_wrap(~medium, ncol = 1, scales = "free_y") +
+  labs(
+    x = "Reported release (kg/yr, log scale)", y = NULL,
+    caption = "Zero and unreported values excluded. One row per facility per year."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid.minor = element_blank())
+```
+
+**A handful of facilities dominate every sector.** That matters for the AEP in a
+specific way: a source node's magnitude is a national total, but the exposure it
+drives is local to wherever those few facilities are. The national node is
+honest about total load and says nothing about where it lands.
+
+```{r}
+#| label: tbl-top-facilities
+#| tbl-cap: "The twelve largest single facilities by mean annual release to water."
+prtr |>
+  filter(medium == "Water") |>
+  summarise(
+    `Mean kg/yr` = mean(value_kg),
+    Years = n_distinct(year),
+    .by = c(facility, fylke, source_category)
+  ) |>
+  arrange(desc(`Mean kg/yr`)) |>
+  head(12) |>
+  rename(Facility = facility, Fylke = fylke, Sector = source_category) |>
+  tbl()
+```
+
+## Repparfjorden (A002)
+
+The A002 bounding box sits inside **Hammerfest kommune**, which absorbed
+Kvalsund in the 2020 municipal reform. Both names are matched, or the pre-2020
+rows are silently lost.
+
+```{r}
+#| label: tbl-hammerfest
+#| tbl-cap: "Every PRTR facility reporting copper in Hammerfest or Kvalsund kommune."
+hf <- filter_prtr_kommune(prtr)
+
+hf |>
+  summarise(
+    `Mean kg/yr` = mean(value_kg),
+    `sd` = sd(value_kg),
+    Years = n_distinct(year),
+    Period = paste0(min(year), "-", max(year)),
+    .by = c(facility, source_category, medium)
+  ) |>
+  arrange(desc(`Mean kg/yr`)) |>
+  rename(Facility = facility, Sector = source_category, Medium = medium) |>
+  tbl()
+```
+
+```{r}
+#| label: fig-hammerfest-series
+#| fig-cap: "Reported copper release by Hammerfest facilities over time. Points are individual reported years; gaps are years with no report, not years with no release."
+#| fig-height: 5
+# A REPORTED ZERO IS NOT PLOTTABLE ON A LOG AXIS and vanishes silently, taking
+# its line segment with it. Counted and stated rather than dropped quietly.
+n_zero <- sum(hf$value_kg <= 0)
+
+# COLOUR BY FACILITY, NOT BY SECTOR. With five facilities sharing two sector
+# colours, the connecting lines read as though they join different facilities.
+# Names are trimmed because the register spells them out in full, parenthetical
+# operator and all.
+short <- function(x) {
+  stringr::str_trunc(
+    stringr::str_to_sentence(sub(" [(].*[)]$", "", x)), 38
+  )
+}
+
+hf_plot <- hf |>
+  filter(value_kg > 0) |>
+  mutate(facility_short = short(facility))
+
+ggplot(hf_plot, aes(year, value_kg, colour = facility_short, shape = medium)) +
+  geom_line(aes(group = interaction(facility_short, medium)), linewidth = 0.5, alpha = 0.7) +
+  geom_point(size = 2.4) +
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
+  scale_shape_manual(values = c(Air = 17, Water = 16), name = NULL) +
+  scale_y_log10(breaks = 10^(-3:2), labels = label_log(), minor_breaks = NULL) +
+  guides(colour = guide_legend(ncol = 1, order = 1)) +
+  labs(
+    x = NULL, y = "Reported release (kg/yr, log scale)",
+    caption = if (n_zero > 0) {
+      paste(
+        n_zero, "reported zero value(s) omitted: not plottable on a log axis.",
+        "A reported zero is a declared nil return, not a missing report."
+      )
+    } else {
+      NULL
+    }
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "right", panel.grid.minor = element_blank())
+```
+
+::: {.callout-important}
+## The reported releases are not the dominant historic source, and the diagram must say so
+
+```{r}
+#| label: hammerfest-total
+#| output: asis
+hf_water <- summarise_prtr_releases(
+  filter(hf, medium == "Water"), "medium"
+)
+cat(sprintf(
+  "All reported copper to water in Hammerfest kommune is **%s kg/yr** across %d facilities (%d-%d).\n",
+  fmt(hf_water$total_kg_yr), hf_water$n_facilities,
+  hf_water$year_min, hf_water$year_max
+))
+```
+
+Repparfjorden received on the order of a **million tonnes of tailings** over
+seven years of submarine tailings disposal in the 1970s (Kvassnes & Iversen
+2013). A source node built from PRTR alone would say industry contributes
+essentially nothing to this fjord. That is true of *reported* emissions and
+badly false of the system.
+
+Hence **N008, submarine tailing disposal**, as a separate `external` node.
+Two things about it still need resolving, and both are unit questions rather
+than data questions:
+
+1. **A million tonnes of what?** Tailings mass, not copper mass. A source node's
+   magnitude should be copper. Repparfjorden ore ran roughly 0.7% Cu and
+   tailings retain some fraction of that, so the copper figure is likely three
+   orders of magnitude smaller than the tailings figure. Transcribing the
+   tailings tonnage into `external_value` and labelling it `tonnes` will read as
+   a copper release.
+2. **A seven-year total is not an annual rate.** Every PRTR node here is kg/yr.
+   A total and a rate on the same diagram will be compared as though they were
+   the same quantity.
+:::
+
+## REACH declarations
+
+```{r}
+#| label: fig-reach
+#| fig-cap: "Declared net copper quantity by year: imported + produced - exported, for declared chemicals. This is copper in commerce, not copper released."
+#| fig-height: 4
+ry <- reach_complete_years(reach)
+
+ggplot(ry, aes(year, tonnes, fill = complete)) +
+  geom_col(width = 0.65) +
+  scale_fill_manual(
+    values = c(`TRUE` = "#2B5F75", `FALSE` = "#B5876B"),
+    labels = c(`TRUE` = "Plausibly complete", `FALSE` = "Suspect: far below median"),
+    name = NULL
+  ) +
+  scale_y_continuous(labels = label_number(big.mark = ",", scale = 1e-3, suffix = " kt")) +
+  labs(x = NULL, y = "Declared net copper (tonnes/yr)") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top", panel.grid.minor = element_blank())
+```
+
+::: {.callout-warning}
+## Do not average across the break
+
+```{r}
+#| label: reach-note
+#| output: asis
+ok <- ry |> filter(complete)
+cat(sprintf(
+  paste(
+    "Years flagged plausibly complete (%s) average **%s tonnes/yr** (sd %s).",
+    "The remaining years (%s) sit at %s tonnes, a %sx step rather than a trend.\n"
+  ),
+  paste(ok$year, collapse = ", "),
+  fmt(mean(ok$tonnes)), fmt(sd(ok$tonnes)),
+  paste(ry$year[!ry$complete], collapse = ", "),
+  paste(fmt(ry$tonnes[!ry$complete]), collapse = " and "),
+  fmt(mean(ok$tonnes) / mean(ry$tonnes[!ry$complete]), 2)
+))
+```
+
+A sixfold drop between consecutive years is far more likely to be incomplete
+recent reporting than a real collapse in Norwegian copper imports. **Check
+whether the recent years are fully reported before using any mean of this
+series.** `reach_complete_years()` detects the cut from the data rather than
+hard-coding a year, so it moves if the file is refreshed.
+:::
+
+```{r}
+#| label: tbl-reach-sector
+#| tbl-cap: "Declared net copper by sector, plausibly complete years only."
+reach |>
+  filter(year %in% ry$year[ry$complete]) |>
+  summarise(
+    `Mean tonnes/yr` = mean(netto_tonn),
+    `sd` = sd(netto_tonn),
+    Years = n_distinct(year),
+    .by = sector
+  ) |>
+  arrange(desc(`Mean tonnes/yr`)) |>
+  mutate(sector = coalesce(sector, "Unclassified")) |>
+  rename(Sector = sector) |>
+  tbl()
+```
+
+## What this supports as source nodes
+
+`scripts/scaffold_prtr_nodes.R` appends these as `external` nodes with
+`external_value`, `external_sd`, `external_n` and `external_unit` filled and
+every EPEQ score left blank. Scores and coordinates are judgement and are not
+scaffolded.
+
+```{r}
+#| label: tbl-proposed
+#| tbl-cap: "Proposed source nodes. Magnitudes are annual totals in kg/yr."
+bind_rows(
+  national |>
+    transmute(
+      AEP = "A001",
+      Label = paste0(source_category, " releases to ", tolower(medium)),
+      `kg/yr` = total_kg_yr, sd = sd_total_kg_yr, Years = n_years
+    ),
+  summarise_prtr_releases(hf, "medium") |>
+    transmute(
+      AEP = "A002",
+      Label = paste0("Reported point sources to ", tolower(medium)),
+      `kg/yr` = total_kg_yr, sd = sd_total_kg_yr, Years = n_years
+    )
+) |>
+  tbl()
+```
+
+**Still missing, and not fillable from this data:**
+
+- **Aquaculture antifouling application (N007).** Not a reported PRTR release, so
+  nothing here can fill it. It is currently `node_type = empirical` with no
+  members, which is why it warns on every build and renders "no measured data".
+  Either it becomes `external` with a figure derived from the aquaculture
+  register, or it is dropped.
+- **The ratio between declared and released copper.** REACH says roughly 60 kt
+  enters Norwegian commerce annually; PRTR says roughly 22 t is reported
+  released to water and air. That is a factor of about 2,700, and the gap is
+  stock accumulation, unreported diffuse release, and export in products. It is
+  the most interesting number in this notebook and it is not one this dataset
+  can settle.

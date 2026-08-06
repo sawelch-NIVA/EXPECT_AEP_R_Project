@@ -22,7 +22,7 @@ suppressMessages(pkgload::load_all(quiet = TRUE))
 suppressMessages(library(dplyr))
 
 refresh <- "--refresh" %in% commandArgs(trailingOnly = TRUE)
-path <- here::here("data/clean/unit_corrections.csv")
+path <- here::here("data/clean/decisions/unit_corrections.csv")
 
 if (!file.exists(path)) {
   write_unit_corrections_template(path)

@@ -120,7 +120,7 @@ add_coverage_columns <- function(summary_data) {
 #' @export
 scaffold_group_decisions <- function(
   summary_data,
-  path = here_rel("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/decisions/group_decisions.csv"),
   ids = read_group_ids(),
   verbose = TRUE
 ) {
@@ -230,7 +230,7 @@ scaffold_group_decisions <- function(
 #' @return A tibble of decisions.
 #' @export
 read_group_decisions <- function(
-  path = here_rel("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/decisions/group_decisions.csv"),
   summary_data = NULL
 ) {
   if (!file.exists(path)) {
@@ -448,7 +448,7 @@ assign_notebook <- function(data) {
 #' @return The written tibble, invisibly.
 #' @export
 apply_notebook_scheme <- function(
-  path = here::here("data/clean/group_decisions.csv"),
+  path = here::here("data/clean/decisions/group_decisions.csv"),
   overwrite = FALSE,
   verbose = TRUE
 ) {

@@ -38,7 +38,7 @@ empty_aep_node_groups <- function() {
 #' @return A tibble with a parsed `members` list column.
 #' @export
 read_aep_node_groups <- function(
-  path = here_rel("data/clean/aep_node_groups.csv"),
+  path = here_rel("data/clean/aep/aep_node_groups.csv"),
   nodes = NULL
 ) {
   if (!file.exists(path)) {

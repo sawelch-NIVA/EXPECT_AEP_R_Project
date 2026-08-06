@@ -38,8 +38,8 @@
 #' @return A character vector of paths relative to the working directory.
 #' @examples
 #' \dontrun{
-#' here_rel("data/clean/group_decisions.csv")
-#' #> "data/clean/group_decisions.csv"      (not "C:/Users/.../data/clean/...")
+#' here_rel("data/clean/decisions/group_decisions.csv")
+#' #> "data/clean/decisions/group_decisions.csv"      (not "C:/Users/.../data/clean/...")
 #' }
 #' @export
 here_rel <- function(...) {

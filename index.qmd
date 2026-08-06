@@ -31,40 +31,22 @@ pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
 here::i_am("index.qmd")
 ```
 
-**Comment: Based on the eData manuscript I imagine a lot of this should be in the discussion. Would welcome your guidance on the most important messages here, I will summarise and move the rest. Language will be made more formal in time.**
 
-Copper is a vital nutrient across the tree of life (cite), a much needed raw resource in manufacturing and infrastructure (especially electrical), and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
+Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure , and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
 
-Copper is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years (cite), as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As Artic regions undergo rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.  
+Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years (cite), as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As Artic regions undergo rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.  
 
 ## Aggregate Exposure Pathways
-
-**A lot of background on AEPs *and* AOPs here. unnecessary? on the other hand, most people haven't heard of AEPs but probably have heard of AOPs. not sure how to balance audience between exposure scientists, ecotoxicologists**
 
 The Aggregate Exposure Pathway (AEP) [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] concept was developed in 2016 as an exposure-based counterpart to the Adverse Outcome Pathway. AOPs assemble evidence to causally link the biological effects of stressors in organisms. AEPs do the same for the emission, transport and fate of stressors in the environment, up until the point they reach sensitive tissues or organs in selected organisms [@fig-aep-intro].
 
 ![Placeholder. Planned to be an image of a simple AEP (copper, fish) and AOP (one of the ROS ones) to introduce the concept and teach the readers what an AEP looks like](images/../images/peng_aep_diagram.png){#fig-aep-intro}
 
-AEPs consist of a series of Key Exposure States (KES, the state of a stressor in space and time) linked by Key Transitional Relationships (KTR, the transport or transformation of stressors) that link the source and Target Site Exposure (TSE), a biological entity (biomolecules, cells, tissues, etc.) where an MIE may occur. No specific set of WoE guidlines have been developed for AEP , but the modfied Bradford-Hill criteria have been further adapted to the construction of marine microplastic pollution AEPs [@pengAggregateExposurePathways2022].
+An AEP is a directed graph: Nodes are Key Exposure States (KESs), which represent the state of stressor(s) in space and time . KES are linked by by Key Transitional Relationships (KTR), the transport or transformation of said stressor(s). An AEP has two specialised (types of) KES, a stressor Source and a Target Site Exposure (TSE), representing the state of a stressor at its origin and site of action respectively [@tanAggregateExposurePathways2018]. The TSE corresponds to the initiating Key Event of an AOP (the Molecular Initiating Event or MIE); thus, an AEP and AOP that cover the same stressor can be integrated to create a full Source-to-Outcom Pathway (STOP). AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale (at time of writing, 561 AOPs have been drafted or published @societyforadvancementofaopsAOPwikiV272026). Conversely, the AEP concept has seen less adoption, withn a mini-review in 2025 (see SI) finding 21 papers mentioning and 15 employing the concept. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR.
 
-Linkages between nodes are created on from a putative relationship by applying a number of Weight of Evidence (WoE) criteria. [@beckerIncreasingScientificConfidence2015] advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. Within each of these categories an association can be strongly, moderately, or weakly confident, based on the understanding of the underlying mechanism and its role within the wider organism.
+The conceptual papers describing the AEP [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] state that both the AEP and AOP are "supported by [...] weight of evidence", although no specific approach is laid out. Consensus and standards have emerged in the AOP community on how Weight of Evidence (WoE) should be assessed, and 
+@beckerIncreasingScientificConfidence2015 advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. @pengAggregateExposurePathways2022, which represents the most sophisticated and relevant (that it, it focuses on pollution of the environment and wildlife) AEP of which we are aware, adapts OECD guidance on AOP development [@oecdUsersHandbookSupplement2018] to AEPs. However, a consensus on the correct criteria has yet to emerge. 
 
-<!-- Messy at the moment, needs rewrite -->
-
-
-A few key differences:
-
--   AOPs are generally stressor-agnostic. AEPs aren't.
--   Existing AEPs (cite sources from mini-review) are generally human-based and often focus on specific scenarios (e.g. Korean humidifier disinfectant case)
--   Adapted-Bradford-Hill doesn't apply so well to environental dynamics as it does to cellular stuff
-
-AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale, and to date 561 AOPs are available on the AOP Wiki of which (42) have been endorsed (what does WHPA... endorsed mean?) [@societyforadvancementofaopsAOPwikiV272026]. 
-
-By contrast, the AEP concept has seen less adoption, withn a mini-review in 2025 (see SI) finding 21 papers mentioning and 15 employing the concept. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR. The small number of relevant papers we found may also be an artifact of people doing very similar things in a different methodological framework - or with different vocabulary - but if this is the case, we're not aware of it. 
-
-The Source to Outcome Pathway concept attempts to unify these two models by... 
-
-**KET: Please draft some bullet points on STOP**.
 
 ## Copper as a stressor
 
@@ -151,7 +133,7 @@ Extracted data were processed and converted to the eData format (see [NB02-vannm
 
 **Text on explicit inclusion criteria/study area will go here.** The study area is shown in @fig-study-area.
 
-![To do: Fix title overlaps](.images-raw/map-study-area.png){#fig-study-area}
+![Study area, sampling density (left), points of interest, and PRTR copper release coverage by fylke (right). **Draft**: points of interest list is a placeholder seed, not reviewed data.](.images-raw/map-study-area.png){#fig-study-area}
 
 Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers. 
 
@@ -193,7 +175,7 @@ Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as i
 
 ### Data Post-Processing
 
-Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded.
+Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded. Each group was given a sequentially-numbered ID (GXXX); these IDs are used throughout these manuscript to refer to specific groups
 
 For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated (@tbl-groups-summary).
 
@@ -237,7 +219,7 @@ Sample groups were ordered based on sample size and flagged for inspection where
 
 In these cases, 
 
-- Outliers were visually inspected
+- Outliers were visually inspected by constructing heatmaps
 - Metadata and comments were reviewed
 - Unless there was a convincing argument not to, outliers were removed
 - We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons 
@@ -263,7 +245,9 @@ In these cases,
   - both on the basis of: is it a natural occurence? and does it reach thresholds of concern (not the focus of this paper, but included)
   - For KTRs: is this flow a relevant source of copper for the receiving matrix? is it a relevant sink of copper for the upstream matrix?
 
-We adapted [@pengAggregateExposurePathways2022]'s WoE criteria (based on [@oecdUsersHandbookSupplement2018; @hillEnvironmentDiseaseAssociation1965]) to score each of our putative KES and KTRs. CREED's in there somewhere, too. The criteria are summarised in @tbl-woe-criteria.
+We adapted [@pengAggregateExposurePathways2022]'s WoE criteria (based on [@oecdUsersHandbookSupplement2018; @hillEnvironmentDiseaseAssociation1965]) to score each of our putative KES and KTRs. 
+
+CREED's in there somewhere, too. The criteria are summarised in @tbl-woe-criteria.
 
 
 ```{r}
@@ -272,11 +256,11 @@ We adapted [@pengAggregateExposurePathways2022]'s WoE criteria (based on [@oecdU
 #| echo: false
 
 tibble::tribble(
-  ~Criterion                    , ~Category , ~Description , ~`Strength levels`         ,
-  "Biological plausibility"     , ""        , ""           , "Weak / Moderate / Strong" ,
-  "Empirical support"           , ""        , ""           , "Weak / Moderate / Strong" ,
-  "Essentiality"                , ""        , ""           , "Weak / Moderate / Strong" ,
-  "Dose/concentration response" , ""        , ""           , "Weak / Moderate / Strong" ,
+  ~Criterion          , ~Category , ~Description , ~`Strength levels`         ,
+  "Essentiality"      , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Plausibility"      , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Evidence Strength" , ""        , ""           , "Weak / Moderate / Strong" ,
+  "Quantification"    , ""        , ""           , "Weak / Moderate / Strong" ,
 ) |>
   knitr::kable()
 ```

@@ -20,7 +20,7 @@ pkgload::load_all(quiet = TRUE)
 
 ledger <- allocate_group_ids(
   tar_read(summarise_literature_data),
-  path = here("data/clean/group_ids.csv")
+  path = here("data/clean/decisions/group_ids.csv")
 )
 
 message("\nFirst few, by allocation order:")

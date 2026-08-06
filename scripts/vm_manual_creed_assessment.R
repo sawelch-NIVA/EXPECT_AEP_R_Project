@@ -58,7 +58,7 @@
 # # 4. PURPOSE STATEMENT ----
 # # Fill this in for copper assessment
 
-# purpose_data <- yaml::read_yaml("data/clean/CREED_Copper_Purpose.yml")
+# purpose_data <- yaml::read_yaml("data/clean/lookups/CREED_Copper_Purpose.yml")
 
 # # 5. CONFIG: YOUR MANUAL ASSESSMENTS ----
 # #

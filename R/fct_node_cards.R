@@ -101,7 +101,16 @@ node_epeq_badges <- function(node, text_size = 2.4) {
       ggplot2::aes(label = .data$shown),
       size = text_size, colour = "grey10"
     ) +
-    ggplot2::scale_x_continuous(limits = c(0.4, length(labs) + 1.6)) +
+    # THE BAND MUST BE CENTRED IN ITS PANEL (Sam 2026-08-06: "misaligned with
+    # the text above"). Tiles sit at x = 1..n, so the panel has to be symmetric
+    # about (n + 1) / 2. The old limits, c(0.4, n + 1.6), put the panel centre
+    # half a tile to the RIGHT of the tiles' centre, which on the compact card
+    # threw the band out of line with the centred title and headline above it.
+    # Panel width is unchanged, so the badges are the same size as before and
+    # only their position moves.
+    ggplot2::scale_x_continuous(
+      limits = (length(labs) + 1) / 2 + c(-1, 1) * (length(labs) / 2 + 0.6)
+    ) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(add = 0.02)) +
     ggplot2::theme_void()
 }
@@ -568,11 +577,13 @@ mean and median disagree; see strips")
   if (style == "compact") {
     return(
       ggplot2::ggplot() +
-        # NODE ID IN THE TOP RIGHT, at default size (Sam 2026-08-06): it is a
-        # handle for referring to the node in conversation, not information about
-        # it, so it sits out of the reading path rather than inside the title.
+        # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
+        # the top right later the same day): it is a handle for referring to the
+        # node in conversation, not information about it, so it sits out of the
+        # reading path rather than inside the title. Left rather than right so it
+        # matches the full card, where the id leads the title.
         ggplot2::annotate(
-          "text", x = 1, y = 3.0, hjust = 1, vjust = 1, size = 2.6,
+          "text", x = 0, y = 3.0, hjust = 0, vjust = 1, size = 2.6,
           label = node$node_id[1], colour = "grey55"
         ) +
         # All three centred on the SAME anchor, x = 0.5 with hjust = 0.5. That
@@ -630,6 +641,10 @@ mean and median disagree; see strips")
 #' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
 #' @param dir Output directory.
 #' @param width,height,dpi Canvas.
+#' @param limits Shared value limits per unit, from [node_card_limits()]. Passed
+#'   in rather than computed once AEPs exist: limits derived from one AEP's nodes
+#'   are that AEP's, and two cards for the same node under different axes cannot
+#'   be compared. The caller computes them across the whole node pool.
 #' @return The written paths.
 #' @export
 write_node_cards <- function(
@@ -643,11 +658,14 @@ write_node_cards <- function(
   width = 3.6,
   height = 2.4,
   dpi = 150,
-  style = c("full", "compact")
+  style = c("full", "compact"),
+  limits = NULL
 ) {
   style <- match.arg(style)
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
-  limits <- node_card_limits(nodes, members, data, ids)
+  if (is.null(limits)) {
+    limits <- node_card_limits(nodes, members, data, ids)
+  }
 
   paths <- character(0)
   for (i in seq_len(nrow(nodes))) {

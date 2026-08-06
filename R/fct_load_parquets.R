@@ -13,7 +13,7 @@
 #'
 #' @export
 load_literature_parquet <- function(
-  input_path = "data/clean",
+  input_path = "data/clean/derived",
   filename = "literature_data.parquet"
 ) {
   # Construct full filepath

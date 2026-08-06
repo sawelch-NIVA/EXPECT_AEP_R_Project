@@ -21,7 +21,7 @@
 suppressMessages(pkgload::load_all(quiet = TRUE))
 suppressMessages(library(dplyr))
 
-path <- here::here("data/clean/aep_edges.csv")
+path <- here::here("data/clean/aep/aep_edges.csv")
 
 nodes <- read_aep_nodes()
 placed <- nodes |> filter(!is.na(x), !is.na(y))

@@ -13,7 +13,7 @@
 #
 # So IDs are ALLOCATED ONCE AND STORED, never recomputed. The ledger is the
 # authority; the code only appends to it. Same cache-versus-curation split as the
-# decisions file: `data/clean/group_ids.csv` is append-only identity, and
+# decisions file: `data/clean/decisions/group_ids.csv` is append-only identity, and
 # `group_decisions.csv` is judgement.
 #
 # Deliberately a separate file from the decisions. Identity and judgement have
@@ -40,7 +40,7 @@ format_group_id <- function(i) {
 #' @return A tibble of the group key plus `group_id`, or a zero-row tibble.
 #' @export
 read_group_ids <- function(
-  path = here::here("data/clean/group_ids.csv")
+  path = here::here("data/clean/decisions/group_ids.csv")
 ) {
   key <- triage_group_cols()
   if (!file.exists(path)) {
@@ -80,7 +80,7 @@ read_group_ids <- function(
 #' @export
 allocate_group_ids <- function(
   summary_data,
-  path = here::here("data/clean/group_ids.csv"),
+  path = here::here("data/clean/decisions/group_ids.csv"),
   verbose = TRUE
 ) {
   key <- triage_group_cols()

@@ -19,7 +19,7 @@ suppressPackageStartupMessages({
 })
 
 aep_literature_review_table <- read_csv(
-  here("data/clean/aep_literature_summary_claude.csv"),
+  here("data/clean/derived/aep_literature_summary_claude.csv"),
   show_col_types = FALSE
 ) |>
   select(-`Paper ID`)

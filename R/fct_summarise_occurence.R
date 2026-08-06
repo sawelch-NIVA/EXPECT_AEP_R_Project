@@ -1,4 +1,4 @@
-# main_table <- arrow::read_parquet("data/clean/literature_data.parquet")
+# main_table <- arrow::read_parquet("data/clean/derived/literature_data.parquet")
 
 # geo_stuff <- main_table |>
 #   select(COUNTRY_ISO, OCEAN_IHO) |>

@@ -256,7 +256,7 @@ notebook_header_markdown <- function(notebook, rows, overview = NULL) {
     "",
     paste0(
       "Figures and counts are static, written at scaffold time rather than ",
-      "computed on render. Group ids are stable (`data/clean/group_ids.csv`), ",
+      "computed on render. Group ids are stable (`data/clean/decisions/group_ids.csv`), ",
       "so they remain the reliable way to refer back to a group even if the ",
       "numbers here go stale."
     ),

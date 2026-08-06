@@ -6,7 +6,7 @@ Working document for the **Marine and Brackish Water** grouping: 4 groups, 5,018
 
 Scaffolded 2026-08-04 by `scripts/generate_group_notebooks.R`. **The generator is append-only**: re-running it adds sections for new groups and never touches anything already written here, so this file is yours to edit freely.
 
-Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
+Figures and counts are static, written at scaffold time rather than computed on render. Group ids are stable (`data/clean/decisions/group_ids.csv`), so they remain the reliable way to refer back to a group even if the numbers here go stale.
 
 # Overview
 

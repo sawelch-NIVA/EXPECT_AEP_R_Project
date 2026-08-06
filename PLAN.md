@@ -59,13 +59,13 @@ summarise_literature_data  (exists, needs a triage score)
   docs/NBXX-Triage.qmd    contact sheet, ranked. YOU READ THIS.
         │
         v
-  data/clean/group_decisions.csv     <-- hand-edited. THE decision layer.
+  data/clean/decisions/group_decisions.csv     <-- hand-edited. THE decision layer.
         │
         v
-  report cards / nodes  ──> data/clean/aep_nodes.csv   <-- hand-edited EPEQ + x/y
+  report cards / nodes  ──> data/clean/aep/aep_nodes.csv   <-- hand-edited EPEQ + x/y
         │
         v
-  data/clean/aep_edges.csv                             <-- hand-edited EPEQ + status
+  data/clean/aep/aep_edges.csv                             <-- hand-edited EPEQ + status
         │
         v
   plot_aep()              ggraph, manual layout, node cards as images
@@ -236,7 +236,7 @@ The goal is a contact sheet you can read in one sitting.
 - [x] **P2.1** ✅ **2026-07-30, satisfied by `docs/NBXX-Sample-Groups.qmd`** rather than by a new file. It already embeds the panels as linked images, one row of five views per group, under a hierarchical heading tree, above a summary table that links into each section. A second near-identical notebook would be duplication, and the 14 distributions notebooks it was meant to replace are already gone (P0.2).
       Also widened from a 25-group sample to **all 27 groups with `n >= 100`** (`n_sample = Inf`). At 25 there were two eligible groups with no panels and nothing on the page to say they were missing rather than absent.
       **Difference from this item as written:** ordering is hierarchical with siblings ranked by `sum(MEASURED_N)`, not flat rank order. Nesting is what makes 27 groups navigable, and the summary table above is already strictly rank-ordered, so rank order is available where it is useful.
-- [x] **P2.2** ✅ **2026-07-30.** `R/fct_group_decisions.R` plus `scripts/scaffold_group_decisions.R`, which writes `data/clean/group_decisions.csv`: 245 rows, the full group key, `species_common_name`, `rank`, `n`, `n_sources`, `cum_pct`, `tier`, both flags, and empty `decision` / `lump_into` / `notes`.
+- [x] **P2.2** ✅ **2026-07-30.** `R/fct_group_decisions.R` plus `scripts/scaffold_group_decisions.R`, which writes `data/clean/decisions/group_decisions.csv`: 245 rows, the full group key, `species_common_name`, `rank`, `n`, `n_sources`, `cum_pct`, `tier`, both flags, and empty `decision` / `lump_into` / `notes`.
       **Scaffolding is a hand-run script, not a target.** The pipeline reads the file (`group_decisions` target, which also warns when groups in the data are absent from the file) and never writes it. Writing a hand-edited file from a target is how an afternoon of judgement gets silently overwritten by a rebuild.
       **The scaffold is an idempotent merge**, so it is safe to re-run whenever new data arrives: machine context (`n`, coverage, flags) refreshes, `decision` / `lump_into` / `notes` are never touched, new groups append as undecided, and a *decided* group that has vanished warns rather than disappearing quietly. Same cache-versus-curation split as section 10. `read_group_decisions()` validates the vocabulary and warns on a `lump` with no `lump_into`. 24 tests.
 - [ ] **P2.3** **You read the contact sheet and fill in the decisions.** No automation. Work down from largest n.
@@ -289,9 +289,9 @@ The goal is a contact sheet you can read in one sitting.
       prototype proves it. `docs/NBXX-algae.qmd` defines its marine node with
       `LATITUDE >= 66.5`, which is not in `triage_group_cols()` at all, and drops
       outliers a few lines later.
-      So the layer is **two hand-edited files**: `data/clean/aep_nodes.csv`
+      So the layer is **two hand-edited files**: `data/clean/aep/aep_nodes.csv`
       (identity, level, x/y, restrictions, EPEQ scores and justifications) and
-      `data/clean/aep_node_members.csv` (one row per node x group). One node can
+      `data/clean/aep/aep_node_members.csv` (one row per node x group). One node can
       be one group, several groups, or a restricted slice of either.
       **Restrictions are fixed columns, not a filter expression in a cell**:
       `lat_min`, `lat_max`, `date_min`, `date_max`, `exclude_references`,
@@ -587,7 +587,7 @@ Measured: 90,221 rows, all unique. Vannmiljø was already clean at 89,631/89,631
 written before `SUBSAMPLE` was refined, or never carrying it), fixed at source.
 `row_id_collisions` reports any that return.
 
-**Unit corrections (`R/fct_unit_corrections.R`).** `data/clean/unit_corrections.csv`,
+**Unit corrections (`R/fct_unit_corrections.R`).** `data/clean/decisions/unit_corrections.csv`,
 hand-edited, read and never written, applied by `literature_corrected` between
 `load_literature_pqt` and `literature_analysis_ready`. Above the hygiene step so
 corrections land before anything is dropped or summarised; below
@@ -792,6 +792,271 @@ needs to see it. Both paths are now `format = "file"` targets.
 
 ------------------------------------------------------------------------
 
+### 9g. Multiple AEPs, and the Repparfjorden scope, 2026-08-06
+
+**P5.3 had no infrastructure costed against it.** It asks for "3-5 focused system
+AEPs plus one holistic low-detail AEP" and assumes that is free. It is not, and
+the reason is the ninety-odd written judgements a single AEP carries: four EPEQ
+scores and four justifications per node, plus the same per edge. Copying a node
+row per AEP multiplies Sam's judgement work by the number of AEPs, and does it in
+the worst way, since the copies start identical and then one gets revised.
+
+So **an AEP is a view over one pool of nodes**, not a node set of its own.
+
+| File | Owns |
+|---|---|
+| `data/clean/aep/aep_nodes.csv` | The node and its scoring. Unchanged, and untouched by this work. |
+| `data/clean/aep/aep_manifest.csv` | **New.** One row per AEP: label, bounding box, date range. |
+| `data/clean/aep/aep_membership.csv` | **New.** Which nodes each AEP contains, and where they sit in it. |
+
+`aep_scope_nodes()` narrows the pool to one AEP and **intersects** the AEP's
+scope with each node's own restrictions. Intersection, not replacement: a node
+restriction states what the node is, an AEP scope states what the diagram is
+about, and both must hold. The result is an ordinary nodes table, which is the
+point. `aep_node_report_cards()`, `write_node_cards()` and `plot_aep()` are all
+unchanged and do not know AEPs exist.
+
+#### EPEQ splits down the middle (revised same day)
+
+Sam's objection to the first design was right and is worth recording, because the
+fix it produced is better than either starting position: *"the evidence in
+repparfjorden for such and such is clearly much weaker than the overall national
+AEP. So, uuuh, I guess we don't want to do membership after all."*
+
+The diagnosis was correct and specifically about **evidence**. The cure was not
+to abandon the shared pool, because the split runs through the middle of EPEQ
+rather than between AEPs:
+
+| Criterion | A claim about | Lives on |
+|---|---|---|
+| Essentiality | the world | `aep_nodes.csv` |
+| Plausibility | the world | `aep_nodes.csv` |
+| **Evidence** | **the dataset** | **`aep_membership.csv`** |
+| **Quantification** | **the dataset** | **`aep_membership.csv`** |
+
+"Copper is present in highly-conserved metabolic systems" is as true in
+Repparfjorden as nationally. "25,024 measurements from two references" is not.
+An AEP scope is precisely a change to the available data, so the two criteria
+that describe the data are the two that move, and `aep_membership.csv` was
+already keyed by AEP and node.
+
+Blank inherits from the node, so A001 needs no entries. `aep_scoped_epeq_cols()`
+names the pair; `read_aep_membership()` range-checks the scores 1-3 and warns on
+a score with no justification, the same guard `validate_aep_edges()` applies to
+edges. Verified on the real store: A002's N001 card renders Es 3, Pl 3, Ev 1,
+Qn 2 with only the membership row edited.
+
+**This is not a general per-AEP override table**, which was rejected and stays
+rejected. An arbitrary exceptions table reintroduces the drift problem through
+the side door; two named criteria split for a stated reason is a model of the
+thing. The alternative considered and dropped was a full `aep_id` on
+`aep_nodes.csv` with node rows per AEP, which also needed `aep_id` on
+`aep_node_members.csv`, `aep_edges.csv` and `aep_node_groups.csv` (from/to and
+member lists all become ambiguous), and which re-scores essentiality and
+plausibility as a side effect of wanting to re-score evidence.
+
+Three things follow that are worth keeping:
+
+- **Layout lives on the membership file**, because a position is a property of a
+  node *in one diagram*. Blank falls back to the node's own `x`/`y`.
+- **Edges and grouping boxes carry no `aep_id`.** An edge is drawn where both
+  endpoints are in the AEP; a box is intersected and dropped below two nodes.
+  Which diagrams an edge belongs on follows from which diagrams its nodes are on,
+  so there is one place to change it rather than two that can disagree.
+- **Card axis limits are computed once across the whole pool**, not per AEP.
+  Comparing the same node between two AEPs is the entire reason a restricted AEP
+  is interesting, and per-AEP limits would put the two cards on different axes.
+
+**No `tar_map`.** The AEP list lives in a file the pipeline reads, which is the
+data-dependent static branching CLAUDE.md 2.3 documents as a three-pass build.
+Five AEPs at ~45s of card rendering each is under four minutes for the lot. Four
+minutes is cheaper than a three-pass build at this point in the calendar.
+
+#### The Repparfjorden AEP (A002)
+
+Bounding box **23-25 E, 70-71 N**, from `docs/NBXX-reparfjorden.qmd`.
+
+**A latitude band alone was rejected on measurement, not taste.** 70-71 N with no
+longitude bound is 3,371 measurements from four references spanning the whole top
+of Norway; the box is 1,197 measurements across 394 sites that are actually near
+Repparfjorden, including the SED2-SED7 cores and the Ulveryggen upstream
+reference point. Longitude bounds therefore exist at AEP level only; adding two
+more columns to the hand-edited nodes file to duplicate a restriction the
+manifest expresses better is churn.
+
+The notebook's own conclusion, "we don't have a lot of data for the Repparfjord
+itself", is too pessimistic. A002 resolves to **more compartments than A001 has**:
+
+| Node | A001 (national) | A002 (Repparfjorden) |
+|---|---|---|
+| N001 Benthic sediment | 25,024 @ 20.6 mg/kg dry | 806 @ **10.9** |
+| N002 Water column | 4,969 @ 8.5e-4 mg/L | 13 @ **1.4e-4** |
+| N003 Mussel soft tissue | 5,498 @ 1.67 mg/kg wet | 43 @ 1.79 |
+| N004 *G. morhua* liver | 2,796 @ 5.11 mg/kg wet | 156 @ 5.28 |
+
+N005 (*G. morhua* muscle) has no rows in the box and is not a member, so the
+"Cod" grouping box correctly drops out of A002 while "Coastal" survives.
+
+**Sediment is half the national geometric mean inside the box, and that wants
+explaining before it goes in the paper.** It is the opposite of the naive
+expectation for a tailings disposal site. Candidates: the national figure is
+pulled up by industrial harbours; the Repparfjorden stations are mostly reference
+and background rather than deposition zone; or the 1970s tailings are buried
+below the sampled horizon. This is a finding to chase, not a bug to fix.
+
+**Open, for Sam:**
+
+1. **N002 is thin at 13 measurements.** Freshwater in the box is 90 river plus 33
+   lake measurements, and given Ulveryggen runoff that is arguably the more
+   important pathway. Adding a freshwater node is a new node row and new scoring.
+2. **A submarine tailings disposal source node** is the obvious A002-specific
+   addition, and it has no counterpart in A001.
+3. **A002's `evidence_score` and `quantification_score` are still blank**, so
+   every node inherits A001's. That is exactly the thing the EPEQ split was built
+   to fix and it is now four cells per node in `aep_membership.csv`. The
+   measurement and reference counts are already in that file's `notes` column, so
+   only the digit and the sentence are missing.
+
+#### Source nodes from the PRTR, 2026-08-06
+
+Sam: *"If we're going to do source nodes we need to go to the REACH PRTR data and
+work with that rather than adding too much putative stuff that won't match up."*
+Agreed, and the data supports it better than expected.
+
+`scripts/summarise_prtr_emissions.R` aggregates the emissions files and writes
+`data/clean/derived/prtr_emissions_summary.csv`. **Deliberately not a target**, matching
+PLAN.md section 10 (pipeline integration deferred) and P3.6 (these assessments
+need transcribing, not re-deriving). Same contract as
+`scripts/scaffold_unit_corrections.R`.
+
+**Two sources, two different kinds of number, never to be added together:**
+
+- `norske_utslipp_*.xlsx` -- Norwegian PRTR. **Releases**, kg/yr, per facility or
+  sector, to air / water / subsurface. Facility files carry Fylke and Kommune, so
+  they restrict to a region.
+- `REACH_copper_prtd.xlsx` -- declared quantities, "Netto mengde" = imported +
+  produced - exported, tonnes/yr. Copper **in commerce**, not released. Upstream
+  of any emission, and national only.
+
+**The aggregation trap, hit and fixed within the hour.** The first draft reported
+the mean of individual facility-year values and labelled it the sector release.
+For land-based industry to water that is 149 kg/yr against a true annual national
+total of 12,848: a factor of 25, in the direction that makes a source look
+negligible. The script now reports `total_kg_yr` (sum across facilities within a
+year, averaged over years) as the headline and keeps `mean_kg_yr` beside it,
+labelled. Anything transcribed onto a source node wants the total.
+
+**A magnitude problem that is a framing decision, not a data one.** All reported
+copper to water in Hammerfest kommune is about **0.6 kg/yr** across four
+facilities. Repparfjorden received on the order of a million tonnes of tailings
+from the 1970s STD operation. A source node built from PRTR alone says industry
+contributes almost nothing, which is true of *reported* emissions and badly false
+of the system. Sam's call: **the historic STD gets its own `external` node in
+A002**, with a magnitude transcribed from Sternal 2017 or Pedersen 2017. Still
+outstanding, and it needs a number from the papers.
+
+Also outstanding: **N007 (aquaculture copper application) is `node_type =
+empirical` with no members**, which is why it warns on every build and renders
+"no measured data". Antifouling application is not a reported PRTR release, so
+PRTR cannot fill it. Either it becomes `external` with a figure from the
+aquaculture register, or it is dropped.
+
+**REACH has a discontinuity that must not be averaged over.** 2018-2021 run
+56-65 kt/yr; 2022-2023 drop to 8-10 kt. A sixfold step, not a trend, and far more
+likely incomplete recent reporting than a collapse in copper imports. The script
+reports per year and refuses to give a single mean across both regimes.
+
+#### Arrow clipping, P5.1's rough edge, closed
+
+`aep_edge_coords()` clips each segment to the destination card's rectangle rather
+than trimming a fixed fraction of the segment. A fraction scales with edge length
+and a card does not, so one trim value cannot clear cards on both a short edge and
+a long one; every edge in `figures/aep.png` was wrong in one direction or the
+other. `node_card_extent()` computes the box in data units, and needs the device
+size because `ggimage` sizes a card as a fraction of panel width. Overlapping
+cards drop the edge with a warning rather than drawing a backwards arrow.
+
+#### PRTR and REACH source data, plotted (2026-08-06, later)
+
+Sam: *"cardinal data can live in CSVs but really needs to be dumped out into
+notebooks and graphed before I can reasonably turn it into nodes."* Right, and
+plotting it immediately found an error a table could not show.
+
+`docs/NBXX-emissions-prtr.qmd`, parked (not in the `_quarto.yml` render list),
+built by hand. Reading and aggregation moved into `R/fct_prtr_emissions.R` so the
+notebook and `scripts/summarise_prtr_emissions.R` share one implementation.
+31 tests.
+
+**A third completeness trap, found by plotting the series.** The most recent year
+is routinely partial, because facilities report on a lag. Land-based industry
+reported roughly 7,000 kg to water in 2023 and 47 kg in 2024, across a
+hundred-odd facilities. Landfills has the mirror image at the start, where the
+obligation was phasing in. Those years were entering the means as low-emission
+years. Corrected magnitudes:
+
+| Sector / medium | Before | After | Years |
+|---|---|---|---|
+| Land-based industry, water | 12,848 | **13,204** | 36, 2024 dropped |
+| Land-based industry, air | 3,173 | **3,261** | 36, 2024 dropped |
+| Landfills, water | 352 | **402** | 14, 2009-10 dropped |
+| Waste water treatment, water | 5,173 | 5,173 | 23 |
+| Offshore oil and gas, water | 675 | 675 | 28 |
+| Hammerfest, all sources, water | 0.597 | 0.597 | 13 |
+
+**The detector is gated on group size, and the gate is the interesting part.**
+The first version used only "is the total far below the median?", and on the four
+Hammerfest facilities it dropped 6 of 13 years. With that few reporters an
+individual facility *is* the series, so a low year is a low year. It now requires
+all three of: at least five typical reporters, a collapse in reporter count, and
+a collapse in total. A regression test covers the Hammerfest case.
+
+Same class as the `mean_kg_yr` versus `total_kg_yr` error earlier the same day:
+an aggregate that looks like a result rather than a mistake. Both are now named
+distinctly and both have tests.
+
+**Encoding.** `prtr_emissions_summary.csv` looked mojibake in Excel. The file was
+valid UTF-8; readr writes no BOM and Excel on Windows then assumes CP1252.
+`write_excel_csv()` throughout. Same family as the micro-sign trap in CLAUDE.md
+4.4.-2, and the worse failure of the two because there is nothing wrong to find
+when you go looking.
+
+**Worth Sam's eye:** Hammerfest LNG's reported copper to **air** is 19 kg/yr in
+2023, against 0.6 kg/yr to water from every facility in the kommune combined. If
+the fjord is the receptor, atmospheric deposition may matter more than direct
+discharge, and no node currently represents it.
+
+`scripts/scaffold_prtr_nodes.R` appends seven `external` source nodes with
+magnitudes and provenance filled and every score blank, append-only and
+idempotent. It also reports nodes with no `x`/`y` and nodes in no AEP, which is
+how **N008 was found to be in neither**.
+
+#### `data/clean/` reorganised by authority (2026-08-06)
+
+Thirty files in one flat directory, split into `aep/`, `decisions/`, `lookups/`,
+`spatial/`, `derived/` and `archive/`. See CLAUDE.md 2.1.1 for the table and the
+contract. The organising principle is **who owns the file**: anything in
+`derived/` can be deleted and regenerated, nothing in `aep/` or `decisions/` can.
+
+Cost: 85 of 106 targets outdated, because the Vannmiljø lookups feed the whole
+chain. Test suite 1,211 passing, and every hand-edited reader verified against
+its moved file. **The rebuild is Sam's to run.**
+
+#### Housekeeping
+
+- **`figures/aep.png` and the flat `figures/node_cards*/N0??.png` are now stale.**
+  The targets write `figures/aep_A001.png` and `figures/node_cards*/<aep_id>/`.
+  Nothing references the old paths, and they are safe to delete.
+- **N008 (submarine tailing disposal) has no `x`/`y` and no membership row**, so
+  it is in no AEP and is drawn on nothing. Two unit questions on it as well: a
+  million tonnes of *tailings* is not a million tonnes of copper, and a
+  seven-year total is not the kg/yr every other source node carries.
+- Node cards: EPEQ band centred (it was half a tile left of the tiles' own
+  centre), and the compact card's node id moved to the top left.
+- **1,167 tests passing**, up from 1,115. The same 5 pre-existing failures in
+  `test-fct_node_cards.R` (9f item 4) remain, untouched.
+
+------------------------------------------------------------------------
+
 ## 10. Deferred, deliberately
 
 Real problems (see `CLAUDE.md` section 3) that must not eat working days before 2026-09-14. Revisit after submission.
@@ -852,7 +1117,7 @@ Noted 2026-07-30 while the reasoning was fresh. **An important pattern, not an
 important task right now.** Roughly 30-45 minutes including tests, and the
 current state works (94 of 128 species named, 99% of biota rows by volume).
 
-`data/clean/species_common_names_cache.csv` currently does two jobs with
+`data/clean/lookups/species_common_names_cache.csv` currently does two jobs with
 different lifecycles: it stores what the API said (reproducible, disposable,
 regenerable) *and* it is the only place a hand correction could live
 (irreplaceable). Because they share one file, the cache cannot safely be deleted

@@ -20,8 +20,8 @@
 
 suppressMessages(pkgload::load_all(quiet = TRUE))
 
-nodes_path <- here::here("data/clean/aep_nodes.csv")
-members_path <- here::here("data/clean/aep_node_members.csv")
+nodes_path <- here::here("data/clean/aep/aep_nodes.csv")
+members_path <- here::here("data/clean/aep/aep_node_members.csv")
 
 # ---- Nodes ---------------------------------------------------------------
 

@@ -66,7 +66,7 @@ empty_aep_edges <- function() {
 #' @return A tibble of edges.
 #' @export
 read_aep_edges <- function(
-  path = here_rel("data/clean/aep_edges.csv"),
+  path = here_rel("data/clean/aep/aep_edges.csv"),
   nodes = NULL
 ) {
   if (!file.exists(path)) {
@@ -223,17 +223,94 @@ validate_aep_edges <- function(edges, nodes) {
   invisible(edges)
 }
 
+#' Half-Extent of a Node Card, in Data Units
+#'
+#' The geometry [aep_edge_coords()] needs in order to stop an arrow at the edge
+#' of a card rather than under it.
+#'
+#' `ggimage::geom_image()` sizes an image as a fraction of **panel width**, so
+#' its extent in data units depends on three things this function has to be told:
+#' the coordinate range (after the expansion [plot_aep()] applies), the shape of
+#' the card image itself, and the shape of the output device. Getting any of them
+#' wrong moves the clip boundary, which is why they are named arguments with
+#' documented defaults rather than constants buried in the drawing code.
+#'
+#' Defaults match the `aep_diagram` target: `node_cards_compact` is written at
+#' 2.4 x 1.8 inches (`card_aspect = 1.8 / 2.4`) onto a 12 x 8 inch canvas
+#' (`device_aspect = 12 / 8`). **Change either in `_targets.R` and these defaults
+#' are wrong**, so both are passed explicitly from there.
+#'
+#' @param nodes The nodes table, with `x` and `y`.
+#' @param image_size Card width as a fraction of panel width, as passed to
+#'   `ggimage::geom_image()`.
+#' @param card_aspect Card height divided by card width, in inches.
+#' @param device_aspect Device width divided by device height, in inches.
+#' @param x_expand,y_expand The multiplicative axis expansions [plot_aep()] uses.
+#' @return A list with `hw` and `hh`, half-width and half-height in data units.
+#' @export
+node_card_extent <- function(
+  nodes,
+  image_size = 0.19,
+  card_aspect = 1.8 / 2.4,
+  device_aspect = 12 / 8,
+  x_expand = 0.15,
+  y_expand = 0.12
+) {
+  span <- function(v, mult) {
+    v <- v[is.finite(v)]
+    d <- if (length(v) < 2) 0 else diff(range(v))
+    # A single placed node, or all nodes in a line, leaves one axis with no
+    # range. ggplot2 falls back to a unit window there, so this does too.
+    if (!is.finite(d) || d == 0) {
+      d <- 1
+    }
+    d * (1 + 2 * mult)
+  }
+
+  rx <- span(nodes$x, x_expand)
+  ry <- span(nodes$y, y_expand)
+
+  list(
+    hw = image_size * rx / 2,
+    # Width is a fraction of panel WIDTH, so converting to a fraction of panel
+    # height picks up the device aspect. A card 0.19 of a 12in panel is 2.28in
+    # wide and 1.71in tall, which over an 8in panel is 0.214 of the height.
+    hh = image_size * card_aspect * device_aspect * ry / 2
+  )
+}
+
 #' Edge Coordinates for Plotting
 #'
-#' Joins each edge to its endpoints' hand-placed coordinates, and trims both ends
-#' back so an arrow stops short of the node label rather than running under it.
+#' Joins each edge to its endpoints' hand-placed coordinates, and pulls both ends
+#' back so the arrow starts and stops at the boundary of the node's card.
+#'
+#' **Clipping to the card box replaced a fixed fractional trim on 2026-08-06**,
+#' which is the rough edge PLAN.md P5.1 recorded and deferred. Trimming a
+#' *fraction* of the segment scales the gap with edge length, and the cards do
+#' not: a card is roughly 0.25 data units wide either way, so a fractional trim
+#' of 0.12 cleared it on a long diagonal and left the arrow buried under the card
+#' on a short one. Every edge in `figures/aep.png` was one or the other.
+#'
+#' Where `hw`/`hh` are `NULL` the old fractional trim is kept, because a diagram
+#' drawn with text labels rather than cards has no box to clip to.
 #'
 #' @param edges The edges table.
 #' @param nodes The nodes table, with `x` and `y`.
-#' @param trim Fraction of the segment removed at each end.
+#' @param trim Fraction of the segment removed at each end. Used only when
+#'   `hw`/`hh` are `NULL`.
+#' @param hw,hh Half-width and half-height of a node card in data units, from
+#'   [node_card_extent()].
+#' @param gap Clear space in data units between the card edge and the arrow.
 #' @return A tibble of edges with `x`, `y`, `xend`, `yend`.
 #' @export
-aep_edge_coords <- function(edges, nodes, trim = 0.12) {
+aep_edge_coords <- function(
+  edges,
+  nodes,
+  trim = 0.12,
+  hw = NULL,
+  hh = NULL,
+  gap = 0.02
+) {
   coords <- nodes |> dplyr::select("node_id", "x", "y")
 
   out <- edges |>
@@ -254,13 +331,50 @@ aep_edge_coords <- function(edges, nodes, trim = 0.12) {
     ))
   }
 
-  out |>
-    dplyr::mutate(
+  if (is.null(hw) || is.null(hh)) {
+    return(dplyr::mutate(
+      out,
       x = .data$x0 + (.data$x1 - .data$x0) * trim,
       y = .data$y0 + (.data$y1 - .data$y0) * trim,
       xend = .data$x1 - (.data$x1 - .data$x0) * trim,
       yend = .data$y1 - (.data$y1 - .data$y0) * trim
-    )
+    ))
+  }
+
+  dx <- out$x1 - out$x0
+  dy <- out$y1 - out$y0
+  len <- sqrt(dx^2 + dy^2)
+
+  # Where the straight line leaves an axis-aligned box centred on the node,
+  # as a fraction of the whole segment. Whichever side it crosses first wins.
+  # Every card is the same size, so the same fraction applies at both ends.
+  t_box <- pmin(
+    ifelse(dx == 0, Inf, hw / abs(dx)),
+    ifelse(dy == 0, Inf, hh / abs(dy))
+  )
+  t_gap <- ifelse(len == 0, Inf, gap / len)
+  t_cut <- t_box + t_gap
+
+  out$x <- out$x0 + dx * t_cut
+  out$y <- out$y0 + dy * t_cut
+  out$xend <- out$x1 - dx * t_cut
+  out$yend <- out$y1 - dy * t_cut
+
+  # Two cards close enough to overlap leave nothing to draw. Drawing it anyway
+  # produces a BACKWARDS arrow, which reads as a real flow in the wrong
+  # direction, so the edge is dropped and the drop is reported rather than
+  # silently swallowed.
+  keep <- t_cut * 2 < 1
+  if (any(!keep)) {
+    cli::cli_warn(c(
+      "{sum(!keep)} edge{?s} dropped from the diagram: the two cards overlap, \\
+       leaving no room for an arrow between them.",
+      stats::setNames(out$edge_id[!keep], rep("*", sum(!keep))),
+      "i" = "Move the nodes further apart in aep_nodes.csv, or reduce image_size."
+    ))
+  }
+
+  out[keep, , drop = FALSE]
 }
 
 #' Styling for Empirical and Putative Edges
@@ -305,17 +419,35 @@ aep_edge_styles <- function() {
 #'   PLAN.md P5.2, and it is what makes the figure a report-card AEP rather than
 #'   a labelled graph.
 #' @param image_size Card width as a fraction of plot width.
+#' @param card_aspect,device_aspect Card and device shape, passed to
+#'   [node_card_extent()] so arrows can be clipped to the cards. Defaults match
+#'   the `aep_diagram` target; pass them explicitly from anywhere else.
 #' @return A ggplot.
 #' @export
 plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
-                     groups = NULL, node_images = NULL, image_size = 0.16) {
+                     groups = NULL, node_images = NULL, image_size = 0.16,
+                     card_aspect = 1.8 / 2.4, device_aspect = 12 / 8) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
     return(triage_empty_plot("AEP", "no nodes have x/y coordinates"))
   }
 
   styles <- aep_edge_styles()
-  e <- aep_edge_coords(edges, placed)
+
+  # Clip to the card box only where cards are actually drawn. With text labels
+  # there is no box, and the fractional trim remains the honest approximation.
+  ext <- if (!is.null(node_images) && length(node_images) > 0) {
+    node_card_extent(
+      placed,
+      image_size = image_size,
+      card_aspect = card_aspect,
+      device_aspect = device_aspect
+    )
+  } else {
+    list(hw = NULL, hh = NULL)
+  }
+
+  e <- aep_edge_coords(edges, placed, hw = ext$hw, hh = ext$hh)
   if (nrow(e) > 0) {
     e$status <- dplyr::coalesce(e$status, "putative")
   }
