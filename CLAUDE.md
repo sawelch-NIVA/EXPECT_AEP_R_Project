@@ -401,6 +401,41 @@ almost always mg/kg against ug/kg, or ug/g against ug/kg. Check the unit before
 reaching for a statistical explanation. Two separate 1000x faults were found this
 way, one in the extraction and one in the pipeline (`PLAN.md` section 9b).
 
+### 4.4.-1.5 `row_id` and the corrections layer (built 2026-08-06)
+
+**Read `docs/AP04-units.qmd` before touching anything unit-related.** It is the
+how-to, it is built rather than parked, and it reads the corrections file live.
+
+Three things that are easy to get wrong from cold:
+
+- **`row_id` is lower case, and so is everything the corrections layer adds.**
+  SCREAMING_SNAKE in this project means "column of the eData schema". `row_id`,
+  `unit_correction_id` and `unit_correction_factor` are administrative columns of
+  ours and are not in the schema. The casing is the only cue.
+- **`row_id` is not a counter and must never become one.** It is `SAMPLE_ID`
+  (itself content-derived), with `SUBSAMPLE` appended only where rows collide,
+  and the build aborts rather than falling back to a suffix. A positional id
+  shifts under insertion and would let a hand-edited correction silently
+  overwrite a different measurement.
+- **`data/clean/unit_corrections.csv` overrides measured values.** Pipeline reads,
+  never writes. Every failure is an abort, not a warning. Each correction carries
+  both a selector and the `row_id`s it matched, and the two must agree; that is
+  what makes drift loud instead of silent. `scripts/scaffold_unit_corrections.R`
+  records the ids and is deliberately not a target.
+
+**Validate a correction factor by whether the corrected rows land on top of their
+uncorrected campaign-mates.** Where a campaign is only partly affected this is
+available for free and it is far stronger than any comment or heuristic. It is
+what confirmed C001 (five species within 25%) and what exposed the separate
+*G. morhua* muscle fault (ratio 20.3). See PLAN.md 9d and 9e.
+
+**A mode that is 45% of the data is a provenance problem, not a statistical one.**
+`drop_outliers` cannot reach it and should not be asked to. Exclude the affected
+rows with a documented reason (`exclude_campaigns` / `exclude_references` on
+`aep_nodes.csv`), then score what survives. Averaging over rows you believe are
+mislabelled and calling the result low-quality evidence gives a wrong number
+wearing an honest label.
+
 ### 4.4.-1 Sample size means `MEASURED_N` (rule set 2026-08-05)
 
 Project-wide, and it is a rule because breaking it is invisible rather than

@@ -122,7 +122,7 @@ aep_node_human_cols <- function() {
   c(
     "label", "level", "node_type", "x", "y",
     "lat_min", "lat_max", "date_min", "date_max",
-    "exclude_references", "drop_outliers",
+    "exclude_references", "exclude_campaigns", "drop_outliers",
     external_value_cols(),
     epeq_cols(),
     "notes"
@@ -149,6 +149,19 @@ empty_aep_nodes <- function() {
     date_min = as.Date(character(0)),
     date_max = as.Date(character(0)),
     exclude_references = character(0),
+    # Added 2026-08-06. A whole campaign can be defective in a way that is not a
+    # unit error and so cannot be repaired by unit_corrections.csv: 20 of the 44
+    # G. morhua muscle rows carry liver-like concentrations, isolated to two
+    # campaigns, with no intermediate values and with liver flat over the same
+    # period. That is a tissue-labelling fault, and there is no factor that
+    # fixes it. Excluding the affected rows and scoring what remains is honest;
+    # averaging over rows believed to be mislabelled and calling the result
+    # low-quality evidence is not.
+    #
+    # NOT covered by drop_outliers: 20 of 44 rows is far too large a fraction
+    # for Tukey fences to reach, and a mode that size is not an outlier in any
+    # statistical sense. This is a provenance judgement, not a statistical one.
+    exclude_campaigns = character(0),
     drop_outliers = logical(0),
     # External nodes only; see external_value_cols().
     external_value = numeric(0),
@@ -254,6 +267,7 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep_nodes.csv")) {
       level = readr::col_character(),
       node_type = readr::col_character(),
       exclude_references = readr::col_character(),
+      exclude_campaigns = readr::col_character(),
       external_unit = readr::col_character(),
       notes = readr::col_character(),
       # Read as text, then parsed by parse_node_date(). Letting readr guess is
@@ -415,6 +429,61 @@ read_aep_node_members <- function(
   members
 }
 
+#' Apply One Semicolon-Separated Exclusion Column
+#'
+#' Shared by `exclude_references` and `exclude_campaigns`, so the two cannot
+#' drift apart in how they split, trim, or handle a blank cell.
+#'
+#' **Warns when a listed value matches nothing.** A stale exclusion silently
+#' doing nothing is the same failure that has now bitten this project three
+#' times (the missing `imports`, the untracked decisions file, and a correction
+#' whose selector no longer matched). Here it is quieter and worse: the node
+#' still resolves, still produces a mean, and the rows you believed you had
+#' removed are back in it. A typo in a campaign name is easy and invisible
+#' otherwise, since these strings carry spaces and parentheses.
+#'
+#' It warns rather than aborts, unlike the corrections layer, because a node
+#' exclusion narrows an estimate rather than rewriting a measurement, and
+#' because a legitimately empty match happens while a node is being built up.
+#'
+#' @param data The node's rows so far.
+#' @param node A one-row nodes tibble.
+#' @param col Name of the exclusion column on `node`.
+#' @param target Name of the column in `data` to match against.
+#' @return `data` with excluded rows removed.
+#' @export
+apply_node_exclusion <- function(data, node, col, target) {
+  if (!col %in% names(node) || is.na(node[[col]][1]) ||
+    !nzchar(node[[col]][1])) {
+    return(data)
+  }
+  drop <- trimws(strsplit(node[[col]][1], ";", fixed = TRUE)[[1]])
+  drop <- drop[nzchar(drop)]
+  if (length(drop) == 0) {
+    return(data)
+  }
+  if (!target %in% names(data)) {
+    cli::cli_warn(
+      "Node {.val {node$node_id[1]}} sets {.field {col}} but the data has no \\
+       {.field {target}} column; the exclusion did nothing."
+    )
+    return(data)
+  }
+
+  unmatched <- drop[!drop %in% data[[target]]]
+  if (length(unmatched) > 0) {
+    cli::cli_warn(c(
+      "Node {.val {node$node_id[1]}}: {length(unmatched)} value{?s} in \\
+       {.field {col}} matched no rows.",
+      "*" = "{.val {unmatched}}",
+      "i" = "Check for a typo. The rows you meant to exclude are still in \\
+             the node."
+    ))
+  }
+
+  data[!data[[target]] %in% drop, , drop = FALSE]
+}
+
 #' Resolve One Node to its Rows of Data
 #'
 #' Membership first, then the restriction columns, in that order.
@@ -482,11 +551,14 @@ resolve_node_data <- function(node, members, data, ids) {
   }
   # Semicolon-separated, because a comma cannot survive a CSV cell unquoted and
   # reference ids are already long enough to be mistyped.
-  if (!is.na(node$exclude_references[1]) && nzchar(node$exclude_references[1])) {
-    drop <- trimws(strsplit(node$exclude_references[1], ";", fixed = TRUE)[[1]])
-    drop <- drop[nzchar(drop)]
-    out <- out[!out$REFERENCE_ID %in% drop, ]
-  }
+  out <- apply_node_exclusion(
+    out, node, "exclude_references", "REFERENCE_ID"
+  )
+  # Campaign names contain commas and parentheses ("Vm_2010_2025 (Urban Fjord
+  # Contaminants)"), so the semicolon separator matters more here still.
+  out <- apply_node_exclusion(
+    out, node, "exclude_campaigns", "CAMPAIGN_NAME_SHORT"
+  )
   if (isTRUE(node$drop_outliers[1]) && nrow(out) > 0) {
     # Computed WITHIN the resolved node, not inherited from the sampling group.
     # A value that is an outlier against its own small group may be unremarkable

@@ -9,6 +9,10 @@ project:
   render:
     - index.qmd
     - docs/NBXX-Sample-Groups.qmd
+    # Reads unit_corrections.csv live, so it must be built rather than parked:
+    # a stale copy of a how-to that claims to be the source of truth is worse
+    # than none. Cheap to build (tables only, no plots).
+    - docs/AP04-units.qmd
     # - docs/NBXX-Triage.qmd   # Phase 2, once it exists
 
 website:
@@ -32,6 +36,11 @@ website:
           # - href: docs/NBXX-Triage.qmd   # Phase 2, once it exists
           #   text: "Group Triage"
           #   icon: journal-code
+      - section: "Appendices"
+        contents:
+          - href: docs/AP04-units.qmd
+            text: "Units and Corrections"
+            icon: rulers
 
 # acronyms:
 #   keys:

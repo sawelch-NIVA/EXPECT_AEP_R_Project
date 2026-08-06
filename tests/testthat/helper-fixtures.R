@@ -16,6 +16,7 @@ node_fixture <- function(...) {
     lat_min = NA_real_, lat_max = NA_real_,
     date_min = as.Date(NA), date_max = as.Date(NA),
     exclude_references = NA_character_,
+    exclude_campaigns = NA_character_,
     drop_outliers = FALSE,
     external_value = NA_real_, external_sd = NA_real_,
     external_n = NA_real_, external_unit = NA_character_,
@@ -63,7 +64,10 @@ data_fixture <- function() {
       LATITUDE = seq(60, 78, length.out = 10),
       LONGITUDE = 10,
       SAMPLING_DATE = seq(as.Date("2010-01-01"), by = "year", length.out = 10),
-      REFERENCE_ID = rep(c("RefA", "RefB"), 5)
+      REFERENCE_ID = rep(c("RefA", "RefB"), 5),
+      # Deliberately crossed with REFERENCE_ID rather than nested, so a test
+      # excluding a campaign cannot pass by accidentally excluding a reference.
+      CAMPAIGN_NAME_SHORT = rep(c("Camp X (a)", "Camp X (a)", "Camp Y (b)"), length.out = 10)
     )
   }))
 }

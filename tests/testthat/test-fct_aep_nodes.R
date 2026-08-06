@@ -73,6 +73,104 @@ test_that("references can be excluded, semicolon separated", {
   expect_equal(nrow(out2), 0)
 })
 
+test_that("campaigns can be excluded, semicolon separated", {
+  d <- data_fixture()
+  out <- resolve_node_data(
+    node_fixture(exclude_campaigns = "Camp Y (b)"),
+    members_fixture("G001"), d, ids_fixture()
+  )
+  expect_equal(nrow(out), 7)
+  expect_true(all(out$CAMPAIGN_NAME_SHORT == "Camp X (a)"))
+
+  out2 <- resolve_node_data(
+    node_fixture(exclude_campaigns = "Camp X (a); Camp Y (b)"),
+    members_fixture("G001"), d, ids_fixture()
+  )
+  expect_equal(nrow(out2), 0)
+})
+
+test_that("a campaign name containing parentheses and spaces survives", {
+  # Real names look like "Vm_2010_2025 (Urban Fjord Contaminants)". Matching is
+  # exact and literal, never a pattern.
+  d <- data_fixture()
+  out <- resolve_node_data(
+    node_fixture(exclude_campaigns = "Camp X (a)"),
+    members_fixture("G001"), d, ids_fixture()
+  )
+  expect_equal(nrow(out), 3)
+})
+
+test_that("campaign and reference exclusions are independent", {
+  # Crossed in the fixture, so excluding one must not silently do the other.
+  d <- data_fixture()
+  out <- resolve_node_data(
+    node_fixture(exclude_campaigns = "Camp Y (b)"),
+    members_fixture("G001"), d, ids_fixture()
+  )
+  expect_true(all(c("RefA", "RefB") %in% out$REFERENCE_ID))
+})
+
+test_that("an exclusion matching nothing warns rather than passing silently", {
+  # The failure this project keeps rediscovering: the node still resolves, still
+  # produces a mean, and the rows you thought you removed are still in it.
+  d <- data_fixture()
+  expect_warning(
+    resolve_node_data(
+      node_fixture(exclude_campaigns = "Camp Z (typo)"),
+      members_fixture("G001"), d, ids_fixture()
+    ),
+    "matched no rows"
+  )
+  expect_warning(
+    resolve_node_data(
+      node_fixture(exclude_references = "RefC"),
+      members_fixture("G001"), d, ids_fixture()
+    ),
+    "matched no rows"
+  )
+})
+
+test_that("a partly-matching exclusion warns only about the missing part", {
+  d <- data_fixture()
+  expect_warning(
+    out <- resolve_node_data(
+      node_fixture(exclude_campaigns = "Camp Y (b); Camp Z (typo)"),
+      members_fixture("G001"), d, ids_fixture()
+    ),
+    "Camp Z"
+  )
+  expect_equal(nrow(out), 7)
+})
+
+test_that("a blank or NA exclusion is silent and changes nothing", {
+  d <- data_fixture()
+  n <- nrow(resolve_node_data(
+    node_fixture(), members_fixture("G001"), d, ids_fixture()
+  ))
+  for (v in list(NA_character_, "", "  ", ";;")) {
+    expect_silent(
+      out <- resolve_node_data(
+        node_fixture(exclude_campaigns = v),
+        members_fixture("G001"), d, ids_fixture()
+      )
+    )
+    expect_equal(nrow(out), n)
+  }
+})
+
+test_that("apply_node_exclusion degrades when the target column is absent", {
+  d <- data_fixture()
+  d$CAMPAIGN_NAME_SHORT <- NULL
+  expect_warning(
+    out <- apply_node_exclusion(
+      d, node_fixture(exclude_campaigns = "Camp Y (b)"),
+      "exclude_campaigns", "CAMPAIGN_NAME_SHORT"
+    ),
+    "no .*CAMPAIGN_NAME_SHORT.* column|did nothing"
+  )
+  expect_equal(nrow(out), nrow(d))
+})
+
 test_that("outliers are flagged WITHIN the node, not inherited", {
   # A value that is an outlier against its own small sampling group may be
   # unremarkable against the pooled node, and the node is the thing being

@@ -44,6 +44,7 @@ if (file.exists(nodes_path)) {
     date_min = as.Date(NA),
     date_max = as.Date(NA),
     exclude_references = NA_character_,
+    exclude_campaigns = NA_character_,
     drop_outliers = FALSE,
     # Blank, and they must stay blank on an empirical node: its magnitude is
     # computed from its member groups. read_aep_nodes() stops if they are set

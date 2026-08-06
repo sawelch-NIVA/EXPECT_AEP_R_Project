@@ -983,10 +983,85 @@ list(
   ### # Load literature parquet ----
   # TODO: I believe something I've done somewhere means that this doesn't
   # properly update. We'll have to come back to it.
+  #
+  # This is also where every measurement gets its `row_id` (2026-08-06), because
+  # it is the hub: everything downstream inherits the column, and nothing
+  # upstream needs it. Lower case on purpose -- SCREAMING_SNAKE in this project
+  # means "column of the eData schema", and this is an administrative key of
+  # ours that is not in the schema.
+  #
+  # It is NOT a sequential counter. See the header of R/fct_row_ids.R for why
+  # that was rejected: positional ids shift under insertion, which would let a
+  # hand-edited correction silently retarget a different measurement.
   tar_target(
     name = load_literature_pqt,
     command = {
-      literature_clean_standardised # add a dependency on save_literature_pqt even though we don't directly read it
+      add_row_ids(
+        literature_clean_standardised # add a dependency on save_literature_pqt even though we don't directly read it
+      )
+    }
+  ),
+
+  # Companion report: rows whose SAMPLE_ID was shared with another and had to be
+  # broken apart by SUBSAMPLE. Non-empty means a data-entry defect in the source
+  # extraction, so it is surfaced rather than absorbed quietly. Same pattern as
+  # literature_dropped_report and unit_anomaly_report.
+  tar_target(
+    name = row_id_collisions,
+    command = {
+      coll <- report_row_id_collisions(load_literature_pqt)
+      report_row_id_status(coll)
+      coll
+    }
+  ),
+
+  ### # Unit corrections ----
+  # PLAN.md 9b. Overriding measured values that arrived wrong from the source,
+  # from a hand-edited CSV. The pipeline reads it and never writes it, same
+  # contract as group_decisions.csv and aep_nodes.csv.
+  #
+  # WHY HERE. Above the hygiene step so a correction is applied before anything
+  # is dropped or summarised, and below literature_clean_standardised so that
+  # OUR conversions and THEIR errors stay separate concerns. Correcting further
+  # down (in a notebook, or per AEP node) would leave the triage panels, the
+  # summary table and group_decisions.csv all showing the uncorrected numbers
+  # while the AEP showed the corrected ones, which is the worse failure.
+  #
+  # format = "file" is load-bearing: as a literal path string, targets would
+  # hash the command and never the file, so editing the CSV would invalidate
+  # nothing. Exactly the fault found in group_decisions (PLAN.md 9b), and it
+  # would be far worse here.
+  tar_target(
+    name = unit_corrections_file,
+    command = here_rel("data/clean/unit_corrections.csv"),
+    format = "file"
+  ),
+
+  tar_target(
+    name = unit_corrections,
+    command = read_unit_corrections(unit_corrections_file)
+  ),
+
+  # Aborts on a stale correction, on one whose recorded row_ids no longer match
+  # its selector, and on any row matched twice. See R/fct_unit_corrections.R for
+  # why both a selector and a row id list are required.
+  tar_target(
+    name = literature_corrected,
+    command = apply_unit_corrections(
+      load_literature_pqt,
+      unit_corrections,
+      ids = group_ids
+    )
+  ),
+
+  # Announced on every build. Overriding a national monitoring database should
+  # not become invisible through familiarity.
+  tar_target(
+    name = unit_correction_report,
+    command = {
+      rep <- report_unit_corrections(literature_corrected, group_ids)
+      report_unit_correction_status(rep)
+      rep
     }
   ),
 
@@ -1002,16 +1077,17 @@ list(
   # legitimately sparse.
   tar_target(
     name = literature_analysis_ready,
-    command = drop_nonpositive_measurements(load_literature_pqt)
+    command = drop_nonpositive_measurements(literature_corrected)
   ),
 
   # Companion report: what the filter above removed, per group, worst first.
   # Reads the *unfiltered* data on purpose -- it needs the rows that
-  # literature_analysis_ready throws away. Check this before letting any
-  # heavily-censored group become an AEP node.
+  # literature_analysis_ready throws away. Corrected, though, so its per-group
+  # loss counts describe the same numbers everything else downstream sees.
+  # Check this before letting any heavily-censored group become an AEP node.
   tar_target(
     name = literature_dropped_report,
-    command = report_dropped_measurements(load_literature_pqt)
+    command = report_dropped_measurements(literature_corrected)
   ),
 
   ### # Calculate a summary table per group
@@ -1519,7 +1595,15 @@ list(
   # prevented. See R/fct_unit_anomalies.R.
   #
   # REPORTS, NEVER CORRECTS. Rewriting a measured value on the strength of a
-  # free-text comment is a scientific judgement.
+  # free-text comment is a scientific judgement. That judgement now has a home
+  # of its own in data/clean/unit_corrections.csv; this target stays a detector.
+  #
+  # It reads literature_analysis_ready, which since 2026-08-06 sits DOWNSTREAM of
+  # the corrections. That is deliberate and it changes what this target means: it
+  # is now a shrinking to-do list rather than a static record. A group still
+  # flagged here after a correction has been written means the correction was
+  # insufficient, not that it is missing. The permanent record of what was
+  # resolved, and why, lives in the corrections file.
   tar_target(
     name = unit_anomaly_report,
     command = {
@@ -1630,6 +1714,19 @@ list(
   tar_quarto(
     name = render_nbxx_sample_groups,
     path = "docs/NBXX-Sample-Groups.qmd",
+    quiet = FALSE
+  ),
+
+  # How units are handled, how unit errors are found, and how to write a
+  # correction. Built rather than parked because it reads unit_corrections.csv
+  # and the anomaly report live: a stale copy of a document that calls itself
+  # the source of truth is worse than not having one.
+  #
+  # Its tar_read() calls ARE its dependency declaration (CLAUDE.md 4.4.2), so
+  # writing a correction rebuilds it automatically.
+  tar_quarto(
+    name = render_ap04_units,
+    path = "docs/AP04-units.qmd",
     quiet = FALSE
   )
 

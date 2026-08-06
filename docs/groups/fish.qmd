@@ -320,8 +320,7 @@ G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported 
 - @fig-g047-d:
 - @fig-g047-e:
 
-::: {#fig-g047 layout-ncol=5}
-
+::: {#fig-g047 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g047-a group="G047"}
 
 ![Concentration by date](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g047-b group="G047"}
@@ -333,9 +332,7 @@ G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported 
 ![Spatial distribution](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g047-e group="G047"}
 
 G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
-
 :::
-
 
 **Verdict:** *(unwritten)*
 

@@ -280,7 +280,10 @@ The goal is a contact sheet you can read in one sitting.
       measurements and rows separately, sources, unit, arithmetic and geometric
       mean, SD and GSD, median, spatial and temporal range, plus `n_arctic` /
       `pct_arctic`.
-- [ ] **P3.2** Mini distribution PNG per node. Reuses P1.2 at a smaller canvas.
+- [x] **P3.2** ✅ **2026-08-05/06.** `write_node_cards()` writes one PNG per node
+      to `figures/node_cards/` and a smaller variant to
+      `figures/node_cards_compact/`, both `format = "file"` targets. The compact
+      variant is what the diagram places, so the card and the node cannot drift.
 - [x] **P3.3** ✅ **2026-08-05, by a different design.** Not scaffolded from the
       `notebook` assignment: a node is **not** a sampling group, and Sam's own
       prototype proves it. `docs/NBXX-algae.qmd` defines its marine node with
@@ -367,7 +370,10 @@ The unfilled edges are a result. A regional-scale AEP that honestly marks its ow
       segment, so against a wide node label they can stop visibly short. Fine for
       a working diagram, wants per-label geometry for a manuscript figure. Revisit
       at P5.4, not before.
-- [ ] **P5.2** Node cards placed with `ggimage::geom_image`.
+- [x] **P5.2** ✅ **2026-08-06.** `plot_aep()` places `node_cards_compact` with
+      `ggimage::geom_image` (`R/fct_aep_edges.R:396-401`), falling back to a text
+      label for any node without an image, so an unplaced card degrades rather
+      than blanking the node.
 - [ ] **P5.4** **Composed multi-panel figures.** This is where patchwork comes back, deliberately and only for figures actually going into the manuscript. Triage plots stay as individual PNGs forever.
 - [ ] **P5.3** 3-5 focused system AEPs plus one holistic low-detail AEP (matching the `docs/_planning.qmd` Materials/Methods items 1 and 2, which are still the right targets even though its schedule is dead).
 
@@ -550,6 +556,195 @@ Logged here so they are not lost:
 `unit_anomaly_report` re-derives all three on every build, so they cannot go
 stale or be forgotten.
 
+### 9d. `row_id` and the corrections layer, 2026-08-06
+
+Detection existed; correcting was still a thing done by hand in a notebook, or
+not at all. Two files close that, and the first exists only to make the second
+safe.
+
+**`row_id` (`R/fct_row_ids.R`).** A stable per-measurement key, assigned in
+`load_literature_pqt`. Lower case deliberately: SCREAMING_SNAKE in this project
+means "column of the eData schema", and this is an administrative key of ours
+that is not in it. Same convention holds across the corrections file.
+
+**A sequential `R00001` counter was proposed and rejected.** It is *positional*:
+Vannmiljø is re-exported periodically and the eData files are edited whenever an
+extraction fault is found, so one inserted row shifts every id after it, and a
+hand-edited correction keyed on `R01234` then silently overwrites a different
+measurement. That is the same silent-success failure as the missing
+`imports = "STOPAEP"` and the untracked `group_decisions.csv`, and the worst
+possible place to introduce it deliberately.
+
+`SAMPLE_ID` is already content-derived (`generate_sample_id_with_components()`),
+so it has no such mode, and it sorts by site then parameter then date as a
+property of what it is made of. `row_id` is therefore `SAMPLE_ID`, with
+`SUBSAMPLE` appended only where rows genuinely collide, and an **abort** if a tie
+survives every disambiguator. No counter fallback: a silently-suffixed id is a
+positional id in disguise.
+
+Measured: 90,221 rows, all unique. Vannmiljø was already clean at 89,631/89,631;
+29 literature rows across 11 shared ids were extraction defects (`SAMPLE_ID`s
+written before `SUBSAMPLE` was refined, or never carrying it), fixed at source.
+`row_id_collisions` reports any that return.
+
+**Unit corrections (`R/fct_unit_corrections.R`).** `data/clean/unit_corrections.csv`,
+hand-edited, read and never written, applied by `literature_corrected` between
+`load_literature_pqt` and `literature_analysis_ready`. Above the hygiene step so
+corrections land before anything is dropped or summarised; below
+`literature_clean_standardised` so *our* conversions and *their* errors stay
+separate concerns.
+
+**Correcting per AEP node was considered and rejected.** The same bad rows feed
+the triage panels, the summary table and `group_decisions.csv`; correcting only
+at the node leaves all of those lying while the AEP tells the truth.
+
+Three design points worth keeping:
+
+1. **Both a selector and a `row_ids` list, required to agree.** Selector alone
+   silently widens when a re-export adds matching rows; `row_ids` alone silently
+   narrows and records no reasoning. Requiring both turns a change of extent into
+   a build failure that names the drift in both directions. `row_id` exists for
+   this. Resolution is `scripts/scaffold_unit_corrections.R`, hand-run and never
+   a target, because resolving in the pipeline would make the ids track the data
+   and destroy the check.
+2. **Matching happens in a pass of its own, before anything is scaled.** Matching
+   and scaling in one loop tests `value_min`/`value_max` against values an
+   earlier correction already multiplied, so the row order of the CSV would
+   change the numbers. Caught by a test, not by review.
+3. **`comment_match` normalises the micro sign on both sides.** The comment that
+   identifies the Urban Fjord fault carries a real `µ`. Requiring one to be typed
+   into a spreadsheet, on Windows, to select rows for overwriting, invites 4.4.-2
+   into the least forgiving place in the pipeline. Write `ug`.
+
+Corrections scale `MEASURED_VALUE_STANDARD` and both LOD/LOQ standard and imputed
+columns (a submitter who multiplied their values multiplied their limits).
+`MEASURED_VALUE` is untouched as the audit trail. Every failure is an abort, not
+a warning: stale correction, drifted row ids, a row matched twice, a missing
+`reason` or `evidence`, no selector at all.
+
+`unit_anomaly_report` now reads corrected data, which changes what it means: it
+is a **shrinking to-do list**, not a static record. A group still flagged after a
+correction means the correction was insufficient.
+
+C001 written by Sam 2026-08-06: Urban Fjord, `comment_match`, factor 0.001,
+33 rows across 7 groups.
+
+**The factor is cross-validated five ways, and that method is reusable.** The
+campaign is only partly affected, so each species has both corrected and
+uncorrected rows and they must agree afterwards. Post-correction medians against
+their uncorrected campaign-mates: *C. harengus* muscle 1.10, Euphausiacea 1.13,
+Polychaeta 1.15, *M. edulis* 1.24, *P. borealis* 1.24. Five species inside 25%
+is far stronger than the comment alone. **Use this check on every future
+correction**: a right factor lands the corrected rows on top of their peers.
+
+### 9e. `exclude_campaigns`, and why G047 needed it, 2026-08-06
+
+The same check found a **second, unrelated fault** that no factor can fix.
+*G. morhua* muscle came out at ratio 20.3, against 1.10-1.24 for everything else.
+
+Diagnosis, at the single site `Vannmiljø_01.01-82497`:
+
+| | year | n | median |
+|---|---|---|---|
+| Cod muscle (corrected) | 2017 | 15 | 3.509 |
+| Cod muscle (uncorrected) | 2022 | 3 | 0.173 |
+| Cod liver | 2022 | 3 | 5.08 |
+| Cod liver | 2023 | 3 | 4.22 |
+
+Four things say this is a **tissue-labelling fault, not contamination**:
+
+1. A 20x fall in five years at one site is not an exposure signal.
+2. The high muscle values sit inside the cod *liver* range at that same site.
+   So does Measures Monitoring 2010 muscle (6.34).
+3. Cod muscle across all campaigns is either 0.10-0.35 or 3.5-7.7, with
+   **nothing in between**. Contamination gives a continuum; a labelling fault
+   gives exactly this gap.
+4. Liver is flat while muscle moves 20x. That is backwards: copper is essential
+   and homeostatically regulated in muscle, and liver is the accumulating organ.
+
+**Why not just flag the node as low-quality evidence** (Sam's first instinct,
+and a reasonable one). Low quality is the right label for genuine uncertainty.
+This is a positive diagnosis of a defect in a known, enumerable set of rows.
+Averaging over rows believed to be mislabelled and calling the mean low-quality
+gives a wrong number wearing an honest label, and the EPEQ score then does not
+mean what it says. Exclude first, then score what survives.
+
+**Why not `drop_outliers`.** 20 of 44 rows. Tukey fences cannot reach a mode
+that size, and a mode that size is not an outlier in any statistical sense. This
+is a provenance judgement, not a statistical one.
+
+So `exclude_campaigns` joins `exclude_references` as a fixed restriction column
+on `aep_nodes.csv`, sharing `apply_node_exclusion()` so the two cannot drift.
+**An exclusion matching nothing warns**, because the silent version is
+particularly nasty here: the node still resolves, still produces a mean, and the
+rows you believed you removed are still in it. Campaign names carry spaces and
+parentheses, so a typo is easy and otherwise invisible.
+
+Excluding both affected campaigns leaves N005 on **21 rows spanning 0.10-0.50
+mg/kg wet**, across four campaigns. It also drops the 3 clean 2022 Urban Fjord
+rows, which is the deliberate conservative reading: a campaign that mislabels
+tissue in one year is suspect throughout, and "looks fine" is not evidence.
+
+Still outstanding from 9c: anomalies 2 (*S. trutta* muscle) and 3 (Aquatic
+Sediment / Screening), and the Coteur transcription fix, which stays a raw-data
+edit. If corrections are applied before submission they need a methods sentence,
+since this is the pipeline overriding a national database.
+
+**Anomaly 2 is worse than 9c recorded.** *S. trutta* muscle, Urban Fjord, 6 rows,
+median **33,571 mg/kg wet**, max **76,815**, i.e. 7.7% copper by mass. Its
+comment reads `ICP-MS`, not unit arithmetic, so C001 correctly did not touch it.
+Next correction candidate; use the cross-validation check to pick the factor
+(other trout muscle campaigns sit at 0.15-0.64).
+
+### 9f. State of play, end of 2026-08-06
+
+Pipeline fully built, `tar_outdated()` reports 0. Test suite 1115 passing.
+**Nothing committed yet** (~30 modified, ~7 new files).
+
+#### Do this first
+
+`aep_nodes.csv` has the `exclude_campaigns` column but **N005's cell is still
+blank**, so the node is still on all 44 rows (mean 2.23, median 0.235, GSD 5.15,
+still bimodal). Paste:
+
+```
+Vm_2010_2025 (Urban Fjord Contaminants); Vm_2010_2025 (Measures Monitoring)
+```
+
+then `tar_make()`. N005 lands on 21 rows at 0.10-0.50 mg/kg wet. This is the
+last step of 9e and everything in that section assumes it.
+
+#### Open, ordered by how much they bite
+
+1. **C002 for *S. trutta*.** See 9e. Biggest remaining data fault.
+2. **The comment detector never shrinks.** `scan_comment_unit_flags()` matches on
+   comment text, and the text does not change when a row is corrected, so it
+   still reports 8 groups including the 33 rows C001 already fixed. Only the
+   offsets half of `unit_anomaly_report` is a shrinking to-do list (5 down to 4);
+   the comment half is not, and it will mislead. Fix is one filter on
+   `unit_correction_id`. Cheap, do it before it costs someone an hour.
+3. **C001's `evidence` cell** records only the comment. Add the five-species
+   cross-validation from 9d; it is the stronger argument and it is the one that
+   belongs in the methods.
+4. **5 failing tests in `test-fct_node_cards.R`**, pre-existing, from the compact
+   card work of 2026-08-05: `title_size` 2.6 against headline 3.7, and the
+   compact strip drawing an x axis the test expects blank. Not caused by the
+   units work; unpicked.
+5. **9c anomalies 2 and 3, and the Coteur transcription fix.** Unchanged.
+
+#### Then the actual AEP
+
+**P3.4 and P4.2 are what is left, and they are both Sam's judgement, not
+infrastructure.** Every node carries only `plausibility_score`, so three of the
+four EPEQ chips render grey on every card, and all 16 edges are still `putative`.
+The machinery to draw a fully scored, empirically-supported AEP has existed since
+2026-08-05 and is waiting on the scoring.
+
+That is worth stating plainly, because two full days have now gone into data
+faults found while looking at the AEP rather than into the AEP itself. The faults
+were real and worth fixing, and the correction layer will keep paying off. But
+the deadline is bought with P3.4 and P4.2, not with more detection.
+
 ### The decisions file was not tracked at all
 
 Found while re-running after the scaffold. `group_decisions` and `group_ids`
@@ -608,6 +803,16 @@ Real problems (see `CLAUDE.md` section 3) that must not eat working days before 
 - Half-migrated frontmatter between commits `9134762` and `8ad2d1f`.
 - `DESCRIPTION` placeholder license, missing imports, one test file.
 - 4.6 MB `references.bib`, 770 KB `manifest.json`, \~190 orphaned `.quarto/quarto-session-temp*` directories.
+
+### Rationalise target names
+
+Noted 2026-08-06. Full audit and mapping in **`PLAN-target-naming.md`**; nothing applied.
+
+All 100 targets in `_targets.R` audited against a `<source>_<entity>_<state>` scheme. The load-bearing problems are that the literature eData reads carry no source prefix at all (`sites_data` beside `vm_edata_sites`, 22 targets), and that `aep_node_cards` (a table) and `node_cards` (the PNGs) are one word apart. Tier 1 is 25 targets and removes real ambiguity; Tier 2 is another 12 and is aesthetic.
+
+**Cost: 2-3 hours plus a full rebuild**, because `targets` keys the store on the name, so every rename is a cache miss. Blast radius outside `_targets.R` is \~35 `tar_read()` call sites in notebooks (each one a dependency declaration, `CLAUDE.md` 4.4.2) and 9 scripts. Run it in one commit at a point where the store is being rebuilt anyway, never incrementally: half-renamed is worse than either end state.
+
+Three decisions wait on Sam (`lit_` vs `literature_`; Tier 2 at all; whether `load_literature_pqt` should be folded away rather than renamed).
 
 ### Integrate the emissions and REACH data into the pipeline
 
