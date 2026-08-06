@@ -1367,6 +1367,22 @@ list(
     )
   ),
 
+  ### # Node grouping boxes ----
+  # Sam 2026-08-05: "Having everything say 'coastal' at the start is clearly a
+  # bit silly." A shared property repeated in five labels needs somewhere else to
+  # live. Groups nest and may overlap, so membership is many-to-many and lives in
+  # a semicolon list per group. Nesting depth is DERIVED from containment rather
+  # than declared, so it cannot drift out of step with the member lists.
+  tar_target(
+    name = aep_node_groups_file,
+    command = here_rel("data/clean/aep_node_groups.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_node_groups,
+    command = read_aep_node_groups(aep_node_groups_file, nodes = aep_nodes)
+  ),
+
   ### # Node report cards ----
   # PLAN.md P3.1. One row per node: the compact summary a node has to carry.
   # Arctic coverage is REPORTED, not filtered (Sam's call 2026-08-05); a global
@@ -1440,6 +1456,28 @@ list(
     format = "file"
   ),
 
+  ### # Compact cards, for placing on the diagram ----
+  # PLAN.md P5.2. A separate render rather than a resize: at graph-node size the
+  # full card's body text lands around 1pt, so the compact variant drops the
+  # count line, the row labels and the axis instead of shrinking them.
+  tar_target(
+    name = node_cards_compact,
+    command = write_node_cards(
+      nodes = aep_nodes,
+      cards = aep_node_cards,
+      members = aep_node_members,
+      data = literature_analysis_ready,
+      ids = group_ids,
+      thresholds = copper_toxicity_thresholds,
+      dir = here_rel("figures/node_cards_compact"),
+      width = 2.4,
+      height = 1.8,
+      dpi = 200,
+      style = "compact"
+    ),
+    format = "file"
+  ),
+
   ### # The AEP diagram ----
   # PLAN.md P5.1. Manual coordinates from aep_nodes.csv, never an automatic
   # layout: vertical position carries source-to-exposure meaning, so a layout
@@ -1453,9 +1491,19 @@ list(
       dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
       ggplot2::ggsave(
         filename = path,
-        plot = plot_aep(aep_nodes, aep_edges, aep_node_cards),
-        width = 10,
-        height = 7,
+        plot = plot_aep(
+          aep_nodes, aep_edges, aep_node_cards,
+          groups = aep_node_groups,
+          # Nodes drawn as their own report cards (PLAN.md P5.2), which is what
+          # makes this a report-card AEP rather than a labelled graph.
+          node_images = stats::setNames(
+            node_cards_compact,
+            tools::file_path_sans_ext(basename(node_cards_compact))
+          ),
+          image_size = 0.19
+        ),
+        width = 12,
+        height = 8,
         dpi = 150,
         device = ragg::agg_png
       )

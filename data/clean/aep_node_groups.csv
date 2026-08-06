@@ -1,0 +1,3 @@
+group_key,label,node_ids,notes
+coastal,Coastal,N001;N002;N003;N004;N005,"Everything in the coastal fjord system."
+cod,Cod,N004;N005,"Gadus morhua tissues; nests inside coastal."

@@ -296,9 +296,19 @@ aep_edge_styles <- function() {
 #' @param cards Optional report cards from [aep_node_report_cards()]. When
 #'   supplied, each node label gains its geometric mean and unit.
 #' @param label_edges Annotate empirical edges with their magnitude?
+#' @param groups Optional node groups from [read_aep_node_groups()], drawn as
+#'   labelled boxes behind everything else. Nested groups inset automatically;
+#'   see [aep_group_depth()].
+#' @param node_images Optional named character vector of PNG paths keyed by
+#'   `node_id`, from [write_node_cards()] with `style = "compact"`. Where
+#'   supplied, each node is drawn as its card instead of a text label. This is
+#'   PLAN.md P5.2, and it is what makes the figure a report-card AEP rather than
+#'   a labelled graph.
+#' @param image_size Card width as a fraction of plot width.
 #' @return A ggplot.
 #' @export
-plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE) {
+plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
+                     groups = NULL, node_images = NULL, image_size = 0.16) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
     return(triage_empty_plot("AEP", "no nodes have x/y coordinates"))
@@ -332,6 +342,12 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE) {
   }
 
   p <- ggplot2::ggplot()
+
+  # Group boxes go on FIRST, so edges and nodes draw over them. They are
+  # annotation and must never occlude content.
+  if (!is.null(groups) && nrow(groups) > 0) {
+    p <- p + aep_group_layers(aep_group_boxes(groups, placed))
+  }
 
   if (nrow(e) > 0) {
     for (st in names(styles$linetype)) {
@@ -374,8 +390,32 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE) {
     }
   }
 
-  p +
-    ggplot2::geom_label(
+  # NODES: cards where images were supplied, text labels otherwise. Not a mix,
+  # because two visual languages for the same object on one figure is worse than
+  # either alone.
+  p <- if (!is.null(node_images) && length(node_images) > 0) {
+    have <- node_label[node_label$node_id %in% names(node_images), , drop = FALSE]
+    have$.image <- unname(node_images[have$node_id])
+    missing_img <- node_label[!node_label$node_id %in% names(node_images), , drop = FALSE]
+
+    out <- p + ggimage::geom_image(
+      data = have,
+      ggplot2::aes(x = .data$x, y = .data$y, image = .data$.image),
+      size = image_size,
+      asp = 1.5
+    )
+    # A node with no card still has to appear, or the diagram silently loses it.
+    if (nrow(missing_img) > 0) {
+      out <- out + ggplot2::geom_label(
+        data = missing_img,
+        ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
+        size = 2.8, lineheight = 0.95, fill = "white", colour = "grey15",
+        label.padding = ggplot2::unit(4, "pt")
+      )
+    }
+    out
+  } else {
+    p + ggplot2::geom_label(
       data = node_label,
       ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
       size = 2.8,
@@ -383,7 +423,10 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE) {
       fill = "white",
       colour = "grey15",
       label.padding = ggplot2::unit(4, "pt")
-    ) +
+    )
+  }
+
+  p +
     # Expanded so labels at the edge of the coordinate range are not clipped.
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.15)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.12)) +

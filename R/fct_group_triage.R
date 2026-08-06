@@ -1495,7 +1495,8 @@ triage_category_overlay <- function(
   min_n = 10,
   ticks = TRUE,
   header = TRUE,
-  label_size = 2.1
+  label_size = 2.1,
+  labels = TRUE
 ) {
   if (nrow(data) == 0) {
     return(list())
@@ -1536,7 +1537,9 @@ triage_category_overlay <- function(
     layers <- c(layers, list(tick("grey15", 0.75), tick("white", 0.35)))
   }
 
-  labels <- triage_category_labels(data, min_n = min_n)
+  # `lab_data`, not `labels`: the argument of that name now controls whether
+  # they are drawn at all.
+  lab_data <- triage_category_labels(data, min_n = min_n)
   # Labels go in the RESERVED MARGIN beyond the data limits, not at limits[2].
   #
   # Sam, 2026-08-05: "Polluted seabed's very high right conc covers up sample
@@ -1572,15 +1575,21 @@ triage_category_overlay <- function(
       hjust = 0
     )
   }
+  # `labels = FALSE` drops the right-margin counts entirely, for the compact node
+  # card where they would be drawn far too small to read.
+  if (!labels) {
+    return(layers)
+  }
+
   c(
     layers,
     Filter(
       Negate(is.null),
       list(
-        text_layer(labels[labels$tested, , drop = FALSE], "grey15"),
+        text_layer(lab_data[lab_data$tested, , drop = FALSE], "grey15"),
         # Greyer, so an untested row's label does not read with the same
         # authority as a tested one.
-        text_layer(labels[!labels$tested, , drop = FALSE], "grey60"),
+        text_layer(lab_data[!lab_data$tested, , drop = FALSE], "grey60"),
         # Omitted on node cards: the card's own header block already explains
         # the counts, and at card width the strip is too narrow to hold it.
         if (header) triage_category_header(data, x_at, size = label_size)
