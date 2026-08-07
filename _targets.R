@@ -1638,6 +1638,8 @@ list(
       # Nodes drawn as their own report cards (PLAN.md P5.2), which is what
       # makes this a report-card AEP rather than a labelled graph.
       card_paths = node_cards_compact,
+      manifest = aep_manifest,
+      bbox_map = wgs84_map,
       dir = here_rel("figures"),
       width = 12,
       height = 8,

@@ -544,18 +544,28 @@ write_aep_node_cards <- function(
 #' @param cards Output of [aep_all_report_cards()].
 #' @param groups Output of [read_aep_node_groups()], or `NULL`.
 #' @param card_paths Compact card paths from [write_aep_node_cards()].
+#' @param manifest Output of [read_aep_manifest()], or `NULL`. Supplies the
+#'   title (`label`), subtitle (`scope_note`) and, where set, the bounding box
+#'   drawn on the locator inset. Without it, diagrams are untitled and
+#'   uninset, as before this was added.
+#' @param bbox_map The whole-study-area map used as the locator inset's base,
+#'   e.g. the `wgs84_map` target. Required for an inset to be drawn; an AEP
+#'   with a bounding box but no `bbox_map` supplied is titled but not inset.
 #' @param dir Where the figures go.
 #' @param width,height,dpi Canvas, passed on to [node_card_extent()] via
 #'   `plot_aep()` so arrow clipping matches the device actually used.
 #' @param image_size Card width as a fraction of panel width.
 #' @param card_aspect Compact card height over width, in inches.
+#' @param inset_width Width of the locator inset relative to the main panel
+#'   (e.g. `0.25` puts it at a quarter of the main diagram's width).
 #' @return The written paths, one per AEP.
 #' @export
 write_aep_diagrams <- function(
   scoped, edges, cards, groups = NULL, card_paths = character(0),
+  manifest = NULL, bbox_map = NULL,
   dir = here_rel("figures"),
   width = 12, height = 8, dpi = 150,
-  image_size = 0.19, card_aspect = 1.8 / 2.4
+  image_size = 0.19, card_aspect = 1.8 / 2.4, inset_width = 0.25
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -568,19 +578,49 @@ write_aep_diagrams <- function(
       mine, tools::file_path_sans_ext(basename(mine))
     )
 
+    diagram <- plot_aep(
+      nodes,
+      aep_scope_edges(edges, nodes),
+      cards[cards$aep_id %in% id, , drop = FALSE],
+      groups = aep_scope_groups(groups, nodes),
+      node_images = images,
+      image_size = image_size,
+      card_aspect = card_aspect,
+      device_aspect = width / height
+    )
+
+    row <- if (!is.null(manifest)) {
+      manifest[manifest$aep_id %in% id, , drop = FALSE]
+    } else {
+      NULL
+    }
+    title <- if (!is.null(row) && nrow(row) == 1) row$label else id
+    subtitle <- if (!is.null(row) && nrow(row) == 1) row$scope_note else NULL
+
+    has_bbox <- !is.null(row) && nrow(row) == 1 && any(!is.na(row[
+      c("lat_min", "lat_max", "lon_min", "lon_max")
+    ]))
+
+    combined <- if (has_bbox && !is.null(bbox_map)) {
+      inset <- aep_bbox_inset(
+        bbox_map, row$lat_min, row$lat_max, row$lon_min, row$lon_max
+      )
+      diagram + inset + patchwork::plot_layout(widths = c(1, inset_width))
+    } else {
+      diagram
+    }
+
+    combined <- combined + patchwork::plot_annotation(
+      title = title, subtitle = subtitle,
+      theme = ggplot2::theme(
+        plot.title = ggplot2::element_text(face = "bold", size = 14),
+        plot.subtitle = ggplot2::element_text(colour = "grey30")
+      )
+    )
+
     path <- file.path(dir, paste0("aep_", id, ".png"))
     ggplot2::ggsave(
-      filename = path,
-      plot = plot_aep(
-        nodes,
-        aep_scope_edges(edges, nodes),
-        cards[cards$aep_id %in% id, , drop = FALSE],
-        groups = aep_scope_groups(groups, nodes),
-        node_images = images,
-        image_size = image_size,
-        card_aspect = card_aspect,
-        device_aspect = width / height
-      ),
+      filename = path, plot = combined,
       width = width, height = height, dpi = dpi, device = ragg::agg_png
     )
     path

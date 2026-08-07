@@ -310,7 +310,6 @@ render_ap04_units|stem|a18a5fe0073a6942|6f22023e70fe9480|209b40dc22556718|-11350
 group_decisions|stem|f008eea429c904cb|6c312ddd21856e32|4d934692f4d5f81b|1594493645||t20672.2066917705s|s10430b|10430|qs|local|vector|||0.843|1 group(s) in the data are absent from group_decisions.csv. ℹ Re-run scripts/scaffold_group_decisions.R to append them.|
 aep_node_coverage|stem|75653f03fdaa3622|3357723fd679873a|7b256cd7979da404|915204563||t20672.206702871s|s8490b|8490|qs|local|vector|||0.234|1 group(s) have no ID yet. ℹ Run scripts/allocate_group_ids.R to append them.|
 render_index|stem|5b603b0864112810|559d005c715e5e9a|2b32193a86607bb9|1072169657|_site/index.docx*_site/index.html*index.qmd*_extensions/flextable-qmd/_extension.yml*_extensions/flextable-qmd/flextable-qmd.lua*_extensions/flextable-qmd/unwrap-float.lua*_quarto.yml|t20672.2072468787s|s7810908b|7810908|file|local|vector|||81.156||
-aep_diagram|stem|e7dfb6dd05a2b3fd|faf7cac7a5a3cccd|fc9421562c301fa7|834918380|figures/aep_A001.png*figures/aep_A002.png|t20672.2073170735s|s428467b|428467|file|local|vector|||3.328||
 render_ap05_aep|stem|c503c449797cf3a7|9782524618564e7e|b1368bb2a90cd3b4|1292803788|_site/docs/AP05-aep.html*docs/AP05-aep.qmd|t20672.2073193008s|s264763b|264763|file|local|vector|||53.031||
 triage_species_node_table|stem|35f1e7daf11d5c31|e2a59dab6e1336c1|264a91dbf25e34f8|1039034513||t20672.2073385307s|s748b|748|qs|local|vector|||0.078||
 triage_overview_node_table|stem|17a85d65c7564c07|c1e29eed0ac70aa0|946c3cbab3e8d58b|1244232725||t20672.2073581901s|s807b|807|qs|local|vector|||0.422||
@@ -357,6 +356,7 @@ triage_label_x|function|5fa881193b38912e
 threshold_class_number|function|67db0e4070980b54
 threshold_class_linetypes|function|756bf0866fbe4b7a
 dip_test_safe|function|6760de2725ae4d5d
+aep_bbox_inset|function|bf32553a8acf02f0
 is_missing|function|1b041ea4ab10d6ad
 is_not_relevant|function|f8bc809e100f9337
 is_not_reported|function|f45bd520bc8c17f3
@@ -368,7 +368,7 @@ empty_unit_anomalies|function|279e0af1d144e809
 save_literature_parquet|function|2ac5b0ea7382aa45
 restrict_to_dominant_unit|function|416da43ab480d964
 load_literature_parquet|function|180f5530c96d3b09
-starttime|object|f0af038a68260c69
+starttime|object|932dd1ded692ff2c
 generate_copper_thresholds|function|82c6547081a3b593
 triage_flag_limits|function|1e7f7d71759db792
 vm_filter_sites|function|903af27e97c404d5
@@ -511,7 +511,7 @@ pb_action_levels|object|bf1e230407f723b1
 prtr_facility_files|function|1eff5d984206f3cc
 mine_tailings_coords|function|e372788873e30d76
 epeq_score_colours|function|850fce697b6bc069
-.Random.seed|object|de6b9488bc81a7ed
+.Random.seed|object|6cc25c3625f1278c
 .__DEVTOOLS__|object|f89badf81490623e
 read_prtr_file|function|bf3d1f73de154364
 clean_joined_columns|function|cc7756f4c945b315
@@ -649,7 +649,7 @@ triage_threshold_layers|function|9808374166031821
 spatial_bin_strokes|function|7f02ffeb7cb7535f
 thresholds_for_group_by_unit|function|05cf916fbb35c8dd
 prepare_geography_polar|function|538f66948dce500e
-write_aep_diagrams|function|085f41ab74793db0
+write_aep_diagrams|function|15067c167683e6cc
 standardise_measured_units|function|4d569946564c9175
 apply_unit_corrections|function|bb1f9e7d786a7016
 triage_overview_nodes|function|f975f0c0c9581d1c
@@ -671,3 +671,4 @@ write_triage_overviews|function|9ce6c6821974114e
 write_triage_plots_for_group|function|f6896193b3a2e6fa
 write_aep_node_cards|function|a971f1ba4c63b22d
 write_triage_plots|function|d4b5f436dba49b32
+aep_diagram|stem|9868beb7af304fce|8f7967fb63b5605c|93d912238b23c6d0|834918380|figures/aep_A001.png*figures/aep_A002.png|t20672.3306768133s|s462876b|462876|file|local|vector|||14.75|st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. st_point_on_surface may not give correct results for longitude/latitude data. Removed 287 rows containing missing values or values outside the scale range (`geom_shadow_text()`).. Removed 254 rows containing missing values or values outside the scale range (`geom_shadow_text()`).|

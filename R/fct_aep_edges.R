@@ -577,6 +577,46 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
     )
 }
 
+#' A Small Bounding-Box Locator Map
+#'
+#' For a geographically scoped AEP (a manifest row with any of `lat_min`,
+#' `lat_max`, `lon_min`, `lon_max` set), shows where its bounding box sits
+#' against the whole study area, so the diagram does not have to be read next
+#' to the manifest to know what "Repparfjorden" is scoped to.
+#'
+#' @param base_map The whole-study-area map, e.g. the `wgs84_map` target
+#'   ([create_study_area_map_wgs84()]).
+#' @param lat_min,lat_max,lon_min,lon_max Bounding box; `NA` on any side means
+#'   unbounded and is drawn against the full plotted extent of `base_map` on
+#'   that side.
+#' @return A ggplot, stripped down for use as a side panel.
+#' @export
+aep_bbox_inset <- function(base_map, lat_min, lat_max, lon_min, lon_max) {
+  built <- ggplot2::ggplot_build(base_map)
+  xr <- built$layout$panel_scales_x[[1]]$range$range
+  yr <- built$layout$panel_scales_y[[1]]$range$range
+
+  rect <- data.frame(
+    xmin = dplyr::coalesce(lon_min, xr[1]),
+    xmax = dplyr::coalesce(lon_max, xr[2]),
+    ymin = dplyr::coalesce(lat_min, yr[1]),
+    ymax = dplyr::coalesce(lat_max, yr[2])
+  )
+
+  base_map +
+    ggplot2::geom_rect(
+      data = rect,
+      ggplot2::aes(
+        xmin = .data$xmin, xmax = .data$xmax,
+        ymin = .data$ymin, ymax = .data$ymax
+      ),
+      inherit.aes = FALSE,
+      colour = "firebrick", fill = "firebrick", alpha = 0.25, linewidth = 0.6
+    ) +
+    ggplot2::guides(fill = "none", colour = "none", alpha = "none") +
+    ggplot2::theme(legend.position = "none")
+}
+
 #' Progress Through the Edge Time-Box
 #'
 #' P4.2 time-boxes gap-filling to three working days. This is the number to look
