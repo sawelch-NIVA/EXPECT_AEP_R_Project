@@ -1,36 +1,19 @@
 aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A001,N004,,,,,,,Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones.
-A001,N005,,,,,,,
-A001,N006,,,,,,,
-A001,N007,,,,,,,
-A001,N008,,,,,,,
-A001,N001,,,,,,,
-A001,N002,,,,,,,
-A002,N004,,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
-A002,N005,,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
-A002,N006,,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
-A002,N007,,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
-A002,N001,,,,,,,External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence.
-A002,N002,,,,,,,External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd.
-A001,N003,,,,,,,
-A001,N009,,,,,,,
-A001,N010,,,,,,,
-A001,N011,,,,,,,
-A001,N012,,,,,,,
-A001,N013,,,,,,,
-A001,N014,,,,,,,
-A001,N015,,,,,,,
-A001,N016,,,,,,,
-A001,N017,,,,,,,
-A001,N018,,,,,,,
-A002,N003,,,,,,,
-A002,N009,,,,,,,
-A002,N010,,,,,,,
-A002,N011,,,,,,,
-A002,N012,,,,,,,
-A002,N013,,,,,,,
-A002,N014,,,,,,,
-A002,N015,,,,,,,
-A002,N016,,,,,,,
-A002,N017,,,,,,,
-A002,N018,,,,,,,
+A001,N004-benthic-sediment,,,,,,,Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones.
+A001,N005-water-column,,,,,,,
+A001,N006-mussel-soft-tissue,,,,,,,
+A001,N007-g-morhua-liver,,,,,,,
+A001,N008-g-morhua-muscle,,,,,,,
+A001,N001-natural-occurrence,,,,,,,
+A001,N002-aquaculture,,,,,,,
+A002,N004-benthic-sediment,,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
+A002,N005-water-column,,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
+A002,N006-mussel-soft-tissue,,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
+A002,N007-g-morhua-liver,,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
+A002,N001-natural-occurrence,,,,,,,External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence.
+A002,N002-aquaculture,,,,,,,External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd.
+A001,N003-submarine-tailing-disposal,,,,,,,
+A001,N009-crab-total,,,,,,,
+A001,N010-crab-muscle,,,,,,,
+A001,N011-crab-brown-meat,,,,,,,
+A001,N012-marine-crustaceans,,,,,,,

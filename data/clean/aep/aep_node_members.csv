@@ -1,22 +1,22 @@
 node_id,group_id,notes
-N004,G002,Coastal sediment
-N005,G004,Coastal water
-N006,G005,Coastal mussels (SF not reported)
-N006,G007,Coastal mussels (SF benthos)
-N007,G006,Coastal cod livers
-N008,G047,Coastal cod muscle
-N009,G148, Crab whole body (WIP)
-N010,G011,Crab muscle; split into contam and non-contam (WIP)
-N011,G037,Crab brown meat
-N012,G022,"Northern shrimp, whole body"
-N012,G023,"Gammarus, whole body"
-N012,G024,Calanus h.
-N014,G040,Marine benthic inverts
-N015,G033,Marine macroalgae
-N015,G147,Marine macroalgae; potential pollution signal but small samples
-N015,G036,Marine macroalgae; potential pollution signal but small samples
-N016,G186,Seabird egg
-N016,G167,Seabird egg
-N016,G240,Seabird egg
-N017,G026,Eider blood
-N018,G187,Eider egg
+N004-benthic-sediment,G002,Coastal sediment
+N005-water-column,G004,Coastal water
+N006-mussel-soft-tissue,G005,Coastal mussels (SF not reported)
+N006-mussel-soft-tissue,G007,Coastal mussels (SF benthos)
+N007-g-morhua-liver,G006,Coastal cod livers
+N008-g-morhua-muscle,G047,Coastal cod muscle
+N009-crab-total,G148,Crab whole body (WIP)
+N010-crab-muscle,G011,Crab muscle; split into contam and non-contam (WIP)
+N011-crab-brown-meat,G037,Crab brown meat
+N012-marine-crustaceans,G022,"Northern shrimp, whole body"
+N012-marine-crustaceans,G023,"Gammarus, whole body"
+N012-marine-crustaceans,G024,Calanus h.
+N014-marine-benthic-inverts,G040,Marine benthic inverts
+N015-marine-macroalgae,G033,Marine macroalgae
+N015-marine-macroalgae,G147,Marine macroalgae; potential pollution signal but small samples
+N015-marine-macroalgae,G036,Marine macroalgae; potential pollution signal but small samples
+N016-seabird-egg,G186,Seabird egg
+N016-seabird-egg,G167,Seabird egg
+N016-seabird-egg,G240,Seabird egg
+N017-eider-blood,G026,Eider blood
+N018-eider-eggs,G187,Eider egg

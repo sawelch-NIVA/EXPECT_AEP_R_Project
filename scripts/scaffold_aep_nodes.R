@@ -33,7 +33,7 @@ if (file.exists(nodes_path)) {
   # Its scores and justifications are Sam's own, transcribed from
   # tbl-epeq-marine. Delete the row or edit it; it is a template, not data.
   example <- tibble::tibble(
-    node_id = "N001",
+    node_id = "N001-marine-water",
     label = "Marine water",
     level = "medium",
     node_type = "empirical",
@@ -92,7 +92,7 @@ if (file.exists(members_path)) {
     dplyr::slice_head(n = 1)
 
   members <- tibble::tibble(
-    node_id = "N001",
+    node_id = "N001-marine-water",
     group_id = if (nrow(marine) > 0) marine$group_id[1] else NA_character_,
     notes = "Example membership row."
   )

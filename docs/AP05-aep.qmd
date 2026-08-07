@@ -84,7 +84,7 @@ erDiagram
         string group_id PK "G001, stable"
     }
     AEP_NODES {
-        string node_id PK "N001"
+        string node_id PK "N001-marine-water"
         string level "source medium organism tse"
         string node_type "empirical or external"
         number essentiality_score "claim about the world"
@@ -113,7 +113,7 @@ erDiagram
     }
     AEP_NODE_GROUPS {
         string group_key PK
-        string node_ids "N001;N002;N003"
+        string node_ids "N001-marine-water;N002-aquaculture"
     }
 ```
 
@@ -240,11 +240,11 @@ The complement is the **coverage backlog**: groups no node has claimed, ranked b
 
 ## 1. Add the node
 
-One row in `aep_nodes.csv`.
+One row in `aep_nodes.csv`. Get the id with `next_node_id(nodes, label)`, which finds the highest `N<number>` in use and slugifies `label` onto it.
 
 | Column | What goes in it |
 |------------------------------------|------------------------------------|
-| `node_id` | `N001`, `N002`, ... Unique, never reused |
+| `node_id` | `N001-marine-water`, `N002-aquaculture`, ... The `N<number>` is the real key, unique and never reused; the trailing slug is generated from `label` at creation via `next_node_id()` so `from`/`to` and membership rows are legible without a lookup. **The slug freezes at creation** and is not regenerated if the node is later relabelled, so a small mismatch between an old slug and a current label is expected, not a bug |
 | `label` | Short. The grouping boxes carry the shared part, so do not write "Coastal" five times |
 | `level` | `source`, `medium`, `organism` or `tse`. Orders the pathway |
 | `node_type` | `empirical` (computed from groups) or `external` (typed in) |
@@ -508,7 +508,7 @@ The node, membership and manifest readers **stop**. The cross-file completeness 
 
 | Message | What happened | What to do |
 |------------------------|------------------------|------------------------|
-| `Duplicate node_id(s)` | Two rows claim the same `N0xx` | Ids are never reused. Allocate a new one |
+| `Duplicate node_id(s)` | Two rows claim the same `N0xx-slug` | Ids are never reused. Call `next_node_id(nodes, label)` for the next one |
 | `Unrecognised level(s)` | Typo in `level` | One of `source`, `medium`, `organism`, `tse` |
 | `Unrecognised node_type(s)` | Typo in `node_type` | `empirical` or `external` |
 | `empirical node(s) have external_* values set` | A magnitude typed onto a computed node | Clear the columns, or change `node_type` |

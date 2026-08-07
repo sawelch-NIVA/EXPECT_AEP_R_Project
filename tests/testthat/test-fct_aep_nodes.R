@@ -5,6 +5,29 @@
 # (latitude, date, source, outliers). These tests cover each of those and the
 # ways the combination can go wrong.
 
+# ---- Composite ids -------------------------------------------------------
+
+test_that("node_label_slug lowercases, hyphenates, and strips punctuation", {
+  expect_equal(node_label_slug("G. morhua liver"), "g-morhua-liver")
+  expect_equal(node_label_slug("Marine water"), "marine-water")
+  expect_equal(node_label_slug("  Leading/trailing -- punctuation!! "), "leading-trailing-punctuation")
+})
+
+test_that("next_node_id mints N<max+1>-<slug> from an empty table", {
+  expect_equal(
+    next_node_id(node_fixture()[0, ], "Marine water"),
+    "N001-marine-water"
+  )
+})
+
+test_that("next_node_id continues from the highest number in use, gaps and all", {
+  nodes <- dplyr::bind_rows(
+    node_fixture(node_id = "N001-marine-water"),
+    node_fixture(node_id = "N003-benthic-sediment")
+  )
+  expect_equal(next_node_id(nodes, "Eider blood"), "N004-eider-blood")
+})
+
 # ---- Resolution ---------------------------------------------------------
 
 test_that("a node resolves to exactly its member groups", {
