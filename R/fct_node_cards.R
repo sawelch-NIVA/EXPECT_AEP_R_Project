@@ -60,6 +60,49 @@ epeq_score_colours <- function() {
   )
 }
 
+#' Pastel Background Colour per Node Level
+#'
+#' Sam 2026-08-07: colour the card background by node type so the AEP reads at
+#' a glance without following edges. Pale/pastel throughout, because these sit
+#' behind data (text, violins, threshold lines) that has to stay legible on
+#' top, and a saturated fill would fight it.
+#'
+#' Keyed on `level` (`aep_node_levels()`), not `node_type`: `node_type` is only
+#' `empirical`/`external`, an internal distinction about where the numbers came
+#' from, not the source/medium/organism/target-site distinction the colouring
+#' is meant to carry. Sam specified three: orange for `source`, blue for
+#' `medium` (the "Key Exposure State" compartment nodes), pink for `organism`.
+#' `tse` (target site exposure) wasn't in that list; given a fourth pastel in
+#' the same family (lavender) rather than left uncoloured, so every node gets a
+#' background and the palette stays internally consistent.
+#'
+#' @return A named character vector, level to hex colour.
+#' @export
+node_level_bg_colours <- function() {
+  c(
+    source = "#FBE3C7",
+    medium = "#D7E6F5",
+    organism = "#F9D9E6",
+    tse = "#E4DCF2"
+  )
+}
+
+#' Background Colour for One Node's Card
+#'
+#' @param node A one-row nodes tibble, carrying `level`.
+#' @return A single hex colour. Falls back to white for an unrecognised or
+#'   missing level, rather than erroring: a malformed `aep_nodes.csv` row
+#'   should still produce a card.
+#' @export
+node_card_bg_colour <- function(node) {
+  lvl <- node$level[1]
+  cols <- node_level_bg_colours()
+  if (length(lvl) == 0 || is.na(lvl) || !lvl %in% names(cols)) {
+    return("white")
+  }
+  unname(cols[lvl])
+}
+
 #' EPEQ Badge Strip for One Node
 #'
 #' Four small squares, each a criterion abbreviation over its score. Programmer
@@ -221,7 +264,14 @@ node_group_strips <- function(
       header = FALSE, label_size = 1.6,
       labels = (style == "full")
     ) +
-    triage_threshold_layers(thr, orientation = "vertical", limits = limits) +
+    # Half the default triage-panel linewidth (0.7 -> 0.35): a card is a
+    # fraction of a triage panel's size, and Sam 2026-08-07 found the default
+    # too heavy at that scale. Overridden here rather than in
+    # triage_threshold_layers()'s own default, which is still right for the
+    # full-size triage notebooks.
+    triage_threshold_layers(
+      thr, orientation = "vertical", limits = limits, linewidth = 0.35
+    ) +
     triage_value_scale(
       limits = limits, axis = "x",
       expand = triage_category_x_expansion()
@@ -259,7 +309,7 @@ node_group_strips <- function(
         # Drawing the ids inside the panel lets all three panels span the same
         # width, and then centring on x = 0.5 means the same thing everywhere.
         compact_group_labels(d, limits),
-        compact_value_scale(limits),
+        compact_value_scale(limits, thresholds = thr),
         compact_axis_theme()
       )
     } else {
@@ -376,6 +426,17 @@ node_card <- function(
   style = c("full", "compact")
 ) {
   style <- match.arg(style)
+  bg <- node_card_bg_colour(node)
+  # Applied to every subplot via patchwork's `&`, which merges into each
+  # panel's theme rather than replacing it, so it survives on top of
+  # theme_void() (header, badges) and triage_theme() (strips) alike. Both
+  # panel and plot background are set: panel is what shows behind the violin
+  # or points, plot is the margin around it, and a colour visible in one but
+  # not the other would look like a rendering bug rather than a fill.
+  bg_theme <- ggplot2::theme(
+    plot.background = ggplot2::element_rect(fill = bg, colour = NA),
+    panel.background = ggplot2::element_rect(fill = bg, colour = NA)
+  )
 
   # COMPACT EXISTS BECAUSE SHRINKING THE FULL CARD DOES NOT WORK.
   #
@@ -395,13 +456,15 @@ node_card <- function(
       limits = limits, thresholds = thresholds, max_groups = max_groups,
       style = "compact"
     )
-    return(patchwork::wrap_plots(
-      header, badges, strips,
-      ncol = 1,
-      # Header takes the most: a wrapped two-line title plus the headline plus
-      # the counts line does not fit in the same band as a single strip.
-      heights = c(1.55, 0.40, 1.4)
-    ))
+    return(
+      patchwork::wrap_plots(
+        header, badges, strips,
+        ncol = 1,
+        # Header takes the most: a wrapped two-line title plus the headline plus
+        # the counts line does not fit in the same band as a single strip.
+        heights = c(1.55, 0.40, 1.4)
+      ) & bg_theme
+    )
   }
 
   header <- node_card_header(node, card)
@@ -415,7 +478,7 @@ node_card <- function(
     header, badges, strips,
     ncol = 1,
     heights = c(0.9, 0.5, 2.2)
-  )
+  ) & bg_theme
 }
 
 #' Value Axis for a Compact Strip
@@ -433,9 +496,16 @@ node_card <- function(
 #'
 #' @param limits Shared value limits for the node's unit.
 #' @param every Decades between labelled breaks.
+#' @param thresholds Output of [thresholds_for_group()], or `NULL`. Where
+#'   given, adds a secondary axis on top naming each threshold's class in
+#'   roman numerals (I, II, III, ...) at the value it sits on. Sam asked for
+#'   the class levels on the compact card but nothing else the full secondary
+#'   axis carries, so unlike [triage_threshold_sec_axis()] this omits the axis
+#'   title (source and matrix): at card width there is no room for it and it
+#'   would compete with the class numerals it is meant to explain.
 #' @return A ggplot2 scale.
 #' @export
-compact_value_scale <- function(limits = NULL, every = 3) {
+compact_value_scale <- function(limits = NULL, every = 3, thresholds = NULL) {
   decades <- -12:12
   major <- decades[decades %% every == 0]
 
@@ -447,7 +517,29 @@ compact_value_scale <- function(limits = NULL, every = 3) {
       ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
     },
     expand = ggplot2::expansion(mult = c(0.02, 0.02)),
-    guide = ggplot2::guide_axis(minor.ticks = TRUE)
+    guide = ggplot2::guide_axis(minor.ticks = TRUE),
+    sec.axis = compact_threshold_sec_axis(thresholds, limits)
+  )
+}
+
+#' Compact Secondary Axis Naming Only the Threshold Classes
+#'
+#' A pared-down [triage_threshold_sec_axis()]: same roman-numeral breaks, no
+#' axis title. See [compact_value_scale()] for why.
+#'
+#' @param thresholds Output of [thresholds_for_group()], or `NULL`.
+#' @param limits Shared value-axis limits, used to drop off-scale breaks.
+#' @return A `ggplot2::dup_axis()` specification, or `ggplot2::waiver()`.
+#' @export
+compact_threshold_sec_axis <- function(thresholds, limits = NULL) {
+  thresholds <- thresholds_in_limits(thresholds, limits)
+  if (is.null(thresholds) || nrow(thresholds) == 0) {
+    return(ggplot2::waiver())
+  }
+  ggplot2::dup_axis(
+    breaks = thresholds$THRESHOLD_VALUE_STANDARD,
+    labels = threshold_axis_label(thresholds),
+    name = NULL
   )
 }
 
@@ -467,7 +559,15 @@ compact_axis_theme <- function() {
     ),
     axis.ticks.length.x = ggplot2::unit(2.4, "pt"),
     axis.minor.ticks.length.x = ggplot2::rel(0.5),
-    panel.grid = ggplot2::element_blank()
+    panel.grid = ggplot2::element_blank(),
+    # Roman numerals at the bottom axis's text size read as noise, per the same
+    # reasoning as triage_sec_axis_theme(): bolder and a touch larger so they
+    # read as the class label they are.
+    axis.text.x.top = ggplot2::element_text(
+      size = ggplot2::rel(0.68), face = "bold", colour = "grey25"
+    ),
+    axis.title.x.top = ggplot2::element_blank(),
+    axis.ticks.x.top = ggplot2::element_line(colour = "grey45", linewidth = 0.3)
   )
 }
 
@@ -518,6 +618,29 @@ headline_is_suspect <- function(card, tol = 0.5) {
   abs(log10(gm) - log10(md)) > tol
 }
 
+#' Year Range of a Node's Underlying Measurements
+#'
+#' `"2004-2019"`, or a single year where `date_min` and `date_max` fall in the
+#' same year, or `""` where neither is known (an external node, or a node with
+#' no `SAMPLING_DATE` at all).
+#'
+#' @param card A one-row report card, carrying `date_min`/`date_max`.
+#' @return A single string, possibly empty.
+#' @export
+node_card_year_range <- function(card) {
+  if (!all(c("date_min", "date_max") %in% names(card))) {
+    return("")
+  }
+  lo <- card$date_min[1]
+  hi <- card$date_max[1]
+  if (length(lo) == 0 || length(hi) == 0 || is.na(lo) || is.na(hi)) {
+    return("")
+  }
+  y_lo <- format(as.Date(lo), "%Y")
+  y_hi <- format(as.Date(hi), "%Y")
+  if (identical(y_lo, y_hi)) y_lo else paste0(y_lo, "-", y_hi)
+}
+
 #' The Text Block at the Top of a Card
 #'
 #' Label, then the four aggregation levels Sam asked for (measurements, rows,
@@ -565,10 +688,13 @@ mean and median disagree; see strips")
     "n = ", count(card$n), ", rows = ", count(card$n_rows),
     ", groups = ", count(card$n_groups), ", refs = ", count(card$n_sources)
   )
-  # Compact keeps the sample size and the source count and drops the rest: those
-  # two are what make the headline a measurement rather than an assertion.
+  # Compact keeps the sample size, the source count, and the year range: those
+  # are what make the headline a measurement rather than an assertion, and
+  # "when was this measured" is as basic a question as "how much data".
+  year_range <- node_card_year_range(card)
   compact_counts <- paste0(
-    "n = ", count(card$n), ", refs = ", count(card$n_sources)
+    "n = ", count(card$n), ", refs = ", count(card$n_sources),
+    if (nzchar(year_range)) paste0(", ", year_range) else ""
   )
   # Arctic coverage is DROPPED FROM THE CARD but still computed and carried in
   # aep_node_cards, per Sam: "remove the Arctic measure from the plot, but keep
@@ -682,7 +808,7 @@ write_node_cards <- function(
     path <- file.path(dir, paste0(node$node_id[1], ".png"))
     ggplot2::ggsave(
       filename = path, plot = p, width = width, height = height,
-      dpi = dpi, device = ragg::agg_png, bg = "white"
+      dpi = dpi, device = ragg::agg_png, bg = node_card_bg_colour(node)
     )
     paths <- c(paths, path)
   }

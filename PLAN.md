@@ -1055,6 +1055,15 @@ its moved file. **The rebuild is Sam's to run.**
 - **1,167 tests passing**, up from 1,115. The same 5 pre-existing failures in
   `test-fct_node_cards.R` (9f item 4) remain, untouched.
 
+#### Density map attempt, abandoned (2026-08-07)
+
+Tried a study-area density map (`scripts/build_study_area_density_variant.R`,
+`R/fct_occurence_density.R`). Doesn't work: the Norwegian signal is so strong
+it washes out every other point on the map, so the plot just shows Norway and
+nothing else. Not worth fixing before submission. Might be worth another go
+post-submission with a log10 transform on the density scale, in case that
+recovers visibility of the weaker clusters.
+
 ------------------------------------------------------------------------
 
 ## 10. Deferred, deliberately

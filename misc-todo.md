@@ -8,6 +8,4 @@
 6. Colour nodes by unit type? 
 7. better grouping aesthetics, esp. for mussels
 8. I think we are going to have to accept loads of missing data at this stage
-9. Add year info to AEP
-10. Give AEPs title with scope
-11. Add a node time for outflow to AOPs
+11. Add a node type for outflow to AOPs

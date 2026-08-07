@@ -50,7 +50,7 @@ long measurements table. Everything downstream reads from that.
 | `data/clean/` | Split into subdirectories 2026-08-06, see 2.1.1 |
 | `_targets/` | Target store (`qs` format), gitignored |
 | `_site/`, `_freeze/`, `.quarto/` | Quarto build output and caches, gitignored |
-| `tests/testthat/` | One test file. Effectively unused. |
+| `tests/testthat/` | 29 test files against 49 in `R/`, as of 2026-08-07. No longer the "effectively unused" single file this once was. |
 
 ### 2.1.1 `data/clean/` is organised by authority, not by topic (2026-08-06)
 
@@ -232,8 +232,19 @@ Listed roughly by how much they will bite. I have **not** fixed any of these.
 > outlier factory and the 14 generated distributions notebooks are to be
 > **deleted**, not repaired. The rest of section 3 is deferred until after
 > submission (`PLAN.md` section 10).
+>
+> **Re-audited 2026-08-07** against the current tree: 3.1, 3.2, 3.3 and 3.6 are
+> all confirmed resolved and the detail below is now historical, kept for
+> context rather than as an open flaw. 3.4, 3.5 and 3.7 were spot-checked and
+> are still accurate. Package Imports (3.8) got a follow-up correction the same
+> day.
 
-### 3.1 The outlier factory is commented out of the pipeline
+### 3.1 The outlier factory is commented out of the pipeline — **resolved**
+
+No longer applicable: `outlier_targets_compartment`, `outlier_targets_biota`
+and `outlier_notebook_targets` are gone from `_targets.R` entirely, not just
+commented out, and no `docs/NBXX-Distributions-*.qmd` files remain in the
+tree. (Original text below, for context.)
 
 `_targets.R:1158-1160` and `:1262` have `outlier_targets_compartment`,
 `outlier_targets_biota`, and `outlier_notebook_targets` commented out of the
@@ -250,7 +261,14 @@ the repo right now.
 There are also **no `render_*` objects in the store at all**, so the Quarto
 render targets have not completed since the store was last built.
 
-### 3.2 Duplicated and stray files in `docs/`
+### 3.2 Duplicated and stray files in `docs/` — **resolved**
+
+`docs/NBXX-Distributions-Aquatic copy.qmd` and
+`docs/NBXX-Distributions-Aquatic-Sediment.rmarkdown` no longer exist in the
+tree. Both root `.nojekyll` and `docs/.nojekyll` were checked 2026-08-07: root
+`.nojekyll` is present (0 bytes, tracked); `docs/.nojekyll` is absent, but
+since the distributions notebooks it would have served are also gone, this no
+longer looks like an open question. (Original text below, for context.)
 
 - `docs/NBXX-Distributions-Aquatic copy.qmd` is **byte-identical** to
   `docs/NBXX-Distributions-Aquatic.qmd`, and both are committed.
@@ -260,7 +278,12 @@ render targets have not completed since the store was last built.
   **UNCERTAIN** whether that deletion was deliberate; it matters for GitHub
   Pages if that is a publishing route.
 
-### 3.3 The sidebar has fallen far behind the file tree
+### 3.3 The sidebar has fallen far behind the file tree — **resolved**
+
+`_quarto.yml`'s sidebar now lists only three entries (`index.qmd`,
+`docs/NBXX-Sample-Groups.qmd`, `docs/AP04-units.qmd`), consistent with the
+deliberately-minimal rendering regime in 2.2.1. The mismatch described below no
+longer exists. (Original text below, for context.)
 
 `_quarto.yml` lists NB01 to NB08, `NBXX-reparfjorden`, AP01 and AP02. Not
 listed, but present and rendering: all 14 `NBXX-Distributions-*`,
@@ -292,7 +315,11 @@ again (for example `NBXX-Distributions-Aquatic-Sediment.qmd` sets
 `lightbox: true` and `fig-column: screen-inset-shaded` locally). The intended
 end state is **UNCERTAIN** and worth deciding explicitly before touching it.
 
-### 3.6 Live bug in the new `NBXX-Sample-Groups.qmd`
+### 3.6 Live bug in the new `NBXX-Sample-Groups.qmd` — **resolved**
+
+Checked 2026-08-07: no `multimodal` column or casing mismatch remains anywhere
+in the file. Either fixed directly or superseded by a rewrite. (Original text
+below, for context.)
 
 Untracked, work in progress. The column is created as `` `multimodal (p)` ``
 (lowercase) at line 58 but referenced as `"Multimodal (p)"` (capitalised) in
@@ -321,16 +348,24 @@ Flagged in comments by Sam, carried here so they do not get lost:
 ### 3.8 Reproducibility and packaging
 
 - renv disabled (3.4 above), so the lockfile is decorative.
-- `DESCRIPTION` `Imports:` omits several packages `_targets.R` actually loads:
-  `qs2`, `crew`, `quarto`, `tarchetypes` is present but `pkgload` is not.
-  `Description:` is literally "A bit of a mess so far." and `License:` is still
-  the `use_mit_license()` placeholder.
-- `tests/testthat/` contains one file, `test-fct_imputation.R`, against 30
-  function files.
+- This is a pseudo-package: real enough to need `Imports:` kept honest, not a
+  real package otherwise. `Description:` is literally "A bit of a mess so far."
+  and `License:` is still the `use_mit_license()` placeholder, and that is fine
+  for now. **Updated 2026-08-07:** `qs2`, `crew`, `quarto`, `pkgload` were
+  checked and are all present in `Imports:`, contrary to what this section used
+  to say. The actual gap found by auditing every `pkg::` call in `R/*.R` and
+  `_targets.R` against `Imports:` was `ggimage` (used in
+  `R/fct_aep_edges.R:533` for the node-card image inset), which has been added.
+- ~~`tests/testthat/` contains one file, `test-fct_imputation.R`, against 30
+  function files.~~ Checked 2026-08-07: 29 test files exist against 49
+  function files in `R/`, so coverage is much healthier than this line
+  claimed. Left unstruck how current that ratio is; worth a proper coverage
+  check rather than a file count if it matters later.
 - Absolute Windows paths in both `_targets.yaml` files make the repo
   single-machine.
 - `references.bib` is 4.6 MB and `manifest.json` is 770 KB, both committed.
-- `.quarto/` holds ~190 orphaned `quarto-session-temp*` directories.
+- ~~`.quarto/` holds ~190 orphaned `quarto-session-temp*` directories.~~
+  Cleaned 2026-08-07 (197 dirs removed, gitignored so nothing to commit).
 
 ## 4. Where the project is going
 

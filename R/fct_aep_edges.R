@@ -394,6 +394,62 @@ aep_edge_styles <- function() {
   )
 }
 
+#' Quadratic Bezier Control Points for a Set of Edges
+#'
+#' One control point per edge, offset perpendicular from the chord midpoint,
+#' so the curve bends away from a straight line by `curvature` (as a fraction
+#' of the edge's own length). Expands each edge into three rows -- start,
+#' control point, end -- which is what `ggforce::geom_bezier()` needs: it
+#' infers the curve's order from how many points share a `group`, so three
+#' points draws a quadratic curve and, if this is ever extended to more
+#' control points per edge, the same function and the same call site would
+#' draw a genuine multi-point curve with no other change. That is the reason
+#' this exists as ggforce rather than `ggplot2::geom_curve()` (2026-08-05),
+#' which tops out at one control point.
+#'
+#' Sign convention matches the old `geom_curve(curvature = ...)`: rotating the
+#' edge direction 90 degrees the same way for every edge means every edge
+#' bends to the same relative side of its own start-to-end direction, so the
+#' diagram reads as one consistent style rather than a jumble of arbitrary
+#' bends.
+#'
+#' @param edges A clipped edges tibble with `x`, `y`, `xend`, `yend` (from
+#'   [aep_edge_coords()]) and `edge_id`.
+#' @param curvature Control-point offset as a fraction of edge length. `0` is
+#'   a straight line.
+#' @return A tibble with one row per point, `edge_id`, `.point` (1:3, start to
+#'   end) and `x`, `y`.
+#' @export
+aep_edge_bezier_points <- function(edges, curvature = 0.15) {
+  if (nrow(edges) == 0) {
+    return(tibble::tibble(
+      edge_id = character(0), .point = integer(0),
+      x = numeric(0), y = numeric(0)
+    ))
+  }
+
+  dx <- edges$xend - edges$x
+  dy <- edges$yend - edges$y
+  len <- sqrt(dx^2 + dy^2)
+
+  # Unit perpendicular, rotating (dx, dy) by +90 degrees. Zero-length edges
+  # (overlapping cards) are already dropped upstream by aep_edge_coords(), but
+  # guarded here too since dividing by len = 0 would otherwise produce NA
+  # control points and silently drop the curve.
+  perp_x <- ifelse(len == 0, 0, -dy / len)
+  perp_y <- ifelse(len == 0, 0, dx / len)
+
+  ctrl_x <- (edges$x + edges$xend) / 2 + perp_x * curvature * len
+  ctrl_y <- (edges$y + edges$yend) / 2 + perp_y * curvature * len
+
+  tibble::tibble(
+    edge_id = rep(edges$edge_id, each = 3),
+    .point = rep(1:3, times = nrow(edges)),
+    x = as.vector(rbind(edges$x, ctrl_x, edges$xend)),
+    y = as.vector(rbind(edges$y, ctrl_y, edges$yend))
+  )
+}
+
 #' Draw the AEP
 #'
 #' **Manual coordinates, never an automatic layout.** Vertical position carries
@@ -422,11 +478,22 @@ aep_edge_styles <- function() {
 #' @param card_aspect,device_aspect Card and device shape, passed to
 #'   [node_card_extent()] so arrows can be clipped to the cards. Defaults match
 #'   the `aep_diagram` target; pass them explicitly from anywhere else.
+#' @param curvature Bend applied to every edge, passed to
+#'   [aep_edge_bezier_points()]. `0` is a straight line.
+#' @param tile_size,tile_aspect Bare-node rectangle width (as a fraction of
+#'   panel width) and height-over-width, used only when `node_images` is not
+#'   supplied. Analogous to `image_size`/`card_aspect` for the real cards, and
+#'   deliberately reusing [node_card_extent()] to compute them: a bare node is
+#'   geometrically the same problem (a fixed-size rectangle at a data
+#'   coordinate whose extent has to be known for edge clipping), just filled
+#'   with `geom_tile()` instead of an image. See the note below on why this
+#'   replaced `geom_label()`.
 #' @return A ggplot.
 #' @export
 plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
                      groups = NULL, node_images = NULL, image_size = 0.16,
-                     card_aspect = 1.8 / 2.4, device_aspect = 12 / 8) {
+                     card_aspect = 1.8 / 2.4, device_aspect = 12 / 8,
+                     curvature = 0.15, tile_size = 0.14, tile_aspect = 0.45) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
     return(triage_empty_plot("AEP", "no nodes have x/y coordinates"))
@@ -434,8 +501,16 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
 
   styles <- aep_edge_styles()
 
-  # Clip to the card box only where cards are actually drawn. With text labels
-  # there is no box, and the fractional trim remains the honest approximation.
+  # A bare node used to be geom_label(): text with a background and a rounded
+  # border, sized however wide the label happened to be. Sam 2026-08-07:
+  # that isn't "any kind of geometrically explicit geometry", so an edge had
+  # nothing real to clip to and fell back to the old fractional trim (see
+  # aep_edge_coords()) -- not wrong exactly, but not the same box-clipping the
+  # real cards get, and not why an edge missed a corner was ever obvious from
+  # the bare diagram. A bare node is now geom_tile(): a real fixed-size
+  # rectangle, computed by the SAME node_card_extent() the card path uses
+  # (tile_size/tile_aspect standing in for image_size/card_aspect), so
+  # aep_edge_coords() clips to it exactly as it does a card.
   ext <- if (!is.null(node_images) && length(node_images) > 0) {
     node_card_extent(
       placed,
@@ -444,7 +519,12 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
       device_aspect = device_aspect
     )
   } else {
-    list(hw = NULL, hh = NULL)
+    node_card_extent(
+      placed,
+      image_size = tile_size,
+      card_aspect = tile_aspect,
+      device_aspect = device_aspect
+    )
   }
 
   e <- aep_edge_coords(edges, placed, hw = ext$hw, hh = ext$hh)
@@ -477,8 +557,14 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
 
   # Group boxes go on FIRST, so edges and nodes draw over them. They are
   # annotation and must never occlude content.
+  #
+  # ext$hw/ext$hh (computed above for arrow clipping) are passed through here
+  # too: the box padding otherwise has no idea how tall a card is, and a card
+  # taller than the default pad draws over both the box edge and its label.
   if (!is.null(groups) && nrow(groups) > 0) {
-    p <- p + aep_group_layers(aep_group_boxes(groups, placed))
+    p <- p + aep_group_layers(
+      aep_group_boxes(groups, placed, card_hw = ext$hw, card_hh = ext$hh)
+    )
   }
 
   if (nrow(e) > 0) {
@@ -487,11 +573,21 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
       if (nrow(sub) == 0) {
         next
       }
-      p <- p + ggplot2::geom_segment(
-        data = sub,
-        ggplot2::aes(
-          x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend
-        ),
+      # ggforce::geom_bezier(), not ggplot2::geom_curve(): same idea (bend
+      # every edge by `curvature` instead of drawing it straight), but built
+      # on real control points via aep_edge_bezier_points() rather than
+      # geom_curve()'s single implicit one. Sam 2026-08-07 asked for "elbow
+      # joints, splines, or some other kind of more pretty line", and then
+      # specifically for the ggforce route once told plain ggplot2 tops out at
+      # one control point. The payoff beyond decoration: several edges here
+      # cross at a shallow angle near the figure's centre, and a curve
+      # visibly separates two lines that would otherwise overlap along most of
+      # their length. All edges bend the same relative way (see
+      # aep_edge_bezier_points()), so the diagram reads as one consistent
+      # style.
+      p <- p + ggforce::geom_bezier(
+        data = aep_edge_bezier_points(sub, curvature = curvature),
+        ggplot2::aes(x = .data$x, y = .data$y, group = .data$edge_id),
         linetype = styles$linetype[[st]],
         colour = styles$colour[[st]],
         linewidth = styles$linewidth[[st]],
@@ -499,6 +595,16 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
         arrow = ggplot2::arrow(
           length = ggplot2::unit(6, "pt"), type = "closed"
         )
+        # No arrow.fill: 2026-08-07 briefly added one here on a hypothesis
+        # that the arrowhead was rendering unfilled/invisible, then reverted
+        # -- Sam confirmed arrowheads were actually visible before but
+        # overplotted by the node card images on some edges, which is the
+        # opposite problem, and my inspection of a rendered PNG at low
+        # res/crop was not reliable enough to have caught that. See
+        # node_card_extent()/aep_edge_coords() for the real mechanism: edges
+        # are clipped to a box around each card BEFORE the card image is
+        # drawn on top, so an undersized box is what lets an arrowhead land
+        # under the image rather than short of it.
       )
     }
 
@@ -508,6 +614,9 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
         p <- p + ggplot2::geom_label(
           data = lab,
           ggplot2::aes(
+            # The CHORD midpoint, not a point on the curve itself: at
+            # curvature = 0.15 the two are close enough that computing the
+            # true bezier midpoint is not worth the complexity it would add.
             x = (.data$x + .data$xend) / 2,
             y = (.data$y + .data$yend) / 2,
             label = paste0(

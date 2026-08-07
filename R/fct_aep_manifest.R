@@ -549,13 +549,26 @@ write_aep_node_cards <- function(
 #'   `plot_aep()` so arrow clipping matches the device actually used.
 #' @param image_size Card width as a fraction of panel width.
 #' @param card_aspect Compact card height over width, in inches.
-#' @return The written paths, one per AEP.
+#' @param bare Draw text labels instead of node card images? Sam 2026-08-07:
+#'   "let's draw a bare aep without images every render/targets runthrough,
+#'   diagnosing stuff when the images are already drawn is tricky." A card
+#'   image is opaque and draws last (see `plot_aep()`), so it can hide an
+#'   edge or a group-box label that is actually mispositioned underneath --
+#'   exactly what made the arrowhead-clipping bug hard to pin down by eye. The
+#'   bare figure shares every geometry decision with the real one (same
+#'   coordinates, same edge clipping math minus the card-box term, same group
+#'   boxes) so a problem visible there is a real geometry problem, not an
+#'   image-occlusion artefact, and a problem invisible there but present in
+#'   the real figure IS the occlusion.
+#' @return The written paths, one per AEP. Named `aep_<id>.png`, or
+#'   `aep_<id>_bare.png` when `bare = TRUE`.
 #' @export
 write_aep_diagrams <- function(
   scoped, edges, cards, groups = NULL, card_paths = character(0),
   dir = here_rel("figures"),
   width = 12, height = 8, dpi = 150,
-  image_size = 0.19, card_aspect = 1.8 / 2.4
+  image_size = 0.19, card_aspect = 1.8 / 2.4,
+  bare = FALSE
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -563,12 +576,15 @@ write_aep_diagrams <- function(
     # Cards for THIS AEP only. They live in figures/<style dir>/<aep_id>/, so
     # the directory name is the key; matching on basename alone would collide
     # across AEPs, since every AEP names its cards N001.png and so on.
-    mine <- card_paths[basename(dirname(card_paths)) == id]
-    images <- stats::setNames(
-      mine, tools::file_path_sans_ext(basename(mine))
-    )
+    images <- if (bare) {
+      NULL
+    } else {
+      mine <- card_paths[basename(dirname(card_paths)) == id]
+      stats::setNames(mine, tools::file_path_sans_ext(basename(mine)))
+    }
 
-    path <- file.path(dir, paste0("aep_", id, ".png"))
+    suffix <- if (bare) "_bare" else ""
+    path <- file.path(dir, paste0("aep_", id, suffix, ".png"))
     ggplot2::ggsave(
       filename = path,
       plot = plot_aep(

@@ -1643,6 +1643,31 @@ list(
     format = "file"
   ),
 
+  ### # The bare AEP diagram (no card images) ----
+  # Sam 2026-08-07: "let's draw a bare aep without images every render/targets
+  # runthrough, diagnosing stuff when the images are already drawn is tricky."
+  # Card images draw LAST in plot_aep() and are opaque, so they can hide a
+  # geometry problem (an edge clipped short, a group box or label
+  # mispositioned) underneath -- see write_aep_diagrams()'s `bare` doc for the
+  # full reasoning. This target does NOT depend on node_cards_compact, only on
+  # the nodes/edges/groups/cards tables, so it builds (and can be inspected)
+  # independently of whether the card images are even up to date.
+  tar_target(
+    name = aep_diagram_bare,
+    command = write_aep_diagrams(
+      scoped = aep_scoped,
+      edges = aep_edges,
+      cards = aep_node_cards,
+      groups = aep_node_groups,
+      dir = here_rel("figures"),
+      width = 12,
+      height = 8,
+      dpi = 150,
+      bare = TRUE
+    ),
+    format = "file"
+  ),
+
   ### # Source unit errors ----
   # Added 2026-08-05, after three separate 1000x faults surfaced in one day from
   # the same ug/g-is-mg/kg misconception. Two of them were ours and are fixed;

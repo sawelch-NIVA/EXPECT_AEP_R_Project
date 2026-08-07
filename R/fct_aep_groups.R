@@ -142,10 +142,22 @@ aep_group_depth <- function(groups) {
 #' @param nodes The nodes table, with `x` and `y`.
 #' @param pad Padding at depth 0, in coordinate units.
 #' @param inset How much padding is removed per level of nesting.
+#' @param card_hw,card_hh Half-width and half-height of a node card in data
+#'   units, from [node_card_extent()]. When supplied, the box is pulled out far
+#'   enough to clear the card itself, not just `pad`: a fixed `pad` smaller than
+#'   the card's own half-height leaves the box top, and the label above it,
+#'   drawn under the topmost card's image. `NULL` (the default) keeps the old
+#'   behaviour for callers with no cards to clear, e.g. a text-label diagram.
+#' @param label_margin Extra clearance above the box top reserved for the
+#'   label text itself, in coordinate units, on top of whatever clears the
+#'   card.
 #' @return A tibble of `group_key`, `label`, `xmin`, `xmax`, `ymin`, `ymax`,
 #'   `depth`.
 #' @export
-aep_group_boxes <- function(groups, nodes, pad = 0.42, inset = 0.13) {
+aep_group_boxes <- function(
+  groups, nodes, pad = 0.42, inset = 0.13,
+  card_hw = NULL, card_hh = NULL, label_margin = 0.06
+) {
   if (nrow(groups) == 0) {
     return(tibble::tibble(
       group_key = character(0), label = character(0),
@@ -157,6 +169,13 @@ aep_group_boxes <- function(groups, nodes, pad = 0.42, inset = 0.13) {
   depth <- aep_group_depth(groups)
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
 
+  # A fixed `pad` is a guess at the card's footprint; a real one is available
+  # once cards are actually being drawn, so use whichever is larger. Only the
+  # top gets the extra label_margin, since that is the only edge with text
+  # sitting on it.
+  pad_x <- if (!is.null(card_hw)) max(pad, card_hw) else pad
+  pad_y <- if (!is.null(card_hh)) max(pad, card_hh) else pad
+
   out <- lapply(seq_len(nrow(groups)), function(i) {
     members <- placed |> dplyr::filter(.data$node_id %in% groups$members[[i]])
     if (nrow(members) == 0) {
@@ -164,14 +183,15 @@ aep_group_boxes <- function(groups, nodes, pad = 0.42, inset = 0.13) {
     }
     # Padding shrinks with depth so nested boxes sit inside their parent. Floored
     # so a deeply nested group still clears its own nodes.
-    p <- max(pad - inset * depth[i], inset)
+    px <- max(pad_x - inset * depth[i], inset)
+    py <- max(pad_y - inset * depth[i], inset)
     tibble::tibble(
       group_key = groups$group_key[i],
       label = groups$label[i],
-      xmin = min(members$x) - p,
-      xmax = max(members$x) + p,
-      ymin = min(members$y) - p,
-      ymax = max(members$y) + p,
+      xmin = min(members$x) - px,
+      xmax = max(members$x) + px,
+      ymin = min(members$y) - py,
+      ymax = max(members$y) + py + label_margin,
       depth = depth[i]
     )
   })
@@ -186,9 +206,22 @@ aep_group_boxes <- function(groups, nodes, pad = 0.42, inset = 0.13) {
 
 #' Group Box Layers for the AEP
 #'
-#' Rounded rectangles with a label at the top left. Deliberately quiet: dashed
-#' grey outlines and no fill, so the boxes read as annotation and never compete
-#' with the nodes or the edges, which carry the actual content.
+#' Rounded rectangles with a label at the top left. Dashed grey outlines and no
+#' fill, so the boxes read as annotation and never compete with the nodes or
+#' the edges, which carry the actual content -- "quiet" rather than invisible;
+#' see the 2026-08-07 note below on getting that balance wrong first.
+#'
+#' **The label sits INSIDE the box, not floating above it.** Before
+#' 2026-08-07 it was drawn at `y = ymax` with `vjust = -0.5`, which pushes the
+#' rendered text upward past `ymax` in device space. ggplot2's automatic axis
+#' ranging only sees the DATA coordinate the text is anchored to, never the
+#' rendered glyph extent, so nothing told the panel to leave room for that
+#' overhang -- Sam saw "Cod" clipped to its top half, and a nested box gets the
+#' least headroom of all since its own padding is already smaller by
+#' construction (`aep_group_boxes()`'s depth-based inset). Anchoring inside the
+#' box's own rectangle instead means the label is guaranteed visible: the rect
+#' itself always contributes to the axis range because it's real plotted data,
+#' not an annotation-only offset.
 #'
 #' @param boxes Output of [aep_group_boxes()].
 #' @return A list of ggplot2 layers, possibly empty.
@@ -206,16 +239,24 @@ aep_group_layers <- function(boxes) {
       ),
       inherit.aes = FALSE,
       fill = NA,
-      colour = "grey60",
-      linetype = "22",
-      linewidth = 0.4
+      # Darker and a touch heavier than the 2026-08-05 original (grey60,
+      # linewidth 0.4), and a longer dash ("42" vs "22"): Sam 2026-08-07,
+      # "both the vertical and horizontal sides of the box are still (largely)
+      # invisible". Still meant to read as annotation, just no longer at a
+      # weight that disappears against white at figure scale.
+      colour = "grey35",
+      linetype = "42",
+      linewidth = 0.6
     ),
     ggplot2::geom_text(
       data = boxes,
       ggplot2::aes(x = .data$xmin, y = .data$ymax, label = .data$label),
       inherit.aes = FALSE,
-      hjust = -0.08,
-      vjust = -0.5,
+      # Small positive hjust/vjust, not negative: pulls the label IN from the
+      # top-left corner rather than pushing it out past the box. See the
+      # function doc above for why "outside the box" was the actual bug.
+      hjust = 0.05,
+      vjust = 1.4,
       size = 2.8,
       fontface = "italic",
       colour = "grey45"
