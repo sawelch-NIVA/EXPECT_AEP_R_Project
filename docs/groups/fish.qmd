@@ -240,7 +240,15 @@ G017: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
 G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
-**Verdict:** *(unwritten)*
+**Verdict:**
+
+- @fig-g018-a clearly shows two different constituent normal distributions.
+
+- these distributions are from different years @fig-g018-b but the same site type and campaign @fig-g018-c, @fig-g018-d
+
+- @fig-g018-e shows slightly different medians at different sampling hexbins
+
+- TODO: Are site and year correlate
 
 ## G028 Fish / Gadus morhua / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G028}
 

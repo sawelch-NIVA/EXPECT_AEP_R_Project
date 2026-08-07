@@ -12,81 +12,68 @@ Figures and counts are static, written at scaffold time rather than computed on 
 
 **Overview, `mg/kg (wet)`.** `n` = 10,904 measurements in 129 groups below this sub-compartment.
 
-::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol=1}
-
+::: {#fig-biota-biota-aquatic-mg-kg-wet layout-ncol="1"}
 ![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-wet-a}
 
 Biota / Biota, Aquatic / mg/kg (wet)
-
 :::
 
 **Overview, `mg/kg (dry)`.** `n` = 2,374 measurements in 66 groups below this sub-compartment.
 
-::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol=1}
-
+::: {#fig-biota-biota-aquatic-mg-kg-dry layout-ncol="1"}
 ![a) Distribution by species group](../../triage/Biota_Biota_Aquatic_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-aquatic-mg-kg-dry-a}
 
 Biota / Biota, Aquatic / mg/kg (dry)
-
 :::
 
 **Overview, `mg/kg (dry)`.** `n` = 376 measurements in 4 groups below this sub-compartment.
 
-::: {#fig-biota-biota-terrestrial-mg-kg-dry layout-ncol=1}
-
+::: {#fig-biota-biota-terrestrial-mg-kg-dry layout-ncol="1"}
 ![a) Distribution by species group](../../triage/Biota_Biota_Terrestrial_mg_kg_dry_a_overview_species_group.png){#fig-biota-biota-terrestrial-mg-kg-dry-a}
 
 Biota / Biota, Terrestrial / mg/kg (dry)
-
 :::
 
 **Overview, `mg/kg (wet)`.** `n` = 293 measurements in 12 groups below this sub-compartment.
 
-::: {#fig-biota-biota-terrestrial-mg-kg-wet layout-ncol=1}
-
+::: {#fig-biota-biota-terrestrial-mg-kg-wet layout-ncol="1"}
 ![a) Distribution by species group](../../triage/Biota_Biota_Terrestrial_mg_kg_wet_a_overview_species_group.png){#fig-biota-biota-terrestrial-mg-kg-wet-a}
 
 Biota / Biota, Terrestrial / mg/kg (wet)
-
 :::
 
 **By species, `mg/kg (wet)`.** `n` = 143 measurements across 2 species and 2 tissues.
 
 ::: {#fig-species-biota-aquatic-algae-mg-kg-wet}
-
 ![By species and tissue](../../triage/Biota_Aquatic_Algae_mg_kg_wet_a_species.png)
 
 Biota, Aquatic / Algae / mg/kg (wet)
-
 :::
 
 # Groups at a glance
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
-|---|---|---|---:|---:|---:|---:|---:|---:|---|
+|--------|--------|--------|-------:|-------:|-------:|-------:|-------:|-------:|--------|
 | [G033](#grp-G033) | Algae / Ascophyllum nodosum / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 70 | 4.34 | 1.19 | 1.25 | 2.99 | 1 |  |
 | [G036](#grp-G036) | Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 68 | 2.49 | 1.79 | 1.61 | 2.56 | 1 |  |
 | [G124](#grp-G124) | Algae / Fucus vesiculosus / Shoot tips / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 9 | 2.56 | 2.41 | 2.51 | 1.26 | 1 |  |
-| [G147](#grp-G147) | Algae / Ascophyllum nodosum / Plant tissue / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 5 | 2.14 |  2.1 |  1.9 | 1.72 | 1 |  |
-| [G188](#grp-G188) | Moss/Hornworts / Fontinalis antipyretica / Plant tissue / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 21.9 |   17 | 20.6 | 1.51 | 1 |  |
-| [G245](#grp-G245) | Moss/Hornworts / Hylocomium splendens / Plant tissue / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 1 |  3.4 |  3.4 |  3.4 |  | 1 |  |
+| [G147](#grp-G147) | Algae / Ascophyllum nodosum / Plant tissue / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 5 | 2.14 | 2.1 | 1.9 | 1.72 | 1 |  |
+| [G188](#grp-G188) | Moss/Hornworts / Fontinalis antipyretica / Plant tissue / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 21.9 | 17 | 20.6 | 1.51 | 1 |  |
+| [G245](#grp-G245) | Moss/Hornworts / Hylocomium splendens / Plant tissue / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 1 | 3.4 | 3.4 | 3.4 |  | 1 |  |
 
-: Groups in the Algae and Plants notebook. {#tbl-glance}
+: Groups in the Algae and Plants notebook.
 
 # Comparison
 
-*(Notes on how these groups relate: what should be lumped, split, or
-dropped, and why. This is the question the document exists to answer.)*
+*(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
 
 # Groups
-
 
 ## G033 Algae / Ascophyllum nodosum / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G033}
 
 `G033` **Egg wrack**. `n` = 70 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-::: {#fig-g033 layout-ncol=5}
-
+::: {#fig-g033 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g033-a group="G033"}
 
 ![Concentration by date](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g033-b group="G033"}
@@ -98,18 +85,15 @@ dropped, and why. This is the question the document exists to answer.)*
 ![Spatial distribution](../../triage/Algae_Ascophyllum_nodosum_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g033-e group="G033"}
 
 G033: Algae / Ascophyllum nodosum / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet)
-
 :::
 
 **Verdict:** *(unwritten)*
-
 
 ## G036 Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G036}
 
 `G036` **Bladder wrack**. `n` = 68 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-::: {#fig-g036 layout-ncol=5}
-
+::: {#fig-g036 layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g036-a group="G036"}
 
 ![Concentration by date](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g036-b group="G036"}
@@ -121,11 +105,9 @@ G033: Algae / Ascophyllum nodosum / Shoot tip / Coastal, fjord / Not reported / 
 ![Spatial distribution](../../triage/Algae_Fucus_vesiculosus_Shoot_tip_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g036-e group="G036"}
 
 G036: Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg/kg (wet)
-
 :::
 
 **Verdict:** *(unwritten)*
-
 
 ## G124 Algae / Fucus vesiculosus / Shoot tips / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G124}
 
@@ -135,7 +117,6 @@ G036: Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg
 
 **Verdict:** *(unwritten)*
 
-
 ## G147 Algae / Ascophyllum nodosum / Plant tissue / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G147}
 
 `G147` **Egg wrack**. `n` = 5 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
@@ -143,7 +124,6 @@ G036: Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg
 *No triage panels: this group is below the `min_n` cutoff. Add `G147` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
 **Verdict:** *(unwritten)*
-
 
 ## G188 Moss/Hornworts / Fontinalis antipyretica / Plant tissue / River, stream, canal / Not reported / mg/kg (wet) {#grp-G188}
 
@@ -153,7 +133,6 @@ G036: Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg
 
 **Verdict:** *(unwritten)*
 
-
 ## G245 Moss/Hornworts / Hylocomium splendens / Plant tissue / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G245}
 
 `G245` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
@@ -161,4 +140,3 @@ G036: Algae / Fucus vesiculosus / Shoot tip / Coastal, fjord / Not reported / mg
 *No triage panels: this group is below the `min_n` cutoff. Add `G245` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
 **Verdict:** *(unwritten)*
-

@@ -63,6 +63,28 @@ test_that("a nested box is inset inside its parent", {
   expect_lte(cod$ymax, coastal$ymax)
 })
 
+test_that("a nested box still clears its cards' own edges", {
+  # REGRESSION, 2026-08-08. Before this, depth's inset was subtracted from a
+  # single combined max(pad, card_hw) term, so a nested group (depth >= 1)
+  # could end up with LESS clearance than the card's own half-width -- Sam
+  # found this directly: the "Cod" box (nested inside "Coastal") was smaller
+  # than the node rectangles it was supposed to contain. The card clearance
+  # itself must never shrink with nesting; only the extra margin beyond it may.
+  card_hw <- 0.45
+  card_hh <- 0.3
+  boxes <- aep_group_boxes(
+    groups_fixture(), group_nodes(), card_hw = card_hw, card_hh = card_hh
+  )
+  cod <- boxes[boxes$group_key == "cod", ]
+  # Cod's members are N004, N005 at x = 3, 4 and y = 3, 4 (see group_nodes()),
+  # so the box must clear card_hw/card_hh beyond BOTH the leftmost (3) and
+  # rightmost (4) member on each axis.
+  expect_gte(3 - cod$xmin, card_hw)
+  expect_gte(cod$xmax - 4, card_hw)
+  expect_gte(3 - cod$ymin, card_hh)
+  expect_gte(cod$ymax - 4, card_hh)
+})
+
 test_that("shallow boxes are drawn first so nested ones sit on top", {
   boxes <- aep_group_boxes(groups_fixture(), group_nodes())
   expect_false(is.unsorted(boxes$depth))

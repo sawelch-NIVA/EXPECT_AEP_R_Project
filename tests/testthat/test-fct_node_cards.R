@@ -254,20 +254,21 @@ test_that("a suspect headline is marked on the card", {
 
 # ---- Compact style ------------------------------------------------------
 
-test_that("the compact strip drops the axis, not just its parent element", {
-  # REGRESSION. `axis.text = element_blank()` looks right and does nothing: the
-  # theme above sets axis.text.x explicitly, and ggplot2 resolves the more
-  # specific setting rather than inheriting the parent given later.
+test_that("the compact strip keeps a decade axis and blanks the real y axis", {
+  # UPDATED 2026-08-08 for the 2026-08-06 design this had fallen behind: group
+  # ids moved OFF the real y axis and onto compact_group_labels(), a geom_text
+  # drawn inside the panel (see node_group_strips()), so the real y axis text
+  # is now redundant and blanked. compact_value_scale() added a real x axis
+  # with decade breaks the same day ("violin plots need _some_ kind of x axis
+  # or they're fairly meaningless"), so x is the one that stays.
   d <- data_fixture()
   p <- node_group_strips(
     card_nodes(), members_fixture("G001"), d, ids_fixture(),
     limits = c(0.1, 100), style = "compact"
   )
   built <- ggplot2::ggplot_build(p)
-  expect_s3_class(built$plot$theme$axis.text.x, "element_blank")
-  # y is NOT blanked, since 2026-08-06: Sam asked to keep the group ids, which
-  # are how a reader gets from a strip back to the group it came from.
-  expect_false(inherits(built$plot$theme$axis.text.y, "element_blank"))
+  expect_false(inherits(built$plot$theme$axis.text.x, "element_blank"))
+  expect_s3_class(built$plot$theme$axis.text.y, "element_blank")
 })
 
 test_that("the full strip keeps its axis", {
@@ -329,6 +330,16 @@ test_that("the node title carries the id as well as the label", {
 test_that("the compact header outranks the headline number", {
   # Sam 2026-08-06: the name is the header and should be larger than the
   # geometric mean below it.
+  #
+  # UPDATED 2026-08-08: the old selector found the title by grepping for the
+  # node's own id (nodes$node_id[1]) in the drawn labels. That stopped working
+  # when the id was moved 2026-08-06 into its own small standalone corner
+  # marker (size 2.6), separate from the bold title text (size 4.5), which
+  # contains only the wrapped label and never the id -- so the old selector
+  # picked up the corner marker instead of the actual title, compared 2.6
+  # against the headline's 3.7, and failed even though the real title (4.5)
+  # genuinely is larger. The label itself (str_wrap()-ped, so match its first
+  # word rather than the full string) is now what identifies the title layer.
   d <- data_fixture()
   nodes <- card_nodes()
   cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
@@ -337,7 +348,8 @@ test_that("the compact header outranks the headline number", {
   layers <- do.call(rbind, lapply(built$data, function(x) {
     x[, c("label", "size"), drop = FALSE]
   }))
-  title_size <- layers$size[grepl(nodes$node_id[1], layers$label, fixed = TRUE)]
+  label_word <- strsplit(nodes$label[1], " ")[[1]][1]
+  title_size <- layers$size[grepl(label_word, layers$label, fixed = TRUE)]
   headline_size <- layers$size[grepl(cards$unit[1], layers$label, fixed = TRUE)]
 
   expect_length(title_size, 1)
@@ -361,14 +373,19 @@ test_that("the compact card keeps sample size and source count", {
   expect_false(grepl("rows = ", txt))
 })
 
-test_that("the compact strip keeps group ids but drops the value axis", {
-  # Sam 2026-08-06: still report the group number on the y axis. The decade
-  # labels go, the three-character group id stays.
+test_that("the compact strip keeps group ids inside the panel, not on the y axis", {
+  # UPDATED 2026-08-08, same fix as "the compact strip keeps a decade axis and
+  # blanks the real y axis" above: group ids moved OFF the real y axis onto
+  # compact_group_labels() on 2026-08-06, so the real y axis text is blanked
+  # and the decade x axis stays. This test checks the OTHER object plot_aep()
+  # code paths use (the ggplot object directly, not a built one), which is why
+  # it is a separate test from the ggplot_build() version above rather than a
+  # duplicate.
   d <- data_fixture()
   p <- node_group_strips(
     card_nodes(), members_fixture("G001"), d, ids_fixture(),
     limits = c(0.1, 100), style = "compact"
   )
-  expect_s3_class(p$theme$axis.text.x, "element_blank")
-  expect_false(inherits(p$theme$axis.text.y, "element_blank"))
+  expect_false(inherits(p$theme$axis.text.x, "element_blank"))
+  expect_s3_class(p$theme$axis.text.y, "element_blank")
 })

@@ -88,10 +88,13 @@ empty_aep_manifest <- function() {
 #' @param path Where the CSV lives.
 #' @return A tibble, one row per AEP.
 #' @export
-read_aep_manifest <- function(path = here_rel("data/clean/aep/aep_manifest.csv")) {
+read_aep_manifest <- function(
+  path = here_rel("data/clean/aep/aep_manifest.csv")
+) {
   if (!file.exists(path)) {
     stop(
-      "No AEP manifest at ", path,
+      "No AEP manifest at ",
+      path,
       ". Run scripts/scaffold_aep_manifest.R first."
     )
   }
@@ -132,14 +135,21 @@ read_aep_manifest <- function(path = here_rel("data/clean/aep/aep_manifest.csv")
   # An inverted bound empties an AEP silently, exactly as an inverted date bound
   # emptied a node. Same failure, same treatment.
   for (pair in list(
-    c("lat_min", "lat_max"), c("lon_min", "lon_max"), c("date_min", "date_max")
+    c("lat_min", "lat_max"),
+    c("lon_min", "lon_max"),
+    c("date_min", "date_max")
   )) {
     lo <- manifest[[pair[1]]]
     hi <- manifest[[pair[2]]]
     bad <- !is.na(lo) & !is.na(hi) & lo > hi
     if (any(bad)) {
       stop(
-        sum(bad), " AEP(s) have ", pair[1], " above ", pair[2], ": ",
+        sum(bad),
+        " AEP(s) have ",
+        pair[1],
+        " above ",
+        pair[2],
+        ": ",
         paste(sQuote(manifest$aep_id[bad]), collapse = ", ")
       )
     }
@@ -183,8 +193,10 @@ empty_aep_membership <- function() {
 #' @export
 aep_scoped_epeq_cols <- function() {
   c(
-    "evidence_score", "evidence_justification",
-    "quantification_score", "quantification_justification"
+    "evidence_score",
+    "evidence_justification",
+    "quantification_score",
+    "quantification_justification"
   )
 }
 
@@ -202,7 +214,8 @@ read_aep_membership <- function(
 ) {
   if (!file.exists(path)) {
     stop(
-      "No AEP membership file at ", path,
+      "No AEP membership file at ",
+      path,
       ". Run scripts/scaffold_aep_manifest.R first."
     )
   }
@@ -231,7 +244,10 @@ read_aep_membership <- function(
       bad <- !is.na(membership[[col]]) & is.na(num)
       if (any(bad)) {
         stop(
-          sum(bad), " membership row(s) have a non-numeric ", col, ": ",
+          sum(bad),
+          " membership row(s) have a non-numeric ",
+          col,
+          ": ",
           paste(sQuote(membership[[col]][bad]), collapse = ", ")
         )
       }
@@ -260,7 +276,10 @@ read_aep_membership <- function(
     unparseable <- !is.na(membership[[col]]) & is.na(v)
     if (any(unparseable)) {
       stop(
-        sum(unparseable), " membership row(s) have a non-numeric ", col, ": ",
+        sum(unparseable),
+        " membership row(s) have a non-numeric ",
+        col,
+        ": ",
         paste(sQuote(membership[[col]][unparseable]), collapse = ", ")
       )
     }
@@ -269,7 +288,9 @@ read_aep_membership <- function(
     bad <- !is.na(v) & !(v %in% 1:3)
     if (any(bad)) {
       stop(
-        sum(bad), " membership row(s) have an out-of-range ", col,
+        sum(bad),
+        " membership row(s) have an out-of-range ",
+        col,
         ": scores are 1, 2 or 3, or blank to inherit from the node."
       )
     }
@@ -306,7 +327,9 @@ read_aep_membership <- function(
     unknown <- setdiff(membership$node_id, nodes$node_id)
     if (length(unknown) > 0) {
       stop(
-        "AEP membership names ", length(unknown), " unknown node_id(s): ",
+        "AEP membership names ",
+        length(unknown),
+        " unknown node_id(s): ",
         paste(sQuote(utils::head(unknown, 5)), collapse = ", ")
       )
     }
@@ -315,7 +338,9 @@ read_aep_membership <- function(
     unknown <- setdiff(membership$aep_id, manifest$aep_id)
     if (length(unknown) > 0) {
       stop(
-        "AEP membership names ", length(unknown), " unknown aep_id(s): ",
+        "AEP membership names ",
+        length(unknown),
+        " unknown aep_id(s): ",
         paste(sQuote(utils::head(unknown, 5)), collapse = ", "),
         ". Add them to data/clean/aep/aep_manifest.csv."
       )
@@ -431,7 +456,8 @@ aep_scope_nodes <- function(nodes, membership, manifest, aep_id) {
 #' @export
 aep_scope_edges <- function(edges, scoped_nodes) {
   edges[
-    edges$from %in% scoped_nodes$node_id & edges$to %in% scoped_nodes$node_id, ,
+    edges$from %in% scoped_nodes$node_id & edges$to %in% scoped_nodes$node_id,
+    ,
     drop = FALSE
   ]
 }
@@ -451,7 +477,8 @@ aep_scope_groups <- function(groups, scoped_nodes) {
     return(groups)
   }
   groups$members <- lapply(
-    groups$members, function(m) intersect(m, scoped_nodes$node_id)
+    groups$members,
+    function(m) intersect(m, scoped_nodes$node_id)
   )
   groups[lengths(groups$members) >= 2, , drop = FALSE]
 }
@@ -516,25 +543,159 @@ aep_all_report_cards <- function(scoped, members, data, ids) {
 #' @return The written paths, across all AEPs.
 #' @export
 write_aep_node_cards <- function(
-  scoped, cards, members, data, ids,
+  scoped,
+  cards,
+  members,
+  data,
+  ids,
   thresholds = NULL,
   dir = here_rel("figures/node_cards"),
   limits = NULL,
   ...
 ) {
-  unlist(purrr::imap(scoped, function(nodes, id) {
-    write_node_cards(
-      nodes = nodes,
-      cards = cards[cards$aep_id %in% id, , drop = FALSE],
-      members = members,
-      data = data,
-      ids = ids,
-      thresholds = thresholds,
-      dir = file.path(dir, id),
-      limits = limits,
-      ...
-    )
-  }), use.names = FALSE)
+  unlist(
+    purrr::imap(scoped, function(nodes, id) {
+      write_node_cards(
+        nodes = nodes,
+        cards = cards[cards$aep_id %in% id, , drop = FALSE],
+        members = members,
+        data = data,
+        ids = ids,
+        thresholds = thresholds,
+        dir = file.path(dir, id),
+        limits = limits,
+        ...
+      )
+    }),
+    use.names = FALSE
+  )
+}
+
+#' Squeeze Compensation for a Diagram That May Carry a Locator Inset
+#'
+#' An AEP with a bounding box gets `+ inset + patchwork::plot_layout(widths =
+#' c(1, inset_width))` appended in [write_aep_diagrams()], which squeezes the
+#' diagram's own panel down to `1 / (1 + inset_width)` of the canvas width.
+#' `ggimage::geom_image()` sizes a card as a fraction of WHATEVER panel it
+#' actually lands in, so calling `plot_aep()` with the nominal canvas width
+#' before knowing an inset is coming undersizes every card on an inset AEP
+#' relative to a plain one -- which is exactly what Sam noticed 2026-08-08
+#' comparing A001 (no bounding box) against A002 (Repparfjorden, boxed):
+#' "AEPs 1 and 2 use different size rectangles."
+#'
+#' Pulled out as its own function, pure arithmetic with no plotting or file
+#' I/O, so the compensation itself can be tested directly rather than only by
+#' rendering and measuring pixels.
+#'
+#' @param draw_inset Will an inset actually be drawn for this AEP? (Already
+#'   resolved by the caller: has a bounding box AND a `bbox_map` was supplied.)
+#' @param width,height Nominal canvas size in inches.
+#' @param image_size Card width as a fraction of panel width, before
+#'   compensation.
+#' @param inset_width Width of the locator inset relative to the main panel.
+#' @return A list: `image_size` (compensated), `device_aspect` (the TRUE
+#'   effective width over height, for [plot_aep()]) and `effective_width`
+#'   (inches, for [aep_diagram_height()] -- computing that from `device_aspect
+#'   * height` again at the call site would just re-derive this number by a
+#'   different route).
+#' @export
+aep_diagram_squeeze <- function(
+  draw_inset, width, height, image_size, inset_width
+) {
+  squeeze <- if (isTRUE(draw_inset)) 1 + inset_width else 1
+  effective_width <- width / squeeze
+  list(
+    image_size = image_size * squeeze,
+    device_aspect = effective_width / height,
+    effective_width = effective_width
+  )
+}
+
+#' Canvas Height That Scales With Node Density
+#'
+#' A node card's PHYSICAL size (in inches) is fixed by `image_size` and the
+#' panel's WIDTH alone -- see the note at the top of [node_card_extent()]'s
+#' `hh` calculation: `ggimage::geom_image()` preserves the image's own aspect
+#' ratio regardless of device shape, so widening or narrowing the canvas
+#' HEIGHT never changes how big a card actually is. What it changes is how
+#' many data-y-units fit in that fixed physical height: a taller canvas packs
+#' more inches into the same y-range, i.e. more room between rows. That is the
+#' whole mechanism this function uses.
+#'
+#' Sam 2026-08-08, once the reindexed node set gave "10 or so organism nodes"
+#' stacked in one column at a fixed 12x8in canvas: "we can't especially afford
+#' to put them in a 1x10 column ... it may be time to start thinking about
+#' ggraph". Ruled out (see chat): vertical position is semantically meaningful
+#' here (CLAUDE.md, `plot_aep()`'s own header), so an automatic layout is off
+#' the table regardless of library. The actual two causes of the overlap were
+#' cheaper: canvas size was a constant regardless of node count, and this
+#' function fixes exactly that half, automatically, from the AEP's own layout.
+#' (Widening the canvas would NOT help the companion problem of several nodes
+#' sharing a column at close x-spacing -- `hw` has no such width dependency to
+#' exploit, since `image_size` is already a fraction of panel width by
+#' definition. That half stays a manual layout decision.)
+#'
+#' @param nodes The AEP's own scoped, placed nodes tibble.
+#' @param effective_width Inches, from [aep_diagram_squeeze()]'s
+#'   `effective_width` (i.e. already accounting for a locator inset, if any).
+#' @param image_size,card_aspect As elsewhere; use the SQUEEZE-COMPENSATED
+#'   `image_size` (`aep_diagram_squeeze()`'s own output), not the raw one.
+#' @param x_expand,y_expand As [plot_aep()]; keep these in sync with whatever
+#'   is actually passed to `plot_aep()` for the real render, since this
+#'   function has to predict the same `hh` `node_card_extent()` will.
+#' @param min_height Floor, inches. Never returns less than this.
+#' @param fill_fraction How much of the tightest row's vertical space a card
+#'   may occupy at most, leaving `1 - fill_fraction` as a visible gap between
+#'   adjacent rows. `0.6` errs toward "clearly separated" over "tightly
+#'   packed": the group boxes drawn behind everything add their own visual
+#'   weight, so rows sitting right on top of each other read as more crowded
+#'   than the same numeric gap does on a plain grid.
+#' @return Height in inches, `>= min_height`.
+#' @export
+aep_diagram_height <- function(
+  nodes, effective_width, image_size, card_aspect,
+  x_expand = 0.15, y_expand = 0.12,
+  min_height = 8, fill_fraction = 0.6
+) {
+  placed <- nodes[!is.na(nodes$x) & !is.na(nodes$y), , drop = FALSE]
+  if (nrow(placed) < 2) {
+    return(min_height)
+  }
+
+  # Measured WITHIN each x-column separately, not across the whole node set.
+  # Two nodes sharing a y but sitting in different columns (a source and an
+  # organism at the same row, say) do not compete for vertical space at all;
+  # only nodes sharing an x-column really do, and that is exactly what "10 or
+  # so organism nodes ... a 1x10 column" describes. Measuring globally would
+  # have inflated height for AEPs that are not actually crowded, just because
+  # some unrelated column happens to reuse a y value -- e.g. the very first
+  # AEP, whose source/medium/organism columns each independently use y = 0,
+  # 1, 2.
+  col_min_gaps <- vapply(split(placed$y, placed$x), function(yv) {
+    yv <- sort(unique(yv))
+    if (length(yv) < 2) {
+      return(Inf)
+    }
+    min(diff(yv))
+  }, numeric(1))
+  min_gap <- suppressWarnings(min(col_min_gaps))
+  if (!is.finite(min_gap) || min_gap <= 0) {
+    return(min_height)
+  }
+
+  # hh (half card height, data units) scales as 1/height_in -- see this
+  # function's own doc above -- so hh * height_in is invariant, and evaluating
+  # it once at min_height recovers that constant regardless of what min_height
+  # happened to be.
+  ext_ref <- node_card_extent(
+    placed,
+    image_size = image_size, card_aspect = card_aspect,
+    device_aspect = effective_width / min_height,
+    x_expand = x_expand, y_expand = y_expand
+  )
+  const <- ext_ref$hh * min_height
+  required <- 2 * const / (min_gap * fill_fraction)
+  max(min_height, required)
 }
 
 #' Draw and Write Every AEP
@@ -544,11 +705,22 @@ write_aep_node_cards <- function(
 #' @param cards Output of [aep_all_report_cards()].
 #' @param groups Output of [read_aep_node_groups()], or `NULL`.
 #' @param card_paths Compact card paths from [write_aep_node_cards()].
+#' @param manifest Output of [read_aep_manifest()], or `NULL`. Supplies the
+#'   title (`label`), subtitle (`scope_note`) and, where set, the bounding box
+#'   drawn on the locator inset. Without it, diagrams are untitled and
+#'   uninset, as before this was added.
+#' @param bbox_map The whole-study-area map used as the locator inset's base,
+#'   e.g. the `wgs84_map` target. Required for an inset to be drawn; an AEP
+#'   with a bounding box but no `bbox_map` supplied is titled but not inset.
 #' @param dir Where the figures go.
 #' @param width,height,dpi Canvas, passed on to [node_card_extent()] via
 #'   `plot_aep()` so arrow clipping matches the device actually used.
 #' @param image_size Card width as a fraction of panel width.
 #' @param card_aspect Compact card height over width, in inches.
+#' @param inset_width Width of the locator inset relative to the main panel
+#'   (e.g. `0.25` puts it at a quarter of the main diagram's width). Ignored
+#'   when `bare = TRUE`, or when an AEP has no bounding box, or when
+#'   `bbox_map` is not supplied.
 #' @param bare Draw text labels instead of node card images? Sam 2026-08-07:
 #'   "let's draw a bare aep without images every render/targets runthrough,
 #'   diagnosing stuff when the images are already drawn is tricky." A card
@@ -556,49 +728,119 @@ write_aep_node_cards <- function(
 #'   edge or a group-box label that is actually mispositioned underneath --
 #'   exactly what made the arrowhead-clipping bug hard to pin down by eye. The
 #'   bare figure shares every geometry decision with the real one (same
-#'   coordinates, same edge clipping math minus the card-box term, same group
-#'   boxes) so a problem visible there is a real geometry problem, not an
-#'   image-occlusion artefact, and a problem invisible there but present in
-#'   the real figure IS the occlusion.
+#'   coordinates, same edge clipping math, same group boxes) so a problem
+#'   visible there is a real geometry problem, not an image-occlusion
+#'   artefact, and a problem invisible there but present in the real figure IS
+#'   the occlusion. The title/subtitle/inset still apply in bare mode, since
+#'   none of those depend on the card images.
 #' @return The written paths, one per AEP. Named `aep_<id>.png`, or
 #'   `aep_<id>_bare.png` when `bare = TRUE`.
 #' @export
 write_aep_diagrams <- function(
-  scoped, edges, cards, groups = NULL, card_paths = character(0),
+  scoped,
+  edges,
+  cards,
+  groups = NULL,
+  card_paths = character(0),
+  manifest = NULL,
+  bbox_map = NULL,
   dir = here_rel("figures"),
-  width = 12, height = 8, dpi = 150,
-  image_size = 0.19, card_aspect = 1.8 / 2.4,
+  width = 12,
+  height = 8,
+  dpi = 150,
+  image_size = 0.19,
+  card_aspect = 1.8 / 2.4,
+  inset_width = 0.25,
   bare = FALSE
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
 
-  unlist(purrr::imap(scoped, function(nodes, id) {
-    # Cards for THIS AEP only. They live in figures/<style dir>/<aep_id>/, so
-    # the directory name is the key; matching on basename alone would collide
-    # across AEPs, since every AEP names its cards N001.png and so on.
-    images <- if (bare) {
-      NULL
-    } else {
-      mine <- card_paths[basename(dirname(card_paths)) == id]
-      stats::setNames(mine, tools::file_path_sans_ext(basename(mine)))
-    }
+  unlist(
+    purrr::imap(scoped, function(nodes, id) {
+      # Cards for THIS AEP only. They live in figures/<style dir>/<aep_id>/, so
+      # the directory name is the key; matching on basename alone would collide
+      # across AEPs, since every AEP names its cards N001.png and so on.
+      images <- if (bare) {
+        NULL
+      } else {
+        mine <- card_paths[basename(dirname(card_paths)) == id]
+        stats::setNames(mine, tools::file_path_sans_ext(basename(mine)))
+      }
 
-    suffix <- if (bare) "_bare" else ""
-    path <- file.path(dir, paste0("aep_", id, suffix, ".png"))
-    ggplot2::ggsave(
-      filename = path,
-      plot = plot_aep(
+      row <- if (!is.null(manifest)) {
+        manifest[manifest$aep_id %in% id, , drop = FALSE]
+      } else {
+        NULL
+      }
+      title <- if (!is.null(row) && nrow(row) == 1) row$label else id
+      subtitle <- if (!is.null(row) && nrow(row) == 1) row$scope_note else NULL
+
+      has_bbox <- !is.null(row) && nrow(row) == 1 && any(!is.na(row[
+        c("lat_min", "lat_max", "lon_min", "lon_max")
+      ]))
+      draw_inset <- has_bbox && !is.null(bbox_map)
+
+      # See aep_diagram_squeeze(): an inset AEP's diagram panel is squeezed
+      # narrower by the plot_layout() below, so plot_aep() needs to be told
+      # about that BEFORE it draws, or its cards (and bare tiles, and edge
+      # clipping) come out smaller than a non-inset AEP's for no reason a
+      # reader could see. Sam 2026-08-08: "AEPs 1 and 2 use different size
+      # rectangles. Why?" -- A002 (Repparfjorden) has a bounding box, A001
+      # doesn't, so only A002 was getting squeezed.
+      sq <- aep_diagram_squeeze(draw_inset, width, height, image_size, inset_width)
+
+      # See aep_diagram_height(): canvas height (not width -- a card's
+      # physical size doesn't depend on canvas width) scales up automatically
+      # once an AEP's nodes are packed too tightly in y for the fixed
+      # `height` to hold them without overlapping. `width`/`height` above are
+      # therefore a FLOOR, not the final canvas size.
+      this_height <- aep_diagram_height(
+        nodes, effective_width = sq$effective_width,
+        image_size = sq$image_size, card_aspect = card_aspect,
+        min_height = height
+      )
+      device_aspect <- sq$effective_width / this_height
+
+      diagram <- plot_aep(
         nodes,
         aep_scope_edges(edges, nodes),
         cards[cards$aep_id %in% id, , drop = FALSE],
         groups = aep_scope_groups(groups, nodes),
         node_images = images,
-        image_size = image_size,
+        image_size = sq$image_size,
         card_aspect = card_aspect,
-        device_aspect = width / height
-      ),
-      width = width, height = height, dpi = dpi, device = ragg::agg_png
-    )
-    path
-  }), use.names = FALSE)
+        device_aspect = device_aspect
+      )
+
+      combined <- if (draw_inset) {
+        inset <- aep_bbox_inset(
+          bbox_map, row$lat_min, row$lat_max, row$lon_min, row$lon_max
+        )
+        diagram + inset + patchwork::plot_layout(widths = c(1, inset_width))
+      } else {
+        diagram
+      }
+
+      combined <- combined + patchwork::plot_annotation(
+        title = title, subtitle = subtitle,
+        theme = ggplot2::theme(
+          plot.title = ggplot2::element_text(face = "bold", size = 14),
+          plot.subtitle = ggplot2::element_text(colour = "grey30")
+        )
+      )
+
+      suffix <- if (bare) "_bare" else ""
+      path <- file.path(dir, paste0("aep_", id, suffix, ".png"))
+      ggplot2::ggsave(
+        filename = path,
+        plot = combined,
+        width = width,
+        height = this_height,
+        dpi = dpi,
+        device = ragg::agg_png
+      )
+      path
+    }),
+    use.names = FALSE
+  )
 }

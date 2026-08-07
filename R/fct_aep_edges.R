@@ -240,13 +240,40 @@ validate_aep_edges <- function(edges, nodes) {
 #' (`device_aspect = 12 / 8`). **Change either in `_targets.R` and these defaults
 #' are wrong**, so both are passed explicitly from there.
 #'
-#' @param nodes The nodes table, with `x` and `y`.
+#' @param nodes The nodes table, with `x` and `y`. Ignored for an axis where
+#'   `x_range`/`y_range` is supplied.
 #' @param image_size Card width as a fraction of panel width, as passed to
 #'   `ggimage::geom_image()`.
 #' @param card_aspect Card height divided by card width, in inches.
 #' @param device_aspect Device width divided by device height, in inches.
 #' @param x_expand,y_expand The multiplicative axis expansions [plot_aep()] uses.
-#' @return A list with `hw` and `hh`, half-width and half-height in data units.
+#' @param x_range,y_range Raw (pre-expansion) `c(min, max)` to use instead of
+#'   `range(nodes$x)`/`range(nodes$y)`. `NULL` (the default) derives from
+#'   `nodes`, exactly as before this parameter existed.
+#'
+#'   **Added 2026-08-08, and it is the fix for a real bug, not a nicety.**
+#'   `nodes` alone is only correct if the FINAL rendered panel's data range
+#'   equals the node coordinate range expanded by `x_expand`/`y_expand` -- but
+#'   [plot_aep()] also draws group boxes (`aep_group_layers()`), which are
+#'   real plotted data (`geom_rect()`) that auto-expand the panel range
+#'   whenever a box's padding pushes past what `x_expand`/`y_expand` alone
+#'   would add. When that happens, `hw`/`hh` come out smaller than the panel
+#'   actually is. That is silent for `ggimage::geom_image()`, whose size is a
+#'   fraction of PANEL WIDTH and does not care what the data range is -- but
+#'   it directly undersizes anything sized in DATA units against the same
+#'   `hw`/`hh`, which by 2026-08-07 included `geom_tile()` for bare nodes and
+#'   the edge-clipping box both. Sam measured it directly: a bare node's
+#'   rendered rect came out 251x162px against the real card's 310x232px, and
+#'   162/251 = 0.645 while the real card's own aspect is 0.75 -- not just
+#'   smaller, skewed, because the node x-range and y-range differ in how much
+#'   the group box's padding exceeds `x_expand`/`y_expand`'s guess on each
+#'   axis. `plot_aep()` now computes the TRUE combined range (nodes + boxes)
+#'   and passes it in here, then pins the actual rendered panel to that exact
+#'   window with `coord_cartesian(expand = FALSE)`, so this function's
+#'   prediction and the real render can no longer disagree.
+#' @return A list with `hw`, `hh` (half-width/height in data units) and `rx`,
+#'   `ry` (the full expanded span each was computed from, for callers that
+#'   need to reconstruct the axis window, e.g. [plot_aep()]).
 #' @export
 node_card_extent <- function(
   nodes,
@@ -254,10 +281,12 @@ node_card_extent <- function(
   card_aspect = 1.8 / 2.4,
   device_aspect = 12 / 8,
   x_expand = 0.15,
-  y_expand = 0.12
+  y_expand = 0.12,
+  x_range = NULL,
+  y_range = NULL
 ) {
-  span <- function(v, mult) {
-    v <- v[is.finite(v)]
+  span <- function(v, mult, override = NULL) {
+    v <- if (!is.null(override)) override else v[is.finite(v)]
     d <- if (length(v) < 2) 0 else diff(range(v))
     # A single placed node, or all nodes in a line, leaves one axis with no
     # range. ggplot2 falls back to a unit window there, so this does too.
@@ -267,15 +296,17 @@ node_card_extent <- function(
     d * (1 + 2 * mult)
   }
 
-  rx <- span(nodes$x, x_expand)
-  ry <- span(nodes$y, y_expand)
+  rx <- span(nodes$x, x_expand, x_range)
+  ry <- span(nodes$y, y_expand, y_range)
 
   list(
     hw = image_size * rx / 2,
     # Width is a fraction of panel WIDTH, so converting to a fraction of panel
     # height picks up the device aspect. A card 0.19 of a 12in panel is 2.28in
     # wide and 1.71in tall, which over an 8in panel is 0.214 of the height.
-    hh = image_size * card_aspect * device_aspect * ry / 2
+    hh = image_size * card_aspect * device_aspect * ry / 2,
+    rx = rx,
+    ry = ry
   )
 }
 
@@ -394,6 +425,39 @@ aep_edge_styles <- function() {
   )
 }
 
+#' A Node Drawn as a Fixed-Size Rectangle Plus Label
+#'
+#' Used for bare nodes (no card image) and for a node with no card among
+#' otherwise-imaged siblings. Replaced `geom_label()` on 2026-08-07: a label's
+#' background is sized to its own text, not to a shared, known extent, so an
+#' edge had nothing geometrically real to clip to. A tile at `hw`/`hh` (from
+#' [node_card_extent()]) is the same fixed rectangle [aep_edge_coords()]
+#' already clips edges to when cards are drawn, so a bare diagram and the real
+#' one agree exactly on where a node's boundary is.
+#'
+#' @param data A nodes-like tibble carrying `x`, `y`, `.label`.
+#' @param hw,hh Half-width and half-height in data units, from
+#'   [node_card_extent()].
+#' @return A list of ggplot2 layers.
+#' @export
+aep_node_tile_layers <- function(data, hw, hh) {
+  list(
+    ggplot2::geom_tile(
+      data = data,
+      ggplot2::aes(x = .data$x, y = .data$y),
+      inherit.aes = FALSE,
+      width = 2 * hw, height = 2 * hh,
+      fill = "white", colour = "grey30", linewidth = 0.4
+    ),
+    ggplot2::geom_text(
+      data = data,
+      ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
+      inherit.aes = FALSE,
+      size = 2.8, lineheight = 0.95, colour = "grey15"
+    )
+  )
+}
+
 #' Quadratic Bezier Control Points for a Set of Edges
 #'
 #' One control point per edge, offset perpendicular from the chord midpoint,
@@ -482,18 +546,30 @@ aep_edge_bezier_points <- function(edges, curvature = 0.15) {
 #'   [aep_edge_bezier_points()]. `0` is a straight line.
 #' @param tile_size,tile_aspect Bare-node rectangle width (as a fraction of
 #'   panel width) and height-over-width, used only when `node_images` is not
-#'   supplied. Analogous to `image_size`/`card_aspect` for the real cards, and
-#'   deliberately reusing [node_card_extent()] to compute them: a bare node is
-#'   geometrically the same problem (a fixed-size rectangle at a data
-#'   coordinate whose extent has to be known for edge clipping), just filled
-#'   with `geom_tile()` instead of an image. See the note below on why this
-#'   replaced `geom_label()`.
+#'   supplied. `NULL` (the default for both) means "the same size as the real
+#'   card": falls back to `image_size`/`card_aspect`, so a bare diagram and the
+#'   real one draw identically sized boxes without having to keep two sets of
+#'   numbers in sync by hand. Sam 2026-08-07: the first cut of this used its
+#'   own guessed defaults (0.14, 0.45) instead, and they came out roughly half
+#'   the real card's size (the real compact card is 2.4in x 1.8in at 200dpi,
+#'   i.e. 480x360px, `card_aspect = 1.8/2.4 = 0.75`, not the 0.45 guessed
+#'   here) -- pass them explicitly only if a bare diagram should deliberately
+#'   look different from the real cards.
+#' @param x_expand,y_expand Axis margin as a fraction of the node coordinate
+#'   span, applied before any group box is taken into account. The single
+#'   source of truth for this: previously `node_card_extent()`'s defaults and
+#'   this function's own axis `expand=` were two separately hardcoded 0.15/
+#'   0.12 pairs that had to be kept in sync by hand and were the seed of the
+#'   2026-08-07/08 tile-sizing bug (see [node_card_extent()]'s `x_range`/
+#'   `y_range` doc). Now there is one value, threaded through everywhere it
+#'   matters.
 #' @return A ggplot.
 #' @export
 plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
                      groups = NULL, node_images = NULL, image_size = 0.16,
                      card_aspect = 1.8 / 2.4, device_aspect = 12 / 8,
-                     curvature = 0.15, tile_size = 0.14, tile_aspect = 0.45) {
+                     curvature = 0.15, tile_size = NULL, tile_aspect = NULL,
+                     x_expand = 0.15, y_expand = 0.12) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
     return(triage_empty_plot("AEP", "no nodes have x/y coordinates"))
@@ -501,31 +577,61 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
 
   styles <- aep_edge_styles()
 
-  # A bare node used to be geom_label(): text with a background and a rounded
-  # border, sized however wide the label happened to be. Sam 2026-08-07:
-  # that isn't "any kind of geometrically explicit geometry", so an edge had
-  # nothing real to clip to and fell back to the old fractional trim (see
-  # aep_edge_coords()) -- not wrong exactly, but not the same box-clipping the
-  # real cards get, and not why an edge missed a corner was ever obvious from
-  # the bare diagram. A bare node is now geom_tile(): a real fixed-size
-  # rectangle, computed by the SAME node_card_extent() the card path uses
-  # (tile_size/tile_aspect standing in for image_size/card_aspect), so
-  # aep_edge_coords() clips to it exactly as it does a card.
-  ext <- if (!is.null(node_images) && length(node_images) > 0) {
-    node_card_extent(
-      placed,
-      image_size = image_size,
-      card_aspect = card_aspect,
-      device_aspect = device_aspect
-    )
+  card_image_size <- if (!is.null(node_images) && length(node_images) > 0) {
+    image_size
   } else {
-    node_card_extent(
-      placed,
-      image_size = tile_size,
-      card_aspect = tile_aspect,
-      device_aspect = device_aspect
-    )
+    tile_size %||% image_size
   }
+  card_card_aspect <- if (!is.null(node_images) && length(node_images) > 0) {
+    card_aspect
+  } else {
+    tile_aspect %||% card_aspect
+  }
+
+  # PASS ONE: extent from the node coordinates alone, exactly as before
+  # 2026-08-08. Used only to size the group boxes' card-clearance term below --
+  # a box needs *some* estimate of card size to pad against, and a small error
+  # there just shifts a box's own padding slightly, which is cosmetic. It is
+  # NOT used for the real extent any more; see pass two.
+  ext0 <- node_card_extent(
+    placed,
+    image_size = card_image_size, card_aspect = card_card_aspect,
+    device_aspect = device_aspect, x_expand = x_expand, y_expand = y_expand
+  )
+
+  boxes <- if (!is.null(groups) && nrow(groups) > 0) {
+    aep_group_boxes(groups, placed, card_hw = ext0$hw, card_hh = ext0$hh)
+  } else {
+    NULL
+  }
+
+  # PASS TWO, and the actual fix: node_card_extent() predicts the panel's
+  # final data-unit span from the node coordinates plus a fixed margin, but
+  # the REAL rendered panel auto-expands to fit every plotted layer, including
+  # the group box rectangles just computed -- which routinely extend further
+  # than that prediction once a box's own padding is accounted for. Predicting
+  # from nodes alone therefore undersizes hw/hh. So: fold the boxes' extent
+  # into the range before computing the real hw/hh, then (below)
+  # coord_cartesian() PINS the rendered panel to this exact window, so the
+  # prediction and the render can never again disagree the way they did for
+  # Sam's 251x162 (predicted) vs 310x232 (real) card measurement.
+  x_all <- placed$x
+  y_all <- placed$y
+  if (!is.null(boxes) && nrow(boxes) > 0) {
+    x_all <- c(x_all, boxes$xmin, boxes$xmax)
+    y_all <- c(y_all, boxes$ymin, boxes$ymax)
+  }
+
+  ext <- node_card_extent(
+    placed,
+    image_size = card_image_size, card_aspect = card_card_aspect,
+    device_aspect = device_aspect, x_expand = x_expand, y_expand = y_expand,
+    x_range = range(x_all), y_range = range(y_all)
+  )
+  cx <- mean(range(x_all))
+  cy <- mean(range(y_all))
+  xlim <- cx + c(-1, 1) * (ext$rx / 2)
+  ylim <- cy + c(-1, 1) * (ext$ry / 2)
 
   e <- aep_edge_coords(edges, placed, hw = ext$hw, hh = ext$hh)
   if (nrow(e) > 0) {
@@ -556,15 +662,12 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
   p <- ggplot2::ggplot()
 
   # Group boxes go on FIRST, so edges and nodes draw over them. They are
-  # annotation and must never occlude content.
-  #
-  # ext$hw/ext$hh (computed above for arrow clipping) are passed through here
-  # too: the box padding otherwise has no idea how tall a card is, and a card
-  # taller than the default pad draws over both the box edge and its label.
-  if (!is.null(groups) && nrow(groups) > 0) {
-    p <- p + aep_group_layers(
-      aep_group_boxes(groups, placed, card_hw = ext$hw, card_hh = ext$hh)
-    )
+  # annotation and must never occlude content. `boxes` was already computed
+  # above (pass one) -- NOT recomputed against the pass-two `ext`, which would
+  # be circular, since pass two's whole purpose is to fold these same boxes'
+  # extent into the range.
+  if (!is.null(boxes) && nrow(boxes) > 0) {
+    p <- p + aep_group_layers(boxes)
   }
 
   if (nrow(e) > 0) {
@@ -631,7 +734,7 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
     }
   }
 
-  # NODES: cards where images were supplied, text labels otherwise. Not a mix,
+  # NODES: cards where images were supplied, tiles otherwise. Not a mix,
   # because two visual languages for the same object on one figure is worse than
   # either alone.
   p <- if (!is.null(node_images) && length(node_images) > 0) {
@@ -643,34 +746,41 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
       data = have,
       ggplot2::aes(x = .data$x, y = .data$y, image = .data$.image),
       size = image_size,
-      asp = 1.5
+      # asp corrects ggimage's render for the plot area's aspect ratio, and
+      # MUST track the real device shape -- it was hardcoded to 1.5 (the
+      # original fixed 12x8 canvas's ratio) until 2026-08-08, harmless while
+      # device_aspect was always 12/8 for every AEP but silently wrong the
+      # moment it wasn't: aep_diagram_height() makes device_aspect vary per
+      # AEP, and a stale asp against a real device_aspect of e.g. 0.28 (12in
+      # over a 42in-tall canvas) is what ggimage read as "compensate by
+      # blowing the image up roughly 5x", confirmed by measuring the actual
+      # rendered pixel footprint of a card at three different heights with
+      # asp fixed: it grew with height instead of staying constant. Sam:
+      # "now the node images don't scale with the plot, so they still
+      # overprint."
+      asp = device_aspect
     )
-    # A node with no card still has to appear, or the diagram silently loses it.
+    # A node with no card still has to appear, or the diagram silently loses
+    # it. Tiled at the CARD's own extent (ext, computed above from
+    # image_size/card_aspect), so it reads as the same size as its sibling
+    # cards rather than a different-shaped placeholder.
     if (nrow(missing_img) > 0) {
-      out <- out + ggplot2::geom_label(
-        data = missing_img,
-        ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
-        size = 2.8, lineheight = 0.95, fill = "white", colour = "grey15",
-        label.padding = ggplot2::unit(4, "pt")
-      )
+      out <- out + aep_node_tile_layers(missing_img, ext$hw, ext$hh)
     }
     out
   } else {
-    p + ggplot2::geom_label(
-      data = node_label,
-      ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
-      size = 2.8,
-      lineheight = 0.95,
-      fill = "white",
-      colour = "grey15",
-      label.padding = ggplot2::unit(4, "pt")
-    )
+    p + aep_node_tile_layers(node_label, ext$hw, ext$hh)
   }
 
   p +
-    # Expanded so labels at the edge of the coordinate range are not clipped.
-    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.15)) +
-    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.12)) +
+    # PINNED to xlim/ylim (computed above, pass two), not left to auto-range
+    # plus a mult expansion: that auto-range is exactly what silently drifted
+    # away from node_card_extent()'s prediction whenever a group box was
+    # bigger than the node range alone, which is the 2026-08-08 tile-sizing
+    # bug. coord_cartesian() windows the panel without dropping any
+    # out-of-window data (unlike setting `limits` on the scale itself), so
+    # this is safe even if a box or edge extends past the window.
+    ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE) +
     ggplot2::labs(
       x = NULL, y = NULL,
       caption = paste(
@@ -684,6 +794,46 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
         size = ggplot2::rel(0.75), colour = "grey40", hjust = 0
       )
     )
+}
+
+#' A Small Bounding-Box Locator Map
+#'
+#' For a geographically scoped AEP (a manifest row with any of `lat_min`,
+#' `lat_max`, `lon_min`, `lon_max` set), shows where its bounding box sits
+#' against the whole study area, so the diagram does not have to be read next
+#' to the manifest to know what "Repparfjorden" is scoped to.
+#'
+#' @param base_map The whole-study-area map, e.g. the `wgs84_map` target
+#'   ([create_study_area_map_wgs84()]).
+#' @param lat_min,lat_max,lon_min,lon_max Bounding box; `NA` on any side means
+#'   unbounded and is drawn against the full plotted extent of `base_map` on
+#'   that side.
+#' @return A ggplot, stripped down for use as a side panel.
+#' @export
+aep_bbox_inset <- function(base_map, lat_min, lat_max, lon_min, lon_max) {
+  built <- ggplot2::ggplot_build(base_map)
+  xr <- built$layout$panel_scales_x[[1]]$range$range
+  yr <- built$layout$panel_scales_y[[1]]$range$range
+
+  rect <- data.frame(
+    xmin = dplyr::coalesce(lon_min, xr[1]),
+    xmax = dplyr::coalesce(lon_max, xr[2]),
+    ymin = dplyr::coalesce(lat_min, yr[1]),
+    ymax = dplyr::coalesce(lat_max, yr[2])
+  )
+
+  base_map +
+    ggplot2::geom_rect(
+      data = rect,
+      ggplot2::aes(
+        xmin = .data$xmin, xmax = .data$xmax,
+        ymin = .data$ymin, ymax = .data$ymax
+      ),
+      inherit.aes = FALSE,
+      colour = "firebrick", fill = "firebrick", alpha = 0.25, linewidth = 0.6
+    ) +
+    ggplot2::guides(fill = "none", colour = "none", alpha = "none") +
+    ggplot2::theme(legend.position = "none")
 }
 
 #' Progress Through the Edge Time-Box

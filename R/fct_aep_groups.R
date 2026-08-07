@@ -140,14 +140,28 @@ aep_group_depth <- function(groups) {
 #'
 #' @param groups Output of [read_aep_node_groups()].
 #' @param nodes The nodes table, with `x` and `y`.
-#' @param pad Padding at depth 0, in coordinate units.
-#' @param inset How much padding is removed per level of nesting.
+#' @param pad Flat padding at depth 0, in coordinate units. Used only when
+#'   `card_hw`/`card_hh` are `NULL`, i.e. there is no real card size to clear
+#'   (a text-label diagram). Shrinks with nesting depth like `margin` does
+#'   below.
+#' @param inset How much `margin` (or, with no card context, `pad`) shrinks
+#'   per level of nesting.
 #' @param card_hw,card_hh Half-width and half-height of a node card in data
-#'   units, from [node_card_extent()]. When supplied, the box is pulled out far
-#'   enough to clear the card itself, not just `pad`: a fixed `pad` smaller than
-#'   the card's own half-height leaves the box top, and the label above it,
-#'   drawn under the topmost card's image. `NULL` (the default) keeps the old
-#'   behaviour for callers with no cards to clear, e.g. a text-label diagram.
+#'   units, from [node_card_extent()]. When supplied, the box's mandatory
+#'   clearance is exactly this -- see `margin` for why nothing is ever allowed
+#'   to shrink it below the card's own edge.
+#' @param margin Extra breathing room beyond the card's edge, in coordinate
+#'   units, at depth 0. Only this shrinks with nesting depth, floored at 0 --
+#'   the card clearance itself (`card_hw`/`card_hh`) never does.
+#'
+#'   **This split is the fix for a real bug, not a style choice.** Before
+#'   2026-08-08, nesting depth was subtracted from a single combined
+#'   `max(pad, card_hw)` term, so a nested group (any depth >= 1) could end up
+#'   with LESS clearance than the card's own half-width -- Sam found this
+#'   directly: the "Cod" box (nested inside "Coastal") was smaller than the
+#'   node rectangles it was supposed to contain. A box must always reach
+#'   `min(x) - card_hw` at minimum, full stop; nesting should only tighten the
+#'   space AROUND that, which is what `margin` alone now does.
 #' @param label_margin Extra clearance above the box top reserved for the
 #'   label text itself, in coordinate units, on top of whatever clears the
 #'   card.
@@ -156,7 +170,7 @@ aep_group_depth <- function(groups) {
 #' @export
 aep_group_boxes <- function(
   groups, nodes, pad = 0.42, inset = 0.13,
-  card_hw = NULL, card_hh = NULL, label_margin = 0.06
+  card_hw = NULL, card_hh = NULL, margin = 0.15, label_margin = 0.06
 ) {
   if (nrow(groups) == 0) {
     return(tibble::tibble(
@@ -169,22 +183,21 @@ aep_group_boxes <- function(
   depth <- aep_group_depth(groups)
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
 
-  # A fixed `pad` is a guess at the card's footprint; a real one is available
-  # once cards are actually being drawn, so use whichever is larger. Only the
-  # top gets the extra label_margin, since that is the only edge with text
-  # sitting on it.
-  pad_x <- if (!is.null(card_hw)) max(pad, card_hw) else pad
-  pad_y <- if (!is.null(card_hh)) max(pad, card_hh) else pad
-
   out <- lapply(seq_len(nrow(groups)), function(i) {
     members <- placed |> dplyr::filter(.data$node_id %in% groups$members[[i]])
     if (nrow(members) == 0) {
       return(NULL)
     }
-    # Padding shrinks with depth so nested boxes sit inside their parent. Floored
-    # so a deeply nested group still clears its own nodes.
-    px <- max(pad_x - inset * depth[i], inset)
-    py <- max(pad_y - inset * depth[i], inset)
+    # Extra breathing room shrinks with depth, floored at zero -- never
+    # negative, but free to vanish entirely for a deeply nested group.
+    m <- max(margin - inset * depth[i], 0)
+    # The card clearance itself (card_hw/card_hh) is added on top UNCHANGED
+    # regardless of depth: this is what guarantees the box can never end up
+    # smaller than the cards it contains. Only where there is no card context
+    # at all does this fall back to the old flat `pad`, itself still shrinking
+    # with depth as before (there is no card edge to protect in that case).
+    px <- if (!is.null(card_hw)) card_hw + m else max(pad - inset * depth[i], inset)
+    py <- if (!is.null(card_hh)) card_hh + m else max(pad - inset * depth[i], inset)
     tibble::tibble(
       group_key = groups$group_key[i],
       label = groups$label[i],

@@ -59,11 +59,26 @@ if (nrow(new_pairs) == 0) {
   message("No new node pairs to propose. ", nrow(existing), " edge(s) on file.")
 } else {
   labels <- setNames(placed$label, placed$node_id)
-  n_existing <- nrow(existing)
+
+  # BUG, fixed 2026-08-08: this used to be `n_existing <- nrow(existing)`,
+  # the ROW COUNT, and new ids were `n_existing + row_number()`. That is only
+  # correct if edge_id is dense with no gaps -- but edges get deleted
+  # sometimes (E009-E011 are gone from the file as of this fix), so the row
+  # count can undercount the highest id actually in use. The next run then
+  # proposes ids that collide with real, already-on-file edges further down
+  # the sequence: `Rscript scripts/scaffold_aep_edges.R` produced "Duplicate
+  # edge_id(s): E012, E013" and then "E015, E016, E017" on successive runs,
+  # and the second of those had ALREADY corrupted aep_edges.csv with
+  # duplicate rows before the validation error was raised (append-then-
+  # validate, not validate-then-append). Deriving the next id from the
+  # highest NUMBER actually in use, not the row count, cannot undercount
+  # regardless of how many gaps exist.
+  existing_nums <- suppressWarnings(as.integer(sub("^E", "", existing$edge_id)))
+  next_num <- if (all(is.na(existing_nums))) 0L else max(existing_nums, na.rm = TRUE)
 
   additions <- new_pairs |>
     mutate(
-      edge_id = sprintf("E%03d", n_existing + row_number()),
+      edge_id = sprintf("E%03d", next_num + row_number()),
       label = paste(labels[from], "to", labels[to]),
       # EVERY edge starts putative. Marking one empirical is a positive act
       # requiring a citation, not the default state. PLAN.md Phase 4.
@@ -85,6 +100,21 @@ if (nrow(new_pairs) == 0) {
     select(all_of(names(empty_aep_edges())))
 
   out <- bind_rows(existing, additions)
+
+  # Validate BEFORE writing, not after: this script used to write first and
+  # only catch a problem on the read-back-and-validate at the bottom of the
+  # file, by which point the bad batch was already on disk. That is exactly
+  # how the 2026-08-08 duplicate-id bug corrupted aep_edges.csv rather than
+  # just failing loudly.
+  dup <- out$edge_id[duplicated(out$edge_id)]
+  if (length(dup) > 0) {
+    stop(
+      "Refusing to write: generated edge_id(s) collide with existing ones: ",
+      paste(unique(dup), collapse = ", "),
+      ". This should not happen; check the id-generation logic above."
+    )
+  }
+
   readr::write_csv(out, path, na = "")
   message(
     "Proposed ", nrow(additions), " new edge(s); ",

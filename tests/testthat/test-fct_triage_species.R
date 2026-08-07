@@ -59,6 +59,91 @@ test_that("band labels are vectorised elementwise", {
   )
 })
 
+# ---- Group id prefixes --------------------------------------------------
+
+species_ids <- function(d = species_rows(), prefix = "G") {
+  key <- triage_group_cols()
+  ids <- unique(d[, key])
+  ids$group_id <- sprintf("%s%03d", prefix, seq_len(nrow(ids)))
+  ids
+}
+
+test_that("a band gains the id of the group beneath it", {
+  d <- add_species_tissue_col(species_rows())
+  out <- add_group_ids_to_bands(d, species_ids())
+  expect_setequal(
+    unique(out$.species_tissue),
+    c("G001 Gadus morhua (Liver)", "G002 Salmo trutta (Muscle)")
+  )
+})
+
+test_that("a band spanning several groups lists all of them, sorted", {
+  # Mytilus edulis (Total soft tissues) in mg/kg (wet) really does cover four
+  # groups, split only by geography. The ids are what a lump decision needs.
+  d <- species_rows()
+  d$SITE_GEOGRAPHIC_FEATURE <- rep_len(c("Coastal, fjord", "Lake"), nrow(d))
+  d$SAMPLE_SPECIES <- "Mytilus edulis"
+  d$SAMPLE_TISSUE <- "Total soft tissues"
+  ids <- species_ids(d)
+  # Reversed, so a result in ledger order rather than sorted order would fail.
+  ids$group_id <- rev(ids$group_id)
+
+  out <- add_group_ids_to_bands(add_species_tissue_col(d), ids)
+  expect_equal(
+    unique(out$.species_tissue),
+    "G001, G002 Mytilus edulis (Total soft tissues)"
+  )
+})
+
+test_that("the prefix does not merge or split bands", {
+  d <- add_species_tissue_col(species_rows())
+  out <- add_group_ids_to_bands(d, species_ids())
+  expect_equal(
+    dplyr::n_distinct(out$.species_tissue),
+    dplyr::n_distinct(d$.species_tissue)
+  )
+})
+
+test_that("a band absent from the ledger keeps its bare label", {
+  # Better a missing prefix than a mangled label such as "NA Gadus morhua".
+  d <- add_species_tissue_col(species_rows())
+  ids <- species_ids()[1, ]
+  out <- add_group_ids_to_bands(d, ids)
+  expect_setequal(
+    unique(out$.species_tissue),
+    c("G001 Gadus morhua (Liver)", "Salmo trutta (Muscle)")
+  )
+})
+
+test_that("no ledger leaves the labels alone", {
+  d <- add_species_tissue_col(species_rows())
+  expect_equal(add_group_ids_to_bands(d, NULL), d)
+  expect_equal(add_group_ids_to_bands(d, species_ids()[0, ]), d)
+})
+
+test_that("an empty node is handled without erroring", {
+  d <- add_species_tissue_col(species_rows()[0, ])
+  expect_equal(nrow(add_group_ids_to_bands(d, species_ids())), 0)
+})
+
+test_that("a duplicated ledger key is an error, not a silently grown table", {
+  d <- add_species_tissue_col(species_rows())
+  ids <- species_ids()
+  ids <- rbind(ids, ids[1, ])
+  ids$group_id[nrow(ids)] <- "G999"
+  expect_error(add_group_ids_to_bands(d, ids), "duplicate group keys")
+})
+
+test_that("NA group-key values still match the ledger", {
+  # left_join() matches NA to NA, and SAMPLE_TISSUE is legitimately missing for
+  # whole-organism rows. Matching on 'not NA' would leave those bands unlabelled.
+  d <- species_rows(species = c("A", "B"), tissue = NA)
+  ids <- species_ids(d)
+  out <- add_group_ids_to_bands(add_species_tissue_col(d), ids)
+  expect_false(any(startsWith(out$.species_tissue, "A")))
+  expect_true(all(grepl("^G[0-9]{3} ", out$.species_tissue)))
+})
+
 # ---- Node selection -----------------------------------------------------
 
 test_that("a species group with two bands qualifies", {
@@ -175,6 +260,31 @@ test_that("the by-species panel builds and writes", {
   expect_true(file.exists(path))
   expect_gt(file.size(path), 0)
   expect_match(path, "_a_species\\.png$")
+})
+
+test_that("the panel draws id-prefixed bands on the y axis", {
+  # ggplot_build() rather than inspecting the object: a discrete scale's labels
+  # are only resolved when the plot is built.
+  d <- species_rows()
+  nodes <- triage_species_nodes(d)
+  dir <- withr::local_tempdir()
+
+  path <- write_species_overview_for_node(
+    d, nodes[1, ],
+    dir = dir, ids = species_ids()
+  )
+  expect_true(file.exists(path))
+
+  p <- triage_plot_by_category(
+    add_group_ids_to_bands(
+      add_species_tissue_col(filter_to_species_node(d, nodes[1, ])),
+      species_ids()
+    ),
+    ".species_tissue", "t",
+    wrap_width = 24
+  )
+  labs <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$y$get_labels()
+  expect_true(all(grepl("^G[0-9]{3}", labs)))
 })
 
 test_that("the panel's categories are species/tissue bands", {

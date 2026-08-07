@@ -343,3 +343,114 @@ test_that("the split covers exactly the data-dependent half of EPEQ", {
   expect_true(all(aep_scoped_epeq_cols() %in% epeq_cols()))
   expect_equal(length(aep_scoped_epeq_cols()), 4)
 })
+
+# ---- Inset squeeze compensation (2026-08-08) -----------------------------
+
+test_that("no inset means no compensation at all", {
+  sq <- aep_diagram_squeeze(
+    draw_inset = FALSE, width = 12, height = 8,
+    image_size = 0.19, inset_width = 0.25
+  )
+  expect_equal(sq$image_size, 0.19)
+  expect_equal(sq$device_aspect, 12 / 8)
+})
+
+test_that("an inset inflates image_size and shrinks the effective width by the same factor", {
+  # REGRESSION. Sam 2026-08-08, comparing A001 (no bounding box) against A002
+  # (Repparfjorden, boxed): "AEPs 1 and 2 use different size rectangles. Why?"
+  # A002 alone got `+ inset + plot_layout(widths = c(1, inset_width))`, which
+  # squeezes its diagram panel to 1/(1+inset_width) of the canvas -- so
+  # ggimage::geom_image() (a fraction of PANEL width, whatever that panel
+  # turns out to be) drew smaller cards purely because that AEP happened to
+  # carry a bounding box. The fix inflates image_size by exactly the factor
+  # the panel will later be squeezed by, so the two cancel out.
+  sq <- aep_diagram_squeeze(
+    draw_inset = TRUE, width = 12, height = 8,
+    image_size = 0.19, inset_width = 0.25
+  )
+  expect_equal(sq$image_size, 0.19 * 1.25)
+  expect_equal(sq$device_aspect, (12 / 1.25) / 8)
+  # The actual point: apparent card width on the FINAL composed figure is
+  # image_size * panel_width, and panel_width is squeezed to width/1.25 by
+  # patchwork -- so the two should cancel to the ORIGINAL, uncompensated
+  # image_size * width, matching a non-inset AEP's apparent card size exactly.
+  apparent_width_inset <- sq$image_size * (12 / 1.25)
+  apparent_width_plain <- 0.19 * 12
+  expect_equal(apparent_width_inset, apparent_width_plain)
+})
+
+test_that("aep_diagram_squeeze also reports the effective width", {
+  # aep_diagram_height() needs this directly, added 2026-08-08 so it does not
+  # have to re-derive the squeeze factor by a second route.
+  plain <- aep_diagram_squeeze(FALSE, 12, 8, 0.19, 0.25)
+  expect_equal(plain$effective_width, 12)
+  inset <- aep_diagram_squeeze(TRUE, 12, 8, 0.19, 0.25)
+  expect_equal(inset$effective_width, 12 / 1.25)
+})
+
+# ---- aep_diagram_height() (2026-08-08) -----------------------------------
+
+test_that("a sparsely spaced column stays at the floor", {
+  # This is the shape the ORIGINAL working AEPs are in: a handful of nodes at
+  # unit y-spacing, which already rendered fine at height = 8. The fix must
+  # not inflate a diagram that was never actually crowded.
+  placed <- tibble::tibble(node_id = paste0("N", 1:3), x = 0, y = 0:2)
+  h <- aep_diagram_height(
+    placed, effective_width = 12, image_size = 0.19, card_aspect = 0.75,
+    min_height = 8
+  )
+  expect_equal(h, 8)
+})
+
+test_that("a densely packed column grows the canvas past the floor", {
+  # Sam 2026-08-08: "10 or so organism nodes ... we can't especially afford
+  # to put them in a 1x10 column" at a fixed 12x8in canvas.
+  placed <- tibble::tibble(node_id = paste0("N", 1:10), x = 0, y = 0:9)
+  h <- aep_diagram_height(
+    placed, effective_width = 12, image_size = 0.19, card_aspect = 0.75,
+    min_height = 8
+  )
+  # The formula itself, not a hardcoded number: hh is invariant under
+  # height_in * hh (see the function's own doc), so the required height is
+  # exactly 2 * (hh_at_min_height * min_height) / (min_gap * fill_fraction).
+  ext <- node_card_extent(
+    placed, image_size = 0.19, card_aspect = 0.75, device_aspect = 12 / 8,
+    x_expand = 0.15, y_expand = 0.12
+  )
+  expected <- 2 * (ext$hh * 8) / (1 * 0.6)
+  expect_equal(h, expected)
+  expect_gt(h, 8)
+})
+
+test_that("nodes in different columns sharing close y values do not inflate height", {
+  # REGRESSION. The first cut of this measured the y-gap across ALL nodes
+  # regardless of x, so two DIFFERENT columns landing at similar y -- which do
+  # not actually compete for space, since a card's extent is bounded in x --
+  # triggered the same inflation a genuinely crowded single column would.
+  placed <- tibble::tibble(node_id = c("N1", "N2"), x = c(0, 1), y = c(0, 0.1))
+  h <- aep_diagram_height(
+    placed, effective_width = 12, image_size = 0.19, card_aspect = 0.75,
+    min_height = 8
+  )
+  expect_equal(h, 8)
+})
+
+test_that("fewer than two placed nodes never grows the canvas", {
+  placed <- tibble::tibble(node_id = "N1", x = 0, y = 0)
+  h <- aep_diagram_height(
+    placed, effective_width = 12, image_size = 0.19, card_aspect = 0.75,
+    min_height = 8
+  )
+  expect_equal(h, 8)
+})
+
+test_that("unplaced nodes are ignored rather than treated as a huge gap", {
+  placed <- tibble::tibble(
+    node_id = c("N1", "N2", "N3"), x = c(0, 0, 0), y = c(0, NA, 1)
+  )
+  h <- aep_diagram_height(
+    placed, effective_width = 12, image_size = 0.19, card_aspect = 0.75,
+    min_height = 8
+  )
+  expect_equal(h, 8)
+})
