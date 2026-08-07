@@ -1,0 +1,552 @@
+---
+title: "Appendix 05 - Building an Aggregate Exposure Pathway"
+# Formatting lives in docs/_metadata.yml.
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+here::i_am("index.qmd")
+
+# Reads a target, or returns NULL if it has not been built yet.
+#
+# Everything on this page comes from a target rather than from readr, because a
+# chunk's tar_read() calls ARE the render target's dependency declaration
+# (CLAUDE.md 4.4.2). Reading the CSVs directly here would make the document
+# stop rebuilding when the CSVs change, which for a document that calls itself
+# the guide to those CSVs is the worst possible failure.
+#
+# CALL IT AS `tr(tar_read(aep_nodes))`, WITH THE TARGET NAME WRITTEN OUT.
+# tarchetypes finds dependencies by parsing the chunk source for literal
+# tar_read()/tar_load() calls, so `tar_read_raw(name)` with a variable is
+# invisible to it and would silently sever every dependency this page has. The
+# argument is lazy, so the error still happens inside tryCatch().
+#
+# The guard exists only so the page renders by hand against a partly built
+# store. Under tar_make() the targets are built first and it never fires. It
+# does not hide a validation error either: a read_aep_*() failure happens when
+# the TARGET builds, not here.
+tr <- function(expr) {
+  tryCatch(expr, error = function(e) NULL)
+}
+
+not_built <- function(name) {
+  flextable(tibble(
+    ` ` = paste0(
+      "`", name, "` is not in the target store yet. Run `tar_make()`."
+    )
+  )) |>
+    autofit()
+}
+
+# Justifications are paragraphs. They belong in the CSV and in the report cards,
+# not in an overview table that becomes unreadable the moment one is written.
+drop_justifications <- function(d) {
+  dplyr::select(d, -dplyr::ends_with("_justification"))
+}
+```
+
+How the AEP is assembled out of six hand-edited CSVs, in the order you have to do it, and what each file is allowed to say.
+
+The **single source of truth is `data/clean/aep/`**. Every table on this page is read from those files live through the pipeline's own readers, so nothing here can drift away from what the diagram actually shows. This document explains the files; it does not duplicate them.
+
+::: callout-important
+## The contract, in one line
+
+The pipeline **reads** these six files and **never writes** them. Scaffolding is a hand-run script that appends and never overwrites a judgement. If a rebuild could rewrite `aep_nodes.csv`, an afternoon of scoring would vanish into a `tar_make()`.
+:::
+
+# The shape of it
+
+Six files, plus two things they point at. The cardinality is the part worth holding in your head, because most of the mistakes in this layer are really mistakes about which file owns a fact.
+
+```{mermaid}
+%%| label: fig-aep-schema
+%%| fig-cap: "The AEP data model. `||` is exactly one, `o{` is zero or more. The two boxes at the top are not part of this layer: `group_ids` is the stable ledger from `data/clean/decisions/`, and the measurement rows are `literature_analysis_ready`."
+erDiagram
+    MEASUREMENTS }o--|| GROUP_IDS : "8 group-key columns"
+    GROUP_IDS ||--o{ AEP_NODE_MEMBERS : "group_id"
+    AEP_NODES ||--o{ AEP_NODE_MEMBERS : "node_id"
+    AEP_NODES ||--o{ AEP_MEMBERSHIP : "node_id"
+    AEP_MANIFEST ||--o{ AEP_MEMBERSHIP : "aep_id"
+    AEP_NODES ||--o{ AEP_EDGES : "from"
+    AEP_NODES ||--o{ AEP_EDGES : "to"
+    AEP_NODES }o--o{ AEP_NODE_GROUPS : "semicolon list"
+
+    GROUP_IDS {
+        string group_id PK "G001, stable"
+    }
+    AEP_NODES {
+        string node_id PK "N001"
+        string level "source medium organism tse"
+        string node_type "empirical or external"
+        number essentiality_score "claim about the world"
+        number plausibility_score "claim about the world"
+    }
+    AEP_NODE_MEMBERS {
+        string node_id FK
+        string group_id FK
+    }
+    AEP_MANIFEST {
+        string aep_id PK "A001"
+        number lat_min "scope, optional"
+        number lon_min "scope, optional"
+    }
+    AEP_MEMBERSHIP {
+        string aep_id FK
+        string node_id FK
+        number x "layout, per AEP"
+        number y "layout, per AEP"
+        number evidence_score "claim about the data"
+        number quantification_score "claim about the data"
+    }
+    AEP_EDGES {
+        string edge_id PK "E001"
+        string status "putative or empirical"
+    }
+    AEP_NODE_GROUPS {
+        string group_key PK
+        string node_ids "N001;N002;N003"
+    }
+```
+
+Read the cardinality as follows.
+
+| Relationship | Cardinality | What it means in practice |
+|------------------------|------------------------|------------------------|
+| node to member groups | 1 to 0..n | A node can pool several sampling groups. An `empirical` node wants at least one; an `external` node must have none. |
+| group to nodes | 1 to 0..n | The same group may feed more than one node. A group in no node is the coverage backlog. |
+| AEP to placed nodes | 1 to 0..n | Membership is what puts a node on a diagram. |
+| node to AEPs | 1 to 0..n | **One node, many AEPs.** A node defined and scored once appears in every AEP that wants it. |
+| node to edges | 1 to 0..n each end | `from` and `to` are separate relationships. |
+| node groups to nodes | n to n | Boxes nest and overlap, so membership is a semicolon list. |
+
+::: callout-note
+## There is no `aep_id` on `aep_edges.csv`, and that is deliberate
+
+An edge is a claim about two nodes, so which diagrams it belongs on **follows from** which diagrams they are on. `aep_scope_edges()` keeps an edge where both endpoints are in the AEP. A column would be a second place to say the same thing, and the two would disagree the first time a node was dropped from an AEP.
+
+The same holds for the grouping boxes: their member lists are intersected with the AEP's nodes, and a box left with fewer than two nodes is dropped, because a box around one node is not a grouping, it is a second border on a card.
+:::
+
+# What each file owns
+
+| File | One row per | Owns | Never holds |
+|------------------|------------------|------------------|------------------|
+| `aep_nodes.csv` | node | The scientific claim: label, level, type, data restrictions, **essentiality and plausibility** | Anything AEP-specific |
+| `aep_node_members.csv` | node x group | Which sampling groups a node pools | Restrictions, scores |
+| `aep_manifest.csv` | AEP | The AEP's identity and its **scope** (bounding box, dates) | Node facts |
+| `aep_membership.csv` | AEP x node | Which nodes are in it, **where they sit**, and **evidence and quantification** | Essentiality, plausibility |
+| `aep_edges.csv` | edge | A claimed flow between two nodes, and its status | `aep_id` |
+| `aep_node_groups.csv` | box | A labelled box drawn around a set of nodes | `aep_id` |
+
+# The idea that trips everyone up
+
+::: callout-important
+## A node is not a sampling group
+
+A **sampling group** is defined by `triage_group_cols()`: compartment, sub-compartment, species group, species, tissue, site type, site sub-type, unit. It is machine-derived and there are hundreds of them.
+
+An **AEP node** is whatever you decide to assess as one thing. It may be one group, several groups, or a restricted slice of either.
+:::
+
+The prototype in `docs/NBXX-algae.qmd` proves the distinction. Its marine node is a latitude cut plus a compartment plus a site type, and `LATITUDE >= 66.5` is not in the group key at all. So membership and restriction have to be separable, and they are:
+
+- **`aep_node_members.csv` says which groups.** Coarse, additive.
+- **The restriction columns on `aep_nodes.csv` say which rows of those groups.** A fixed set of named columns, not a filter expression in a cell.
+
+The restriction columns are a fixed vocabulary on purpose. Arbitrary R in a spreadsheet cannot be validated, fails at pipeline runtime rather than at read time, and cannot be reviewed in a diff. If you need something the columns cannot express, that is a case for a new column with a name, not for an escape hatch.
+
+# How a node becomes a number
+
+Membership first, then restrictions, in this order. Each step only ever removes rows.
+
+```{mermaid}
+%%| label: fig-node-resolution
+%%| fig-cap: "`resolve_node_data()`, in order. The AEP scope is intersected with the node's own restrictions before any of this runs, so the tighter of the two always wins."
+flowchart TD
+    A["literature_analysis_ready<br/><i>all measurement rows</i>"] --> B
+    B["member groups<br/><i>aep_node_members x group_ids</i>"] --> C
+    C["lat_min / lat_max<br/><i>node, tightened by AEP</i>"] --> D
+    D["lon_min / lon_max<br/><i>AEP scope only</i>"] --> E
+    E["date_min / date_max<br/><i>bare year is expanded</i>"] --> F
+    F["exclude_references<br/><i>semicolon list</i>"] --> G
+    G["exclude_campaigns<br/><i>semicolon list</i>"] --> H
+    H["drop_outliers<br/><i>within the node, not the group</i>"] --> I
+    I{"one unit?"}
+    I -->|"no"| J["<b>STOP</b><br/>node pools N units"]
+    I -->|"yes"| K["node_report_card()<br/><i>mean, geo mean, GSD, median, n</i>"]
+```
+
+Three things about that chain are worth stating explicitly.
+
+**Scope intersects, it does not replace.** An AEP's bounding box is combined with the node's own `lat_min` / `lat_max` by `pmax` and `pmin`, so the result is always the tighter of the two. A node restricted to the Arctic stays Arctic inside a national AEP.
+
+**`drop_outliers` is computed within the resolved node**, not inherited from the constituent sampling groups. A value that is an outlier against its own small group may be unremarkable against the pool, and the node is the thing being assessed.
+
+**Mixed units are refused, never averaged.** `mg/kg (dry)` against `mg/kg (wet)` is routinely a factor of four or five in biota, so a node pooling both would produce a mean that means nothing. Split the node, or restrict its membership to one unit.
+
+# Where the EPEQ scores live, and why they are split
+
+Four criteria, adapted from Peng et al. 2022, each scored 1 to 3 with a written justification beside it. They do **not** all live in the same file.
+
+| Criterion        | Lives on             | Because it is a claim about |
+|------------------|----------------------|-----------------------------|
+| `essentiality`   | `aep_nodes.csv`      | the **world**               |
+| `plausibility`   | `aep_nodes.csv`      | the **world**               |
+| `evidence`       | `aep_membership.csv` | the **dataset**             |
+| `quantification` | `aep_membership.csv` | the **dataset**             |
+
+"Copper is present in highly conserved metabolic systems" is as true in Repparfjorden as it is nationally, so it is written once. But N001 is 25,024 measurements from two references nationally and 806 from one inside the Repparfjorden box, and the same evidence score cannot honestly describe both.
+
+::: callout-tip
+## Blank inherits
+
+A blank `evidence_score` on a membership row falls back to the node's own. So an AEP that restricts nothing needs no score entries at all, and the national AEP's membership rows are mostly empty by design.
+:::
+
+This is **not** a general per-AEP override table. Two named criteria, split for a stated reason, is a model of the thing. An arbitrary exceptions table would reintroduce exactly the drift problem the single node pool exists to prevent.
+
+# Build order
+
+```{mermaid}
+%%| label: fig-build-order
+%%| fig-cap: "The order the six files have to be filled in. Solid arrows are hard dependencies: the validator refuses if you skip one."
+flowchart TD
+    G["<b>0</b> group_ids.csv<br/><i>allocate_group_ids.R</i>"] --> N
+    N["<b>1</b> aep_nodes.csv<br/><i>label, level, type</i>"] --> M
+    M["<b>2</b> aep_node_members.csv<br/><i>which groups</i>"] --> R
+    R["<b>3</b> restrictions on aep_nodes.csv<br/><i>lat, date, exclusions</i>"] --> S
+    S["<b>4</b> essentiality + plausibility<br/><i>on aep_nodes.csv</i>"] --> A
+    A["<b>5</b> aep_manifest.csv<br/><i>register the AEP, set scope</i>"] --> P
+    P["<b>6</b> aep_membership.csv<br/><i>x, y, evidence, quantification</i>"] --> E
+    E["<b>7</b> aep_edges.csv<br/><i>scaffold_aep_edges.R, then triage</i>"] --> B
+    B["<b>8</b> aep_node_groups.csv<br/><i>optional boxes</i>"] --> T
+    T["<b>9</b> tar_make()"]
+```
+
+## 0. Know which groups you are drawing on
+
+Every node member is a `group_id` from `data/clean/decisions/group_ids.csv`. If a group you want has no id yet, run `scripts/allocate_group_ids.R`. Ids are append-only and never reused.
+
+The complement is the **coverage backlog**: groups no node has claimed, ranked by measurements. It exists so that stopping is a visible choice rather than an oversight. See @tbl-coverage.
+
+## 1. Add the node
+
+One row in `aep_nodes.csv`.
+
+| Column | What goes in it |
+|------------------------------------|------------------------------------|
+| `node_id` | `N001`, `N002`, ... Unique, never reused |
+| `label` | Short. The grouping boxes carry the shared part, so do not write "Coastal" five times |
+| `level` | `source`, `medium`, `organism` or `tse`. Orders the pathway |
+| `node_type` | `empirical` (computed from groups) or `external` (typed in) |
+| `x`, `y` | Default layout. Overridden per AEP by `aep_membership.csv` |
+
+`level` is not decorative. It orders the pathway, `scaffold_aep_edges.R` derives the candidate edge grid from it, and vertical position on the diagram carries source-to-exposure meaning. That is also why layout is manual: an automatic graph layout optimising for edge crossings would destroy the one thing the y axis is for.
+
+## 2. Give it members
+
+One row per node/group pair in `aep_node_members.csv`. Just `node_id`, `group_id`, `notes`.
+
+An `external` node gets none. Its magnitude was assessed elsewhere (a national emissions total, a REACH tonnage) and is typed into `external_value`, `external_unit`, `external_sd`, `external_n`.
+
+::: callout-warning
+## Filling `external_*` on an `empirical` node is a hard stop
+
+Not a warning, and not silently ignored. An empirical node's magnitude is computed from its member groups, so a number typed into those columns is never read: the node would report a value the file does not contain, and the file would show a value the node does not use. Either clear them or change `node_type`.
+:::
+
+## 3. Restrict it, if it needs restricting
+
+All optional, all on `aep_nodes.csv`, all combining with AND.
+
+| Column | Selects on | Note |
+|------------------------|------------------------|------------------------|
+| `lat_min`, `lat_max` | `LATITUDE` | The Arctic Circle is `66.5` |
+| `date_min`, `date_max` | `SAMPLING_DATE` | A bare year is accepted and expanded |
+| `exclude_references` | `REFERENCE_ID` | Semicolon separated |
+| `exclude_campaigns` | `CAMPAIGN_NAME_SHORT` | Semicolon separated, because campaign names contain commas |
+| `drop_outliers` | `TRUE` / `FALSE` | Tukey and robust z, both, within the node |
+
+::: callout-important
+## A bare year is expanded to the inclusive end of its interval
+
+`date_min = 2010` is `2010-01-01`; `date_max = 2020` is `2020-12-31`. So those two mean the eleven whole years you would expect.
+
+This exists because the alternative **silently emptied every node**. Typing `1900` and `2100`, which is the obvious thing to type, had `readr` parse them as numbers; comparing a `Date` against `2100` coerces the date to days since 1970, so the bound meant "before mid-1975" and every node resolved to zero rows with no error at all.
+:::
+
+A stale exclusion **warns**. If a name in `exclude_campaigns` matches nothing, you are told, because the node otherwise still resolves, still produces a mean, and quietly contains the rows you believed you had removed. It warns rather than aborts because a legitimately empty match is normal while a node is being built up.
+
+::: callout-note
+## Exclusion, not outlier rejection, for a provenance problem
+
+`drop_outliers` cannot reach a mode that is 45% of the data, and should not be asked to. Twenty of the 44 *G. morhua* muscle rows carry liver-like concentrations, isolated to two campaigns. That is a tissue-labelling fault, not a statistical one. Exclude the affected rows with a documented reason and score what survives. Averaging over rows you believe are mislabelled and calling the result low-quality evidence gives a wrong number wearing an honest label.
+:::
+
+## 4. Score essentiality and plausibility
+
+On `aep_nodes.csv`, 1 to 3, each with a written justification in the adjacent column. A 0 or a 4 is a typo and stops the build, because a typo that survives into a figure is indistinguishable from a judgement.
+
+Blank is legitimate and means "not assessed". The report card renders an unscored badge grey, deliberately distinct from the colour for a score of 1.
+
+## 5. Register the AEP
+
+One row in `aep_manifest.csv`. `aep_id`, `label`, `scope_note`, then the scope: `lat_min`, `lat_max`, `lon_min`, `lon_max`, `date_min`, `date_max`. Every scope column is optional, and all blank means no restriction, which is what the national AEP wants.
+
+::: callout-warning
+## Scope is a bounding box, not a latitude band
+
+Measured, not assumed. 70 to 71 degrees north with no longitude bound is 3,371 measurements from four references spanning the whole top of Norway. The box in `NBXX-reparfjorden.qmd`, 23 to 25 east as well, is 1,197 measurements that are actually near Repparfjorden. Those two extra columns are the difference between a Repparfjorden AEP and a northern-Norway one.
+:::
+
+Note that `lon_min` / `lon_max` exist **only** at AEP level. Nodes carry latitude bounds but not longitude bounds.
+
+## 6. Place the nodes in it
+
+One row per node in `aep_membership.csv`: `aep_id`, `node_id`, `x`, `y`, then `evidence_score` / `quantification_score` and their justifications.
+
+**Membership is what puts a node on a diagram.** A node absent from every membership row is defined and scored but never drawn, which is a legitimate state while you are building up.
+
+`x` and `y` here override the defaults on `aep_nodes.csv`. A position is a property of a node in a particular diagram, not of the node.
+
+## 7. Propose the edges, then triage them
+
+``` bash
+Rscript scripts/scaffold_aep_edges.R
+```
+
+This proposes every **downward** flow between placed nodes, all defaulting to `putative`, and appends only pairs not already in the file. It never removes or reverses anything. Upward flows are real (biota returning copper to sediment) but are a judgement to make deliberately rather than to find pre-typed.
+
+The proposal is deliberately over-generous: the time-box works by having the candidate list in front of you and crossing edges off.
+
+::: callout-important
+## Every edge starts `putative`, and that is not a failure state
+
+Marking one `empirical` is a positive act requiring a citation in `evidence_justification`. `putative` edges are drawn differently on the diagram, and that is what makes stopping defensible: sparse edges are a finding, provided empirically supported edges are visually distinguished from putative ones. A diagram that quietly implies completeness is the failure mode. One that marks its own gaps is a contribution.
+:::
+
+The edge validator **warns** rather than stops, because a half-built edge layer is the normal state. It will tell you about: an `empirical` edge with no justification, a `putative` edge carrying a magnitude (a contradiction, since putative means the flow is not evidenced here), a magnitude with no unit, and nodes with no edges at all.
+
+## 8. Box things up, if the labels are repeating themselves
+
+`aep_node_groups.csv`, one row per box: `group_key`, `label`, `node_ids` as a semicolon list, `notes`.
+
+Boxes nest and may overlap, which is why membership is a list rather than a column on the node. `N004` can be in both `coastal` and `cod`. Nesting depth is derived from containment rather than declared, so it cannot drift out of step with the member lists.
+
+A label repeating "Coastal" five times is a shared property with nowhere to live. Give it a box and the labels shorten themselves.
+
+## 9. Rebuild
+
+``` bash
+Rscript -e "targets::tar_make()"
+```
+
+Every one of these files is a `format = "file"` target, so editing one invalidates the node cards, the compact cards and the diagram. Outputs land in `figures/aep_<aep_id>.png`, with per-node cards under `figures/node_cards/<aep_id>/` and the diagram-sized versions under `figures/node_cards_compact/<aep_id>/`.
+
+Review the diff before you rebuild: `git diff data/clean/aep/`.
+
+# Current state
+
+Everything below is read live from the files.
+
+```{r}
+#| label: tbl-manifest
+#| tbl-cap: "`aep_manifest.csv`. Blank scope columns mean no restriction."
+
+m <- tr(tar_read(aep_manifest))
+if (is.null(m)) {
+  not_built("aep_manifest")
+} else {
+  m |>
+    select(any_of(c(
+      "aep_id", "label", "lat_min", "lat_max",
+      "lon_min", "lon_max", "date_min", "date_max"
+    ))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-nodes
+#| tbl-cap: "`aep_nodes.csv`, without the justification columns. `E` and `P` are the two node-level EPEQ scores; blank means not assessed."
+
+n <- tr(tar_read(aep_nodes))
+if (is.null(n)) {
+  not_built("aep_nodes")
+} else {
+  n |>
+    drop_justifications() |>
+    select(any_of(c(
+      "node_id", "label", "level", "node_type",
+      "lat_min", "lat_max", "date_min", "date_max",
+      "exclude_campaigns", "drop_outliers",
+      "essentiality_score", "plausibility_score"
+    ))) |>
+    rename(any_of(c(E = "essentiality_score", P = "plausibility_score"))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-members
+#| tbl-cap: "`aep_node_members.csv`. Which sampling groups each node pools."
+
+mem <- tr(tar_read(aep_node_members))
+if (is.null(mem)) {
+  not_built("aep_node_members")
+} else {
+  mem |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-membership
+#| tbl-cap: "`aep_membership.csv`. Placement and the two data-level EPEQ scores, per AEP. Blank scores inherit from the node."
+
+ms <- tr(tar_read(aep_membership))
+if (is.null(ms)) {
+  not_built("aep_membership")
+} else {
+  ms |>
+    drop_justifications() |>
+    select(any_of(c(
+      "aep_id", "node_id", "x", "y",
+      "evidence_score", "quantification_score"
+    ))) |>
+    rename(any_of(c(E = "evidence_score", Q = "quantification_score"))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-edges
+#| tbl-cap: "`aep_edges.csv`. An edge appears on an AEP where both of its endpoints do."
+
+e <- tr(tar_read(aep_edges))
+if (is.null(e)) {
+  not_built("aep_edges")
+} else {
+  e |>
+    drop_justifications() |>
+    select(any_of(c(
+      "edge_id", "from", "to", "label", "status",
+      "magnitude", "magnitude_unit"
+    ))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-node-groups
+#| tbl-cap: "`aep_node_groups.csv`. Boxes drawn around sets of nodes."
+
+g <- tr(tar_read(aep_node_groups))
+if (is.null(g)) {
+  not_built("aep_node_groups")
+} else {
+  g |>
+    select(any_of(c("group_key", "label", "node_ids", "notes"))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-cards
+#| tbl-cap: "The resolved node report cards, one row per node per AEP. `n` counts measurements (`sum(MEASURED_N)`); `n_rows` counts rows. The centre is weighted and the spread is not: see `?node_statistic_weighting`."
+
+cards <- tr(tar_read(aep_node_cards))
+if (is.null(cards)) {
+  not_built("aep_node_cards")
+} else {
+  cards |>
+    select(any_of(c(
+      "aep_id", "node_id", "label", "node_type", "unit",
+      "n", "n_rows", "n_sources", "geo_mean", "gsd", "median"
+    ))) |>
+    flextable() |>
+    colformat_double(digits = 3) |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-coverage
+#| tbl-cap: "The coverage backlog: sampling groups no node has claimed, ranked by measurements. This is the record that makes stopping a choice rather than an oversight."
+
+cov <- tr(tar_read(aep_node_coverage))
+if (is.null(cov)) {
+  not_built("aep_node_coverage")
+} else {
+  cov |>
+    head(25) |>
+    flextable() |>
+    autofit()
+}
+```
+
+# When the build refuses
+
+The node, membership and manifest readers **stop**. The cross-file completeness checks **warn**, because a half-built node layer is the normal state while the assessment is in progress and the pipeline still has to run.
+
+## Errors
+
+| Message | What happened | What to do |
+|------------------------|------------------------|------------------------|
+| `Duplicate node_id(s)` | Two rows claim the same `N0xx` | Ids are never reused. Allocate a new one |
+| `Unrecognised level(s)` | Typo in `level` | One of `source`, `medium`, `organism`, `tse` |
+| `Unrecognised node_type(s)` | Typo in `node_type` | `empirical` or `external` |
+| `empirical node(s) have external_* values set` | A magnitude typed onto a computed node | Clear the columns, or change `node_type` |
+| `out-of-range <criterion>_score` | A 0 or a 4 | Scores are 1, 2, 3, or blank |
+| `node(s) have date_min after date_max` | Inverted bound | Swap them |
+| `Membership names N unknown node_id(s)` | A member points at a node that does not exist | Check for a typo, or add the node first |
+| `Membership names N unknown group_id(s)` | A member points at a group with no id | Run `scripts/allocate_group_ids.R` |
+| `Duplicate membership row(s)` | The same node/group pair twice | Delete one |
+| `pools N units` | A node's groups span `mg/kg (dry)` and `mg/kg (wet)` | Split the node, or restrict membership to one unit |
+| `AEP membership names N unknown aep_id(s)` | A membership row names an AEP not in the manifest | Add it to `aep_manifest.csv` |
+| `Duplicate aep_id(s)` | Two manifest rows | Ids are unique |
+| `Edge(s) from a node to itself` | `from` equals `to` | Delete the row |
+| `is <class>, not a Date` | A date bound bypassed `read_aep_nodes()` | Read the file with the reader, which accepts a bare year |
+
+## Warnings
+
+| Message | What it means |
+|------------------------------------|------------------------------------|
+| `empirical node(s) have no members` | The node computes from nothing and will resolve empty |
+| `empirical node(s) resolve to no data` | Members exist but a restriction removed everything. Check the restriction columns, and check the dates first |
+| `external node(s) have members, which are ignored` | Either the type or the member rows are wrong |
+| `external node(s) have no external_value` | Nothing to report and nothing to compute from |
+| `not fully EPEQ scored` | Unscored criteria, rendered as grey badges |
+| `no x/y placement` | Defined but not drawable |
+| `matches no rows` (exclusion) | A stale or mistyped `exclude_*` entry. **The rows you meant to remove are still in the node** |
+| `edge(s) marked empirical with no evidence_justification` | An assertion of evidence with nothing behind it |
+| `putative edge(s) carry a magnitude` | A contradiction. Mark it empirical or clear the number |
+| `node(s) have no edges at all` | Not necessarily wrong: a source has no inflow, a `tse` no outflow |
+
+::: callout-warning
+## `Run scripts/scaffold_aep_manifest.R first`
+
+That script **does not exist**. `read_aep_manifest()` and `read_aep_membership()` both name it in their missing-file errors, but nothing in `scripts/` provides it. If `aep_manifest.csv` or `aep_membership.csv` ever goes missing, write the two files by hand from the schemas in `empty_aep_manifest()` and `empty_aep_membership()`, or copy them back out of git.
+:::
+
+# Standing decisions
+
+- **Nodes are defined once and shared across AEPs.** The alternative, an `aep_id` column on `aep_nodes.csv`, was rejected: a node carries four scores and four written justifications, and copying those per AEP multiplies the judgement work and then lets the copies drift apart silently.
+- **Arctic coverage is reported, never filtered.** A global `LATITUDE >= 66.5` cut would drop 81% of measurements and leave the marine node on 258. So the AEP is Norwegian, and Arctic representativeness is a stated property of each node in the same spirit as `n_sources`: a visible weakness rather than a silent one.
+- **The centre is weighted by `MEASURED_N`, the spread is not.** A literature row can be a summary of fifty samples, so the centre should carry that weight. But we hold study *means*, not study *values*, so weighting the spread would erase within-study variation and report a dataset far tighter than it is. `sd` and `gsd` are therefore per row, with `n_rows` beside them.
+- **Layout is manual.** Vertical position carries source-to-exposure meaning, so an automatic layout is actively wrong here, not merely unhelpful.

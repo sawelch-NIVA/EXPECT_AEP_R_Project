@@ -1345,7 +1345,11 @@ list(
       nodes = triage_species_node_table,
       dir = "triage",
       scale_limits = triage_scale_limits,
-      thresholds = copper_toxicity_thresholds
+      thresholds = copper_toxicity_thresholds,
+      # Band labels carry their stable group ids, so a band on the panel can be
+      # read back to its section in docs/groups/. Defined below; targets resolves
+      # by name, not by position in the list.
+      ids = group_ids
     ),
     format = "file"
   ),
@@ -1782,6 +1786,19 @@ list(
   tar_quarto(
     name = render_ap04_units,
     path = "docs/AP04-units.qmd",
+    quiet = FALSE
+  ),
+
+  # How the AEP is assembled from the six data/clean/aep/ CSVs. Built rather
+  # than parked for the same reason as AP04: it reads those files live, and a
+  # stale guide to a hand-edited schema is worse than none.
+  #
+  # Every table in it goes through tar_read() rather than readr, so its
+  # dependency declaration (CLAUDE.md 4.4.2) covers all six files and editing
+  # any of them rebuilds the page.
+  tar_quarto(
+    name = render_ap05_aep,
+    path = "docs/AP05-aep.qmd",
     quiet = FALSE
   )
 

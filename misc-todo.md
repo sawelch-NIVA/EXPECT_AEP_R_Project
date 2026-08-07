@@ -11,3 +11,5 @@
 9. Add year info to AEP
 10. Give AEPs title with scope
 11. Add a node time for outflow to AOPs
+12. Pedantry note: don't call the AEP node super-hierachy groups, it collides with sampling groups
+13. Dotplot version of triage plot e) still uses the old binned scale

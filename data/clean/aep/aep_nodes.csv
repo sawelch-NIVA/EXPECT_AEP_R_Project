@@ -6,4 +6,5 @@ N004,G. morhua liver,organism,empirical,2,1,,,1900,2100,,,FALSE,,,,,3,TODO,3,"Co
 N005,G. morhua muscle,organism,empirical,2,2,,,1900,2100,,Vm_2010_2025 (Urban Fjord Contaminants); Vm_2010_2025 (Measures Monitoring),FALSE,,,,,3,TODO,3,Copper is present in highly-conserved metabolic systems.,1,,3,TODO,
 N006,Natural occurrence,source,external,0,0,,,1900,2100,,,FALSE,,,,,2,TODO,3,Copper occurrence in the earth's crust and downstream compartments is consensus and uncontroversial.,1,,3,TODO,
 N007,Aquaculture application,source,empirical,0,1,,,1900,2100,,,FALSE,,,,,2,TODO,3,Use of copper-based antifouling treatments is common practice in aquaculture.,1,,1,TODO,
-N008,Submarine tailing disposal,source,external,,,,,1900,2100,,,FALSE,1.00E+06,,1,tonnes,1,"Structurally, no single source of copper is essential. ",3,,3,"Kvassnes & Iversen (2013) reports ""~1 million tonnes over 7 years""",2,,
+N008,Submarine tailing disposal,source,external,0,2,,,1900,2100,,,FALSE,1.00E+06,,1,tonnes,1,"Structurally, no single source of copper is essential. ",3,,3,"Kvassnes & Iversen (2013) reports ""~1 million tonnes over 7 years""",2,,
+N009,Marine crustaceans,organism,empirical,2,3,,,1900,2100,,,FALSE,,,,,3,crusties have copper in them,3,,2,,2,,

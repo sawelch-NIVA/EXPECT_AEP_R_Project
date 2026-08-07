@@ -70,6 +70,88 @@ add_species_tissue_col <- function(data) {
   data
 }
 
+#' Stable Group Ids Behind Each Species/Tissue Band
+#'
+#' A band is species x tissue, but a *group* is [triage_group_cols()], eight
+#' columns including the two geographic ones. So a band is usually one group and
+#' occasionally several: 126 of the 139 bands drawn are one-to-one, 12 cover two
+#' groups and *Mytilus edulis* (Total soft tissues) in `mg/kg (dry)` covers four.
+#' Every matching id is listed, because the bands that pool groups are exactly
+#' the ones a lump/split decision needs to be able to look up.
+#'
+#' @param data Rows under one species-group node, already carrying
+#'   `.species_tissue` from [add_species_tissue_col()].
+#' @param ids The `group_ids` ledger.
+#' @return A tibble of `.species_tissue` and `group_ids`, one row per band.
+#' @keywords internal
+band_group_ids <- function(data, ids) {
+  key <- triage_group_cols()
+
+  # Joined on distinct key combinations rather than on the rows themselves, so a
+  # duplicated ledger key cannot quietly multiply the data. read_group_ids()
+  # checks that group_id is unique but not that the key is.
+  combos <- dplyr::distinct(
+    data,
+    dplyr::across(dplyr::all_of(c(key, ".species_tissue")))
+  )
+  n_before <- nrow(combos)
+  combos <- dplyr::left_join(
+    combos,
+    dplyr::select(ids, dplyr::all_of(c(key, "group_id"))),
+    by = key
+  )
+  if (nrow(combos) != n_before) {
+    stop(
+      "band_group_ids(): the ID ledger has duplicate group keys, so the join ",
+      "changed the row count from ", n_before, " to ", nrow(combos), "."
+    )
+  }
+
+  combos |>
+    dplyr::filter(!is.na(.data$group_id)) |>
+    dplyr::group_by(.data$.species_tissue) |>
+    dplyr::summarise(
+      group_ids = paste(sort(unique(.data$group_id)), collapse = ", "),
+      .groups = "drop"
+    )
+}
+
+#' Prefix Band Labels With Their Group Ids
+#'
+#' `G022 Pandalus borealis (Whole body)`. Sam's request 2026-08-06: the panel
+#' names species but the notebook is organised by id, so reading a band back to
+#' the section discussing it meant matching on the species name by eye.
+#'
+#' The id goes in FRONT for the same reason it does in the notebook headings and
+#' the glance table: it is the short, fixed-width part, so the ids line up down
+#' the axis and can be scanned without reading the names. Bands are ordered by
+#' median value, so the prefix has no effect on ordering.
+#'
+#' A band with no id in the ledger keeps its bare label rather than gaining an
+#' empty prefix. That should not happen (every row of
+#' `literature_analysis_ready` matches the ledger), but a silently mangled label
+#' would be worse than a missing one.
+#'
+#' @param data Rows carrying `.species_tissue`.
+#' @param ids The `group_ids` ledger, or `NULL` to leave the labels alone.
+#' @return `data`, with `.species_tissue` prefixed.
+#' @keywords internal
+add_group_ids_to_bands <- function(data, ids = NULL) {
+  if (is.null(ids) || nrow(ids) == 0 || nrow(data) == 0) {
+    return(data)
+  }
+  lookup <- band_group_ids(data, ids)
+  prefix <- stats::setNames(lookup$group_ids, lookup$.species_tissue)[
+    data$.species_tissue
+  ]
+  data$.species_tissue <- ifelse(
+    is.na(prefix),
+    data$.species_tissue,
+    paste0(prefix, " ", data$.species_tissue)
+  )
+  data
+}
+
 #' Species Groups Worth a By-Species Panel
 #'
 #' One row per compartment x sub-compartment x species group x unit carrying at
@@ -195,6 +277,8 @@ filter_to_species_node <- function(data, node) {
 #' @param scale_limits Output of [compute_triage_scale_limits()], so this panel
 #'   shares the value axis with everything above and below it.
 #' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
+#' @param ids The `group_ids` ledger. Band labels are prefixed with their stable
+#'   group ids; see [add_group_ids_to_bands()]. `NULL` gives bare species names.
 #' @param max_categories Passed to [truncate_categories()].
 #' @param width Figure width in inches.
 #' @param height_per_category Height allowance per band.
@@ -208,6 +292,7 @@ write_species_overview_for_node <- function(
   dir = "triage",
   scale_limits = NULL,
   thresholds = NULL,
+  ids = NULL,
   max_categories = 25,
   width = 8,
   height_per_category = 0.28,
@@ -217,7 +302,13 @@ write_species_overview_for_node <- function(
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
 
-  node_data <- add_species_tissue_col(filter_to_species_node(data, node))
+  # Ids are added BEFORE truncation. The prefix is a function of the band, so it
+  # cannot merge or split bands, and doing it here keeps the "showing the N
+  # largest of M" note counting the same things the axis shows.
+  node_data <- add_group_ids_to_bands(
+    add_species_tissue_col(filter_to_species_node(data, node)),
+    ids
+  )
   trimmed <- truncate_categories(node_data, ".species_tissue", max_categories)
 
   subtitle <- paste(
@@ -231,7 +322,10 @@ write_species_overview_for_node <- function(
     "a) Distribution by species and tissue",
     subtitle,
     # Wider than the default 15: "Gadus morhua (Liver)" is 20 characters and
-    # wraps to three cramped lines at the default.
+    # wraps to three cramped lines at the default. Still 24 with the id prefix
+    # in front: two lines is the common case, the four-id Mytilus band is the
+    # only one anywhere that reaches three, and widening this steals panel width
+    # from every panel to fix one label.
     wrap_width = 24,
     limits = triage_limits_for(scale_limits, node),
     thresholds = thresholds,
