@@ -4,7 +4,15 @@
 \alias{triage_category_overlay}
 \title{Distribution Overlay for the Categorical Panels}
 \usage{
-triage_category_overlay(data, limits = NULL, min_n = 10, ticks = TRUE)
+triage_category_overlay(
+  data,
+  limits = NULL,
+  min_n = 10,
+  ticks = TRUE,
+  header = TRUE,
+  label_size = 2.1,
+  labels = TRUE
+)
 }
 \arguments{
 \item{data}{Output of \code{\link[=triage_flag_by_category]{triage_flag_by_category()}}.}

@@ -1,0 +1,11 @@
+ENVIRON_COMPARTMENT_SUB,code
+Aquatic Sediment,sd
+Brackish/Transitional Water,bw
+Freshwater,fw
+Groundwater,gw
+Marine/Salt Water,mw
+Porewater,pw
+Sludge,sl
+Stormwater,sw
+Wastewater,ww
+Soil O Horizon (Organic),so

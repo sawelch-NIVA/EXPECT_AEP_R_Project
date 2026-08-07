@@ -12,16 +12,39 @@ triage_category_labels(data, min_n = 10)
 \item{min_n}{The same \code{min_n} passed to \code{\link[=triage_flag_by_category]{triage_flag_by_category()}}.}
 }
 \value{
-A tibble of \code{.facet}, \code{n}, \code{k}, \code{tested}, \code{label}.
+A tibble of \code{.facet}, \code{n} (measurements), \code{n_rows}, \code{k}
+(measurements), \code{tested}, \code{label}.
 }
 \description{
-\code{"1,193 (53)"}: rows in the category, and how many of them the per-category
-fences flagged. Sam's call, 2026-08-04, and it earns its place because the
-shared value axis leaves a wide empty margin on the right of most panels.
+\code{"1,193 (53)"}: the sample size of the category, and how much of it the
+per-category fences flagged. Sam's call, 2026-08-04, and it earns its place
+because the shared value axis leaves a wide empty margin on the right of most
+panels. Headed in-panel by \code{\link[=triage_category_header]{triage_category_header()}} so the reader is not
+left to infer what the bracket means.
 }
 \details{
+\strong{Both figures are measurement counts, \code{sum(MEASURED_N)}, not row counts, as
+of 2026-08-05.} This is the project-wide rule Sam set that day: \emph{anywhere we
+report a sample size it is \code{MEASURED_N}; where we mean rows we say "n rows"}.
+Before this, the labels counted rows while the group heading above them
+reported measurements, and the two disagreed by a factor of five on the fish
+overview without anything on the page explaining why. A literature row can
+carry an aggregated \code{MEASURED_N} of 50; a Vannmiljø row carries 1.
+
+The outlier count is weighted the same way, matching the treatment
+\code{summarise_literature_data} already gives \code{n_double_outliers} (PLAN.md P1.5):
+numerator and denominator have to be the same currency or the fraction means
+nothing.
+
+\strong{What stays a row count}, deliberately, because it is a count of marks
+drawn rather than a sample size: the heatmap fill (one tile counts the rows in
+its bin) and the outlier ticks (one tick per flagged row). The fill legend
+says "Rows" for that reason. A category can therefore show a label of 2,450
+over 45 ticks' worth of data, which is honest: 45 rows reporting 2,450
+measurements between them.
+
 Untested categories read \code{"7 (n < 10)"} rather than \code{"7 (0)"}, which would
-claim a test that did not run. The threshold is interpolated from \code{min_n}
-rather than written into the string, so the label cannot drift if the default
-changes.
+claim a test that did not run. Note the gate is on \strong{rows}, since that is
+what the statistics are computed over; a category of 3 rows carrying 300
+measurements is still untested.
 }

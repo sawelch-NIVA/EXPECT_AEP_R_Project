@@ -4,7 +4,14 @@
 \alias{triage_plot_spatial}
 \title{Triage Plot: Spatial Distribution}
 \usage{
-triage_plot_spatial(data, label = NULL, limits = NULL, bins = 120)
+triage_plot_spatial(
+  data,
+  label = NULL,
+  limits = NULL,
+  bins = 120,
+  thresholds = NULL,
+  grp = NULL
+)
 }
 \arguments{
 \item{data}{A group subset. @param label Group label for the subtitle.}
@@ -29,6 +36,10 @@ and the latitude width comes out at roughly half the longitude width, which
 \code{binwidth} to \code{stat_summary_hex()}
 if a genuinely fine grid is ever wanted; \code{bins} cannot get there without
 absurd numbers.}
+
+\item{thresholds}{The \code{copper_toxicity_thresholds} target, or \code{NULL}.}
+
+\item{grp}{The one-row group tibble, needed to match thresholds.}
 }
 \value{
 A ggplot.
@@ -36,4 +47,10 @@ A ggplot.
 \description{
 Median concentration per hex cell over a coastline base map. Falls back to
 points where there are too few sites to bin meaningfully.
+}
+\details{
+Binned on both branches at one step per order of magnitude, with the
+classification boundaries marked in the legend. See
+\code{\link[=spatial_colour_breaks]{spatial_colour_breaks()}}, including why the thresholds cannot be drawn as
+lines on this panel.
 }

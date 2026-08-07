@@ -34,9 +34,13 @@ If \code{remove_other = TRUE}, rows with "Other" units are excluded.
 }
 \description{
 Converts measurement values to standard units (mg/kg for dry/wet weight,
-mg/L for concentration). Handles both Greek mu (μ) and micro sign (µ)
-in microgram units. Can convert multiple value columns that share the same
-unit column.
+mg/L for concentration) by parsing each unit with \code{\link[=parse_measured_unit]{parse_measured_unit()}}.
+Can convert multiple value columns that share the same unit column.
+}
+\details{
+Units that cannot be parsed produce \code{NA} values, as before, but are now
+\strong{reported by name and row count} rather than vanishing. Silence was how a
+1000x error survived in this function; see the note at the top of the file.
 }
 \examples{
 \dontrun{

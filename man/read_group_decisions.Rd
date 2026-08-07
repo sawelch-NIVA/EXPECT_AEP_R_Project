@@ -5,7 +5,7 @@
 \title{Read and Validate the Group Decisions File}
 \usage{
 read_group_decisions(
-  path = here_rel("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/decisions/group_decisions.csv"),
   summary_data = NULL
 )
 }

@@ -15,12 +15,15 @@ triage_threshold_sec_axis(thresholds, limits = NULL)
 A \code{ggplot2::dup_axis()} specification, or \code{ggplot2::waiver()}.
 }
 \description{
-Breaks at the threshold values, labelled with the class numeral (or the
-threshold type where there is no class, since PROREF and BAC are styled as
-class I but are not Norwegian classification classes). The axis title names
-the source.
+Breaks at the threshold values, labelled with the numeral of the class the
+boundary \strong{opens} (or the threshold type where there is no class, since
+PROREF and BAC are styled as class I but are not Norwegian classification
+classes). The axis title names the source.
 }
 \details{
+A label therefore reads "above this line you are in class X". See the section
+comment above for why that changed on 2026-08-05.
+
 Returns a \code{waiver()} where nothing applies, which is what \code{sec.axis} expects
 when there is no secondary axis, so call sites need no branching.
 }

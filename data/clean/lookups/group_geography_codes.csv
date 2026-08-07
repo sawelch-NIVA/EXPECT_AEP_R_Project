@@ -1,0 +1,10 @@
+SITE_GEOGRAPHIC_FEATURE,code
+"Bare land and lichen/moss",M
+"Coastal, fjord",C
+"Drainage, sewer, artificial water",D
+"Estuary",U
+"Groundwater, aquifer",G
+"Lake, pond, pool, reservoir",L
+"Ocean, sea, territorial waters",O
+"River, stream, canal",R
+"WWTP",P

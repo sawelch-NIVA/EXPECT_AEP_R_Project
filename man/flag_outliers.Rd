@@ -7,19 +7,50 @@
 flag_outliers(x, min_n = 10)
 }
 \arguments{
-\item{x}{A numeric vector of measured values (assumed positive; flagged
-partly on the log10 scale).}
+\item{x}{A numeric vector of measured values. Must be positive: non-positive
+values are \code{NaN} under \code{log10()} and are dropped upstream by
+\code{\link[=drop_nonpositive_measurements]{drop_nonpositive_measurements()}}.}
 
 \item{min_n}{Minimum sample size required to compute flags.}
 }
 \value{
-A tibble with one row per element of \code{x}: \code{RMZ}, \code{outlier_RMZ},
-\code{outlier_IQR}, and \code{dot_fill} (factor: "neither", "IQR", "RMZ", "both",
-"not tested").
+A tibble with one row per element of \code{x}: \code{RMZ} (on the log10 scale),
+\code{outlier_RMZ}, \code{outlier_IQR}, and \code{dot_fill} (factor: "neither", "IQR",
+"RMZ", "both", "not tested").
 }
 \description{
-Flags are computed on the log10 scale (Tukey fences, IQR x 1.5) and on the
-raw scale (Robust Modified Z-Score, threshold 3.5). Below \code{min_n}, these
+Both criteria are computed on the \strong{log10 scale}: Tukey fences (IQR x 1.5)
+and the Robust Modified Z-Score (threshold 3.5). Below \code{min_n}, these
 statistics are unreliable, so flag columns are returned as \code{NA} (and
 \code{dot_fill} as \code{"not tested"}) rather than computed.
+}
+\details{
+\strong{The RMZ moved from the raw scale to log10 on 2026-08-05}, and the reason
+is worth keeping. Sam's observation was that outliers were "only highlighted
+on the right", read as a missing \code{abs()}. The \code{abs()} was always there and the
+Tukey fences were always two-sided; the asymmetry came from the \emph{scale}. MAD
+on raw lognormal data is set by the bulk near the median, so a value ten times
+\strong{below} the median sits well inside 3.5 MADs while a value ten times above
+blows straight through. The criterion was in practice an upper-tail test.
+
+Measured over the 74 groups with at least 10 rows, double-flagged rows split
+low/high as:\tabular{llll}{
+   Scheme \tab low \tab high \tab \% of rows \cr
+   IQR log10, RMZ raw (old) \tab 5 \tab 2,525 \tab 2.8 \cr
+   both raw \tab 5 \tab 8,876 \tab 9.9 \cr
+   both log10 (this) \tab 359 \tab 1,637 \tab 2.2 \cr
+}
+
+
+Moving the \emph{fences} to raw instead was considered and rejected: it triples
+right-tail flagging and leaves the left tail at the same 5 rows. Copper
+concentrations here span roughly 12 orders of magnitude and are approximately
+lognormal, so log space is where a symmetric fence means anything.
+
+\code{mad()} returns 0 where more than half the values are identical, which makes
+every RMZ \code{Inf} or \code{NaN}. Guarded rather than left to propagate: \code{RMZ} comes
+back all-\code{NA} and the criterion abstains, leaving the Tukey fences to decide.
+Downstream code already treats an \code{NA} flag as "not an outlier"
+(\code{add_triage_flags()} sums with \code{na.rm = TRUE}), which is the conservative
+direction.
 }

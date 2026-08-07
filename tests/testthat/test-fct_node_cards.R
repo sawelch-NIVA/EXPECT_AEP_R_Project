@@ -345,7 +345,12 @@ test_that("the compact header outranks the headline number", {
   cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
   built <- ggplot2::ggplot_build(node_card_header(nodes, cards, style = "compact"))
 
-  layers <- do.call(rbind, lapply(built$data, function(x) {
+  # The corner id marker is drawn via annotation_custom() (Sam 2026-08-07: pinned
+  # to a fixed 18pt/18pt offset from the card corner so long composite ids like
+  # "N003-mine-tailings" don't drift), so its layer has no label/size columns and
+  # must be skipped rather than rbind-ed with the geom_text layers.
+  text_layers <- Filter(function(x) all(c("label", "size") %in% names(x)), built$data)
+  layers <- do.call(rbind, lapply(text_layers, function(x) {
     x[, c("label", "size"), drop = FALSE]
   }))
   label_word <- strsplit(nodes$label[1], " ")[[1]][1]

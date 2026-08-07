@@ -20,5 +20,7 @@ and \code{thresholds}.}
 A character vector of all written file paths, for \code{format = "file"}.
 }
 \description{
-Write Triage Plots for Several Groups
+No longer used by the pipeline, which branches over \code{\link[=split_triage_data]{split_triage_data()}} and
+calls \code{\link[=write_triage_plots_for_group]{write_triage_plots_for_group()}} once per branch. Kept because it is the
+convenient way to redraw several groups by hand in a console.
 }

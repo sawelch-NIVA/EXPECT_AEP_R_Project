@@ -6,7 +6,7 @@
 \usage{
 scaffold_group_decisions(
   summary_data,
-  path = here_rel("data/clean/group_decisions.csv"),
+  path = here_rel("data/clean/decisions/group_decisions.csv"),
   ids = read_group_ids(),
   verbose = TRUE
 )

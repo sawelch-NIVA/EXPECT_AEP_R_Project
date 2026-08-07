@@ -10,6 +10,7 @@ write_species_overview_for_node(
   dir = "triage",
   scale_limits = NULL,
   thresholds = NULL,
+  ids = NULL,
   max_categories = 25,
   width = 8,
   height_per_category = 0.28,
@@ -29,6 +30,9 @@ write_species_overview_for_node(
 shares the value axis with everything above and below it.}
 
 \item{thresholds}{The \code{copper_toxicity_thresholds} target, or \code{NULL}.}
+
+\item{ids}{The \code{group_ids} ledger. Band labels are prefixed with their stable
+group ids; see \code{\link[=add_group_ids_to_bands]{add_group_ids_to_bands()}}. \code{NULL} gives bare species names.}
 
 \item{max_categories}{Passed to \code{\link[=truncate_categories]{truncate_categories()}}.}
 

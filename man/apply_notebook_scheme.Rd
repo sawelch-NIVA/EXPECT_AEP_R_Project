@@ -5,7 +5,7 @@
 \title{Apply the Notebook Scheme to the Decisions File}
 \usage{
 apply_notebook_scheme(
-  path = here::here("data/clean/group_decisions.csv"),
+  path = here::here("data/clean/decisions/group_decisions.csv"),
   overwrite = FALSE,
   verbose = TRUE
 )

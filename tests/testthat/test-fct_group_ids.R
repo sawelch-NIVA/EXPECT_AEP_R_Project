@@ -130,6 +130,214 @@ test_that("a ledger missing a column fails loudly", {
   expect_error(read_group_ids(path), "missing column")
 })
 
+# ---- format_composite_group_id() ---------------------------------------
+
+composite_codes_fixture <- function() {
+  list(
+    compartment = data.frame(
+      ENVIRON_COMPARTMENT = c("Aquatic", "Terrestrial", "Biota"),
+      code = c("W", "E", "B")
+    ),
+    subcompartment = data.frame(
+      ENVIRON_COMPARTMENT_SUB = c("Freshwater", "Marine/Salt Water"),
+      code = c("fw", "mw")
+    ),
+    species_group = data.frame(
+      SPECIES_GROUP = c("Fish", "Molluscs"),
+      code = c("f", "l")
+    ),
+    geography = data.frame(
+      SITE_GEOGRAPHIC_FEATURE = c("Coastal, fjord", "Ocean, sea, territorial waters"),
+      code = c("C", "O")
+    ),
+    geography_sub = data.frame(
+      SITE_GEOGRAPHIC_FEATURE_SUB = c("Water column, pelagic zone", "Water benthos"),
+      code = c("wc", "wb")
+    ),
+    tissue = data.frame(
+      SAMPLE_TISSUE = c("Liver", "Muscle"),
+      code = c("Liv", "Mus")
+    ),
+    unit = data.frame(
+      MEASURED_UNIT_STANDARD = c("mg/kg (wet)", "mg/kg (dry)", "mg/L"),
+      code = c("Mw", "Md", "C")
+    )
+  )
+}
+
+composite_data_fixture <- function(...) {
+  fixture <- data.frame(
+    group_id = "G014",
+    ENVIRON_COMPARTMENT = "Aquatic",
+    ENVIRON_COMPARTMENT_SUB = "Freshwater",
+    SPECIES_GROUP = NA_character_,
+    SITE_GEOGRAPHIC_FEATURE = "Coastal, fjord",
+    SITE_GEOGRAPHIC_FEATURE_SUB = "Water column, pelagic zone",
+    SAMPLE_SPECIES = NA_character_,
+    SAMPLE_TISSUE = NA_character_,
+    MEASURED_UNIT_STANDARD = "mg/kg (wet)",
+    stringsAsFactors = FALSE
+  )
+  overrides <- list(...)
+  for (col in names(overrides)) fixture[[col]] <- overrides[[col]]
+  fixture
+}
+
+format_fixture <- function(data, species_overrides = NULL) {
+  codes <- composite_codes_fixture()
+  format_composite_group_id(
+    data, codes$compartment, codes$subcompartment, codes$species_group,
+    codes$geography, codes$geography_sub, codes$tissue, codes$unit,
+    species_overrides
+  )
+}
+
+test_that("blocks have no internal hyphen and a lowercase child code", {
+  # Sam 2026-08-07: "take out the hyphen between B and L and make the second
+  # letter small so that the hierarchy is represented" -- capitalisation
+  # alone marks parent vs. child within a block; hyphens only separate blocks.
+  out <- format_fixture(composite_data_fixture())
+  expect_equal(out, "G014-Wfw-Cwc-Mw")
+})
+
+test_that("a biota group's compartment block uses a 1-letter species-group code", {
+  data <- composite_data_fixture(
+    ENVIRON_COMPARTMENT = "Biota",
+    ENVIRON_COMPARTMENT_SUB = "Biota, Aquatic",
+    SPECIES_GROUP = "Molluscs"
+  )
+  out <- format_fixture(data)
+  expect_equal(out, "G014-Bl-Cwc-Mw")
+})
+
+test_that("an unmapped value warns once and falls back to the bare group_id", {
+  data <- composite_data_fixture(ENVIRON_COMPARTMENT_SUB = "Porewater")
+  expect_warning(out <- format_fixture(data), "no compartment/geography code")
+  expect_equal(out, "G014")
+})
+
+test_that("the species/tissue segment is omitted for a group with no species", {
+  # Sam 2026-08-07: "this is an optional block, we don't need to include it
+  # in stuff without a species" -- no warning either, unlike the
+  # compartment/geography gap, since a missing species isn't a lookup gap.
+  out <- format_fixture(composite_data_fixture())
+  expect_equal(out, "G014-Wfw-Cwc-Mw")
+})
+
+test_that("the species/tissue segment appears, abbreviated, when species is known", {
+  data <- composite_data_fixture(
+    SAMPLE_SPECIES = "Gadus morhua", SAMPLE_TISSUE = "Liver"
+  )
+  out <- format_fixture(data)
+  expect_equal(out, "G014-Wfw-Cwc-G.mor-Liv-Mw")
+})
+
+test_that("a single-word species name takes its own first 4 letters", {
+  data <- composite_data_fixture(
+    SAMPLE_SPECIES = "Chironomidae", SAMPLE_TISSUE = "Whole body"
+  )
+  codes <- composite_codes_fixture()
+  codes$tissue <- rbind(codes$tissue, data.frame(SAMPLE_TISSUE = "Whole body", code = "Wbd"))
+  out <- format_composite_group_id(
+    data, codes$compartment, codes$subcompartment, codes$species_group,
+    codes$geography, codes$geography_sub, codes$tissue, codes$unit
+  )
+  expect_equal(out, "G014-Wfw-Cwc-Chir-Wbd-Mw")
+})
+
+test_that("a species code override wins over the derived code", {
+  data <- composite_data_fixture(
+    SAMPLE_SPECIES = "Odobenus rosmarus divergens", SAMPLE_TISSUE = "Liver"
+  )
+  overrides <- data.frame(
+    SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O.rmd"
+  )
+  out <- format_fixture(data, overrides)
+  expect_equal(out, "G014-Wfw-Cwc-O.rmd-Liv-Mw")
+})
+
+test_that("a species with no tissue code yet warns and drops just that segment", {
+  data <- composite_data_fixture(
+    SAMPLE_SPECIES = "Gadus morhua", SAMPLE_TISSUE = "Otolith"
+  )
+  expect_warning(out <- format_fixture(data), "no tissue code")
+  expect_equal(out, "G014-Wfw-Cwc-Mw")
+})
+
+test_that("an unmapped unit falls back to X without warning", {
+  data <- composite_data_fixture(MEASURED_UNIT_STANDARD = "ng/g")
+  expect_no_warning(out <- format_fixture(data))
+  expect_equal(out, "G014-Wfw-Cwc-X")
+})
+
+test_that("format_composite_group_id is vectorised across mixed rows", {
+  data <- rbind(
+    composite_data_fixture(),
+    composite_data_fixture(
+      group_id = "G020", ENVIRON_COMPARTMENT = "Biota",
+      ENVIRON_COMPARTMENT_SUB = "Biota, Aquatic", SPECIES_GROUP = "Fish",
+      SITE_GEOGRAPHIC_FEATURE = "Ocean, sea, territorial waters",
+      SITE_GEOGRAPHIC_FEATURE_SUB = "Water benthos",
+      SAMPLE_SPECIES = "Gadus morhua", SAMPLE_TISSUE = "Muscle",
+      MEASURED_UNIT_STANDARD = "mg/L"
+    )
+  )
+  out <- format_fixture(data)
+  expect_equal(out, c("G014-Wfw-Cwc-Mw", "G020-Bf-Owb-G.mor-Mus-C"))
+})
+
+test_that("format_species_code abbreviates and applies overrides", {
+  expect_equal(format_species_code("Gadus morhua"), "G.mor")
+  expect_equal(format_species_code("Cancer pagurus"), "C.pag")
+  expect_equal(format_species_code("Chironomidae"), "Chir")
+  expect_equal(format_species_code(NA_character_), NA_character_)
+  expect_equal(format_species_code(""), NA_character_)
+
+  overrides <- data.frame(SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O.rmd")
+  expect_equal(
+    format_species_code("Odobenus rosmarus divergens", overrides), "O.rmd"
+  )
+  # An un-overridden species in the same call still gets the derived code.
+  expect_equal(
+    format_species_code(c("Odobenus rosmarus divergens", "Gadus morhua"), overrides),
+    c("O.rmd", "G.mor")
+  )
+})
+
+test_that("the real species list has no unresolved collisions after overrides", {
+  skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
+  species <- unique(read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))$SAMPLE_SPECIES)
+  species <- species[!is.na(species) & nzchar(species)]
+  codes <- format_species_code(species)
+  # The two genuine-duplicate pairs flagged in misc-todo.md item 14 are left
+  # deliberately un-overridden and still collide -- that collision is the
+  # point, a visible flag that they might be the same species under two
+  # names rather than something to paper over with a distinguishing code.
+  # Everything else should be unique or explicitly overridden.
+  dupes <- codes[duplicated(codes) | duplicated(codes, fromLast = TRUE)]
+  expect_setequal(unique(dupes), c("E.ham", "P.gro"))
+})
+
+test_that("the real lookup CSVs cover the ledger except known genuine data gaps", {
+  # G127 has no SPECIES_GROUP/SAMPLE_SPECIES/SAMPLE_TISSUE; G087, G094, G131
+  # have no SITE_GEOGRAPHIC_FEATURE. All four are unclassified samples, not a
+  # lookup that has fallen behind the data. Pinning the exact set here means a
+  # REAL coverage gap (a new vocabulary string with no code) shows up as a
+  # changed set rather than being lost in the noise.
+  skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
+  ids <- read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))
+  expect_warning(out <- format_composite_group_id(ids), "4 group\\(s\\)")
+  expect_equal(
+    sort(ids$group_id[out == ids$group_id]),
+    c("G087", "G094", "G127", "G131")
+  )
+  # Every ID is either the bare group_id (a compartment/geography gap) or
+  # starts with "<compartment block>-<geography block>", each block one
+  # capital letter followed by lowercase; the rest is an optional
+  # species/tissue segment and a mandatory trailing unit code.
+  expect_true(all(grepl("^G\\d{3}(-[A-Z][a-z]+-[A-Z][a-z]+.*)?$", out)))
+})
+
 # ---- The real ledger ---------------------------------------------------
 
 test_that("the committed ledger pins its IDs to specific groups", {

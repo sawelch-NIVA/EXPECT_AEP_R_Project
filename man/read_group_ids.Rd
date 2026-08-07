@@ -4,7 +4,7 @@
 \alias{read_group_ids}
 \title{Read the Group ID Ledger}
 \usage{
-read_group_ids(path = here::here("data/clean/group_ids.csv"))
+read_group_ids(path = here::here("data/clean/decisions/group_ids.csv"))
 }
 \arguments{
 \item{path}{Path to the ledger CSV.}

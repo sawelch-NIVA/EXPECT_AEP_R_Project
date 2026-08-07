@@ -25,4 +25,16 @@ Standardising freshwater to mg/L turns a legible 0.3 ug/L into 0.0003, which
 is three leading zeros of noise in a label that has to fit sideways in a
 panel. The line is still \emph{positioned} on the standardised value; only the text
 uses the original.
+
+\strong{Reads as a lower bound since 2026-08-05}, matching the secondary axis: a
+boundary is named for the class it opens, and the value is prefixed with \code{>}.
+So the sediment line at 147 is \verb{Very Poor (V) > 147 mg/kg (dry)}, not
+\verb{Poor (IV) 147 mg/kg (dry)}. Where the class above cannot be determined (a
+subset that has lost its ladder) the class part is dropped rather than
+guessed, leaving a bare \verb{> value unit}.
+
+Not currently drawn on any panel: the v2 threshold design moved the naming to
+the secondary axis and the panels carry no text. Kept because it is the only
+human-readable description of a matched threshold, and updated here so it
+cannot contradict the axis if it is ever rendered again.
 }

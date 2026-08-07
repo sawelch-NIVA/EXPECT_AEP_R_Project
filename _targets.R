@@ -1639,7 +1639,10 @@ list(
       # makes this a report-card AEP rather than a labelled graph.
       card_paths = node_cards_compact,
       manifest = aep_manifest,
-      bbox_map = wgs84_map,
+      # Inset locator maps disabled 2026-08-07: too many rendering issues.
+      # Omitting bbox_map is write_aep_diagrams()'s documented escape hatch --
+      # AEPs stay titled but draw uninset. Re-supply wgs84_map to re-enable.
+      bbox_map = NULL,
       dir = here_rel("figures"),
       width = 12,
       height = 8,
@@ -1666,7 +1669,8 @@ list(
       cards = aep_node_cards,
       groups = aep_node_groups,
       manifest = aep_manifest,
-      bbox_map = wgs84_map,
+      # See aep_diagram above: inset locator maps disabled 2026-08-07.
+      bbox_map = NULL,
       dir = here_rel("figures"),
       width = 12,
       height = 8,

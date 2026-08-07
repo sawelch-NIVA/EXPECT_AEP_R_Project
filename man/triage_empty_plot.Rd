@@ -4,10 +4,12 @@
 \alias{triage_empty_plot}
 \title{Placeholder Plot for Groups a Given View Cannot Describe}
 \usage{
-triage_empty_plot(title, reason)
+triage_empty_plot(title, reason, size = 5)
 }
 \arguments{
 \item{title}{Plot title. @param reason Short explanation.}
+
+\item{size}{Text size. Smaller on a node card than on a full triage panel.}
 }
 \value{
 A ggplot.

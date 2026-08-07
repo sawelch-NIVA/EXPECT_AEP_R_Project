@@ -116,6 +116,291 @@ allocate_group_ids <- function(
   invisible(ledger)
 }
 
+#' Read a Group Code Lookup
+#'
+#' Shared reader for the three hand-edited lookups behind
+#' [format_composite_group_id()]. Kept separate from [read_group_ids()]
+#' because these map *vocabulary values* (compartment names, species groups)
+#' to short codes, not group keys to IDs, and have no `n`-driven allocation
+#' step -- Sam edits them directly when a new value appears in the data.
+#'
+#' @param path Path to the lookup CSV.
+#' @param key_col Name of the value column (e.g. `"ENVIRON_COMPARTMENT"`).
+#' @return A tibble with `key_col` and `code`.
+#' @keywords internal
+read_group_code_lookup <- function(path, key_col) {
+  lookup <- readr::read_csv(path, show_col_types = FALSE)
+  missing_cols <- setdiff(c(key_col, "code"), names(lookup))
+  if (length(missing_cols) > 0) {
+    stop(
+      "Code lookup at ", path, " is missing column(s): ",
+      paste(missing_cols, collapse = ", ")
+    )
+  }
+  lookup
+}
+
+#' One Capital-Plus-Lowercase Code Block
+#'
+#' A single axis of [format_composite_group_id()]: a parent value's capital
+#' letter directly followed by a child value's lowercase code, e.g. `"Wfw"`
+#' (Aquatic + Freshwater) or `"Bl"` (Biota + Molluscs). No hyphen inside the
+#' block -- the capital/lowercase split *is* the parent/child marker (Sam
+#' 2026-08-07: "take out the hyphen between B and L... make the second letter
+#' small so that the hierarchy is represented"), so hyphens are reserved for
+#' separating axes from each other, not levels within one axis.
+#'
+#' @param parent,child Character vectors, same length, e.g.
+#'   `data$ENVIRON_COMPARTMENT` and the row-wise sub-compartment/species-group
+#'   value already selected by the caller.
+#' @param parent_codes,child_codes Lookups from [read_group_code_lookup()],
+#'   keyed on `parent_name`/`child_name` respectively.
+#' @param parent_name,child_name The lookups' key columns.
+#' @return A character vector of blocks, `NA` where either lookup misses.
+#' @keywords internal
+group_code_block <- function(
+  parent, child, parent_codes, child_codes, parent_name, child_name
+) {
+  parent_code <- parent_codes$code[match(parent, parent_codes[[parent_name]])]
+  child_code <- tolower(child_codes$code[match(child, child_codes[[child_name]])])
+  ifelse(is.na(parent_code) | is.na(child_code), NA_character_, paste0(parent_code, child_code))
+}
+
+#' Abbreviate a Scientific Name
+#'
+#' Deterministic, not looked up: `"Gadus morhua"` -> `"G.mor"`, capital genus
+#' initial, dot, first 3 letters of the epithet in lowercase (Sam 2026-08-07:
+#' "an abbreviated form of the abbreviated scientific name... this costs more
+#' in characters but I think will be worth it"). A single-word name -- a
+#' genus, family, order or other higher taxon on its own, e.g.
+#' `"Chironomidae"`, `"Littorina"` -- has no epithet to abbreviate, so it
+#' instead takes its own first 4 letters, capitalised: `"Chir"`.
+#'
+#' The scheme is NOT collision-free: two different genera sharing an epithet
+#' (`"Hymenodora glacialis"` / `"Heliometra glacialis"`, both -> `"H.gla"`)
+#' or a trinomial's subspecies (`"Odobenus rosmarus divergens"` /
+#' `"...rosmarus"`, both -> `"O.ros"`) collide by construction. `overrides`
+#' exists for exactly this: a hand-edited lookup of the specific names that
+#' need a different code, `data/clean/lookups/group_species_code_overrides.csv`.
+#' [format_composite_group_id()] does not error or warn on a collision here --
+#' the code is a readability aid layered on the stable G-number, which is
+#' already unique on its own, so a collision degrades legibility rather than
+#' identity.
+#'
+#' Running this over the committed ledger (2026-08-07) turned up two
+#' collisions that look like genuine taxonomic duplicates rather than
+#' unrelated species that happen to collide -- see item 14 in
+#' `misc-todo.md`.
+#'
+#' @param species Character vector of `SAMPLE_SPECIES` values. `NA`/blank
+#'   pass through as `NA`, since the whole species+tissue block is omitted
+#'   for a group with no species (Sam: "this is an optional block, we don't
+#'   need to include it in stuff without a species").
+#' @param overrides A tibble with `SAMPLE_SPECIES` and `code`, or `NULL` to
+#'   read the default lookup (an empty table if it doesn't exist yet).
+#' @return A character vector, same length as `species`.
+#' @export
+format_species_code <- function(species, overrides = NULL) {
+  if (is.null(overrides)) {
+    path <- here::here("data/clean/lookups/group_species_code_overrides.csv")
+    overrides <- if (file.exists(path)) {
+      read_group_code_lookup(path, "SAMPLE_SPECIES")
+    } else {
+      data.frame(SAMPLE_SPECIES = character(0), code = character(0))
+    }
+  }
+
+  derived <- vapply(species, function(x) {
+    if (is.na(x) || !nzchar(x)) {
+      return(NA_character_)
+    }
+    parts <- strsplit(x, "\\s+")[[1]]
+    if (length(parts) >= 2) {
+      paste0(toupper(substr(parts[1], 1, 1)), ".", tolower(substr(parts[2], 1, 3)))
+    } else {
+      paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, 4)))
+    }
+  }, character(1), USE.NAMES = FALSE)
+
+  override_code <- overrides$code[match(species, overrides$SAMPLE_SPECIES)]
+  ifelse(!is.na(override_code), override_code, derived)
+}
+
+#' Composite Group Codes
+#'
+#' A human-referenceable label layered onto the stable G-number rather than
+#' replacing it: `group_id` (e.g. `"G014"`) is already what `lump_into` cells
+#' and free-text notes across the project point at (see [allocate_group_ids()]
+#' above for why that value can never change). This produces a second,
+#' DERIVED label -- `"G014-Wfw-Cwb-G.mor-Liv-Mw"` -- for places that want the
+#' compartment, geography, species/tissue and unit visible at a glance,
+#' recomputed from the lookups on every call and never stored as identity.
+#'
+#' Scheme (Sam 2026-08-07): `G<num>-<compartment block>-<geography block>
+#' [-<species code>-<tissue code>]-<unit code>`. The compartment and
+#' geography blocks are each a [group_code_block()]: one capital parent
+#' letter directly followed by a lowercase child code, no internal hyphen, so
+#' case alone marks the parent/child split within that block. The
+#' compartment block's capital is Water/Earth/Air/Biota; its lowercase part
+#' is a 2-letter sub-compartment code, or a 1-letter species-group code when
+#' the compartment is Biota (Biota's own `ENVIRON_COMPARTMENT_SUB` is always
+#' just "Biota, Aquatic" / "Biota, Terrestrial" and carries no information
+#' the species group doesn't already give more usefully, hence the swap
+#' rather than a fourth lookup). The geography block's capital is
+#' `SITE_GEOGRAPHIC_FEATURE`'s first letter and its lowercase part is a
+#' 2-letter `SITE_GEOGRAPHIC_FEATURE_SUB` code.
+#'
+#' `SITE_GEOGRAPHIC_FEATURE`'s own letters deliberately avoid W/E/A/B, the
+#' compartment letters: the geography block sits immediately after the
+#' compartment block, so reusing one of those (WWTP -> "W" would have been
+#' the obvious pick) would put two same-lettered-but-different-meaning
+#' capitals back to back, e.g. an aquifer sample would misleadingly read as
+#' "GW" repeated. `data/clean/lookups/group_geography_codes.csv` documents
+#' the choice per feature.
+#'
+#' The species/tissue segment is OPTIONAL and omitted entirely for a group
+#' with no `SAMPLE_SPECIES` (Sam: "we don't need to include it in stuff
+#' without a species") -- unlike the compartment/geography blocks, its
+#' absence is not a gap and does not warn. It is two hyphen-joined pieces
+#' rather than one [group_code_block()], because species and tissue are
+#' peers describing the same sample rather than a parent/child pair, and the
+#' species code already uses its own internal `.` (see
+#' [format_species_code()]).
+#'
+#' The unit code is always present: `"C"` (concentration, `mg/L`), `"Md"`
+#' (mass, dry weight), `"Mw"` (mass, wet weight), or `"X"` for anything else
+#' -- a real category, not a gap, so an unmapped unit falls back to `"X"`
+#' silently rather than warning.
+#'
+#' @param data A table carrying `group_id` plus at least
+#'   `ENVIRON_COMPARTMENT`, `ENVIRON_COMPARTMENT_SUB`, `SPECIES_GROUP`,
+#'   `SITE_GEOGRAPHIC_FEATURE`, `SITE_GEOGRAPHIC_FEATURE_SUB`,
+#'   `SAMPLE_SPECIES`, `SAMPLE_TISSUE`, `MEASURED_UNIT_STANDARD`.
+#' @param compartment_codes,subcompartment_codes,species_group_codes,
+#'   geography_codes,geography_sub_codes,tissue_codes,unit_codes The seven
+#'   lookups, from [read_group_code_lookup()]. `NULL` reads them from their
+#'   default paths in `data/clean/lookups/`.
+#' @param species_overrides Passed to [format_species_code()].
+#' @return A character vector the same length as `nrow(data)`. A row with no
+#'   compartment or geography code yet warns once and falls back to the bare
+#'   `group_id`, so a lookup that has fallen behind the data fails loud
+#'   rather than emitting a silently wrong code. A row with a species but no
+#'   tissue code yet warns separately and drops just the species/tissue
+#'   segment, keeping the rest of the ID.
+#' @export
+format_composite_group_id <- function(
+  data,
+  compartment_codes = NULL,
+  subcompartment_codes = NULL,
+  species_group_codes = NULL,
+  geography_codes = NULL,
+  geography_sub_codes = NULL,
+  tissue_codes = NULL,
+  unit_codes = NULL,
+  species_overrides = NULL
+) {
+  if (is.null(compartment_codes)) {
+    compartment_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_compartment_codes.csv"),
+      "ENVIRON_COMPARTMENT"
+    )
+  }
+  if (is.null(subcompartment_codes)) {
+    subcompartment_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_subcompartment_codes.csv"),
+      "ENVIRON_COMPARTMENT_SUB"
+    )
+  }
+  if (is.null(species_group_codes)) {
+    species_group_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_species_group_codes.csv"),
+      "SPECIES_GROUP"
+    )
+  }
+  if (is.null(geography_codes)) {
+    geography_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_geography_codes.csv"),
+      "SITE_GEOGRAPHIC_FEATURE"
+    )
+  }
+  if (is.null(geography_sub_codes)) {
+    geography_sub_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_geography_sub_codes.csv"),
+      "SITE_GEOGRAPHIC_FEATURE_SUB"
+    )
+  }
+  if (is.null(tissue_codes)) {
+    tissue_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_tissue_codes.csv"),
+      "SAMPLE_TISSUE"
+    )
+  }
+  if (is.null(unit_codes)) {
+    unit_codes <- read_group_code_lookup(
+      here::here("data/clean/lookups/group_unit_codes.csv"),
+      "MEASURED_UNIT_STANDARD"
+    )
+  }
+
+  # ENVIRON_COMPARTMENT_SUB and SPECIES_GROUP are two different lookups keyed
+  # on two different columns, so this can't be a single group_code_block()
+  # call; resolve each row against its own lookup by ENVIRON_COMPARTMENT.
+  is_biota <- data$ENVIRON_COMPARTMENT == "Biota"
+  compartment_child_code <- ifelse(
+    is_biota,
+    tolower(species_group_codes$code[match(data$SPECIES_GROUP, species_group_codes$SPECIES_GROUP)]),
+    tolower(subcompartment_codes$code[
+      match(data$ENVIRON_COMPARTMENT_SUB, subcompartment_codes$ENVIRON_COMPARTMENT_SUB)
+    ])
+  )
+  compartment_parent_code <- compartment_codes$code[
+    match(data$ENVIRON_COMPARTMENT, compartment_codes$ENVIRON_COMPARTMENT)
+  ]
+  compartment_block <- ifelse(
+    is.na(compartment_parent_code) | is.na(compartment_child_code),
+    NA_character_,
+    paste0(compartment_parent_code, compartment_child_code)
+  )
+
+  geography_block <- group_code_block(
+    data$SITE_GEOGRAPHIC_FEATURE, data$SITE_GEOGRAPHIC_FEATURE_SUB,
+    geography_codes, geography_sub_codes,
+    "SITE_GEOGRAPHIC_FEATURE", "SITE_GEOGRAPHIC_FEATURE_SUB"
+  )
+
+  composite <- paste(data$group_id, compartment_block, geography_block, sep = "-")
+  missing <- is.na(compartment_block) | is.na(geography_block)
+  if (any(missing)) {
+    cli::cli_warn(c(
+      "{sum(missing)} group(s) have no compartment/geography code yet.",
+      "i" = "Add the missing value(s) to the lookup CSVs in data/clean/lookups/."
+    ))
+    composite[missing] <- data$group_id[missing]
+  }
+
+  has_species <- !is.na(data$SAMPLE_SPECIES) & nzchar(data$SAMPLE_SPECIES)
+  species_code <- format_species_code(data$SAMPLE_SPECIES, species_overrides)
+  tissue_code <- tissue_codes$code[match(data$SAMPLE_TISSUE, tissue_codes$SAMPLE_TISSUE)]
+  needs_tissue <- has_species & !missing & is.na(tissue_code)
+  if (any(needs_tissue)) {
+    cli::cli_warn(c(
+      "{sum(needs_tissue)} group(s) have a species but no tissue code yet.",
+      "i" = "Add the missing SAMPLE_TISSUE value(s) to group_tissue_codes.csv."
+    ))
+  }
+  add_species_tissue <- has_species & !missing & !is.na(tissue_code)
+  composite[add_species_tissue] <- paste0(
+    composite[add_species_tissue], "-",
+    species_code[add_species_tissue], "-", tissue_code[add_species_tissue]
+  )
+
+  unit_code <- unit_codes$code[match(data$MEASURED_UNIT_STANDARD, unit_codes$MEASURED_UNIT_STANDARD)]
+  unit_code[is.na(unit_code)] <- "X"
+  composite[!missing] <- paste0(composite[!missing], "-", unit_code[!missing])
+
+  composite
+}
+
 #' Attach Group IDs to a Table
 #'
 #' Left join on the full group key, with an assertion that the row count did not

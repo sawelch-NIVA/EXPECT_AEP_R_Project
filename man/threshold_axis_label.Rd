@@ -13,7 +13,14 @@ threshold_axis_label(thresholds)
 A character vector of short labels.
 }
 \description{
-What goes on the secondary axis: the class numeral where there is one, and the
-threshold type otherwise. PROREF and BAC are \emph{styled} as class I but must not
-be \emph{labelled} \code{I}, since neither is a Norwegian classification class.
+What goes on the secondary axis: the numeral of the class the boundary
+\strong{opens} where there is one, and the threshold type otherwise. PROREF and BAC
+are \emph{styled} as class I but must not be \emph{labelled} \code{I}, since neither is a
+Norwegian classification class.
+}
+\details{
+Reads \code{THRESHOLD_OPENS_CLASS} (see \code{\link[=add_threshold_boundary_class]{add_threshold_boundary_class()}}) so that a
+line reads as "above here you are in class X", which is the question a
+concentration is being compared against. Falls back to deriving it where the
+column is absent, so a hand-built table still labels sensibly.
 }

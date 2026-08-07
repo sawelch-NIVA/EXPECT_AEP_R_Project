@@ -5,7 +5,7 @@
 \title{Load literature data from parquet file}
 \usage{
 load_literature_parquet(
-  input_path = "data/clean",
+  input_path = "data/clean/derived",
   filename = "literature_data.parquet"
 )
 }

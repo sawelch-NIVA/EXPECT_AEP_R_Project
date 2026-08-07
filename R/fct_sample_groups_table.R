@@ -28,9 +28,16 @@
 #' from there into the docx.
 #'
 #' @param summary_data The `summarise_literature_data` target.
-#' @param ids The `group_ids` ledger, or `NULL`. When supplied, the stable group
-#'   id becomes the table's first column: it is what you read off the page and
-#'   type into `group_decisions.csv`, so it has to be visible here.
+#' @param ids The `group_ids` ledger, or `NULL`. When supplied, the table's
+#'   first column shows [format_composite_group_id()]'s composite label
+#'   (e.g. `"G006-Bf-Cnr-G.mor-Liv-Mw"`) rather than the bare `group_id`.
+#'   This is DISPLAY ONLY: `type into group_decisions.csv` still means the
+#'   bare `group_id` (e.g. `"G006"`) -- that value, not the composite label,
+#'   is what `lump_into` cells, `aep_nodes.csv` notes and every
+#'   `{#grp-G006}` heading anchor in `docs/groups/*.qmd` actually point at,
+#'   and none of those are touched here. A group with no compartment or
+#'   geography code yet (see `misc-todo.md` item 13) falls back to its bare
+#'   `group_id` in this column too.
 #' @return A tibble sorted by `n` descending, with columns `group_id`, `group`,
 #'   `location`, `dates`, `n`, `mean_sd`, `median`, `n_outliers`,
 #'   `dip_p_label`, `n_units`, `dropped_label`, `.is_multimodal`, `.is_outlier`,
@@ -43,7 +50,7 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
   group_ids <- if (is.null(ids)) {
     rep(NA_character_, nrow(summary_data))
   } else {
-    attach_group_ids(summary_data, ids)$group_id
+    format_composite_group_id(attach_group_ids(summary_data, ids))
   }
 
   summary_data |>

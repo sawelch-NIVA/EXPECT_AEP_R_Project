@@ -6,7 +6,7 @@
 \usage{
 save_literature_parquet(
   data,
-  output_path = "data/clean",
+  output_path = "data/clean/derived",
   filename = "literature_data.parquet"
 )
 }

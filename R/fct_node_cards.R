@@ -708,9 +708,20 @@ mean and median disagree; see strips")
         # node in conversation, not information about it, so it sits out of the
         # reading path rather than inside the title. Left rather than right so it
         # matches the full card, where the id leads the title.
-        ggplot2::annotate(
-          "text", x = 0, y = 3.0, hjust = 0, vjust = 1, size = 2.6,
-          label = node$node_id[1], colour = "grey55"
+        #
+        # Anchored to the card's physical corner (18pt from the top, 18pt from
+        # the left) rather than the data coordinates used everywhere else on
+        # this card (Sam 2026-08-07: composite ids like "N003-mine-tailings"
+        # are longer than the old "N003" and need to stay pinned to the
+        # corner regardless of card size, not drift with the data range).
+        ggplot2::annotation_custom(
+          grid::textGrob(
+            node$node_id[1],
+            x = grid::unit(18, "points"),
+            y = grid::unit(1, "npc") - grid::unit(18, "points"),
+            hjust = 0, vjust = 1,
+            gp = grid::gpar(fontsize = 2.6 * ggplot2::.pt, col = "grey55")
+          )
         ) +
         # All three centred on the SAME anchor, x = 0.5 with hjust = 0.5. That
         # only means the same thing in each plot now that the strips below span

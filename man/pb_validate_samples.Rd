@@ -34,10 +34,10 @@ pb_validate_samples(example_samples_tibble())
 }
 }
 \seealso{
-\code{\link[eDataDRF:pb_validate_edata_table]{pb_validate_edata_table()}} for the underlying validation framework,
-\code{\link[eDataDRF:pb_validate_all_edata_tables]{pb_validate_all_edata_tables()}} to validate all tables at once,
-\code{\link[eDataDRF:environ_compartments_sub_vocabulary]{environ_compartments_sub_vocabulary()}} for the compartment hierarchy used in
+\code{\link[eDataDRF:pb_validate_edata_table]{eDataDRF::pb_validate_edata_table()}} for the underlying validation framework,
+\code{\link[eDataDRF:pb_validate_all_edata_tables]{eDataDRF::pb_validate_all_edata_tables()}} to validate all tables at once,
+\code{\link[eDataDRF:environ_compartments_sub_vocabulary]{eDataDRF::environ_compartments_sub_vocabulary()}} for the compartment hierarchy used in
 the consistency check,
-\code{\link[eDataDRF:example_samples_tibble]{example_samples_tibble()}} for an example Samples table.
+\code{\link[eDataDRF:example_samples_tibble]{eDataDRF::example_samples_tibble()}} for an example Samples table.
 }
 \concept{validation}

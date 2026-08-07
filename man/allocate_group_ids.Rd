@@ -6,7 +6,7 @@
 \usage{
 allocate_group_ids(
   summary_data,
-  path = here::here("data/clean/group_ids.csv"),
+  path = here::here("data/clean/decisions/group_ids.csv"),
   verbose = TRUE
 )
 }

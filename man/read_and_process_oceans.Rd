@@ -6,7 +6,7 @@
 \usage{
 read_and_process_oceans(
   raw_path = "data/raw/shapefiles/World_Seas_IHO_v3.shp",
-  output_path = "data/clean/study_area_shapefile.shp",
+  output_path = "data/clean/spatial/study_area_shapefile.shp",
   bbox = northern_hemisphere_bbox(),
   force_reprocess = FALSE
 )

@@ -14,6 +14,7 @@ generate_group_notebooks(
   species_nodes = NULL,
   overview_paths = character(0),
   species_paths = character(0),
+  refresh_panels = TRUE,
   verbose = TRUE
 )
 }

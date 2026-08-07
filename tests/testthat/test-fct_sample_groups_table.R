@@ -124,6 +124,36 @@ test_that("build_sample_groups_table labels non-biota by compartment", {
   expect_false(grepl("Gadus", result$group))
 })
 
+test_that("build_sample_groups_table shows the composite id, not the bare one, when ids are supplied", {
+  # format_composite_group_id() display-only integration, 2026-08-07: the
+  # bare group_id stays the join/anchor key everywhere else (group_decisions
+  # lump_into, aep_nodes.csv notes, docs/groups/*.qmd {#grp-...} anchors) --
+  # this only changes what's shown in the rendered table.
+  summary <- fake_summary(SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported")
+  key <- triage_group_cols()
+  ids <- summary[key]
+  ids$group_id <- "G014"
+
+  result <- build_sample_groups_table(summary, ids)
+  expect_equal(result$group_id, "G014-Bf-Cnr-G.mor-Liv-Md")
+})
+
+test_that("a group with no compartment/geography code falls back to its bare id in the table", {
+  summary <- fake_summary(
+    ENVIRON_COMPARTMENT = "Aquatic", ENVIRON_COMPARTMENT_SUB = "Some New Compartment",
+    SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported"
+  )
+  key <- triage_group_cols()
+  ids <- summary[key]
+  ids$group_id <- "G014"
+
+  expect_warning(
+    result <- build_sample_groups_table(summary, ids),
+    "no compartment/geography code"
+  )
+  expect_equal(result$group_id, "G014")
+})
+
 test_that("build_sample_groups_table folds dates into a year range", {
   expect_equal(build_sample_groups_table(fake_summary())$dates, "2001–2019")
 })

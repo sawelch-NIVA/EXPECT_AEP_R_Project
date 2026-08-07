@@ -28,6 +28,6 @@ relationship to how well known a name is, and the whole point of this column
 is recognisability.
 
 The register's order is not authoritative either, so a wrong-looking name here
-is a cache edit away: \code{data/clean/species_common_names_cache.csv} is
+is a cache edit away: \code{data/clean/lookups/species_common_names_cache.csv} is
 hand-editable and is never overwritten for a species already in it.
 }
