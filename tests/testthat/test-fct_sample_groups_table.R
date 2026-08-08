@@ -124,34 +124,19 @@ test_that("build_sample_groups_table labels non-biota by compartment", {
   expect_false(grepl("Gadus", result$group))
 })
 
-test_that("build_sample_groups_table shows the composite id, not the bare one, when ids are supplied", {
-  # format_composite_group_id() display-only integration, 2026-08-07: the
-  # bare group_id stays the join/anchor key everywhere else (group_decisions
-  # lump_into, aep_nodes.csv notes, docs/groups/*.qmd {#grp-...} anchors) --
-  # this only changes what's shown in the rendered table.
-  summary <- fake_summary(SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported")
+test_that("build_sample_groups_table shows whatever group_id the ledger carries", {
+  # Since the 2026-08-08 migration (scripts/migrate_group_ids_to_composite.R),
+  # the ledger's group_id IS the composite label already -- this function just
+  # passes it through via attach_group_ids(), it does not derive it. Deriving
+  # is a one-off, done to the ledger, not a per-render step; see
+  # format_composite_group_id()'s own tests in test-fct_group_ids.R for that.
+  summary <- fake_summary()
   key <- triage_group_cols()
   ids <- summary[key]
-  ids$group_id <- "G014"
+  ids$group_id <- "G014-Bf-Cnr-G-mor-Liv-Md"
 
   result <- build_sample_groups_table(summary, ids)
-  expect_equal(result$group_id, "G014-Bf-Cnr-G.mor-Liv-Md")
-})
-
-test_that("a group with no compartment/geography code falls back to its bare id in the table", {
-  summary <- fake_summary(
-    ENVIRON_COMPARTMENT = "Aquatic", ENVIRON_COMPARTMENT_SUB = "Some New Compartment",
-    SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported"
-  )
-  key <- triage_group_cols()
-  ids <- summary[key]
-  ids$group_id <- "G014"
-
-  expect_warning(
-    result <- build_sample_groups_table(summary, ids),
-    "no compartment/geography code"
-  )
-  expect_equal(result$group_id, "G014")
+  expect_equal(result$group_id, "G014-Bf-Cnr-G-mor-Liv-Md")
 })
 
 test_that("build_sample_groups_table folds dates into a year range", {

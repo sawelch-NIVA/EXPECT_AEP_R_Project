@@ -42,34 +42,36 @@ Aquatic / Aquatic Sediment / mg/kg (dry)
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |--------|--------|--------|-------:|-------:|-------:|-------:|-------:|-------:|--------|
-| [G002](#grp-G002) | Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 25,024 | 94.1 | 19.7 | 20.6 | 3.6 | 2 | multimodal |
-| [G008](#grp-G008) | Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 857 | 152 | 19 | 20.5 | 3.85 | 1 |  |
-| [G009](#grp-G009) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 573 | 108 | 50 | 46.4 | 3.08 | 1 |  |
-| [G013](#grp-G013) | Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 314 | 137 | 86 | 88.6 | 2.45 | 1 |  |
-| [G016](#grp-G016) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 247 | 14.4 | 13.4 | 11.6 | 2.05 | 3 |  |
-| [G019](#grp-G019) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) | `mg/kg (dry)` | 164 | 31.7 | 30 | 25 | 4.07 | 2 | outliers |
-| [G034](#grp-G034) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 69 | 43.9 | 35.8 | 36.3 | 1.82 | 1 |  |
-| [G096](#grp-G096) | Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 17 | 216 | 216 | 216 |  | 1 |  |
-| [G128](#grp-G128) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 8 | 0.00268 | 0.00268 | 0.00268 |  | 1 |  |
-| [G133](#grp-G133) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 7 | 781 | 200 | 273 | 4.93 | 1 |  |
-| [G134](#grp-G134) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) | `mg/kg (wet)` | 7 | 0.053 | 0.053 | 0.0473 | 1.99 | 1 |  |
-| [G135](#grp-G135) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 7 | 1.6 | 0.00538 | 0.0234 | 39.7 | 1 |  |
-| [G155](#grp-G155) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.128 | 0.128 | 0.128 |  | 1 |  |
-| [G168](#grp-G168) | Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 3 | 45.2 | 39.1 | 39.6 | 1.89 | 1 |  |
-| [G169](#grp-G169) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 3 | 38.3 | 46 | 31.6 | 2.33 | 1 |  |
-| [G189](#grp-G189) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.6e+03 | 2.6e+03 | 2.6e+03 | 1.06 | 1 |  |
+| [G002-Wsd-Cwb-Md](#grp-G002-Wsd-Cwb-Md) | Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 25,024 | 94.1 | 19.7 | 20.6 | 3.6 | 2 | multimodal |
+| [G008-Wsd-Rwb-Md](#grp-G008-Wsd-Rwb-Md) | Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 857 | 152 | 19 | 20.5 | 3.85 | 1 |  |
+| [G009-Wsd-Lwb-Md](#grp-G009-Wsd-Lwb-Md) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 573 | 108 | 50 | 46.4 | 3.08 | 1 |  |
+| [G013-Wsd-Cwc-Md](#grp-G013-Wsd-Cwc-Md) | Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 314 | 137 | 86 | 88.6 | 2.45 | 1 |  |
+| [G016-Wsd-Owb-Md](#grp-G016-Wsd-Owb-Md) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 247 | 14.4 | 13.4 | 11.6 | 2.05 | 3 |  |
+| [G019-Wsd-Cot-Md](#grp-G019-Wsd-Cot-Md) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) | `mg/kg (dry)` | 164 | 31.7 | 30 | 25 | 4.07 | 2 | outliers |
+| [G034-Wsd-Rwc-Md](#grp-G034-Wsd-Rwc-Md) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 69 | 43.9 | 35.8 | 36.3 | 1.82 | 1 |  |
+| [G096-Wsd-Dws-Md](#grp-G096-Wsd-Dws-Md) | Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 17 | 216 | 216 | 216 |  | 1 |  |
+| [G128-Wsd-Oot-Md](#grp-G128-Wsd-Oot-Md) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 8 | 0.00268 | 0.00268 | 0.00268 |  | 1 |  |
+| [G133-Wsd-Gwb-Md](#grp-G133-Wsd-Gwb-Md) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 7 | 781 | 200 | 273 | 4.93 | 1 |  |
+| [G134-Wsd-Oot-Mw](#grp-G134-Wsd-Oot-Mw) | Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) | `mg/kg (wet)` | 7 | 0.053 | 0.053 | 0.0473 | 1.99 | 1 |  |
+| [G135-Wsd-Rwc-C](#grp-G135-Wsd-Rwc-C) | Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 7 | 1.6 | 0.00538 | 0.0234 | 39.7 | 1 |  |
+| [G155-Wsd-Cot-Mw](#grp-G155-Wsd-Cot-Mw) | Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.128 | 0.128 | 0.128 |  | 1 |  |
+| [G168-Wsd-Cnv-Md](#grp-G168-Wsd-Cnv-Md) | Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) | `mg/kg (dry)` | 3 | 45.2 | 39.1 | 39.6 | 1.89 | 1 |  |
+| [G169-Wsd-Lwc-Md](#grp-G169-Wsd-Lwc-Md) | Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 3 | 38.3 | 46 | 31.6 | 2.33 | 1 |  |
+| [G189-Wsd-Gwc-Md](#grp-G189-Wsd-Gwc-Md) | Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.6e+03 | 2.6e+03 | 2.6e+03 | 1.06 | 1 |  |
 
 : Groups in the Aquatic Sediment notebook.
 
 # Comparison
 
+::: {.callout-note}
 Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Sediment from different site times probably are slightly different, because biogeochemistry, hydrology, etc. will be different, but this might not be a strong enough signal. We also have some very small sample sizes. My initial reaction is that we should drop any samples that correspond to suspended sediment (e.g. *Water column, pelagic zone* rather than *Water benthos*), because they're a small proportion of the overall group and they require a level of resolution that I don't think we can consistently provide with the data we have.
+:::
 
 # Groups
 
-## G002 Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G002}
+## G002-Wsd-Cwb-Md Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry) {#grp-G002-Wsd-Cwb-Md}
 
-`G002` `n` = 25,024 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G002-Wsd-Cwb-Md` `n` = 25,024 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -77,7 +79,7 @@ Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Se
 - **multimodal** (dip test not run)
 :::
 
-Distribution here (\@fig-g002-a) is normal-ish and centered slightly above the background concentration, but there's clearly at least one sub-peak at \~1e+00.5. Large right tail, and many samples at extremely high concentrations, which suggests unit errors. @fig-g002-b shows no clear temporal pattern, but central tendency around the aquatic sediment background (I) threshold from 2016 onwards. A few big outliers in specific years are perhaps errors rather than true variation. @fig-g002-c shows that with a handful of exceptions, campaigns have similar medians, but different patterns of outliers. @coteurFieldContaminationStarfish2003's concentrations have a median around 1e-03 and are several orders of magnitude lower than those from @norwegianenvironmentagencyVannmiljo2026. Some campaigns have slightly higher medians (Urban Fjord Contaminants), while Screening New Contaminants has a surprisingly low median with a lot of spread (but small sample size). No campaigns are explicitly and only focused on non-contaminated sites (e.g. Reference sites), so it is difficult to determine if there's a real difference between contaminated and uncontaminated sites. Probably inconclusive without looking at sampling depth, more detailed site information, and fractionation. @fig-g002-d mainly shows site coding atefacts, in any case, there seems to be no substantial difference between settled and suspended sediment. @fig-g002-e shows that most areas (at the current resolution) fall between 1e01 and 1e04, which isn't enough concentration resolution.
+Distribution here (\@fig-g002-wsd-cwb-md-a) is normal-ish and centered slightly above the background concentration, but there's clearly at least one sub-peak at \~1e+00.5. Large right tail, and many samples at extremely high concentrations, which suggests unit errors. @fig-g002-wsd-cwb-md-b shows no clear temporal pattern, but central tendency around the aquatic sediment background (I) threshold from 2016 onwards. A few big outliers in specific years are perhaps errors rather than true variation. @fig-g002-wsd-cwb-md-c shows that with a handful of exceptions, campaigns have similar medians, but different patterns of outliers. @coteurFieldContaminationStarfish2003's concentrations have a median around 1e-03 and are several orders of magnitude lower than those from @norwegianenvironmentagencyVannmiljo2026. Some campaigns have slightly higher medians (Urban Fjord Contaminants), while Screening New Contaminants has a surprisingly low median with a lot of spread (but small sample size). No campaigns are explicitly and only focused on non-contaminated sites (e.g. Reference sites), so it is difficult to determine if there's a real difference between contaminated and uncontaminated sites. Probably inconclusive without looking at sampling depth, more detailed site information, and fractionation. @fig-g002-wsd-cwb-md-d mainly shows site coding atefacts, in any case, there seems to be no substantial difference between settled and suspended sediment. @fig-g002-wsd-cwb-md-e shows that most areas (at the current resolution) fall between 1e01 and 1e04, which isn't enough concentration resolution.
 
 TODO: Figure b is missing a secondary axis for thresholds *(still open, 2026-08-05: the class numerals collide on a vertical axis, II and IV being 0.24 orders apart on a 10.7-order scale. No better idea yet. PLAN.md P1.1g.)*
 
@@ -124,91 +126,97 @@ TODO: More concentration resolution for fig-e. COuld we add thresholds to the ke
 >
 > Three options, in the order I would take them: (1) chase the two tails, since they are data errors that will distort means and thresholds too; (2) split the limits by unit and give panel (a) its own; (3) clip the colour scale to a percentile range and mark out-of-range cells. Not doing any of them unilaterally because all three change a figure the manuscript may use.
 
-::: {#fig-g002 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_a_density.png){#fig-g002-a group="G002"}
+::: {#fig-g002-wsd-cwb-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G002-Wsd-Cwb-Md_a_density.png){#fig-g002-wsd-cwb-md-a group="G002-Wsd-Cwb-Md"}
 
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_b_date.png){#fig-g002-b group="G002"}
+![Concentration by date](../../triage/G002-Wsd-Cwb-Md_b_date.png){#fig-g002-wsd-cwb-md-b group="G002-Wsd-Cwb-Md"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_c_source.png){#fig-g002-c group="G002"}
+![Distribution by campaign or reference](../../triage/G002-Wsd-Cwb-Md_c_source.png){#fig-g002-wsd-cwb-md-c group="G002-Wsd-Cwb-Md"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g002-d group="G002"}
+![Distribution by site type (all geographies)](../../triage/G002-Wsd-Cwb-Md_d_site_type.png){#fig-g002-wsd-cwb-md-d group="G002-Wsd-Cwb-Md"}
 
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g002-e group="G002"}
+![Spatial distribution](../../triage/G002-Wsd-Cwb-Md_e_spatial.png){#fig-g002-wsd-cwb-md-e group="G002-Wsd-Cwb-Md"}
 
-G002: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
+G002-Wsd-Cwb-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
 :::
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
-
-## G008 Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) {#grp-G008}
-
-`G008` `n` = 857 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
-
-- @fig-g008-a: at least two log-normal distributions with slightly different means (one below I, one above), plus characteristic 1e3 unit error slopes.
-
-- @fig-g008-b: no obvious time trend. highest concentration of samples in 2017, doesn't look log-normal but may be resolution artifact. some outlier noise apparent.
-
-- @fig-g008-c: little variation between campaigns, no reference rivers for comparison but noticable difference between the two biggest groups: Polluted Seabed and Measures Monitoring, probably makes sense to group into polluted and non-polluted. A handful of unit error outliers.
-
-- @fig-g008-d: as with other sediment sampling groups, suspended sediment concentrations appear to generally be higher than those taken from benthos (though this may be artefact of methodology). given the much wider spread of benthic samples, these could probably be lumped.
-
-- @fig-g008-e: TODO: Re-run with better resolution
-
-::: {#fig-g008 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_a_density.png){#fig-g008-a group="G008"}
-
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_b_date.png){#fig-g008-b group="G008"}
-
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_c_source.png){#fig-g008-c group="G008"}
-
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g008-d group="G008"}
-
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_River_stream_canal_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g008-e group="G008"}
-
-G008: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry)
 :::
 
+## G008-Wsd-Rwb-Md Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry) {#grp-G008-Wsd-Rwb-Md}
+
+`G008-Wsd-Rwb-Md` `n` = 857 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+- @fig-g008-wsd-rwb-md-a: at least two log-normal distributions with slightly different means (one below I, one above), plus characteristic 1e3 unit error slopes.
+
+- @fig-g008-wsd-rwb-md-b: no obvious time trend. highest concentration of samples in 2017, doesn't look log-normal but may be resolution artifact. some outlier noise apparent.
+
+- @fig-g008-wsd-rwb-md-c: little variation between campaigns, no reference rivers for comparison but noticable difference between the two biggest groups: Polluted Seabed and Measures Monitoring, probably makes sense to group into polluted and non-polluted. A handful of unit error outliers.
+
+- @fig-g008-wsd-rwb-md-d: as with other sediment sampling groups, suspended sediment concentrations appear to generally be higher than those taken from benthos (though this may be artefact of methodology). given the much wider spread of benthic samples, these could probably be lumped.
+
+- @fig-g008-wsd-rwb-md-e: TODO: Re-run with better resolution
+
+::: {#fig-g008-wsd-rwb-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G008-Wsd-Rwb-Md_a_density.png){#fig-g008-wsd-rwb-md-a group="G008-Wsd-Rwb-Md"}
+
+![Concentration by date](../../triage/G008-Wsd-Rwb-Md_b_date.png){#fig-g008-wsd-rwb-md-b group="G008-Wsd-Rwb-Md"}
+
+![Distribution by campaign or reference](../../triage/G008-Wsd-Rwb-Md_c_source.png){#fig-g008-wsd-rwb-md-c group="G008-Wsd-Rwb-Md"}
+
+![Distribution by site type (all geographies)](../../triage/G008-Wsd-Rwb-Md_d_site_type.png){#fig-g008-wsd-rwb-md-d group="G008-Wsd-Rwb-Md"}
+
+![Spatial distribution](../../triage/G008-Wsd-Rwb-Md_e_spatial.png){#fig-g008-wsd-rwb-md-e group="G008-Wsd-Rwb-Md"}
+
+G008-Wsd-Rwb-Md: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry)
+:::
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G009 Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) {#grp-G009}
+## G009-Wsd-Lwb-Md Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry) {#grp-G009-Wsd-Lwb-Md}
 
-`G009` `n` = 573 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G009-Wsd-Lwb-Md` `n` = 573 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-- @fig-g009-a: one normal distribution around 108 mg/kg dry, plus unit error foothills. Noticably higher mean than *Coastal, fjord* benthos (G002); lower mean but higher median than freshwater lotic (G008)
+- @fig-g009-wsd-lwb-md-a: one normal distribution around 108 mg/kg dry, plus unit error foothills. Noticably higher mean than *Coastal, fjord* benthos (G002-Wsd-Cwb-Md); lower mean but higher median than freshwater lotic (G008-Wsd-Rwb-Md)
 
-- @fig-g009-b: no obvious temporal trend. most samples from 2023 and 2019.
+- @fig-g009-wsd-lwb-md-b: no obvious temporal trend. most samples from 2023 and 2019.
 
-- @fig-g009-c: some variation between campaigns, suspected outliers in *Other* and *Mine Impact* not explicitly flagged as such due to small sample sizes. Campaigns suggest that e.g. mines are a bigger copper source than firing ranges, but very small sample sizes make WoE low.
+- @fig-g009-wsd-lwb-md-c: some variation between campaigns, suspected outliers in *Other* and *Mine Impact* not explicitly flagged as such due to small sample sizes. Campaigns suggest that e.g. mines are a bigger copper source than firing ranges, but very small sample sizes make WoE low.
 
-- @fig-g009-d: as with other sediment sampling groups, suspended sediment appears to be slightly more contaminated, but displays far less variation
+- @fig-g009-wsd-lwb-md-d: as with other sediment sampling groups, suspended sediment appears to be slightly more contaminated, but displays far less variation
 
-- TODO: Not enough resolution *(see the note under G002 fig-e: the shared compartment scale costs 4 orders, but the two data-error tails cost more. Your call.)*
+- TODO: Not enough resolution *(see the note under G002-Wsd-Cwb-Md fig-e: the shared compartment scale costs 4 orders, but the two data-error tails cost more. Your call.)*
 
 - TODO: shadowtext sample size? not visible when high concentrations *(FIXED 2026-08-05, without shadowtext. The labels now sit in a reserved margin outside the data rather than on top of it, which also stops them hiding the observations they count. A halo would have kept them legible over the tiles but left them covering data.)*
 
-::: {#fig-g009 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_a_density.png){#fig-g009-a group="G009"}
+::: {#fig-g009-wsd-lwb-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G009-Wsd-Lwb-Md_a_density.png){#fig-g009-wsd-lwb-md-a group="G009-Wsd-Lwb-Md"}
 
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_b_date.png){#fig-g009-b group="G009"}
+![Concentration by date](../../triage/G009-Wsd-Lwb-Md_b_date.png){#fig-g009-wsd-lwb-md-b group="G009-Wsd-Lwb-Md"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_c_source.png){#fig-g009-c group="G009"}
+![Distribution by campaign or reference](../../triage/G009-Wsd-Lwb-Md_c_source.png){#fig-g009-wsd-lwb-md-c group="G009-Wsd-Lwb-Md"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g009-d group="G009"}
+![Distribution by site type (all geographies)](../../triage/G009-Wsd-Lwb-Md_d_site_type.png){#fig-g009-wsd-lwb-md-d group="G009-Wsd-Lwb-Md"}
 
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Lake_pond_pool_reservoir_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g009-e group="G009"}
+![Spatial distribution](../../triage/G009-Wsd-Lwb-Md_e_spatial.png){#fig-g009-wsd-lwb-md-e group="G009-Wsd-Lwb-Md"}
 
-G009: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry)
+G009-Wsd-Lwb-Md: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry)
 :::
 
+::: {.callout-note}
 **Verdict:**
 
 - Drop outliers, split into contaminated and uncontaminated sites, use benthos group
 
 - Campaigns are good evidence of sources
+:::
 
-## G013 Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) {#grp-G013}
+## G013-Wsd-Cwc-Md Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry) {#grp-G013-Wsd-Cwc-Md}
 
-`G013` `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G013-Wsd-Cwc-Md` `n` = 314 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 TODO: Add bullet points with figure refs to scaffold (generate once then don't touch to avoid over-writing anything
 
@@ -216,32 +224,33 @@ TODO: Add bullet points with figure refs to scaffold (generate once then don't t
 >
 > Append-only is safe by construction and needed no special handling: sections are only emitted for group anchors absent from the file, so any section you have already written in is never revisited. That is also why this is **not backfilled** into the 29 sections that already have panels, including this one. Backfilling would mean rewriting existing sections, which the generator does not do. New groups get the bullets; existing ones keep whatever you wrote.
 
-- @fig-g013-a: 2+ normal distributions with means at and below threshold II, plus foothills that suggest unit errors or sub-groups
+- @fig-g013-wsd-cwc-md-a: 2+ normal distributions with means at and below threshold II, plus foothills that suggest unit errors or sub-groups
 
-- @fig-g013-b: No obvious time trend, although mean seems to shift between 2010-2017 and 2019-2025 sampling periods
+- @fig-g013-wsd-cwc-md-b: No obvious time trend, although mean seems to shift between 2010-2017 and 2019-2025 sampling periods
 
-- @fig-g013-c: Polluted Seabed and Measures Monitoring contribute majority of data, mean of latter above that of former suggests strong Polluted Seabed signal (but polluted by what not obvious from Campaign name). Other campaign (Pollution Monitoring, Industrial Impact, Dredging & Dumping) sample sizes so small as to preclude useful interpretation.
+- @fig-g013-wsd-cwc-md-c: Polluted Seabed and Measures Monitoring contribute majority of data, mean of latter above that of former suggests strong Polluted Seabed signal (but polluted by what not obvious from Campaign name). Other campaign (Pollution Monitoring, Industrial Impact, Dredging & Dumping) sample sizes so small as to preclude useful interpretation.
 
-- @fig-g013-d: same suspended vs. benthic variation as for other sediment (does site type and campaign correlate?)
+- @fig-g013-wsd-cwc-md-d: same suspended vs. benthic variation as for other sediment (does site type and campaign correlate?)
 
-- @fig-g013-e: No enough resolution, but notable that no sites are actually in Arctic regions.\
+- @fig-g013-wsd-cwc-md-e: No enough resolution, but notable that no sites are actually in Arctic regions.\
 
   TODO: Correlation matrices?
 
-::: {#fig-g013 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_a_density.png){#fig-g013-a group="G013"}
+::: {#fig-g013-wsd-cwc-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G013-Wsd-Cwc-Md_a_density.png){#fig-g013-wsd-cwc-md-a group="G013-Wsd-Cwc-Md"}
 
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_b_date.png){#fig-g013-b group="G013"}
+![Concentration by date](../../triage/G013-Wsd-Cwc-Md_b_date.png){#fig-g013-wsd-cwc-md-b group="G013-Wsd-Cwc-Md"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_c_source.png){#fig-g013-c group="G013"}
+![Distribution by campaign or reference](../../triage/G013-Wsd-Cwc-Md_c_source.png){#fig-g013-wsd-cwc-md-c group="G013-Wsd-Cwc-Md"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_d_site_type.png){#fig-g013-d group="G013"}
+![Distribution by site type (all geographies)](../../triage/G013-Wsd-Cwc-Md_d_site_type.png){#fig-g013-wsd-cwc-md-d group="G013-Wsd-Cwc-Md"}
 
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Water_column_pelagic_zone_mg_kg_dry_e_spatial.png){#fig-g013-e group="G013"}
+![Spatial distribution](../../triage/G013-Wsd-Cwc-Md_e_spatial.png){#fig-g013-wsd-cwc-md-e group="G013-Wsd-Cwc-Md"}
 
-G013: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry)
+G013-Wsd-Cwc-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry)
 :::
 
+::: {.callout-note}
 **Verdict:**
 
 - Weaker evidence for arctic stuff, because all sites are under Arctic circle
@@ -249,30 +258,33 @@ G013: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone /
 - Polluted seabeds are actually polluted, but we don't know what they're polluted by
 
 - Split into reference/polluted, benthos/suspended?
-
-## G016 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G016}
-
-`G016` `n` = 247 measurements, from **3** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
-
-::: {#fig-g016 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_a_density.png){#fig-g016-a group="G016"}
-
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_b_date.png){#fig-g016-b group="G016"}
-
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_c_source.png){#fig-g016-c group="G016"}
-
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_d_site_type.png){#fig-g016-d group="G016"}
-
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Ocean_sea_territorial_waters_Water_benthos_mg_kg_dry_e_spatial.png){#fig-g016-e group="G016"}
-
-G016: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry)
 :::
 
+## G016-Wsd-Owb-Md Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G016-Wsd-Owb-Md}
+
+`G016-Wsd-Owb-Md` `n` = 247 measurements, from **3** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g016-wsd-owb-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G016-Wsd-Owb-Md_a_density.png){#fig-g016-wsd-owb-md-a group="G016-Wsd-Owb-Md"}
+
+![Concentration by date](../../triage/G016-Wsd-Owb-Md_b_date.png){#fig-g016-wsd-owb-md-b group="G016-Wsd-Owb-Md"}
+
+![Distribution by campaign or reference](../../triage/G016-Wsd-Owb-Md_c_source.png){#fig-g016-wsd-owb-md-c group="G016-Wsd-Owb-Md"}
+
+![Distribution by site type (all geographies)](../../triage/G016-Wsd-Owb-Md_d_site_type.png){#fig-g016-wsd-owb-md-d group="G016-Wsd-Owb-Md"}
+
+![Spatial distribution](../../triage/G016-Wsd-Owb-Md_e_spatial.png){#fig-g016-wsd-owb-md-e group="G016-Wsd-Owb-Md"}
+
+G016-Wsd-Owb-Md: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry)
+:::
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G019 Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) {#grp-G019}
+## G019-Wsd-Cot-Md Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry) {#grp-G019-Wsd-Cot-Md}
 
-`G019` `n` = 164 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G019-Wsd-Cot-Md` `n` = 164 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -280,98 +292,121 @@ G016: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water bentho
 - **? outliers**
 :::
 
-::: {#fig-g019 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_a_density.png){#fig-g019-a group="G019"}
+::: {#fig-g019-wsd-cot-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G019-Wsd-Cot-Md_a_density.png){#fig-g019-wsd-cot-md-a group="G019-Wsd-Cot-Md"}
 
-![Concentration by date](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_b_date.png){#fig-g019-b group="G019"}
+![Concentration by date](../../triage/G019-Wsd-Cot-Md_b_date.png){#fig-g019-wsd-cot-md-b group="G019-Wsd-Cot-Md"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_c_source.png){#fig-g019-c group="G019"}
+![Distribution by campaign or reference](../../triage/G019-Wsd-Cot-Md_c_source.png){#fig-g019-wsd-cot-md-c group="G019-Wsd-Cot-Md"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_d_site_type.png){#fig-g019-d group="G019"}
+![Distribution by site type (all geographies)](../../triage/G019-Wsd-Cot-Md_d_site_type.png){#fig-g019-wsd-cot-md-d group="G019-Wsd-Cot-Md"}
 
-![Spatial distribution](../../triage/Aquatic_Aquatic_Sediment_Coastal_fjord_Other_mg_kg_dry_e_spatial.png){#fig-g019-e group="G019"}
+![Spatial distribution](../../triage/G019-Wsd-Cot-Md_e_spatial.png){#fig-g019-wsd-cot-md-e group="G019-Wsd-Cot-Md"}
 
-G019: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry)
+G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry)
 :::
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G034 Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) {#grp-G034}
+## G034-Wsd-Rwc-Md Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/kg (dry) {#grp-G034-Wsd-Rwc-Md}
 
-`G034` `n` = 69 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G034-Wsd-Rwc-Md` `n` = 69 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G034` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G034-Wsd-Rwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G096 Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G096}
+## G096-Wsd-Dws-Md Aquatic / Aquatic Sediment / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G096-Wsd-Dws-Md}
 
-`G096` `n` = 17 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G096-Wsd-Dws-Md` `n` = 17 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G096` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G096-Wsd-Dws-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G128 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G128}
+## G128-Wsd-Oot-Md Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G128-Wsd-Oot-Md}
 
-`G128` `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G128-Wsd-Oot-Md` `n` = 8 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G128` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G128-Wsd-Oot-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G133 Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) {#grp-G133}
+## G133-Wsd-Gwb-Md Aquatic / Aquatic Sediment / Groundwater, aquifer / Water benthos / mg/kg (dry) {#grp-G133-Wsd-Gwb-Md}
 
-`G133` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G133-Wsd-Gwb-Md` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G133` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G133-Wsd-Gwb-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G134 Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) {#grp-G134}
+## G134-Wsd-Oot-Mw Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Other / mg/kg (wet) {#grp-G134-Wsd-Oot-Mw}
 
-`G134` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G134-Wsd-Oot-Mw` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G134` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G134-Wsd-Oot-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G135 Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G135}
+## G135-Wsd-Rwc-C Aquatic / Aquatic Sediment / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G135-Wsd-Rwc-C}
 
-`G135` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G135-Wsd-Rwc-C` `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G135` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G135-Wsd-Rwc-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G155 Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) {#grp-G155}
+## G155-Wsd-Cot-Mw Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (wet) {#grp-G155-Wsd-Cot-Mw}
 
-`G155` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G155-Wsd-Cot-Mw` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G155` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G155-Wsd-Cot-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G168 Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G168}
+## G168-Wsd-Cnv-Md Aquatic / Aquatic Sediment / Coastal, fjord / Not relevant / mg/kg (dry) {#grp-G168-Wsd-Cnv-Md}
 
-`G168` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G168-Wsd-Cnv-Md` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G168` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G168-Wsd-Cnv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G169 Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) {#grp-G169}
+## G169-Wsd-Lwc-Md Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/kg (dry) {#grp-G169-Wsd-Lwc-Md}
 
-`G169` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G169-Wsd-Lwc-Md` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G169` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G169-Wsd-Lwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G189 Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) {#grp-G189}
+## G189-Wsd-Gwc-Md Aquatic / Aquatic Sediment / Groundwater, aquifer / Water column, pelagic zone / mg/kg (dry) {#grp-G189-Wsd-Gwc-Md}
 
-`G189` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G189-Wsd-Gwc-Md` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G189` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G189-Wsd-Gwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
+

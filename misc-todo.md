@@ -20,17 +20,33 @@
     - G087, G094, G131: no SITE_GEOGRAPHIC_FEATURE.
     Worth checking whether these are recoverable from the source references
     or genuinely unreported.
-14. Possible duplicate species under different names, found while abbreviating
-    SAMPLE_SPECIES for composite group IDs (2026-08-07). Both pairs abbreviate
-    to the same code by coincidence, which is what surfaced them, but they
-    look like genuine taxonomic duplicates rather than unrelated species that
-    happen to collide:
-    - "Eukrohnia hamata" and "Eukronia hamata" -- looks like a misspelling of
-      the same chaetognath, not two species.
-    - "Phoca groenlandica" and "Pagophilus groenlandicus" -- old vs. current
-      name for harp seal.
-    If they are the same species, those groups should probably be lumped
-    rather than each given a distinguishing code. Left un-overridden in
-    group_species_code_overrides.csv on purpose for now, so the composite ID
-    keeps surfacing the collision (both -> "E.ham" / "P.gro") until it's
-    resolved one way or the other.
+14. RESOLVED 2026-08-08: possible duplicate species under different names,
+    found while abbreviating SAMPLE_SPECIES for composite group IDs
+    (2026-08-07). "Eukronia hamata" -> "Eukrohnia hamata" and "Phoca
+    groenlandica" -> "Pagophilus groenlandicus" corrected at the source in
+    group_ids.csv. The Pagophilus/Phoca pair are still separate groups (same
+    species, different tissue) -- fine, the point was the name. The Eukrohnia
+    pair turned out to be a genuine duplicate: see item 16.
+16. G130 retired 2026-08-08, folded into G068. Both were "Eukrohnia
+    hamata / Whole body / Ocean, sea, territorial waters / Water column,
+    pelagic zone / mg/kg (dry)" -- identical on every group-key column --
+    once item 14's rename fixed G130's SAMPLE_SPECIES text, which is exactly
+    what surfaced the collision (attach_group_ids() errors loudly on a
+    duplicated ledger key, by design). Checked against the freshly computed
+    `summarise_literature_data`: the merged group's n = 34 exactly equals
+    G068's old n (26) plus G130's old n (8), confirming the underlying
+    literature data already treated these as one population and only the
+    ledger had them split. Removed G130's rows from group_ids.csv and
+    group_decisions.csv, and its section from
+    docs/groups/crustaceans-and-invertebrates.qmd (machine-generated only,
+    verdict was unwritten, no triage panels existed for it). G068's own
+    decision/notes are unreviewed since this merge -- worth a look now that
+    its n has grown from 26 to 34.
+15. Orphaned triage PNGs, expected from the group_id/group_slug migration
+    (2026-08-08, see R/fct_group_ids.R header and
+    scripts/migrate_group_ids_to_composite.R). `group_slug` used to be an
+    independent slugify_name(label) derivation and is now an alias for the
+    composite group_id, so every triage/*.png filename changes on the next
+    render. `targets` will write the new files but will not delete the old
+    ones under the previous slugs -- `triage/` needs a manual sweep at some
+    point to remove whatever is left unreferenced. Not urgent.

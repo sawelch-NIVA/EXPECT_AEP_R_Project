@@ -24,77 +24,84 @@ Aquatic / Marine/Salt Water / mg/L
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
-| [G004](#grp-G004) | Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L | `mg/L` | 4,969 | 0.00418 | 0.000724 | 0.000848 | 2.86 | 1 | multimodal |
-| [G046](#grp-G046) | Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 44 |  178 |  120 |  138 | 2.03 | 1 |  |
-| [G156](#grp-G156) | Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 | 77.5 |   48 | 61.3 | 2.09 | 1 | outliers |
-| [G207](#grp-G207) | Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L | `mg/L` | 1 | 0.000305 | 0.000305 | 0.000305 |  | 1 |  |
+| [G004-Wmw-Cwc-C](#grp-G004-Wmw-Cwc-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L | `mg/L` | 4,969 | 0.00418 | 0.000724 | 0.000848 | 2.86 | 1 | multimodal |
+| [G046-Wbw-Uwb-Md](#grp-G046-Wbw-Uwb-Md) | Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 44 |  178 |  120 |  138 | 2.03 | 1 |  |
+| [G156-Wbw-Owb-Md](#grp-G156-Wbw-Owb-Md) | Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 | 77.5 |   48 | 61.3 | 2.09 | 1 | outliers |
+| [G207-Wmw-Cnv-C](#grp-G207-Wmw-Cnv-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L | `mg/L` | 1 | 0.000305 | 0.000305 | 0.000305 |  | 1 |  |
 
 : Groups in the Marine and Brackish Water notebook. {#tbl-glance}
 
 # Comparison
 
+::: {.callout-note}
 *(Notes on how these groups relate: what should be lumped, split, or
 dropped, and why. This is the question the document exists to answer.)*
+:::
 
 # Groups
 
 
-## G004 Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L {#grp-G004}
+## G004-Wmw-Cwc-C Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L {#grp-G004-Wmw-Cwc-C}
 
-`G004` `n` = 4,969 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G004-Wmw-Cwc-C` `n` = 4,969 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
 ::: callout-warning
 ## Flagged
 - **multimodal** (dip test not run)
 :::
 
-::: {#fig-g004 layout-ncol=5}
+::: {#fig-g004-wmw-cwc-c layout-ncol=5}
 
-![Overall distribution (all units)](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g004-a group="G004"}
+![Overall distribution (all units)](../../triage/G004-Wmw-Cwc-C_a_density.png){#fig-g004-wmw-cwc-c-a group="G004-Wmw-Cwc-C"}
 
-![Concentration by date](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g004-b group="G004"}
+![Concentration by date](../../triage/G004-Wmw-Cwc-C_b_date.png){#fig-g004-wmw-cwc-c-b group="G004-Wmw-Cwc-C"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_c_source.png){#fig-g004-c group="G004"}
+![Distribution by campaign or reference](../../triage/G004-Wmw-Cwc-C_c_source.png){#fig-g004-wmw-cwc-c-c group="G004-Wmw-Cwc-C"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g004-d group="G004"}
+![Distribution by site type (all geographies)](../../triage/G004-Wmw-Cwc-C_d_site_type.png){#fig-g004-wmw-cwc-c-d group="G004-Wmw-Cwc-C"}
 
-![Spatial distribution](../../triage/Aquatic_Marine_Salt_Water_Coastal_fjord_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g004-e group="G004"}
+![Spatial distribution](../../triage/G004-Wmw-Cwc-C_e_spatial.png){#fig-g004-wmw-cwc-c-e group="G004-Wmw-Cwc-C"}
 
-G004: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L
+G004-Wmw-Cwc-C: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L
 
 :::
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G046-Wbw-Uwb-Md Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) {#grp-G046-Wbw-Uwb-Md}
 
-## G046 Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) {#grp-G046}
+`G046-Wbw-Uwb-Md` `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-`G046` `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+*No triage panels: this group is below the `min_n` cutoff. Add `G046-Wbw-Uwb-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G046` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G156-Wbw-Owb-Md Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G156-Wbw-Owb-Md}
 
-## G156 Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) {#grp-G156}
-
-`G156` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G156-Wbw-Owb-Md` `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G156` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G156-Wbw-Owb-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G207-Wmw-Cnv-C Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L {#grp-G207-Wmw-Cnv-C}
 
-## G207 Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L {#grp-G207}
+`G207-Wmw-Cnv-C` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
-`G207` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+*No triage panels: this group is below the `min_n` cutoff. Add `G207-Wmw-Cnv-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G207` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 

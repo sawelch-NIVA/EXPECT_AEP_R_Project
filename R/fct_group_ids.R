@@ -20,6 +20,18 @@
 # different lifecycles, and keeping them apart means the summary table and the
 # triage notebook can carry IDs without depending on whether anyone has made a
 # decision yet.
+#
+# UPDATE 2026-08-08: `group_id` is no longer just the bare `G001` accession
+# number -- see format_composite_group_id() below for the compartment/
+# geography/species/tissue/unit code appended to it, and
+# scripts/migrate_group_ids_to_composite.R for the one-off rewrite that
+# folded the composite form INTO the ledger itself (Sam: "I want to replace
+# the old ones with them"). THE PROPERTY THAT MATTERS is unchanged: whatever
+# string sits in `group_id` for a given group is frozen the moment it is
+# written, and only ever rewritten by that one-off script, never by the
+# ordinary pipeline. A group's compartment or species getting hand-corrected
+# later does NOT retroactively update its id -- the composite form is a
+# snapshot taken once, not a live view.
 
 #' Format a Group ID
 #'
@@ -98,7 +110,11 @@ allocate_group_ids <- function(
     highest <- if (nrow(ledger) == 0) {
       0L
     } else {
-      max(as.integer(sub("^G", "", ledger$group_id)))
+      # Not just sub("^G", ""): once group_id carries a composite suffix
+      # (Sam 2026-08-08: "G014-Bf-Cnr-Gmor-Liv-Mw" rather than bare "G014"),
+      # stripping only the "G" leaves "014-Bf-Cnr-..." and as.integer() of
+      # that is NA. Capture the leading digit run and discard the rest.
+      max(as.integer(sub("^G(\\d+).*$", "\\1", ledger$group_id)))
     }
     need$group_id <- format_group_id(highest + seq_len(nrow(need)))
     ledger <- dplyr::bind_rows(ledger, need)
@@ -168,18 +184,23 @@ group_code_block <- function(
 
 #' Abbreviate a Scientific Name
 #'
-#' Deterministic, not looked up: `"Gadus morhua"` -> `"G.mor"`, capital genus
-#' initial, dot, first 3 letters of the epithet in lowercase (Sam 2026-08-07:
-#' "an abbreviated form of the abbreviated scientific name... this costs more
-#' in characters but I think will be worth it"). A single-word name -- a
-#' genus, family, order or other higher taxon on its own, e.g.
-#' `"Chironomidae"`, `"Littorina"` -- has no epithet to abbreviate, so it
-#' instead takes its own first 4 letters, capitalised: `"Chir"`.
+#' Deterministic, not looked up: `"Gadus morhua"` -> `"G-mor"`, capital genus
+#' initial, hyphen, first 3 letters of the epithet in lowercase (Sam
+#' 2026-08-07: "an abbreviated form of the abbreviated scientific name...
+#' this costs more in characters but I think will be worth it"). Originally a
+#' dot rather than a hyphen; changed 2026-08-08 once it was clear the id
+#' would be embedded in Quarto heading anchors and `@fig-` cross-reference
+#' ids -- a dot means something in a CSS id selector, and anything doing
+#' `querySelector('#' + id)` unescaped would break on it, so the separator
+#' had to match the hyphens used everywhere else in the composite id. A
+#' single-word name -- a genus, family, order or other higher taxon on its
+#' own, e.g. `"Chironomidae"`, `"Littorina"` -- has no epithet to abbreviate,
+#' so it instead takes its own first 4 letters, capitalised: `"Chir"`.
 #'
 #' The scheme is NOT collision-free: two different genera sharing an epithet
-#' (`"Hymenodora glacialis"` / `"Heliometra glacialis"`, both -> `"H.gla"`)
+#' (`"Hymenodora glacialis"` / `"Heliometra glacialis"`, both -> `"H-gla"`)
 #' or a trinomial's subspecies (`"Odobenus rosmarus divergens"` /
-#' `"...rosmarus"`, both -> `"O.ros"`) collide by construction. `overrides`
+#' `"...rosmarus"`, both -> `"O-ros"`) collide by construction. `overrides`
 #' exists for exactly this: a hand-edited lookup of the specific names that
 #' need a different code, `data/clean/lookups/group_species_code_overrides.csv`.
 #' [format_composite_group_id()] does not error or warn on a collision here --
@@ -188,9 +209,11 @@ group_code_block <- function(
 #' identity.
 #'
 #' Running this over the committed ledger (2026-08-07) turned up two
-#' collisions that look like genuine taxonomic duplicates rather than
-#' unrelated species that happen to collide -- see item 14 in
-#' `misc-todo.md`.
+#' collisions that looked like genuine taxonomic duplicates rather than
+#' unrelated species that happen to collide, and Sam fixed both at the
+#' source (2026-08-08): the misspelled/superseded name was corrected to
+#' match its counterpart, so the two pairs are now genuinely the same
+#' species rather than a code collision -- see item 14 in `misc-todo.md`.
 #'
 #' @param species Character vector of `SAMPLE_SPECIES` values. `NA`/blank
 #'   pass through as `NA`, since the whole species+tissue block is omitted
@@ -216,7 +239,7 @@ format_species_code <- function(species, overrides = NULL) {
     }
     parts <- strsplit(x, "\\s+")[[1]]
     if (length(parts) >= 2) {
-      paste0(toupper(substr(parts[1], 1, 1)), ".", tolower(substr(parts[2], 1, 3)))
+      paste0(toupper(substr(parts[1], 1, 1)), "-", tolower(substr(parts[2], 1, 3)))
     } else {
       paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, 4)))
     }
@@ -228,13 +251,20 @@ format_species_code <- function(species, overrides = NULL) {
 
 #' Composite Group Codes
 #'
-#' A human-referenceable label layered onto the stable G-number rather than
-#' replacing it: `group_id` (e.g. `"G014"`) is already what `lump_into` cells
-#' and free-text notes across the project point at (see [allocate_group_ids()]
-#' above for why that value can never change). This produces a second,
-#' DERIVED label -- `"G014-Wfw-Cwb-G.mor-Liv-Mw"` -- for places that want the
-#' compartment, geography, species/tissue and unit visible at a glance,
-#' recomputed from the lookups on every call and never stored as identity.
+#' Builds the human-referenceable form of a group id -- e.g.
+#' `"G014-Wfw-Cwb-G-mor-Liv-Mw"` from the bare accession number `"G014"` plus
+#' its compartment, geography, species/tissue and unit.
+#'
+#' UPDATE 2026-08-08: this used to be a pure display-layer function, called
+#' fresh on every render so `group_id` in the ledger stayed the bare number.
+#' It is now instead the engine behind a ONE-OFF migration
+#' (`scripts/migrate_group_ids_to_composite.R`) that wrote its output
+#' directly into `group_id` in the ledger -- the composite form IS the id
+#' everywhere now, not a label recomputed on top of it. Call this function
+#' again only to regenerate that migration (e.g. after extending the
+#' lookups to cover more of the grouping variables), not as part of any
+#' normal read path -- calling it on a table whose `group_id` is already
+#' composite would double-append the blocks.
 #'
 #' Scheme (Sam 2026-08-07): `G<num>-<compartment block>-<geography block>
 #' [-<species code>-<tissue code>]-<unit code>`. The compartment and

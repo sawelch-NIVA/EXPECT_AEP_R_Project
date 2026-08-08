@@ -68,107 +68,109 @@ Biota, Aquatic / Fish / mg/kg (dry)
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |--------|--------|--------|-------:|-------:|-------:|-------:|-------:|-------:|--------|
-| [G006](#grp-G006) | Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2,796 | 66.2 | 5.1 | 5.15 | 2.9 | 1 | multimodal |
-| [G017](#grp-G017) | Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 218 | 6.07 | 5.05 | 4.97 | 1.96 | 1 |  |
-| [G018](#grp-G018) | Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 192 | 1.7 | 0.5 | 0.905 | 2.86 | 1 | multimodal |
-| [G028](#grp-G028) | Fish / Gadus morhua / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 92 | 5.29 | 4.5 | 4.55 | 1.75 | 1 |  |
-| [G031](#grp-G031) | Fish / Salmo trutta / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 78 | 2.01 | 1.92 | 1.95 | 1.27 | 1 |  |
-| [G035](#grp-G035) | Fish / Coregonus lavaretus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 69 | 0.185 | 0.16 | 0.17 | 1.52 | 1 |  |
-| [G041](#grp-G041) | Fish / Platichthys flesus / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 56 | 12.6 | 14 | 5.65 | 5.95 | 1 | multimodal |
-| [G042](#grp-G042) | Fish / Coregonus lavaretus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 51 | 7.43 | 6.13 | 6.27 | 1.79 | 1 |  |
-| [G043](#grp-G043) | Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 51 | 0.0017 | 0.0007 | 0.000984 | 2.6 | 1 | outliers |
-| [G045](#grp-G045) | Fish / Salmo salar / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 50 | 4.23 | 2.58 | 3.4 | 1.87 | 1 |  |
-| [G047](#grp-G047) | Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 44 | 1.39e+03 | 0.282 | 8 | 101 | 1 |  |
-| [G048](#grp-G048) | Fish / Perca fluviatilis / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 44 | 0.306 | 0.21 | 0.244 | 1.76 | 1 |  |
-| [G049](#grp-G049) | Fish / Reinhardtius hippoglossoides / Muscle / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 43 | 0.19 | 0.19 | 0.189 | 1.16 | 1 |  |
-| [G054](#grp-G054) | Fish / Salmo trutta / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 40 | 17.2 | 0.415 | 1.14 | 8.79 | 1 | outliers |
-| [G056](#grp-G056) | Fish / Esox lucius / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 38 | 0.327 | 0.179 | 0.195 | 1.95 | 1 | outliers |
-| [G058](#grp-G058) | Fish / Salvelinus alpinus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 36 | 15.4 | 6.66 | 7.57 | 3.27 | 1 |  |
-| [G060](#grp-G060) | Fish / Salmo trutta / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 34 | 0.696 | 0.66 | 0.429 | 3.4 | 1 | multimodal |
-| [G063](#grp-G063) | Fish / Esox lucius / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 29 | 7.77 | 5.87 | 6.08 | 1.96 | 1 |  |
-| [G071](#grp-G071) | Fish / Perca fluviatilis / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 25 | 2.21 | 1.56 | 1.93 | 1.66 | 1 |  |
-| [G079](#grp-G079) | Fish / Salmo trutta / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 22 | 139 | 109 | 90.6 | 2.92 | 1 |  |
-| [G082](#grp-G082) | Fish / Clupea harengus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 21 | 228 | 0.748 | 4.94 | 26.5 | 1 |  |
-| [G083](#grp-G083) | Fish / Limanda limanda / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 21 | 6.86 | 5.7 | 6.3 | 1.51 | 1 |  |
-| [G085](#grp-G085) | Fish / Blicca bjoerkna / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 20 | 2.53 | 2.25 | 2.38 | 1.37 | 1 |  |
-| [G086](#grp-G086) | Fish / Lota lota / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 20 | 5.14 | 4.25 | 4.42 | 1.66 | 1 |  |
+| [G006-Bf-Cnr-G-mor-Liv-Mw](#grp-G006-Bf-Cnr-G-mor-Liv-Mw) | Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2,796 | 66.2 | 5.1 | 5.15 | 2.9 | 1 | multimodal |
+| [G017-Bf-Cnr-G-mor-Liv-Md](#grp-G017-Bf-Cnr-G-mor-Liv-Md) | Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 218 | 6.07 | 5.05 | 4.97 | 1.96 | 1 |  |
+| [G018-Bf-Cnr-C-rup-Wbd-Mw](#grp-G018-Bf-Cnr-C-rup-Wbd-Mw) | Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 192 | 1.7 | 0.5 | 0.905 | 2.86 | 1 | multimodal |
+| [G028-Bf-Onr-G-mor-Liv-Mw](#grp-G028-Bf-Onr-G-mor-Liv-Mw) | Fish / Gadus morhua / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 92 | 5.29 | 4.5 | 4.55 | 1.75 | 1 |  |
+| [G031-Bf-Rnr-S-tru-Gil-Md](#grp-G031-Bf-Rnr-S-tru-Gil-Md) | Fish / Salmo trutta / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 78 | 2.01 | 1.92 | 1.95 | 1.27 | 1 |  |
+| [G035-Bf-Lnr-C-lav-Mus-Mw](#grp-G035-Bf-Lnr-C-lav-Mus-Mw) | Fish / Coregonus lavaretus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 69 | 0.185 | 0.16 | 0.17 | 1.52 | 1 |  |
+| [G041-Bf-Cnr-P-fle-Liv-Mw](#grp-G041-Bf-Cnr-P-fle-Liv-Mw) | Fish / Platichthys flesus / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 56 | 12.6 | 14 | 5.65 | 5.95 | 1 | multimodal |
+| [G042-Bf-Lnr-C-lav-Liv-Mw](#grp-G042-Bf-Lnr-C-lav-Liv-Mw) | Fish / Coregonus lavaretus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 51 | 7.43 | 6.13 | 6.27 | 1.79 | 1 |  |
+| [G043-Bf-Oot-G-mor-Mus-Md](#grp-G043-Bf-Oot-G-mor-Mus-Md) | Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 51 | 0.0017 | 0.0007 | 0.000984 | 2.6 | 1 | outliers |
+| [G045-Bf-Rnr-S-sal-Gil-Md](#grp-G045-Bf-Rnr-S-sal-Gil-Md) | Fish / Salmo salar / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 50 | 4.23 | 2.58 | 3.4 | 1.87 | 1 |  |
+| [G047-Bf-Cnr-G-mor-Mus-Mw](#grp-G047-Bf-Cnr-G-mor-Mus-Mw) | Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 44 | 1.39e+03 | 0.282 | 8 | 101 | 1 |  |
+| [G048-Bf-Lnr-P-flu-Mus-Mw](#grp-G048-Bf-Lnr-P-flu-Mus-Mw) | Fish / Perca fluviatilis / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 44 | 0.306 | 0.21 | 0.244 | 1.76 | 1 |  |
+| [G049-Bf-Owc-R-hip-Mus-Mw](#grp-G049-Bf-Owc-R-hip-Mus-Mw) | Fish / Reinhardtius hippoglossoides / Muscle / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) | `mg/kg (wet)` | 43 | 0.19 | 0.19 | 0.189 | 1.16 | 1 |  |
+| [G054-Bf-Lnr-S-tru-Mus-Mw](#grp-G054-Bf-Lnr-S-tru-Mus-Mw) | Fish / Salmo trutta / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 40 | 17.2 | 0.415 | 1.14 | 8.79 | 1 | outliers |
+| [G056-Bf-Lnr-E-luc-Mus-Mw](#grp-G056-Bf-Lnr-E-luc-Mus-Mw) | Fish / Esox lucius / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 38 | 0.327 | 0.179 | 0.195 | 1.95 | 1 | outliers |
+| [G058-Bf-Lnr-S-alp-Liv-Mw](#grp-G058-Bf-Lnr-S-alp-Liv-Mw) | Fish / Salvelinus alpinus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 36 | 15.4 | 6.66 | 7.57 | 3.27 | 1 |  |
+| [G060-Bf-Rnr-S-tru-Wbd-Mw](#grp-G060-Bf-Rnr-S-tru-Wbd-Mw) | Fish / Salmo trutta / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 34 | 0.696 | 0.66 | 0.429 | 3.4 | 1 | multimodal |
+| [G063-Bf-Lnr-E-luc-Liv-Mw](#grp-G063-Bf-Lnr-E-luc-Liv-Mw) | Fish / Esox lucius / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 29 | 7.77 | 5.87 | 6.08 | 1.96 | 1 |  |
+| [G071-Bf-Lnr-P-flu-Liv-Mw](#grp-G071-Bf-Lnr-P-flu-Liv-Mw) | Fish / Perca fluviatilis / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 25 | 2.21 | 1.56 | 1.93 | 1.66 | 1 |  |
+| [G079-Bf-Lnr-S-tru-Liv-Mw](#grp-G079-Bf-Lnr-S-tru-Liv-Mw) | Fish / Salmo trutta / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 22 | 139 | 109 | 90.6 | 2.92 | 1 |  |
+| [G082-Bf-Cnr-C-har-Mus-Mw](#grp-G082-Bf-Cnr-C-har-Mus-Mw) | Fish / Clupea harengus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 21 | 228 | 0.748 | 4.94 | 26.5 | 1 |  |
+| [G083-Bf-Cnr-L-lim-Liv-Mw](#grp-G083-Bf-Cnr-L-lim-Liv-Mw) | Fish / Limanda limanda / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 21 | 6.86 | 5.7 | 6.3 | 1.51 | 1 |  |
+| [G085-Bf-Rnr-B-bjo-Gil-Md](#grp-G085-Bf-Rnr-B-bjo-Gil-Md) | Fish / Blicca bjoerkna / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 20 | 2.53 | 2.25 | 2.38 | 1.37 | 1 |  |
+| [G086-Bf-Lnr-L-lot-Liv-Mw](#grp-G086-Bf-Lnr-L-lot-Liv-Mw) | Fish / Lota lota / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 20 | 5.14 | 4.25 | 4.42 | 1.66 | 1 |  |
 | [G087](#grp-G087) | Fish / Reinhardtius hippoglossoides / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) | `mg/kg (wet)` | 20 | 0.09 | 0.09 | 0.09 |  | 1 |  |
-| [G089](#grp-G089) | Fish / Coregonus lavaretus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 19 | 1.4 | 1.4 | 1.39 | 1.16 | 1 |  |
-| [G090](#grp-G090) | Fish / Thymallus thymallus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 19 | 1.25 | 1.3 | 1.24 | 1.13 | 1 | multimodal |
-| [G091](#grp-G091) | Fish / Thymallus thymallus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 19 | 3.49 | 2.1 | 2.62 | 1.96 | 1 | outliers |
-| [G092](#grp-G092) | Fish / Thymallus thymallus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 19 | 0.21 | 0.19 | 0.203 | 1.32 | 1 |  |
-| [G095](#grp-G095) | Fish / Salvelinus alpinus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 18 | 0.892 | 0.357 | 0.415 | 2.61 | 1 | outliers |
-| [G103](#grp-G103) | Fish / Blicca bjoerkna / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 15 | 80.3 | 78 | 73.8 | 1.55 | 1 |  |
-| [G104](#grp-G104) | Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 15 | 2.16 | 2 | 2.04 | 1.4 | 1 | outliers |
-| [G105](#grp-G105) | Fish / Salmo trutta / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 15 | 1.45e+04 | 0.416 | 3.44 | 183 | 1 | outliers |
-| [G106](#grp-G106) | Fish / Abramis brama / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 13 | 2.27 | 2.22 | 2.23 | 1.22 | 1 |  |
-| [G107](#grp-G107) | Fish / Abramis brama / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 13 | 67.4 | 59 | 59.4 | 1.71 | 1 |  |
-| [G111](#grp-G111) | Fish / Gymnocephalus cernuus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 12 | 4.03 | 4 | 3.93 | 1.26 | 1 |  |
-| [G112](#grp-G112) | Fish / Sander lucioperca / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 12 | 2.29 | 1.8 | 2.07 | 1.58 | 1 |  |
-| [G113](#grp-G113) | Fish / Symphodus melops / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 12 | 2.77 | 2.75 | 1.44 | 3.79 | 1 | multimodal |
-| [G116](#grp-G116) | Fish / Salmo trutta / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 11 | 1.48 | 1.3 | 1.39 | 1.42 | 1 | outliers |
-| [G117](#grp-G117) | Fish / Salmo trutta / Gill / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.0034 | 0.0034 | 0.00306 | 1.93 | 1 |  |
-| [G118](#grp-G118) | Fish / Salmo trutta / Kidney / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.00291 | 0.00291 | 0.00275 | 1.61 | 1 |  |
-| [G119](#grp-G119) | Fish / Salmo trutta / Liver / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.173 | 0.173 | 0.159 | 1.83 | 1 |  |
-| [G120](#grp-G120) | Fish / Sander lucioperca / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 11 | 17.3 | 17.2 | 16.7 | 1.31 | 1 |  |
-| [G125](#grp-G125) | Fish / Salvelinus alpinus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 9 | 2.86 | 1.5 | 1.85 | 2.18 | 1 | outliers |
+| [G089-Bf-Lnr-C-lav-Gil-Md](#grp-G089-Bf-Lnr-C-lav-Gil-Md) | Fish / Coregonus lavaretus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 19 | 1.4 | 1.4 | 1.39 | 1.16 | 1 |  |
+| [G090-Bf-Lnr-T-thy-Gil-Md](#grp-G090-Bf-Lnr-T-thy-Gil-Md) | Fish / Thymallus thymallus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 19 | 1.25 | 1.3 | 1.24 | 1.13 | 1 | multimodal |
+| [G091-Bf-Lnr-T-thy-Liv-Mw](#grp-G091-Bf-Lnr-T-thy-Liv-Mw) | Fish / Thymallus thymallus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 19 | 3.49 | 2.1 | 2.62 | 1.96 | 1 | outliers |
+| [G092-Bf-Lnr-T-thy-Mus-Mw](#grp-G092-Bf-Lnr-T-thy-Mus-Mw) | Fish / Thymallus thymallus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 19 | 0.21 | 0.19 | 0.203 | 1.32 | 1 |  |
+| [G095-Bf-Lnr-S-alp-Mus-Mw](#grp-G095-Bf-Lnr-S-alp-Mus-Mw) | Fish / Salvelinus alpinus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 18 | 0.892 | 0.357 | 0.415 | 2.61 | 1 | outliers |
+| [G103-Bf-Rnr-B-bjo-Liv-Mw](#grp-G103-Bf-Rnr-B-bjo-Liv-Mw) | Fish / Blicca bjoerkna / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 15 | 80.3 | 78 | 73.8 | 1.55 | 1 |  |
+| [G104-Bf-Cnr-M-aeg-Liv-Md](#grp-G104-Bf-Cnr-M-aeg-Liv-Md) | Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 15 | 2.16 | 2 | 2.04 | 1.4 | 1 | outliers |
+| [G105-Bf-Rnr-S-tru-Mus-Mw](#grp-G105-Bf-Rnr-S-tru-Mus-Mw) | Fish / Salmo trutta / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 15 | 1.45e+04 | 0.416 | 3.44 | 183 | 1 | outliers |
+| [G106-Bf-Rnr-A-bra-Gil-Md](#grp-G106-Bf-Rnr-A-bra-Gil-Md) | Fish / Abramis brama / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 13 | 2.27 | 2.22 | 2.23 | 1.22 | 1 |  |
+| [G107-Bf-Rnr-A-bra-Liv-Mw](#grp-G107-Bf-Rnr-A-bra-Liv-Mw) | Fish / Abramis brama / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 13 | 67.4 | 59 | 59.4 | 1.71 | 1 |  |
+| [G111-Bf-Lnr-G-cer-Liv-Mw](#grp-G111-Bf-Lnr-G-cer-Liv-Mw) | Fish / Gymnocephalus cernuus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 12 | 4.03 | 4 | 3.93 | 1.26 | 1 |  |
+| [G112-Bf-Rnr-S-luc-Gil-Md](#grp-G112-Bf-Rnr-S-luc-Gil-Md) | Fish / Sander lucioperca / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 12 | 2.29 | 1.8 | 2.07 | 1.58 | 1 |  |
+| [G113-Bf-Cnr-S-mel-Wbd-Mw](#grp-G113-Bf-Cnr-S-mel-Wbd-Mw) | Fish / Symphodus melops / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 12 | 2.77 | 2.75 | 1.44 | 3.79 | 1 | multimodal |
+| [G116-Bf-Lnr-S-tru-Gil-Md](#grp-G116-Bf-Lnr-S-tru-Gil-Md) | Fish / Salmo trutta / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 11 | 1.48 | 1.3 | 1.39 | 1.42 | 1 | outliers |
+| [G117-Bf-Rot-S-tru-Gil-Mw](#grp-G117-Bf-Rot-S-tru-Gil-Mw) | Fish / Salmo trutta / Gill / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.0034 | 0.0034 | 0.00306 | 1.93 | 1 |  |
+| [G118-Bf-Rot-S-tru-Kid-Mw](#grp-G118-Bf-Rot-S-tru-Kid-Mw) | Fish / Salmo trutta / Kidney / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.00291 | 0.00291 | 0.00275 | 1.61 | 1 |  |
+| [G119-Bf-Rot-S-tru-Liv-Mw](#grp-G119-Bf-Rot-S-tru-Liv-Mw) | Fish / Salmo trutta / Liver / River, stream, canal / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 0.173 | 0.173 | 0.159 | 1.83 | 1 |  |
+| [G120-Bf-Rnr-S-luc-Liv-Mw](#grp-G120-Bf-Rnr-S-luc-Liv-Mw) | Fish / Sander lucioperca / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 11 | 17.3 | 17.2 | 16.7 | 1.31 | 1 |  |
+| [G125-Bf-Lnr-S-alp-Gil-Md](#grp-G125-Bf-Lnr-S-alp-Gil-Md) | Fish / Salvelinus alpinus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) | `mg/kg (dry)` | 9 | 2.86 | 1.5 | 1.85 | 2.18 | 1 | outliers |
 | [G131](#grp-G131) | Fish / Salmo salar / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) | `mg/kg (wet)` | 8 | 0.35 | 0.35 | 0.35 |  | 1 |  |
-| [G137](#grp-G137) | Fish / Merlangius merlangus / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 7 | 4.93 | 5 | 4.75 | 1.36 | 1 |  |
-| [G139](#grp-G139) | Fish / Brosme brosme / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 0.457 | 0.3 | 0.293 | 2.72 | 1 |  |
-| [G140](#grp-G140) | Fish / Pleuronectes platessa / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 6.3 | 3.6 | 3.72 | 3 | 1 |  |
-| [G141](#grp-G141) | Fish / Pleuronectes platessa / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 1.08 | 0.2 | 0.356 | 4.2 | 1 | outliers |
-| [G142](#grp-G142) | Fish / Rutilus rutilus / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 6 | 2.62 | 2.33 | 2.47 | 1.43 | 1 | outliers |
-| [G143](#grp-G143) | Fish / Rutilus rutilus / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 35.1 | 33.5 | 32.4 | 1.58 | 1 |  |
-| [G159](#grp-G159) | Fish / Brosme brosme / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 2.45 | 2.45 | 2.4 | 1.26 | 1 |  |
-| [G160](#grp-G160) | Fish / Labrus bergylta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.3 | 0.3 | 0.3 | 1 | 1 |  |
-| [G161](#grp-G161) | Fish / Leuciscus cephalus / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.25 | 0.25 | 0.245 | 1.26 | 1 |  |
-| [G162](#grp-G162) | Fish / Melanogrammus aeglefinus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.168 | 0.155 | 0.165 | 1.22 | 1 |  |
-| [G163](#grp-G163) | Fish / Perca fluviatilis / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 4 | 1.68 | 1.57 | 1.58 | 1.48 | 1 |  |
-| [G164](#grp-G164) | Fish / Perca fluviatilis / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 14.2 | 14.8 | 13.3 | 1.53 | 1 |  |
-| [G173](#grp-G173) | Fish / Centrolabrus exoletus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.4 | 0.4 | 0.4 | 1 | 1 |  |
-| [G174](#grp-G174) | Fish / Esox lucius / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 15 | 10 | 11.8 | 2.32 | 1 |  |
-| [G175](#grp-G175) | Fish / Esox lucius / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.133 | 0.1 | 0.126 | 1.49 | 1 |  |
-| [G176](#grp-G176) | Fish / Lamna nasus / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 3.35 | 3.5 | 3.21 | 1.45 | 1 |  |
-| [G177](#grp-G177) | Fish / Molva molva / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.133 | 0.1 | 0.126 | 1.49 | 1 |  |
-| [G178](#grp-G178) | Fish / Perca fluviatilis / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 5 | 5 | 5 | 1 | 1 |  |
-| [G179](#grp-G179) | Fish / Pollachius pollachius / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.253 | 0.3 | 0.243 | 1.44 | 1 |  |
-| [G180](#grp-G180) | Fish / Squalus acanthias / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 1.9 | 1.91 | 1.89 | 1.1 | 1 |  |
-| [G191](#grp-G191) | Fish / Actinopterygii / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 3.5 | 3.5 | 3.48 | 1.18 | 1 |  |
-| [G192](#grp-G192) | Fish / Actinopterygii / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.25 | 0.25 | 0.245 | 1.33 | 1 |  |
-| [G193](#grp-G193) | Fish / Esox lucius / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.165 | 0.165 | 0.165 | 1.04 | 1 |  |
-| [G194](#grp-G194) | Fish / Gadidae / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 5.5 | 5.5 | 5.49 | 1.08 | 1 |  |
-| [G195](#grp-G195) | Fish / Gadidae / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.25 | 0.25 | 0.245 | 1.33 | 1 |  |
-| [G196](#grp-G196) | Fish / Leuciscus idus / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.13 | 2.13 | 2.12 | 1.16 | 1 |  |
-| [G197](#grp-G197) | Fish / Leuciscus idus / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 102 | 102 | 101 | 1.21 | 1 |  |
-| [G198](#grp-G198) | Fish / Perca fluviatilis / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.1 | 0.1 | 0.1 | 1 | 1 |  |
-| [G199](#grp-G199) | Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 2 | 3.1 | 3.1 | 3.09 | 1.15 | 1 |  |
-| [G200](#grp-G200) | Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 4.15 | 4.15 | 3.49 | 2.36 | 1 |  |
-| [G211](#grp-G211) | Fish / Esox lucius / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 1 | 1.56 | 1.56 | 1.56 |  | 1 |  |
-| [G212](#grp-G212) | Fish / Gymnocephalus cernuus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.76 | 0.76 | 0.76 |  | 1 |  |
-| [G213](#grp-G213) | Fish / Labrus bergylta / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 7.6 | 7.6 | 7.6 |  | 1 |  |
-| [G214](#grp-G214) | Fish / Labrus bergylta / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 1.2 | 1.2 | 1.2 |  | 1 |  |
-| [G215](#grp-G215) | Fish / Labrus mixtus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.4 | 0.4 | 0.4 |  | 1 |  |
-| [G216](#grp-G216) | Fish / Leuciscus cephalus / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.17 | 0.17 | 0.17 |  | 1 |  |
-| [G217](#grp-G217) | Fish / Limanda limanda / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.15 | 0.15 | 0.15 |  | 1 |  |
-| [G218](#grp-G218) | Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 2.4 | 2.4 | 2.4 |  | 1 |  |
-| [G219](#grp-G219) | Fish / Platichthys flesus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.1 | 0.1 | 0.1 |  | 1 |  |
-| [G220](#grp-G220) | Fish / Rutilus rutilus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.692 | 0.692 | 0.692 |  | 1 |  |
-| [G221](#grp-G221) | Fish / Salmo trutta / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 1.18 | 1.18 | 1.18 |  | 1 |  |
-| [G222](#grp-G222) | Fish / Sander lucioperca / Bile / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 15.7 | 15.7 | 15.7 |  | 1 |  |
-| [G223](#grp-G223) | Fish / Somniosus microcephalus / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.184 | 0.184 | 0.184 |  | 1 |  |
-| [G224](#grp-G224) | Fish / Trisopterus minutus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.698 | 0.698 | 0.698 |  | 1 |  |
+| [G137-Bf-Cnr-M-mer-Liv-Md](#grp-G137-Bf-Cnr-M-mer-Liv-Md) | Fish / Merlangius merlangus / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 7 | 4.93 | 5 | 4.75 | 1.36 | 1 |  |
+| [G139-Bf-Cnr-B-bro-Mus-Mw](#grp-G139-Bf-Cnr-B-bro-Mus-Mw) | Fish / Brosme brosme / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 0.457 | 0.3 | 0.293 | 2.72 | 1 |  |
+| [G140-Bf-Cnr-P-pla-Liv-Mw](#grp-G140-Bf-Cnr-P-pla-Liv-Mw) | Fish / Pleuronectes platessa / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 6.3 | 3.6 | 3.72 | 3 | 1 |  |
+| [G141-Bf-Cnr-P-pla-Mus-Mw](#grp-G141-Bf-Cnr-P-pla-Mus-Mw) | Fish / Pleuronectes platessa / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 1.08 | 0.2 | 0.356 | 4.2 | 1 | outliers |
+| [G142-Bf-Rnr-R-rut-Gil-Md](#grp-G142-Bf-Rnr-R-rut-Gil-Md) | Fish / Rutilus rutilus / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 6 | 2.62 | 2.33 | 2.47 | 1.43 | 1 | outliers |
+| [G143-Bf-Rnr-R-rut-Liv-Mw](#grp-G143-Bf-Rnr-R-rut-Liv-Mw) | Fish / Rutilus rutilus / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 6 | 35.1 | 33.5 | 32.4 | 1.58 | 1 |  |
+| [G159-Bf-Cnr-B-bro-Liv-Mw](#grp-G159-Bf-Cnr-B-bro-Liv-Mw) | Fish / Brosme brosme / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 2.45 | 2.45 | 2.4 | 1.26 | 1 |  |
+| [G160-Bf-Cnr-L-ber-Wbd-Mw](#grp-G160-Bf-Cnr-L-ber-Wbd-Mw) | Fish / Labrus bergylta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.3 | 0.3 | 0.3 | 1 | 1 |  |
+| [G161-Bf-Rnr-L-cep-Mus-Mw](#grp-G161-Bf-Rnr-L-cep-Mus-Mw) | Fish / Leuciscus cephalus / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.25 | 0.25 | 0.245 | 1.26 | 1 |  |
+| [G162-Bf-Cnr-M-aeg-Mus-Mw](#grp-G162-Bf-Cnr-M-aeg-Mus-Mw) | Fish / Melanogrammus aeglefinus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.168 | 0.155 | 0.165 | 1.22 | 1 |  |
+| [G163-Bf-Rnr-P-flu-Gil-Md](#grp-G163-Bf-Rnr-P-flu-Gil-Md) | Fish / Perca fluviatilis / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 4 | 1.68 | 1.57 | 1.58 | 1.48 | 1 |  |
+| [G164-Bf-Rnr-P-flu-Liv-Mw](#grp-G164-Bf-Rnr-P-flu-Liv-Mw) | Fish / Perca fluviatilis / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 4 | 14.2 | 14.8 | 13.3 | 1.53 | 1 |  |
+| [G173-Bf-Cnr-C-exo-Wbd-Mw](#grp-G173-Bf-Cnr-C-exo-Wbd-Mw) | Fish / Centrolabrus exoletus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.4 | 0.4 | 0.4 | 1 | 1 |  |
+| [G174-Bf-Rnr-E-luc-Liv-Mw](#grp-G174-Bf-Rnr-E-luc-Liv-Mw) | Fish / Esox lucius / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 15 | 10 | 11.8 | 2.32 | 1 |  |
+| [G175-Bf-Rnr-E-luc-Mus-Mw](#grp-G175-Bf-Rnr-E-luc-Mus-Mw) | Fish / Esox lucius / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.133 | 0.1 | 0.126 | 1.49 | 1 |  |
+| [G176-Bf-Onr-L-nas-Liv-Mw](#grp-G176-Bf-Onr-L-nas-Liv-Mw) | Fish / Lamna nasus / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 3.35 | 3.5 | 3.21 | 1.45 | 1 |  |
+| [G177-Bf-Cnr-M-mol-Mus-Mw](#grp-G177-Bf-Cnr-M-mol-Mus-Mw) | Fish / Molva molva / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.133 | 0.1 | 0.126 | 1.49 | 1 |  |
+| [G178-Bf-Lnr-P-flu-Wbd-Mw](#grp-G178-Bf-Lnr-P-flu-Wbd-Mw) | Fish / Perca fluviatilis / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 5 | 5 | 5 | 1 | 1 |  |
+| [G179-Bf-Cnr-P-pol-Mus-Mw](#grp-G179-Bf-Cnr-P-pol-Mus-Mw) | Fish / Pollachius pollachius / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.253 | 0.3 | 0.243 | 1.44 | 1 |  |
+| [G180-Bf-Onr-S-aca-Liv-Mw](#grp-G180-Bf-Onr-S-aca-Liv-Mw) | Fish / Squalus acanthias / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 1.9 | 1.91 | 1.89 | 1.1 | 1 |  |
+| [G191-Bf-Cnr-Acti-Liv-Mw](#grp-G191-Bf-Cnr-Acti-Liv-Mw) | Fish / Actinopterygii / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 3.5 | 3.5 | 3.48 | 1.18 | 1 |  |
+| [G192-Bf-Cnr-Acti-Mus-Mw](#grp-G192-Bf-Cnr-Acti-Mus-Mw) | Fish / Actinopterygii / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.25 | 0.25 | 0.245 | 1.33 | 1 |  |
+| [G193-Bf-Rnr-E-luc-Wbd-Mw](#grp-G193-Bf-Rnr-E-luc-Wbd-Mw) | Fish / Esox lucius / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.165 | 0.165 | 0.165 | 1.04 | 1 |  |
+| [G194-Bf-Cnr-Gadi-Liv-Mw](#grp-G194-Bf-Cnr-Gadi-Liv-Mw) | Fish / Gadidae / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 5.5 | 5.5 | 5.49 | 1.08 | 1 |  |
+| [G195-Bf-Cnr-Gadi-Mus-Mw](#grp-G195-Bf-Cnr-Gadi-Mus-Mw) | Fish / Gadidae / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.25 | 0.25 | 0.245 | 1.33 | 1 |  |
+| [G196-Bf-Rnr-L-idu-Gil-Md](#grp-G196-Bf-Rnr-L-idu-Gil-Md) | Fish / Leuciscus idus / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 2 | 2.13 | 2.13 | 2.12 | 1.16 | 1 |  |
+| [G197-Bf-Rnr-L-idu-Liv-Mw](#grp-G197-Bf-Rnr-L-idu-Liv-Mw) | Fish / Leuciscus idus / Liver / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 102 | 102 | 101 | 1.21 | 1 |  |
+| [G198-Bf-Rnr-P-flu-Mus-Mw](#grp-G198-Bf-Rnr-P-flu-Mus-Mw) | Fish / Perca fluviatilis / Muscle / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 0.1 | 0.1 | 0.1 | 1 | 1 |  |
+| [G199-Bf-Cnr-P-pol-Liv-Md](#grp-G199-Bf-Cnr-P-pol-Liv-Md) | Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (dry) | `mg/kg (dry)` | 2 | 3.1 | 3.1 | 3.09 | 1.15 | 1 |  |
+| [G200-Bf-Cnr-P-pol-Liv-Mw](#grp-G200-Bf-Cnr-P-pol-Liv-Mw) | Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 4.15 | 4.15 | 3.49 | 2.36 | 1 |  |
+| [G211-Bf-Rnr-E-luc-Gil-Md](#grp-G211-Bf-Rnr-E-luc-Gil-Md) | Fish / Esox lucius / Gill / River, stream, canal / Not reported / mg/kg (dry) | `mg/kg (dry)` | 1 | 1.56 | 1.56 | 1.56 |  | 1 |  |
+| [G212-Bf-Lnr-G-cer-Wbd-Mw](#grp-G212-Bf-Lnr-G-cer-Wbd-Mw) | Fish / Gymnocephalus cernuus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.76 | 0.76 | 0.76 |  | 1 |  |
+| [G213-Bf-Cnr-L-ber-Liv-Mw](#grp-G213-Bf-Cnr-L-ber-Liv-Mw) | Fish / Labrus bergylta / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 7.6 | 7.6 | 7.6 |  | 1 |  |
+| [G214-Bf-Cnr-L-ber-Mus-Mw](#grp-G214-Bf-Cnr-L-ber-Mus-Mw) | Fish / Labrus bergylta / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 1.2 | 1.2 | 1.2 |  | 1 |  |
+| [G215-Bf-Cnr-L-mix-Wbd-Mw](#grp-G215-Bf-Cnr-L-mix-Wbd-Mw) | Fish / Labrus mixtus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.4 | 0.4 | 0.4 |  | 1 |  |
+| [G216-Bf-Rnr-L-cep-Wbd-Mw](#grp-G216-Bf-Rnr-L-cep-Wbd-Mw) | Fish / Leuciscus cephalus / Whole body / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.17 | 0.17 | 0.17 |  | 1 |  |
+| [G217-Bf-Cnr-L-lim-Mus-Mw](#grp-G217-Bf-Cnr-L-lim-Mus-Mw) | Fish / Limanda limanda / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.15 | 0.15 | 0.15 |  | 1 |  |
+| [G218-Bf-Cnr-M-aeg-Liv-Mw](#grp-G218-Bf-Cnr-M-aeg-Liv-Mw) | Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 2.4 | 2.4 | 2.4 |  | 1 |  |
+| [G219-Bf-Cnr-P-fle-Mus-Mw](#grp-G219-Bf-Cnr-P-fle-Mus-Mw) | Fish / Platichthys flesus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.1 | 0.1 | 0.1 |  | 1 |  |
+| [G220-Bf-Lnr-R-rut-Wbd-Mw](#grp-G220-Bf-Lnr-R-rut-Wbd-Mw) | Fish / Rutilus rutilus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.692 | 0.692 | 0.692 |  | 1 |  |
+| [G221-Bf-Lnr-S-tru-Wbd-Mw](#grp-G221-Bf-Lnr-S-tru-Wbd-Mw) | Fish / Salmo trutta / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 1.18 | 1.18 | 1.18 |  | 1 |  |
+| [G222-Bf-Rnr-S-luc-Bil-Mw](#grp-G222-Bf-Rnr-S-luc-Bil-Mw) | Fish / Sander lucioperca / Bile / River, stream, canal / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 15.7 | 15.7 | 15.7 |  | 1 |  |
+| [G223-Bf-Onr-S-mic-Mus-Mw](#grp-G223-Bf-Onr-S-mic-Mus-Mw) | Fish / Somniosus microcephalus / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.184 | 0.184 | 0.184 |  | 1 |  |
+| [G224-Bf-Cnr-T-min-Wbd-Mw](#grp-G224-Bf-Cnr-T-min-Wbd-Mw) | Fish / Trisopterus minutus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 1 | 0.698 | 0.698 | 0.698 |  | 1 |  |
 
 : Groups in the Fish notebook.
 
 # Comparison
 
+::: {.callout-note}
 *(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
+:::
 
 # Groups
 
-## G006 Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G006}
+## G006-Bf-Cnr-G-mor-Liv-Mw Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G006-Bf-Cnr-G-mor-Liv-Mw}
 
-`G006` **Atlantic cod**. `n` = 2,796 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G006-Bf-Cnr-G-mor-Liv-Mw` **Atlantic cod**. `n` = 2,796 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -176,49 +178,53 @@ Biota, Aquatic / Fish / mg/kg (dry)
 - **multimodal** (dip test not run)
 :::
 
-::: {#fig-g006 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g006-a group="G006"}
+::: {#fig-g006-bf-cnr-g-mor-liv-mw layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G006-Bf-Cnr-G-mor-Liv-Mw_a_density.png){#fig-g006-bf-cnr-g-mor-liv-mw-a group="G006-Bf-Cnr-G-mor-Liv-Mw"}
 
-![Concentration by date](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g006-b group="G006"}
+![Concentration by date](../../triage/G006-Bf-Cnr-G-mor-Liv-Mw_b_date.png){#fig-g006-bf-cnr-g-mor-liv-mw-b group="G006-Bf-Cnr-G-mor-Liv-Mw"}
 
-![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g006-c group="G006"}
+![Distribution by campaign or reference](../../triage/G006-Bf-Cnr-G-mor-Liv-Mw_c_source.png){#fig-g006-bf-cnr-g-mor-liv-mw-c group="G006-Bf-Cnr-G-mor-Liv-Mw"}
 
-![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g006-d group="G006"}
+![Distribution by site type (all geographies)](../../triage/G006-Bf-Cnr-G-mor-Liv-Mw_d_site_type.png){#fig-g006-bf-cnr-g-mor-liv-mw-d group="G006-Bf-Cnr-G-mor-Liv-Mw"}
 
-![Spatial distribution](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g006-e group="G006"}
+![Spatial distribution](../../triage/G006-Bf-Cnr-G-mor-Liv-Mw_e_spatial.png){#fig-g006-bf-cnr-g-mor-liv-mw-e group="G006-Bf-Cnr-G-mor-Liv-Mw"}
 
-G006: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet)
+G006-Bf-Cnr-G-mor-Liv-Mw: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
+::: {.callout-note}
 **Verdict:**
 
 Gadus morhua (Atlantic cod) livers are the single largest biota sampling group in the dataset and are heavily used as a reference bioindicator of contamination across monitoring campaigns. Concentrations are reported in mg/kg wet (n = 2,796) and mg/kg dry (n = 218), roughly distributed log-normally around a mean of around (?). Fig 1a (fix cross ref) shows a large normal distribution at (mean) with distinctive secondary normal distributions at around 1e-1 mg/kg and 1e+4 mg/kg; these are likely unit errors and we have elected to remove them.
 
 Fig 1b shows that more recent concentrations are strongly normal. Outliers in 2018 and
-
-## G017 Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G017}
-
-`G017` **Atlantic cod**. `n` = 218 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
-
-::: {#fig-g017 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_a_density.png){#fig-g017-a group="G017"}
-
-![Concentration by date](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_b_date.png){#fig-g017-b group="G017"}
-
-![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_c_source.png){#fig-g017-c group="G017"}
-
-![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_d_site_type.png){#fig-g017-d group="G017"}
-
-![Spatial distribution](../../triage/Fish_Gadus_morhua_Liver_Coastal_fjord_Not_reported_mg_kg_dry_e_spatial.png){#fig-g017-e group="G017"}
-
-G017: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
 :::
 
+## G017-Bf-Cnr-G-mor-Liv-Md Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G017-Bf-Cnr-G-mor-Liv-Md}
+
+`G017-Bf-Cnr-G-mor-Liv-Md` **Atlantic cod**. `n` = 218 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+::: {#fig-g017-bf-cnr-g-mor-liv-md layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G017-Bf-Cnr-G-mor-Liv-Md_a_density.png){#fig-g017-bf-cnr-g-mor-liv-md-a group="G017-Bf-Cnr-G-mor-Liv-Md"}
+
+![Concentration by date](../../triage/G017-Bf-Cnr-G-mor-Liv-Md_b_date.png){#fig-g017-bf-cnr-g-mor-liv-md-b group="G017-Bf-Cnr-G-mor-Liv-Md"}
+
+![Distribution by campaign or reference](../../triage/G017-Bf-Cnr-G-mor-Liv-Md_c_source.png){#fig-g017-bf-cnr-g-mor-liv-md-c group="G017-Bf-Cnr-G-mor-Liv-Md"}
+
+![Distribution by site type (all geographies)](../../triage/G017-Bf-Cnr-G-mor-Liv-Md_d_site_type.png){#fig-g017-bf-cnr-g-mor-liv-md-d group="G017-Bf-Cnr-G-mor-Liv-Md"}
+
+![Spatial distribution](../../triage/G017-Bf-Cnr-G-mor-Liv-Md_e_spatial.png){#fig-g017-bf-cnr-g-mor-liv-md-e group="G017-Bf-Cnr-G-mor-Liv-Md"}
+
+G017-Bf-Cnr-G-mor-Liv-Md: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
+:::
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G018 Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G018}
+## G018-Bf-Cnr-C-rup-Wbd-Mw Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G018-Bf-Cnr-C-rup-Wbd-Mw}
 
-`G018` **Goldsinny wrasse**. `n` = 192 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G018-Bf-Cnr-C-rup-Wbd-Mw` **Goldsinny wrasse**. `n` = 192 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -226,57 +232,65 @@ G017: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
 - **multimodal** (dip test not run)
 :::
 
-::: {#fig-g018 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g018-a group="G018"}
+::: {#fig-g018-bf-cnr-c-rup-wbd-mw layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G018-Bf-Cnr-C-rup-Wbd-Mw_a_density.png){#fig-g018-bf-cnr-c-rup-wbd-mw-a group="G018-Bf-Cnr-C-rup-Wbd-Mw"}
 
-![Concentration by date](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g018-b group="G018"}
+![Concentration by date](../../triage/G018-Bf-Cnr-C-rup-Wbd-Mw_b_date.png){#fig-g018-bf-cnr-c-rup-wbd-mw-b group="G018-Bf-Cnr-C-rup-Wbd-Mw"}
 
-![Distribution by campaign or reference](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g018-c group="G018"}
+![Distribution by campaign or reference](../../triage/G018-Bf-Cnr-C-rup-Wbd-Mw_c_source.png){#fig-g018-bf-cnr-c-rup-wbd-mw-c group="G018-Bf-Cnr-C-rup-Wbd-Mw"}
 
-![Distribution by site type (all geographies)](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g018-d group="G018"}
+![Distribution by site type (all geographies)](../../triage/G018-Bf-Cnr-C-rup-Wbd-Mw_d_site_type.png){#fig-g018-bf-cnr-c-rup-wbd-mw-d group="G018-Bf-Cnr-C-rup-Wbd-Mw"}
 
-![Spatial distribution](../../triage/Fish_Ctenolabrus_rupestris_Whole_body_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g018-e group="G018"}
+![Spatial distribution](../../triage/G018-Bf-Cnr-C-rup-Wbd-Mw_e_spatial.png){#fig-g018-bf-cnr-c-rup-wbd-mw-e group="G018-Bf-Cnr-C-rup-Wbd-Mw"}
 
-G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet)
+G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
+::: {.callout-note}
 **Verdict:**
 
-- @fig-g018-a clearly shows two different constituent normal distributions.
+- @fig-g018-bf-cnr-c-rup-wbd-mw-a clearly shows two different constituent normal distributions.
 
-- these distributions are from different years @fig-g018-b but the same site type and campaign @fig-g018-c, @fig-g018-d
+- these distributions are from different years @fig-g018-bf-cnr-c-rup-wbd-mw-b but the same site type and campaign @fig-g018-bf-cnr-c-rup-wbd-mw-c, @fig-g018-bf-cnr-c-rup-wbd-mw-d
 
-- @fig-g018-e shows slightly different medians at different sampling hexbins
+- @fig-g018-bf-cnr-c-rup-wbd-mw-e shows slightly different medians at different sampling hexbins
 
 - TODO: Are site and year correlate
+:::
 
-## G028 Fish / Gadus morhua / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G028}
+## G028-Bf-Onr-G-mor-Liv-Mw Fish / Gadus morhua / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G028-Bf-Onr-G-mor-Liv-Mw}
 
-`G028` **Atlantic cod**. `n` = 92 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G028-Bf-Onr-G-mor-Liv-Mw` **Atlantic cod**. `n` = 92 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G028` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G028-Bf-Onr-G-mor-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G031 Fish / Salmo trutta / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G031}
+## G031-Bf-Rnr-S-tru-Gil-Md Fish / Salmo trutta / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G031-Bf-Rnr-S-tru-Gil-Md}
 
-`G031` **River trout**. `n` = 78 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G031-Bf-Rnr-S-tru-Gil-Md` **River trout**. `n` = 78 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G031` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G031-Bf-Rnr-S-tru-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G035 Fish / Coregonus lavaretus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G035}
+## G035-Bf-Lnr-C-lav-Mus-Mw Fish / Coregonus lavaretus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G035-Bf-Lnr-C-lav-Mus-Mw}
 
-`G035` **Common whitefish**. `n` = 69 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G035-Bf-Lnr-C-lav-Mus-Mw` **Common whitefish**. `n` = 69 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G035` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G035-Bf-Lnr-C-lav-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G041 Fish / Platichthys flesus / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G041}
+## G041-Bf-Cnr-P-fle-Liv-Mw Fish / Platichthys flesus / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G041-Bf-Cnr-P-fle-Liv-Mw}
 
-`G041` **European flounder**. `n` = 56 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G041-Bf-Cnr-P-fle-Liv-Mw` **European flounder**. `n` = 56 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -284,21 +298,25 @@ G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported 
 - **multimodal** (dip test not run)
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G041` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G041-Bf-Cnr-P-fle-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G042 Fish / Coregonus lavaretus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G042}
+## G042-Bf-Lnr-C-lav-Liv-Mw Fish / Coregonus lavaretus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G042-Bf-Lnr-C-lav-Liv-Mw}
 
-`G042` **Common whitefish**. `n` = 51 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G042-Bf-Lnr-C-lav-Liv-Mw` **Common whitefish**. `n` = 51 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G042` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G042-Bf-Lnr-C-lav-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G043 Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G043}
+## G043-Bf-Oot-G-mor-Mus-Md Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry) {#grp-G043-Bf-Oot-G-mor-Mus-Md}
 
-`G043` **Atlantic cod**. `n` = 51 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G043-Bf-Oot-G-mor-Mus-Md` **Atlantic cod**. `n` = 51 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -306,63 +324,73 @@ G018: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported 
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G043` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G043-Bf-Oot-G-mor-Mus-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
-
-## G045 Fish / Salmo salar / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G045}
-
-`G045` **Atlantic salmon**. `n` = 50 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
-
-*No triage panels: this group is below the `min_n` cutoff. Add `G045` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
-**Verdict:** *(unwritten)*
-
-## G047 Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G047}
-
-`G047` **Atlantic cod**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
-
-- @fig-g047-a:
-- @fig-g047-b:
-- @fig-g047-c:
-- @fig-g047-d:
-- @fig-g047-e:
-
-::: {#fig-g047 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_a_density.png){#fig-g047-a group="G047"}
-
-![Concentration by date](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_b_date.png){#fig-g047-b group="G047"}
-
-![Distribution by campaign or reference](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_c_source.png){#fig-g047-c group="G047"}
-
-![Distribution by site type (all geographies)](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_d_site_type.png){#fig-g047-d group="G047"}
-
-![Spatial distribution](../../triage/Fish_Gadus_morhua_Muscle_Coastal_fjord_Not_reported_mg_kg_wet_e_spatial.png){#fig-g047-e group="G047"}
-
-G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
+## G045-Bf-Rnr-S-sal-Gil-Md Fish / Salmo salar / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G045-Bf-Rnr-S-sal-Gil-Md}
+
+`G045-Bf-Rnr-S-sal-Gil-Md` **Atlantic salmon**. `n` = 50 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G045-Bf-Rnr-S-sal-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G048 Fish / Perca fluviatilis / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G048}
+## G047-Bf-Cnr-G-mor-Mus-Mw Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G047-Bf-Cnr-G-mor-Mus-Mw}
 
-`G048` **European perch**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G047-Bf-Cnr-G-mor-Mus-Mw` **Atlantic cod**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G048` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+- @fig-g047-bf-cnr-g-mor-mus-mw-a:
+- @fig-g047-bf-cnr-g-mor-mus-mw-b:
+- @fig-g047-bf-cnr-g-mor-mus-mw-c:
+- @fig-g047-bf-cnr-g-mor-mus-mw-d:
+- @fig-g047-bf-cnr-g-mor-mus-mw-e:
 
+::: {#fig-g047-bf-cnr-g-mor-mus-mw layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G047-Bf-Cnr-G-mor-Mus-Mw_a_density.png){#fig-g047-bf-cnr-g-mor-mus-mw-a group="G047-Bf-Cnr-G-mor-Mus-Mw"}
+
+![Concentration by date](../../triage/G047-Bf-Cnr-G-mor-Mus-Mw_b_date.png){#fig-g047-bf-cnr-g-mor-mus-mw-b group="G047-Bf-Cnr-G-mor-Mus-Mw"}
+
+![Distribution by campaign or reference](../../triage/G047-Bf-Cnr-G-mor-Mus-Mw_c_source.png){#fig-g047-bf-cnr-g-mor-mus-mw-c group="G047-Bf-Cnr-G-mor-Mus-Mw"}
+
+![Distribution by site type (all geographies)](../../triage/G047-Bf-Cnr-G-mor-Mus-Mw_d_site_type.png){#fig-g047-bf-cnr-g-mor-mus-mw-d group="G047-Bf-Cnr-G-mor-Mus-Mw"}
+
+![Spatial distribution](../../triage/G047-Bf-Cnr-G-mor-Mus-Mw_e_spatial.png){#fig-g047-bf-cnr-g-mor-mus-mw-e group="G047-Bf-Cnr-G-mor-Mus-Mw"}
+
+G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
+:::
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G049 Fish / Reinhardtius hippoglossoides / Muscle / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G049}
+## G048-Bf-Lnr-P-flu-Mus-Mw Fish / Perca fluviatilis / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G048-Bf-Lnr-P-flu-Mus-Mw}
 
-`G049` **Greenland flounder**. `n` = 43 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G048-Bf-Lnr-P-flu-Mus-Mw` **European perch**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G049` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G048-Bf-Lnr-P-flu-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G054 Fish / Salmo trutta / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G054}
+## G049-Bf-Owc-R-hip-Mus-Mw Fish / Reinhardtius hippoglossoides / Muscle / Ocean, sea, territorial waters / Water column, pelagic zone / mg/kg (wet) {#grp-G049-Bf-Owc-R-hip-Mus-Mw}
 
-`G054` **River trout**. `n` = 40 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G049-Bf-Owc-R-hip-Mus-Mw` **Greenland flounder**. `n` = 43 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+
+*No triage panels: this group is below the `min_n` cutoff. Add `G049-Bf-Owc-R-hip-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+
+::: {.callout-note}
+**Verdict:** *(unwritten)*
+:::
+
+## G054-Bf-Lnr-S-tru-Mus-Mw Fish / Salmo trutta / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G054-Bf-Lnr-S-tru-Mus-Mw}
+
+`G054-Bf-Lnr-S-tru-Mus-Mw` **River trout**. `n` = 40 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -370,13 +398,15 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G054` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G054-Bf-Lnr-S-tru-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G056 Fish / Esox lucius / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G056}
+## G056-Bf-Lnr-E-luc-Mus-Mw Fish / Esox lucius / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G056-Bf-Lnr-E-luc-Mus-Mw}
 
-`G056` **Northern pike**. `n` = 38 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G056-Bf-Lnr-E-luc-Mus-Mw` **Northern pike**. `n` = 38 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -384,21 +414,25 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G056` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G056-Bf-Lnr-E-luc-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G058 Fish / Salvelinus alpinus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G058}
+## G058-Bf-Lnr-S-alp-Liv-Mw Fish / Salvelinus alpinus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G058-Bf-Lnr-S-alp-Liv-Mw}
 
-`G058` **Arctic char**. `n` = 36 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G058-Bf-Lnr-S-alp-Liv-Mw` **Arctic char**. `n` = 36 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G058` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G058-Bf-Lnr-S-alp-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G060 Fish / Salmo trutta / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G060}
+## G060-Bf-Rnr-S-tru-Wbd-Mw Fish / Salmo trutta / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G060-Bf-Rnr-S-tru-Wbd-Mw}
 
-`G060` **River trout**. `n` = 34 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G060-Bf-Rnr-S-tru-Wbd-Mw` **River trout**. `n` = 34 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -406,65 +440,81 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **multimodal** (dip test not run)
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G060` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G060-Bf-Rnr-S-tru-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G063 Fish / Esox lucius / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G063}
+## G063-Bf-Lnr-E-luc-Liv-Mw Fish / Esox lucius / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G063-Bf-Lnr-E-luc-Liv-Mw}
 
-`G063` **Northern pike**. `n` = 29 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G063-Bf-Lnr-E-luc-Liv-Mw` **Northern pike**. `n` = 29 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G063` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G063-Bf-Lnr-E-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G071 Fish / Perca fluviatilis / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G071}
+## G071-Bf-Lnr-P-flu-Liv-Mw Fish / Perca fluviatilis / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G071-Bf-Lnr-P-flu-Liv-Mw}
 
-`G071` **European perch**. `n` = 25 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G071-Bf-Lnr-P-flu-Liv-Mw` **European perch**. `n` = 25 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G071` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G071-Bf-Lnr-P-flu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G079 Fish / Salmo trutta / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G079}
+## G079-Bf-Lnr-S-tru-Liv-Mw Fish / Salmo trutta / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G079-Bf-Lnr-S-tru-Liv-Mw}
 
-`G079` **River trout**. `n` = 22 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G079-Bf-Lnr-S-tru-Liv-Mw` **River trout**. `n` = 22 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G079` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G079-Bf-Lnr-S-tru-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G082 Fish / Clupea harengus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G082}
+## G082-Bf-Cnr-C-har-Mus-Mw Fish / Clupea harengus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G082-Bf-Cnr-C-har-Mus-Mw}
 
-`G082` **Atlantic herring**. `n` = 21 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G082-Bf-Cnr-C-har-Mus-Mw` **Atlantic herring**. `n` = 21 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G082` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G082-Bf-Cnr-C-har-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G083 Fish / Limanda limanda / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G083}
+## G083-Bf-Cnr-L-lim-Liv-Mw Fish / Limanda limanda / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G083-Bf-Cnr-L-lim-Liv-Mw}
 
-`G083` **Common dab**. `n` = 21 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G083-Bf-Cnr-L-lim-Liv-Mw` **Common dab**. `n` = 21 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G083` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G083-Bf-Cnr-L-lim-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G085 Fish / Blicca bjoerkna / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G085}
+## G085-Bf-Rnr-B-bjo-Gil-Md Fish / Blicca bjoerkna / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G085-Bf-Rnr-B-bjo-Gil-Md}
 
-`G085` **White bream**. `n` = 20 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G085-Bf-Rnr-B-bjo-Gil-Md` **White bream**. `n` = 20 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G085` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G085-Bf-Rnr-B-bjo-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G086 Fish / Lota lota / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G086}
+## G086-Bf-Lnr-L-lot-Liv-Mw Fish / Lota lota / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G086-Bf-Lnr-L-lot-Liv-Mw}
 
-`G086` **Burbot**. `n` = 20 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G086-Bf-Lnr-L-lot-Liv-Mw` **Burbot**. `n` = 20 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G086` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G086-Bf-Lnr-L-lot-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
 ## G087 Fish / Reinhardtius hippoglossoides / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) {#grp-G087}
 
@@ -472,19 +522,23 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G087` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G089 Fish / Coregonus lavaretus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G089}
+## G089-Bf-Lnr-C-lav-Gil-Md Fish / Coregonus lavaretus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G089-Bf-Lnr-C-lav-Gil-Md}
 
-`G089` **Common whitefish**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G089-Bf-Lnr-C-lav-Gil-Md` **Common whitefish**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G089` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G089-Bf-Lnr-C-lav-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G090 Fish / Thymallus thymallus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G090}
+## G090-Bf-Lnr-T-thy-Gil-Md Fish / Thymallus thymallus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G090-Bf-Lnr-T-thy-Gil-Md}
 
-`G090` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G090-Bf-Lnr-T-thy-Gil-Md` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -492,13 +546,15 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **multimodal** (dip test not run)
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G090` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G090-Bf-Lnr-T-thy-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G091 Fish / Thymallus thymallus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G091}
+## G091-Bf-Lnr-T-thy-Liv-Mw Fish / Thymallus thymallus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G091-Bf-Lnr-T-thy-Liv-Mw}
 
-`G091` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G091-Bf-Lnr-T-thy-Liv-Mw` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -506,21 +562,25 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G091` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G091-Bf-Lnr-T-thy-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G092 Fish / Thymallus thymallus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G092}
+## G092-Bf-Lnr-T-thy-Mus-Mw Fish / Thymallus thymallus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G092-Bf-Lnr-T-thy-Mus-Mw}
 
-`G092` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G092-Bf-Lnr-T-thy-Mus-Mw` **Grayling**. `n` = 19 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G092` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G092-Bf-Lnr-T-thy-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G095 Fish / Salvelinus alpinus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G095}
+## G095-Bf-Lnr-S-alp-Mus-Mw Fish / Salvelinus alpinus / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G095-Bf-Lnr-S-alp-Mus-Mw}
 
-`G095` **Arctic char**. `n` = 18 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G095-Bf-Lnr-S-alp-Mus-Mw` **Arctic char**. `n` = 18 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -528,21 +588,25 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G095` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G095-Bf-Lnr-S-alp-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G103 Fish / Blicca bjoerkna / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G103}
+## G103-Bf-Rnr-B-bjo-Liv-Mw Fish / Blicca bjoerkna / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G103-Bf-Rnr-B-bjo-Liv-Mw}
 
-`G103` **White bream**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G103-Bf-Rnr-B-bjo-Liv-Mw` **White bream**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G103` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G103-Bf-Rnr-B-bjo-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G104 Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G104}
+## G104-Bf-Cnr-M-aeg-Liv-Md Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G104-Bf-Cnr-M-aeg-Liv-Md}
 
-`G104` **Haddock**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G104-Bf-Cnr-M-aeg-Liv-Md` **Haddock**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -550,13 +614,15 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G104` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G104-Bf-Cnr-M-aeg-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G105 Fish / Salmo trutta / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G105}
+## G105-Bf-Rnr-S-tru-Mus-Mw Fish / Salmo trutta / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G105-Bf-Rnr-S-tru-Mus-Mw}
 
-`G105` **River trout**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G105-Bf-Rnr-S-tru-Mus-Mw` **River trout**. `n` = 15 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -564,45 +630,55 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G105` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G105-Bf-Rnr-S-tru-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G106 Fish / Abramis brama / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G106}
+## G106-Bf-Rnr-A-bra-Gil-Md Fish / Abramis brama / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G106-Bf-Rnr-A-bra-Gil-Md}
 
-`G106` **Common bream**. `n` = 13 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G106-Bf-Rnr-A-bra-Gil-Md` **Common bream**. `n` = 13 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G106` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G106-Bf-Rnr-A-bra-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G107 Fish / Abramis brama / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G107}
+## G107-Bf-Rnr-A-bra-Liv-Mw Fish / Abramis brama / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G107-Bf-Rnr-A-bra-Liv-Mw}
 
-`G107` **Common bream**. `n` = 13 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G107-Bf-Rnr-A-bra-Liv-Mw` **Common bream**. `n` = 13 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G107` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G107-Bf-Rnr-A-bra-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G111 Fish / Gymnocephalus cernuus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G111}
+## G111-Bf-Lnr-G-cer-Liv-Mw Fish / Gymnocephalus cernuus / Liver / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G111-Bf-Lnr-G-cer-Liv-Mw}
 
-`G111` **Ruffe**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G111-Bf-Lnr-G-cer-Liv-Mw` **Ruffe**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G111` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G111-Bf-Lnr-G-cer-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G112 Fish / Sander lucioperca / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G112}
+## G112-Bf-Rnr-S-luc-Gil-Md Fish / Sander lucioperca / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G112-Bf-Rnr-S-luc-Gil-Md}
 
-`G112` **Pikeperch**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G112-Bf-Rnr-S-luc-Gil-Md` **Pikeperch**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G112` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G112-Bf-Rnr-S-luc-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G113 Fish / Symphodus melops / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G113}
+## G113-Bf-Cnr-S-mel-Wbd-Mw Fish / Symphodus melops / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G113-Bf-Cnr-S-mel-Wbd-Mw}
 
-`G113` **Corkwing wrasse**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G113-Bf-Cnr-S-mel-Wbd-Mw` **Corkwing wrasse**. `n` = 12 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -610,13 +686,15 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **multimodal** (dip test not run)
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G113` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G113-Bf-Cnr-S-mel-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G116 Fish / Salmo trutta / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G116}
+## G116-Bf-Lnr-S-tru-Gil-Md Fish / Salmo trutta / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G116-Bf-Lnr-S-tru-Gil-Md}
 
-`G116` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G116-Bf-Lnr-S-tru-Gil-Md` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -624,45 +702,55 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G116` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G116-Bf-Lnr-S-tru-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G117 Fish / Salmo trutta / Gill / River, stream, canal / Other / mg/kg (wet) {#grp-G117}
+## G117-Bf-Rot-S-tru-Gil-Mw Fish / Salmo trutta / Gill / River, stream, canal / Other / mg/kg (wet) {#grp-G117-Bf-Rot-S-tru-Gil-Mw}
 
-`G117` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G117-Bf-Rot-S-tru-Gil-Mw` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G117` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G117-Bf-Rot-S-tru-Gil-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G118 Fish / Salmo trutta / Kidney / River, stream, canal / Other / mg/kg (wet) {#grp-G118}
+## G118-Bf-Rot-S-tru-Kid-Mw Fish / Salmo trutta / Kidney / River, stream, canal / Other / mg/kg (wet) {#grp-G118-Bf-Rot-S-tru-Kid-Mw}
 
-`G118` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G118-Bf-Rot-S-tru-Kid-Mw` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G118` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G118-Bf-Rot-S-tru-Kid-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G119 Fish / Salmo trutta / Liver / River, stream, canal / Other / mg/kg (wet) {#grp-G119}
+## G119-Bf-Rot-S-tru-Liv-Mw Fish / Salmo trutta / Liver / River, stream, canal / Other / mg/kg (wet) {#grp-G119-Bf-Rot-S-tru-Liv-Mw}
 
-`G119` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G119-Bf-Rot-S-tru-Liv-Mw` **River trout**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G119` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G119-Bf-Rot-S-tru-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G120 Fish / Sander lucioperca / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G120}
+## G120-Bf-Rnr-S-luc-Liv-Mw Fish / Sander lucioperca / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G120-Bf-Rnr-S-luc-Liv-Mw}
 
-`G120` **Pikeperch**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G120-Bf-Rnr-S-luc-Liv-Mw` **Pikeperch**. `n` = 11 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G120` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G120-Bf-Rnr-S-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G125 Fish / Salvelinus alpinus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G125}
+## G125-Bf-Lnr-S-alp-Gil-Md Fish / Salvelinus alpinus / Gill / Lake, pond, pool, reservoir / Not reported / mg/kg (dry) {#grp-G125-Bf-Lnr-S-alp-Gil-Md}
 
-`G125` **Arctic char**. `n` = 9 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G125-Bf-Lnr-S-alp-Gil-Md` **Arctic char**. `n` = 9 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -670,9 +758,11 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G125` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G125-Bf-Lnr-S-alp-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
 ## G131 Fish / Salmo salar / Whole body / Unknown site / Unknown sub-site / mg/kg (wet) {#grp-G131}
 
@@ -680,35 +770,43 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G131` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G137 Fish / Merlangius merlangus / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G137}
+## G137-Bf-Cnr-M-mer-Liv-Md Fish / Merlangius merlangus / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G137-Bf-Cnr-M-mer-Liv-Md}
 
-`G137` **Whiting**. `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G137-Bf-Cnr-M-mer-Liv-Md` **Whiting**. `n` = 7 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G137` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G137-Bf-Cnr-M-mer-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G139 Fish / Brosme brosme / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G139}
+## G139-Bf-Cnr-B-bro-Mus-Mw Fish / Brosme brosme / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G139-Bf-Cnr-B-bro-Mus-Mw}
 
-`G139` **Cusk**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G139-Bf-Cnr-B-bro-Mus-Mw` **Cusk**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G139` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G139-Bf-Cnr-B-bro-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G140 Fish / Pleuronectes platessa / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G140}
+## G140-Bf-Cnr-P-pla-Liv-Mw Fish / Pleuronectes platessa / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G140-Bf-Cnr-P-pla-Liv-Mw}
 
-`G140` **European plaice**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G140-Bf-Cnr-P-pla-Liv-Mw` **European plaice**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G140` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G140-Bf-Cnr-P-pla-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G141 Fish / Pleuronectes platessa / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G141}
+## G141-Bf-Cnr-P-pla-Mus-Mw Fish / Pleuronectes platessa / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G141-Bf-Cnr-P-pla-Mus-Mw}
 
-`G141` **European plaice**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G141-Bf-Cnr-P-pla-Mus-Mw` **European plaice**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
 ::: callout-warning
 ## Flagged
@@ -716,13 +814,15 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G141` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G141-Bf-Cnr-P-pla-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G142 Fish / Rutilus rutilus / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G142}
+## G142-Bf-Rnr-R-rut-Gil-Md Fish / Rutilus rutilus / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G142-Bf-Rnr-R-rut-Gil-Md}
 
-`G142` **Roach minnow**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G142-Bf-Rnr-R-rut-Gil-Md` **Roach minnow**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
 ::: callout-warning
 ## Flagged
@@ -730,318 +830,399 @@ G047: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G142` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G142-Bf-Rnr-R-rut-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G143 Fish / Rutilus rutilus / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G143}
+## G143-Bf-Rnr-R-rut-Liv-Mw Fish / Rutilus rutilus / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G143-Bf-Rnr-R-rut-Liv-Mw}
 
-`G143` **Roach minnow**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G143-Bf-Rnr-R-rut-Liv-Mw` **Roach minnow**. `n` = 6 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G143` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G143-Bf-Rnr-R-rut-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G159 Fish / Brosme brosme / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G159}
+## G159-Bf-Cnr-B-bro-Liv-Mw Fish / Brosme brosme / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G159-Bf-Cnr-B-bro-Liv-Mw}
 
-`G159` **Cusk**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G159-Bf-Cnr-B-bro-Liv-Mw` **Cusk**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G159` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G159-Bf-Cnr-B-bro-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G160 Fish / Labrus bergylta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G160}
+## G160-Bf-Cnr-L-ber-Wbd-Mw Fish / Labrus bergylta / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G160-Bf-Cnr-L-ber-Wbd-Mw}
 
-`G160` **Ballan wrasse**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G160-Bf-Cnr-L-ber-Wbd-Mw` **Ballan wrasse**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G160` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G160-Bf-Cnr-L-ber-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G161 Fish / Leuciscus cephalus / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G161}
+## G161-Bf-Rnr-L-cep-Mus-Mw Fish / Leuciscus cephalus / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G161-Bf-Rnr-L-cep-Mus-Mw}
 
-`G161` **European chub**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G161-Bf-Rnr-L-cep-Mus-Mw` **European chub**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G161` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G161-Bf-Rnr-L-cep-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G162 Fish / Melanogrammus aeglefinus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G162}
+## G162-Bf-Cnr-M-aeg-Mus-Mw Fish / Melanogrammus aeglefinus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G162-Bf-Cnr-M-aeg-Mus-Mw}
 
-`G162` **Haddock**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G162-Bf-Cnr-M-aeg-Mus-Mw` **Haddock**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G162` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G162-Bf-Cnr-M-aeg-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G163 Fish / Perca fluviatilis / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G163}
+## G163-Bf-Rnr-P-flu-Gil-Md Fish / Perca fluviatilis / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G163-Bf-Rnr-P-flu-Gil-Md}
 
-`G163` **European perch**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G163-Bf-Rnr-P-flu-Gil-Md` **European perch**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G163` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G163-Bf-Rnr-P-flu-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G164 Fish / Perca fluviatilis / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G164}
+## G164-Bf-Rnr-P-flu-Liv-Mw Fish / Perca fluviatilis / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G164-Bf-Rnr-P-flu-Liv-Mw}
 
-`G164` **European perch**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G164-Bf-Rnr-P-flu-Liv-Mw` **European perch**. `n` = 4 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G164` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G164-Bf-Rnr-P-flu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G173 Fish / Centrolabrus exoletus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G173}
+## G173-Bf-Cnr-C-exo-Wbd-Mw Fish / Centrolabrus exoletus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G173-Bf-Cnr-C-exo-Wbd-Mw}
 
-`G173` **Rock cook**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G173-Bf-Cnr-C-exo-Wbd-Mw` **Rock cook**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G173` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G173-Bf-Cnr-C-exo-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G174 Fish / Esox lucius / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G174}
+## G174-Bf-Rnr-E-luc-Liv-Mw Fish / Esox lucius / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G174-Bf-Rnr-E-luc-Liv-Mw}
 
-`G174` **Northern pike**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G174-Bf-Rnr-E-luc-Liv-Mw` **Northern pike**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G174` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G174-Bf-Rnr-E-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G175 Fish / Esox lucius / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G175}
+## G175-Bf-Rnr-E-luc-Mus-Mw Fish / Esox lucius / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G175-Bf-Rnr-E-luc-Mus-Mw}
 
-`G175` **Northern pike**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G175-Bf-Rnr-E-luc-Mus-Mw` **Northern pike**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G175` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G175-Bf-Rnr-E-luc-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G176 Fish / Lamna nasus / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G176}
+## G176-Bf-Onr-L-nas-Liv-Mw Fish / Lamna nasus / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G176-Bf-Onr-L-nas-Liv-Mw}
 
-`G176` **American porbeagle**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G176-Bf-Onr-L-nas-Liv-Mw` **American porbeagle**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G176` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G176-Bf-Onr-L-nas-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G177 Fish / Molva molva / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G177}
+## G177-Bf-Cnr-M-mol-Mus-Mw Fish / Molva molva / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G177-Bf-Cnr-M-mol-Mus-Mw}
 
-`G177` **Ling**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G177-Bf-Cnr-M-mol-Mus-Mw` **Ling**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G177` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G177-Bf-Cnr-M-mol-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G178 Fish / Perca fluviatilis / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G178}
+## G178-Bf-Lnr-P-flu-Wbd-Mw Fish / Perca fluviatilis / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G178-Bf-Lnr-P-flu-Wbd-Mw}
 
-`G178` **European perch**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G178-Bf-Lnr-P-flu-Wbd-Mw` **European perch**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G178` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G178-Bf-Lnr-P-flu-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G179 Fish / Pollachius pollachius / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G179}
+## G179-Bf-Cnr-P-pol-Mus-Mw Fish / Pollachius pollachius / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G179-Bf-Cnr-P-pol-Mus-Mw}
 
-`G179` **Pollack**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G179-Bf-Cnr-P-pol-Mus-Mw` **Pollack**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G179` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G179-Bf-Cnr-P-pol-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G180 Fish / Squalus acanthias / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G180}
+## G180-Bf-Onr-S-aca-Liv-Mw Fish / Squalus acanthias / Liver / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G180-Bf-Onr-S-aca-Liv-Mw}
 
-`G180` **Spiny dogfish**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G180-Bf-Onr-S-aca-Liv-Mw` **Spiny dogfish**. `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G180` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G180-Bf-Onr-S-aca-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G191 Fish / Actinopterygii / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G191}
+## G191-Bf-Cnr-Acti-Liv-Mw Fish / Actinopterygii / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G191-Bf-Cnr-Acti-Liv-Mw}
 
-`G191` **Ray-finned fishes**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G191-Bf-Cnr-Acti-Liv-Mw` **Ray-finned fishes**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G191` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G191-Bf-Cnr-Acti-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G192 Fish / Actinopterygii / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G192}
+## G192-Bf-Cnr-Acti-Mus-Mw Fish / Actinopterygii / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G192-Bf-Cnr-Acti-Mus-Mw}
 
-`G192` **Ray-finned fishes**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G192-Bf-Cnr-Acti-Mus-Mw` **Ray-finned fishes**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G192` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G192-Bf-Cnr-Acti-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G193 Fish / Esox lucius / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G193}
+## G193-Bf-Rnr-E-luc-Wbd-Mw Fish / Esox lucius / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G193-Bf-Rnr-E-luc-Wbd-Mw}
 
-`G193` **Northern pike**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G193-Bf-Rnr-E-luc-Wbd-Mw` **Northern pike**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G193` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G193-Bf-Rnr-E-luc-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G194 Fish / Gadidae / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G194}
+## G194-Bf-Cnr-Gadi-Liv-Mw Fish / Gadidae / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G194-Bf-Cnr-Gadi-Liv-Mw}
 
-`G194` **Cods**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G194-Bf-Cnr-Gadi-Liv-Mw` **Cods**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G194` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G194-Bf-Cnr-Gadi-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G195 Fish / Gadidae / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G195}
+## G195-Bf-Cnr-Gadi-Mus-Mw Fish / Gadidae / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G195-Bf-Cnr-Gadi-Mus-Mw}
 
-`G195` **Cods**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G195-Bf-Cnr-Gadi-Mus-Mw` **Cods**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G195` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G195-Bf-Cnr-Gadi-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G196 Fish / Leuciscus idus / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G196}
+## G196-Bf-Rnr-L-idu-Gil-Md Fish / Leuciscus idus / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G196-Bf-Rnr-L-idu-Gil-Md}
 
-`G196` **Ide**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G196-Bf-Rnr-L-idu-Gil-Md` **Ide**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G196` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G196-Bf-Rnr-L-idu-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G197 Fish / Leuciscus idus / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G197}
+## G197-Bf-Rnr-L-idu-Liv-Mw Fish / Leuciscus idus / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G197-Bf-Rnr-L-idu-Liv-Mw}
 
-`G197` **Ide**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G197-Bf-Rnr-L-idu-Liv-Mw` **Ide**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G197` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G197-Bf-Rnr-L-idu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G198 Fish / Perca fluviatilis / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G198}
+## G198-Bf-Rnr-P-flu-Mus-Mw Fish / Perca fluviatilis / Muscle / River, stream, canal / Not reported / mg/kg (wet) {#grp-G198-Bf-Rnr-P-flu-Mus-Mw}
 
-`G198` **European perch**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G198-Bf-Rnr-P-flu-Mus-Mw` **European perch**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G198` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G198-Bf-Rnr-P-flu-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G199 Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G199}
+## G199-Bf-Cnr-P-pol-Liv-Md Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (dry) {#grp-G199-Bf-Cnr-P-pol-Liv-Md}
 
-`G199` **Pollack**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G199-Bf-Cnr-P-pol-Liv-Md` **Pollack**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G199` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G199-Bf-Cnr-P-pol-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G200 Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G200}
+## G200-Bf-Cnr-P-pol-Liv-Mw Fish / Pollachius pollachius / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G200-Bf-Cnr-P-pol-Liv-Mw}
 
-`G200` **Pollack**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G200-Bf-Cnr-P-pol-Liv-Mw` **Pollack**. `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G200` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G200-Bf-Cnr-P-pol-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G211 Fish / Esox lucius / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G211}
+## G211-Bf-Rnr-E-luc-Gil-Md Fish / Esox lucius / Gill / River, stream, canal / Not reported / mg/kg (dry) {#grp-G211-Bf-Rnr-E-luc-Gil-Md}
 
-`G211` **Northern pike**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G211-Bf-Rnr-E-luc-Gil-Md` **Northern pike**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G211` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G211-Bf-Rnr-E-luc-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G212 Fish / Gymnocephalus cernuus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G212}
+## G212-Bf-Lnr-G-cer-Wbd-Mw Fish / Gymnocephalus cernuus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G212-Bf-Lnr-G-cer-Wbd-Mw}
 
-`G212` **Ruffe**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G212-Bf-Lnr-G-cer-Wbd-Mw` **Ruffe**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G212` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G212-Bf-Lnr-G-cer-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G213 Fish / Labrus bergylta / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G213}
+## G213-Bf-Cnr-L-ber-Liv-Mw Fish / Labrus bergylta / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G213-Bf-Cnr-L-ber-Liv-Mw}
 
-`G213` **Ballan wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G213-Bf-Cnr-L-ber-Liv-Mw` **Ballan wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G213` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G213-Bf-Cnr-L-ber-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G214 Fish / Labrus bergylta / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G214}
+## G214-Bf-Cnr-L-ber-Mus-Mw Fish / Labrus bergylta / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G214-Bf-Cnr-L-ber-Mus-Mw}
 
-`G214` **Ballan wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G214-Bf-Cnr-L-ber-Mus-Mw` **Ballan wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G214` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G214-Bf-Cnr-L-ber-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G215 Fish / Labrus mixtus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G215}
+## G215-Bf-Cnr-L-mix-Wbd-Mw Fish / Labrus mixtus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G215-Bf-Cnr-L-mix-Wbd-Mw}
 
-`G215` **Cuckoo wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G215-Bf-Cnr-L-mix-Wbd-Mw` **Cuckoo wrasse**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G215` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G215-Bf-Cnr-L-mix-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G216 Fish / Leuciscus cephalus / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G216}
+## G216-Bf-Rnr-L-cep-Wbd-Mw Fish / Leuciscus cephalus / Whole body / River, stream, canal / Not reported / mg/kg (wet) {#grp-G216-Bf-Rnr-L-cep-Wbd-Mw}
 
-`G216` **European chub**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G216-Bf-Rnr-L-cep-Wbd-Mw` **European chub**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G216` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G216-Bf-Rnr-L-cep-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G217 Fish / Limanda limanda / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G217}
+## G217-Bf-Cnr-L-lim-Mus-Mw Fish / Limanda limanda / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G217-Bf-Cnr-L-lim-Mus-Mw}
 
-`G217` **Common dab**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G217-Bf-Cnr-L-lim-Mus-Mw` **Common dab**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G217` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G217-Bf-Cnr-L-lim-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G218 Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G218}
+## G218-Bf-Cnr-M-aeg-Liv-Mw Fish / Melanogrammus aeglefinus / Liver / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G218-Bf-Cnr-M-aeg-Liv-Mw}
 
-`G218` **Haddock**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G218-Bf-Cnr-M-aeg-Liv-Mw` **Haddock**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G218` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G218-Bf-Cnr-M-aeg-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G219 Fish / Platichthys flesus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G219}
+## G219-Bf-Cnr-P-fle-Mus-Mw Fish / Platichthys flesus / Muscle / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G219-Bf-Cnr-P-fle-Mus-Mw}
 
-`G219` **European flounder**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G219-Bf-Cnr-P-fle-Mus-Mw` **European flounder**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G219` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G219-Bf-Cnr-P-fle-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G220 Fish / Rutilus rutilus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G220}
+## G220-Bf-Lnr-R-rut-Wbd-Mw Fish / Rutilus rutilus / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G220-Bf-Lnr-R-rut-Wbd-Mw}
 
-`G220` **Roach minnow**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G220-Bf-Lnr-R-rut-Wbd-Mw` **Roach minnow**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G220` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G220-Bf-Lnr-R-rut-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G221 Fish / Salmo trutta / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G221}
+## G221-Bf-Lnr-S-tru-Wbd-Mw Fish / Salmo trutta / Whole body / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G221-Bf-Lnr-S-tru-Wbd-Mw}
 
-`G221` **River trout**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G221-Bf-Lnr-S-tru-Wbd-Mw` **River trout**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G221` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G221-Bf-Lnr-S-tru-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G222 Fish / Sander lucioperca / Bile / River, stream, canal / Not reported / mg/kg (wet) {#grp-G222}
+## G222-Bf-Rnr-S-luc-Bil-Mw Fish / Sander lucioperca / Bile / River, stream, canal / Not reported / mg/kg (wet) {#grp-G222-Bf-Rnr-S-luc-Bil-Mw}
 
-`G222` **Pikeperch**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G222-Bf-Rnr-S-luc-Bil-Mw` **Pikeperch**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G222` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G222-Bf-Rnr-S-luc-Bil-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G223 Fish / Somniosus microcephalus / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G223}
+## G223-Bf-Onr-S-mic-Mus-Mw Fish / Somniosus microcephalus / Muscle / Ocean, sea, territorial waters / Not reported / mg/kg (wet) {#grp-G223-Bf-Onr-S-mic-Mus-Mw}
 
-`G223` **Greenland sleeper shark**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G223-Bf-Onr-S-mic-Mus-Mw` **Greenland sleeper shark**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G223` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G223-Bf-Onr-S-mic-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G224 Fish / Trisopterus minutus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G224}
+## G224-Bf-Cnr-T-min-Wbd-Mw Fish / Trisopterus minutus / Whole body / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G224-Bf-Cnr-T-min-Wbd-Mw}
 
-`G224` **Poor cod**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+`G224-Bf-Cnr-T-min-Wbd-Mw` **Poor cod**. `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G224` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G224-Bf-Cnr-T-min-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
+

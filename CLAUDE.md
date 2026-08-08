@@ -203,6 +203,17 @@ Practical consequences, and they apply to every plotting task in this repo:
 - Reviewing a plot by eye is *my* job before handing it over, since he cannot do
   it from the conversation. Render it, look at it, fix what is wrong, then report
   what it looks like.
+- **My own eyeballing of a screenshot is not reliable for subtle layout bugs**
+  (text overlap, spacing, precise alignment), learned the hard way 2026-08-08
+  fixing a node-card corner-id marker: repeated "looks fine now" verdicts from
+  reading rendered PNGs turned out wrong, several times in a row, wasting many
+  fix-render-look iterations before the actual cause was found. For that class
+  of bug, verify structurally instead of by eye where possible -- read back
+  actual coordinates (`ggplot_build()` panel params, `grid::current.viewport()`),
+  diff pixel regions programmatically, or render a debug marker at the exact
+  intended bounds and check it numerically. If a screenshot is genuinely the
+  only check available, say so and flag the result as an impression, not a
+  verified fix.
 
 `figures/` is the conventional destination: `figures/aep.png` for the diagram,
 `figures/node_cards/*.png` for the per-node cards, and `triage/` for the triage

@@ -35,15 +35,17 @@ Biota / Biota, Aquatic / mg/kg (dry)
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
 | [G127](#grp-G127) | Unknown / spp. / whole / Ocean, sea, territorial waters / Other / mg/kg (dry) | `mg/kg (dry)` | 9 | 0.000911 | 0.000911 | 0.000911 |  | 1 |  |
-| [G172](#grp-G172) | Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.478 | 0.494 | 0.477 | 1.09 | 1 |  |
-| [G206](#grp-G206) | Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 15.5 | 15.5 | 14.8 | 1.53 | 1 |  |
+| [G172-Be-Lnr-Z-epi-Tst-Mw](#grp-G172-Be-Lnr-Z-epi-Tst-Mw) | Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) | `mg/kg (wet)` | 3 | 0.478 | 0.494 | 0.477 | 1.09 | 1 |  |
+| [G206-Bx-Cnr-Bunn-Tst-Mw](#grp-G206-Bx-Cnr-Bunn-Tst-Mw) | Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) | `mg/kg (wet)` | 2 | 15.5 | 15.5 | 14.8 | 1.53 | 1 |  |
 
 : Groups in the Unclassified Biota notebook. {#tbl-glance}
 
 # Comparison
 
+::: {.callout-note}
 *(Notes on how these groups relate: what should be lumped, split, or
 dropped, and why. This is the question the document exists to answer.)*
+:::
 
 # Groups
 
@@ -54,23 +56,27 @@ dropped, and why. This is the question the document exists to answer.)*
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G127` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G172-Be-Lnr-Z-epi-Tst-Mw Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G172-Be-Lnr-Z-epi-Tst-Mw}
 
-## G172 Ecosystem / Zooplankton epilimnion / Total soft tissues / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G172}
+`G172-Be-Lnr-Z-epi-Tst-Mw` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-`G172` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+*No triage panels: this group is below the `min_n` cutoff. Add `G172-Be-Lnr-Z-epi-Tst-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G172` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G206-Bx-Cnr-Bunn-Tst-Mw Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G206-Bx-Cnr-Bunn-Tst-Mw}
 
-## G206 Other / Bunndyr / Total soft tissues / Coastal, fjord / Not reported / mg/kg (wet) {#grp-G206}
+`G206-Bx-Cnr-Bunn-Tst-Mw` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-`G206` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
+*No triage panels: this group is below the `min_n` cutoff. Add `G206-Bx-Cnr-Bunn-Tst-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G206` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 

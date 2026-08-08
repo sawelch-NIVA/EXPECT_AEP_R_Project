@@ -66,7 +66,11 @@ existing_group_sections <- function(path) {
     return(character(0))
   }
   lines <- readLines(path, warn = FALSE)
-  matches <- stringr::str_match(lines, "\\{#grp-([A-Za-z0-9]+)[^}]*\\}")[, 2]
+  # [A-Za-z0-9-]+, not just [A-Za-z0-9]+ (Sam 2026-08-08): a composite group
+  # id like "G014-Bf-Cnr-G-mor-Liv-Mw" contains hyphens, and the narrower
+  # class used to stop at the first one, silently truncating the captured id
+  # to "G014" rather than failing loudly.
+  matches <- stringr::str_match(lines, "\\{#grp-([A-Za-z0-9-]+)[^}]*\\}")[, 2]
   unique(stats::na.omit(matches))
 }
 
@@ -183,9 +187,16 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
     c(no_panels_placeholder(id), "")
   })
 
-  # The point of the whole file. Left as a visible prompt rather than a blank, so
-  # an unwritten verdict is obvious when skimming.
-  c(out, "**Verdict:** *(unwritten)*", "")
+  # The point of the whole file, and the ONLY thing in a section Sam edits --
+  # everything above is machine-written and gets left alone by both this
+  # generator (append-only) and refresh_group_panels(). A callout marks that
+  # boundary visually (Sam 2026-08-08: "move the areas of the QMDs that
+  # expect human writing into callouts... make it a lot more clear what's
+  # safe to change and what isn't"). "**Verdict:**" itself stays literal
+  # text inside the callout, not folded into the callout title, so existing
+  # verdicts (grep-matched on that prefix elsewhere) keep meaning the same
+  # thing.
+  c(out, "::: {.callout-note}", "**Verdict:** *(unwritten)*", ":::", "")
 }
 
 #' Markdown for a Notebook's Header and Comparison Table
@@ -251,7 +262,9 @@ notebook_header_markdown <- function(notebook, rows, overview = NULL) {
       "Scaffolded ", format(Sys.Date()), " by ",
       "`scripts/generate_group_notebooks.R`. **The generator is append-only**: ",
       "re-running it adds sections for new groups and never touches anything ",
-      "already written here, so this file is yours to edit freely."
+      "already written here. The callout boxes (:::  {.callout-note}) mark ",
+      "what it expects YOU to write -- everything else is machine-generated ",
+      "and will be silently out of sync with the data if hand-edited."
     ),
     "",
     paste0(
@@ -272,8 +285,10 @@ notebook_header_markdown <- function(notebook, rows, overview = NULL) {
     "",
     "# Comparison",
     "",
+    "::: {.callout-note}",
     "*(Notes on how these groups relate: what should be lumped, split, or",
     "dropped, and why. This is the question the document exists to answer.)*",
+    ":::",
     "",
     "# Groups",
     ""
@@ -583,7 +598,8 @@ refresh_group_panels <- function(
 
   for (path in files) {
     lines <- readLines(path, warn = FALSE)
-    anchors <- stringr::str_match(lines, "\\{#grp-([A-Za-z0-9]+)")[, 2]
+    # See existing_group_sections() above for why this is [A-Za-z0-9-]+.
+    anchors <- stringr::str_match(lines, "\\{#grp-([A-Za-z0-9-]+)")[, 2]
     changed <- FALSE
 
     # Walk backwards so earlier line numbers stay valid as the file grows.

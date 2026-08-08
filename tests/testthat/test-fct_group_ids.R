@@ -65,6 +65,22 @@ test_that("new groups take the next free ID", {
   expect_equal(again$group_id[again$SAMPLE_SPECIES == "A"], "G001")
 })
 
+test_that("the next free ID is found correctly when group_id carries a composite suffix", {
+  # sub("^G", "", "G014-Bf-Cnr-Gmor-Liv-Mw") used to leave "014-Bf-Cnr-..." and
+  # as.integer() of that is NA -- this pins the fix (Sam 2026-08-08).
+  path <- tempfile(fileext = ".csv")
+  allocate_group_ids(id_summary(), path, verbose = FALSE)
+  ledger <- readr::read_csv(path, show_col_types = FALSE)
+  ledger$group_id <- paste0(ledger$group_id, "-Bf-Cnr-Gmor-Liv-Mw")
+  readr::write_csv(ledger, path, na = "")
+
+  wider <- id_summary(n = c(900, 60, 30, 10, 5000), species = c(LETTERS[1:4], "E"))
+  again <- allocate_group_ids(wider, path, verbose = FALSE)
+
+  expect_equal(again$group_id[again$SAMPLE_SPECIES == "E"], "G005")
+  expect_equal(again$group_id[again$SAMPLE_SPECIES == "A"], "G001-Bf-Cnr-Gmor-Liv-Mw")
+})
+
 test_that("a retired ID is never reused", {
   # Reuse is how a note written in March ends up pointing at a different group in
   # September. The next ID is one past the highest EVER issued.
@@ -229,7 +245,7 @@ test_that("the species/tissue segment appears, abbreviated, when species is know
     SAMPLE_SPECIES = "Gadus morhua", SAMPLE_TISSUE = "Liver"
   )
   out <- format_fixture(data)
-  expect_equal(out, "G014-Wfw-Cwc-G.mor-Liv-Mw")
+  expect_equal(out, "G014-Wfw-Cwc-G-mor-Liv-Mw")
 })
 
 test_that("a single-word species name takes its own first 4 letters", {
@@ -250,10 +266,10 @@ test_that("a species code override wins over the derived code", {
     SAMPLE_SPECIES = "Odobenus rosmarus divergens", SAMPLE_TISSUE = "Liver"
   )
   overrides <- data.frame(
-    SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O.rmd"
+    SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O-rmd"
   )
   out <- format_fixture(data, overrides)
-  expect_equal(out, "G014-Wfw-Cwc-O.rmd-Liv-Mw")
+  expect_equal(out, "G014-Wfw-Cwc-O-rmd-Liv-Mw")
 })
 
 test_that("a species with no tissue code yet warns and drops just that segment", {
@@ -283,39 +299,39 @@ test_that("format_composite_group_id is vectorised across mixed rows", {
     )
   )
   out <- format_fixture(data)
-  expect_equal(out, c("G014-Wfw-Cwc-Mw", "G020-Bf-Owb-G.mor-Mus-C"))
+  expect_equal(out, c("G014-Wfw-Cwc-Mw", "G020-Bf-Owb-G-mor-Mus-C"))
 })
 
 test_that("format_species_code abbreviates and applies overrides", {
-  expect_equal(format_species_code("Gadus morhua"), "G.mor")
-  expect_equal(format_species_code("Cancer pagurus"), "C.pag")
+  expect_equal(format_species_code("Gadus morhua"), "G-mor")
+  expect_equal(format_species_code("Cancer pagurus"), "C-pag")
   expect_equal(format_species_code("Chironomidae"), "Chir")
   expect_equal(format_species_code(NA_character_), NA_character_)
   expect_equal(format_species_code(""), NA_character_)
 
-  overrides <- data.frame(SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O.rmd")
+  overrides <- data.frame(SAMPLE_SPECIES = "Odobenus rosmarus divergens", code = "O-rmd")
   expect_equal(
-    format_species_code("Odobenus rosmarus divergens", overrides), "O.rmd"
+    format_species_code("Odobenus rosmarus divergens", overrides), "O-rmd"
   )
   # An un-overridden species in the same call still gets the derived code.
   expect_equal(
     format_species_code(c("Odobenus rosmarus divergens", "Gadus morhua"), overrides),
-    c("O.rmd", "G.mor")
+    c("O-rmd", "G-mor")
   )
 })
 
-test_that("the real species list has no unresolved collisions after overrides", {
+test_that("the real species list has no unresolved collisions", {
+  # Sam fixed both genuine-duplicate pairs at the source 2026-08-08 (renamed
+  # "Eukronia hamata" to "Eukrohnia hamata" and "Phoca groenlandica" to
+  # "Pagophilus groenlandicus" in the underlying data), so the collision that
+  # surfaced them in the first place -- see misc-todo.md item 14 -- is gone:
+  # zero collisions should remain, overridden or otherwise.
   skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
   species <- unique(read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))$SAMPLE_SPECIES)
   species <- species[!is.na(species) & nzchar(species)]
   codes <- format_species_code(species)
-  # The two genuine-duplicate pairs flagged in misc-todo.md item 14 are left
-  # deliberately un-overridden and still collide -- that collision is the
-  # point, a visible flag that they might be the same species under two
-  # names rather than something to paper over with a distinguishing code.
-  # Everything else should be unique or explicitly overridden.
   dupes <- codes[duplicated(codes) | duplicated(codes, fromLast = TRUE)]
-  expect_setequal(unique(dupes), c("E.ham", "P.gro"))
+  expect_length(dupes, 0)
 })
 
 test_that("the real lookup CSVs cover the ledger except known genuine data gaps", {
@@ -344,18 +360,25 @@ test_that("the committed ledger pins its IDs to specific groups", {
   # Deliberately hard-coded. If a future refactor "helpfully" regenerates the
   # ledger, this fails rather than silently re-pointing every note Sam has
   # written. Update it only when the underlying group genuinely changes.
+  #
+  # Matched on the stable "G<num>-" prefix, not the full composite string:
+  # since the 2026-08-08 migration (scripts/migrate_group_ids_to_composite.R)
+  # group_id IS the composite form, but the compartment/geography/species
+  # lookups it's built from are explicitly meant to be extended later
+  # (misc-todo.md), so pinning the exact suffix here would make routine
+  # lookup edits fail this test for no reason. The number is what's frozen.
   skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
   ids <- read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))
 
-  g001 <- ids[ids$group_id == "G001", ]
+  g001 <- ids[startsWith(ids$group_id, "G001-"), ]
   expect_equal(g001$ENVIRON_COMPARTMENT_SUB, "Freshwater")
   expect_equal(g001$MEASURED_UNIT_STANDARD, "mg/L")
 
-  g005 <- ids[ids$group_id == "G005", ]
+  g005 <- ids[startsWith(ids$group_id, "G005-"), ]
   expect_equal(g005$SAMPLE_SPECIES, "Mytilus edulis")
   expect_equal(g005$SAMPLE_TISSUE, "Total soft tissues")
 
-  g006 <- ids[ids$group_id == "G006", ]
+  g006 <- ids[startsWith(ids$group_id, "G006-"), ]
   expect_equal(g006$SAMPLE_SPECIES, "Gadus morhua")
   expect_equal(g006$SAMPLE_TISSUE, "Liver")
 

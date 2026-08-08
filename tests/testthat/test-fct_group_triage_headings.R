@@ -470,6 +470,24 @@ test_that("must_include without ids errors rather than silently doing nothing", 
   )
 })
 
+test_that("group_slug aliases group_id when ids are supplied, and is NA otherwise", {
+  # Sam 2026-08-08: "we already have another naming scheme that we use for
+  # plots [group_slug]. I think it makes sense to replace that one with this
+  # one [the composite group_id]." group_slug is no longer its own
+  # slugify_name(label) derivation.
+  with_ids <- sample_triage_groups(
+    must_include_summary(), must_include_data(),
+    min_n = 100, n_sample = Inf, ids = must_include_ledger()
+  )
+  expect_equal(with_ids$group_slug, with_ids$group_id)
+
+  without_ids <- sample_triage_groups(
+    must_include_summary(), must_include_data(),
+    min_n = 100, n_sample = Inf
+  )
+  expect_true(all(is.na(without_ids$group_slug)))
+})
+
 test_that("an empty must_include changes nothing", {
   with_ids <- sample_triage_groups(
     must_include_summary(), must_include_data(),

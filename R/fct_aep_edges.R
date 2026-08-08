@@ -71,7 +71,8 @@ read_aep_edges <- function(
 ) {
   if (!file.exists(path)) {
     stop(
-      "No edges file at ", path,
+      "No edges file at ",
+      path,
       ". Run scripts/scaffold_aep_edges.R first."
     )
   }
@@ -103,8 +104,10 @@ read_aep_edges <- function(
   bad <- setdiff(stats::na.omit(unique(edges$status)), aep_edge_statuses())
   if (length(bad) > 0) {
     stop(
-      "Unrecognised status(es): ", paste(sQuote(bad), collapse = ", "),
-      ". Permitted: ", paste(aep_edge_statuses(), collapse = ", ")
+      "Unrecognised status(es): ",
+      paste(sQuote(bad), collapse = ", "),
+      ". Permitted: ",
+      paste(aep_edge_statuses(), collapse = ", ")
     )
   }
 
@@ -133,7 +136,9 @@ read_aep_edges <- function(
     bad_score <- !is.na(v) & !(v %in% 1:3)
     if (any(bad_score)) {
       stop(
-        sum(bad_score), " row(s) have an out-of-range ", col,
+        sum(bad_score),
+        " row(s) have an out-of-range ",
+        col,
         ": scores are 1, 2 or 3, or blank if unscored."
       )
     }
@@ -144,7 +149,9 @@ read_aep_edges <- function(
     unknown <- unknown[!is.na(unknown)]
     if (length(unknown) > 0) {
       stop(
-        "Edges name ", length(unknown), " unknown node_id(s): ",
+        "Edges name ",
+        length(unknown),
+        " unknown node_id(s): ",
         paste(sQuote(utils::head(unknown, 5)), collapse = ", ")
       )
     }
@@ -169,16 +176,20 @@ validate_aep_edges <- function(edges, nodes) {
   # evidence exists without saying what it is, and nothing downstream can tell
   # that apart from a real citation.
   unevidenced <- edges$edge_id[
-    edges$status %in% "empirical" &
+    edges$status %in%
+      "empirical" &
       (is.na(edges$evidence_justification) |
         !nzchar(trimws(edges$evidence_justification)))
   ]
   if (length(unevidenced) > 0) {
-    problems <- c(problems, paste0(
-      length(unevidenced),
-      " edge(s) marked empirical with no evidence_justification: ",
-      paste(unevidenced, collapse = ", ")
-    ))
+    problems <- c(
+      problems,
+      paste0(
+        length(unevidenced),
+        " edge(s) marked empirical with no evidence_justification: ",
+        paste(unevidenced, collapse = ", ")
+      )
+    )
   }
 
   # A magnitude on a putative edge is a contradiction: putative means the flow is
@@ -187,19 +198,27 @@ validate_aep_edges <- function(edges, nodes) {
     edges$status %in% "putative" & !is.na(edges$magnitude)
   ]
   if (length(contradictory) > 0) {
-    problems <- c(problems, paste0(
-      length(contradictory), " putative edge(s) carry a magnitude: ",
-      paste(contradictory, collapse = ", "),
-      " (mark them empirical, or clear the magnitude)"
-    ))
+    problems <- c(
+      problems,
+      paste0(
+        length(contradictory),
+        " putative edge(s) carry a magnitude: ",
+        paste(contradictory, collapse = ", "),
+        " (mark them empirical, or clear the magnitude)"
+      )
+    )
   }
 
   bare <- edges$edge_id[!is.na(edges$magnitude) & is.na(edges$magnitude_unit)]
   if (length(bare) > 0) {
-    problems <- c(problems, paste0(
-      length(bare), " edge(s) have a magnitude with no unit: ",
-      paste(bare, collapse = ", ")
-    ))
+    problems <- c(
+      problems,
+      paste0(
+        length(bare),
+        " edge(s) have a magnitude with no unit: ",
+        paste(bare, collapse = ", ")
+      )
+    )
   }
 
   # Nodes nothing flows into or out of. Not necessarily wrong (a source has no
@@ -207,10 +226,14 @@ validate_aep_edges <- function(edges, nodes) {
   # left to Sam.
   orphans <- setdiff(nodes$node_id, c(edges$from, edges$to))
   if (length(orphans) > 0) {
-    problems <- c(problems, paste0(
-      length(orphans), " node(s) have no edges at all: ",
-      paste(orphans, collapse = ", ")
-    ))
+    problems <- c(
+      problems,
+      paste0(
+        length(orphans),
+        " node(s) have no edges at all: ",
+        paste(orphans, collapse = ", ")
+      )
+    )
   }
 
   if (length(problems) > 0) {
@@ -358,7 +381,10 @@ aep_edge_coords <- function(
   if (nrow(out) == 0) {
     return(dplyr::mutate(
       out,
-      x = numeric(0), y = numeric(0), xend = numeric(0), yend = numeric(0)
+      x = numeric(0),
+      y = numeric(0),
+      xend = numeric(0),
+      yend = numeric(0)
     ))
   }
 
@@ -446,14 +472,19 @@ aep_node_tile_layers <- function(data, hw, hh) {
       data = data,
       ggplot2::aes(x = .data$x, y = .data$y),
       inherit.aes = FALSE,
-      width = 2 * hw, height = 2 * hh,
-      fill = "white", colour = "grey30", linewidth = 0.4
+      width = 2 * hw,
+      height = 2 * hh,
+      fill = "white",
+      colour = "grey30",
+      linewidth = 0.4
     ),
     ggplot2::geom_text(
       data = data,
       ggplot2::aes(x = .data$x, y = .data$y, label = .data$.label),
       inherit.aes = FALSE,
-      size = 2.8, lineheight = 0.95, colour = "grey15"
+      size = 2.8,
+      lineheight = 0.95,
+      colour = "grey15"
     )
   )
 }
@@ -487,8 +518,10 @@ aep_node_tile_layers <- function(data, hw, hh) {
 aep_edge_bezier_points <- function(edges, curvature = 0.15) {
   if (nrow(edges) == 0) {
     return(tibble::tibble(
-      edge_id = character(0), .point = integer(0),
-      x = numeric(0), y = numeric(0)
+      edge_id = character(0),
+      .point = integer(0),
+      x = numeric(0),
+      y = numeric(0)
     ))
   }
 
@@ -565,11 +598,22 @@ aep_edge_bezier_points <- function(edges, curvature = 0.15) {
 #'   matters.
 #' @return A ggplot.
 #' @export
-plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
-                     groups = NULL, node_images = NULL, image_size = 0.16,
-                     card_aspect = 1.8 / 2.4, device_aspect = 12 / 8,
-                     curvature = 0.15, tile_size = NULL, tile_aspect = NULL,
-                     x_expand = 0.15, y_expand = 0.12) {
+plot_aep <- function(
+  nodes,
+  edges,
+  cards = NULL,
+  label_edges = TRUE,
+  groups = NULL,
+  node_images = NULL,
+  image_size = 0.16,
+  card_aspect = 1.8 / 2.4,
+  device_aspect = 12 / 8,
+  curvature = 0.15,
+  tile_size = NULL,
+  tile_aspect = NULL,
+  x_expand = 0.15,
+  y_expand = 0.12
+) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
     return(triage_empty_plot("AEP", "no nodes have x/y coordinates"))
@@ -595,8 +639,11 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
   # NOT used for the real extent any more; see pass two.
   ext0 <- node_card_extent(
     placed,
-    image_size = card_image_size, card_aspect = card_card_aspect,
-    device_aspect = device_aspect, x_expand = x_expand, y_expand = y_expand
+    image_size = card_image_size,
+    card_aspect = card_card_aspect,
+    device_aspect = device_aspect,
+    x_expand = x_expand,
+    y_expand = y_expand
   )
 
   boxes <- if (!is.null(groups) && nrow(groups) > 0) {
@@ -624,9 +671,13 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
 
   ext <- node_card_extent(
     placed,
-    image_size = card_image_size, card_aspect = card_card_aspect,
-    device_aspect = device_aspect, x_expand = x_expand, y_expand = y_expand,
-    x_range = range(x_all), y_range = range(y_all)
+    image_size = card_image_size,
+    card_aspect = card_card_aspect,
+    device_aspect = device_aspect,
+    x_expand = x_expand,
+    y_expand = y_expand,
+    x_range = range(x_all),
+    y_range = range(y_all)
   )
   cx <- mean(range(x_all))
   cy <- mean(range(y_all))
@@ -649,9 +700,14 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
           is.na(.data$geo_mean),
           .data$label,
           paste0(
-            .data$label, "\n",
-            formatC(.data$geo_mean, format = "g", digits = 3), " ", .data$unit,
-            "  (n = ", format(.data$n, big.mark = ","), ")"
+            .data$label,
+            "\n",
+            formatC(.data$geo_mean, format = "g", digits = 3),
+            " ",
+            .data$unit,
+            "  (n = ",
+            format(.data$n, big.mark = ","),
+            ")"
           )
         )
       )
@@ -688,48 +744,55 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
       # their length. All edges bend the same relative way (see
       # aep_edge_bezier_points()), so the diagram reads as one consistent
       # style.
-      p <- p + ggforce::geom_bezier(
-        data = aep_edge_bezier_points(sub, curvature = curvature),
-        ggplot2::aes(x = .data$x, y = .data$y, group = .data$edge_id),
-        linetype = styles$linetype[[st]],
-        colour = styles$colour[[st]],
-        linewidth = styles$linewidth[[st]],
-        alpha = styles$alpha[[st]],
-        arrow = ggplot2::arrow(
-          length = ggplot2::unit(6, "pt"), type = "closed"
+      p <- p +
+        ggforce::geom_bezier(
+          data = aep_edge_bezier_points(sub, curvature = curvature),
+          ggplot2::aes(x = .data$x, y = .data$y, group = .data$edge_id),
+          linetype = styles$linetype[[st]],
+          colour = styles$colour[[st]],
+          linewidth = styles$linewidth[[st]],
+          alpha = styles$alpha[[st]],
+          arrow = ggplot2::arrow(
+            length = ggplot2::unit(6, "pt"),
+            type = "closed"
+          )
+          # No arrow.fill: 2026-08-07 briefly added one here on a hypothesis
+          # that the arrowhead was rendering unfilled/invisible, then reverted
+          # -- Sam confirmed arrowheads were actually visible before but
+          # overplotted by the node card images on some edges, which is the
+          # opposite problem, and my inspection of a rendered PNG at low
+          # res/crop was not reliable enough to have caught that. See
+          # node_card_extent()/aep_edge_coords() for the real mechanism: edges
+          # are clipped to a box around each card BEFORE the card image is
+          # drawn on top, so an undersized box is what lets an arrowhead land
+          # under the image rather than short of it.
         )
-        # No arrow.fill: 2026-08-07 briefly added one here on a hypothesis
-        # that the arrowhead was rendering unfilled/invisible, then reverted
-        # -- Sam confirmed arrowheads were actually visible before but
-        # overplotted by the node card images on some edges, which is the
-        # opposite problem, and my inspection of a rendered PNG at low
-        # res/crop was not reliable enough to have caught that. See
-        # node_card_extent()/aep_edge_coords() for the real mechanism: edges
-        # are clipped to a box around each card BEFORE the card image is
-        # drawn on top, so an undersized box is what lets an arrowhead land
-        # under the image rather than short of it.
-      )
     }
 
     if (label_edges) {
       lab <- e[e$status == "empirical" & !is.na(e$magnitude), , drop = FALSE]
       if (nrow(lab) > 0) {
-        p <- p + ggplot2::geom_label(
-          data = lab,
-          ggplot2::aes(
-            # The CHORD midpoint, not a point on the curve itself: at
-            # curvature = 0.15 the two are close enough that computing the
-            # true bezier midpoint is not worth the complexity it would add.
-            x = (.data$x + .data$xend) / 2,
-            y = (.data$y + .data$yend) / 2,
-            label = paste0(
-              formatC(.data$magnitude, format = "g", digits = 3), " ",
-              .data$magnitude_unit
-            )
-          ),
-          size = 2.4, colour = "grey15", label.size = 0,
-          fill = "white", alpha = 0.85
-        )
+        p <- p +
+          ggplot2::geom_label(
+            data = lab,
+            ggplot2::aes(
+              # The CHORD midpoint, not a point on the curve itself: at
+              # curvature = 0.15 the two are close enough that computing the
+              # true bezier midpoint is not worth the complexity it would add.
+              x = (.data$x + .data$xend) / 2,
+              y = (.data$y + .data$yend) / 2,
+              label = paste0(
+                formatC(.data$magnitude, format = "g", digits = 3),
+                " ",
+                .data$magnitude_unit
+              )
+            ),
+            size = 2.4,
+            colour = "grey15",
+            label.size = 0,
+            fill = "white",
+            alpha = 0.85
+          )
       }
     }
   }
@@ -738,28 +801,37 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
   # because two visual languages for the same object on one figure is worse than
   # either alone.
   p <- if (!is.null(node_images) && length(node_images) > 0) {
-    have <- node_label[node_label$node_id %in% names(node_images), , drop = FALSE]
+    have <- node_label[
+      node_label$node_id %in% names(node_images),
+      ,
+      drop = FALSE
+    ]
     have$.image <- unname(node_images[have$node_id])
-    missing_img <- node_label[!node_label$node_id %in% names(node_images), , drop = FALSE]
+    missing_img <- node_label[
+      !node_label$node_id %in% names(node_images),
+      ,
+      drop = FALSE
+    ]
 
-    out <- p + ggimage::geom_image(
-      data = have,
-      ggplot2::aes(x = .data$x, y = .data$y, image = .data$.image),
-      size = image_size,
-      # asp corrects ggimage's render for the plot area's aspect ratio, and
-      # MUST track the real device shape -- it was hardcoded to 1.5 (the
-      # original fixed 12x8 canvas's ratio) until 2026-08-08, harmless while
-      # device_aspect was always 12/8 for every AEP but silently wrong the
-      # moment it wasn't: aep_diagram_height() makes device_aspect vary per
-      # AEP, and a stale asp against a real device_aspect of e.g. 0.28 (12in
-      # over a 42in-tall canvas) is what ggimage read as "compensate by
-      # blowing the image up roughly 5x", confirmed by measuring the actual
-      # rendered pixel footprint of a card at three different heights with
-      # asp fixed: it grew with height instead of staying constant. Sam:
-      # "now the node images don't scale with the plot, so they still
-      # overprint."
-      asp = device_aspect
-    )
+    out <- p +
+      ggimage::geom_image(
+        data = have,
+        ggplot2::aes(x = .data$x, y = .data$y, image = .data$.image),
+        size = image_size,
+        # asp corrects ggimage's render for the plot area's aspect ratio, and
+        # MUST track the real device shape -- it was hardcoded to 1.5 (the
+        # original fixed 12x8 canvas's ratio) until 2026-08-08, harmless while
+        # device_aspect was always 12/8 for every AEP but silently wrong the
+        # moment it wasn't: aep_diagram_height() makes device_aspect vary per
+        # AEP, and a stale asp against a real device_aspect of e.g. 0.28 (12in
+        # over a 42in-tall canvas) is what ggimage read as "compensate by
+        # blowing the image up roughly 5x", confirmed by measuring the actual
+        # rendered pixel footprint of a card at three different heights with
+        # asp fixed: it grew with height instead of staying constant. Sam:
+        # "now the node images don't scale with the plot, so they still
+        # overprint."
+        asp = device_aspect
+      )
     # A node with no card still has to appear, or the diagram silently loses
     # it. Tiled at the CARD's own extent (ext, computed above from
     # image_size/card_aspect), so it reads as the same size as its sibling
@@ -782,7 +854,8 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
     # this is safe even if a box or edge extends past the window.
     ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE) +
     ggplot2::labs(
-      x = NULL, y = NULL,
+      x = NULL,
+      y = NULL,
       caption = paste(
         "Solid arrows: empirically supported.",
         "Dashed grey: putative, not evidenced here."
@@ -791,7 +864,9 @@ plot_aep <- function(nodes, edges, cards = NULL, label_edges = TRUE,
     ggplot2::theme_void(base_size = 11) +
     ggplot2::theme(
       plot.caption = ggplot2::element_text(
-        size = ggplot2::rel(0.75), colour = "grey40", hjust = 0
+        size = ggplot2::rel(0.75),
+        colour = "grey40",
+        hjust = 0
       )
     )
 }
@@ -826,11 +901,16 @@ aep_bbox_inset <- function(base_map, lat_min, lat_max, lon_min, lon_max) {
     ggplot2::geom_rect(
       data = rect,
       ggplot2::aes(
-        xmin = .data$xmin, xmax = .data$xmax,
-        ymin = .data$ymin, ymax = .data$ymax
+        xmin = .data$xmin,
+        xmax = .data$xmax,
+        ymin = .data$ymin,
+        ymax = .data$ymax
       ),
       inherit.aes = FALSE,
-      colour = "firebrick", fill = "firebrick", alpha = 0.25, linewidth = 0.6
+      colour = "firebrick",
+      fill = "firebrick",
+      alpha = 0.25,
+      linewidth = 0.6
     ) +
     ggplot2::guides(fill = "none", colour = "none", alpha = "none") +
     ggplot2::theme(legend.position = "none")
@@ -856,8 +936,10 @@ aep_edge_progress <- function(edges) {
   n_putative <- sum(edges$status %in% "putative")
   n_magnitude <- sum(!is.na(edges$magnitude))
   n_scored <- sum(
-    !is.na(edges$essentiality_score) & !is.na(edges$plausibility_score) &
-      !is.na(edges$evidence_score) & !is.na(edges$quantification_score)
+    !is.na(edges$essentiality_score) &
+      !is.na(edges$plausibility_score) &
+      !is.na(edges$evidence_score) &
+      !is.na(edges$quantification_score)
   )
 
   tibble::tibble(

@@ -12,33 +12,38 @@ Figures and counts are static, written at scaffold time rather than computed on 
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
-| [G075](#grp-G075) | Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) | `mg/kg (dry)` | 24 |  100 |  100 | 63.8 | 4.23 | 1 |  |
-| [G101](#grp-G101) | Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 16 |  105 |  105 |  105 |  | 1 |  |
+| [G075-Eso-Rws-Md](#grp-G075-Eso-Rws-Md) | Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) | `mg/kg (dry)` | 24 |  100 |  100 | 63.8 | 4.23 | 1 |  |
+| [G101-Eso-Dws-Md](#grp-G101-Eso-Dws-Md) | Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) | `mg/kg (dry)` | 16 |  105 |  105 |  105 |  | 1 |  |
 
 : Groups in the Terrestrial Soil notebook. {#tbl-glance}
 
 # Comparison
 
+::: {.callout-note}
 *(Notes on how these groups relate: what should be lumped, split, or
 dropped, and why. This is the question the document exists to answer.)*
+:::
 
 # Groups
 
 
-## G075 Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) {#grp-G075}
+## G075-Eso-Rws-Md Terrestrial / Soil O Horizon (Organic) / River, stream, canal / Water surface / mg/kg (dry) {#grp-G075-Eso-Rws-Md}
 
-`G075` `n` = 24 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+`G075-Eso-Rws-Md` `n` = 24 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G075` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G075-Eso-Rws-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
+## G101-Eso-Dws-Md Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G101-Eso-Dws-Md}
 
-## G101 Terrestrial / Soil O Horizon (Organic) / Drainage, sewer, artificial water / Water surface / mg/kg (dry) {#grp-G101}
+`G101-Eso-Dws-Md` `n` = 16 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
 
-`G101` `n` = 16 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (dry)`.
+*No triage panels: this group is below the `min_n` cutoff. Add `G101-Eso-Dws-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G101` to `must_include` in the `triage_pilot_groups` target if it needs them.*
-
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 

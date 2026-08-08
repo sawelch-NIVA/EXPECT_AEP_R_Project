@@ -26,24 +26,26 @@ Aquatic / Freshwater / mg/L
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |--------|--------|--------|-------:|-------:|-------:|-------:|-------:|-------:|--------|
-| [G001](#grp-G001) | Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 41,831 | 0.33 | 0.0012 | 0.00152 | 4.88 | 1 | multimodal |
-| [G003](#grp-G003) | Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L | `mg/L` | 6,847 | 0.0119 | 0.001 | 0.00105 | 4.14 | 1 | multimodal |
-| [G027](#grp-G027) | Aquatic / Freshwater / River, stream, canal / Other / mg/L | `mg/L` | 106 | 0.00615 | 0.00163 | 0.00059 | 23.3 | 2 |  |
-| [G170](#grp-G170) | Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L | `mg/L` | 3 | 0.797 | 0.797 | 0.797 |  | 1 |  |
+| [G001-Wfw-Rwc-C](#grp-G001-Wfw-Rwc-C) | Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L | `mg/L` | 41,831 | 0.33 | 0.0012 | 0.00152 | 4.88 | 1 | multimodal |
+| [G003-Wfw-Lwc-C](#grp-G003-Wfw-Lwc-C) | Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L | `mg/L` | 6,847 | 0.0119 | 0.001 | 0.00105 | 4.14 | 1 | multimodal |
+| [G027-Wfw-Rot-C](#grp-G027-Wfw-Rot-C) | Aquatic / Freshwater / River, stream, canal / Other / mg/L | `mg/L` | 106 | 0.00615 | 0.00163 | 0.00059 | 23.3 | 2 |  |
+| [G170-Wfw-Dws-C](#grp-G170-Wfw-Dws-C) | Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L | `mg/L` | 3 | 0.797 | 0.797 | 0.797 |  | 1 |  |
 
 : Groups in the Freshwater notebook.
 
 # Comparison
 
+::: {.callout-note}
 *(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
+:::
 
 # Groups
 
-## G001 Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G001}
+## G001-Wfw-Rwc-C Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L {#grp-G001-Wfw-Rwc-C}
 
-`G001` `n` = 41,831 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G001-Wfw-Rwc-C` `n` = 41,831 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
-@fig-g001 shows a clear multimopdal (a) distribution of copper concentrations between background (I) and good (III) threshholds. A possible weak time trend is apparent (b) but not confirmable without additional evidence. Plotting distributions by campaign (c) shows a clear effect on concentration distributions: Measured Monitoring, Pollution Monitoring, and Road Traffic Impact show roughly log-normal distributions between M-608 classes I and II, but Mine Impact displays a distinctly flatter log-normal distribution that drags the right tail of the overall distribution as high as 1e3 mg/L; that is, copper in the g/L range. Although mine sites may be expected to be extremely contaminated, this seems improbably high, and possibly represents a unit error.
+@fig-g001-wfw-rwc-c shows a clear multimopdal (a) distribution of copper concentrations between background (I) and good (III) threshholds. A possible weak time trend is apparent (b) but not confirmable without additional evidence. Plotting distributions by campaign (c) shows a clear effect on concentration distributions: Measured Monitoring, Pollution Monitoring, and Road Traffic Impact show roughly log-normal distributions between M-608 classes I and II, but Mine Impact displays a distinctly flatter log-normal distribution that drags the right tail of the overall distribution as high as 1e3 mg/L; that is, copper in the g/L range. Although mine sites may be expected to be extremely contaminated, this seems improbably high, and possibly represents a unit error.
 
 The vast majority of samples are coded as taken from *Water column, pelagic zone* (d). Because in *Water surface* and *Other* fall well within the distribution of the former, it seems valid to lump these together under the former. (e) shows no detectable spatial variation in concentrations at the resolution assessed.
 
@@ -53,20 +55,21 @@ The vast majority of samples are coded as taken from *Water column, pelagic zone
 - **multimodal** (dip test not run)
 :::
 
-::: {#fig-g001 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g001-a group="G001"}
+::: {#fig-g001-wfw-rwc-c layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G001-Wfw-Rwc-C_a_density.png){#fig-g001-wfw-rwc-c-a group="G001-Wfw-Rwc-C"}
 
-![Concentration by date](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g001-b group="G001"}
+![Concentration by date](../../triage/G001-Wfw-Rwc-C_b_date.png){#fig-g001-wfw-rwc-c-b group="G001-Wfw-Rwc-C"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_c_source.png){#fig-g001-c group="G001"}
+![Distribution by campaign or reference](../../triage/G001-Wfw-Rwc-C_c_source.png){#fig-g001-wfw-rwc-c-c group="G001-Wfw-Rwc-C"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g001-d group="G001"}
+![Distribution by site type (all geographies)](../../triage/G001-Wfw-Rwc-C_d_site_type.png){#fig-g001-wfw-rwc-c-d group="G001-Wfw-Rwc-C"}
 
-![Spatial distribution](../../triage/Aquatic_Freshwater_River_stream_canal_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g001-e group="G001"}
+![Spatial distribution](../../triage/G001-Wfw-Rwc-C_e_spatial.png){#fig-g001-wfw-rwc-c-e group="G001-Wfw-Rwc-C"}
 
-G001: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L
+G001-Wfw-Rwc-C: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L
 :::
 
+::: {.callout-note}
 **Verdict:**
 
 1.  Investigate Mine Impact
@@ -74,10 +77,11 @@ G001: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone /
 2.  Lump *Water surface* and *Other into Water column, pelagic zone*
 
 3.  Investigate high-value hex- does it correspond to a specific campaign?
+:::
 
-## G003 Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L {#grp-G003}
+## G003-Wfw-Lwc-C Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L {#grp-G003-Wfw-Lwc-C}
 
-`G003` `n` = 6,847 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G003-Wfw-Lwc-C` `n` = 6,847 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
 ::: callout-warning
 ## Flagged
@@ -85,54 +89,61 @@ G001: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone /
 - **multimodal** (dip test not run)
 :::
 
-@fig-g003-a shows a clearly multi-modal distribution clustered around a mean of mu ± sd (n = n, m sources). Small peaks are seen at approximately 1e-4 and 1e+00, the former likely a true distribution but the latter probably a unit error. @fig-g003-b suggests that the leftmost peak seen is from sampling in the 2018-2019 period that returned a mean copper concentration below background levels, more recent samples (2019 onwards) are centred around a the 1e-03 point. @fig-g003-c shows a similar pattern of distributions across campaigns, where the Mine Impact monitoring campaign reports concentrations orders of magnitude higher than other campaigns with larger sample sizes. @fig-g003-d shows no apparent difference between sub-geographies, while @fig-g003-e shows no spatial variation at the analysed resolution.
+@fig-g003-wfw-lwc-c-a shows a clearly multi-modal distribution clustered around a mean of mu ± sd (n = n, m sources). Small peaks are seen at approximately 1e-4 and 1e+00, the former likely a true distribution but the latter probably a unit error. @fig-g003-wfw-lwc-c-b suggests that the leftmost peak seen is from sampling in the 2018-2019 period that returned a mean copper concentration below background levels, more recent samples (2019 onwards) are centred around a the 1e-03 point. @fig-g003-wfw-lwc-c-c shows a similar pattern of distributions across campaigns, where the Mine Impact monitoring campaign reports concentrations orders of magnitude higher than other campaigns with larger sample sizes. @fig-g003-wfw-lwc-c-d shows no apparent difference between sub-geographies, while @fig-g003-wfw-lwc-c-e shows no spatial variation at the analysed resolution.
 
-::: {#fig-g003 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_a_density.png){#fig-g003-a group="G003"}
+::: {#fig-g003-wfw-lwc-c layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G003-Wfw-Lwc-C_a_density.png){#fig-g003-wfw-lwc-c-a group="G003-Wfw-Lwc-C"}
 
-![Concentration by date](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_b_date.png){#fig-g003-b group="G003"}
+![Concentration by date](../../triage/G003-Wfw-Lwc-C_b_date.png){#fig-g003-wfw-lwc-c-b group="G003-Wfw-Lwc-C"}
 
-![Distribution by campaign or reference](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_c_source.png){#fig-g003-c group="G003"}
+![Distribution by campaign or reference](../../triage/G003-Wfw-Lwc-C_c_source.png){#fig-g003-wfw-lwc-c-c group="G003-Wfw-Lwc-C"}
 
-![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_d_site_type.png){#fig-g003-d group="G003"}
+![Distribution by site type (all geographies)](../../triage/G003-Wfw-Lwc-C_d_site_type.png){#fig-g003-wfw-lwc-c-d group="G003-Wfw-Lwc-C"}
 
-![Spatial distribution](../../triage/Aquatic_Freshwater_Lake_pond_pool_reservoir_Water_column_pelagic_zone_mg_L_e_spatial.png){#fig-g003-e group="G003"}
+![Spatial distribution](../../triage/G003-Wfw-Lwc-C_e_spatial.png){#fig-g003-wfw-lwc-c-e group="G003-Wfw-Lwc-C"}
 
-G003: Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L
+G003-Wfw-Lwc-C: Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L
 :::
 
+::: {.callout-note}
 **Verdict:**
 
 1.  Investigate mine impact again
 2.  Check spatial resolution again
 3.  Rivers and lakes have roughly equal copper concentrations
-
-## G027 Aquatic / Freshwater / River, stream, canal / Other / mg/L {#grp-G027}
-
-`G027` `n` = 106 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/L`.
-
-G027 is an artefact of sub-geography coding and should be folded under [G001](#grp-G001).
-
-::: {#fig-g027 layout-ncol="5"}
-![Overall distribution (all units)](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_a_density.png){#fig-g027-a group="G027"}
-
-![Concentration by date](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_b_date.png){#fig-g027-b group="G027"}
-
-![Distribution by campaign or reference](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_c_source.png){#fig-g027-c group="G027"}
-
-![Distribution by site type (all geographies)](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_d_site_type.png){#fig-g027-d group="G027"}
-
-![Spatial distribution](../../triage/Aquatic_Freshwater_River_stream_canal_Other_mg_L_e_spatial.png){#fig-g027-e group="G027"}
-
-G027: Aquatic / Freshwater / River, stream, canal / Other / mg/L
 :::
 
+## G027-Wfw-Rot-C Aquatic / Freshwater / River, stream, canal / Other / mg/L {#grp-G027-Wfw-Rot-C}
+
+`G027-Wfw-Rot-C` `n` = 106 measurements, from **2** sources (distinct `REFERENCE_ID`). Unit: `mg/L`.
+
+G027-Wfw-Rot-C is an artefact of sub-geography coding and should be folded under [G001-Wfw-Rwc-C](#grp-G001-Wfw-Rwc-C).
+
+::: {#fig-g027-wfw-rot-c layout-ncol="5"}
+![Overall distribution (all units)](../../triage/G027-Wfw-Rot-C_a_density.png){#fig-g027-wfw-rot-c-a group="G027-Wfw-Rot-C"}
+
+![Concentration by date](../../triage/G027-Wfw-Rot-C_b_date.png){#fig-g027-wfw-rot-c-b group="G027-Wfw-Rot-C"}
+
+![Distribution by campaign or reference](../../triage/G027-Wfw-Rot-C_c_source.png){#fig-g027-wfw-rot-c-c group="G027-Wfw-Rot-C"}
+
+![Distribution by site type (all geographies)](../../triage/G027-Wfw-Rot-C_d_site_type.png){#fig-g027-wfw-rot-c-d group="G027-Wfw-Rot-C"}
+
+![Spatial distribution](../../triage/G027-Wfw-Rot-C_e_spatial.png){#fig-g027-wfw-rot-c-e group="G027-Wfw-Rot-C"}
+
+G027-Wfw-Rot-C: Aquatic / Freshwater / River, stream, canal / Other / mg/L
+:::
+
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
 
-## G170 Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L {#grp-G170}
+## G170-Wfw-Dws-C Aquatic / Freshwater / Drainage, sewer, artificial water / Water surface / mg/L {#grp-G170-Wfw-Dws-C}
 
-`G170` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G170-Wfw-Dws-C` `n` = 3 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G170` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+*No triage panels: this group is below the `min_n` cutoff. Add `G170-Wfw-Dws-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
+::: {.callout-note}
 **Verdict:** *(unwritten)*
+:::
+

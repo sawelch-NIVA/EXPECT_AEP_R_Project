@@ -1,22 +1,22 @@
 node_id,group_id,notes
-N004-benthic-sediment,G002,Coastal sediment
-N005-water-column,G004,Coastal water
-N006-mussel-soft-tissue,G005,Coastal mussels (SF not reported)
-N006-mussel-soft-tissue,G007,Coastal mussels (SF benthos)
-N007-g-morhua-liver,G006,Coastal cod livers
-N008-g-morhua-muscle,G047,Coastal cod muscle
-N009-crab-total,G148,Crab whole body (WIP)
-N010-crab-muscle,G011,Crab muscle; split into contam and non-contam (WIP)
-N011-crab-brown-meat,G037,Crab brown meat
-N012-marine-crustaceans,G022,"Northern shrimp, whole body"
-N012-marine-crustaceans,G023,"Gammarus, whole body"
-N012-marine-crustaceans,G024,Calanus h.
-N014-marine-benthic-inverts,G040,Marine benthic inverts
-N015-marine-macroalgae,G033,Marine macroalgae
-N015-marine-macroalgae,G147,Marine macroalgae; potential pollution signal but small samples
-N015-marine-macroalgae,G036,Marine macroalgae; potential pollution signal but small samples
-N016-seabird-egg,G186,Seabird egg
-N016-seabird-egg,G167,Seabird egg
-N016-seabird-egg,G240,Seabird egg
-N017-eider-blood,G026,Eider blood
-N018-eider-eggs,G187,Eider egg
+N004-benthic-sediment,G002-Wsd-Cwb-Md,Coastal sediment
+N005-water-column,G004-Wmw-Cwc-C,Coastal water
+N006-mussel-soft-tissue,G005-Bl-Cnr-M-edu-Tst-Mw,Coastal mussels (SF not reported)
+N006-mussel-soft-tissue,G007-Bl-Cwc-M-edu-Tst-Mw,Coastal mussels (SF benthos)
+N007-g-morhua-liver,G006-Bf-Cnr-G-mor-Liv-Mw,Coastal cod livers
+N008-g-morhua-muscle,G047-Bf-Cnr-G-mor-Mus-Mw,Coastal cod muscle
+N009-crab-total,G148-Bc-Cnr-C-pag-Wbd-Mw,Crab whole body (WIP)
+N010-crab-muscle,G011-Bc-Cnr-C-pag-Mus-Mw,Crab muscle; split into contam and non-contam (WIP)
+N011-crab-brown-meat,G037-Bc-Oot-C-pag-Bmt-Md,Crab brown meat
+N012-marine-crustaceans,G022-Bc-Owc-P-bor-Wbd-Md,"Northern shrimp, whole body"
+N012-marine-crustaceans,G023-Bc-Cwb-G-oce-Wbd-Md,"Gammarus, whole body"
+N012-marine-crustaceans,G024-Bc-Owc-C-hyp-Wbd-Md,Calanus h.
+N014-marine-benthic-inverts,G040-Bi-Cwb-A-rub-Pyl-Md,Marine benthic inverts
+N015-marine-macroalgae,G033-Ba-Cnr-A-nod-Sti-Mw,Marine macroalgae
+N015-marine-macroalgae,G147-Ba-Cnr-A-nod-Pla-Mw,Marine macroalgae; potential pollution signal but small samples
+N015-marine-macroalgae,G036-Ba-Cnr-F-ves-Sti-Mw,Marine macroalgae; potential pollution signal but small samples
+N016-seabird-egg,G186-Bb-Cnr-G-ari-Egg-Mw,Seabird egg
+N016-seabird-egg,G167-Bb-Cnr-L-arg-Egg-Mw,Seabird egg
+N016-seabird-egg,G240-Bb-Rnr-T-pil-Egg-Mw,Seabird egg
+N017-eider-blood,G026-Bb-Onr-S-mol-Blo-Mw,Eider blood
+N018-eider-eggs,G187-Bb-Cnr-S-mol-Egg-Mw,Eider egg

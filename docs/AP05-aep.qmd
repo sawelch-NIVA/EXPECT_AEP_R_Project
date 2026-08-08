@@ -81,10 +81,10 @@ erDiagram
     AEP_NODES }o--o{ AEP_NODE_GROUPS : "semicolon list"
 
     GROUP_IDS {
-        string group_id PK "G001, stable"
+        string group_id PK "G001-Wfw-Rwc-C, stable"
     }
     AEP_NODES {
-        string node_id PK "N001-marine-water"
+        string node_id PK "N001-natural-occurrence"
         string level "source medium organism tse"
         string node_type "empirical or external"
         number essentiality_score "claim about the world"

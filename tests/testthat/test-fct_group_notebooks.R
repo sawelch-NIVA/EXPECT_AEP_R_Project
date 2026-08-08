@@ -55,6 +55,20 @@ test_that("every group gets a section, anchored on its id", {
   expect_equal(existing_group_sections(file.path(dir, "molluscs.qmd")), "G003")
 })
 
+test_that("a composite group id round-trips through the anchor regex", {
+  # [A-Za-z0-9]+ used to stop at the first hyphen and silently truncate a
+  # composite id like "G001-Bf-Cnr-G-mor-Liv-Mw" down to "G001" rather than
+  # failing loudly (Sam 2026-08-08). This pins the fix.
+  dir <- withr::local_tempdir()
+  composite <- c("G001-Bf-Cnr-G-mor-Liv-Mw", "G002-Bf-Cnr-C-pag-Liv-Mw")
+  generate_group_notebooks(
+    nb_decisions(ids = composite, notebooks = c("Fish", "Fish"), n = c(900, 60)),
+    nb_groups(ids = composite, slugs = c("slug_1", "slug_2")),
+    dir = dir, verbose = FALSE
+  )
+  expect_setequal(existing_group_sections(file.path(dir, "fish.qmd")), composite)
+})
+
 test_that("re-running changes nothing at all", {
   dir <- withr::local_tempdir()
   generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
@@ -127,6 +141,23 @@ test_that("groups with panels link them and groups without say so", {
   expect_true(grepl("No triage panels", txt, fixed = TRUE))
   # The remedy is named, with the id to add.
   expect_true(grepl("must_include", txt, fixed = TRUE))
+})
+
+test_that("hand-written areas are wrapped in a callout", {
+  # Sam 2026-08-08: "move the areas of the QMDs that expect human writing
+  # into callouts -- I think this will make it a lot more clear what's safe
+  # to change and what isn't."
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(nb_decisions(), nb_groups(), dir = dir, verbose = FALSE)
+  lines <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  verdict_line <- grep("^\\*\\*Verdict:\\*\\*", lines)
+  expect_true(length(verdict_line) > 0)
+  expect_true(all(lines[verdict_line - 1] == "::: {.callout-note}"))
+  expect_true(all(lines[verdict_line + 1] == ":::"))
+
+  comparison <- grep("^# Comparison$", lines)
+  expect_equal(lines[comparison + 2], "::: {.callout-note}")
 })
 
 test_that("the glance table lists every group and links to its section", {

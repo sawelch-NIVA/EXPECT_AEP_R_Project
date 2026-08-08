@@ -1225,7 +1225,13 @@ list(
       # Lowering min_n to 68 instead would admit seven unrelated groups, because
       # eight others are interleaved between 68 and 99. Add ids here as P3.5
       # picks its systems.
-      must_include = c("G033", "G036", "G047")
+      #
+      # Updated to composite form 2026-08-08 (scripts/migrate_group_ids_to_composite.R):
+      # G033 -> G033-Ba-Cnr-A-nod-Sti-Mw, G036 -> G036-Ba-Cnr-F-ves-Sti-Mw,
+      # G047 -> G047-Bf-Cnr-G-mor-Mus-Mw.
+      must_include = c(
+        "G033-Ba-Cnr-A-nod-Sti-Mw", "G036-Ba-Cnr-F-ves-Sti-Mw", "G047-Bf-Cnr-G-mor-Mus-Mw"
+      )
     )
   ),
 

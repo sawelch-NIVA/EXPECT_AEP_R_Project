@@ -48,7 +48,8 @@ triage_group_cols <- function() {
 #'   without admitting seven unrelated groups as well. Unknown ids are an error,
 #'   not a silent omission.
 #' @return A tibble of group-defining columns plus `n`, `n_sources` (distinct
-#'   REFERENCE_ID), `n_rows`, a filesystem-safe `group_slug`, a heading-anchor
+#'   REFERENCE_ID), `n_rows`, a filesystem-safe `group_slug` (an alias for the
+#'   composite `group_id`, `NA` if `ids` was not supplied), a heading-anchor
 #'   `heading_slug` shared by every unit variant of the same group, and
 #'   `n_heading` (measurements summed across unit variants), sorted for
 #'   hierarchical presentation.
@@ -109,8 +110,17 @@ sample_triage_groups <- function(
   # between 68 and 99.
   #
   # Named by group id rather than by key, which is the whole point of the ids
-  # existing (R/fct_group_ids.R).
-  forced <- summary_data$group_id %in% must_include
+  # existing (R/fct_group_ids.R). Guarded rather than `summary_data$group_id
+  # %in% must_include` directly: without `ids`, `group_id` is absent and
+  # `NULL %in% x` is `logical(0)`, not a same-length all-FALSE vector, which
+  # made the filter() below error on any non-empty `summary_data` (found
+  # 2026-08-08, writing a test for the `ids = NULL` path the docs already
+  # claimed to support).
+  forced <- if ("group_id" %in% names(summary_data)) {
+    summary_data$group_id %in% must_include
+  } else {
+    rep(FALSE, nrow(summary_data))
+  }
   eligible <- summary_data |>
     dplyr::filter(.data$n >= min_n | forced) |>
     dplyr::select(
@@ -158,11 +168,23 @@ sample_triage_groups <- function(
   })
   picked <- dplyr::bind_rows(kept, sampled)
 
+  # group_slug used to be its own independent slugify_name(label) derivation,
+  # with make.unique() papering over two groups sharing a label by appending
+  # "_1"/"_2" -- CLAUDE.md 4.4.2 documents the bug that caused: the unsuffixed
+  # slug is a string PREFIX of the suffixed one, so a startsWith() match could
+  # silently grab the wrong group's files. Aliasing it to the composite
+  # group_id (Sam 2026-08-08: "I think it makes sense to replace that one
+  # with this one") removes the whole class of bug, since group_id is already
+  # unique by construction. `NA` when `ids` was not supplied, same as every
+  # other id-derived column here.
+  picked$group_slug <- if ("group_id" %in% names(picked)) {
+    picked$group_id
+  } else {
+    NA_character_
+  }
+  picked$heading_slug <- heading_anchor(picked)
+
   picked |>
-    dplyr::mutate(
-      group_slug = slugify_name(triage_group_label(picked, sep = "_")),
-      heading_slug = heading_anchor(picked)
-    ) |>
     sort_triage_groups()
 }
 
