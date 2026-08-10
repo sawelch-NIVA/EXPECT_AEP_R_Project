@@ -37,15 +37,22 @@ tissue code yet warns separately and drops just the species/tissue
 segment, keeping the rest of the ID.
 }
 \description{
-A human-referenceable label layered onto the stable G-number rather than
-replacing it: \code{group_id} (e.g. \code{"G014"}) is already what \code{lump_into} cells
-and free-text notes across the project point at (see \code{\link[=allocate_group_ids]{allocate_group_ids()}}
-above for why that value can never change). This produces a second,
-DERIVED label -- \code{"G014-Wfw-Cwb-G.mor-Liv-Mw"} -- for places that want the
-compartment, geography, species/tissue and unit visible at a glance,
-recomputed from the lookups on every call and never stored as identity.
+Builds the human-referenceable form of a group id -- e.g.
+\code{"G014-Wfw-Cwb-G-mor-Liv-Mw"} from the bare accession number \code{"G014"} plus
+its compartment, geography, species/tissue and unit.
 }
 \details{
+UPDATE 2026-08-08: this used to be a pure display-layer function, called
+fresh on every render so \code{group_id} in the ledger stayed the bare number.
+It is now instead the engine behind a ONE-OFF migration
+(\code{scripts/migrate_group_ids_to_composite.R}) that wrote its output
+directly into \code{group_id} in the ledger -- the composite form IS the id
+everywhere now, not a label recomputed on top of it. Call this function
+again only to regenerate that migration (e.g. after extending the
+lookups to cover more of the grouping variables), not as part of any
+normal read path -- calling it on a table whose \code{group_id} is already
+composite would double-append the blocks.
+
 Scheme (Sam 2026-08-07): \verb{G<num>-<compartment block>-<geography block> [-<species code>-<tissue code>]-<unit code>}. The compartment and
 geography blocks are each a \code{\link[=group_code_block]{group_code_block()}}: one capital parent
 letter directly followed by a lowercase child code, no internal hyphen, so

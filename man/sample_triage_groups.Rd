@@ -36,7 +36,8 @@ not a silent omission.}
 }
 \value{
 A tibble of group-defining columns plus \code{n}, \code{n_sources} (distinct
-REFERENCE_ID), \code{n_rows}, a filesystem-safe \code{group_slug}, a heading-anchor
+REFERENCE_ID), \code{n_rows}, a filesystem-safe \code{group_slug} (an alias for the
+composite \code{group_id}, \code{NA} if \code{ids} was not supplied), a heading-anchor
 \code{heading_slug} shared by every unit variant of the same group, and
 \code{n_heading} (measurements summed across unit variants), sorted for
 hierarchical presentation.

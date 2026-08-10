@@ -119,6 +119,7 @@ export(node_card)
 export(node_card_bg_colour)
 export(node_card_extent)
 export(node_card_header)
+export(node_card_heights)
 export(node_card_limits)
 export(node_card_year_range)
 export(node_coverage)
@@ -129,7 +130,6 @@ export(node_group_strips)
 export(node_label_slug)
 export(node_level_bg_colours)
 export(node_report_card)
-export(node_title)
 export(normalise_unit_string)
 export(northern_hemisphere_bbox)
 export(notebook_header_markdown)
@@ -303,132 +303,164 @@ export(write_triage_plots)
 export(write_triage_plots_for_group)
 export(write_unit_corrections_template)
 import(eDataDRF)
-importFrom(arrow,read_parquet)
-importFrom(arrow,write_parquet)
-importFrom(cli,cli_abort)
-importFrom(cli,cli_alert_danger)
-importFrom(cli,cli_alert_info)
-importFrom(cli,cli_alert_warning)
-importFrom(cli,cli_h1)
-importFrom(cli,cli_inform)
-importFrom(cli,cli_text)
-importFrom(cli,cli_warn)
-importFrom(data.table,as.IDate)
-importFrom(data.table,fread)
-importFrom(dplyr,across)
-importFrom(dplyr,all_of)
-importFrom(dplyr,any_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,as_tibble)
-importFrom(dplyr,bind_cols)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,case_match)
-importFrom(dplyr,case_when)
-importFrom(dplyr,contains)
-importFrom(dplyr,count)
-importFrom(dplyr,desc)
-importFrom(dplyr,distinct)
-importFrom(dplyr,filter)
-importFrom(dplyr,first)
-importFrom(dplyr,group_by)
-importFrom(dplyr,if_any)
-importFrom(dplyr,if_else)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,n_distinct)
-importFrom(dplyr,pull)
-importFrom(dplyr,reframe)
-importFrom(dplyr,rename)
-importFrom(dplyr,row_number)
-importFrom(dplyr,rowwise)
-importFrom(dplyr,select)
-importFrom(dplyr,semi_join)
-importFrom(dplyr,summarise)
-importFrom(dplyr,summarise_all)
-importFrom(dplyr,tally)
-importFrom(dplyr,ungroup)
-importFrom(dplyr,where)
-importFrom(eDataDRF,initialise_biota_tibble)
-importFrom(eDataDRF,initialise_campaign_tibble)
-importFrom(eDataDRF,initialise_measurements_tibble)
-importFrom(eDataDRF,initialise_parameters_tibble)
-importFrom(eDataDRF,initialise_references_tibble)
-importFrom(eDataDRF,initialise_samples_tibble)
-importFrom(eDataDRF,initialise_sites_tibble)
+importFrom(arrow,
+  read_parquet,
+  write_parquet
+)
+importFrom(cli,
+  cli_abort,
+  cli_alert_danger,
+  cli_alert_info,
+  cli_alert_warning,
+  cli_h1,
+  cli_inform,
+  cli_text,
+  cli_warn
+)
+importFrom(data.table,
+  as.IDate,
+  fread
+)
+importFrom(dplyr,
+  across,
+  all_of,
+  any_of,
+  arrange,
+  as_tibble,
+  bind_cols,
+  bind_rows,
+  case_match,
+  case_when,
+  contains,
+  count,
+  desc,
+  distinct,
+  filter,
+  first,
+  group_by,
+  if_any,
+  if_else,
+  left_join,
+  mutate,
+  n,
+  n_distinct,
+  pull,
+  reframe,
+  rename,
+  row_number,
+  rowwise,
+  select,
+  semi_join,
+  summarise,
+  summarise_all,
+  tally,
+  ungroup,
+  where
+)
+importFrom(eDataDRF,
+  initialise_biota_tibble,
+  initialise_campaign_tibble,
+  initialise_measurements_tibble,
+  initialise_parameters_tibble,
+  initialise_references_tibble,
+  initialise_samples_tibble,
+  initialise_sites_tibble
+)
 importFrom(forcats,fct_reorder)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,coord_sf)
-importFrom(ggplot2,element_blank)
-importFrom(ggplot2,element_rect)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_boxplot)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,geom_sf)
-importFrom(ggplot2,geom_sf_text)
-importFrom(ggplot2,geom_text)
-importFrom(ggplot2,geom_tile)
-importFrom(ggplot2,geom_vline)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,guides)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,layer_sf)
-importFrom(ggplot2,margin)
-importFrom(ggplot2,position_nudge)
-importFrom(ggplot2,scale_color_identity)
-importFrom(ggplot2,scale_fill_identity)
-importFrom(ggplot2,stat_boxplot)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_minimal)
-importFrom(ggplot2,unit)
-importFrom(ggplot2,vars)
-importFrom(ggridges,geom_ridgeline)
-importFrom(ggridges,theme_ridges)
+importFrom(ggplot2,
+  aes,
+  coord_sf,
+  element_blank,
+  element_rect,
+  element_text,
+  facet_wrap,
+  geom_boxplot,
+  geom_point,
+  geom_sf,
+  geom_sf_text,
+  geom_text,
+  geom_tile,
+  geom_vline,
+  ggplot,
+  guides,
+  labs,
+  layer_sf,
+  margin,
+  position_nudge,
+  scale_color_identity,
+  scale_fill_identity,
+  stat_boxplot,
+  theme,
+  theme_minimal,
+  unit,
+  vars
+)
+importFrom(ggridges,
+  geom_ridgeline,
+  theme_ridges
+)
 importFrom(glue,glue)
-importFrom(lubridate,dmy)
-importFrom(lubridate,today)
-importFrom(lubridate,year)
-importFrom(lubridate,ymd)
-importFrom(pointblank,action_levels)
-importFrom(pointblank,col_vals_in_set)
-importFrom(pointblank,col_vals_not_null)
-importFrom(purrr,as_vector)
-importFrom(purrr,flatten)
-importFrom(purrr,map)
-importFrom(purrr,reduce)
-importFrom(rlang,inherits_only)
-importFrom(rlang,list2)
-importFrom(rnaturalearth,ne_countries)
-importFrom(rnaturalearth,ne_download)
-importFrom(rnaturalearth,ne_load)
-importFrom(rnaturalearth,ne_states)
-importFrom(sf,read_sf)
-importFrom(sf,sf_use_s2)
-importFrom(sf,st_as_sf)
-importFrom(sf,st_bbox)
-importFrom(sf,st_cast)
-importFrom(sf,st_convex_hull)
-importFrom(sf,st_coordinates)
-importFrom(sf,st_crop)
-importFrom(sf,st_crs)
-importFrom(sf,st_drop_geometry)
-importFrom(sf,st_geometry)
-importFrom(sf,st_graticule)
-importFrom(sf,st_simplify)
-importFrom(sf,st_transform)
-importFrom(sf,st_union)
-importFrom(sf,write_sf)
-importFrom(stats,dnorm)
-importFrom(stats,qnorm)
-importFrom(stringr,str_detect)
-importFrom(stringr,str_replace)
-importFrom(stringr,str_replace_all)
-importFrom(stringr,str_to_upper)
-importFrom(stringr,str_trunc)
-importFrom(stringr,str_wrap)
-importFrom(tibble,add_row)
-importFrom(tibble,tibble)
-importFrom(tibble,tribble)
+importFrom(lubridate,
+  dmy,
+  today,
+  year,
+  ymd
+)
+importFrom(pointblank,
+  action_levels,
+  col_vals_in_set,
+  col_vals_not_null
+)
+importFrom(purrr,
+  as_vector,
+  flatten,
+  map,
+  reduce
+)
+importFrom(rlang,
+  inherits_only,
+  list2
+)
+importFrom(rnaturalearth,
+  ne_countries,
+  ne_download,
+  ne_load,
+  ne_states
+)
+importFrom(sf,
+  read_sf,
+  sf_use_s2,
+  st_as_sf,
+  st_bbox,
+  st_cast,
+  st_convex_hull,
+  st_coordinates,
+  st_crop,
+  st_crs,
+  st_drop_geometry,
+  st_geometry,
+  st_graticule,
+  st_simplify,
+  st_transform,
+  st_union,
+  write_sf
+)
+importFrom(stats,
+  dnorm,
+  qnorm
+)
+importFrom(stringr,
+  str_detect,
+  str_replace,
+  str_replace_all,
+  str_to_upper,
+  str_trunc,
+  str_wrap
+)
+importFrom(tibble,
+  add_row,
+  tibble,
+  tribble
+)
 importFrom(tidyr,uncount)
 importFrom(viridis,scale_fill_viridis)

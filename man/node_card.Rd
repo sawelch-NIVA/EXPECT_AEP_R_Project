@@ -13,7 +13,7 @@ node_card(
   limits = NULL,
   thresholds = NULL,
   max_groups = 3,
-  style = c("full", "compact")
+  dpi = 200
 )
 }
 \arguments{
@@ -28,6 +28,9 @@ node_card(
 \item{thresholds}{The \code{copper_toxicity_thresholds} target, or \code{NULL}.}
 
 \item{max_groups}{Most strips to draw.}
+
+\item{dpi}{The device resolution this card will be saved at. Only affects
+the corner id marker; see \code{\link[=node_card_header]{node_card_header()}}.}
 }
 \value{
 A patchwork object.

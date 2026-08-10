@@ -10,15 +10,11 @@ build_sample_groups_table(summary_data, ids = NULL)
 \item{summary_data}{The \code{summarise_literature_data} target.}
 
 \item{ids}{The \code{group_ids} ledger, or \code{NULL}. When supplied, the table's
-first column shows \code{\link[=format_composite_group_id]{format_composite_group_id()}}'s composite label
-(e.g. \code{"G006-Bf-Cnr-G.mor-Liv-Mw"}) rather than the bare \code{group_id}.
-This is DISPLAY ONLY: \verb{type into group_decisions.csv} still means the
-bare \code{group_id} (e.g. \code{"G006"}) -- that value, not the composite label,
-is what \code{lump_into} cells, \code{aep_nodes.csv} notes and every
-\verb{\{#grp-G006\}} heading anchor in \verb{docs/groups/*.qmd} actually point at,
-and none of those are touched here. A group with no compartment or
-geography code yet (see \code{misc-todo.md} item 13) falls back to its bare
-\code{group_id} in this column too.}
+first column shows the ledger's \code{group_id} (since 2026-08-08, the
+composite label itself, e.g. \code{"G006-Bf-Cnr-G-mor-Liv-Mw"} -- see
+\code{R/fct_group_ids.R}'s header). That is the SAME value \code{lump_into} cells,
+\code{aep_nodes.csv} notes and every \verb{\{#grp-...\}} heading anchor in
+\verb{docs/groups/*.qmd} point at; there is no longer a separate bare form.}
 }
 \value{
 A tibble sorted by \code{n} descending, with columns \code{group_id}, \code{group},

@@ -26,7 +26,7 @@ root. That is also the right answer when the working directory is somewhere
 else: called during a Quarto render rooted in \verb{docs/}, \code{here_rel("data/x")}
 gives \code{"../data/x"}, which resolves correctly from there.
 
-Returns a plain character vector, not the \code{fs_path} that \code{\link[fs:path_math]{fs::path_rel()}}
+Returns a plain character vector, not the \code{fs_path} that \code{\link[fs:path_rel]{fs::path_rel()}}
 hands back. targets accepts \code{fs_path} (it inherits from character) but hashes
 it differently, so a bare character keeps target invalidation predictable.
 }

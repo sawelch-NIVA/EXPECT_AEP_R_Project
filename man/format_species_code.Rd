@@ -19,19 +19,24 @@ read the default lookup (an empty table if it doesn't exist yet).}
 A character vector, same length as \code{species}.
 }
 \description{
-Deterministic, not looked up: \code{"Gadus morhua"} -> \code{"G.mor"}, capital genus
-initial, dot, first 3 letters of the epithet in lowercase (Sam 2026-08-07:
-"an abbreviated form of the abbreviated scientific name... this costs more
-in characters but I think will be worth it"). A single-word name -- a
-genus, family, order or other higher taxon on its own, e.g.
-\code{"Chironomidae"}, \code{"Littorina"} -- has no epithet to abbreviate, so it
-instead takes its own first 4 letters, capitalised: \code{"Chir"}.
+Deterministic, not looked up: \code{"Gadus morhua"} -> \code{"G-mor"}, capital genus
+initial, hyphen, first 3 letters of the epithet in lowercase (Sam
+2026-08-07: "an abbreviated form of the abbreviated scientific name...
+this costs more in characters but I think will be worth it"). Originally a
+dot rather than a hyphen; changed 2026-08-08 once it was clear the id
+would be embedded in Quarto heading anchors and \verb{@fig-} cross-reference
+ids -- a dot means something in a CSS id selector, and anything doing
+\code{querySelector('#' + id)} unescaped would break on it, so the separator
+had to match the hyphens used everywhere else in the composite id. A
+single-word name -- a genus, family, order or other higher taxon on its
+own, e.g. \code{"Chironomidae"}, \code{"Littorina"} -- has no epithet to abbreviate,
+so it instead takes its own first 4 letters, capitalised: \code{"Chir"}.
 }
 \details{
 The scheme is NOT collision-free: two different genera sharing an epithet
-(\code{"Hymenodora glacialis"} / \code{"Heliometra glacialis"}, both -> \code{"H.gla"})
+(\code{"Hymenodora glacialis"} / \code{"Heliometra glacialis"}, both -> \code{"H-gla"})
 or a trinomial's subspecies (\code{"Odobenus rosmarus divergens"} /
-\code{"...rosmarus"}, both -> \code{"O.ros"}) collide by construction. \code{overrides}
+\code{"...rosmarus"}, both -> \code{"O-ros"}) collide by construction. \code{overrides}
 exists for exactly this: a hand-edited lookup of the specific names that
 need a different code, \code{data/clean/lookups/group_species_code_overrides.csv}.
 \code{\link[=format_composite_group_id]{format_composite_group_id()}} does not error or warn on a collision here --
@@ -40,7 +45,9 @@ already unique on its own, so a collision degrades legibility rather than
 identity.
 
 Running this over the committed ledger (2026-08-07) turned up two
-collisions that look like genuine taxonomic duplicates rather than
-unrelated species that happen to collide -- see item 14 in
-\code{misc-todo.md}.
+collisions that looked like genuine taxonomic duplicates rather than
+unrelated species that happen to collide, and Sam fixed both at the
+source (2026-08-08): the misspelled/superseded name was corrected to
+match its counterpart, so the two pairs are now genuinely the same
+species rather than a code collision -- see item 14 in \code{misc-todo.md}.
 }

@@ -1,0 +1,386 @@
+---
+title: "Dev - Node Card Styling"
+# Formatting lives in docs/_metadata.yml.
+#
+# Code is SHOWN here, against the project default of `echo: false`. This is a
+# notebook about how the card is built, so hiding the calls that build it
+# would leave only the pictures, which is the half you can get from
+# figures/node_cards/ already.
+execute:
+  echo: true
+format:
+  html:
+    code-fold: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(ggplot2)
+library(patchwork)
+library(ggview)
+pkgload::load_all(quiet = TRUE)
+
+here::i_am("index.qmd")
+source(here::here("tests/testthat/helper-fixtures.R"))
+```
+
+Every figure here is shown exactly once, and where it exists as a file on disk
+it is shown *from* that file. A whole card is built silently, written at its
+real size, and then included; only the single panels, which have no artefact of
+their own, are drawn by knitr. Printing a card inline as well as including the
+written PNG showed each one twice, at two different sizes, which is worse than
+useless in a notebook about how the thing looks.
+
+Sizing is a chunk option throughout, never a `ggview::canvas()`: see the note
+under the geometry table below.
+
+```{r}
+#| label: fixtures
+
+node <- node_fixture()
+ids <- ids_fixture()
+data <- data_fixture()
+members <- members_fixture(c("G001", "G002"))
+card <- aep_node_report_cards(node, members, data, ids)
+```
+
+```{r}
+#| label: card
+
+card_width <- 2.4
+card_height <- 1.8
+card_dpi <- 300
+# Named rather than inline, because the unpacked rebuild below has to pass the
+# identical limits for its comparison against this card to mean anything.
+card_limits <- c(0.1, 100)
+
+# Built, not printed. The written file below is what gets shown.
+p <- node_card(
+  node,
+  card,
+  members,
+  data,
+  ids,
+  limits = card_limits,
+  dpi = card_dpi
+)
+```
+
+```{r}
+#| label: write
+#| include: false
+
+card_path <- here::here("figures/dummy_node_card.png")
+save_ggplot(
+  p,
+  card_path,
+  width = card_width,
+  height = card_height,
+  dpi = card_dpi,
+  bg = NULL
+)
+```
+
+```{r}
+#| label: fig-card
+#| echo: false
+#| fig-cap: !expr sprintf("The finished card at its real size, %s x %s in at %s dpi, as written to `figures/dummy_node_card.png`. Everything below takes it apart.", card_width, card_height, card_dpi)
+
+knitr::include_graphics(card_path)
+```
+
+## Unpacking `node_card()`
+
+`node_card()` is three plots and a stack. It builds each panel from its own
+exported function, then makes one `patchwork::wrap_plots()` call and merges a
+background theme into all three. Nothing else happens in it. This section calls
+those three functions separately so each piece can be seen on its own, then
+reassembles them by hand and checks the rebuild against the card above.
+
+### The geometry
+
+`node_card_heights()` owns the vertical split, and is exported rather than
+inlined so that anything illustrating the layout reads the real ratio instead
+of a second, driftable copy of the same three numbers. The units are relative;
+patchwork normalises them, so only the share matters.
+
+```{r}
+#| label: unpack-geometry
+
+heights <- node_card_heights()
+frac <- heights / sum(heights)
+
+tibble::tibble(
+  panel = names(heights),
+  height = unname(heights),
+  share = sprintf("%.1f%%", 100 * unname(frac)),
+  inches = round(unname(frac) * card_height, 3)
+)
+```
+
+Those inches are the constraint the whole design is fighting. The badge band
+is a fifth of an inch tall, and text sizes are absolute, so a panel previewed
+at any other size lies about its own legibility. Every preview below is
+therefore drawn at card width by the panel's own share of card height, not
+blown up to fill the page.
+
+**That takes a chunk option, not just a `canvas()`.** Under knitr the figure
+device is sized by `fig-width` / `fig-height`, which default project-wide to
+12x8, and a `ggview::canvas()` does not bring it down to the card size: the
+figure the `card` chunk prints inline measures 4.5x3.2 inches, and only the
+written `figures/dummy_node_card.png` is a true 2.4x1.8. So each preview below
+sets its device explicitly with `!expr`, reading the same `frac` as the table
+above.
+
+### The background
+
+The level colour comes from none of the three panel functions. `node_card()`
+builds one theme and merges it into all three with patchwork's `&`. That is
+what lets it survive on top of `theme_void()` (header, badges) and
+`triage_theme()` (strips) alike, since `&` merges into each panel's theme
+rather than replacing it. Both `plot.background` and `panel.background` are
+set: a colour visible in one but not the other reads as a rendering bug rather
+than a fill.
+
+```{r}
+#| label: unpack-background
+
+bg <- node_card_bg_colour(node)  # keyed on `level`, here "medium"
+bg_theme <- ggplot2::theme(
+  plot.background = ggplot2::element_rect(fill = bg, colour = NA),
+  panel.background = ggplot2::element_rect(fill = bg, colour = NA)
+)
+
+# What `node_card()` does to each panel with `&`, done to one panel at a time
+# so the previews below show what actually lands on the card. Sizing is the
+# chunk's job, not this function's.
+with_bg <- function(p) p + bg_theme
+
+bg
+```
+
+### 1. Header, `node_card_header()`
+
+An empty `ggplot()` under `theme_void()`, used as a text canvas with hand-set
+limits (`x` 0 to 1, `y` -0.75 to 3.1). Three `annotate("text")` calls share the
+`x = 0.5` anchor: the wrapped node label, the headline geometric mean, and the
+counts line. The headline turns red and gains a `(!)` where it diverges from
+the median by more than half an order, via `headline_is_suspect()`.
+
+The node id is the exception. It is an `annotation_custom()` textGrob pinned
+18x18 **pixels** from the physical top-left corner in `npc` units, which is the
+only reason `dpi` is an argument to this function at all: the offset is
+recomputed as `18 / dpi` inches so it lands on the same pixel whatever
+resolution the card is saved at.
+
+```{r}
+#| label: fig-unpack-header
+#| fig-width: !expr card_width
+#| fig-height: !expr frac[["header"]] * card_height
+#| fig-cap: "Header panel alone, at the 46% of card height it occupies. Node id in the corner, wrapped label, geometric mean with unit, then measurements, references and year range."
+
+header <- node_card_header(node, card, dpi = card_dpi)
+with_bg(header)
+```
+
+### 2. Badges, `node_epeq_badges()`
+
+Four `geom_tile()` squares, filled from `epeq_score_colours()` (three levels
+low to high, plus grey for unscored, which must not read as a low score), each
+carrying its abbreviation and score on one line. Two letters per criterion
+because Essentiality and Evidence share an initial.
+
+Note the `text_size`: `node_card()` calls this at 3.4, not the function's own
+default of 2.4, which is sized for full-size figures rather than a 2.4 inch
+card. The x limits are symmetric about the tiles' centre so the band lines up
+with the centred text above it.
+
+```{r}
+#| label: fig-unpack-badges
+#| fig-width: !expr card_width
+#| fig-height: !expr frac[["badges"]] * card_height
+#| fig-cap: "Badge band alone, the whole of its 0.22 in. Fixture scores are Es 3, Pl 3, Ev 2, Qn 2, so two green and two yellow tiles; grey would mean unscored rather than low."
+
+badges <- node_epeq_badges(node, text_size = 3.4)
+with_bg(badges)
+```
+
+### 3. Strips, `node_group_strips()`
+
+One violin per constituent group rather than one for the pooled node, because
+the pooled geometric mean cannot tell you whether the lumping was sound and two
+strips an order apart can. Value on x on the shared per-unit log scale, groups
+on y, capped at `max_groups` with any remainder named rather than dropped
+silently.
+
+This is the only one of the three that touches the data, and so the only one
+that can degrade: `triage_empty_plot()` for an external node or one with no
+rows left after its restrictions, points instead of violins below the
+`triage_use_points()` threshold. Group ids are drawn inside the panel, since a
+y axis would inset this panel relative to the two `theme_void()` panels above
+and put the whole text block off centre.
+
+```{r}
+#| label: fig-unpack-strips
+#| fig-width: !expr card_width
+#| fig-height: !expr frac[["strips"]] * card_height
+#| fig-cap: "Strips panel alone. Two fixture groups, G001 and G002, twenty rows between them, which is under the thirty-row `triage_use_points()` threshold, so points rather than violins. The log value axis is the only axis the card keeps."
+
+strips <- node_group_strips(
+  node,
+  members,
+  data,
+  ids,
+  limits = card_limits,
+  max_groups = 3
+)
+with_bg(strips)
+```
+
+### 4. The stack
+
+One `wrap_plots()` in a single column with the heights from above, then
+`& bg_theme`. The `&` is load-bearing: `+` would add the theme to the last
+plot only, leaving the header and badges on white.
+
+```{r}
+#| label: fig-unpack-compose
+#| fig-width: !expr card_width
+#| fig-height: !expr card_height
+#| fig-cap: "The three panels above stacked by hand. Compare with @fig-card, which `node_card()` produced; the check below says they are the same file."
+
+composed <- patchwork::wrap_plots(
+  header,
+  badges,
+  strips,
+  ncol = 1,
+  heights = node_card_heights()
+) & bg_theme
+
+composed
+```
+
+Rebuilt by hand from the three panels above, this is the same card
+`node_card()` returns. Checked by rendering both and comparing the files, not
+by eye, since a difference of a few pixels in one panel's height is exactly
+the sort of thing eyeballing a screenshot misses.
+
+```{r}
+#| label: unpack-verify
+
+reference <- node_card(
+  node, card, members, data, ids,
+  limits = card_limits, dpi = card_dpi
+)
+
+png_of <- function(x) {
+  f <- tempfile(fileext = ".png")
+  save_ggplot(
+    x, f,
+    width = card_width, height = card_height, dpi = card_dpi, bg = NULL
+  )
+  unname(tools::md5sum(f))
+}
+
+c(
+  heights_identical = identical(
+    composed$patches$layout$heights,
+    reference$patches$layout$heights
+  ),
+  png_identical = png_of(composed) == png_of(reference)
+)
+```
+
+## Stress test
+
+```{r}
+#| label: stress-fixtures
+
+stress_node <- node_fixture(
+  node_id = "N014-arctic-coastal-benthic-copper-bioaccumulation-network",
+  label = "Coastal Sediment-Associated Copper"
+)
+
+stress_group_ids <- c(
+  "G010-Bm-Cfj-G-mor-Liv-Mw",
+  "G011-Bm-Cfj-G-mor-Mus-Mw",
+  "G012-Bm-Cfj-M-edu-St-Mw",
+  "G013-Bm-Cfj-C-pag-Mus-Mw",
+  "G014-Bm-Cfj-P-pla-Liv-Mw"
+)
+
+stress_ids <- tibble::tibble(
+  ENVIRON_COMPARTMENT = "Biota",
+  ENVIRON_COMPARTMENT_SUB = "Biota, Marine",
+  SPECIES_GROUP = c("Fish", "Fish", "Mollusc", "Crustacean", "Fish"),
+  SAMPLE_SPECIES = c(
+    "Gadus morhua", "Gadus morhua", "Mytilus edulis",
+    "Cancer pagurus", "Pleuronectes platessa"
+  ),
+  SAMPLE_TISSUE = c("Liver", "Muscle", "Soft tissue", "Muscle", "Liver"),
+  SITE_GEOGRAPHIC_FEATURE = "Coastal, fjord",
+  SITE_GEOGRAPHIC_FEATURE_SUB = "Not reported",
+  MEASURED_UNIT_STANDARD = "mg/kg (wet)",
+  group_id = stress_group_ids
+)
+
+stress_data <- purrr::list_rbind(purrr::imap(stress_group_ids, function(gid, i) {
+  row <- stress_ids[stress_ids$group_id == gid, ]
+  n_rows <- 30
+  tibble::tibble(
+    ENVIRON_COMPARTMENT = row$ENVIRON_COMPARTMENT,
+    ENVIRON_COMPARTMENT_SUB = row$ENVIRON_COMPARTMENT_SUB,
+    SPECIES_GROUP = row$SPECIES_GROUP,
+    SAMPLE_SPECIES = row$SAMPLE_SPECIES,
+    SAMPLE_TISSUE = row$SAMPLE_TISSUE,
+    SITE_GEOGRAPHIC_FEATURE = row$SITE_GEOGRAPHIC_FEATURE,
+    SITE_GEOGRAPHIC_FEATURE_SUB = row$SITE_GEOGRAPHIC_FEATURE_SUB,
+    MEASURED_UNIT_STANDARD = row$MEASURED_UNIT_STANDARD,
+    MEASURED_VALUE_STANDARD = 10^stats::rnorm(n_rows, mean = log10(i), sd = 0.4),
+    MEASURED_N = sample(10:80, n_rows, replace = TRUE),
+    LATITUDE = seq(60, 78, length.out = n_rows),
+    LONGITUDE = 10,
+    SAMPLING_DATE = seq(as.Date("2000-01-01"), by = "year", length.out = n_rows),
+    REFERENCE_ID = sample(paste0("Ref", LETTERS[1:8]), n_rows, replace = TRUE),
+    CAMPAIGN_NAME_SHORT = paste0("Stress Campaign ", i)
+  )
+}))
+
+stress_members <- members_fixture(stress_group_ids, stress_node$node_id[1])
+stress_card <- aep_node_report_cards(stress_node, stress_members, stress_data, stress_ids)
+```
+
+```{r}
+#| label: stress-card
+
+stress_path <- here::here("figures/dummy_node_card_stress.png")
+
+p_stress <- node_card(
+  stress_node,
+  stress_card,
+  stress_members,
+  stress_data,
+  stress_ids,
+  limits = range(stress_data$MEASURED_VALUE_STANDARD),
+  dpi = card_dpi
+)
+
+save_ggplot(
+  p_stress,
+  stress_path,
+  width = card_width,
+  height = card_height,
+  dpi = card_dpi,
+  bg = NULL
+)
+```
+
+```{r}
+#| label: fig-stress-card
+#| echo: false
+#| fig-cap: "The same card under a long composite id, a long label and five constituent groups, of which `max_groups` keeps the three largest. Written to `figures/dummy_node_card_stress.png`."
+
+knitr::include_graphics(stress_path)
+```

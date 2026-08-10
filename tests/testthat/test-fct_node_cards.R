@@ -65,7 +65,7 @@ test_that("a strip is drawn per constituent group, not one for the pool", {
   )
 })
 
-test_that("strips are capped and the omission is named", {
+test_that("strips are capped at max_groups", {
   # G003 is a different unit and resolve_node_data() would refuse to pool it, so
   # the cap is exercised with two same-unit groups and max_groups = 1.
   d <- data_fixture()
@@ -74,8 +74,6 @@ test_that("strips are capped and the omission is named", {
     limits = c(0.1, 100), max_groups = 1
   )
   expect_length(levels(ggplot2::ggplot_build(p)$plot$data$.facet), 1)
-  # The dropped group is named rather than silently missing.
-  expect_match(p$labels$caption, "1 smaller group")
 })
 
 test_that("groups are kept by measurement count, largest first", {
@@ -160,7 +158,7 @@ test_that("a card with no unit does not print the string NA", {
   expect_false(any(grepl("NA", drawn)))
 })
 
-test_that("the header reports all four aggregation levels", {
+test_that("the header reports sample size and source count", {
   d <- data_fixture()
   nodes <- card_nodes()
   members <- members_fixture(c("G001", "G002"))
@@ -169,18 +167,11 @@ test_that("the header reports all four aggregation levels", {
   drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(x) x$label))
   txt <- paste(drawn, collapse = " ")
 
-  # Compact form since 2026-08-05: "n = 44, rows = 44, ..." rather than spelling
-  # out "measurements", which was doing no work.
   expect_match(txt, "n = ")
-  expect_match(txt, "rows = ")
-  expect_match(txt, "groups = ")
   expect_match(txt, "refs = ")
 })
 
-test_that("the geometric mean is the bold headline, with median beside it", {
-  # Sam 2026-08-05, and the median is not decoration: geo mean and median agree
-  # on a lognormal distribution and diverge when it is not one, so the gap is a
-  # free diagnostic. N005 shows 8.0 against 0.235.
+test_that("the geometric mean is the bold headline", {
   d <- data_fixture()
   nodes <- card_nodes()
   cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
@@ -192,7 +183,6 @@ test_that("the geometric mean is the bold headline, with median beside it", {
   headline <- labels[faces == "bold" | faces == 2]
   expect_true(any(grepl(formatC(cards$geo_mean, format = "g", digits = 3),
                         headline, fixed = TRUE)))
-  expect_true(any(grepl("median", labels)))
 })
 
 test_that("Arctic coverage is off the card but still computed", {
@@ -249,7 +239,6 @@ test_that("a suspect headline is marked on the card", {
     function(x) x$label
   ))
   expect_true(any(grepl("(!)", drawn, fixed = TRUE)))
-  expect_true(any(grepl("disagree", drawn)))
 })
 
 # ---- Compact style ------------------------------------------------------
@@ -264,42 +253,25 @@ test_that("the compact strip keeps a decade axis and blanks the real y axis", {
   d <- data_fixture()
   p <- node_group_strips(
     card_nodes(), members_fixture("G001"), d, ids_fixture(),
-    limits = c(0.1, 100), style = "compact"
+    limits = c(0.1, 100)
   )
   built <- ggplot2::ggplot_build(p)
   expect_false(inherits(built$plot$theme$axis.text.x, "element_blank"))
   expect_s3_class(built$plot$theme$axis.text.y, "element_blank")
 })
 
-test_that("the full strip keeps its axis", {
-  d <- data_fixture()
-  p <- node_group_strips(
-    card_nodes(), members_fixture("G001"), d, ids_fixture(),
-    limits = c(0.1, 100), style = "full"
-  )
-  expect_false(inherits(p$theme$axis.text.x, "element_blank"))
-})
-
-test_that("a compact card writes and is smaller than the full one", {
+test_that("a card writes", {
   d <- data_fixture()
   nodes <- card_nodes()
   members <- members_fixture("G001")
   ids <- ids_fixture()
   cards <- aep_node_report_cards(nodes, members, d, ids)
 
-  dir_full <- withr::local_tempdir()
-  dir_comp <- withr::local_tempdir()
-  full <- suppressWarnings(
-    write_node_cards(nodes, cards, members, d, ids, dir = dir_full)
+  dir <- withr::local_tempdir()
+  paths <- suppressWarnings(
+    write_node_cards(nodes, cards, members, d, ids, dir = dir)
   )
-  comp <- suppressWarnings(
-    write_node_cards(
-      nodes, cards, members, d, ids, dir = dir_comp,
-      width = 2.4, height = 1.8, style = "compact"
-    )
-  )
-  expect_true(file.exists(full))
-  expect_true(file.exists(comp))
+  expect_true(file.exists(paths))
 })
 
 test_that("long labels wrap rather than running off the card", {
@@ -310,22 +282,12 @@ test_that("long labels wrap rather than running off the card", {
     gsd = NA_real_, unit = NA_character_, n = NA_real_, n_rows = 0L,
     n_groups = 0L, n_sources = NA_integer_, pct_arctic = NA_real_
   )
-  p <- node_card_header(nodes, cards, style = "compact")
+  p <- node_card_header(nodes, cards)
   drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(x) x$label))
   expect_true(any(grepl("\n", drawn, fixed = TRUE)))
 })
 
 # ---- Compact card content (2026-08-06) ---------------------------------
-
-test_that("the node title carries the id as well as the label", {
-  # "N003 Mussel soft tissues": easier to reference than the label alone once
-  # several nodes sound alike.
-  expect_equal(node_title(card_nodes(node_id = "N003", label = "Mussels")),
-               "N003 Mussels")
-  # A node with no id falls back to the bare label rather than "NA Mussels".
-  expect_equal(node_title(card_nodes(node_id = NA_character_, label = "Mussels")),
-               "Mussels")
-})
 
 test_that("the compact header outranks the headline number", {
   # Sam 2026-08-06: the name is the header and should be larger than the
@@ -343,7 +305,7 @@ test_that("the compact header outranks the headline number", {
   d <- data_fixture()
   nodes <- card_nodes()
   cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
-  built <- ggplot2::ggplot_build(node_card_header(nodes, cards, style = "compact"))
+  built <- ggplot2::ggplot_build(node_card_header(nodes, cards))
 
   # The corner id marker is drawn via annotation_custom() (Sam 2026-08-07: pinned
   # to a fixed 18pt/18pt offset from the card corner so long composite ids like
@@ -367,7 +329,7 @@ test_that("the compact card keeps sample size and source count", {
   nodes <- card_nodes()
   cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
   drawn <- unlist(lapply(
-    ggplot2::ggplot_build(node_card_header(nodes, cards, style = "compact"))$data,
+    ggplot2::ggplot_build(node_card_header(nodes, cards))$data,
     function(x) x$label
   ))
   txt <- paste(drawn, collapse = " ")
@@ -389,7 +351,7 @@ test_that("the compact strip keeps group ids inside the panel, not on the y axis
   d <- data_fixture()
   p <- node_group_strips(
     card_nodes(), members_fixture("G001"), d, ids_fixture(),
-    limits = c(0.1, 100), style = "compact"
+    limits = c(0.1, 100)
   )
   expect_false(inherits(p$theme$axis.text.x, "element_blank"))
   expect_s3_class(p$theme$axis.text.y, "element_blank")

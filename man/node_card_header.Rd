@@ -4,12 +4,19 @@
 \alias{node_card_header}
 \title{The Text Block at the Top of a Card}
 \usage{
-node_card_header(node, card, style = c("full", "compact"))
+node_card_header(node, card, dpi = 200)
 }
 \arguments{
 \item{node}{A one-row nodes tibble.}
 
 \item{card}{The matching report-card row.}
+
+\item{dpi}{The device resolution this card will be saved at. The corner id
+marker is offset 18x18 PIXELS from the card's top-left corner, not 18
+points -- a physical unit (points, inches, mm) would drift in device
+pixels as \code{dpi} changes, so the offset is computed in inches from \code{dpi}
+right before use (\code{18 / dpi}), matching whatever raster the card is
+actually saved as.}
 }
 \value{
 A ggplot.

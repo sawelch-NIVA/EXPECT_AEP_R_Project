@@ -12,10 +12,9 @@ write_node_cards(
   ids,
   thresholds = NULL,
   dir = here_rel("figures/node_cards"),
-  width = 3.6,
-  height = 2.4,
-  dpi = 150,
-  style = c("full", "compact"),
+  width = 2.4,
+  height = 1.8,
+  dpi = 200,
   limits = NULL
 )
 }

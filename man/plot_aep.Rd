@@ -36,7 +36,7 @@ labelled boxes behind everything else. Nested groups inset automatically;
 see \code{\link[=aep_group_depth]{aep_group_depth()}}.}
 
 \item{node_images}{Optional named character vector of PNG paths keyed by
-\code{node_id}, from \code{\link[=write_node_cards]{write_node_cards()}} with \code{style = "compact"}. Where
+\code{node_id}, from \code{\link[=write_node_cards]{write_node_cards()}}. Where
 supplied, each node is drawn as its card instead of a text label. This is
 PLAN.md P5.2, and it is what makes the figure a report-card AEP rather than
 a labelled graph.}

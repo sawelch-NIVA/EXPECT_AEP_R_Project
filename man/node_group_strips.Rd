@@ -11,8 +11,7 @@ node_group_strips(
   ids,
   limits = NULL,
   thresholds = NULL,
-  max_groups = 3,
-  style = c("full", "compact")
+  max_groups = 3
 )
 }
 \arguments{

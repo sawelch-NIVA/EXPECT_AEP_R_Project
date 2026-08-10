@@ -137,12 +137,16 @@ node_epeq_badges <- function(node, text_size = 2.4) {
 
   ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = 0)) +
     ggplot2::geom_tile(
-      fill = d$fill, colour = "white", linewidth = 0.6,
-      width = 0.98, height = 1
+      fill = d$fill,
+      colour = "white",
+      linewidth = 0.6,
+      width = 0.98,
+      height = 1
     ) +
     ggplot2::geom_text(
       ggplot2::aes(label = .data$shown),
-      size = text_size, colour = "grey10"
+      size = text_size,
+      colour = "grey10"
     ) +
     # THE BAND MUST BE CENTRED IN ITS PANEL (Sam 2026-08-06: "misaligned with
     # the text above"). Tiles sit at x = 1..n, so the panel has to be symmetric
@@ -188,10 +192,8 @@ node_group_strips <- function(
   ids,
   limits = NULL,
   thresholds = NULL,
-  max_groups = 3,
-  style = c("full", "compact")
+  max_groups = 3
 ) {
-  style <- match.arg(style)
   key <- triage_group_cols()
   my_groups <- members$group_id[members$node_id == node$node_id[1]]
 
@@ -212,7 +214,10 @@ node_group_strips <- function(
 
   ranked <- d |>
     dplyr::group_by(.data$group_id) |>
-    dplyr::summarise(n = sum(.data$MEASURED_N, na.rm = TRUE), .groups = "drop") |>
+    dplyr::summarise(
+      n = sum(.data$MEASURED_N, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
     dplyr::arrange(dplyr::desc(.data$n))
 
   keep <- utils::head(ranked$group_id, max_groups)
@@ -248,8 +253,11 @@ node_group_strips <- function(
     p +
       ggplot2::geom_violin(
         ggplot2::aes(group = .data$.facet),
-        fill = "grey75", colour = "grey35", linewidth = 0.25,
-        scale = "width", width = 0.9,
+        fill = "grey75",
+        colour = "grey35",
+        linewidth = 0.25,
+        scale = "width",
+        width = 0.9,
         # trim = FALSE would extend the kernel past the observed range, which on
         # a log axis invents concentrations nobody measured.
         trim = TRUE
@@ -258,11 +266,15 @@ node_group_strips <- function(
 
   p +
     triage_category_overlay(
-      d, limits = limits, min_n = 10, ticks = FALSE,
+      d,
+      limits = limits,
+      min_n = 10,
+      ticks = FALSE,
       # No header: the card's own text block already says what the counts are,
       # and at card width it clipped off the canvas.
-      header = FALSE, label_size = 1.6,
-      labels = (style == "full")
+      header = FALSE,
+      label_size = 1.6,
+      labels = FALSE
     ) +
     # Half the default triage-panel linewidth (0.7 -> 0.35): a card is a
     # fraction of a triage panel's size, and Sam 2026-08-07 found the default
@@ -270,28 +282,42 @@ node_group_strips <- function(
     # triage_threshold_layers()'s own default, which is still right for the
     # full-size triage notebooks.
     triage_threshold_layers(
-      thr, orientation = "vertical", limits = limits, linewidth = 0.35
+      thr,
+      orientation = "vertical",
+      limits = limits,
+      linewidth = 0.35
     ) +
     triage_value_scale(
-      limits = limits, axis = "x",
+      limits = limits,
+      axis = "x",
       expand = triage_category_x_expansion()
     ) +
     ggplot2::scale_y_discrete(expand = ggplot2::expansion(add = c(0.5, 0.5))) +
     ggplot2::labs(
-      x = NULL, y = NULL,
+      x = NULL,
+      y = NULL,
       caption = if (length(dropped) > 0) {
-        paste0("+ ", length(dropped), " smaller group(s) not shown: ",
-               paste(dropped, collapse = ", "))
+        paste0(
+          "+ ",
+          length(dropped),
+          " smaller group(s) not shown: ",
+          paste(dropped, collapse = ", ")
+        )
       } else {
         NULL
       }
     ) +
     triage_theme() +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(size = ggplot2::rel(0.55), colour = "grey45"),
+      axis.text.x = ggplot2::element_text(
+        size = ggplot2::rel(0.55),
+        colour = "grey45"
+      ),
       axis.text.y = ggplot2::element_text(size = ggplot2::rel(0.6)),
       plot.caption = ggplot2::element_text(
-        size = ggplot2::rel(0.5), colour = "grey50", hjust = 0
+        size = ggplot2::rel(0.5),
+        colour = "grey50",
+        hjust = 0
       ),
       panel.grid.minor = ggplot2::element_blank()
     ) +
@@ -299,22 +325,16 @@ node_group_strips <- function(
     # illegible, so they are removed rather than drawn too small to read. The
     # threshold lines and the violin shape survive, which is what a glance is
     # for.
-    (if (style == "compact") {
-      list(
-        ggplot2::labs(caption = NULL),
-        # GROUP IDS MOVE INSIDE THE PANEL, and that is an alignment fix rather
-        # than a cosmetic one. A y axis pushes the strip's panel to the right,
-        # while the header and badge plots above are theme_void and span the full
-        # card, so the text block sat about 8% of the card left of the violins.
-        # Drawing the ids inside the panel lets all three panels span the same
-        # width, and then centring on x = 0.5 means the same thing everywhere.
-        compact_group_labels(d, limits),
-        compact_value_scale(limits, thresholds = thr),
-        compact_axis_theme()
-      )
-    } else {
-      list()
-    })
+    ggplot2::labs(caption = NULL) +
+    # GROUP IDS MOVE INSIDE THE PANEL, and that is an alignment fix rather
+    # than a cosmetic one. A y axis pushes the strip's panel to the right,
+    # while the header and badge plots above are theme_void and span the full
+    # card, so the text block sat about 8% of the card left of the violins.
+    # Drawing the ids inside the panel lets all three panels span the same
+    # width, and then centring on x = 0.5 means the same thing everywhere.
+    compact_group_labels(d, limits) +
+    compact_value_scale(limits, thresholds = thr) +
+    compact_axis_theme()
 }
 
 #' Group Ids Drawn Inside the Panel
@@ -341,8 +361,10 @@ compact_group_labels <- function(data, limits = NULL) {
     data = d,
     ggplot2::aes(x = lo, y = .data$.facet, label = .data$.facet),
     inherit.aes = FALSE,
-    hjust = 0, vjust = -0.9,
-    size = 1.9, colour = "grey45"
+    hjust = 0,
+    vjust = -0.9,
+    size = 1.9,
+    colour = "grey45"
   )
 }
 
@@ -394,6 +416,21 @@ node_card_limits <- function(nodes, members, data, ids) {
   out
 }
 
+#' Relative Heights of a Card's Three Panels
+#'
+#' Header, badges, strips, in that order. Pulled out of [node_card()] so
+#' anything illustrating the card's layout (e.g. a dev notebook's box-model
+#' diagram) reads the real ratio instead of a second, driftable copy of the
+#' same three numbers.
+#'
+#' @return A named numeric vector, `c(header, badges, strips)`.
+#' @export
+node_card_heights <- function() {
+  # Header takes the most: a wrapped two-line title plus the headline plus
+  # the counts line does not fit in the same band as a single strip.
+  c(header = 1.55, badges = 0.40, strips = 1.4)
+}
+
 #' Assemble One Node Card
 #'
 #' Title and statistics, the EPEQ badge strip, and one distribution strip per
@@ -412,6 +449,8 @@ node_card_limits <- function(nodes, members, data, ids) {
 #' @param limits Shared limits for this node's unit.
 #' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
 #' @param max_groups Most strips to draw.
+#' @param dpi The device resolution this card will be saved at. Only affects
+#'   the corner id marker; see [node_card_header()].
 #' @return A patchwork object.
 #' @export
 node_card <- function(
@@ -423,9 +462,8 @@ node_card <- function(
   limits = NULL,
   thresholds = NULL,
   max_groups = 3,
-  style = c("full", "compact")
+  dpi = 200
 ) {
-  style <- match.arg(style)
   bg <- node_card_bg_colour(node)
   # Applied to every subplot via patchwork's `&`, which merges into each
   # panel's theme rather than replacing it, so it survives on top of
@@ -438,47 +476,32 @@ node_card <- function(
     panel.background = ggplot2::element_rect(fill = bg, colour = NA)
   )
 
-  # COMPACT EXISTS BECAUSE SHRINKING THE FULL CARD DOES NOT WORK.
-  #
-  # A card placed on a graph node is roughly 1.6in wide against the 3.6in it was
-  # designed at, so every point size lands under half its intended value and the
-  # body text arrives at about 1pt. Fewer, larger elements is the only way down
-  # in size; scaling is not.
-  #
-  # What survives: the label, the headline number, the EPEQ badges, and the
-  # distribution. What goes: the count line, the per-group row labels, the axis,
-  # and the margin counts. All of it is still on the full card, one file away.
-  if (style == "compact") {
-    header <- node_card_header(node, card, style = "compact")
-    badges <- node_epeq_badges(node, text_size = 3.4)
-    strips <- node_group_strips(
-      node, members, data, ids,
-      limits = limits, thresholds = thresholds, max_groups = max_groups,
-      style = "compact"
-    )
-    return(
-      patchwork::wrap_plots(
-        header, badges, strips,
-        ncol = 1,
-        # Header takes the most: a wrapped two-line title plus the headline plus
-        # the counts line does not fit in the same band as a single strip.
-        heights = c(1.55, 0.40, 1.4)
-      ) & bg_theme
-    )
-  }
-
-  header <- node_card_header(node, card)
-  badges <- node_epeq_badges(node)
+  # A card placed on a graph node is roughly 1.6in wide, so every point size
+  # lands under half its intended value at anything larger. Fewer, larger
+  # elements is the only way down in size; scaling is not. What survives: the
+  # label, the headline number, the EPEQ badges, and the distribution. What
+  # goes: the count line, the per-group row labels, the axis, and the margin
+  # counts.
+  header <- node_card_header(node, card, dpi = dpi)
+  badges <- node_epeq_badges(node, text_size = 3.4)
   strips <- node_group_strips(
-    node, members, data, ids,
-    limits = limits, thresholds = thresholds, max_groups = max_groups
+    node,
+    members,
+    data,
+    ids,
+    limits = limits,
+    thresholds = thresholds,
+    max_groups = max_groups
   )
 
   patchwork::wrap_plots(
-    header, badges, strips,
+    header,
+    badges,
+    strips,
     ncol = 1,
-    heights = c(0.9, 0.5, 2.2)
-  ) & bg_theme
+    heights = node_card_heights()
+  ) &
+    bg_theme
 }
 
 #' Value Axis for a Compact Strip
@@ -551,11 +574,15 @@ compact_threshold_sec_axis <- function(thresholds, limits = NULL) {
 #' @export
 compact_axis_theme <- function() {
   ggplot2::theme(
-    axis.text.x = ggplot2::element_text(size = ggplot2::rel(0.62), colour = "grey40"),
+    axis.text.x = ggplot2::element_text(
+      size = ggplot2::rel(0.62),
+      colour = "grey40"
+    ),
     axis.text.y = ggplot2::element_blank(),
     axis.ticks.x = ggplot2::element_line(colour = "grey45", linewidth = 0.3),
     axis.minor.ticks.x.bottom = ggplot2::element_line(
-      colour = "grey65", linewidth = 0.22
+      colour = "grey65",
+      linewidth = 0.22
     ),
     axis.ticks.length.x = ggplot2::unit(2.4, "pt"),
     axis.minor.ticks.length.x = ggplot2::rel(0.5),
@@ -564,29 +591,13 @@ compact_axis_theme <- function() {
     # reasoning as triage_sec_axis_theme(): bolder and a touch larger so they
     # read as the class label they are.
     axis.text.x.top = ggplot2::element_text(
-      size = ggplot2::rel(0.68), face = "bold", colour = "grey25"
+      size = ggplot2::rel(0.68),
+      face = "bold",
+      colour = "grey25"
     ),
     axis.title.x.top = ggplot2::element_blank(),
     axis.ticks.x.top = ggplot2::element_line(colour = "grey45", linewidth = 0.3)
   )
-}
-
-#' Node Title: Id and Label
-#'
-#' `"N003 Coastal mussels"`. Sam 2026-08-06: reporting the number alongside the
-#' name "will make it easier to reference them", which matters as soon as there
-#' are more than a handful and the labels start sounding alike.
-#'
-#' @param node A one-row nodes tibble.
-#' @return A single string.
-#' @export
-node_title <- function(node) {
-  id <- node$node_id[1]
-  label <- node$label[1]
-  if (is.na(id) || !nzchar(id)) {
-    return(label)
-  }
-  paste0(id, " ", label)
 }
 
 #' Does the Headline Number Deserve to be Believed?
@@ -648,12 +659,21 @@ node_card_year_range <- function(card) {
 #'
 #' @param node A one-row nodes tibble.
 #' @param card The matching report-card row.
+#' @param dpi The device resolution this card will be saved at. The corner id
+#'   marker is offset 18x18 PIXELS from the card's top-left corner, not 18
+#'   points -- a physical unit (points, inches, mm) would drift in device
+#'   pixels as `dpi` changes, so the offset is computed in inches from `dpi`
+#'   right before use (`18 / dpi`), matching whatever raster the card is
+#'   actually saved as.
 #' @return A ggplot.
 #' @export
-node_card_header <- function(node, card, style = c("full", "compact")) {
-  style <- match.arg(style)
+node_card_header <- function(node, card, dpi = 200) {
   num <- function(x) {
-    if (length(x) == 0 || is.na(x)) "-" else formatC(x, format = "g", digits = 3)
+    if (length(x) == 0 || is.na(x)) {
+      "-"
+    } else {
+      formatC(x, format = "g", digits = 3)
+    }
   }
   count <- function(x) {
     if (length(x) == 0 || is.na(x)) "-" else format(x, big.mark = ",")
@@ -671,104 +691,94 @@ node_card_header <- function(node, card, style = c("full", "compact")) {
   # them is a free diagnostic. N005 is the worked example, with a geometric mean
   # of 8.0 against a median of 0.235, a thirtyfold gap that says the node holds
   # two populations rather than one.
-  headline <- paste0(num(card$geo_mean), if (nzchar(unit)) paste0(" ", unit) else "")
+  headline <- paste0(
+    num(card$geo_mean),
+    if (nzchar(unit)) paste0(" ", unit) else ""
+  )
   # A marker, not a scolding: the reader still gets the number, and a reason to
   # go and look at the strips below before quoting it.
   suspect <- isTRUE(headline_is_suspect(card))
   if (suspect) {
     headline <- paste0(headline, "  (!)")
   }
-  checks <- paste0("GSD ", num(card$gsd), "   median ", num(card$median))
-  if (suspect) {
-    checks <- paste0(checks, "
-mean and median disagree; see strips")
-  }
-  # "n = 44, rows = 44" (Sam 2026-08-05): the words were doing no work.
-  counts <- paste0(
-    "n = ", count(card$n), ", rows = ", count(card$n_rows),
-    ", groups = ", count(card$n_groups), ", refs = ", count(card$n_sources)
-  )
-  # Compact keeps the sample size, the source count, and the year range: those
-  # are what make the headline a measurement rather than an assertion, and
-  # "when was this measured" is as basic a question as "how much data".
+  # Sample size, source count and the year range: those are what make the
+  # headline a measurement rather than an assertion, and "when was this
+  # measured" is as basic a question as "how much data".
   year_range <- node_card_year_range(card)
   compact_counts <- paste0(
-    "n = ", count(card$n), ", refs = ", count(card$n_sources),
+    "n = ",
+    count(card$n),
+    ", refs = ",
+    count(card$n_sources),
     if (nzchar(year_range)) paste0(", ", year_range) else ""
   )
   # Arctic coverage is DROPPED FROM THE CARD but still computed and carried in
   # aep_node_cards, per Sam: "remove the Arctic measure from the plot, but keep
   # the code. we can worry about it later."
 
-  if (style == "compact") {
-    return(
-      ggplot2::ggplot() +
-        # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
-        # the top right later the same day): it is a handle for referring to the
-        # node in conversation, not information about it, so it sits out of the
-        # reading path rather than inside the title. Left rather than right so it
-        # matches the full card, where the id leads the title.
-        #
-        # Anchored to the card's physical corner (18pt from the top, 18pt from
-        # the left) rather than the data coordinates used everywhere else on
-        # this card (Sam 2026-08-07: composite ids like "N003-mine-tailings"
-        # are longer than the old "N003" and need to stay pinned to the
-        # corner regardless of card size, not drift with the data range).
-        ggplot2::annotation_custom(
-          grid::textGrob(
-            node$node_id[1],
-            x = grid::unit(18, "points"),
-            y = grid::unit(1, "npc") - grid::unit(18, "points"),
-            hjust = 0, vjust = 1,
-            gp = grid::gpar(fontsize = 2.6 * ggplot2::.pt, col = "grey55")
-          )
-        ) +
-        # All three centred on the SAME anchor, x = 0.5 with hjust = 0.5. That
-        # only means the same thing in each plot now that the strips below span
-        # the full card too; see compact_group_labels().
-        ggplot2::annotate(
-          "text", x = 0.5, y = 2.35, hjust = 0.5, vjust = 1, size = 4.5,
-          fontface = "bold",
-          label = stringr::str_wrap(node$label[1], width = 18),
-          lineheight = 0.95, colour = "grey10"
-        ) +
-        ggplot2::annotate(
-          "text", x = 0.5, y = 0.75, hjust = 0.5, vjust = 0.5, size = 3.7,
-          fontface = "bold",
-          label = headline, colour = if (suspect) "#A8452F" else "grey5"
-        ) +
-        ggplot2::annotate(
-          # Dropped further below the concentration than it was: at one line's
-          # spacing the sample size read as part of the number above it.
-          "text", x = 0.5, y = -0.35, hjust = 0.5, vjust = 0.5, size = 2.7,
-          label = compact_counts, colour = "grey40"
-        ) +
-        ggplot2::scale_x_continuous(limits = c(0, 1)) +
-        ggplot2::scale_y_continuous(limits = c(-0.75, 3.1)) +
-        ggplot2::theme_void()
-    )
-  }
+  # 18x18 PIXELS at the card's own save resolution, not a physical unit -- see
+  # the `dpi` argument doc above.
+  corner_offset <- grid::unit(12 / dpi, "inches")
 
   ggplot2::ggplot() +
+    # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
+    # the top right later the same day): it is a handle for referring to the
+    # node in conversation, not information about it, so it sits out of the
+    # reading path rather than inside the title.
+    #
+    # Anchored to the card's physical corner (18x18px from the top-left)
+    # rather than the data coordinates used everywhere else on this card
+    # (Sam 2026-08-07: composite ids like "N003-mine-tailings" are longer
+    # than the old "N003" and need to stay pinned to the corner regardless
+    # of card size, not drift with the data range).
+    ggplot2::annotation_custom(
+      grid::textGrob(
+        node$node_id[1],
+        x = corner_offset,
+        y = grid::unit(1, "npc") - corner_offset,
+        hjust = 0,
+        vjust = 1,
+        gp = grid::gpar(fontsize = 0.75 * 2.6 * ggplot2::.pt, col = "grey55")
+      )
+    ) +
+    # All three centred on the SAME anchor, x = 0.5 with hjust = 0.5.
     ggplot2::annotate(
-      "text", x = 0, y = 2, hjust = 0, size = 3.0, fontface = "bold",
-      label = stringr::str_wrap(node_title(node), width = 34),
-      lineheight = 0.95, colour = "grey10"
+      "text",
+      x = 0.5,
+      y = 2.35,
+      hjust = 0.5,
+      vjust = 1,
+      size = 4.5,
+      fontface = "bold",
+      label = stringr::str_wrap(node$label[1], width = 18),
+      lineheight = 0.95,
+      colour = "grey10"
     ) +
     ggplot2::annotate(
-      "text", x = 0, y = 1, hjust = 0, size = 3.4, fontface = "bold",
-      label = headline, colour = if (suspect) "#A8452F" else "grey5"
+      "text",
+      x = 0.5,
+      y = 0.75,
+      hjust = 0.5,
+      vjust = 0.5,
+      size = 3.7,
+      fontface = "bold",
+      label = headline,
+      colour = if (suspect) "#A8452F" else "grey5"
     ) +
     ggplot2::annotate(
-      "text", x = 1, y = 1, hjust = 1, size = 2.2, label = checks,
-      colour = if (suspect) "#A8452F" else "grey45", lineheight = 0.9
-    ) +
-    ggplot2::annotate(
-      "text", x = 0, y = 0, hjust = 0, size = 2.2, label = counts,
-      colour = "grey45"
+      # Dropped further below the concentration than it was: at one line's
+      # spacing the sample size read as part of the number above it.
+      "text",
+      x = 0.5,
+      y = -0.35,
+      hjust = 0.5,
+      vjust = 0.5,
+      size = 2.7,
+      label = compact_counts,
+      colour = "grey40"
     ) +
     ggplot2::scale_x_continuous(limits = c(0, 1)) +
-    ggplot2::scale_y_continuous(limits = c(-0.4, 2.4)) +
+    ggplot2::scale_y_continuous(limits = c(-0.75, 3.1)) +
     ggplot2::theme_void()
 }
 
@@ -792,13 +802,11 @@ write_node_cards <- function(
   ids,
   thresholds = NULL,
   dir = here_rel("figures/node_cards"),
-  width = 3.6,
-  height = 2.4,
-  dpi = 150,
-  style = c("full", "compact"),
+  width = 2.4,
+  height = 1.8,
+  dpi = 200,
   limits = NULL
 ) {
-  style <- match.arg(style)
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   if (is.null(limits)) {
     limits <- node_card_limits(nodes, members, data, ids)
@@ -813,13 +821,24 @@ write_node_cards <- function(
     }
     lim <- limits[[card$unit[1] %||% ""]]
     p <- node_card(
-      node, card, members, data, ids,
-      limits = lim, thresholds = thresholds, style = style
+      node,
+      card,
+      members,
+      data,
+      ids,
+      limits = lim,
+      thresholds = thresholds,
+      dpi = dpi
     )
     path <- file.path(dir, paste0(node$node_id[1], ".png"))
     ggplot2::ggsave(
-      filename = path, plot = p, width = width, height = height,
-      dpi = dpi, device = ragg::agg_png, bg = node_card_bg_colour(node)
+      filename = path,
+      plot = p,
+      width = width,
+      height = height,
+      dpi = dpi,
+      device = ragg::agg_png,
+      bg = node_card_bg_colour(node)
     )
     paths <- c(paths, path)
   }

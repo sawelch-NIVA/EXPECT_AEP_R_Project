@@ -567,7 +567,7 @@ aep_edge_bezier_points <- function(edges, curvature = 0.15) {
 #'   labelled boxes behind everything else. Nested groups inset automatically;
 #'   see [aep_group_depth()].
 #' @param node_images Optional named character vector of PNG paths keyed by
-#'   `node_id`, from [write_node_cards()] with `style = "compact"`. Where
+#'   `node_id`, from [write_node_cards()]. Where
 #'   supplied, each node is drawn as its card instead of a text label. This is
 #'   PLAN.md P5.2, and it is what makes the figure a report-card AEP rather than
 #'   a labelled graph.

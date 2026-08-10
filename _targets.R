@@ -1572,8 +1572,8 @@ list(
   ),
 
   ### # Node report cards ----
-  # PLAN.md 4.3 and P3.2. One PNG per node into figures/node_cards/, as a
-  # `format = "file"` target so the store caches the images rather than the
+  # PLAN.md 4.3, P3.2, P5.2. One PNG per node into figures/node_cards_compact/,
+  # as a `format = "file"` target so the store caches the images rather than the
   # ggplot objects (CLAUDE.md 4.4).
   #
   # Badges render grey where a node is unscored, which is the honest state until
@@ -1582,25 +1582,6 @@ list(
   #
   # One SUBDIRECTORY PER AEP since 2026-08-06. A node appears in several AEPs
   # with different data behind it, so `N001.png` is not a unique name.
-  tar_target(
-    name = node_cards,
-    command = write_aep_node_cards(
-      scoped = aep_scoped,
-      cards = aep_node_cards,
-      members = aep_node_members,
-      data = literature_analysis_ready,
-      ids = group_ids,
-      thresholds = copper_toxicity_thresholds,
-      dir = here_rel("figures/node_cards"),
-      limits = aep_card_limits
-    ),
-    format = "file"
-  ),
-
-  ### # Compact cards, for placing on the diagram ----
-  # PLAN.md P5.2. A separate render rather than a resize: at graph-node size the
-  # full card's body text lands around 1pt, so the compact variant drops the
-  # count line, the row labels and the axis instead of shrinking them.
   tar_target(
     name = node_cards_compact,
     command = write_aep_node_cards(
@@ -1611,11 +1592,7 @@ list(
       ids = group_ids,
       thresholds = copper_toxicity_thresholds,
       dir = here_rel("figures/node_cards_compact"),
-      limits = aep_card_limits,
-      width = 2.4,
-      height = 1.8,
-      dpi = 200,
-      style = "compact"
+      limits = aep_card_limits
     ),
     format = "file"
   ),
