@@ -11,7 +11,11 @@ node_group_strips(
   ids,
   limits = NULL,
   thresholds = NULL,
-  max_groups = 3
+  max_groups = 3,
+  violin_fill = "grey35",
+  violin_alpha = 0.35,
+  violin_colour = NA,
+  violin_width = 0.9
 )
 }
 \arguments{
@@ -29,6 +33,20 @@ top of this file for why the sharing is per unit.}
 \item{thresholds}{The \code{copper_toxicity_thresholds} target, or \code{NULL}.}
 
 \item{max_groups}{Most strips to draw.}
+
+\item{violin_fill, violin_alpha, violin_colour}{Violin styling. Translucent
+fill and no outline since 2026-08-10; see the comment at the geom for why.
+\code{violin_colour = NA} draws no border at all, which is not the same as
+matching it to the fill: a border matching a translucent fill still
+doubles the alpha where it lands, drawing a darker rim.}
+
+\item{violin_width}{Violin width in discrete units. Below 1 the rows cannot
+touch; above 1 they overlap. \strong{Leave it at 0.9.} Overlap was tried at 1.8
+and 3.0 on 2026-08-10 and rejected, with the renders and the reasoning
+kept in \code{docs/dev-node-card-style.qmd}. The argument stays because that
+section needs it to draw the rejected variants, not because widening is a
+live option. The y-axis expansion derives from it either way, so the
+clearance to the panel edge holds at any width.}
 }
 \value{
 A ggplot.

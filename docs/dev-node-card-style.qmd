@@ -27,11 +27,12 @@ source(here::here("tests/testthat/helper-fixtures.R"))
 ```
 
 Every figure here is shown exactly once, and where it exists as a file on disk
-it is shown *from* that file. A whole card is built silently, written at its
-real size, and then included; only the single panels, which have no artefact of
-their own, are drawn by knitr. Printing a card inline as well as including the
-written PNG showed each one twice, at two different sizes, which is worse than
-useless in a notebook about how the thing looks.
+it is shown *from* that file. The two real cards are built silently, written at
+their real size, and then included. Everything with no artefact of its own, the
+single panels and the rejected variants at the end, is drawn by knitr instead.
+Printing a card inline as well as including the written PNG showed each one
+twice, at two different sizes, which is worse than useless in a notebook about
+how the thing looks.
 
 Sizing is a chunk option throughout, never a `ggview::canvas()`: see the note
 under the geometry table below.
@@ -137,28 +138,29 @@ above.
 ### The background
 
 The level colour comes from none of the three panel functions. `node_card()`
-builds one theme and merges it into all three with patchwork's `&`. That is
-what lets it survive on top of `theme_void()` (header, badges) and
-`triage_theme()` (strips) alike, since `&` merges into each panel's theme
-rather than replacing it. Both `plot.background` and `panel.background` are
-set: a colour visible in one but not the other reads as a rendering bug rather
-than a fill.
+takes one theme from `node_card_theme()` and merges it into all three with
+patchwork's `&`. That is what lets it survive on top of `theme_void()` (header,
+badges) and `triage_theme()` (strips) alike, since `&` merges into each panel's
+theme rather than replacing it. It carries the level background, on both
+`plot.background` and `panel.background`, and the outer margin, which is
+2pt rather than ggplot2's 5.5pt because on a 1.8in card the default spends a
+fifth of the strips band on white space.
+
+The margin has to be shared. Patchwork aligns the three panels on their panel
+areas, so trimming one panel's side margin alone makes that panel wider than
+the other two, and the centred title, the badge band and the group ids inside
+the strips panel all assume `x = 0.5` means the same thing on each.
 
 ```{r}
 #| label: unpack-background
 
-bg <- node_card_bg_colour(node)  # keyed on `level`, here "medium"
-bg_theme <- ggplot2::theme(
-  plot.background = ggplot2::element_rect(fill = bg, colour = NA),
-  panel.background = ggplot2::element_rect(fill = bg, colour = NA)
-)
+card_theme <- node_card_theme(node)  # background keyed on `level`, here "medium"
+node_card_bg_colour(node)
 
 # What `node_card()` does to each panel with `&`, done to one panel at a time
 # so the previews below show what actually lands on the card. Sizing is the
 # chunk's job, not this function's.
-with_bg <- function(p) p + bg_theme
-
-bg
+with_bg <- function(p) p + card_theme
 ```
 
 ### 1. Header, `node_card_header()`
@@ -242,8 +244,9 @@ with_bg(strips)
 ### 4. The stack
 
 One `wrap_plots()` in a single column with the heights from above, then
-`& bg_theme`. The `&` is load-bearing: `+` would add the theme to the last
-plot only, leaving the header and badges on white.
+`& card_theme`. The `&` is load-bearing: `+` would add the theme to the last
+plot only, leaving the header and badges on white with a wider margin than the
+strips.
 
 ```{r}
 #| label: fig-unpack-compose
@@ -257,7 +260,7 @@ composed <- patchwork::wrap_plots(
   strips,
   ncol = 1,
   heights = node_card_heights()
-) & bg_theme
+) & card_theme
 
 composed
 ```
@@ -384,3 +387,83 @@ save_ggplot(
 
 knitr::include_graphics(stress_path)
 ```
+
+## Why the violins do not overlap
+
+Tried and rejected on 2026-08-10. Kept here rather than deleted, because the
+idea is a reasonable one that will occur to someone again, and the reason it
+fails is not the reason you would expect.
+
+The problem it was meant to solve is real. `max_groups` keeps the three
+largest constituent groups and names the rest in text, so a node built from
+five or six sampling groups shows most of itself and describes the remainder.
+Raising the cap without changing anything else gives each group a thinner slice
+of the same 0.75 in band. The alternative is to stop giving each group its own
+row and let the violins overlap, which is only legible if the fills blend, and
+they now do: the violins are translucent with no outline.
+
+So the fills were never the obstacle. `violin_width` sets the width in discrete
+units, rows sit one unit apart, and anything above 1 overlaps.
+
+```{r}
+#| label: overlap-setup
+
+overlap_args <- list(
+  stress_node, stress_card, stress_members, stress_data, stress_ids,
+  limits = range(stress_data$MEASURED_VALUE_STANDARD),
+  dpi = card_dpi,
+  # All five groups, not the usual three: the crowding is the thing under test.
+  max_groups = 5
+)
+
+overlap_card <- function(width) {
+  do.call(node_card, c(overlap_args, list(violin_width = width)))
+}
+```
+
+```{r}
+#| label: fig-overlap-09
+#| fig-width: !expr card_width
+#| fig-height: !expr card_height
+#| fig-cap: "`violin_width = 0.9`, what the card does today, with `max_groups` raised to 5. Rows cannot touch, so nothing blends, and each violin gets a fifth of the band. The failure here is the group ids: they collide with the rows above and below, and the topmost one is clipped."
+
+overlap_card(0.9)
+```
+
+```{r}
+#| label: fig-overlap-18
+#| fig-width: !expr card_width
+#| fig-height: !expr card_height
+#| fig-cap: "`violin_width = 1.8`. The blending works exactly as hoped, and the individual lobes stay distinguishable. Everything else gets worse: five sets of box-and-whisker furniture now sit on top of each other, and the ids are no closer to being readable."
+
+overlap_card(1.8)
+```
+
+```{r}
+#| label: fig-overlap-30
+#| fig-width: !expr card_width
+#| fig-height: !expr card_height
+#| fig-cap: "`violin_width = 3.0`. Past the point where the shapes mean anything: the card reads as one grey mass with rectangles in it."
+
+overlap_card(3.0)
+```
+
+**The verdict, and the part worth remembering.** Overlapping violins are
+readable. Sam's hypothesis about the fills was right, and @fig-overlap-18 shows
+it. What sinks the idea is everything *around* the violins: five group ids in
+a 0.75 in band collide with each other whatever the violins do, and the
+box-and-whisker overlay multiplies by five along with them. Widening the
+violins does not buy space for either. So a card that shows more than three
+groups needs a different labelling scheme first, probably a key in the right
+margin or colour-coded ids, and only then is the width worth revisiting.
+
+Two mechanical notes for whoever tries again:
+
+- ggplot2 emits `position_dodge() requires non-overlapping x intervals` for any
+  width above 1. It is harmless, and it will appear in the pipeline log.
+- The y-axis expansion is derived from `violin_width`, so a wide violin pushes
+  the panel out instead of being clipped. That is why @fig-overlap-30 still
+  fits inside its panel.
+
+`violin_width` stays at 0.9, and the argument exists mainly so this section can
+draw the variants it rejects.

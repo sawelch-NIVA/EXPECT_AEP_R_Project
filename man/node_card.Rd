@@ -13,7 +13,8 @@ node_card(
   limits = NULL,
   thresholds = NULL,
   max_groups = 3,
-  dpi = 200
+  dpi = 300,
+  ...
 )
 }
 \arguments{
@@ -30,7 +31,16 @@ node_card(
 \item{max_groups}{Most strips to draw.}
 
 \item{dpi}{The device resolution this card will be saved at. Only affects
-the corner id marker; see \code{\link[=node_card_header]{node_card_header()}}.}
+the corner id marker; see \code{\link[=node_card_header]{node_card_header()}}. 300 since 2026-08-10, up
+from 200: nothing in the card's geometry is measured in pixels, so this is
+the same card with more of them. Note that \code{aep_diagram} is written at
+\code{dpi = 150}, and a card occupies roughly 340px there, so beyond about 200
+this buys anti-aliasing on the diagram and nothing else. It is the card
+viewed on its own that gains.}
+
+\item{...}{Passed to \code{\link[=node_group_strips]{node_group_strips()}}, which is where every knob worth
+turning while styling a card lives (\code{violin_fill}, \code{violin_alpha},
+\code{violin_colour}, \code{violin_width}).}
 }
 \value{
 A patchwork object.

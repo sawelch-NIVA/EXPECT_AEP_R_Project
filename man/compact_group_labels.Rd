@@ -4,12 +4,22 @@
 \alias{compact_group_labels}
 \title{Group Ids Drawn Inside the Panel}
 \usage{
-compact_group_labels(data, limits = NULL)
+compact_group_labels(data, limits = NULL, size = 1.425)
 }
 \arguments{
 \item{data}{The plot subset, carrying \code{.facet}.}
 
 \item{limits}{Shared value limits.}
+
+\item{size}{Text size. 1.425 since 2026-08-10, three quarters of the
+original 1.9: halving it first (to 0.95) put the glyphs at 8px on a 300 dpi
+card, which Sam judged too small, and this splits the difference at 12px.
+The id is a handle for looking a group up rather than something to be read
+at a glance like the headline number, so it can afford to be the smallest
+text on the card, but not so small it stops being readable. An argument
+rather than a constant because the right value depends on how large the
+card is drawn, and the AEP diagram and the dev notebook draw it at
+different sizes.}
 }
 \value{
 A ggplot2 layer.

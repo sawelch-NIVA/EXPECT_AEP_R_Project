@@ -14,7 +14,7 @@ write_node_cards(
   dir = here_rel("figures/node_cards"),
   width = 2.4,
   height = 1.8,
-  dpi = 200,
+  dpi = 300,
   limits = NULL
 )
 }

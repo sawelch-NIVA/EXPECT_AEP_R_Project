@@ -183,6 +183,18 @@ node_epeq_badges <- function(node, text_size = 2.4) {
 #'   top of this file for why the sharing is per unit.
 #' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
 #' @param max_groups Most strips to draw.
+#' @param violin_fill,violin_alpha,violin_colour Violin styling. Translucent
+#'   fill and no outline since 2026-08-10; see the comment at the geom for why.
+#'   `violin_colour = NA` draws no border at all, which is not the same as
+#'   matching it to the fill: a border matching a translucent fill still
+#'   doubles the alpha where it lands, drawing a darker rim.
+#' @param violin_width Violin width in discrete units. Below 1 the rows cannot
+#'   touch; above 1 they overlap. **Leave it at 0.9.** Overlap was tried at 1.8
+#'   and 3.0 on 2026-08-10 and rejected, with the renders and the reasoning
+#'   kept in `docs/dev-node-card-style.qmd`. The argument stays because that
+#'   section needs it to draw the rejected variants, not because widening is a
+#'   live option. The y-axis expansion derives from it either way, so the
+#'   clearance to the panel edge holds at any width.
 #' @return A ggplot.
 #' @export
 node_group_strips <- function(
@@ -192,7 +204,11 @@ node_group_strips <- function(
   ids,
   limits = NULL,
   thresholds = NULL,
-  max_groups = 3
+  max_groups = 3,
+  violin_fill = "grey35",
+  violin_alpha = 0.35,
+  violin_colour = NA,
+  violin_width = 0.9
 ) {
   key <- triage_group_cols()
   my_groups <- members$group_id[members$node_id == node$node_id[1]]
@@ -247,17 +263,28 @@ node_group_strips <- function(
   #
   # Bimodality survives better than it did: two lobes read at a glance, where two
   # bright bands in a heatmap needed looking for.
+  # TRANSLUCENT FILL, NO OUTLINE (Sam 2026-08-10). A violin outlined in grey35
+  # at card size is mostly outline: the stroke is a visible fraction of a lobe
+  # a few pixels tall, so it thickens every shape and closes up the narrow
+  # tails. Dropping the border and letting the fill carry the shape is the
+  # whole change.
+  #
+  # It is NOT here to enable overlapping rows. That was tried the same day,
+  # rejected, and the evidence is kept in docs/dev-node-card-style.qmd under
+  # "Why the violins do not overlap": at `violin_width` 1.8 and 3.0 the fills
+  # blend perfectly well and it is the LABELS that fail, so widening buys
+  # nothing. `violin_width` stays 0.9, which is why rows cannot touch.
   p <- if (triage_use_points(d)) {
     p + ggplot2::geom_point(alpha = 0.6, size = 0.7)
   } else {
     p +
       ggplot2::geom_violin(
         ggplot2::aes(group = .data$.facet),
-        fill = "grey75",
-        colour = "grey35",
-        linewidth = 0.25,
+        fill = violin_fill,
+        alpha = violin_alpha,
+        colour = violin_colour,
         scale = "width",
-        width = 0.9,
+        width = violin_width,
         # trim = FALSE would extend the kernel past the observed range, which on
         # a log axis invents concentrations nobody measured.
         trim = TRUE
@@ -292,7 +319,20 @@ node_group_strips <- function(
       axis = "x",
       expand = triage_category_x_expansion()
     ) +
-    ggplot2::scale_y_discrete(expand = ggplot2::expansion(add = c(0.5, 0.5))) +
+    # CLEARANCE ABOVE AND BELOW THE OUTERMOST VIOLIN, doubled 2026-08-10.
+    #
+    # An expansion of exactly 0.5 against a violin 0.9 wide leaves 0.05 discrete
+    # units, about six pixels at 300 dpi, between the widest point of the
+    # outermost violin and the panel edge, which is also where the threshold
+    # numerals and their ticks sit. 0.10 doubles it.
+    #
+    # Expressed as violin half-width plus clearance rather than as a bare
+    # number, so that changing `violin_width` cannot silently close the gap.
+    # It also keeps a deliberately overlapping layout (width > 1) honest: the
+    # panel grows to fit rather than clipping the outer two violins.
+    ggplot2::scale_y_discrete(
+      expand = ggplot2::expansion(add = rep(violin_width / 2 + 0.10, 2))
+    ) +
     ggplot2::labs(
       x = NULL,
       y = NULL,
@@ -346,9 +386,18 @@ node_group_strips <- function(
 #'
 #' @param data The plot subset, carrying `.facet`.
 #' @param limits Shared value limits.
+#' @param size Text size. 1.425 since 2026-08-10, three quarters of the
+#'   original 1.9: halving it first (to 0.95) put the glyphs at 8px on a 300 dpi
+#'   card, which Sam judged too small, and this splits the difference at 12px.
+#'   The id is a handle for looking a group up rather than something to be read
+#'   at a glance like the headline number, so it can afford to be the smallest
+#'   text on the card, but not so small it stops being readable. An argument
+#'   rather than a constant because the right value depends on how large the
+#'   card is drawn, and the AEP diagram and the dev notebook draw it at
+#'   different sizes.
 #' @return A ggplot2 layer.
 #' @export
-compact_group_labels <- function(data, limits = NULL) {
+compact_group_labels <- function(data, limits = NULL, size = 1.425) {
   lo <- if (!is.null(limits) && all(is.finite(limits)) && all(limits > 0)) {
     limits[1]
   } else {
@@ -362,8 +411,12 @@ compact_group_labels <- function(data, limits = NULL) {
     ggplot2::aes(x = lo, y = .data$.facet, label = .data$.facet),
     inherit.aes = FALSE,
     hjust = 0,
-    vjust = -0.9,
-    size = 1.9,
+    # SCALED BY `size`, and it has to be. `vjust` is in units of the text's own
+    # height, so halving the size at a fixed vjust halves the offset too, and
+    # the label lands on the violin's tail line instead of above it. This keeps
+    # the offset that size 1.9 had at vjust -0.9, whatever the size is now.
+    vjust = -0.9 * 1.9 / size,
+    size = size,
     colour = "grey45"
   )
 }
@@ -450,7 +503,15 @@ node_card_heights <- function() {
 #' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`.
 #' @param max_groups Most strips to draw.
 #' @param dpi The device resolution this card will be saved at. Only affects
-#'   the corner id marker; see [node_card_header()].
+#'   the corner id marker; see [node_card_header()]. 300 since 2026-08-10, up
+#'   from 200: nothing in the card's geometry is measured in pixels, so this is
+#'   the same card with more of them. Note that `aep_diagram` is written at
+#'   `dpi = 150`, and a card occupies roughly 340px there, so beyond about 200
+#'   this buys anti-aliasing on the diagram and nothing else. It is the card
+#'   viewed on its own that gains.
+#' @param ... Passed to [node_group_strips()], which is where every knob worth
+#'   turning while styling a card lives (`violin_fill`, `violin_alpha`,
+#'   `violin_colour`, `violin_width`).
 #' @return A patchwork object.
 #' @export
 node_card <- function(
@@ -462,20 +523,9 @@ node_card <- function(
   limits = NULL,
   thresholds = NULL,
   max_groups = 3,
-  dpi = 200
+  dpi = 300,
+  ...
 ) {
-  bg <- node_card_bg_colour(node)
-  # Applied to every subplot via patchwork's `&`, which merges into each
-  # panel's theme rather than replacing it, so it survives on top of
-  # theme_void() (header, badges) and triage_theme() (strips) alike. Both
-  # panel and plot background are set: panel is what shows behind the violin
-  # or points, plot is the margin around it, and a colour visible in one but
-  # not the other would look like a rendering bug rather than a fill.
-  bg_theme <- ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = bg, colour = NA),
-    panel.background = ggplot2::element_rect(fill = bg, colour = NA)
-  )
-
   # A card placed on a graph node is roughly 1.6in wide, so every point size
   # lands under half its intended value at anything larger. Fewer, larger
   # elements is the only way down in size; scaling is not. What survives: the
@@ -491,7 +541,8 @@ node_card <- function(
     ids,
     limits = limits,
     thresholds = thresholds,
-    max_groups = max_groups
+    max_groups = max_groups,
+    ...
   )
 
   patchwork::wrap_plots(
@@ -501,7 +552,45 @@ node_card <- function(
     ncol = 1,
     heights = node_card_heights()
   ) &
-    bg_theme
+    node_card_theme(node)
+}
+
+#' The Theme Every Panel of a Card Shares
+#'
+#' Applied to all three panels with patchwork's `&`, which merges into each
+#' panel's theme rather than replacing it, so it survives on top of
+#' `theme_void()` (header, badges) and [triage_theme()] (strips) alike.
+#'
+#' Exported for the same reason as [node_card_heights()]: the dev notebook
+#' shows the card being assembled panel by panel, and a second hand-written
+#' copy of this theme there would drift from the real one.
+#'
+#' **The margin is shared deliberately, and must not be cut per panel.** All
+#' three panels are aligned by patchwork on their panel areas, so trimming one
+#' panel's left or right margin alone widens that panel relative to the other
+#' two. The card's centred title, its badge band and the group ids drawn inside
+#' the strips panel all assume the three panels span the same width, and that
+#' assumption is what keeps `x = 0.5` meaning the same thing on each.
+#'
+#' @param node A one-row nodes tibble, carrying `level`.
+#' @param margin Outer margin on every side, in points. Cut from ggplot2's
+#'   default 5.5 to 2 on 2026-08-10 at Sam's request. On a 1.8 in card the top
+#'   and bottom defaults together took a fifth of the strips band, which is a
+#'   lot of a violin to spend on white space. Not zero: at zero a violin tail
+#'   or an axis numeral sits flush against the card edge, and against the
+#'   neighbouring card once these are placed on the AEP diagram.
+#' @return A ggplot2 theme.
+#' @export
+node_card_theme <- function(node, margin = 2) {
+  bg <- node_card_bg_colour(node)
+  ggplot2::theme(
+    # Both panel and plot background are set: panel is what shows behind the
+    # violin or points, plot is the margin around it, and a colour visible in
+    # one but not the other would look like a rendering bug rather than a fill.
+    plot.background = ggplot2::element_rect(fill = bg, colour = NA),
+    panel.background = ggplot2::element_rect(fill = bg, colour = NA),
+    plot.margin = ggplot2::margin(margin, margin, margin, margin, unit = "pt")
+  )
 }
 
 #' Value Axis for a Compact Strip
@@ -593,10 +682,20 @@ compact_axis_theme <- function() {
     axis.text.x.top = ggplot2::element_text(
       size = ggplot2::rel(0.68),
       face = "bold",
-      colour = "grey25"
+      colour = "grey25",
+      # PULLED IN TO 2px, from ggplot2's default 4.95pt (23px at 300 dpi).
+      # Sam 2026-08-10: the numerals floated a long way off the lines they
+      # name, which on a panel this short reads as two separate rows of
+      # furniture rather than one label per line. `margin` on a top axis is
+      # measured on the side facing the panel, so `b` is the one that matters.
+      margin = ggplot2::margin(b = 0.5, unit = "pt")
     ),
     axis.title.x.top = ggplot2::element_blank(),
-    axis.ticks.x.top = ggplot2::element_line(colour = "grey45", linewidth = 0.3)
+    axis.ticks.x.top = ggplot2::element_line(colour = "grey45", linewidth = 0.3),
+    # The tick then carries the remaining distance, so the numeral, the tick and
+    # the line it names read as one mark. Halved from the shared 2.4pt for the
+    # same reason: it is a connector here, not a scale reading aid.
+    axis.ticks.length.x.top = ggplot2::unit(1.2, "pt")
   )
 }
 
@@ -660,14 +759,16 @@ node_card_year_range <- function(card) {
 #' @param node A one-row nodes tibble.
 #' @param card The matching report-card row.
 #' @param dpi The device resolution this card will be saved at. The corner id
-#'   marker is offset 18x18 PIXELS from the card's top-left corner, not 18
-#'   points -- a physical unit (points, inches, mm) would drift in device
-#'   pixels as `dpi` changes, so the offset is computed in inches from `dpi`
-#'   right before use (`18 / dpi`), matching whatever raster the card is
-#'   actually saved as.
+#'   marker is offset in PIXELS from the corner, not in points -- a physical
+#'   unit (points, inches, mm) would drift in device pixels as `dpi` changes,
+#'   so the offset is computed in inches from `dpi` right before use
+#'   (`offset / dpi`), matching whatever raster the card is actually saved as.
+#'   The offset itself is 2px as of 2026-08-10 (Sam cut it from 18); this
+#'   sentence used to name 18 and had gone stale, so it now points at the
+#'   constant rather than repeating it.
 #' @return A ggplot.
 #' @export
-node_card_header <- function(node, card, dpi = 200) {
+node_card_header <- function(node, card, dpi = 300) {
   num <- function(x) {
     if (length(x) == 0 || is.na(x)) {
       "-"
@@ -718,7 +819,7 @@ node_card_header <- function(node, card, dpi = 200) {
 
   # 18x18 PIXELS at the card's own save resolution, not a physical unit -- see
   # the `dpi` argument doc above.
-  corner_offset <- grid::unit(12 / dpi, "inches")
+  corner_offset <- grid::unit(2 / dpi, "inches")
 
   ggplot2::ggplot() +
     # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
@@ -804,7 +905,7 @@ write_node_cards <- function(
   dir = here_rel("figures/node_cards"),
   width = 2.4,
   height = 1.8,
-  dpi = 200,
+  dpi = 300,
   limits = NULL
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
