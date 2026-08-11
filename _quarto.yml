@@ -12,7 +12,7 @@ project:
     # Reads unit_corrections.csv live, so it must be built rather than parked:
     # a stale copy of a how-to that claims to be the source of truth is worse
     # than none. Cheap to build (tables only, no plots).
-    - docs/AP04-units.qmd
+    - docs/AP04-unit-corrections.qmd
     # Reads the six data/clean/aep/ CSVs live, same argument as AP04.
     - docs/AP05-aep.qmd
     # - docs/NBXX-Triage.qmd   # Phase 2, once it exists

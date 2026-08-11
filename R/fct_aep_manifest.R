@@ -539,7 +539,10 @@ aep_all_report_cards <- function(scoped, members, data, ids) {
 #' @param members,data,ids,thresholds As in [write_node_cards()].
 #' @param dir Parent directory; each AEP gets a subdirectory of it.
 #' @param limits Shared limits per unit, computed across the whole node pool.
-#' @param ... Passed to [write_node_cards()] (`width`, `height`, `dpi`, `style`).
+#' @param ... Passed to [write_node_cards()] (`width`, `height`, `dpi`,
+#'   `external_series`). The same `external_series` reaches every AEP's call
+#'   unchanged: it is keyed by `node_id`, not by AEP, so a REACH node's series
+#'   is the same series regardless of which AEP happens to include that node.
 #' @return The written paths, across all AEPs.
 #' @export
 write_aep_node_cards <- function(

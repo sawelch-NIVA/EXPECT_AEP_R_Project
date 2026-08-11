@@ -162,6 +162,72 @@ node_epeq_badges <- function(node, text_size = 2.4) {
     ggplot2::theme_void()
 }
 
+#' Bar Chart of an External Node's Own Time Series
+#'
+#' The card-body equivalent of [node_card_header()]'s "AM" label: where the
+#' headline is an arithmetic mean of a typed-in `external_value`, and that
+#' figure came from a (year, value) series rather than a single number, this
+#' draws the series that mean was computed from, in the same panel slot a
+#' distribution node would use for its violin strips.
+#'
+#' **Deliberately not a violin.** There is no distribution here in the sense
+#' [node_group_strips()] means it -- one value per year, not repeated
+#' measurements at any point in time -- so a bar per year is the honest
+#' summarising geom (CLAUDE.md 4.4), not a stand-in for the real thing.
+#'
+#' @param series A tibble with `year` (numeric or integer) and `value`
+#'   columns, one row per year. Extra columns are ignored.
+#' @param mean_value The node's own headline figure (`external_value`), drawn
+#'   as a dashed reference line so the bars can be read against the number
+#'   already shown above them in [node_card_header()]. `NA` draws no line.
+#' @return A ggplot.
+#' @export
+node_external_series_bars <- function(series, mean_value = NA_real_) {
+  p <- ggplot2::ggplot(
+    series,
+    ggplot2::aes(x = .data$year, y = .data$value)
+  ) +
+    # geom_col()'s default position is "stack", which activates the moment
+    # `series` has more than one row sharing a year -- a lumped node's REACH
+    # series does this routinely (up to six constituent sectors reporting for
+    # the same year), and that stacking is honest: the node IS the sum of
+    # those sectors, so a year's total bar height is genuinely their sum.
+    # What is NOT honest without help is a bare grey35 fill with no border,
+    # which draws that stack as an indistinguishable single bar. The white
+    # border is thin enough not to clutter a single-segment year (the common
+    # case for a standalone, non-lumped node) but visible enough to show a
+    # multi-segment year as several pieces rather than one number.
+    ggplot2::geom_col(fill = "grey35", colour = "white", linewidth = 0.15, width = 0.7)
+
+  if (!is.na(mean_value)) {
+    p <- p +
+      # Same dashed style and rejection colour convention as the "(!)" suspect
+      # marker elsewhere on the card (node_card_header()), reused here for the
+      # same reason: a reference line, not new colour vocabulary to learn.
+      ggplot2::geom_hline(
+        yintercept = mean_value,
+        linetype = "22",
+        colour = "#A8452F",
+        linewidth = 0.4
+      )
+  }
+
+  p +
+    ggplot2::scale_x_continuous(breaks = scales::breaks_pretty(n = 3)) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_comma(),
+      expand = ggplot2::expansion(mult = c(0, 0.08))
+    ) +
+    ggplot2::labs(x = NULL, y = NULL) +
+    ggplot2::theme_minimal(base_size = 7) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      axis.text = ggplot2::element_text(size = 6, colour = "grey40"),
+      plot.margin = ggplot2::margin(t = 2, r = 6, b = 0, l = 2)
+    )
+}
+
 #' Horizontal Distribution Strips, One per Constituent Group
 #'
 #' **The point is the groups, not the pool.** A node pooling several sampling
@@ -195,6 +261,11 @@ node_epeq_badges <- function(node, text_size = 2.4) {
 #'   section needs it to draw the rejected variants, not because widening is a
 #'   live option. The y-axis expansion derives from it either way, so the
 #'   clearance to the panel edge holds at any width.
+#' @param external_series Named list of (year, value) tibbles keyed by
+#'   `node_id`, from [node_external_series_bars()]. Only consulted for
+#'   `node_type = "external"`; a missing or empty entry falls back to the
+#'   plain "no measured data" placeholder, so passing `NULL` (the default)
+#'   reproduces the pre-2026-08-11 behaviour exactly.
 #' @return A ggplot.
 #' @export
 node_group_strips <- function(
@@ -208,12 +279,33 @@ node_group_strips <- function(
   violin_fill = "grey35",
   violin_alpha = 0.35,
   violin_colour = NA,
-  violin_width = 0.9
+  violin_width = 0.9,
+  external_series = NULL
 ) {
+  # AN EXTERNAL NODE HAS NO DISTRIBUTION, BUT MAY HAVE A TIME SERIES.
+  # resolve_node_data() always returns zero rows for node_type = "external"
+  # (there is nothing to draw a violin from), but several external sources ARE
+  # natively a (year, value) series before they get collapsed to the single
+  # mean/sd typed into external_value/external_sd -- REACH sector data is
+  # exactly this. Where the caller supplies that series (keyed by node_id,
+  # since write_node_cards() draws many nodes from one call), show it as bars
+  # in the space that would otherwise say "no measured data": it is real data
+  # about this node, just not the kind resolve_node_data() ever returns.
+  if (identical(node$node_type[1], "external")) {
+    series <- external_series[[node$node_id[1]]]
+    if (!is.null(series) && nrow(series) > 0) {
+      return(node_external_series_bars(
+        series,
+        mean_value = node$external_value[1]
+      ))
+    }
+    return(triage_empty_plot("", "no measured data", size = 2.6))
+  }
+
   key <- triage_group_cols()
   my_groups <- members$group_id[members$node_id == node$node_id[1]]
 
-  if (length(my_groups) == 0 || identical(node$node_type[1], "external")) {
+  if (length(my_groups) == 0) {
     return(triage_empty_plot("", "no measured data", size = 2.6))
   }
 
@@ -511,7 +603,7 @@ node_card_heights <- function() {
 #'   viewed on its own that gains.
 #' @param ... Passed to [node_group_strips()], which is where every knob worth
 #'   turning while styling a card lives (`violin_fill`, `violin_alpha`,
-#'   `violin_colour`, `violin_width`).
+#'   `violin_colour`, `violin_width`, `external_series`).
 #' @return A patchwork object.
 #' @export
 node_card <- function(
@@ -792,8 +884,39 @@ node_card_header <- function(node, card, dpi = 300) {
   # them is a free diagnostic. N005 is the worked example, with a geometric mean
   # of 8.0 against a median of 0.235, a thirtyfold gap that says the node holds
   # two populations rather than one.
+  #
+  # FALLS BACK TO card$mean FOR AN EXTERNAL NODE. node_report_card() never
+  # computes geo_mean for node_type = "external" (there is no distribution to
+  # take a geometric mean of; the typed-in external_value IS the figure), so
+  # geo_mean is always NA there and the coalesce is load-bearing, not
+  # defensive: without it every external node's headline silently rendered
+  # "- <unit>" rather than its value, unnoticed until the first batch of
+  # external cards (the REACH sector nodes, 2026-08-11) was actually rendered
+  # and looked at, per CLAUDE.md 2.3.1.
+  #
+  # LABELLED "GM"/"AM" (2026-08-11), because the coalesce means the headline
+  # can now be either statistic and nothing distinguished them on the card
+  # itself -- a geometric and an arithmetic mean are not interchangeable
+  # numbers, and a reader quoting the card has no way to tell which one they
+  # have. NOT "μg"/"μa": this project has a standing, costly rule against writing a
+  # micro sign anywhere it can be avoided (CLAUDE.md 4.4.-2, 18 rows of real
+  # data lost silently to one), and half these cards' units are already
+  # "µg/kg" or similar -- putting a look-alike Greek mu directly in front of a
+  # unit that may itself start with a micro sign is exactly the collision
+  # that rule exists to prevent. Plain ASCII "GM"/"AM" is unambiguous next to
+  # any unit string. Omitted entirely when there is no value to label (an
+  # external node with nothing entered, e.g. N001).
+  headline_value <- dplyr::coalesce(card$geo_mean, card$mean)
+  headline_stat <- if (length(headline_value) == 0 || is.na(headline_value)) {
+    ""
+  } else if (!is.na(card$geo_mean[1])) {
+    "GM "
+  } else {
+    "AM "
+  }
   headline <- paste0(
-    num(card$geo_mean),
+    headline_stat,
+    num(headline_value),
     if (nzchar(unit)) paste0(" ", unit) else ""
   )
   # A marker, not a scolding: the reader still gets the number, and a reason to
@@ -893,6 +1016,9 @@ node_card_header <- function(node, card, dpi = 300) {
 #'   in rather than computed once AEPs exist: limits derived from one AEP's nodes
 #'   are that AEP's, and two cards for the same node under different axes cannot
 #'   be compared. The caller computes them across the whole node pool.
+#' @param external_series Passed straight to [node_group_strips()]; see its
+#'   own doc. `NULL` (the default) draws every external node's body panel as
+#'   "no measured data", same as before this parameter existed.
 #' @return The written paths.
 #' @export
 write_node_cards <- function(
@@ -906,7 +1032,8 @@ write_node_cards <- function(
   width = 2.4,
   height = 1.8,
   dpi = 300,
-  limits = NULL
+  limits = NULL,
+  external_series = NULL
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   if (is.null(limits)) {
@@ -929,7 +1056,8 @@ write_node_cards <- function(
       ids,
       limits = lim,
       thresholds = thresholds,
-      dpi = dpi
+      dpi = dpi,
+      external_series = external_series
     )
     path <- file.path(dir, paste0(node$node_id[1], ".png"))
     ggplot2::ggsave(

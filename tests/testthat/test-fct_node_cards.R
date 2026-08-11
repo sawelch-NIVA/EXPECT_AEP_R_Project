@@ -98,6 +98,80 @@ test_that("an external node gets a labelled blank, not an error", {
   expect_s3_class(p, "ggplot")
 })
 
+# ---- External nodes with a time series (2026-08-11) ---------------------
+#
+# A source figure like REACH net copper by sector is natively (year, value)
+# before it collapses to the single mean/sd typed into external_value. Where
+# that series is available, it draws instead of the "no measured data" blank.
+
+test_that("bars are drawn, not a scale, for a single value in isolation", {
+  series <- tibble::tibble(year = 2020, value = 5)
+  p <- node_external_series_bars(series)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_true("GeomCol" %in% class(built$plot$layers[[1]]$geom))
+})
+
+test_that("the mean reference line is omitted when mean_value is NA", {
+  series <- tibble::tibble(year = c(2020, 2021), value = c(5, 7))
+  p <- node_external_series_bars(series, mean_value = NA_real_)
+  built <- ggplot2::ggplot_build(p)
+  geoms <- vapply(built$plot$layers, function(l) class(l$geom)[1], character(1))
+  expect_false("GeomHline" %in% geoms)
+})
+
+test_that("the mean reference line is drawn when mean_value is supplied", {
+  series <- tibble::tibble(year = c(2020, 2021), value = c(5, 7))
+  p <- node_external_series_bars(series, mean_value = 6)
+  built <- ggplot2::ggplot_build(p)
+  geoms <- vapply(built$plot$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomHline" %in% geoms)
+})
+
+test_that("node_group_strips() draws bars for an external node with a series", {
+  d <- data_fixture()
+  series <- list(
+    "N001" = tibble::tibble(year = c(2019, 2020, 2021), value = c(3, 5, 4))
+  )
+  p <- node_group_strips(
+    card_nodes(node_type = "external", external_value = 4),
+    members_fixture("G001"), d, ids_fixture(),
+    limits = c(0.1, 100), external_series = series
+  )
+  built <- ggplot2::ggplot_build(p)
+  expect_true("GeomCol" %in% vapply(
+    built$plot$layers, function(l) class(l$geom)[1], character(1)
+  ))
+})
+
+test_that("node_group_strips() falls back to a blank when no series matches this node_id", {
+  d <- data_fixture()
+  series <- list("N999-somewhere-else" = tibble::tibble(year = 2020, value = 5))
+  p <- node_group_strips(
+    card_nodes(node_type = "external"), members_fixture("G001"), d,
+    ids_fixture(), limits = c(0.1, 100), external_series = series
+  )
+  built <- ggplot2::ggplot_build(p)
+  expect_false("GeomCol" %in% vapply(
+    built$plot$layers, function(l) class(l$geom)[1], character(1)
+  ))
+})
+
+test_that("an empirical node ignores external_series even if one is passed", {
+  # external_series only applies to node_type = "external"; a distribution
+  # node draws its violin regardless of what is in the lookup.
+  d <- data_fixture()
+  series <- list("N001" = tibble::tibble(year = 2020, value = 5))
+  p <- node_group_strips(
+    card_nodes(), members_fixture(c("G001", "G002")), d, ids_fixture(),
+    limits = c(0.1, 100), external_series = series
+  )
+  built <- ggplot2::ggplot_build(p)
+  expect_false("GeomCol" %in% vapply(
+    built$plot$layers, function(l) class(l$geom)[1], character(1)
+  ))
+})
+
 test_that("a node whose restrictions exclude everything gets a blank", {
   d <- data_fixture()
   p <- node_group_strips(
@@ -183,6 +257,65 @@ test_that("the geometric mean is the bold headline", {
   headline <- labels[faces == "bold" | faces == 2]
   expect_true(any(grepl(formatC(cards$geo_mean, format = "g", digits = 3),
                         headline, fixed = TRUE)))
+})
+
+# ---- Labelling which statistic the headline is (2026-08-11) -------------
+#
+# The coalesce in node_card_header() that fixed the "external nodes show a
+# blank headline" bug means the headline can now be EITHER a geometric mean
+# (an empirical node with a real distribution) or an arithmetic mean (an
+# external node's typed-in value, which has no distribution to take a
+# geometric mean of). Nothing distinguished the two on the card itself, and
+# they are not interchangeable numbers, so the headline is now prefixed
+# "GM "/"AM " to say which one a reader is looking at.
+
+test_that("an empirical node's headline is labelled GM", {
+  d <- data_fixture()
+  nodes <- card_nodes()
+  cards <- aep_node_report_cards(nodes, members_fixture("G001"), d, ids_fixture())
+  built <- ggplot2::ggplot_build(node_card_header(nodes, cards))
+
+  faces <- unlist(lapply(built$data, function(x) x$fontface))
+  labels <- unlist(lapply(built$data, function(x) x$label))
+  headline <- labels[faces == "bold" | faces == 2]
+  expect_true(any(grepl("^GM ", headline)))
+  expect_false(any(grepl("^AM ", headline)))
+})
+
+test_that("an external node's headline is labelled AM, not GM", {
+  # External nodes never get a geo_mean (see resolve_node_data()); the
+  # headline falls back to the typed-in external_value, which is an
+  # arithmetic figure, not a geometric one.
+  nodes <- card_nodes(
+    node_type = "external",
+    external_value = 1000000, external_sd = 200000,
+    external_n = 5, external_unit = "kg/y"
+  )
+  cards <- aep_node_report_cards(
+    nodes, members_fixture("G001")[0, ], data_fixture(), ids_fixture()
+  )
+  built <- ggplot2::ggplot_build(node_card_header(nodes, cards))
+
+  faces <- unlist(lapply(built$data, function(x) x$fontface))
+  labels <- unlist(lapply(built$data, function(x) x$label))
+  headline <- labels[faces == "bold" | faces == 2]
+  expect_true(any(grepl("^AM ", headline)))
+  expect_false(any(grepl("^GM ", headline)))
+  expect_true(any(grepl(formatC(1000000, format = "g", digits = 3),
+                        headline, fixed = TRUE)))
+})
+
+test_that("an external node with no value entered gets no GM/AM label", {
+  # N001-natural-occurrence's real state: external, nothing typed in yet.
+  # "AM -" or "GM -" would be a label on nothing.
+  nodes <- card_nodes(node_type = "external")
+  cards <- aep_node_report_cards(
+    nodes, members_fixture("G001")[0, ], data_fixture(), ids_fixture()
+  )
+  built <- ggplot2::ggplot_build(node_card_header(nodes, cards))
+
+  drawn <- unlist(lapply(built$data, function(x) x$label))
+  expect_false(any(grepl("GM|AM", drawn)))
 })
 
 test_that("Arctic coverage is off the card but still computed", {
@@ -278,9 +411,9 @@ test_that("long labels wrap rather than running off the card", {
   # "Aquaculture copper application" ran off both ends of a 2.4in canvas.
   nodes <- card_nodes(label = "Aquaculture copper application")
   cards <- tibble::tibble(
-    node_id = "N001", label = nodes$label, geo_mean = NA_real_, median = NA_real_,
-    gsd = NA_real_, unit = NA_character_, n = NA_real_, n_rows = 0L,
-    n_groups = 0L, n_sources = NA_integer_, pct_arctic = NA_real_
+    node_id = "N001", label = nodes$label, geo_mean = NA_real_, mean = NA_real_,
+    median = NA_real_, gsd = NA_real_, unit = NA_character_, n = NA_real_,
+    n_rows = 0L, n_groups = 0L, n_sources = NA_integer_, pct_arctic = NA_real_
   )
   p <- node_card_header(nodes, cards)
   drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(x) x$label))

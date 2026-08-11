@@ -305,7 +305,7 @@ longer looks like an open question. (Original text below, for context.)
 ### 3.3 The sidebar has fallen far behind the file tree — **resolved**
 
 `_quarto.yml`'s sidebar now lists only three entries (`index.qmd`,
-`docs/NBXX-Sample-Groups.qmd`, `docs/AP04-units.qmd`), consistent with the
+`docs/NBXX-Sample-Groups.qmd`, `docs/AP04-unit-corrections.qmd`), consistent with the
 deliberately-minimal rendering regime in 2.2.1. The mismatch described below no
 longer exists. (Original text below, for context.)
 
@@ -494,7 +494,7 @@ way, one in the extraction and one in the pipeline (`PLAN.md` section 9b).
 
 ### 4.4.-1.5 `row_id` and the corrections layer (built 2026-08-06)
 
-**Read `docs/AP04-units.qmd` before touching anything unit-related.** It is the
+**Read `docs/AP04-unit-correction.qmd` before touching anything unit-related.** It is the
 how-to, it is built rather than parked, and it reads the corrections file live.
 
 Three things that are easy to get wrong from cold:

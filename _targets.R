@@ -188,7 +188,10 @@ list(
   #### # Vannkategori lookup ----
   tar_target(
     vm_lookup_vannkategori,
-    read_csv("data/clean/lookups/vm_sites_codes_lookup.csv", show_col_types = FALSE) |>
+    read_csv(
+      "data/clean/lookups/vm_sites_codes_lookup.csv",
+      show_col_types = FALSE
+    ) |>
       rename_with(
         ~ paste0(., "_vkat"),
         c(
@@ -230,7 +233,10 @@ list(
   #### # Campaigns lookup ----
   tar_target(
     vm_lookup_campaigns,
-    read_csv("data/clean/lookups/Vm_lookup_campaigns.csv", show_col_types = FALSE)
+    read_csv(
+      "data/clean/lookups/Vm_lookup_campaigns.csv",
+      show_col_types = FALSE
+    )
   ),
 
   #### # Units lookup ----
@@ -1230,7 +1236,9 @@ list(
       # G033 -> G033-Ba-Cnr-A-nod-Sti-Mw, G036 -> G036-Ba-Cnr-F-ves-Sti-Mw,
       # G047 -> G047-Bf-Cnr-G-mor-Mus-Mw.
       must_include = c(
-        "G033-Ba-Cnr-A-nod-Sti-Mw", "G036-Ba-Cnr-F-ves-Sti-Mw", "G047-Bf-Cnr-G-mor-Mus-Mw"
+        "G033-Ba-Cnr-A-nod-Sti-Mw",
+        "G036-Ba-Cnr-F-ves-Sti-Mw",
+        "G047-Bf-Cnr-G-mor-Mus-Mw"
       )
     )
   ),
@@ -1534,7 +1542,10 @@ list(
   tar_target(
     name = aep_card_limits,
     command = node_card_limits(
-      aep_nodes, aep_node_members, literature_analysis_ready, group_ids
+      aep_nodes,
+      aep_node_members,
+      literature_analysis_ready,
+      group_ids
     )
   ),
 
@@ -1571,6 +1582,40 @@ list(
     }
   ),
 
+  ### # REACH sector data for the AEP source nodes ----
+  # Added 2026-08-11, pulled out of docs/NBXX-REACH.qmd (see the header of
+  # R/fct_reach.R). N004-N011's external_value/sd/n on aep_nodes.csv were typed
+  # in by hand from reach_node_summary_data and stay hand-typed (Sam, per PLAN.md:
+  # source nodes stay manual for now) -- what THIS chain buys is the per-year
+  # series behind that headline figure, so node_cards_compact can draw it rather
+  # than the plain "no measured data" placeholder every other external node gets.
+  #
+  # NOT a group-id ledger. Sam considered and explicitly deferred giving REACH
+  # sectors their own persisted ids analogous to the G-codes in fct_group_ids.R
+  # (2026-08-11: "not now"); reach_node_sectors() is a named-vector lookup, not
+  # an allocated ledger, and the two are not meant to look alike.
+  tar_target(
+    name = reach_prtd_file,
+    command = here_rel("inst/extdata/emissions/REACH_copper_prtd.xlsx"),
+    format = "file"
+  ),
+  tar_target(
+    name = reach_sector_years,
+    command = read_reach_sector_years(reach_prtd_file)
+  ),
+  tar_target(
+    name = reach_node_sectors_data,
+    command = reach_node_sectors(reach_sector_years)
+  ),
+  tar_target(
+    name = reach_node_summary_data,
+    command = reach_node_summary(reach_node_sectors_data)
+  ),
+  tar_target(
+    name = reach_external_series_data,
+    command = reach_external_series(reach_node_sectors_data)
+  ),
+
   ### # Node report cards ----
   # PLAN.md 4.3, P3.2, P5.2. One PNG per node into figures/node_cards_compact/,
   # as a `format = "file"` target so the store caches the images rather than the
@@ -1592,7 +1637,8 @@ list(
       ids = group_ids,
       thresholds = copper_toxicity_thresholds,
       dir = here_rel("figures/node_cards_compact"),
-      limits = aep_card_limits
+      limits = aep_card_limits,
+      external_series = reach_external_series_data
     ),
     format = "file"
   ),
@@ -1801,7 +1847,7 @@ list(
   # writing a correction rebuilds it automatically.
   tar_quarto(
     name = render_ap04_units,
-    path = "docs/AP04-units.qmd",
+    path = "docs/AP04-unit-corrections.qmd",
     quiet = FALSE
   ),
 

@@ -1,0 +1,426 @@
+---
+title: "Appendix 04 - Units, Unit Errors, and Corrections"
+# Formatting lives in docs/_metadata.yml.
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+pkgload::load_all(quiet = TRUE)
+
+here::i_am("index.qmd")
+```
+
+Unit errors are a frequent issue in science. In this project, we run into two main types:
+1. Human error (e.g. using the wrong conversion factor for a pair of units)
+2. Encoding error (e.g. special characters such as µ (mu) being corrupted and thus not being properly read further down a pipeline)
+
+While the former (1) typically only occur when units are explicitly converted, the latter (2) can occur anywhere where files are converted between formats. Encoding errors can be introduced without warning, and cause data groups to be mis-converted or dropped without warning. Because data are processed by multiple parties at different stages of this and others' pipelines, it becomes extremely important to identify, flag, and triage unit errors if data analyses are to be trusted. 
+
+A thorough review of the AEP's upstream and local data determined that both types of errors had been introduced at multiple points, both in source data during processing by its owner, and in this project. Consequently, we elected to scrutinise the data both manually and automatically to correct unit errors from source data owners, and prevent the introduction of new errors. 
+
+This document serves as a reference for the authors, for LLM-based coding, and for readers, and provides a detailed overview of the unit error detection and correction process.
+
+How this project handles units, how it finds units that arrived wrong, and how
+to correct one.
+
+Everything bellow is LLM-written and needs to be re-written.
+
+# Unit Correction Functions
+
+```{r}
+
+```
+
+The **single source of truth is `data/clean/decisions/unit_corrections.csv`**. Every
+correction shown on this page is read from it live, so nothing here can drift
+away from what the pipeline actually did. This document explains the file; it
+does not duplicate it.
+
+# The one fact behind most of the errors
+
+::: callout-important
+## µg/g **is** mg/kg
+
+Micro-over-gram cancels against milli-over-kilogram. They are the same number,
+not a thousand apart.
+:::
+
+Three separate 1000x faults surfaced on 2026-08-05 from that single
+misconception, in three different places:
+
+1. A hand extraction recorded `µg/kg` where the paper said `µg/g`.
+2. Our own `standardise_measured_units()` divided every genuine `µg/g` row by
+   1000.
+3. A Vannmiljø submitter multiplied their `µg/g` values by 1000 to "convert"
+   them to `mg/kg`, and said so in the comment field.
+
+The first two were ours and are fixed. The third is in data we do not control,
+which is what the corrections layer exists for.
+
+# Three files, three different jobs
+
+| File | Job | Changes a number? |
+|---|---|---|
+| `R/fct_units.R` | Conversions **this project** performs | Yes, by rule |
+| `R/fct_unit_anomalies.R` | **Detection** of errors that arrived already made | No, reports only |
+| `R/fct_unit_corrections.R` | The **human decision** to override them | Yes, by hand |
+
+They are deliberately separate. Conversion is a lookup and should be automatic.
+Overriding a national monitoring database is a scientific judgement, and it has
+to be reviewable in a diff and defensible in the methods.
+
+# Two traps that cost a day each
+
+## Never write a micro sign you do not have to
+
+`µ` reaches this project as at least four different characters: `U+03BC` (Greek
+mu), `U+00B5` (micro sign), a plain `u`, and `U+FFFD` (a micro sign already
+destroyed by an encoding round trip). CSV plus Windows plus Excel will mangle it
+eventually, and **the failure is silent**: an unmatched unit becomes `NA`, the
+row is dropped, and a whole reference can vanish without a message. Eighteen
+rows of `2000JulshamnTraceElementLevels` were lost this way for months.
+
+Write `ug` in anything hand-entered. `normalise_unit_string()` maps every
+variant onto `u` before matching, and that includes the `comment_match` column
+of the corrections file, so a plain `ug/g` typed into the spreadsheet will match
+a real micro sign in the data.
+
+## A foothill three orders from the main mode is a unit error
+
+Copper in a given matrix spans maybe two to three orders in reality. Anything
+sitting a clean $10^3$ away from the mode is almost always mg/kg against ug/kg,
+or ug/g against ug/kg. **Check the unit before reaching for a statistical
+explanation.** Two separate 1000x faults were found exactly this way, one in the
+extraction and one in the pipeline.
+
+# Where a correction happens in the pipeline
+
+```
+literature_clean_standardised   <- our conversions
+        |
+load_literature_pqt             <- row_id assigned here
+        |
+literature_corrected            <- unit_corrections.csv applied here
+        |
+literature_analysis_ready       <- hygiene (drop NA / <= 0)
+        |
+everything: summary, triage, group_ids, node cards, AEP
+```
+
+Above the hygiene step, so a correction lands before anything is dropped or
+summarised. Below `literature_clean_standardised`, so our conversions and their
+errors stay separate concerns.
+
+::: callout-note
+## Why not correct inside a notebook, or per AEP node
+
+The same bad rows feed the triage panels, the summary table and
+`group_decisions.csv`. Correcting only where you noticed the problem leaves all
+of those showing the old numbers while the AEP shows the new ones, which is
+worse than not correcting at all.
+:::
+
+A correction scales `MEASURED_VALUE_STANDARD` **and** both LOD/LOQ standard and
+imputed columns, because a submitter who multiplied their values multiplied the
+limits reported alongside them. `MEASURED_VALUE` is never touched: it stays as
+the audit trail, so a corrected row still shows what the source actually said.
+
+# What is currently flagged and not yet corrected
+
+`unit_anomaly_report` runs on **corrected** data, which makes it a shrinking
+to-do list rather than a static record. A group still listed here after a
+correction has been written means the correction was insufficient, not that it
+is missing.
+
+```{r}
+#| label: tbl-anomaly-offsets
+#| tbl-cap: "Campaigns sitting a whole number of decades from their peers within the same sampling group. `log10_ratio` is the offset; `near_decade` is how close that offset is to a clean power of ten, where closer to zero is more suspicious."
+
+anomalies <- tar_read(unit_anomaly_report)
+
+anomalies$offsets |>
+  filter(check_units) |>
+  select(
+    any_of(c(
+      "ENVIRON_COMPARTMENT_SUB",
+      "SAMPLE_SPECIES",
+      "SAMPLE_TISSUE",
+      "CAMPAIGN_NAME_SHORT",
+      "n_rows",
+      "geo_mean",
+      "peer_geo_mean",
+      "log10_ratio",
+      "near_decade"
+    ))
+  ) |>
+  flextable() |>
+  colformat_double(digits = 2) |>
+  autofit()
+```
+
+```{r}
+#| label: tbl-anomaly-comments
+#| tbl-cap: "Rows whose own comment describes unit arithmetic. The cheapest detector, because it is not an inference: the row says what was done to it."
+
+anomalies$comments |>
+  flextable() |>
+  colformat_double(digits = 3) |>
+  autofit()
+```
+
+# Corrections currently applied
+
+```{r}
+#| label: tbl-corrections
+#| tbl-cap: "Live contents of `data/clean/decisions/unit_corrections.csv`."
+
+corrections <- tar_read(unit_corrections)
+
+if (nrow(corrections) == 0) {
+  flextable(tibble(` ` = "No corrections have been written yet."))
+} else {
+  corrections |>
+    select(-row_ids) |>
+    flextable() |>
+    autofit()
+}
+```
+
+```{r}
+#| label: tbl-correction-effect
+#| tbl-cap: "What those corrections touched, per sampling group. `n_corrected` counts measurements (`sum(MEASURED_N)`); `n_rows_corrected` counts rows."
+
+effect <- tar_read(unit_correction_report)
+
+if (nrow(effect) == 0) {
+  flextable(tibble(` ` = "Nothing corrected."))
+} else {
+  effect |>
+    select(
+      any_of(c(
+        "group_id",
+        "SAMPLE_SPECIES",
+        "SAMPLE_TISSUE",
+        "MEASURED_UNIT_STANDARD",
+        "unit_correction_id",
+        "unit_correction_factor",
+        "n_rows_corrected",
+        "n_corrected"
+      ))
+    ) |>
+    flextable() |>
+    autofit()
+}
+```
+
+# How to write a correction
+
+Five steps. Steps 2 and 4 are the ones people skip, and both are checked.
+
+## 1. Convince yourself it is a unit error
+
+The bar is the same as anything else that reaches the methods section. Useful
+evidence, roughly in descending order of strength:
+
+- **The row says so.** A `MEASUREMENT_COMMENT` describing unit arithmetic is as
+  close to proof as this gets. See @tbl-anomaly-comments.
+- **A clean factor of exactly 1000** against the other campaigns measuring the
+  same thing in the same matrix. `near_decade` near zero in
+  @tbl-anomaly-offsets. There is no environmental process that produces a clean
+  three orders.
+- **The corrected values become ordinary.** If dividing by 1000 puts a group
+  back on top of every other campaign measuring the same thing, that is
+  corroboration.
+- **The source paper disagrees with the extraction.** Then fix the extraction in
+  `data/raw/eData/`, not here. This file is for data we do not control.
+
+::: callout-warning
+## Two orders is not automatically a unit error
+
+`check_units` fires at two orders, not three, because a partly-affected campaign
+lands between the good and bad clusters and never reaches a clean decade. That
+makes it a prompt to look, not a verdict. A genuinely contaminated site is a
+real explanation, and `10^2.1` is more likely to be one than `10^2.98`.
+:::
+
+## 2. Work out what the selector has to be
+
+**This is where a correction goes wrong.** The obvious selector is usually too
+coarse.
+
+The Urban Fjord case is the worked example: 18 cod muscle rows in one campaign
+spanning 0.14 to 7,724 mg/kg wet. Only the high ones are wrong. A blanket
+factor on the whole campaign would divide the three correct rows by 1000 too,
+and create a new error underneath the old one.
+
+Selector columns, all optional, combining with **AND**:
+
+| Column | Selects on | Use when |
+|---|---|---|
+| `comment_match` | Fixed substring of `MEASUREMENT_COMMENT` | The rows say what was done to them. **Strongest selector; prefer it.** |
+| `campaign_name_short` | Exactly one campaign | The fault is one submitter's |
+| `group_id` | A sampling group from `group_ids.csv` | The fault is confined to one species/tissue/unit |
+| `value_min` / `value_max` | `MEASURED_VALUE_STANDARD` bounds | No comment exists and you must isolate the bad cluster by magnitude |
+
+::: callout-tip
+## Write `ug`, not `µg`
+
+`comment_match` normalises the micro sign on both sides, so `ug/g (w.w.)`
+matches a comment containing a real `µ`. Do not paste a micro sign into the
+spreadsheet.
+:::
+
+Value bounds are always tested against the **original** values, never against
+values another correction has already scaled, so the order of rows in the CSV
+never changes the result.
+
+## 3. Fill in the row
+
+One row per correction. Leave `row_ids` **blank**; step 4 fills it.
+
+| Column | What goes in it |
+|---|---|
+| `correction_id` | `C001`, `C002`, ... Unique, never reused |
+| `group_id` | Selector, or blank |
+| `campaign_name_short` | Selector, or blank |
+| `comment_match` | Selector, or blank |
+| `value_min`, `value_max` | Selector bounds, or blank |
+| `factor` | What to **multiply** by. A 1000x overstatement is `0.001` |
+| `row_ids` | **Leave blank.** Written by the scaffold script |
+| `reason` | Why this is a unit error, in a sentence. Required |
+| `evidence` | What convinced you. Required |
+| `date_added` | `YYYY-MM-DD` |
+
+`reason` and `evidence` are required by the validator, not by convention. A
+correction that documents nothing cannot be defended to a reviewer, and this
+file's whole purpose is to be defensible.
+
+## 4. Record the rows
+
+```bash
+Rscript scripts/scaffold_unit_corrections.R
+```
+
+This resolves each selector against the current data and writes the matching
+`row_id`s back into the file. It prints the row count, the measurement count,
+and the value range it matched, so **read that output**: it is the last check
+before the numbers change.
+
+::: callout-note
+## Why the file carries both a selector and a list of row ids
+
+Because either alone fails silently, in opposite directions.
+
+A **selector alone** silently widens. If a re-export adds two more rows matching
+the same comment, they get corrected without anyone deciding they should be.
+
+**Row ids alone** silently narrow, and record no reasoning. A row that should be
+corrected but arrived later is simply missed, and a reader cannot tell a
+deliberate omission from an oversight.
+
+Holding both, and requiring them to agree, turns a silent change of extent into
+a build failure that names exactly what drifted, in both directions. That is
+what makes this an audit trail rather than a record, and it is why `row_id`
+exists.
+
+The scaffold is a hand-run script and never a pipeline target, for the same
+reason. If the pipeline re-resolved the ids on every build they would track the
+data automatically, and the check would detect nothing.
+:::
+
+## 5. Review the diff, then rebuild
+
+`git diff data/clean/decisions/unit_corrections.csv` before `tar_make()`. A correction
+invalidates everything downstream, including the triage panels, the node cards
+and the AEP.
+
+# When the build refuses
+
+Every failure in this layer is an error rather than a warning, deliberately. A
+file that overwrites measured values must not be allowed to half-work.
+
+| Message | What happened | What to do |
+|---|---|---|
+| `matches no rows` | The selector is stale or wrong | Check for a typo, or a micro sign that should be `ug` |
+| `no longer matches the rows it recorded` | The data changed under a correction | Read the named gained/lost ids. If the change is right, re-run the scaffold with `--refresh` |
+| `overlaps` | Two corrections claim the same row | Narrow one. Compounding order must never decide a value |
+| `reason` / `evidence` `are required` | Undocumented correction | Write the sentence |
+| `no selector set` | Every selector column blank | Would have matched the entire dataset |
+| `factor must be finite and positive` | Bad factor | A 1000x overstatement is `0.001`, not `-1000` |
+
+::: callout-warning
+## `--refresh` is not a way to make an error go away
+
+It re-records what a selector currently matches, which means it accepts drift.
+Use it only after the build has told you what changed and you have looked at it.
+:::
+
+# Row identifiers
+
+`row_id` is what makes a per-row reference survive a rebuild. It is assigned in
+`load_literature_pqt` and inherited by everything downstream.
+
+It is **not** a sequential counter. A counter is positional: Vannmiljø is
+re-exported periodically and the eData files are edited whenever an extraction
+fault is found, so one inserted row shifts every id after it, and a correction
+keyed on `R01234` would then silently overwrite a different measurement.
+
+`row_id` is `SAMPLE_ID` instead, which is already built from site, parameter,
+compartment, date and subsample. Insert a row and every other id is unchanged.
+Where two rows genuinely share a `SAMPLE_ID`, `SUBSAMPLE` is appended; if that
+still leaves a tie the build **stops**, because a counter fallback would
+reintroduce positional ids by the back door.
+
+```{r}
+#| label: tbl-row-id-collisions
+#| tbl-cap: "Rows whose `SAMPLE_ID` was shared and had to be disambiguated. A non-empty table is a data-entry defect in the source extraction, not a property of the data."
+
+collisions <- tar_read(row_id_collisions)
+
+if (nrow(collisions) == 0) {
+  flextable(tibble(` ` = "No collisions. Every SAMPLE_ID is unique."))
+} else {
+  collisions |>
+    select(any_of(c(
+      "sample_id",
+      "source_file",
+      "n_sharing",
+      "SUBSAMPLE",
+      "SAMPLE_SPECIES",
+      "SAMPLE_TISSUE"
+    ))) |>
+    flextable() |>
+    autofit()
+}
+```
+
+# Standing decisions
+
+- **Molar units are excluded.** 42 rows carry `µM` and are dropped. They *are*
+  convertible (1 µM Cu is 63.55 µg/L), so this is a choice: a molar measurement
+  is not obviously comparable with the total/dissolved mix already in the data,
+  and 42 rows do not justify the methods paragraph that defending the conversion
+  would need. Revisit only if a chosen AEP node depends on them.
+- **Mixed units are refused, never averaged**, when an AEP node resolves its
+  members.
+- **`mg/kg` with no dry/wet basis is not silently assigned to either.** They are
+  different standard units and are not interconvertible without a moisture
+  content this project does not hold.
+
+# For the methods section
+
+If any correction survives to submission it needs a sentence, because this is
+the pipeline overriding a national monitoring database. The defensible form is
+roughly: values from *n* campaigns were divided by 1000 where the submitter's
+own comment recorded that µg/g values had been multiplied by 1000 prior to
+submission, µg/g being equivalent to mg/kg; original values are retained
+unmodified.
+
+The exclusion of molar units belongs there too, since it is a deliberate
+exclusion rather than an absence.

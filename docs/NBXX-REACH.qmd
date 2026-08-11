@@ -19,7 +19,7 @@ suppressMessages(
     library(readxl)
     library(visNetwork)
 
-    # load_all(quiet = TRUE)
+    load_all(quiet = TRUE)
   }
 )
 
@@ -61,23 +61,25 @@ render_table <- function(df, caption = NULL, digits = 2, ...) {
 # ==============================================================================
 
 path_reach <- here("inst/extdata/emissions/REACH_copper_prtd.xlsx")
+
 # -- By sector (hovednæring) --------------------------------------------------
-# TODO: A mess - blank columns and negative numbers - but that's fine(?) -
-# imported quantity + produced quantity - exported quantity, so probably fine to just use them
-# will assume no category = "Other"
-reach_by_sector <- read_excel(
-  path_reach,
-  sheet = "Sum HovedgruppeAndvendelse"
-) |>
-  rename(
-    year = AmountYear,
-    netto_tonn = `Netto Mengde (tonn)`,
-    sector = Beskrivelse
-  ) |>
+# Read via read_reach_sector_years() (R/fct_reach.R), not inline: this
+# notebook and _targets.R's node_cards_compact target both need the same
+# sector-name translation and "Other" -> Unclassified handling (that logic's
+# own TODO, "a mess - blank columns and negative numbers", is documented at
+# read_reach_sector_years()), and two copies of it is how they drift.
+# tar_read(), not a bare function call: this chunk's tar_read() calls ARE its
+# dependency declaration (CLAUDE.md 4.4.2), so the notebook rebuilds when the
+# REACH source file does.
+reach_by_sector_en <- tar_read(reach_sector_years) |>
   mutate(
-    year = as.integer(year),
-    netto_tonn = as.numeric(netto_tonn),
-    sector = na_if(trimws(sector), "Other") # TODO: blank sector -> "Other"
+    NACE_supercategory = recode_values(
+      isic_nace_section,
+      c("A", "B") ~ "Primary",
+      c("C", "F", "L") ~ "Secondary",
+      c("E", "H", "L", "S") ~ "Tertiary",
+      default = "Unclassified"
+    )
   )
 
 # -- By product type ----------------------------------------------------------
@@ -96,41 +98,11 @@ reach_by_product <- read_excel(
     product_type = trimws(product_type)
   )
 
-# Based on https://ec.europa.eu/eurostat/documents/3859598/5902521/KS-RA-07-015-EN.PDF.pdf/dd5443f5-b886-40e4-920d-9df03590ff91?t=1414781457000
-# p143
-nace_sectors <- tribble(
-  ~sector_no                                                  , ~sector_no_en                                          , ~isic_nace_section , ~isic_nace_description                                                                              ,
-  NA                                                          , "Unclassified"                                         , NA                 , NA                                                                                                  ,
-  "Jordbruk, skogbruk og fiske"                               , "Agriculture, forestry and fishing"                    , "A"                , "Agriculture, forestry and fishing"                                                                 ,
-  "Bergverksdrift og utvinning"                               , "Mining and quarrying"                                 , "B"                , "Manufacturing, mining and quarrying and other industry"                                            ,
-  "Industri"                                                  , "Manufacturing"                                        , "C"                , "Manufacturing, mining and quarrying and other industry"                                            ,
-  "Elektrisitets-, gass-, damp- og varmtvannsforsyning"       , "Electricity, gas, steam and air conditioning supply"  , "D"                , "Manufacturing, mining and quarrying and other industry"                                            ,
-  "Vannforsyning, avløps- og renovasjonsvirksomhet"           , "Water supply, sewerage and waste management"          , "E"                , "Manufacturing, mining and quarrying and other industry"                                            ,
-  "Bygge- og anleggsvirksomhet"                               , "Construction"                                         , "F"                , "Construction"                                                                                      ,
-  "Varehandel, reparasjon av motorvogner"                     , "Wholesale and retail trade, repair of motor vehicles" , "G"                , "Wholesale and retail trade, transportation and storage, accommodation and food service activities" ,
-  "Transport og lagring"                                      , "Transportation and storage"                           , "H"                , "Wholesale and retail trade, transportation and storage, accommodation and food service activities" ,
-  "Omsetning og drift av fast eiendom"                        , "Real estate activities"                               , "L"                , "Real estate activities"                                                                            ,
-  "Faglig, vitenskapelig og teknisk tjenesteyting"            , "Professional, scientific and technical activities"    , "M"                , "Professional, scientific, technical, administration and support service activities"                ,
-  "Forretningsmessig tjenesteyting"                           , "Administrative and support service activities"        , "N"                , "Professional, scientific, technical, administration and support service activities"                ,
-  "Kulturell virksomhet, underholdning og fritidsaktiviteter" , "Arts, entertainment and recreation"                   , "R"                , "Other services"                                                                                    ,
-  "Annen tjenesteyting"                                       , "Other service activities"                             , "S"                , "Other services"
-) |>
-  rename(sector_no = sector_no, sector_en = sector_no_en)
-
-
-reach_by_sector_en <- reach_by_sector |>
-  left_join(nace_sectors, by = join_by("sector" == "sector_no")) |>
-  mutate(
-    net_kg = netto_tonn * 1000,
-    NACE_supercategory = recode_values(
-      isic_nace_section,
-      c("A", "B") ~ "Primary",
-      c("C", "F", "L") ~ "Secondary",
-      c("E", "H", "L", "S") ~ "Tertiary",
-      default = "Unclassified"
-    )
-  )
-
+# The Norwegian-to-English NACE sector translation formerly lived here as a
+# tribble; it's now reach_nace_sectors() in R/fct_reach.R (same source,
+# https://ec.europa.eu/eurostat/documents/3859598/5902521/KS-RA-07-015-EN.PDF.pdf
+# p143), applied inside read_reach_sector_years() before it ever reaches this
+# notebook.
 
 reach_by_sector_en_summarised <- reach_by_sector_en |>
   # mutate(z_score = scale(net_kg)[, 1], .by = sector_en) |>
@@ -331,6 +303,39 @@ This leaves us with the following dataset (@tbl-reach-by-sector):
 reach_by_sector_en_summarised |> render_table()
 ```
 
+## Sector groupings used for the AEP source nodes
+
+Eleven NACE sectors is more resolution than the underlying data can support at
+`n_years_reported` as low as 3-6, so before these become AEP source nodes two
+lumps are applied:
+
+- **Construction and real estate**: Construction (NACE F) + Real estate
+  activities (NACE L).
+- **Other services and administration**: Other service activities (S),
+  Unclassified, Arts/entertainment/recreation (R), Professional/scientific/
+  technical (M), Electricity/gas/steam/air conditioning supply (D),
+  Administrative and support service activities (N).
+
+The other six sectors (Manufacturing, Agriculture/forestry/fishing, Mining and
+quarrying, Wholesale and retail trade, Transportation and storage, Water
+supply/sewerage/waste) stand alone. This gives eight groups, each a source node
+in `data/clean/aep/aep_nodes.csv` (`N004`-`N011`), scored with the LoE
+assessment below and using the mean net quantity per year as `external_value`.
+
+The lumping itself (which raw sector rolls into which node) is
+`reach_sector_lump_map()`/`reach_node_id_by_sector()` in `R/fct_reach.R`, not
+computed here: `_targets.R`'s `node_cards_compact` target needs the identical
+lumping to draw each node's per-year series on its card, and two copies is how
+they drift.
+
+```{r}
+#| label: tbl-reach-sector-lumping
+
+reach_by_sector_lumped <- tar_read(reach_node_summary_data)
+
+reach_by_sector_lumped |> render_table()
+```
+
 # Products
 
 We might as well also look at products. The raw data is in Norwegian and not immediately very informative. First we inspect the data for any obvious outliers or suspect data.
@@ -411,3 +416,68 @@ REACH self-reported net values are considered weak evidence of copper occurrence
 | Quantitative Understanding | 1 | Relevant models of copper use and manufacture may exist, but were outside of the scope of this study. |
 
 : REACH WoE Assessment
+
+# Resulting Source Nodes
+
+The eight lumped sectors above are written by hand into
+`data/clean/aep/aep_nodes.csv` as source nodes `N004`-`N011`
+(`node_type = "external"`, `external_value` = mean net kg/year,
+`external_sd`/`external_n` from the same table), carrying the LoE scores above.
+They feed `N012` (coastal benthic sediment) and `N013` (coastal water column)
+in `data/clean/aep/aep_edges.csv`, all `putative` pending a literature check
+(PLAN.md P4.2), and are members of the national AEP (`A001`).
+
+Their cards are drawn by the same `node_cards_compact` target every other
+node's card comes from (via `write_aep_node_cards()`'s `external_series`
+argument, fed by `reach_external_series_data`), not written separately by this
+notebook (Sam, 2026-08-11: "why create an entirely separate dir structure for
+source cards?" -- there is no good reason to, once the pipeline itself knows
+how to draw the bars). That also means these bars now appear on the real
+`figures/aep_A001.png`, not just here.
+
+```{r}
+#| label: reach-node-cards
+#| include: false
+
+tr <- function(expr) tryCatch(expr, error = function(e) NULL)
+
+reach_node_ids <- unname(reach_node_id_by_sector())
+
+reach_card_paths <- tr(tar_read(node_cards_compact))
+if (!is.null(reach_card_paths)) {
+  reach_card_paths <- reach_card_paths[
+    basename(dirname(reach_card_paths)) == "A001" &
+      tools::file_path_sans_ext(basename(reach_card_paths)) %in% reach_node_ids
+  ]
+  # Largest mean net quantity first, not file order.
+  reach_card_paths <- reach_card_paths[
+    match(reach_node_ids, tools::file_path_sans_ext(basename(reach_card_paths)))
+  ]
+}
+```
+
+From `figures/node_cards_compact/A001/`, largest mean net quantity first:
+
+```{r}
+#| echo: false
+#| results: asis
+if (is.null(reach_card_paths) || length(reach_card_paths) == 0) {
+  cat("`node_cards_compact` is not in the target store yet. Run `tar_make()`.\n")
+} else {
+  cat('::: {layout-ncol="4"}\n')
+  for (p in reach_card_paths) {
+    # node_cards_compact's paths come from here_rel() in _targets.R, i.e.
+    # already relative to the PROJECT ROOT, not absolute. here::here(p)
+    # re-anchors that to an absolute path off the real project root
+    # (found via the .here/README.md anchor) regardless of the R working
+    # directory this chunk runs in, which Quarto sets to this .qmd's own
+    # directory (docs/) -- fs::path_rel() on the bare relative string
+    # produced a link with no "../" at all, silently 404ing at
+    # docs/figures/... instead of the real ../figures/... (caught by
+    # actually rendering this notebook and checking, not by inspection).
+    rel <- fs::path_rel(here::here(p), here("docs"))
+    cat(sprintf("![](%s)\n\n", rel))
+  }
+  cat(":::\n")
+}
+```

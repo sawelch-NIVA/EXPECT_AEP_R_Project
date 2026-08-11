@@ -26,16 +26,9 @@ here::i_am("index.qmd")
 source(here::here("tests/testthat/helper-fixtures.R"))
 ```
 
-Every figure here is shown exactly once, and where it exists as a file on disk
-it is shown *from* that file. The two real cards are built silently, written at
-their real size, and then included. Everything with no artefact of its own, the
-single panels and the rejected variants at the end, is drawn by knitr instead.
-Printing a card inline as well as including the written PNG showed each one
-twice, at two different sizes, which is worse than useless in a notebook about
-how the thing looks.
+Every figure here is shown exactly once, and where it exists as a file on disk it is shown *from* that file. The two real cards are built silently, written at their real size, and then included. Everything with no artefact of its own, the single panels and the rejected variants at the end, is drawn by knitr instead. Printing a card inline as well as including the written PNG showed each one twice, at two different sizes, which is worse than useless in a notebook about how the thing looks.
 
-Sizing is a chunk option throughout, never a `ggview::canvas()`: see the note
-under the geometry table below.
+Sizing is a chunk option throughout, never a `ggview::canvas()`: see the note under the geometry table below.
 
 ```{r}
 #| label: fixtures
@@ -94,18 +87,11 @@ knitr::include_graphics(card_path)
 
 ## Unpacking `node_card()`
 
-`node_card()` is three plots and a stack. It builds each panel from its own
-exported function, then makes one `patchwork::wrap_plots()` call and merges a
-background theme into all three. Nothing else happens in it. This section calls
-those three functions separately so each piece can be seen on its own, then
-reassembles them by hand and checks the rebuild against the card above.
+`node_card()` is three plots and a stack. It builds each panel from its own exported function, then makes one `patchwork::wrap_plots()` call and merges a background theme into all three. Nothing else happens in it. This section calls those three functions separately so each piece can be seen on its own, then reassembles them by hand and checks the rebuild against the card above.
 
 ### The geometry
 
-`node_card_heights()` owns the vertical split, and is exported rather than
-inlined so that anything illustrating the layout reads the real ratio instead
-of a second, driftable copy of the same three numbers. The units are relative;
-patchwork normalises them, so only the share matters.
+`node_card_heights()` owns the vertical split, and is exported rather than inlined so that anything illustrating the layout reads the real ratio instead of a second, driftable copy of the same three numbers. The units are relative; patchwork normalises them, so only the share matters.
 
 ```{r}
 #| label: unpack-geometry
@@ -121,35 +107,15 @@ tibble::tibble(
 )
 ```
 
-Those inches are the constraint the whole design is fighting. The badge band
-is a fifth of an inch tall, and text sizes are absolute, so a panel previewed
-at any other size lies about its own legibility. Every preview below is
-therefore drawn at card width by the panel's own share of card height, not
-blown up to fill the page.
+Those inches are the constraint the whole design is fighting. The badge band is a fifth of an inch tall, and text sizes are absolute, so a panel previewed at any other size lies about its own legibility. Every preview below is therefore drawn at card width by the panel's own share of card height, not blown up to fill the page.
 
-**That takes a chunk option, not just a `canvas()`.** Under knitr the figure
-device is sized by `fig-width` / `fig-height`, which default project-wide to
-12x8, and a `ggview::canvas()` does not bring it down to the card size: the
-figure the `card` chunk prints inline measures 4.5x3.2 inches, and only the
-written `figures/dummy_node_card.png` is a true 2.4x1.8. So each preview below
-sets its device explicitly with `!expr`, reading the same `frac` as the table
-above.
+**That takes a chunk option, not just a `canvas()`.** Under knitr the figure device is sized by `fig-width` / `fig-height`, which default project-wide to 12x8, and a `ggview::canvas()` does not bring it down to the card size: the figure the `card` chunk prints inline measures 4.5x3.2 inches, and only the written `figures/dummy_node_card.png` is a true 2.4x1.8. So each preview below sets its device explicitly with `!expr`, reading the same `frac` as the table above.
 
 ### The background
 
-The level colour comes from none of the three panel functions. `node_card()`
-takes one theme from `node_card_theme()` and merges it into all three with
-patchwork's `&`. That is what lets it survive on top of `theme_void()` (header,
-badges) and `triage_theme()` (strips) alike, since `&` merges into each panel's
-theme rather than replacing it. It carries the level background, on both
-`plot.background` and `panel.background`, and the outer margin, which is
-2pt rather than ggplot2's 5.5pt because on a 1.8in card the default spends a
-fifth of the strips band on white space.
+The level colour comes from none of the three panel functions. `node_card()` takes one theme from `node_card_theme()` and merges it into all three with patchwork's `&`. That is what lets it survive on top of `theme_void()` (header, badges) and `triage_theme()` (strips) alike, since `&` merges into each panel's theme rather than replacing it. It carries the level background, on both `plot.background` and `panel.background`, and the outer margin, which is 2pt rather than ggplot2's 5.5pt because on a 1.8in card the default spends a fifth of the strips band on white space.
 
-The margin has to be shared. Patchwork aligns the three panels on their panel
-areas, so trimming one panel's side margin alone makes that panel wider than
-the other two, and the centred title, the badge band and the group ids inside
-the strips panel all assume `x = 0.5` means the same thing on each.
+The margin has to be shared. Patchwork aligns the three panels on their panel areas, so trimming one panel's side margin alone makes that panel wider than the other two, and the centred title, the badge band and the group ids inside the strips panel all assume `x = 0.5` means the same thing on each.
 
 ```{r}
 #| label: unpack-background
@@ -165,17 +131,9 @@ with_bg <- function(p) p + card_theme
 
 ### 1. Header, `node_card_header()`
 
-An empty `ggplot()` under `theme_void()`, used as a text canvas with hand-set
-limits (`x` 0 to 1, `y` -0.75 to 3.1). Three `annotate("text")` calls share the
-`x = 0.5` anchor: the wrapped node label, the headline geometric mean, and the
-counts line. The headline turns red and gains a `(!)` where it diverges from
-the median by more than half an order, via `headline_is_suspect()`.
+An empty `ggplot()` under `theme_void()`, used as a text canvas with hand-set limits (`x` 0 to 1, `y` -0.75 to 3.1). Three `annotate("text")` calls share the `x = 0.5` anchor: the wrapped node label, the headline geometric mean, and the counts line. The headline turns red and gains a `(!)` where it diverges from the median by more than half an order, via `headline_is_suspect()`.
 
-The node id is the exception. It is an `annotation_custom()` textGrob pinned
-18x18 **pixels** from the physical top-left corner in `npc` units, which is the
-only reason `dpi` is an argument to this function at all: the offset is
-recomputed as `18 / dpi` inches so it lands on the same pixel whatever
-resolution the card is saved at.
+The node id is the exception. It is an `annotation_custom()` textGrob pinned 18x18 **pixels** from the physical top-left corner in `npc` units, which is the only reason `dpi` is an argument to this function at all: the offset is recomputed as `18 / dpi` inches so it lands on the same pixel whatever resolution the card is saved at.
 
 ```{r}
 #| label: fig-unpack-header
@@ -189,15 +147,9 @@ with_bg(header)
 
 ### 2. Badges, `node_epeq_badges()`
 
-Four `geom_tile()` squares, filled from `epeq_score_colours()` (three levels
-low to high, plus grey for unscored, which must not read as a low score), each
-carrying its abbreviation and score on one line. Two letters per criterion
-because Essentiality and Evidence share an initial.
+Four `geom_tile()` squares, filled from `epeq_score_colours()` (three levels low to high, plus grey for unscored, which must not read as a low score), each carrying its abbreviation and score on one line. Two letters per criterion because Essentiality and Evidence share an initial.
 
-Note the `text_size`: `node_card()` calls this at 3.4, not the function's own
-default of 2.4, which is sized for full-size figures rather than a 2.4 inch
-card. The x limits are symmetric about the tiles' centre so the band lines up
-with the centred text above it.
+Note the `text_size`: `node_card()` calls this at 3.4, not the function's own default of 2.4, which is sized for full-size figures rather than a 2.4 inch card. The x limits are symmetric about the tiles' centre so the band lines up with the centred text above it.
 
 ```{r}
 #| label: fig-unpack-badges
@@ -211,18 +163,9 @@ with_bg(badges)
 
 ### 3. Strips, `node_group_strips()`
 
-One violin per constituent group rather than one for the pooled node, because
-the pooled geometric mean cannot tell you whether the lumping was sound and two
-strips an order apart can. Value on x on the shared per-unit log scale, groups
-on y, capped at `max_groups` with any remainder named rather than dropped
-silently.
+One violin per constituent group rather than one for the pooled node, because the pooled geometric mean cannot tell you whether the lumping was sound and two strips an order apart can. Value on x on the shared per-unit log scale, groups on y, capped at `max_groups` with any remainder named rather than dropped silently.
 
-This is the only one of the three that touches the data, and so the only one
-that can degrade: `triage_empty_plot()` for an external node or one with no
-rows left after its restrictions, points instead of violins below the
-`triage_use_points()` threshold. Group ids are drawn inside the panel, since a
-y axis would inset this panel relative to the two `theme_void()` panels above
-and put the whole text block off centre.
+This is the only one of the three that touches the data, and so the only one that can degrade: `triage_empty_plot()` for an external node or one with no rows left after its restrictions, points instead of violins below the `triage_use_points()` threshold. Group ids are drawn inside the panel, since a y axis would inset this panel relative to the two `theme_void()` panels above and put the whole text block off centre.
 
 ```{r}
 #| label: fig-unpack-strips
@@ -243,10 +186,7 @@ with_bg(strips)
 
 ### 4. The stack
 
-One `wrap_plots()` in a single column with the heights from above, then
-`& card_theme`. The `&` is load-bearing: `+` would add the theme to the last
-plot only, leaving the header and badges on white with a wider margin than the
-strips.
+One `wrap_plots()` in a single column with the heights from above, then `& card_theme`. The `&` is load-bearing: `+` would add the theme to the last plot only, leaving the header and badges on white with a wider margin than the strips.
 
 ```{r}
 #| label: fig-unpack-compose
@@ -265,10 +205,7 @@ composed <- patchwork::wrap_plots(
 composed
 ```
 
-Rebuilt by hand from the three panels above, this is the same card
-`node_card()` returns. Checked by rendering both and comparing the files, not
-by eye, since a difference of a few pixels in one panel's height is exactly
-the sort of thing eyeballing a screenshot misses.
+Rebuilt by hand from the three panels above, this is the same card `node_card()` returns. Checked by rendering both and comparing the files, not by eye, since a difference of a few pixels in one panel's height is exactly the sort of thing eyeballing a screenshot misses.
 
 ```{r}
 #| label: unpack-verify
@@ -390,20 +327,11 @@ knitr::include_graphics(stress_path)
 
 ## Why the violins do not overlap
 
-Tried and rejected on 2026-08-10. Kept here rather than deleted, because the
-idea is a reasonable one that will occur to someone again, and the reason it
-fails is not the reason you would expect.
+Tried and rejected on 2026-08-10. Kept here rather than deleted, because the idea is a reasonable one that will occur to someone again, and the reason it fails is not the reason you would expect.
 
-The problem it was meant to solve is real. `max_groups` keeps the three
-largest constituent groups and names the rest in text, so a node built from
-five or six sampling groups shows most of itself and describes the remainder.
-Raising the cap without changing anything else gives each group a thinner slice
-of the same 0.75 in band. The alternative is to stop giving each group its own
-row and let the violins overlap, which is only legible if the fills blend, and
-they now do: the violins are translucent with no outline.
+The problem it was meant to solve is real. `max_groups` keeps the three largest constituent groups and names the rest in text, so a node built from five or six sampling groups shows most of itself and describes the remainder. Raising the cap without changing anything else gives each group a thinner slice of the same 0.75 in band. The alternative is to stop giving each group its own row and let the violins overlap, which is only legible if the fills blend, and they now do: the violins are translucent with no outline.
 
-So the fills were never the obstacle. `violin_width` sets the width in discrete
-units, rows sit one unit apart, and anything above 1 overlaps.
+So the fills were never the obstacle. `violin_width` sets the width in discrete units, rows sit one unit apart, and anything above 1 overlaps.
 
 ```{r}
 #| label: overlap-setup
@@ -448,22 +376,11 @@ overlap_card(1.8)
 overlap_card(3.0)
 ```
 
-**The verdict, and the part worth remembering.** Overlapping violins are
-readable. Sam's hypothesis about the fills was right, and @fig-overlap-18 shows
-it. What sinks the idea is everything *around* the violins: five group ids in
-a 0.75 in band collide with each other whatever the violins do, and the
-box-and-whisker overlay multiplies by five along with them. Widening the
-violins does not buy space for either. So a card that shows more than three
-groups needs a different labelling scheme first, probably a key in the right
-margin or colour-coded ids, and only then is the width worth revisiting.
+**The verdict, and the part worth remembering.** Overlapping violins are readable. Sam's hypothesis about the fills was right, and @fig-overlap-18 shows it. What sinks the idea is everything *around* the violins: five group ids in a 0.75 in band collide with each other whatever the violins do, and the box-and-whisker overlay multiplies by five along with them. Widening the violins does not buy space for either. So a card that shows more than three groups needs a different labelling scheme first, probably a key in the right margin or colour-coded ids, and only then is the width worth revisiting.
 
 Two mechanical notes for whoever tries again:
 
-- ggplot2 emits `position_dodge() requires non-overlapping x intervals` for any
-  width above 1. It is harmless, and it will appear in the pipeline log.
-- The y-axis expansion is derived from `violin_width`, so a wide violin pushes
-  the panel out instead of being clipped. That is why @fig-overlap-30 still
-  fits inside its panel.
+- ggplot2 emits `position_dodge() requires non-overlapping x intervals` for any width above 1. It is harmless, and it will appear in the pipeline log.
+- The y-axis expansion is derived from `violin_width`, so a wide violin pushes the panel out instead of being clipped. That is why @fig-overlap-30 still fits inside its panel.
 
-`violin_width` stays at 0.9, and the argument exists mainly so this section can
-draw the variants it rejects.
+`violin_width` stays at 0.9, and the argument exists mainly so this section can draw the variants it rejects.
