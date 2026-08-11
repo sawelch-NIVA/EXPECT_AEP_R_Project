@@ -701,6 +701,76 @@ aep_diagram_height <- function(
   max(min_height, required)
 }
 
+#' Card Size That Shrinks to Fit Horizontal Node Density
+#'
+#' The horizontal counterpart to the crowding problem [aep_diagram_height()]
+#' solves for rows -- but NOT a symmetric fix, because widening the canvas
+#' genuinely does nothing here. [node_card_extent()]'s `hw = image_size * rx /
+#' 2` has no inches term in it at all: `image_size` is defined as a fraction of
+#' panel WIDTH, so a card's width in DATA-X units is set by the data range
+#' (`rx`) and that fraction alone, and stays exactly the same regardless of how
+#' many physical inches the canvas happens to be. (`hh`, by contrast, involves
+#' `device_aspect = width_in / height_in`, which is why taller canvas => more
+#' room per row actually works for the vertical case.) Confirmed the hard way,
+#' 2026-08-11: bending a tall column of source nodes into an L added columns
+#' (grew `rx`) while column-to-column spacing stayed the same 1.3 units, and
+#' every card past the fourth clipped its neighbour -- widening `width` in
+#' `write_aep_diagrams()` would not have touched it.
+#'
+#' The only lever that actually shrinks `hw` relative to a fixed inter-node
+#' gap is `image_size` itself, so that is what this shrinks -- never grows: a
+#' loose diagram keeps the caller's intended card size rather than being
+#' blown up to fill space, matching [aep_diagram_height()]'s own floor-not-
+#' ceiling philosophy.
+#'
+#' **Run this BEFORE [aep_diagram_height()]`, not after.** `rx` here does not
+#' depend on `image_size` (see the formula above), so there is no circularity
+#' in computing the shrink first; but `aep_diagram_height()`'s `hh` DOES
+#' depend on `image_size`, so feeding it the already-shrunk value (rather than
+#' the caller's original) means a diagram that needed shrinking horizontally
+#' does not then get told it needs MORE height than it actually will, once its
+#' cards are smaller.
+#'
+#' @param nodes The AEP's own scoped, placed nodes tibble.
+#' @param image_size The caller's intended card width, as a fraction of panel
+#'   width. Returned unchanged if there is no horizontal crowding to fix.
+#' @param x_expand As [plot_aep()]; keep in sync with the real call, same
+#'   reason as [aep_diagram_height()]'s own `x_expand`.
+#' @param fill_fraction As [aep_diagram_height()]: how much of the tightest
+#'   row's horizontal space a card may occupy at most.
+#' @return `image_size`, or smaller. Never larger than the input.
+#' @export
+aep_diagram_image_size <- function(
+  nodes, image_size, x_expand = 0.15, fill_fraction = 0.6
+) {
+  placed <- nodes[!is.na(nodes$x) & !is.na(nodes$y), , drop = FALSE]
+  if (nrow(placed) < 2) {
+    return(image_size)
+  }
+
+  # Measured WITHIN each y-row separately, mirroring aep_diagram_height()'s
+  # own per-column measurement: two nodes sharing an x but sitting in
+  # different rows do not compete for horizontal space.
+  row_min_gaps <- vapply(split(placed$x, placed$y), function(xv) {
+    xv <- sort(unique(xv))
+    if (length(xv) < 2) {
+      return(Inf)
+    }
+    min(diff(xv))
+  }, numeric(1))
+  min_gap <- suppressWarnings(min(row_min_gaps))
+  if (!is.finite(min_gap) || min_gap <= 0) {
+    return(image_size)
+  }
+
+  # rx is independent of image_size (see this function's own doc), so the
+  # value passed in here is only "whichever is at hand" -- any image_size
+  # would recover the same rx.
+  rx <- node_card_extent(placed, image_size = image_size, x_expand = x_expand)$rx
+  required <- min_gap * fill_fraction / rx
+  min(image_size, required)
+}
+
 #' Draw and Write Every AEP
 #'
 #' @param scoped Output of [aep_scoped_nodes()].
@@ -792,6 +862,15 @@ write_aep_diagrams <- function(
       # doesn't, so only A002 was getting squeezed.
       sq <- aep_diagram_squeeze(draw_inset, width, height, image_size, inset_width)
 
+      # See aep_diagram_image_size(): unlike height, canvas WIDTH cannot fix
+      # horizontal crowding (a card's width in data-x units is invariant to
+      # how many inches the canvas is), so cards shrink instead, and this
+      # must run BEFORE aep_diagram_height() -- its own hh depends on
+      # image_size, so a diagram that needed shrinking horizontally should
+      # not then be told it needs MORE height than its now-smaller cards
+      # actually require.
+      fitted_image_size <- aep_diagram_image_size(nodes, sq$image_size)
+
       # See aep_diagram_height(): canvas height (not width -- a card's
       # physical size doesn't depend on canvas width) scales up automatically
       # once an AEP's nodes are packed too tightly in y for the fixed
@@ -799,7 +878,7 @@ write_aep_diagrams <- function(
       # therefore a FLOOR, not the final canvas size.
       this_height <- aep_diagram_height(
         nodes, effective_width = sq$effective_width,
-        image_size = sq$image_size, card_aspect = card_aspect,
+        image_size = fitted_image_size, card_aspect = card_aspect,
         min_height = height
       )
       device_aspect <- sq$effective_width / this_height
@@ -810,7 +889,7 @@ write_aep_diagrams <- function(
         cards[cards$aep_id %in% id, , drop = FALSE],
         groups = aep_scope_groups(groups, nodes),
         node_images = images,
-        image_size = sq$image_size,
+        image_size = fitted_image_size,
         card_aspect = card_aspect,
         device_aspect = device_aspect
       )

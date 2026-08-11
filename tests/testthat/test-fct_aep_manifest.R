@@ -454,3 +454,61 @@ test_that("unplaced nodes are ignored rather than treated as a huge gap", {
   )
   expect_equal(h, 8)
 })
+
+# ---- aep_diagram_image_size() (2026-08-11) --------------------------------
+
+test_that("a sparsely spaced row keeps the caller's image_size", {
+  # A single row with plenty of x-spacing -- the shape most AEPs are in.
+  placed <- tibble::tibble(node_id = paste0("N", 1:3), x = 0:2, y = 0)
+  s <- aep_diagram_image_size(placed, image_size = 0.19)
+  expect_equal(s, 0.19)
+})
+
+test_that("a densely packed row shrinks image_size below the caller's value", {
+  # The L-shaped source layout (2026-08-11): six nodes at 1.3-unit x-spacing
+  # in one row, added to a pool whose x already ran 0-5.2, growing rx by
+  # about 50% while the LOCAL gap between adjacent nodes stayed the same --
+  # exactly the shape that clipped card text against its neighbour.
+  placed <- tibble::tibble(
+    node_id = paste0("N", 1:8), x = seq(0, 9.1, by = 1.3), y = 0
+  )
+  s <- aep_diagram_image_size(placed, image_size = 0.19)
+  expect_lt(s, 0.19)
+
+  # The formula itself, not a hardcoded number: rx does not depend on
+  # image_size (see the function's own doc), so it can be read straight off
+  # node_card_extent() at any image_size and the required value recovered
+  # directly from the row's own min gap.
+  rx <- node_card_extent(placed, image_size = 0.19, x_expand = 0.15)$rx
+  expected <- min(0.19, 1.3 * 0.6 / rx)
+  expect_equal(s, expected)
+})
+
+test_that("aep_diagram_image_size() never grows past the caller's value", {
+  # Widely spaced nodes have room to spare, but the function's job is only to
+  # shrink for crowding, not to blow cards up to fill the space -- same
+  # floor-not-ceiling philosophy as aep_diagram_height().
+  placed <- tibble::tibble(node_id = c("N1", "N2"), x = c(0, 100), y = 0)
+  s <- aep_diagram_image_size(placed, image_size = 0.19)
+  expect_equal(s, 0.19)
+})
+
+test_that("image_size shrinking is measured within each row, not globally", {
+  # REGRESSION, mirroring aep_diagram_height()'s own column-only regression
+  # test: two nodes in DIFFERENT rows landing at close x values do not
+  # actually compete for horizontal space, since a card's extent is bounded
+  # in y.
+  placed <- tibble::tibble(node_id = c("N1", "N2"), x = c(0, 0.1), y = c(0, 1))
+  s <- aep_diagram_image_size(placed, image_size = 0.19)
+  expect_equal(s, 0.19)
+})
+
+test_that("aep_diagram_image_size() degenerate cases match aep_diagram_height()'s", {
+  one_node <- tibble::tibble(node_id = "N1", x = 0, y = 0)
+  expect_equal(aep_diagram_image_size(one_node, image_size = 0.19), 0.19)
+
+  with_na <- tibble::tibble(
+    node_id = c("N1", "N2", "N3"), x = c(0, NA, 1), y = c(0, 1, 0)
+  )
+  expect_equal(aep_diagram_image_size(with_na, image_size = 0.19), 0.19)
+})
