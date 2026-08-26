@@ -162,7 +162,7 @@ Biota, Aquatic / Fish / mg/kg (dry)
 
 # Comparison
 
-::: {.callout-note}
+::: callout-note
 *(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
 :::
 
@@ -192,7 +192,7 @@ Biota, Aquatic / Fish / mg/kg (dry)
 G006-Bf-Cnr-G-mor-Liv-Mw: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 Gadus morhua (Atlantic cod) livers are the single largest biota sampling group in the dataset and are heavily used as a reference bioindicator of contamination across monitoring campaigns. Concentrations are reported in mg/kg wet (n = 2,796) and mg/kg dry (n = 218), roughly distributed log-normally around a mean of around (?). Fig 1a (fix cross ref) shows a large normal distribution at (mean) with distinctive secondary normal distributions at around 1e-1 mg/kg and 1e+4 mg/kg; these are likely unit errors and we have elected to remove them.
@@ -218,7 +218,7 @@ Fig 1b shows that more recent concentrations are strongly normal. Outliers in 20
 G017-Bf-Cnr-G-mor-Liv-Md: Fish / Gadus morhua / Liver / Coastal, fjord / Not reported / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -246,7 +246,7 @@ G017-Bf-Cnr-G-mor-Liv-Md: Fish / Gadus morhua / Liver / Coastal, fjord / Not rep
 G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 - @fig-g018-bf-cnr-c-rup-wbd-mw-a clearly shows two different constituent normal distributions.
@@ -264,7 +264,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G028-Bf-Onr-G-mor-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -274,7 +274,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G031-Bf-Rnr-S-tru-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -284,7 +284,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G035-Bf-Lnr-C-lav-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -300,7 +300,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G041-Bf-Cnr-P-fle-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -310,7 +310,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G042-Bf-Lnr-C-lav-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -326,7 +326,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G043-Bf-Oot-G-mor-Mus-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -336,7 +336,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G045-Bf-Rnr-S-sal-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -364,7 +364,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not reported / mg/kg (wet)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -374,7 +374,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G048-Bf-Lnr-P-flu-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -384,7 +384,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G049-Bf-Owc-R-hip-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -400,7 +400,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G054-Bf-Lnr-S-tru-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -416,7 +416,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G056-Bf-Lnr-E-luc-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -426,7 +426,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G058-Bf-Lnr-S-alp-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -442,7 +442,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G060-Bf-Rnr-S-tru-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -452,7 +452,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G063-Bf-Lnr-E-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -462,7 +462,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G071-Bf-Lnr-P-flu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -472,7 +472,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G079-Bf-Lnr-S-tru-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -482,7 +482,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G082-Bf-Cnr-C-har-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -492,7 +492,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G083-Bf-Cnr-L-lim-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -502,7 +502,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G085-Bf-Rnr-B-bjo-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -512,7 +512,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G086-Bf-Lnr-L-lot-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -522,7 +522,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G087` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -532,7 +532,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G089-Bf-Lnr-C-lav-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -548,7 +548,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G090-Bf-Lnr-T-thy-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -564,7 +564,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G091-Bf-Lnr-T-thy-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -574,7 +574,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G092-Bf-Lnr-T-thy-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -590,7 +590,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G095-Bf-Lnr-S-alp-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -600,7 +600,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G103-Bf-Rnr-B-bjo-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -616,7 +616,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G104-Bf-Cnr-M-aeg-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -632,7 +632,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G105-Bf-Rnr-S-tru-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -642,7 +642,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G106-Bf-Rnr-A-bra-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -652,7 +652,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G107-Bf-Rnr-A-bra-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -662,7 +662,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G111-Bf-Lnr-G-cer-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -672,7 +672,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G112-Bf-Rnr-S-luc-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -688,7 +688,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G113-Bf-Cnr-S-mel-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -704,7 +704,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G116-Bf-Lnr-S-tru-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -714,7 +714,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G117-Bf-Rot-S-tru-Gil-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -724,7 +724,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G118-Bf-Rot-S-tru-Kid-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -734,7 +734,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G119-Bf-Rot-S-tru-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -744,7 +744,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G120-Bf-Rnr-S-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -760,7 +760,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G125-Bf-Lnr-S-alp-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -770,7 +770,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G131` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -780,7 +780,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G137-Bf-Cnr-M-mer-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -790,7 +790,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G139-Bf-Cnr-B-bro-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -800,7 +800,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G140-Bf-Cnr-P-pla-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -816,7 +816,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G141-Bf-Cnr-P-pla-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -832,7 +832,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G142-Bf-Rnr-R-rut-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -842,7 +842,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G143-Bf-Rnr-R-rut-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -852,7 +852,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G159-Bf-Cnr-B-bro-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -862,7 +862,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G160-Bf-Cnr-L-ber-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -872,7 +872,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G161-Bf-Rnr-L-cep-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -882,7 +882,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G162-Bf-Cnr-M-aeg-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -892,7 +892,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G163-Bf-Rnr-P-flu-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -902,7 +902,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G164-Bf-Rnr-P-flu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -912,7 +912,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G173-Bf-Cnr-C-exo-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -922,7 +922,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G174-Bf-Rnr-E-luc-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -932,7 +932,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G175-Bf-Rnr-E-luc-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -942,7 +942,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G176-Bf-Onr-L-nas-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -952,7 +952,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G177-Bf-Cnr-M-mol-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -962,7 +962,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G178-Bf-Lnr-P-flu-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -972,7 +972,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G179-Bf-Cnr-P-pol-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -982,7 +982,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G180-Bf-Onr-S-aca-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -992,7 +992,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G191-Bf-Cnr-Acti-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1002,7 +1002,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G192-Bf-Cnr-Acti-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1012,7 +1012,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G193-Bf-Rnr-E-luc-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1022,7 +1022,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G194-Bf-Cnr-Gadi-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1032,7 +1032,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G195-Bf-Cnr-Gadi-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1042,7 +1042,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G196-Bf-Rnr-L-idu-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1052,7 +1052,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G197-Bf-Rnr-L-idu-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1062,7 +1062,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G198-Bf-Rnr-P-flu-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1072,7 +1072,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G199-Bf-Cnr-P-pol-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1082,7 +1082,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G200-Bf-Cnr-P-pol-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1092,7 +1092,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G211-Bf-Rnr-E-luc-Gil-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1102,7 +1102,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G212-Bf-Lnr-G-cer-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1112,7 +1112,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G213-Bf-Cnr-L-ber-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1122,7 +1122,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G214-Bf-Cnr-L-ber-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1132,7 +1132,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G215-Bf-Cnr-L-mix-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1142,7 +1142,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G216-Bf-Rnr-L-cep-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1152,7 +1152,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G217-Bf-Cnr-L-lim-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1162,7 +1162,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G218-Bf-Cnr-M-aeg-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1172,7 +1172,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G219-Bf-Cnr-P-fle-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1182,7 +1182,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G220-Bf-Lnr-R-rut-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1192,7 +1192,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G221-Bf-Lnr-S-tru-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1202,7 +1202,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G222-Bf-Rnr-S-luc-Bil-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1212,7 +1212,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G223-Bf-Onr-S-mic-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -1222,7 +1222,6 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G224-Bf-Cnr-T-min-Wbd-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
-

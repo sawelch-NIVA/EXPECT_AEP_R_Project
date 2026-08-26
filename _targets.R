@@ -1238,7 +1238,8 @@ list(
       must_include = c(
         "G033-Ba-Cnr-A-nod-Sti-Mw",
         "G036-Ba-Cnr-F-ves-Sti-Mw",
-        "G047-Bf-Cnr-G-mor-Mus-Mw"
+        "G047-Bf-Cnr-G-mor-Mus-Mw",
+        "G043-Bf-Oot-G-mor-Mus-Md"
       )
     )
   ),
