@@ -237,10 +237,16 @@ the pair, hand over both paths, let Sam judge.
 - `here::i_am("Readme.md")` anchors the project root in `_targets.R` and in the
   generator script. Note the file on disk is `README.md`. This works on Windows
   because the filesystem is case-insensitive.
-- `_targets.yaml` **and** `docs/_targets.yaml` both exist and both hardcode an
-  absolute store path (`C:/Users/SAW/Local Documents/...`). The duplicate in
+- `_targets.yaml` **and** `docs/_targets.yaml` both exist. The duplicate in
   `docs/` exists so notebooks can find the store when Quarto renders with
-  `docs/` as the working directory.
+  `docs/` as the working directory, and it points at `../_targets` rather than
+  `_targets` for exactly that reason.
+  **Corrected 2026-08-26:** both are now *relative* (`_targets` and
+  `../_targets`). They held absolute `C:/Users/SAW/...` paths until 2026-07-31.
+  This section claimed otherwise for weeks; the header comment in
+  `docs/_targets.yaml` still quotes the old absolute path as history, which is
+  a false positive for any whole-file grep. Check the `store:` value, not the
+  comments.
 - `renv.lock` is present but **renv is switched off**: `.Rprofile` has
   `source("renv/activate.R")` commented out. Dependencies are effectively
   whatever is installed in the user library.
@@ -385,8 +391,15 @@ Flagged in comments by Sam, carried here so they do not get lost:
   function files in `R/`, so coverage is much healthier than this line
   claimed. Left unstruck how current that ratio is; worth a proper coverage
   check rather than a file count if it matters later.
-- Absolute Windows paths in both `_targets.yaml` files make the repo
-  single-machine.
+- ~~Absolute Windows paths in both `_targets.yaml` files make the repo
+  single-machine.~~ **Fixed 2026-07-31, verified 2026-08-26.** Both use
+  relative store paths. See 2.4.
+- **`here::i_am("Readme.md")` is a real portability bug, unlike the one above.**
+  `_targets.R:62` and five scripts in `scripts/` ask for `Readme.md`; the file
+  on disk is `README.md`. This resolves on Windows only because the filesystem
+  is case-insensitive, and would fail immediately on Linux. Two scripts
+  (`scaffold_prtr_nodes.R`, `summarise_prtr_emissions.R`) already use the
+  correct casing, so the fix is to make the other six match.
 - `references.bib` is 4.6 MB and `manifest.json` is 770 KB, both committed.
 - ~~`.quarto/` holds ~190 orphaned `quarto-session-temp*` directories.~~
   Cleaned 2026-08-07 (197 dirs removed, gitignored so nothing to commit).
@@ -417,10 +430,31 @@ one holistic low-detail AEP".
 Not yet built. The direction agreed 2026-07-29:
 
 - **`data/clean/decisions/group_decisions.csv`** (hand-edited). The human judgement layer.
-  One row per group from `summarise_literature_data`, with a `decision` of
-  `own_notebook` / `lump` / `split` / `drop`, a `lump_into` key, and free-text
-  notes. The pipeline reads it; it never writes it. Grouping becomes reviewable
-  data rather than logic buried in code.
+  One row per group from `summarise_literature_data`, with a `decision`, a
+  `lump_into` key, and free-text notes. The pipeline reads it; it never writes
+  it. Grouping becomes reviewable data rather than logic buried in code.
+
+  **The permitted values are `keep` / `lump` / `split` / `drop`, plus empty for
+  undecided.** This section said `own_notebook` until 2026-08-26; that value was
+  removed on 2026-07-30 when `notebook` became its own column, and
+  `read_group_decisions()` (`R/fct_group_decisions.R:261`) *errors* on anything
+  outside the permitted set, so acting on the old text aborts the build. The
+  roxygen on `group_decision_levels()` is the source of truth.
+
+  **What each column actually drives, traced 2026-08-26.** Worth knowing before
+  budgeting time against this file:
+  - `notebook` is the one column with real downstream reach: it generates
+    `docs/groups/*.qmd` via `fct_group_notebooks.R`.
+  - `decision` is consumed in exactly one place, `node_coverage()`
+    (`R/fct_aep_nodes.R:995`), where it annotates the coverage table so a group
+    deliberately dropped is distinguishable from one never looked at.
+  - `lump_into` is *validated* (must resolve, no self-lumps) but nothing
+    computes from it.
+
+  So this is a reviewable record of judgement, not pipeline configuration. The
+  lumping that changes numbers happens in `aep_node_members.csv`; see the header
+  of `R/fct_aep_nodes.R` on why a node is not a sampling group. Filling all 250
+  rows was dropped from the plan on 2026-08-26 for this reason.
 - **`data/clean/aep/aep_nodes.csv`** (hand-edited). One row per AEP node: the group
   key, the four EPEQ scores plus justifications, and manual `x` / `y` layout
   coordinates.
