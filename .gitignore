@@ -3,6 +3,7 @@
 .RData
 .rdx
 .Ruserdata
+.Renviron
 /.quarto/
 **/*.quarto_ipynb
 /_targets/*
@@ -37,3 +38,6 @@ triage/
 # Sam can open them, out of git because they are not artefacts. See CLAUDE.md
 # 2.3.1.
 figures/dev/
+
+# rosm/ggspatial tile cache (annotation_map_tile downloads), not an artefact
+rosm.cache/
