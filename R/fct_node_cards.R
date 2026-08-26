@@ -49,12 +49,29 @@ epeq_badge_labels <- function() {
 #'
 #' Grey for unscored, which must not read as a low score.
 #'
+#' **Red / yellow / green since 2026-08-12** (Sam: the old bronze and gold
+#' "is unintuitive as stands"). The previous ramp ran bronze `#B5876B` to gold
+#' `#C9B458` to green, i.e. a medal metaphor, which reads as an award rather
+#' than a warning and left 1 and 2 barely distinguishable at badge size.
+#' A traffic light is the convention every reader already has.
+#'
+#' This does **not** collide with the threshold class palette, for the reason
+#' given above: those two never appear in the same panel, and the badge always
+#' carries its criterion letter and its digit, so the colour is a reinforcement
+#' rather than the only channel.
+#'
+#' **Colourblind safety is deliberately deferred** (Sam, same date: "don't
+#' worry about colourblindness for now, we can do a pass on that later"). Red
+#' against green is the worst possible pairing for deuteranopia, so this needs
+#' revisiting before submission; the digit inside each badge is what keeps it
+#' readable in the meantime.
+#'
 #' @return A named character vector keyed `"1"`, `"2"`, `"3"`, `"NA"`.
 #' @export
 epeq_score_colours <- function() {
   c(
-    "1" = "#B5876B",
-    "2" = "#C9B458",
+    "1" = "#C4453C",
+    "2" = "#E8C55A",
     "3" = "#5A9367",
     "NA" = "#D9D9D9"
   )
@@ -162,7 +179,7 @@ node_epeq_badges <- function(node, text_size = 2.4) {
     ggplot2::theme_void()
 }
 
-#' Bar Chart of an External Node's Own Time Series
+#' An External Node's Own Time Series
 #'
 #' The card-body equivalent of [node_card_header()]'s "AM" label: where the
 #' headline is an arithmetic mean of a typed-in `external_value`, and that
@@ -172,60 +189,352 @@ node_epeq_badges <- function(node, text_size = 2.4) {
 #'
 #' **Deliberately not a violin.** There is no distribution here in the sense
 #' [node_group_strips()] means it -- one value per year, not repeated
-#' measurements at any point in time -- so a bar per year is the honest
+#' measurements at any point in time -- so a point per year is the honest
 #' summarising geom (CLAUDE.md 4.4), not a stand-in for the real thing.
+#'
+#' **Points and a line, not bars, since 2026-08-13.** Bars were tried first and
+#' do not compose with a log axis, which this needs: a bar encodes magnitude as
+#' length from a baseline, and a log axis has no baseline. `geom_col()` resolved
+#' that by silently standing every bar on `y = 1` (verified with
+#' `ggplot_build()`: a bar of height 100 came back `ymin = 0, ymax = 2`), and
+#' even once the base was made explicit the smallest sector stayed a sliver
+#' pinned to the floor, because it is genuinely 5.6 orders below the largest and
+#' the axis is shared. A point sits at its value and is legible anywhere on the
+#' scale. Sam 2026-08-13: "points is absolutely fine then; if anything it'll
+#' work better with the avg. line", and "it's fine if all a card's plot shows is
+#' that it's an absolutely negligible contribution to copper in the
+#' environment".
+#'
+#' **The panel must occupy exactly the space a violin panel would.** Sam
+#' 2026-08-12: "we're just swapping out one graph grob for another without
+#' affecting the rest of the plot". It was not doing that. Measured on the
+#' real cards by seeking the grid viewports after a draw (not by eye):
+#'
+#' | card | panel left | panel right |
+#' |---|---|---|
+#' | external, bars | 0.516 in | 0.055 in |
+#' | empirical, violins | 0.055 in | 0.055 in |
+#'
+#' patchwork aligns all three of a card's panels on their panel areas, so the
+#' y-axis labels this drew (`label_comma()` on values up to 58,500,000) pushed
+#' the header, the badge strip and the body **all** in by 0.46 in on a 2.4 in
+#' card, a fifth of its width. That is the asymmetry Sam saw on the strips, and
+#' its cause was here rather than in any of the three strips.
+#'
+#' So there is **no y axis**. The violin panel does not have one either: it puts
+#' its value axis on top, where an axis costs height rather than width, and
+#' draws its group labels inside the panel. The headline number in
+#' [node_card_header()] and the dashed mean line below carry the magnitude, and
+#' with `limits` shared across every source node the series is a comparison
+#' between cards rather than a readable scale within one.
+#'
+#' **A card that shows nothing but "negligible" is doing its job.** Sam
+#' 2026-08-13. On the shared axis `N011-water-supply-and-waste-management` sits
+#' near the floor and that is the finding, not a rendering problem to design
+#' around.
 #'
 #' @param series A tibble with `year` (numeric or integer) and `value`
 #'   columns, one row per year. Extra columns are ignored.
 #' @param mean_value The node's own headline figure (`external_value`), drawn
-#'   as a dashed reference line so the bars can be read against the number
-#'   already shown above them in [node_card_header()]. `NA` draws no line.
+#'   as a dashed reference line so the series can be read against the number
+#'   already shown above it in [node_card_header()]. `NA` draws no line.
+#' @param limits Shared `list(x = c(min, max), y = c(min, max))` from
+#'   [external_series_limits()], so every source node sits on one pair of
+#'   axes. `NULL` scales each card to itself, which is the pre-2026-08-12
+#'   behaviour and is only useful for looking at one card alone.
+#'
+#'   Applied with `coord_cartesian()`, **never** `scale_*_continuous(limits=)`:
+#'   a continuous scale with explicit limits censors out-of-bounds rows and
+#'   silently drops the point. That exact mistake ate the triage panels' count
+#'   labels once already (PLAN.md 9a).
+#' @param fill Mark colour, matched to the violins' `violin_fill` (`"grey35"`).
+#' @param alpha Kept for call compatibility with [node_group_strips()], which
+#'   passes `violin_alpha` (0.35) through. **Not applied to the marks.** A
+#'   violin is an area whose overlaps have to stay readable; these are a
+#'   handful of points and a thin line, and at 0.35 on a pastel card
+#'   background they wash out. Named rather than dropped so the caller does not
+#'   have to know which of the two it is talking to.
 #' @return A ggplot.
 #' @export
-node_external_series_bars <- function(series, mean_value = NA_real_) {
+node_external_series_bars <- function(
+  series,
+  mean_value = NA_real_,
+  limits = NULL,
+  fill = "grey35",
+  alpha = 0.35
+) {
+  # A LOG AXIS CANNOT DRAW A NON-POSITIVE VALUE, and two REACH sectors have
+  # them: N005 has a year at -545,000 and N007 one at -62,200, because
+  # "Netto mengde" is imports plus production minus exports and can go the
+  # other way. Those years are net EXPORTS, which is a real fact about copper
+  # in commerce but not a quantity a source node releases, so dropping them
+  # from the plot is right on the merits as well as forced by the scale.
+  #
+  # Dropped LOUDLY. ggplot2 would remove them anyway with a generic "removed n
+  # rows containing missing values", which says nothing about which node or
+  # why; this names both, and lands in tar_meta()'s warnings where Sam reads
+  # them.
+  dropped <- sum(!is.na(series$value) & series$value <= 0)
+  if (dropped > 0) {
+    cli::cli_warn(
+      "{dropped} year{?s} with a non-positive value omitted from the series: \\
+       a log axis cannot show them. These are net exports, not releases."
+    )
+    series <- series[is.na(series$value) | series$value > 0, , drop = FALSE]
+  }
+
+  # SUMMED PER YEAR. A node lumping several REACH sectors claims their sum, and
+  # a series with two rows for one year would otherwise draw two points at the
+  # same x with no indication that either is a part rather than the whole.
+  by_year <- stats::aggregate(
+    list(value = series$value), list(year = series$year), sum, na.rm = TRUE
+  )
+  by_year <- by_year[order(by_year$year), , drop = FALSE]
+
+  # The line connects consecutive years and the points mark the observations.
+  # Both carry the same colour as the violins' fill, at full opacity rather
+  # than the violins' 0.35: a violin is an area whose overlap must stay
+  # readable, while these are a handful of marks that simply need to be seen.
+  ink <- fill
+
   p <- ggplot2::ggplot(
-    series,
+    by_year,
     ggplot2::aes(x = .data$year, y = .data$value)
   ) +
-    # geom_col()'s default position is "stack", which activates the moment
-    # `series` has more than one row sharing a year -- a lumped node's REACH
-    # series does this routinely (up to six constituent sectors reporting for
-    # the same year), and that stacking is honest: the node IS the sum of
-    # those sectors, so a year's total bar height is genuinely their sum.
-    # What is NOT honest without help is a bare grey35 fill with no border,
-    # which draws that stack as an indistinguishable single bar. The white
-    # border is thin enough not to clutter a single-segment year (the common
-    # case for a standalone, non-lumped node) but visible enough to show a
-    # multi-segment year as several pieces rather than one number.
-    ggplot2::geom_col(fill = "grey35", colour = "white", linewidth = 0.15, width = 0.7)
+    ggplot2::geom_line(colour = ink, linewidth = 0.35) +
+    ggplot2::geom_point(colour = ink, size = 0.7)
 
-  if (!is.na(mean_value)) {
+  if (!is.na(mean_value) && mean_value > 0 && nrow(by_year) > 0) {
+    # A SEGMENT SPANNING THE NODE'S OWN YEARS, not geom_hline's full-panel
+    # rule. Sam 2026-08-13. The x axis is shared across every source node, so a
+    # full-width line ran on past both ends of a short series and read as a
+    # threshold applying to the whole panel rather than as the mean OF THESE
+    # POINTS. Clipped to the data, it visibly belongs to them.
     p <- p +
-      # Same dashed style and rejection colour convention as the "(!)" suspect
-      # marker elsewhere on the card (node_card_header()), reused here for the
-      # same reason: a reference line, not new colour vocabulary to learn.
-      ggplot2::geom_hline(
-        yintercept = mean_value,
-        linetype = "22",
-        colour = "#A8452F",
-        linewidth = 0.4
+      ggplot2::annotate(
+        "segment",
+        x = min(by_year$year), xend = max(by_year$year),
+        y = mean_value, yend = mean_value,
+        # Same dashed style and rejection colour convention as the "(!)"
+        # suspect marker elsewhere on the card (node_card_header()), reused
+        # here for the same reason: a reference line, not new colour
+        # vocabulary to learn.
+        linetype = "22", colour = "#A8452F", linewidth = 0.4
+      ) +
+      ggplot2::annotate(
+        "text",
+        x = max(by_year$year), y = mean_value, label = "AM",
+        # hjust = 1 anchors the text's RIGHT edge at the line's right end, so
+        # it sits above the line and inside the panel. Anchoring left would
+        # overflow for any node whose last year is the global last year, which
+        # is most of them.
+        hjust = 1, vjust = -0.45,
+        size = 1.25, colour = "#A8452F"
       )
   }
 
-  p +
+  # ONE BREAK VECTOR, used by the gridlines AND the labels. They used to be
+  # computed independently -- scale_y_log10()'s own default breaks for the
+  # lines, scales::breaks_log() for the text -- so there was never anything
+  # making them agree, and on the real cards they did not: three gridlines
+  # against two labels, with no way to tell which line either label belonged
+  # to (Sam 2026-08-13, "pretty inscrutable"). Sharing the vector makes the
+  # correspondence structural rather than coincidental.
+  brk <- external_series_breaks(limits)
+
+  p <- p +
     ggplot2::scale_x_continuous(breaks = scales::breaks_pretty(n = 3)) +
-    ggplot2::scale_y_continuous(
-      labels = scales::label_comma(),
-      expand = ggplot2::expansion(mult = c(0, 0.08))
+    # log10, matching the violins next door and the rest of this project's
+    # value axes. Points have no baseline to lose, which is exactly why they
+    # survive this scale where bars did not.
+    ggplot2::scale_y_log10(
+      breaks = if (length(brk) > 0) brk else ggplot2::waiver()
     ) +
+    # Value labels go INSIDE the panel; see compact_bar_value_labels() for why
+    # a real axis here misaligns the whole card.
+    compact_bar_value_labels(limits, breaks = brk) +
     ggplot2::labs(x = NULL, y = NULL) +
     ggplot2::theme_minimal(base_size = 7) +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),
       panel.grid.major.x = ggplot2::element_blank(),
-      axis.text = ggplot2::element_text(size = 6, colour = "grey40"),
-      plot.margin = ggplot2::margin(t = 2, r = 6, b = 0, l = 2)
+      axis.text.x = ggplot2::element_text(size = 6, colour = "grey40"),
+      # The whole point of this block: no y axis text, no y ticks, no y title,
+      # so the panel claims no horizontal space outside itself and lines up
+      # with the violin panel exactly.
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      plot.margin = ggplot2::margin(t = 2, r = 2, b = 0, l = 2)
     )
+
+  if (!is.null(limits)) {
+    p <- p + ggplot2::coord_cartesian(xlim = limits$x, ylim = limits$y)
+  }
+
+  p
+}
+
+#' Gridline Positions for the External-Series Panel
+#'
+#' The single source of truth for where the horizontal lines go, so that
+#' [compact_bar_value_labels()] and `scale_y_log10()` cannot disagree. They did:
+#' the scale used its own default breaks and the labels used
+#' `scales::breaks_log()`, which on the real cards gave **three gridlines and
+#' two labels**, with nothing to say which line either label belonged to.
+#'
+#' Whole powers of ten only. The panel is roughly 0.6 in tall on a compact card
+#' and the shared range spans six orders, so `2.5e6`-style intermediate breaks
+#' are both unreadable at that size and pointless on a log axis where the
+#' decades are the structure.
+#'
+#' @param limits Shared limits from [external_series_limits()].
+#' @param n Target number of gridlines.
+#' @return A numeric vector of break positions, possibly empty.
+#' @export
+external_series_breaks <- function(limits, n = 3) {
+  if (is.null(limits) || !all(is.finite(limits$y)) || any(limits$y <= 0)) {
+    return(numeric(0))
+  }
+  lo <- ceiling(log10(limits$y[1]))
+  hi <- floor(log10(limits$y[2]))
+  if (!is.finite(lo) || !is.finite(hi) || hi < lo) {
+    return(numeric(0))
+  }
+  powers <- lo:hi
+  # Thin to at most n, keeping the extremes so the labelled span still
+  # describes the whole panel.
+  if (length(powers) > n) {
+    powers <- unique(round(seq(lo, hi, length.out = n)))
+  }
+  10^powers
+}
+
+#' Value Labels Drawn Inside the Bar Panel
+#'
+#' The same trick, and for the same reason, as [compact_group_labels()]: a real
+#' y axis lives OUTSIDE the panel and so consumes horizontal width, which
+#' patchwork then subtracts from all three of the card's panels and throws the
+#' header and badge strip out of line with every violin card. Drawn inside, the
+#' labels cost nothing and the panels stay aligned.
+#'
+#' Removing the axis entirely was the first fix (2026-08-12) and went too far.
+#' Sam, same day: "currently the source bar charts have no y axis labels at
+#' all. I don't need to tell you why this is bad."
+#'
+#' **Exponent-only labels** (`1e2`, `1e4`), per Sam's "do 1eXX kg, I guess".
+#' The unit is not repeated on each label: it is already on the headline
+#' directly above (`AM 4.06e+07 kg/y`), and at card size a six-character label
+#' per gridline crowds the bars it is meant to annotate. Because the scale is
+#' shared across every source node, the labels are identical on all of them,
+#' which is what makes them comparable at a glance.
+#'
+#' @param limits Shared limits from [external_series_limits()].
+#' @param breaks The break vector, from [external_series_breaks()]. **Pass the
+#'   same vector the scale was given.** Recomputing it here is what produced
+#'   three gridlines against two labels on the real cards; the argument exists
+#'   so the two cannot drift again.
+#' @param size Text size.
+#' @return A list of ggplot2 layers, possibly empty.
+#' @export
+compact_bar_value_labels <- function(
+  limits, breaks = external_series_breaks(limits), size = 1.4
+) {
+  if (is.null(limits) || !all(is.finite(limits$y)) || any(limits$y <= 0)) {
+    return(list())
+  }
+  if (length(breaks) == 0) {
+    return(list())
+  }
+  d <- data.frame(
+    x = limits$x[1],
+    y = breaks,
+    label = paste0("1e", round(log10(breaks)))
+  )
+  list(
+    ggplot2::geom_text(
+      data = d,
+      ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
+      inherit.aes = FALSE,
+      hjust = 0, vjust = -0.25,
+      size = size, colour = "grey45"
+    )
+  )
+}
+
+#' Shared Axis Limits for Every External Node's Bars
+#'
+#' Sam 2026-08-12: "the source bar charts should all use the same x and y axes.
+#' If that means some of the bars are very small, so be it."
+#'
+#' Derived from the whole `external_series` list rather than plumbed through a
+#' new target, because [node_group_strips()] is already handed every node's
+#' series in one object (it has to be, since one call draws many cards), so the
+#' shared range is available for free at the only place that needs it.
+#'
+#' **The y range is over POSITIVE values only, because the axis is log10.**
+#' This reverses the "always include zero" rule that stood for about an hour on
+#' 2026-08-12, and the reversal is the point rather than a correction to skip
+#' past: on a linear axis a bar is read from a zero baseline, so excluding zero
+#' exaggerates every difference; on a log axis there is no zero to include, and
+#' forcing one gives an infinite range.
+#'
+#' The linear version was tried first and rejected on the render. Across the
+#' eight sectors the series span 74 to 5.85e7 kg/yr, nearly six orders, so on
+#' one linear axis `N011-water-supply-and-waste-management`'s tallest year came
+#' out at 0.00025 of the axis: not a small bar, a blank panel that reads as a
+#' broken chart. Sam 2026-08-12: "absolutely a shared log axis rather than a
+#' regular one. Really the y axis on the bar charts should be logged for
+#' reasons of spacing anyway."
+#'
+#' **The bottom of the range is floored at `max_orders` below the top**, and
+#' that is not cosmetic. Measured 2026-08-12: the smallest positive value in
+#' the REACH series is 7.4e-5 kg/yr, and the five smallest all belong to
+#' `N007-other-services-and-administration`, whose own headline is 4.06e6.
+#' Sub-gram annual quantities in a net-quantity series are imports and exports
+#' very nearly cancelling, not a magnitude anyone is claiming; taking them at
+#' face value stretched the shared axis to **12.3 orders** and spent 40% of
+#' every panel on empty space below the smallest real number. Six orders covers
+#' 74 to 5.85e7, which is every sector's actual working range.
+#'
+#' Values below the floor are **clipped, not dropped**: `coord_cartesian()`
+#' zooms rather than censors, so the row is still in the data and its bar is
+#' simply off the bottom.
+#'
+#' @param external_series Named list of (year, value) tibbles keyed by
+#'   `node_id`.
+#' @param max_orders How many orders of magnitude the shared axis may span,
+#'   measured down from the largest value.
+#' @return `list(x = c(min, max), y = c(min, max))` with `y` strictly positive,
+#'   or `NULL` where there is nothing to derive a range from.
+#' @export
+external_series_limits <- function(external_series, max_orders = 6) {
+  if (is.null(external_series) || length(external_series) == 0) {
+    return(NULL)
+  }
+  keep <- Filter(function(d) !is.null(d) && nrow(d) > 0, external_series)
+  if (length(keep) == 0) {
+    return(NULL)
+  }
+  years <- unlist(lapply(keep, function(d) d$year), use.names = FALSE)
+  vals <- unlist(lapply(keep, function(d) d$value), use.names = FALSE)
+  years <- years[is.finite(years)]
+  # Positive only. See above: a log axis has no room for zero or a negative,
+  # and letting one in makes the whole shared range infinite or NaN, which
+  # would silently break EVERY source card rather than the one node at fault.
+  vals <- vals[is.finite(vals) & vals > 0]
+  if (length(years) == 0 || length(vals) == 0) {
+    return(NULL)
+  }
+  top <- max(vals)
+  floor_at <- max(min(vals), top / 10^max_orders)
+  list(
+    # Half a year of padding each side so the outermost bar is not clipped in
+    # half by the panel edge; geom_col's width is 0.7, so 0.5 clears it.
+    x = c(min(years) - 0.5, max(years) + 0.5),
+    # Multiplicative padding, because on a log axis an additive pad is a
+    # different size at each end.
+    y = c(floor_at / 1.6, top * 1.6)
+  )
 }
 
 #' Horizontal Distribution Strips, One per Constituent Group
@@ -296,7 +605,13 @@ node_group_strips <- function(
     if (!is.null(series) && nrow(series) > 0) {
       return(node_external_series_bars(
         series,
-        mean_value = node$external_value[1]
+        mean_value = node$external_value[1],
+        # Derived from the WHOLE list, not this node's slice, so every source
+        # card shares one pair of axes (Sam 2026-08-12). See
+        # external_series_limits() for what that costs the smallest sectors.
+        limits = external_series_limits(external_series),
+        fill = violin_fill,
+        alpha = violin_alpha
       ))
     }
     return(triage_empty_plot("", "no measured data", size = 2.6))
@@ -597,7 +912,7 @@ node_card_heights <- function() {
 #' @param dpi The device resolution this card will be saved at. Only affects
 #'   the corner id marker; see [node_card_header()]. 300 since 2026-08-10, up
 #'   from 200: nothing in the card's geometry is measured in pixels, so this is
-#'   the same card with more of them. Note that `aep_diagram` is written at
+#'   the same card with more of them. Note that `aep_diagrams` is written at
 #'   `dpi = 150`, and a card occupies roughly 340px there, so beyond about 200
 #'   this buys anti-aliasing on the diagram and nothing else. It is the card
 #'   viewed on its own that gains.
@@ -974,7 +1289,23 @@ node_card_header <- function(node, card, dpi = 300) {
       vjust = 1,
       size = 4.5,
       fontface = "bold",
-      label = stringr::str_wrap(node$label[1], width = 18),
+      # WIDTH 24, up from 18 on 2026-08-13. At 18 the longest labels wrapped to
+      # two lines, and the second line dropped onto the headline underneath:
+      # "Marine benthic inverts" printed over "GM 18.2 mg/kg (dry)".
+      #
+      # Measured rather than guessed, with grid::stringWidth() at this text's
+      # own size and face: the widest label in the whole node set is that same
+      # "Marine benthic inverts" at **1.887 in**, against a panel 2.289 in
+      # wide. So every current label fits on one line with 0.4 in to spare, and
+      # the wrap was firing on nothing. 24 characters is about 2.06 in at the
+      # measured 0.086 in per character, which keeps the headroom rather than
+      # spending it.
+      #
+      # This is a width limit, not a collision guard: a genuinely longer label
+      # will still wrap, and two lines still collide with the headline. If that
+      # happens the fix is the title size or the panel heights, not a bigger
+      # number here.
+      label = stringr::str_wrap(node$label[1], width = 24),
       lineheight = 0.95,
       colour = "grey10"
     ) +

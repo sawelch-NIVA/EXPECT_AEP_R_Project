@@ -117,10 +117,8 @@ reach_prtd_file|stem|8c6addfc400fa89b|526d5585c3e1c9c3|51ec57782d519166|20353817
 reach_sector_years|stem|3bfc76f79d181075|0ff2727f60c6e8c8|c06de221fb6261ce|1151906711||t20676.4463603827s|s1215b|1215|qs|local|vector|||0.094||
 reach_node_sectors_data|stem|9667d61d827d0bfd|3ff2227813a41965|7083ce856ca3d6b8|1962068664||t20676.4463682339s|s1544b|1544|qs|local|vector|||0||
 reach_node_summary_data|stem|0a682186ee883536|471606d994a19496|6e05c8865ab9b948|879341653||t20676.4463811991s|s701b|701|qs|local|vector|||0.047||
-aep_node_groups_file|stem|a05e34629c21cc8d|d1d85db0da4cbdf5|51ec57782d519166|564800943|data/clean/aep/aep_node_groups.csv|t20676.369576432s|s292b|292|file|local|vector|||0.406||
 reach_external_series_data|stem|721ade3fc997b06a|f3cde650cf9792c3|9379a272663b9f6c|1194700898||t20676.4496099567s|s1029b|1029|qs|local|vector|||0.016||
 group_decisions|stem|dad86341cf258dda|6c312ddd21856e32|424307804940c6a7|1594493645||t20676.4554219868s|s12302b|12302|qs|local|vector|||0.359|1 group(s) in the data are absent from group_decisions.csv. ℹ Re-run scripts/scaffold_group_decisions.R to append them.|
-aep_node_coverage|stem|91380a9743dd969c|3357723fd679873a|9ad1e4d788c9d81a|915204563||t20676.4554307844s|s10632b|10632|qs|local|vector|||0.109|1 group(s) have no ID yet. ℹ Run scripts/allocate_group_ids.R to append them.|
 triage_species_node_table|stem|3d277074293acad1|e2a59dab6e1336c1|749e40185ea6bd6a|1039034513||t20676.4562233646s|s744b|744|qs|local|vector|||0.094||
 triage_species_plots|stem|714ae73a17175fb0|85d921165583c704|cb3d8f75fb683a67|173108688|triage/Biota_Aquatic_Molluscs_mg_kg_wet_a_species.png*triage/Biota_Aquatic_Fish_mg_kg_wet_a_species.png*triage/Biota_Aquatic_Crustaceans_mg_kg_dry_a_species.png*triage/Biota_Aquatic_Crustaceans_mg_kg_wet_a_species.png*triage/Biota_Aquatic_Molluscs_mg_kg_dry_a_species.png*triage/Biota_Aquatic_Fish_mg_kg_dry_a_species.png*triage/Biota_Terrestrial_Birds_mg_kg_wet_a_species.png*triage/Biota_Aquatic_Algae_mg_kg_wet_a_species.png|t20676.456433227s|s807172b|807172|file|local|vector|||16.281||
 triage_overview_node_table|stem|7db16f3abecbdc8e|c1e29eed0ac70aa0|b541297e38f37022|1244232725||t20676.4564514258s|s805b|805|qs|local|vector|||0.25||
@@ -158,21 +156,24 @@ triage_pilot_plots_f6f2b57431dcad5e|branch|19d5c3cfd72bfa08|23ad413c5bc16c42|7ff
 triage_pilot_plots_5f6009c7fcecef6a|branch|a083d5b5375e1e50|23ad413c5bc16c42|7ffdfb4b6f15b17b|-1047358767|triage/G026-Bb-Onr-S-mol-Blo-Mw_a_density.png*triage/G026-Bb-Onr-S-mol-Blo-Mw_b_date.png*triage/G026-Bb-Onr-S-mol-Blo-Mw_c_source.png*triage/G026-Bb-Onr-S-mol-Blo-Mw_d_site_type.png*triage/G026-Bb-Onr-S-mol-Blo-Mw_e_spatial.png|t20676.4578648977s|s272935b|272935|file|local|vector|triage_pilot_plots||3.187||
 triage_pilot_plots|pattern|545f3dbc7464d906|23ad413c5bc16c42||-896280926||||8953247|file|local|vector||triage_pilot_plots_3cff2e666ddc6f2c*triage_pilot_plots_b227ee241523c696*triage_pilot_plots_d4b573170d778705*triage_pilot_plots_c066187f9e1d70e6*triage_pilot_plots_4b75922d2990d21d*triage_pilot_plots_dd7635dd2939343f*triage_pilot_plots_d05068344d9f1652*triage_pilot_plots_b8c44c6007b18751*triage_pilot_plots_ca0d4046acbe8cd7*triage_pilot_plots_55f001d9ae374f76*triage_pilot_plots_24b5f5a1a17963b1*triage_pilot_plots_82b0a12674385c5e*triage_pilot_plots_71dee3708404c0e6*triage_pilot_plots_037e8a29c348797f*triage_pilot_plots_18864b99544688bd*triage_pilot_plots_9c73548e92f2acd5*triage_pilot_plots_775939a03dff68a3*triage_pilot_plots_30f5c38dd5fb5f70*triage_pilot_plots_4e1c2dffe0e301c1*triage_pilot_plots_09e5331fa0ecaa09*triage_pilot_plots_75ebaeddd688e747*triage_pilot_plots_b6146e333a3e3ca2*triage_pilot_plots_277e8e8dff0b79a3*triage_pilot_plots_d83ae5286788f5eb*triage_pilot_plots_92eaa4a4c80b9329*triage_pilot_plots_148884cb614d70af*triage_pilot_plots_93e67134901161c2*triage_pilot_plots_9b2d8c88cff087e9*triage_pilot_plots_e778f1c94769fd31*triage_pilot_plots_f6f2b57431dcad5e*triage_pilot_plots_5f6009c7fcecef6a|149.668||
 render_nbxx_sample_groups|stem|2b7cf1d9b08f3833|b19c5b9a8c4eb3e9|d3a203ef9cbdc8f6|-1402274525|_site/docs/NBXX-Sample-Groups.html*docs/NBXX-Sample-Groups.qmd|t20676.4583676381s|s514633b|514633|file|local|vector|||45.703||
-aep_edges_file|stem|764cfe1f711405f3|3cb4e26ccf73c1a4|51ec57782d519166|-825589504|data/clean/aep/aep_edges.csv|t20676.4610681027s|s9994b|9994|file|local|vector|||0.625||
-aep_membership_file|stem|a4501d6c301213ed|c662e2dd41b00e81|51ec57782d519166|-603810669|data/clean/aep/aep_membership.csv|t20676.461212274s|s6414b|6414|file|local|vector|||0.703||
-aep_node_members_file|stem|11f1b89046bce447|20eaf2afb2898305|51ec57782d519166|1267871302|data/clean/aep/aep_node_members.csv|t20676.4749306242s|s1485b|1485|file|local|vector|||0.015||
-aep_nodes_file|stem|629ccaff72df4b04|2dc083f191803e48|51ec57782d519166|1938283811|data/clean/aep/aep_nodes.csv|t20676.4834667192s|s12346b|12346|file|local|vector|||0.375||
-aep_nodes|stem|4a3d367e87b3bdc2|7003066c80bed3eb|d5d3b22935f9a562|-878028571||t20676.4842697899s|s3608b|3608|qs|local|vector|||0.312||
-aep_edges|stem|1c685bef3671075d|ef64978004fc7176|5beb2a9db15a9bb0|713469290||t20676.4842780995s|s2042b|2042|qs|local|vector|||0.203|AEP edge layer is incomplete: • 1 edge(s) marked empirical with no evidence_justification: E004|
-aep_membership|stem|4c07a65b0ce07335|d0bdfff64e2d8168|900a2f47ad8227b2|-608043956||t20676.4842836458s|s2316b|2316|qs|local|vector|||0.031||
-aep_node_groups|stem|b5aa84130066396d|67b362970c04b2ca|06a9e712ee008043|1954078222||t20676.484289841s|s567b|567|qs|local|vector|||0.015||
-aep_scoped|stem|fdbf6b0cc580af0a|f51de037060d0d0f|337af12c40b80e27|-275475552||t20676.4842965755s|s4553b|4553|qs|local|vector|||0.047||
-aep_node_members|stem|d2e7042fcc02b24b|653ed2e43070afbe|d278edd29374daa6|363828749||t20676.4843033372s|s1034b|1034|qs|local|vector|||0.016||
-aep_node_cards|stem|460265202411469c|5df238c4cd5cfb9f|f8e3f0f0d51fe5b1|1624011376||t20676.4843699789s|s3630b|3630|qs|local|vector|||3.782|AEP node layer is incomplete: • 2 empirical node(s) have no members: N002-aquaculture,   N021-marine-zooplankton • 2 empirical node(s) resolve to no data: N002-aquaculture,   N021-marine-zooplankton (check the restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). Node 'N016-g-morhua-muscle': 2 values in exclude_campaigns matched no rows. • 'Vm_2010_2025 (Urban Fjord Contaminants)' and 'Vm_2010_2025 (Measures   Monitoring)' ℹ Check for a typo. The rows you meant to exclude are still in the node.. AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 2 empirical node(s) resolve to no data: N002-aquaculture,   N016-g-morhua-muscle (check the restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (not|
-aep_card_limits|stem|c81fb1820a6329d1|5aadd22546a49e34|e13ca4c265b6a9de|-719496817||t20676.4843961686s|s186b|186|qs|local|vector|||0.75||
-node_cards_compact|stem|7f2f420cfff56d35|0df2b768e73d917e|682e4208d9c059bf|1351921524|figures/node_cards_compact/A001/N001-natural-occurrence.png*figures/node_cards_compact/A001/N002-aquaculture.png*figures/node_cards_compact/A001/N003-mine-tailings.png*figures/node_cards_compact/A001/N012-coast-benthic-sed.png*figures/node_cards_compact/A001/N013-coast-water-column.png*figures/node_cards_compact/A001/N014-mussel-soft-tissue.png*figures/node_cards_compact/A001/N015-g-morhua-liver.png*figures/node_cards_compact/A001/N016-g-morhua-muscle.png*figures/node_cards_compact/A001/N017-crab-total.png*figures/node_cards_compact/A001/N018-crab-muscle.png*figures/node_cards_compact/A001/N019-crab-brown-meat.png*figures/node_cards_compact/A001/N020-marine-crustaceans.png*figures/node_cards_compact/A001/N021-marine-zooplankton.png*figures/node_cards_compact/A001/N022-marine-benthic-inverts.png*figures/node_cards_compact/A001/N023-marine-macroalgae.png*figures/node_cards_compact/A001/N024-seabird-egg.png*figures/node_cards_compact/A001/N025-eider-blood.png*figures/node_cards_compact/A001/N026-eider-eggs.png*figures/node_cards_compact/A001/N004-manufacturing.png*figures/node_cards_compact/A001/N005-agriculture-forestry-and-fishing.png*figures/node_cards_compact/A001/N006-mining-and-quarrying.png*figures/node_cards_compact/A001/N007-other-services-and-administration.png*figures/node_cards_compact/A001/N008-wholesale-and-retail-trade.png*figures/node_cards_compact/A001/N009-construction-and-real-estate.png*figures/node_cards_compact/A001/N010-transportation-and-storage.png*figures/node_cards_compact/A001/N011-water-supply-and-waste-management.png*figures/node_cards_compact/A002/N001-natural-occurrence.png*figures/node_cards_compact/A002/N002-aquaculture.png*figures/node_cards_compact/A002/N012-coast-benthic-sed.png*figures/node_cards_compact/A002/N013-coast-water-column.png*figures/node_cards_compact/A002/N014-mussel-soft-tissue.png*figures/node_cards_compact/A002/N015-g-morhua-liver.png*figures/node_cards_compact/A003/N001-natural-occurrence.png*figures/node_cards_compact/A003/N002-aquaculture.png*figures/node_cards_compact/A003/N003-mine-tailings.png*figures/node_cards_compact/A003/N012-coast-benthic-sed.png*figures/node_cards_compact/A003/N013-coast-water-column.png*figures/node_cards_compact/A003/N014-mussel-soft-tissue.png*figures/node_cards_compact/A003/N015-g-morhua-liver.png*figures/node_cards_compact/A003/N016-g-morhua-muscle.png*figures/node_cards_compact/A003/N022-marine-benthic-inverts.png*figures/node_cards_compact/A004/N001-natural-occurrence.png*figures/node_cards_compact/A004/N002-aquaculture.png*figures/node_cards_compact/A004/N003-mine-tailings.png*figures/node_cards_compact/A004/N012-coast-benthic-sed.png*figures/node_cards_compact/A004/N013-coast-water-column.png*figures/node_cards_compact/A004/N015-g-morhua-liver.png*figures/node_cards_compact/A004/N016-g-morhua-muscle.png*figures/node_cards_compact/A005/N001-natural-occurrence.png*figures/node_cards_compact/A005/N002-aquaculture.png*figures/node_cards_compact/A005/N003-mine-tailings.png*figures/node_cards_compact/A005/N012-coast-benthic-sed.png*figures/node_cards_compact/A005/N013-coast-water-column.png*figures/node_cards_compact/A005/N014-mussel-soft-tissue.png*figures/node_cards_compact/A006/N001-natural-occurrence.png*figures/node_cards_compact/A006/N002-aquaculture.png*figures/node_cards_compact/A006/N003-mine-tailings.png*figures/node_cards_compact/A006/N012-coast-benthic-sed.png*figures/node_cards_compact/A006/N013-coast-water-column.png*figures/node_cards_compact/A006/N023-marine-macroalgae.png|t20676.4853272623s|s2260503b|2260503|file|local|vector|||79.015|Node 'N016-g-morhua-muscle': 2 values in exclude_campaigns matched no rows. • 'Vm_2010_2025 (Urban Fjord Contaminants)' and 'Vm_2010_2025 (Measures   Monitoring)' ℹ Check for a typo. The rows you meant to exclude are still in the node.|
-aep_diagram|stem|b0a076d927a74901|d03b0a72ac0def75|8edae84c818fe060|834918380|figures/aep_A001.png*figures/aep_A002.png*figures/aep_A003.png*figures/aep_A004.png*figures/aep_A005.png*figures/aep_A006.png|t20676.4907224s|s1520886b|1520886|file|local|vector|||18.609||
-aep_diagram_bare|stem|f18f57903dbd5248|ebc517fa938b385d|7d227418641c8afa|1936095104|figures/aep_A001_bare.png*figures/aep_A002_bare.png*figures/aep_A003_bare.png*figures/aep_A004_bare.png*figures/aep_A005_bare.png*figures/aep_A006_bare.png|t20676.5038462436s|s994159b|994159|file|local|vector|||26.437||
+render_ap04_units|stem|b2afc6164fc1e55c|2ecb5ec2120794ba|84051488166493c8|-1135025311|_site/docs/AP04-unit-corrections.html*docs/AP04-unit-corrections.qmd|t20676.5285078828s|s134534b|134534|file|local|vector|||68.734||
+aep_edges_file|stem|8e03bd6c2fc0fe2e|3cb4e26ccf73c1a4|51ec57782d519166|-825589504|data/clean/aep/aep_edges.csv|t20677.4701997227s|s13492b|13492|file|local|vector|||1.875||
+aep_diagram_bare|stem|10ce50a0ae9065ff|2620cbc84c5b41bf|63b66e30cb00a188|1936095104|figures/aep_A001_bare.png*figures/aep_A002_bare.png*figures/aep_A003_bare.png*figures/aep_A004_bare.png*figures/aep_A005_bare.png*figures/aep_A006_bare.png|t20677.5519683531s|s1718239b|1718239|file|local|vector|||20||
+aep_diagram|stem|03d5d7c22095b53f|2d1b6bfa1f6bf666|a7096307e7d02d00|834918380|figures/aep_A001.png*figures/aep_A002.png*figures/aep_A003.png*figures/aep_A004.png*figures/aep_A005.png*figures/aep_A006.png|t20677.5847053887s|s8829065b|8829065|file|local|vector|||28.172||
+aep_membership_file|stem|cfe45c7f6fa3b914|c662e2dd41b00e81|51ec57782d519166|-603810669|data/clean/aep/aep_membership.csv|t20677.5910335763s|s6968b|6968|file|local|vector|||0.438||
+aep_node_members_file|stem|1253ed903ef6f408|20eaf2afb2898305|51ec57782d519166|1267871302|data/clean/aep/aep_node_members.csv|t20677.591031621s|s1766b|1766|file|local|vector|||0||
+aep_node_groups_file|stem|036c6ab71b0d6f54|d1d85db0da4cbdf5|51ec57782d519166|564800943|data/clean/aep/aep_node_groups.csv|t20677.591032046s|s451b|451|file|local|vector|||0.015||
+aep_node_coverage|stem|e7b2dc202c1540a2|3357723fd679873a|0424e3d1216b3237|915204563||t20677.5945240788s|s10657b|10657|qs|local|vector|||0.125|1 group(s) have no ID yet. ℹ Run scripts/allocate_group_ids.R to append them.|
+aep_nodes_file|stem|964d3bf3244918c9|2dc083f191803e48|51ec57782d519166|1938283811|data/clean/aep/aep_nodes.csv|t20678.4543681322s|s13604b|13604|file|local|vector|||0.469||
+aep_nodes|stem|9cf5c221b4dc6df1|7003066c80bed3eb|6fa2737ea36358ed|-878028571||t20678.4557097311s|s4035b|4035|qs|local|vector|||0.344||
+aep_edges|stem|3e7646b94cf8a936|ef64978004fc7176|2a83179c13774647|713469290||t20678.4557243945s|s2213b|2213|qs|local|vector|||0.266|AEP edge layer is incomplete: • 1 edge(s) marked empirical with no evidence_justification: E004 • 9 node(s) have no edges at all: N018-crab-muscle, N019-crab-brown-meat,   N020-marine-crustaceans, N024-seabird-egg, N025-eider-blood, N026-eider-eggs,   N027-river-water-column, N028-river-benthic-sed, N029-air|
+aep_membership|stem|33a0d605cb995e54|d0bdfff64e2d8168|6dbe342c0cbdd140|-608043956||t20678.4557372652s|s2373b|2373|qs|local|vector|||0.031||
+aep_node_groups|stem|8ab317f287b127e2|67b362970c04b2ca|277e5f3589ed90a8|1954078222||t20678.4557514216s|s637b|637|qs|local|vector|||0.015||
+aep_scoped|stem|bba98bf35586360b|f51de037060d0d0f|d44874ad2753fec7|-275475552||t20678.4557646649s|s4997b|4997|qs|local|vector|||0.094||
+aep_node_members|stem|584e1a0be584d6d3|653ed2e43070afbe|1f39c72d7a128b3d|363828749||t20678.4557765263s|s1098b|1098|qs|local|vector|||0.031||
+render_ap05_aep|stem|5ceebc1e270d17f2|9782524618564e7e|168f4ef5afb7c417|1292803788|_site/docs/AP05-aep.html*docs/AP05-aep.qmd|t20678.4567019206s|s445106b|445106|file|local|vector|||69.047||
+aep_diagrams_bare|stem|5215bbb8aa86bd33|2620cbc84c5b41bf|cf3cc0e8f4fca60a|-245780601|figures/aep_A001_bare.png*figures/aep_A002_bare.png*figures/aep_A003_bare.png*figures/aep_A004_bare.png*figures/aep_A005_bare.png*figures/aep_A006_bare.png|t20678.4568913881s|s1836316b|1836316|file|local|vector|||13.765||
+aep_diagrams|stem|75e1bfb0162bd900|2d1b6bfa1f6bf666|1af16eb6d9cb2d1f|-1148174454|figures/aep_A001.png*figures/aep_A002.png*figures/aep_A003.png*figures/aep_A004.png*figures/aep_A005.png*figures/aep_A006.png|t20678.4575386007s|s8657122b|8657122|file|local|vector|||26.953||
 split_row_ids|function|e2587d025ade3dd2
 triage_group_cols|function|6c1070893dc47f1a
 unit_numerator_factors|function|9ae837a7c3e10471
@@ -195,11 +196,11 @@ node_card_heights|function|c2c01822c26c9c07
 save_literature_parquet|function|2ac5b0ea7382aa45
 restrict_to_dominant_unit|function|416da43ab480d964
 load_literature_parquet|function|180f5530c96d3b09
-starttime|object|727c77c6f722e7c3
+starttime|object|ad048ee319dddeb1
 generate_copper_thresholds|function|82c6547081a3b593
 triage_flag_limits|function|1e7f7d71759db792
 vm_filter_sites|function|903af27e97c404d5
-aep_edge_statuses|function|2b88cdc069487095
+aep_edge_statuses|function|dbddcf55b6f2f432
 empty_aep_edges|function|0af052c6978287b4
 epeq_cols|function|07d0f87142a721b7
 here_rel|function|c890e0f691c97416
@@ -208,6 +209,7 @@ analysis_group_cols|function|6c1070893dc47f1a
 empty_aep_node_groups|function|f0cdce064901dee1
 row_id_disambiguators|function|bcbb333ba8d6b8d0
 label_colors|object|34a05b21b83f806b
+external_series_breaks|function|cf0bc0cd64ce3f0b
 drop_nonpositive_measurements|function|863540153360a966
 empty_threshold_match|function|dda6329418034298
 outlier_flag_table|function|6d65a0dccf291e67
@@ -227,7 +229,8 @@ add_threshold_boundary_class|function|42a6ffd8b63a955c
 vm_create_edata_reference_table|function|c68594e9024549ad
 get_study_area_bbox|function|2fe6f910b68f7146
 aep_edge_styles|function|67d89703fd7f2ff8
-empty_aep_nodes|function|faf1104a06af7ca5
+drop_rejected_edges|function|ff5651739a78e488
+empty_aep_nodes|function|ecfe7848a445fe10
 add_coverage_columns|function|4a1d4de612fb5528
 triage_relaxed_cols|function|e4ca07f396193dac
 filter_reachable_nodes|function|d6bd07eaa86eded6
@@ -251,11 +254,12 @@ triage_unit_label|function|73ef852a99f23921
 sample_groups_flextable|function|d64599aa5f332d78
 prtr_media|function|b5c570fd7e0a69dd
 prtr_annual_totals|function|0064e0f253dc6068
+aep_edge_arrow_stubs|function|4974867d24eda86c
 process_countries_wgs84|function|d343eeb36eb33a82
 marine_colors|object|7b3a2b11c99c18d9
 ne_get|function|d42c74c3c7852ce5
 st_line_split|function|a7e084999681f4c0
-apply_node_exclusion|function|02823f575e83ba2e
+apply_node_exclusion|function|278e41870ad43f89
 theme_aep_plots|function|75e4487c71a5d61c
 headline_is_suspect|function|9cd65fac8e705247
 left_join_diagnostic|function|bfc3890f70324169
@@ -289,12 +293,11 @@ reach_complete_years|function|bebb305b897adf24
 threshold_class_colours|function|c56272be5bcddcac
 compact_axis_theme|function|7460ebf479c8a596
 compact_group_labels|function|70c451716c347f14
-node_external_series_bars|function|b2024094667e5901
+external_series_limits|function|0c64831557ee6f23
 triage_empty_plot|function|0638690594e8231c
 aep_node_tile_layers|function|f550609d4c109e87
 outlier_dotplot_binwidth|function|7201cac3121a9db8
 aep_edge_coords|function|ac8dcf4828af2d9a
-validate_aep_edges|function|8301b219b6ceb5db
 plot_copper_ridges_species|function|b7df3a6e49639a00
 triage_date_scale|function|efc17dcc91bcb2a4
 map_tissue_type|function|5da448aa133f0980
@@ -330,7 +333,7 @@ fread_module_csv|function|bae3470a77ee85f0
 reach_node_id_by_sector|function|d3a9127880e043e5
 aep_node_levels|function|2626430bef5033ce
 aep_node_types|function|9de9c22fc6f612ae
-external_value_cols|function|90ee0df187259388
+external_value_cols|function|c5680b2299d4af3c
 group_decision_levels|function|395b88293b43c220
 node_card_extent|function|4c8cbd855fac0ff4
 aep_edge_bezier_points|function|bfc4f0078e331c50
@@ -345,8 +348,8 @@ ocean_colors|object|895978c666ba7c58
 pb_action_levels|object|bf1e230407f723b1
 prtr_facility_files|function|1eff5d984206f3cc
 mine_tailings_coords|function|e372788873e30d76
-epeq_score_colours|function|850fce697b6bc069
-.Random.seed|object|a4172ce603b54a10
+epeq_score_colours|function|fbff741066c4bb08
+.Random.seed|object|10eaf398e97fd70f
 .__DEVTOOLS__|object|f89badf81490623e
 read_prtr_file|function|bf3d1f73de154364
 node_label_slug|function|e7e3112ae5368f61
@@ -354,7 +357,6 @@ clean_joined_columns|function|cc7756f4c945b315
 subcomp_codes|object|6055a0ed55fab7ac
 empty_aep_manifest|function|aedc9051b0ed73a2
 report_row_id_status|function|e7232ba41592d4c0
-aep_edge_progress|function|b5063a724321fb92
 triage_minor_grid_theme|function|14bdf9e0ce71977a
 make_measurement_boxplot|function|b0b87d27da132e1b
 group_decision_progress|function|992a57abc0cf192c
@@ -382,7 +384,8 @@ notebook_names|function|193ee608fa0617c2
 assign_notebook|function|2a4501db5c1b9185
 flag_outliers|function|6f493ce243e38932
 scan_comment_unit_flags|function|25db3e96cdedb6de
-read_aep_edges|function|e6124fddd5f6bc2b
+aep_edge_live_statuses|function|544c7d7620e728d2
+read_aep_edges|function|0ce968169863ca49
 read_reach_declarations|function|289d12cdc930eb9a
 read_aep_membership|function|c5a374fcb1765b71
 read_aep_node_members|function|abe29693e9b7aabc
@@ -390,6 +393,7 @@ read_reach_sector_years|function|306e4c11afc31a55
 report_dropped_measurements|function|cab3673c578fa887
 read_aep_node_groups|function|3f257ed256338055
 add_row_ids|function|fb3b47b0f7c33e38
+compact_bar_value_labels|function|70190b0e1b1f3121
 thresholds_in_limits|function|26676b546dee55a7
 triage_source_label|function|919b111ed4dcaaf3
 filter_to_species_node|function|ae3e4aeb6b1877c1
@@ -401,6 +405,8 @@ threshold_opens_numeral|function|cd41f5bddbde8208
 threshold_label|function|0fcd7968fa549c07
 standardise_threshold_units|function|0c8f562ad4b1a73a
 map_literature_data_wgs84|function|cd8e929c3f3a007e
+validate_aep_edges|function|d50f09f7a10baaea
+aep_edge_progress|function|0492cbf27bd3c222
 get_biota_groups|function|481746ac1516359f
 get_compartment_groups|function|2575c3352a7010a0
 filter_to_overview_node|function|0e9336decc08d41e
@@ -410,7 +416,7 @@ format_species_code|function|fc7b3f29af473b48
 process_marine_geography_wgs84|function|61361de9b2c42089
 plot_reference_species_heatmap|function|11a5e65c17a6e9d7
 plot_reference_compartment_heatmap|function|fcef6ded7bd72e64
-node_card_header|function|074e2edefded738f
+node_card_header|function|31085951bdcde1c0
 join_all_literature_modules|function|46ed35b0cd683d72
 write_unit_corrections_template|function|5d2b68249418a04d
 theme_arctic_map|function|4e60c94dcaf242d9
@@ -431,14 +437,14 @@ standardise_IDate_all|function|f160062622cff82a
 add_species_tissue_col|function|5d7326a509865fc9
 triage_category_overlay|function|0d3edf6f97ab4fbf
 fread_all_module_files|function|123f056e937e5af8
-read_aep_nodes|function|abdf62545ec03fd9
-aep_node_human_cols|function|7f582ee0e88f3f76
+read_aep_nodes|function|7200feb07b5d3ac2
+aep_node_human_cols|function|f25265facd81314d
 aep_diagram_height|function|bfc3e32facca7025
 aep_diagram_image_size|function|ae436ad4108b1c6d
 aep_group_boxes|function|4769836b64258e27
 node_card_bg_colour|function|febd8b96393e55cb
 annotate_oceans_for_display|function|d60f3efd22075441
-node_epeq_badges|function|cd4a628e1cc7ca95
+node_epeq_badges|function|5966f36e65c41ab9
 read_prtr_long|function|5e4b2dfb1813dd90
 next_node_id|function|a21b33f6d6f0fb2a
 read_aep_manifest|function|a68855180af57004
@@ -459,10 +465,11 @@ resolve_compartment_conflicts|function|ec7d0b3f09f4f96d
 aep_scoped_nodes|function|6350ff0083c8a3aa
 read_group_decisions|function|4efdb618ff016acd
 outlier_group_analysis|function|c0c203b9cfa6a8b3
-resolve_node_data|function|1d36059741e19e10
+resolve_node_data|function|efa15c8430100bef
 triage_flag_by_category|function|8a8ecb8bbf80c8c6
 flag_by_facet|function|3162f40102cba097
 reach_node_sectors|function|5b122c9859a41746
+node_external_series_bars|function|04901086a9529479
 group_summary_line|function|d3d7c40217efe7ef
 threshold_axis_label|function|0f283ed9985b1403
 threshold_boundary_class_number|function|7c547f995db75759
@@ -475,7 +482,7 @@ read_unit_corrections|function|419497009c93aeeb
 refresh_group_panels|function|53edada210dcc197
 get_common_names|function|6d876d634cb69e50
 triage_species_nodes|function|7e3b07a27348bcb4
-plot_aep|function|7d934e84e3be5b35
+plot_aep|function|7330f8259a4d7750
 node_card_theme|function|2de99b6e074aaae8
 parse_measured_unit|function|8ff100028c6136da
 match_unit_correction|function|446c45c44b6389bb
@@ -484,8 +491,8 @@ build_sample_groups_table|function|8da3d0b86d94aa2f
 sample_triage_groups|function|55134cc2802d3fe3
 triage_overview_levels|function|cb9438a231e6490e
 apply_notebook_scheme|function|f209b6b439a78394
-node_card_limits|function|81909d5eaa73774c
-node_report_card|function|bded2e8ec1669057
+node_card_limits|function|f48280e380089e46
+node_report_card|function|499c1143a48d921d
 plot_outlier_distribution|function|d95503b7e7ab2738
 reach_node_summary|function|ecd9617aeb08613b
 reach_external_series|function|fdbf4d33384fd7c2
@@ -497,28 +504,29 @@ triage_threshold_layers|function|9808374166031821
 spatial_bin_strokes|function|7f02ffeb7cb7535f
 thresholds_for_group_by_unit|function|05cf916fbb35c8dd
 prepare_geography_polar|function|538f66948dce500e
-write_aep_diagrams|function|e99f2a885b056b83
+write_aep_diagrams|function|4b94d8535fd2be8d
 standardise_measured_units|function|4d569946564c9175
 apply_unit_corrections|function|bb1f9e7d786a7016
 triage_overview_nodes|function|f975f0c0c9581d1c
-aep_node_report_cards|function|c9f99bb9a0b57758
+aep_node_report_cards|function|b2d755122e3fc5d5
 generate_group_notebooks|function|c158014b3ee5007d
 compact_value_scale|function|bf6d2ce60ccc43c9
 triage_plot_by_category|function|6e40bb44dc58ced6
 triage_plot_by_date|function|95c01fea7fb84114
 triage_plot_spatial|function|d3a6d9ae1200cbca
 triage_plot_density|function|ddc477b8b142cbf4
-aep_all_report_cards|function|b04ed6f46af9e555
-node_group_strips|function|d35db14dcec43e52
+aep_all_report_cards|function|0b8db0f693b787cf
+node_group_strips|function|e824087682332bf9
 write_species_overview_for_node|function|3738866f9d2fcac0
 write_triage_overview_for_node|function|d9df97aac34baedd
 triage_plot_by_source|function|2341089cfaf2b069
-node_card|function|b949a88f5df49fd2
+node_card|function|e41e3a875e18794f
 write_species_overviews|function|2be917d448caf652
 write_triage_overviews|function|9ce6c6821974114e
 write_triage_plots_for_group|function|f6896193b3a2e6fa
-write_node_cards|function|dc05efb23b9f47aa
+write_node_cards|function|a52156479ab201c5
 write_triage_plots|function|d4b5f436dba49b32
-write_aep_node_cards|function|1d307e1bd11dfa5d
-render_ap04_units|stem|b2afc6164fc1e55c|2ecb5ec2120794ba|84051488166493c8|-1135025311|_site/docs/AP04-unit-corrections.html*docs/AP04-unit-corrections.qmd|t20676.5285078828s|s134534b|134534|file|local|vector|||68.734||
-render_ap05_aep|stem|ccace24738606cc4|9782524618564e7e|b90b6aefd8ef947d|1292803788|_site/docs/AP05-aep.html*docs/AP05-aep.qmd|t20676.5286270378s|s435194b|435194|file|local|vector|||77.859||
+write_aep_node_cards|function|f68a623e6a6d6e9e
+aep_card_limits|stem|173390e3c1fde2ee|5aadd22546a49e34|158e7b965b36b808|-719496817||t20678.5106887598s|s186b|186|qs|local|vector|||5.5||
+aep_node_cards|stem|304f36e81fc0d36e|5df238c4cd5cfb9f|5fa637faa2534d0f|1624011376||t20678.5107528893s|s3884b|3884|qs|local|vector|||11.078|AEP node layer is incomplete: • 2 empirical node(s) have no members: N002-aquaculture,   N021-marine-zooplankton • 2 empirical node(s) resolve to no data: N002-aquaculture,   N021-marine-zooplankton (check the restriction columns) • 2 external node(s) have no external_value: N001-natural-occurrence, N029-air   (nothing to compute from and nothing entered) • 3 node(s) are not fully EPEQ scored: N027-river-water-column,   N028-river-benthic-sed, N029-air. AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 2 empirical node(s) resolve to no data: N002-aquaculture,   N016-g-morhua-muscle (check the restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered). AEP node layer is incomplete: • 1 empirical node(s) have no members: N002-aquaculture • 1 empirical node(s) resolve to no data: N002-aquaculture (check the   restriction columns) • 1 external node(s) have no external_value: N001-natural-occurrence (nothing   to compute from and nothing entered)|
+node_cards_compact|stem|60b3c43874583481|0df2b768e73d917e|a2c907e7c332beb2|1351921524|figures/node_cards_compact/A001/N001-natural-occurrence.png*figures/node_cards_compact/A001/N002-aquaculture.png*figures/node_cards_compact/A001/N003-mine-tailings.png*figures/node_cards_compact/A001/N012-coast-benthic-sed.png*figures/node_cards_compact/A001/N013-coast-water-column.png*figures/node_cards_compact/A001/N014-mussel-soft-tissue.png*figures/node_cards_compact/A001/N015-g-morhua-liver.png*figures/node_cards_compact/A001/N016-g-morhua-muscle.png*figures/node_cards_compact/A001/N017-crab-total.png*figures/node_cards_compact/A001/N018-crab-muscle.png*figures/node_cards_compact/A001/N019-crab-brown-meat.png*figures/node_cards_compact/A001/N020-marine-crustaceans.png*figures/node_cards_compact/A001/N021-marine-zooplankton.png*figures/node_cards_compact/A001/N022-marine-benthic-inverts.png*figures/node_cards_compact/A001/N023-marine-macroalgae.png*figures/node_cards_compact/A001/N024-seabird-egg.png*figures/node_cards_compact/A001/N025-eider-blood.png*figures/node_cards_compact/A001/N026-eider-eggs.png*figures/node_cards_compact/A001/N004-manufacturing.png*figures/node_cards_compact/A001/N005-agriculture-forestry-and-fishing.png*figures/node_cards_compact/A001/N006-mining-and-quarrying.png*figures/node_cards_compact/A001/N007-other-services-and-administration.png*figures/node_cards_compact/A001/N008-wholesale-and-retail-trade.png*figures/node_cards_compact/A001/N009-construction-and-real-estate.png*figures/node_cards_compact/A001/N010-transportation-and-storage.png*figures/node_cards_compact/A001/N011-water-supply-and-waste-management.png*figures/node_cards_compact/A001/N027-river-water-column.png*figures/node_cards_compact/A001/N028-river-benthic-sed.png*figures/node_cards_compact/A001/N029-air.png*figures/node_cards_compact/A002/N001-natural-occurrence.png*figures/node_cards_compact/A002/N002-aquaculture.png*figures/node_cards_compact/A002/N012-coast-benthic-sed.png*figures/node_cards_compact/A002/N013-coast-water-column.png*figures/node_cards_compact/A002/N014-mussel-soft-tissue.png*figures/node_cards_compact/A002/N015-g-morhua-liver.png*figures/node_cards_compact/A003/N001-natural-occurrence.png*figures/node_cards_compact/A003/N002-aquaculture.png*figures/node_cards_compact/A003/N003-mine-tailings.png*figures/node_cards_compact/A003/N012-coast-benthic-sed.png*figures/node_cards_compact/A003/N013-coast-water-column.png*figures/node_cards_compact/A003/N014-mussel-soft-tissue.png*figures/node_cards_compact/A003/N015-g-morhua-liver.png*figures/node_cards_compact/A003/N016-g-morhua-muscle.png*figures/node_cards_compact/A003/N022-marine-benthic-inverts.png*figures/node_cards_compact/A004/N001-natural-occurrence.png*figures/node_cards_compact/A004/N002-aquaculture.png*figures/node_cards_compact/A004/N003-mine-tailings.png*figures/node_cards_compact/A004/N012-coast-benthic-sed.png*figures/node_cards_compact/A004/N013-coast-water-column.png*figures/node_cards_compact/A004/N015-g-morhua-liver.png*figures/node_cards_compact/A004/N016-g-morhua-muscle.png*figures/node_cards_compact/A005/N001-natural-occurrence.png*figures/node_cards_compact/A005/N002-aquaculture.png*figures/node_cards_compact/A005/N003-mine-tailings.png*figures/node_cards_compact/A005/N012-coast-benthic-sed.png*figures/node_cards_compact/A005/N013-coast-water-column.png*figures/node_cards_compact/A005/N014-mussel-soft-tissue.png*figures/node_cards_compact/A006/N001-natural-occurrence.png*figures/node_cards_compact/A006/N002-aquaculture.png*figures/node_cards_compact/A006/N003-mine-tailings.png*figures/node_cards_compact/A006/N012-coast-benthic-sed.png*figures/node_cards_compact/A006/N013-coast-water-column.png*figures/node_cards_compact/A006/N023-marine-macroalgae.png|t20678.5119034608s|s2356845b|2356845|file|local|vector|||96.11|1 year with a non-positive value omitted from the series: a log axis cannot show them. These are net exports, not releases.. 2 years with a non-positive value omitted from the series: a log axis cannot show them. These are net exports, not releases.|

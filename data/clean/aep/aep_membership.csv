@@ -1,61 +1,64 @@
-aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A001,N012-coast-benthic-sed,,,,,,,Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones.
-A001,N013-coast-water-column,,,,,,,
-A001,N014-mussel-soft-tissue,,,,,,,
-A001,N015-g-morhua-liver,,,,,,,
-A001,N016-g-morhua-muscle,,,,,,,
-A001,N001-natural-occurrence,,,,,,,
-A001,N002-aquaculture,,,,,,,
-A002,N012-coast-benthic-sed,,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
-A002,N013-coast-water-column,,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
-A002,N014-mussel-soft-tissue,,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
-A002,N015-g-morhua-liver,,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
-A002,N001-natural-occurrence,,,,,,,External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence.
-A002,N002-aquaculture,,,,,,,External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd.
-A001,N003-mine-tailings,,,,,,,
-A001,N017-crab-total,,,,,,,
-A001,N018-crab-muscle,,,,,,,
-A001,N019-crab-brown-meat,,,,,,,
-A001,N020-marine-crustaceans,,,,,,,
-A003,N001-natural-occurrence,,,,,,,External. Same national node; no Sørfjord-specific instance written yet.
-A003,N002-aquaculture,,,,,,,External. Not checked against Hardangerfjorden/Sørfjord aquaculture sites; borrowed from the national node as-is.
-A003,N003-mine-tailings,,,,,,,"External. The historic Odda zinc/copper smelter and its tailings are this AEP's own instance of this source, but the node's external quantification (Kvassnes & Iversen 2013) is Nussir-specific, not Odda's. Wants a Sørfjord source figure before this AEP is more than a placeholder for it."
-A003,N012-coast-benthic-sed,,,,,,,"97 measurements, 2 references (VannmiljøCopper2010-2025, 2005GillanStructureOfSediment) inside the box. Nationally 25,024 from 2 references."
-A003,N013-coast-water-column,,,,,,,"323 marine + 45 freshwater measurements, 1 reference (VannmiljøCopper2010-2025). Nationally 4,969. As with A002, freshwater upstream of the fjord may be worth its own node."
-A003,N014-mussel-soft-tissue,,,,,,,"121 Mytilus edulis measurements, 1 reference (VannmiljøCopper2010-2025). Nationally 5,498 from 3 references."
-A003,N015-g-morhua-liver,,,,,,,"150 Gadus morhua measurements inside the box, 1 reference. Liver vs muscle not separately verified for this count, unlike A002's 156; treat as combined until checked. Nationally liver alone is 2,796 from 1 reference."
-A003,N016-g-morhua-muscle,,,,,,,"Same 150 G. morhua measurements as N015 above until the tissue split is checked. Nationally muscle is thin (see aep_nodes.csv notes, evidence_score 1)."
-A003,N022-marine-benthic-inverts,,,,,,,"18 Asterias rubens measurements, 1 reference (2003CoteurFieldContaminationOf), matching G040-Bi-Cwb-A-rub-Pyl-Md exactly. Not previously a member of any AEP; A001 doesn't include it either."
-A004,N001-natural-occurrence,,,,,,,"National scope, no override. Same as A001."
-A004,N002-aquaculture,,,,,,,"National scope, no override. Same as A001."
-A004,N003-mine-tailings,,,,,,,"National scope, no override. Same as A001."
-A004,N012-coast-benthic-sed,,,,,,,"National scope, no override. Same as A001."
-A004,N013-coast-water-column,,,,,,,"National scope, no override. Same as A001."
-A004,N015-g-morhua-liver,,,,,,,"National scope, no override. Same as A001."
-A004,N016-g-morhua-muscle,,,,,,,"National scope, no override. Same as A001."
-A005,N001-natural-occurrence,,,,,,,"National scope, no override. Same as A001."
-A005,N002-aquaculture,,,,,,,"National scope, no override. Same as A001."
-A005,N003-mine-tailings,,,,,,,"National scope, no override. Same as A001."
-A005,N012-coast-benthic-sed,,,,,,,"National scope, no override. Same as A001."
-A005,N013-coast-water-column,,,,,,,"National scope, no override. Same as A001."
-A005,N014-mussel-soft-tissue,,,,,,,"National scope, no override. Same as A001."
-A006,N001-natural-occurrence,,,,,,,"National scope, no override. Same as A001."
-A006,N002-aquaculture,,,,,,,"National scope, no override. Same as A001."
-A006,N003-mine-tailings,,,,,,,"National scope, no override. Same as A001."
-A006,N012-coast-benthic-sed,,,,,,,"National scope, no override. Same as A001."
-A006,N013-coast-water-column,,,,,,,"National scope, no override. Same as A001."
-A006,N023-marine-macroalgae,,,,,,,"Not previously a member of any AEP; A001 doesn't include it either. Its evidence/quantification scores on aep_nodes.csv (1, TODO) were written generically and haven't been reviewed with this AEP in mind."
-A001,N004-manufacturing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N005-agriculture-forestry-and-fishing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N006-mining-and-quarrying,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N007-other-services-and-administration,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N008-wholesale-and-retail-trade,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N009-construction-and-real-estate,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N010-transportation-and-storage,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N011-water-supply-and-waste-management,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
-A001,N021-marine-zooplankton,,,,,,,"Not previously a member of A001 despite having edges since 2026-08-11; A001 is meant to be the unrestricted, everything AEP."
-A001,N022-marine-benthic-inverts,,,,,,,Not previously a member of A001 despite having edges since 2026-08-11 (added for A003/Sørfjorden).
-A001,N023-marine-macroalgae,,,,,,,Not previously a member of A001 despite having edges since 2026-08-11 (added for A006/Macroalgae).
-A001,N024-seabird-egg,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
-A001,N025-eider-blood,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
-A001,N026-eider-eggs,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
+﻿"aep_id","node_id","x","y","evidence_score","evidence_justification","quantification_score","quantification_justification","notes"
+"A001","N012-coast-benthic-sed",,,,,,,"Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones."
+"A001","N013-coast-water-column",,,,,,,
+"A001","N014-mussel-soft-tissue",,,,,,,
+"A001","N015-g-morhua-liver",,,,,,,
+"A001","N016-g-morhua-muscle",,,,,,,
+"A001","N001-natural-occurrence",,,,,,,
+"A001","N002-aquaculture",,,,,,,
+"A002","N012-coast-benthic-sed",,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
+"A002","N013-coast-water-column",,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
+"A002","N014-mussel-soft-tissue",,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
+"A002","N015-g-morhua-liver",,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
+"A002","N001-natural-occurrence",,,,,,,"External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence."
+"A002","N002-aquaculture",,,,,,,"External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd."
+"A001","N003-mine-tailings",,,,,,,
+"A001","N017-crab-total",,,,,,,
+"A001","N018-crab-muscle",,,,,,,
+"A001","N019-crab-brown-meat",,,,,,,
+"A001","N020-marine-crustaceans",,,,,,,
+"A003","N001-natural-occurrence",,,,,,,"External. Same national node; no Sørfjord-specific instance written yet."
+"A003","N002-aquaculture",,,,,,,"External. Not checked against Hardangerfjorden/Sørfjord aquaculture sites; borrowed from the national node as-is."
+"A003","N003-mine-tailings",,,,,,,"External. The historic Odda zinc/copper smelter and its tailings are this AEP's own instance of this source, but the node's external quantification (Kvassnes & Iversen 2013) is Nussir-specific, not Odda's. Wants a Sørfjord source figure before this AEP is more than a placeholder for it."
+"A003","N012-coast-benthic-sed",,,,,,,"97 measurements, 2 references (VannmiljøCopper2010-2025, 2005GillanStructureOfSediment) inside the box. Nationally 25,024 from 2 references."
+"A003","N013-coast-water-column",,,,,,,"323 marine + 45 freshwater measurements, 1 reference (VannmiljøCopper2010-2025). Nationally 4,969. As with A002, freshwater upstream of the fjord may be worth its own node."
+"A003","N014-mussel-soft-tissue",,,,,,,"121 Mytilus edulis measurements, 1 reference (VannmiljøCopper2010-2025). Nationally 5,498 from 3 references."
+"A003","N015-g-morhua-liver",,,,,,,"150 Gadus morhua measurements inside the box, 1 reference. Liver vs muscle not separately verified for this count, unlike A002's 156; treat as combined until checked. Nationally liver alone is 2,796 from 1 reference."
+"A003","N016-g-morhua-muscle",,,,,,,"Same 150 G. morhua measurements as N015 above until the tissue split is checked. Nationally muscle is thin (see aep_nodes.csv notes, evidence_score 1)."
+"A003","N022-marine-benthic-inverts",,,,,,,"18 Asterias rubens measurements, 1 reference (2003CoteurFieldContaminationOf), matching G040-Bi-Cwb-A-rub-Pyl-Md exactly. Not previously a member of any AEP; A001 doesn't include it either."
+"A004","N001-natural-occurrence",,,,,,,"National scope, no override. Same as A001."
+"A004","N002-aquaculture",,,,,,,"National scope, no override. Same as A001."
+"A004","N003-mine-tailings",,,,,,,"National scope, no override. Same as A001."
+"A004","N012-coast-benthic-sed",,,,,,,"National scope, no override. Same as A001."
+"A004","N013-coast-water-column",,,,,,,"National scope, no override. Same as A001."
+"A004","N015-g-morhua-liver",,,,,,,"National scope, no override. Same as A001."
+"A004","N016-g-morhua-muscle",,,,,,,"National scope, no override. Same as A001."
+"A005","N001-natural-occurrence",,,,,,,"National scope, no override. Same as A001."
+"A005","N002-aquaculture",,,,,,,"National scope, no override. Same as A001."
+"A005","N003-mine-tailings",,,,,,,"National scope, no override. Same as A001."
+"A005","N012-coast-benthic-sed",,,,,,,"National scope, no override. Same as A001."
+"A005","N013-coast-water-column",,,,,,,"National scope, no override. Same as A001."
+"A005","N014-mussel-soft-tissue",,,,,,,"National scope, no override. Same as A001."
+"A006","N001-natural-occurrence",,,,,,,"National scope, no override. Same as A001."
+"A006","N002-aquaculture",,,,,,,"National scope, no override. Same as A001."
+"A006","N003-mine-tailings",,,,,,,"National scope, no override. Same as A001."
+"A006","N012-coast-benthic-sed",,,,,,,"National scope, no override. Same as A001."
+"A006","N013-coast-water-column",,,,,,,"National scope, no override. Same as A001."
+"A006","N023-marine-macroalgae",,,,,,,"Not previously a member of any AEP; A001 doesn't include it either. Its evidence/quantification scores on aep_nodes.csv (1, TODO) were written generically and haven't been reviewed with this AEP in mind."
+"A001","N004-manufacturing",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N005-agriculture-forestry-and-fishing",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N006-mining-and-quarrying",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N007-other-services-and-administration",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N008-wholesale-and-retail-trade",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N009-construction-and-real-estate",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N010-transportation-and-storage",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N011-water-supply-and-waste-management",,,,,,,"REACH source node; see docs/NBXX-REACH.qmd."
+"A001","N021-marine-zooplankton",,,,,,,"Not previously a member of A001 despite having edges since 2026-08-11; A001 is meant to be the unrestricted, everything AEP."
+"A001","N022-marine-benthic-inverts",,,,,,,"Not previously a member of A001 despite having edges since 2026-08-11 (added for A003/Sørfjorden)."
+"A001","N023-marine-macroalgae",,,,,,,"Not previously a member of A001 despite having edges since 2026-08-11 (added for A006/Macroalgae)."
+"A001","N024-seabird-egg",,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
+"A001","N025-eider-blood",,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
+"A001","N026-eider-eggs",,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
+"A001","N027-river-water-column",,,,,,,"Added 2026-08-12 with the non-coastal matrix nodes."
+"A001","N028-river-benthic-sed",,,,,,,"Added 2026-08-12 with the non-coastal matrix nodes."
+"A001","N029-air",,,,,,,"Added 2026-08-12 with the non-coastal matrix nodes."

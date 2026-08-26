@@ -20,6 +20,7 @@ node_fixture <- function(...) {
     drop_outliers = FALSE,
     external_value = NA_real_, external_sd = NA_real_,
     external_n = NA_real_, external_unit = NA_character_,
+    external_refs = NA_real_,
     essentiality_score = 3, essentiality_justification = "x",
     plausibility_score = 3, plausibility_justification = "x",
     evidence_score = 2, evidence_justification = "x",

@@ -130,7 +130,10 @@ print(as.data.frame(aep_edge_progress(edges)), row.names = FALSE)
 message("")
 message("Work down the putative edges. For each, spend at most ~30 minutes ",
         "looking for support (PLAN.md P4.2):")
-message("  found     -> set status = empirical, score it, cite it in ",
+message("  found      -> set status = empirical, score it, cite it in ",
         "evidence_justification")
-message("  not found -> leave it putative, write one sentence in notes on what ",
-        "evidence would settle it")
+message("  not found  -> leave it putative, write one sentence in notes on ",
+        "what evidence would settle it")
+message("  not a flow -> set status = rejected and write the reason in notes. ",
+        "DO NOT delete the row: this script proposes edges by anti_join on ",
+        "from/to, so a deleted edge is re-proposed on the next run.")

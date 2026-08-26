@@ -788,6 +788,15 @@ aep_diagram_image_size <- function(
 #' @param dir Where the figures go.
 #' @param width,height,dpi Canvas, passed on to [node_card_extent()] via
 #'   `plot_aep()` so arrow clipping matches the device actually used.
+#'
+#'   `dpi` defaults to **300 to match the compact cards** (2.4 x 1.8in at
+#'   300dpi, i.e. 720 x 540px, from [write_node_cards()]). `ggimage` sizes a
+#'   card as `image_size` of panel width, so at 12in the card footprint is
+#'   `0.19 * 12 * dpi` pixels: 342 at the old default of 150, against a 720px
+#'   source, which threw away more than half the card's resolution at
+#'   placement. 300 puts the footprint at ~684px, near 1:1. Raising `dpi`
+#'   further only upscales the cards, so it buys sharper vector text and
+#'   blurrier cards. Change this and `write_node_cards()`'s `dpi` together.
 #' @param image_size Card width as a fraction of panel width.
 #' @param card_aspect Compact card height over width, in inches.
 #' @param inset_width Width of the locator inset relative to the main panel
@@ -820,7 +829,7 @@ write_aep_diagrams <- function(
   dir = here_rel("figures"),
   width = 12,
   height = 8,
-  dpi = 150,
+  dpi = 300,
   image_size = 0.19,
   card_aspect = 1.8 / 2.4,
   inset_width = 0.25,

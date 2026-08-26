@@ -106,10 +106,20 @@ epeq_cols <- function() {
 #' read is the same failure class as the untracked decisions file and the
 #' unhashed package namespace: work that appears done and silently is not.
 #'
+#' `external_refs` added 2026-08-12. An empirical node counts its own sources
+#' with `n_distinct(REFERENCE_ID)`; an external one has no rows to count, so
+#' its card read "refs = -" and looked like missing information rather than a
+#' known quantity. Sam: the REACH cards "all have 1 ref, this should be marked
+#' on them". It is a hand-entered column rather than an inference from having
+#' a REACH series, because the external nodes do not share a provenance: N004
+#' to N011 come from one REACH extract, N003 mine tailings wants a figure from
+#' Sternal or Pedersen, and N001 and N029 have no source yet at all.
+#'
 #' @return A character vector of column names.
 #' @export
 external_value_cols <- function() {
-  c("external_value", "external_sd", "external_n", "external_unit")
+  c("external_value", "external_sd", "external_n", "external_unit",
+    "external_refs")
 }
 
 #' Columns Owned by the Human
@@ -208,6 +218,7 @@ empty_aep_nodes <- function() {
     external_sd = numeric(0),
     external_n = numeric(0),
     external_unit = character(0),
+    external_refs = numeric(0),
     essentiality_score = numeric(0),
     essentiality_justification = character(0),
     plausibility_score = numeric(0),
@@ -486,13 +497,44 @@ read_aep_node_members <- function(
 #' exclusion narrows an estimate rather than rewriting a measurement, and
 #' because a legitimately empty match happens while a node is being built up.
 #'
+#' @section Typo, not scope (fixed 2026-08-13):
+#'
+#' The warning used to be raised against `data`, i.e. the node's rows **after**
+#' the AEP scope and the node's own restrictions had already narrowed them. So
+#' it fired on two completely different situations with one message:
+#'
+#' * the name is wrong and the rows are still in the node, which is the fault
+#'   worth shouting about; and
+#' * the name is right but those rows are not in *this* AEP, which is ordinary
+#'   and expected, and happens for every scoped AEP whose bounding box excludes
+#'   the campaign.
+#'
+#' It cost an afternoon. `N016-g-morhua-muscle` warned "2 values in
+#' exclude_campaigns matched no rows" on every build, purely because A002 and
+#' A003 leave that node with no rows at all inside their boxes. Read as a typo,
+#' it led to the cell being "corrected" from `Vm_2010_2025 (...)` to the long
+#' `Vannmiljø Copper Monitoring 2010-2025 (...)`, which matches `CAMPAIGN_NAME`
+#' but **not** `CAMPAIGN_NAME_SHORT`, the column this is actually pointed at.
+#' That silently put the node back on all 44 rows including the 18 mislabelled
+#' Urban Fjord ones, undoing PLAN.md 9e.
+#'
+#' So the typo check now runs against `vocabulary`, the **unrestricted** pool,
+#' where "is this a real campaign name" is a question that has one answer
+#' regardless of which AEP is being drawn. A name that exists but matches
+#' nothing here is silent: it is not an error, and saying so on every build
+#' trains you to ignore the message that matters.
+#'
 #' @param data The node's rows so far.
 #' @param node A one-row nodes tibble.
 #' @param col Name of the exclusion column on `node`.
 #' @param target Name of the column in `data` to match against.
+#' @param vocabulary The unrestricted data (or a bare vector of valid values)
+#'   to check the listed names against. Defaults to `data`, which reproduces
+#'   the pre-2026-08-13 behaviour for any direct caller that does not have the
+#'   full pool to hand.
 #' @return `data` with excluded rows removed.
 #' @export
-apply_node_exclusion <- function(data, node, col, target) {
+apply_node_exclusion <- function(data, node, col, target, vocabulary = data) {
   if (!col %in% names(node) || is.na(node[[col]][1]) ||
     !nzchar(node[[col]][1])) {
     return(data)
@@ -510,17 +552,31 @@ apply_node_exclusion <- function(data, node, col, target) {
     return(data)
   }
 
-  unmatched <- drop[!drop %in% data[[target]]]
-  if (length(unmatched) > 0) {
+  # Checked against the WHOLE pool, not against `data`. See the "Typo, not
+  # scope" section above: `data` has already been narrowed by the AEP's
+  # bounding box and the node's own restrictions, so an absence there says
+  # nothing about whether the name is real.
+  known <- if (is.data.frame(vocabulary)) {
+    if (target %in% names(vocabulary)) vocabulary[[target]] else data[[target]]
+  } else {
+    vocabulary
+  }
+
+  unknown <- drop[!drop %in% known]
+  if (length(unknown) > 0) {
     cli::cli_warn(c(
-      "Node {.val {node$node_id[1]}}: {length(unmatched)} value{?s} in \\
-       {.field {col}} matched no rows.",
-      "*" = "{.val {unmatched}}",
+      "Node {.val {node$node_id[1]}}: {length(unknown)} value{?s} in \\
+       {.field {col}} {?is/are} not {?a/} known {.field {target}}.",
+      "*" = "{.val {unknown}}",
       "i" = "Check for a typo. The rows you meant to exclude are still in \\
-             the node."
+             the node.",
+      "i" = "Note {.field {target}} is matched exactly, and is the SHORT \\
+             campaign name where that column is in use."
     ))
   }
 
+  # Deliberately silent where a name is real but matches nothing in `data`.
+  # That is what a scoped AEP looks like, not a fault.
   data[!data[[target]] %in% drop, , drop = FALSE]
 }
 
@@ -602,13 +658,22 @@ resolve_node_data <- function(node, members, data, ids) {
   }
   # Semicolon-separated, because a comma cannot survive a CSV cell unquoted and
   # reference ids are already long enough to be mistyped.
+  # `vocabulary = data` is the UNRESTRICTED pool, deliberately, so the typo
+  # check asks "is this a real name" rather than "is it present in whatever is
+  # left after this AEP's bounding box". See apply_node_exclusion().
   out <- apply_node_exclusion(
-    out, node, "exclude_references", "REFERENCE_ID"
+    out, node, "exclude_references", "REFERENCE_ID",
+    vocabulary = data
   )
   # Campaign names contain commas and parentheses ("Vm_2010_2025 (Urban Fjord
   # Contaminants)"), so the semicolon separator matters more here still.
+  #
+  # CAMPAIGN_NAME_SHORT, not CAMPAIGN_NAME. The long form
+  # ("Vannmiljø Copper Monitoring 2010-2025 (...)") will not match, and on
+  # 2026-08-13 that cost a day when a cell was "corrected" into it.
   out <- apply_node_exclusion(
-    out, node, "exclude_campaigns", "CAMPAIGN_NAME_SHORT"
+    out, node, "exclude_campaigns", "CAMPAIGN_NAME_SHORT",
+    vocabulary = data
   )
   if (isTRUE(node$drop_outliers[1]) && nrow(out) > 0) {
     # Computed WITHIN the resolved node, not inherited from the sampling group.
@@ -722,7 +787,11 @@ node_report_card <- function(node, members, data, ids) {
       n = node$external_n[1],
       n_rows = 0L,
       n_groups = 0L,
-      n_sources = NA_integer_,
+      # From the hand-entered column, not NA. An external node has no rows to
+      # count REFERENCE_IDs over, but that does not make its provenance
+      # unknown: the REACH sector nodes are one extract, so "refs = 1" is a
+      # fact about them and "refs = -" was reading as missing data.
+      n_sources = as.integer(node$external_refs[1]),
       unit = node$external_unit[1],
       mean = node$external_value[1],
       sd = node$external_sd[1],
