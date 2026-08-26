@@ -31,9 +31,9 @@ pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
 here::i_am("index.qmd")
 ```
 
-Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure , and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
+Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure, and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
 
-Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years (cite), as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As Artic regions undergo rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.
+Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years [@amapHeavyMetalsArctic01.06.04], as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As the Artic undergoes rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.
 
 ## Aggregate Exposure Pathways
 
@@ -41,19 +41,23 @@ The Aggregate Exposure Pathway (AEP) [@teeguardenCompletingLinkExposure2016, @ta
 
 ![Placeholder. Planned to be an image of a simple AEP (copper, fish) and AOP (one of the ROS ones) to introduce the concept and teach the readers what an AEP looks like](images/../images/peng_aep_diagram.png){#fig-aep-intro}
 
-An AEP is a directed graph: Nodes are Key Exposure States (KESs), which represent the state of stressor(s) in space and time . KES are linked by by Key Transitional Relationships (KTR), the transport or transformation of said stressor(s). An AEP has two specialised (types of) KES, a stressor Source and a Target Site Exposure (TSE), representing the state of a stressor at its origin and site of action respectively [@tanAggregateExposurePathways2018]. The TSE corresponds to the initiating Key Event of an AOP (the Molecular Initiating Event or MIE); thus, an AEP and AOP that cover the same stressor can be integrated to create a full Source-to-Outcom Pathway (STOP). AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale (at time of writing, 561 AOPs have been drafted or published @societyforadvancementofaopsAOPwikiV272026). Conversely, the AEP concept has seen less adoption, withn a mini-review in 2025 (see SI) finding 21 papers mentioning and 15 employing the concept. This is perhaps due to the signficant scale and uncertainty of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogenous KES and KTR.
+An AEP is a directed graph: Nodes are Key Exposure States (KESs), which represent the state of stressor(s) in space and time. KES are linked by by Key Transitional Relationships (KTR), the transport or transformation of said stressor(s). An AEP has two specialised (types of) KES, a stressor Source and a Target Site Exposure (TSE), representing the state of a stressor at its origin and site of action respectively [@tanAggregateExposurePathways2018]. The TSE corresponds to the initiating Key Event of an AOP (the Molecular Initiating Event or MIE); thus, an AEP and AOP that cover the same stressor can be integrated to create a full Source-to-Outcom Pathway (STOP). AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale: at time of writing, 561 AOPs have been drafted or published [@societyforadvancementofaopsAOPwikiV272026]. Conversely, the AEPs have seen less adoption, within a mini-review in 2025 (see SI) finding only 21 papers mentioning and 15 employing the concept. This is perhaps due to the significantly larger scale of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogeneous KESs and KTRs.
 
-The conceptual papers describing the AEP [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] state that both the AEP and AOP are "supported by [...] weight of evidence", although no specific approach is laid out. Consensus and standards have emerged in the AOP community on how Weight of Evidence (WoE) should be assessed, and @beckerIncreasingScientificConfidence2015 advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. @pengAggregateExposurePathways2022, which represents the most sophisticated and relevant (that it, it focuses on pollution of the environment and wildlife) AEP of which we are aware, adapts OECD guidance on AOP development [@oecdUsersHandbookSupplement2018] to AEPs. However, a consensus on the correct criteria has yet to emerge.
+The conceptual papers describing the AEP [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] state that both the AEP and AOP are "supported by [...] weight of evidence", although no specific approach is laid out. Consensus and standards have emerged in the AOP community on how Weight of Evidence (WoE) should be assessed, and @beckerIncreasingScientificConfidence2015 advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. @pengAggregateExposurePathways2022, which represents the most sophisticated and relevant (that it, it focuses on pollution of the environment and wildlife) AEP of which we are aware, adapts OECD guidance on AOP development [@oecdUsersHandbookSupplement2018] to AEPs.
 
-## Copper as a stressor
+## Copper: Environmental Chemistry and Ecotoxicology
 
-Life on Earth has evolved alongside copper as both a stressor and potentially useful element, and a wide variety of both copper-containing proteins and copper-protective proteins have been found across the kingdoms of life [@festaCopperEssentialMetal2011]. Both its utility and toxicity stem from its oxidation and binding dynamics, which make it both a useful structural element in protein design, as well as a source of oxidative stress in the cell [@festaCopperEssentialMetal2011]. This long and consistent exposure has driven organisms to develop a diverese range of effective mechanisms for controlling internal copper concentrations in response to a changing external environment. By precise control of copper concentrations in different tissues or parts of the cell, organisms reduce oxidative stress in sensitive areas but increase it where a "hostile environment" can be useful, such as within bacteriacidal macrophages [@focarelliCopperMicroenvironmentsHuman2022]. This rich, nuanced and complex set of interactions make copper both an interesting and difficult object of study. Organisms have been shown to regulate copper uptake and detoxification to maintain homeostasis along a copper gradient [@vandenberghePosttranslationalRegulationCopper2010, @penaDelicateBalanceHomeostatic1999], which in a ecotoxicological context makes linear assumptions of bioaccumulation hard to justify.
+Life on Earth has evolved alongside copper as both a stressor and potentially useful element, and a wide variety of both copper-containing proteins and copper-protective proteins have been found across the kingdoms of life [@festaCopperEssentialMetal2011]. Both its utility and toxicity stem from its oxidation and binding dynamics, which make it both a useful structural element in protein design, as well as a source of oxidative stress in the cell [@festaCopperEssentialMetal2011]. This long history of chronic exposure has driven organisms to develop a diverse range of effective mechanisms for controlling internal copper concentrations.
+
+By precise control of copper concentrations in different tissues or parts of the cell, organisms reduce oxidative stress in sensitive areas, but increase it where a "hostile environment" can be useful, such as within bactericidal macrophages [@focarelliCopperMicroenvironmentsHuman2022]. This rich, nuanced and complex set of interactions make copper both an interesting and difficult object of ecotoxicological study.
+
+Organisms have been shown to regulate copper uptake and detoxification to maintain homeostasis along a copper gradient [@vandenberghePosttranslationalRegulationCopper2010, @penaDelicateBalanceHomeostatic1999], which in a ecotoxicological context makes linear assumptions of bioaccumulation hard to justify.
 
 However, the relative ease of sourcing, working with, and analysing copper has made it a popular "classical" stressor in ecotoxicology.
 
 - Cite some of those AOP papers about copper toxicity, the BLM, etc.
 
-- Different species tolerance, different stratgegies (maybe)
+- Different species tolerance, different strategies (maybe)
 
 - But there are some that are surprisingly sensitive to copper
 
@@ -84,11 +88,13 @@ An exhaustive version of the materials and methods are provided in the notebooks
 **Probably too many section headers. Will keep them for now as they help me organise my thoughts, and remove once closer to final version. Some sections copied from eData MS, will be written to avoid auto-plagiarism.**
 
 | Line of Evidence | AEP Class | Data Type | Notes |
-|------------------------|----------------|----------------|----------------|
+|---------------------|-----------------|-----------------|-----------------|
 | Systematic Literature Review | Matrix Node, Tissue Node | (Exposure) Matrix Concentrations | Big dataset, hence many sub-notebooks |
 | Vannmiljø Database | Matrix Node, Tissue Node | Matrix Concentrations | Folded into SLR, as data of same type |
 | Copper Emissions | Emissions Edge | Mass/year by industry and receiving matrix | Data resolution/quality generally lower than matrix concentrations |
 | Copper PRTR | Source Node | Mass/year by industry | As above |
+
+: lines of evidence
 
 ## Exposure Dataset
 
@@ -185,7 +191,7 @@ We apply fences to log-transformed values because concentrations are approximate
 
 Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
 
-The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distrubtions.
+The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distributions.
 
 For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
 
@@ -207,7 +213,7 @@ The test returns a p-value for the null hypothesis of unimodality; small p-value
 
 Sample groups were ordered based on sample size and flagged for inspection where they met one of the following criteria:
 
-1.  The group represented a matrix that was essential for the construction of aqatic Arctic AEPs (e.g. matrices that are both receiving compartments for copper and habitats for organisms of interest, such as marine and freshwater water columns and sediment, or algae (due to their trophic position)
+1.  The group represented a matrix that was essential for the construction of aquatic Arctic AEPs (e.g. matrices that are both receiving compartments for copper and habitats for organisms of interest, such as marine and freshwater water columns and sediment, or algae (due to their trophic position)
 2.  The group's distribution was flagged as potentially multimodal (see above)
 3.  Over 5% of the group's total sample size (based on `MEASURED_N`) was double-flagged as an outlier based on Tukey fences and Robust-Modified Z-Score
 
@@ -217,14 +223,6 @@ In these cases,
 - Metadata and comments were reviewed
 - Unless there was a convincing argument not to, outliers were removed
 - We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons
-
-## Other Lines of Evidence
-
-- REACH emissions data
-- REACH PRTR
-- Background copper concentrations & thresholds
-- Potentially a table summarising sources and processing, depending on needs/table limits
-- Gap-filling evidence: ad hoc manuscript used to fill gaps where copper presence was suspected but not described in our dataset
 
 ### Weight of Evidence Assessment
 
@@ -259,6 +257,20 @@ tibble::tribble(
   "Quantification"    , ""        , ""           , "Weak / Moderate / Strong" ,
 ) |>
   knitr::kable()
+```
+
+### AEP Construction
+
+An AEP was constructed using all available data for the study area (AEP-001). Several sub-AEPs [@tbl-aeps] were constructed to depict pollution exposure in specific geographical areas (AEP-002, AEP-003), or to specific organisms/tissues of interest (AEP-004, -005, -006). Specific sites (Repparfjorden and Sørfjorden) were selected as areas in Norway with known heavy metal contamination due to mining and industry. *Gadus morhua*, *Mytilus edulis*, and Macroalgae were selected due to their high degree of representation across lines of evidence.
+
+```{r}
+#| label: tbl-aeps
+#| tbl-cap: "Table of AEPs. Can be collapsed to text or moved to SI as needed."
+#| echo: false
+#| 
+table <- read_csv("data/clean/aep/aep_manifest.csv")
+
+table |> select(label, scope_note) |> knitr::kable()
 ```
 
 # Results
@@ -296,45 +308,57 @@ An example KTR plot is shown in @fig-ktr-example.
 
 ## AEPs
 
-# Fish AEP
+### Kitchen Sink AEP
+
+- Includes all nodes from any spatial area
+
+- Probably too complicated to include in the final MS, but useful overview during editing
+
+![](figures/aep_A001.png){#aep-A001-all}
+
+### Geographical Case Studies
+
+AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
+
+#### AEP-002: Reppafjorden
+
+![Case Study: Repparfjorden AEP](figures/aep_A002.png){#fig-repparfjord-aep alt="Case Study: Repparfjorden AEP"}
+
+#### AEP-003: Sørfjorden
+
+![Case Study: Sørfjorden AEP](figures/aep_A003.png){#fig-sorfjorden-aep alt="Case Study: Sørfjorden AEP"}
+
+### Biological Case Studies
+
+#### AEP-004: Gadus morhua 
 
 - Depending on how the fish distributions look I may lump them all together
+- Currently specifically G. morhua - we have a lot of data for this species
 - I assume there's not going to be a lot of variance between species, and we already know most of our data is cod livers
 - If it's relevant to distinguish between fish with different life styles/types of feeding I will cross that bridge when we get to it
 - What are the most important sources of copper to fish? Spatial, temporal patterns, etc (Based on cod liver data I don't expect to see anything interesting, but if we do there's plenty of room to discuss)
 
 The fish AEP is shown in @fig-fish-aep.
 
-![Fish AEP](images/algae_aep_emissions.png){#fig-fish-aep}
+![Fish AEP](figures/aep_A004.png){#fig-fish-aep}
 
-# Invert AEP
+#### AEP-005: Mytuli...
 
-- I may lump or split zooplankton and filter feeders depending on how similar they are
+- Mussels are our next most common species after G. morhua, so I think it makes sense to do an AEP for them.
 
-The invertebrate AEP is shown in @fig-invert-aep.
+The invertebrate AEP is shown in @fig-mussels-aep.
 
-![Invertebrate AEP](images/algae_aep_emissions.png){#fig-invert-aep}
+![Mussesl AEP](figures/aep_A005.png){#fig-mussels-aep}
 
-# Algae AEP
+#### AEP-006: Macroalgae
 
 - Algae aren't the most interesting, but they are key food chain species, and ecotox test species
 - Conversely, if we see something interesting for mammals they could go here instead
+- We only have data for macroalgae, so this'll have to do
 
 The algae AEP is shown in @fig-algae-aep.
 
-![Algae AEP](images/algae_aep_emissions.png){#fig-algae-aep}
-
-## Geographical Case Studies
-
-- These are competing for space with the more ecological AEPs above
-- If the above turn out to be extremely boring, we can cut ecological AEPs and increase focus on geography
-- Sites will be Repparfjorden and, probably, Sørfjorden
-
-AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
-
-![Case Study Site 1: Reppardfjorden AEP](images/algae_aep_emissions.png){#fig-repparfjord-aep}
-
-![Case Study Site 2: Sørfjorden AEP](images/algae_aep_emissions.png){#fig-sorfjorden-aep}
+![Algae AEP](figures/aep_A006.png){#fig-algae-aep}
 
 # Discussion
 

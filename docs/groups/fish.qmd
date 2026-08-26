@@ -324,7 +324,28 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 - **? outliers**
 :::
 
-*No triage panels: this group is below the `min_n` cutoff. Add `G043-Bf-Oot-G-mor-Mus-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
+- @fig-g043-bf-oot-g-mor-mus-md-a:
+- @fig-g043-bf-oot-g-mor-mus-md-b:
+- @fig-g043-bf-oot-g-mor-mus-md-c:
+- @fig-g043-bf-oot-g-mor-mus-md-d:
+- @fig-g043-bf-oot-g-mor-mus-md-e:
+
+::: {#fig-g043-bf-oot-g-mor-mus-md layout-ncol=5}
+
+![Overall distribution (all units)](../../triage/G043-Bf-Oot-G-mor-Mus-Md_a_density.png){#fig-g043-bf-oot-g-mor-mus-md-a group="G043-Bf-Oot-G-mor-Mus-Md"}
+
+![Concentration by date](../../triage/G043-Bf-Oot-G-mor-Mus-Md_b_date.png){#fig-g043-bf-oot-g-mor-mus-md-b group="G043-Bf-Oot-G-mor-Mus-Md"}
+
+![Distribution by campaign or reference](../../triage/G043-Bf-Oot-G-mor-Mus-Md_c_source.png){#fig-g043-bf-oot-g-mor-mus-md-c group="G043-Bf-Oot-G-mor-Mus-Md"}
+
+![Distribution by site type (all geographies)](../../triage/G043-Bf-Oot-G-mor-Mus-Md_d_site_type.png){#fig-g043-bf-oot-g-mor-mus-md-d group="G043-Bf-Oot-G-mor-Mus-Md"}
+
+![Spatial distribution](../../triage/G043-Bf-Oot-G-mor-Mus-Md_e_spatial.png){#fig-g043-bf-oot-g-mor-mus-md-e group="G043-Bf-Oot-G-mor-Mus-Md"}
+
+G043-Bf-Oot-G-mor-Mus-Md: Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry)
+
+:::
+
 
 ::: callout-note
 **Verdict:** *(unwritten)*

@@ -37,3 +37,7 @@ triage/
 # Sam can open them, out of git because they are not artefacts. See CLAUDE.md
 # 2.3.1.
 figures/dev/
+
+# Build logs from hand-run pipeline invocations (see CLAUDE.md 2.3.1: Sam
+# cannot see anything written to a scratch directory).
+logs/

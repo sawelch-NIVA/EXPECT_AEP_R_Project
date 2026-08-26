@@ -616,13 +616,20 @@ refresh_group_panels <- function(
       if (!identical(lines[i], no_panels_placeholder(owner))) {
         next
       }
-      slug <- groups$group_slug[groups$group_id == owner]
+      # which(), not the bare logical: `groups$group_id` can carry NA for a
+      # group that entered triage before it was given a stable id, and base-R
+      # logical subsetting turns each NA index into an extra NA element. That
+      # made `length(slug)` 2 for EVERY group, so this guard sent every
+      # candidate to `next` and the whole function became a silent no-op.
+      # Found 2026-08-26, after G043 sat unrepaired despite its panels
+      # existing. One unidentified group must not disable repair for the rest.
+      slug <- groups$group_slug[which(groups$group_id == owner)]
       if (length(slug) != 1 || is.na(slug)) {
         next
       }
 
       label <- if (!is.null(decisions) && owner %in% decisions$group_id) {
-        triage_group_label(decisions[decisions$group_id == owner, ])
+        triage_group_label(decisions[which(decisions$group_id == owner), ])
       } else {
         # From the heading itself: "## G047 Fish / Gadus morhua / ... {#grp-G047}"
         heading <- utils::tail(

@@ -90,7 +90,7 @@ Biota, Terrestrial / Birds / mg/kg (wet)
 
 # Comparison
 
-::: {.callout-note}
+::: callout-note
 *(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
 :::
 
@@ -114,7 +114,7 @@ Biota, Terrestrial / Birds / mg/kg (wet)
 G012-Bm-Cot-U-mar-Liv-Md: Mammals / Ursus maritimus / Liver / Coastal, fjord / Other / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -136,7 +136,7 @@ G012-Bm-Cot-U-mar-Liv-Md: Mammals / Ursus maritimus / Liver / Coastal, fjord / O
 G025-Bb-Onr-S-mol-Egg-Mw: Birds / Somateria mollissima / Egg / Ocean, sea, territorial waters / Not reported / mg/kg (wet)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -158,7 +158,7 @@ G025-Bb-Onr-S-mol-Egg-Mw: Birds / Somateria mollissima / Egg / Ocean, sea, terri
 G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, territorial waters / Not reported / mg/kg (wet)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -168,8 +168,10 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G029-Bm-Cnv-P-vit-Liv-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
-**Verdict:** *(unwritten)*
+::: callout-note
+**Verdict:**
+
+- N.b.: Some issues with SUBSAMPLE joining in the seal data that I haven't fixed (see also G252). Will come back to later if time permits.
 :::
 
 ## G059-Bm-Rnr-V-vul-Liv-Mw Mammals / Vulpes vulpes / Liver / River, stream, canal / Not reported / mg/kg (wet) {#grp-G059-Bm-Rnr-V-vul-Liv-Mw}
@@ -178,7 +180,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G059-Bm-Rnr-V-vul-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -188,7 +190,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G062-Bb-Mot-R-tri-Mus-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -198,7 +200,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G066-Bb-Mot-R-tri-Liv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -208,7 +210,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G070-Bm-Mot-O-rmd-Lun-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -218,7 +220,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G072-Bm-Mot-O-rmd-Kid-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -228,7 +230,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G078-Bm-Mot-O-rmd-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -238,7 +240,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G080-Bm-Mot-O-rmd-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -248,7 +250,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G081-Bm-Mot-O-rmd-Skn-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -264,7 +266,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G108-Bm-Mot-O-rmr-Skn-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -274,7 +276,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G122-Bm-Mot-O-rmd-Hea-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -284,7 +286,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G150-Bm-Owc-Cy-cri-Kid-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -294,7 +296,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G151-Bm-Owc-Cy-cri-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -304,7 +306,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G152-Bm-Owc-P-gro-Kid-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -314,7 +316,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G153-Bm-Owc-P-gro-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -324,7 +326,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G167-Bb-Cnr-L-arg-Egg-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -334,7 +336,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G184-Bm-Onr-O-orc-Fat-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -344,7 +346,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G186-Bb-Cnr-G-ari-Egg-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -354,7 +356,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G187-Bb-Cnr-S-mol-Egg-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -364,7 +366,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G229-Bm-Onr-B-phy-Fat-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -374,7 +376,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G230-Bm-Onr-L-alb-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -384,7 +386,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G231-Bm-Onr-M-nov-Fat-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -394,7 +396,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G232-Bm-Onr-P-mac-Fat-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -404,7 +406,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G240-Bb-Rnr-T-pil-Egg-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -414,7 +416,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G241-Bm-Rnr-C-cap-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -424,7 +426,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G242-Bm-Onr-P-pho-Fat-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -434,7 +436,7 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G243-Bm-Onr-P-pho-Liv-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -444,7 +446,6 @@ G026-Bb-Onr-S-mol-Blo-Mw: Birds / Somateria mollissima / Blood / Ocean, sea, ter
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G244-Bm-Onr-P-pho-Mus-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
-

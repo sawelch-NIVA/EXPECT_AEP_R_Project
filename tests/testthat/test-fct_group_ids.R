@@ -335,17 +335,24 @@ test_that("the real species list has no unresolved collisions", {
 })
 
 test_that("the real lookup CSVs cover the ledger except known genuine data gaps", {
-  # G127 has no SPECIES_GROUP/SAMPLE_SPECIES/SAMPLE_TISSUE; G087, G094, G131
-  # have no SITE_GEOGRAPHIC_FEATURE. All four are unclassified samples, not a
-  # lookup that has fallen behind the data. Pinning the exact set here means a
-  # REAL coverage gap (a new vocabulary string with no code) shows up as a
-  # changed set rather than being lost in the noise.
+  # G127 and G252 have no SPECIES_GROUP/SAMPLE_SPECIES/SAMPLE_TISSUE; G087,
+  # G094, G131 have no SITE_GEOGRAPHIC_FEATURE. All five are unclassified
+  # samples, not a lookup that has fallen behind the data. Pinning the exact
+  # set here means a REAL coverage gap (a new vocabulary string with no code)
+  # shows up as a changed set rather than being lost in the noise.
+  #
+  # G252 joined the set 2026-08-26. It is the unclassified Biota/Aquatic group
+  # that had been sitting in the data with NO ledger row at all, which is what
+  # put an NA group_id into triage_pilot_groups and silently disabled
+  # refresh_group_panels() for every group at once. Allocating it an id is the
+  # fix; falling back to a bare id here is the documented behaviour for a group
+  # with no species block, exactly as for G127.
   skip_if_not(file.exists(here_rel("data/clean/decisions/group_ids.csv")))
   ids <- read_group_ids(here_rel("data/clean/decisions/group_ids.csv"))
-  expect_warning(out <- format_composite_group_id(ids), "4 group\\(s\\)")
+  expect_warning(out <- format_composite_group_id(ids), "5 group\\(s\\)")
   expect_equal(
     sort(ids$group_id[out == ids$group_id]),
-    c("G087", "G094", "G127", "G131")
+    c("G087", "G094", "G127", "G131", "G252")
   )
   # Every ID is either the bare group_id (a compartment/geography gap) or
   # starts with "<compartment block>-<geography block>", each block one
