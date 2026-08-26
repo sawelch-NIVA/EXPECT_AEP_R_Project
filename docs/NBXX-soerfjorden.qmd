@@ -26,7 +26,133 @@ Sørfjorden ("The South Fjord") is the southerly arm of Hardangerfjorden on Norw
 A003,AEP-003 - Sørfjorden,"Bounding box 59.77-60.37 N, 6.25-6.85 E, measured against load_literature_pqt the same way as A002. 760 measurements, 3 references (VannmiljøCopper2010-2025, 2003CoteurFieldContaminationOf, 2005GillanStructureOfSediment).",59.77,60.37,6.25,6.85,1900,2100,
 
 ```{r}
-# Render map of bounding box/study area
+#| label: fig-soerfjorden-density
+#| fig-cap: Sørfjorden bounding box (59.77-60.37N, 6.25-6.85E) with sampling density (sum of MEASURED_N per site), hexbinned. Adapted from scripts/build_study_area_figure.R panel a).
+#| fig-width: 5
+#| fig-height: 9
+library(sf)
+
+sf::sf_use_s2(FALSE)
+
+soerfjorden_bbox <- st_bbox(
+  c(xmin = 6.25, xmax = 6.85, ymin = 59.77, ymax = 60.37),
+  crs = st_crs(4326)
+)
+
+wgs84_geo <- tar_read(wgs84_geography)
+literature_merged_data <- tar_read(load_literature_pqt)
+
+# Fjord-scale graticule: the project default (30deg lon / 10deg lat, built for
+# the full Arctic study area in build_study_area_figure.R) draws zero lines
+# inside a 0.6deg bbox like this one.
+# wgs84_geo$graticule <- create_graticule(
+#   lon_seq = seq(0, 20, 0.2),
+#   lat_seq = seq(55, 65, 0.2)
+# )
+
+site_points <- literature_merged_data |>
+  filter(
+    !is.na(LATITUDE),
+    !is.na(LONGITUDE),
+    !is.na(MEASURED_N),
+    LATITUDE >= soerfjorden_bbox["ymin"],
+    LATITUDE <= soerfjorden_bbox["ymax"],
+    LONGITUDE >= soerfjorden_bbox["xmin"],
+    LONGITUDE <= soerfjorden_bbox["xmax"]
+  ) |>
+  summarise(
+    total_n = sum(MEASURED_N, na.rm = TRUE),
+    .by = c(SITE_CODE, LATITUDE, LONGITUDE)
+  ) |>
+  st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = 4326, remove = FALSE)
+
+panel_density <- ggplot() +
+  # geom_sf(
+  #   data = wgs84_geo$marine_polys,
+  #   aes(fill = I(ocean_color)),
+  #   color = "white",
+  #   linewidth = 0.15
+  # ) +
+  geom_sf(
+    data = wgs84_geo$countries,
+    # aes(
+    #   fill = I(ifelse(
+    #     highlight_name,
+    #     country_colours["highlight"],
+    #     country_colours["default"]
+    #   ))
+    # ),
+    color = "white",
+    linewidth = 0.25
+  ) +
+  # geom_sf(
+  #   data = wgs84_geo$graticule,
+  #   linewidth = 0.15,
+  #   color = "white",
+  #   alpha = 0.45
+  # ) +
+  ggnewscale::new_scale_fill() +
+  stat_bin_hex(
+    data = site_points,
+    aes(
+      x = LONGITUDE,
+      y = LATITUDE,
+      weight = total_n,
+      fill = after_stat(count)
+    ),
+    bins = 30,
+    linewidth = 0,
+    alpha = 0.75,
+    inherit.aes = FALSE
+  ) +
+  scale_fill_viridis_c(
+    name = "Samples (sum n)",
+    trans = "log10",
+    labels = scales::comma
+  ) +
+  # Equirectangular, true-scale at 60N: same trick as the hexbin cells in
+  # build_study_area_figure.R panel a), keeps them regular hexagons rather
+  # than stretched ones at this latitude (cos(60) = 0.5).
+  coord_sf(
+    crs = st_crs("+proj=eqc +lat_ts=60"),
+    xlim = c(soerfjorden_bbox["xmin"] - 1, soerfjorden_bbox["xmax"] + 1),
+    ylim = c(soerfjorden_bbox["ymin"] - 1, soerfjorden_bbox["ymax"] + 1),
+    default_crs = st_crs(4326),
+    expand = TRUE
+  ) +
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(2, 2, 2, 2),
+    legend.position = "bottom",
+    legend.key.height = unit(0.3, "cm"),
+    legend.key.width = unit(0.8, "cm"),
+    plot.title = element_text(
+      face = "bold",
+      size = 11,
+      hjust = 0.01,
+      margin = margin(b = 2)
+    )
+  ) +
+  labs(title = "Sørfjorden: study area & sampling density") |>
+    suppressWarnings()
+
+# Written to figures/ (not .images-raw/ like the parent script) since this
+# notebook's output is a real, reviewable artefact rather than a one-off
+# manuscript-figure draft. See CLAUDE.md 2.3.1: Sam can't see this inline, so
+# the path is the thing that matters.
+ggsave(
+  "figures/soerfjorden-density.png",
+  panel_density,
+  width = 5,
+  height = 9,
+  dpi = 300,
+  bg = "white"
+) |>
+  suppressWarnings()
+
+panel_density
 ```
 
 ```{r}

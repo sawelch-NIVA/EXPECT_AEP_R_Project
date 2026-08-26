@@ -729,6 +729,22 @@ comment reads `ICP-MS`, not unit arithmetic, so C001 correctly did not touch it.
 Next correction candidate; use the cross-validation check to pick the factor
 (other trout muscle campaigns sit at 0.15-0.64).
 
+**Decided 2026-08-26: leave it, don't correct.** Re-checked against the actual
+data: only 3 of the 6 rows are the fault (`...2021-08-01-R-1/2/3`, 67,141 /
+76,815 / 73,947 mg/kg wet, comment `ICP-MS`); the other 3
+(`...2023-07-14-R-1/2/3`, 0.42-0.52 mg/kg wet, comment `EKSTERN_NILU`) are
+ordinary trout muscle values and were never part of the fault. All 6 sit in
+group **G105** only (G054/G060 were only ever the comparison set for picking a
+factor). G105 is n=15, `tier = "tail"` in `group_decisions.csv`, so it gets no
+triage panel (`n >= 100`) and no AEP node. Its only footprint is one row of a
+wrong mean/median in the all-245-group table in `docs/NBXX-Sample-Groups.qmd`.
+Sam's call: not worth building a new row-exclusion mechanism (no existing
+lever reaches this precisely -- `exclude_campaigns`/`exclude_references` on
+`aep_nodes.csv` can't separate the 3 bad rows from the 3 good ones sharing the
+same campaign and reference, and there's no G105 node to attach it to anyway;
+`unit_corrections.csv` can only scale, not drop) for a row nobody scrutinises.
+Left as-is.
+
 ### 9f. State of play, end of 2026-08-06
 
 Pipeline fully built, `tar_outdated()` reports 0. Test suite 1115 passing.
@@ -749,7 +765,10 @@ last step of 9e and everything in that section assumes it.
 
 #### Open, ordered by how much they bite
 
-1. **C002 for *S. trutta*.** See 9e. Biggest remaining data fault.
+1. ~~**C002 for *S. trutta*.**~~ **Closed 2026-08-26, not corrected.** See 9e:
+   only G105 (n=15, tail tier) is affected, no panel or node ever reaches it,
+   and no existing exclusion lever separates the 3 bad rows from 3 good ones
+   sharing the same campaign/reference. Left as-is.
 2. **The comment detector never shrinks.** `scan_comment_unit_flags()` matches on
    comment text, and the text does not change when a row is corrected, so it
    still reports 8 groups including the 33 rows C001 already fixed. Only the
@@ -763,7 +782,10 @@ last step of 9e and everything in that section assumes it.
    card work of 2026-08-05: `title_size` 2.6 against headline 3.7, and the
    compact strip drawing an x axis the test expects blank. Not caused by the
    units work; unpicked.
-5. **9c anomalies 2 and 3, and the Coteur transcription fix.** Unchanged.
+5. **9c anomalies 2 and 3, and the Coteur transcription fix.** Coteur fixed
+   2026-08-05 (raw-data edit, verified 2026-08-26). Anomaly 2 (*S. trutta*)
+   closed 2026-08-26, see item 1. Anomaly 3 (Aquatic Sediment / Screening)
+   unchanged.
 
 #### Then the actual AEP
 
