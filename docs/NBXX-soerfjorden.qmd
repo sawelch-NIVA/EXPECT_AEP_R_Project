@@ -1,0 +1,36 @@
+---
+title: "Notebook XX - Sørfjorden Case Study"
+date: last-modified
+lightbox: true
+format: html
+execute:
+  freeze: false   # parked 2026-07-29, see _quarto.yml render list
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| warning: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
+
+here::i_am("index.qmd")
+```
+
+Sørfjorden ("The South Fjord") is the southerly arm of Hardangerfjorden on Norway's South-West coast [@thorsnaesSorfjordenHardanger2024]. In the early 1900s a number of heavy industrial plants began operation on the fjord's shores, and it became unusually contaminated with heavy metals [@ruusMonitoringEnvironmentalQuality2010]. Copper is known to have been emitted to Sørfjord as a byproduct of zinc production in the area, and unusually high copper concentrations have been detected in the tissues of fish caught in the area [@ruusMonitoringEnvironmentalQuality2010]
+
+A003,AEP-003 - Sørfjorden,"Bounding box 59.77-60.37 N, 6.25-6.85 E, measured against load_literature_pqt the same way as A002. 760 measurements, 3 references (VannmiljøCopper2010-2025, 2003CoteurFieldContaminationOf, 2005GillanStructureOfSediment).",59.77,60.37,6.25,6.85,1900,2100,
+
+```{r}
+# Render map of bounding box/study area
+```
+
+```{r}
+# Table of groups filtered to bounding box
+```
+
+<!-- Embed AEP here -->

@@ -551,10 +551,43 @@ Logged here so they are not lost:
    apart (Measures Monitoring, Urban Fjord, MilFersk). Uninvestigated; looks like
    the same family of problem.
 3. **Aquatic Sediment / Screening New Contaminants**, 2.0 orders low over 19
-   rows. Uninvestigated.
+   rows. ~~Uninvestigated.~~ **Investigated 2026-08-26, no action taken.** See
+   below.
 
 `unit_anomaly_report` re-derives all three on every build, so they cannot go
 stale or be forgotten.
+
+**Anomaly 3 resolved as "leave it", 2026-08-26.** The 19 rows are really 15 plus
+4. The 4 (Norconsult TA-2852) run 3.69 to 21.1 mg/kg dry and are unremarkable.
+The 15 are one 2011 screening study, `Rapport TA-2899`, marine bed sediment by
+Van Veen grab, running 0.0042 to 0.79 against a peer geometric mean of 20.7 over
+24,807 rows.
+
+Three explanations were ruled out:
+
+- **Not a second analyte.** `Parameter_id` is `CU` on all 138,615 raw rows, and
+  Sam confirmed the Vannmiljø search returned no copper pyrithione. The
+  `Analysemetode: GC-CI-MS` string in the comment field is report-level
+  boilerplate from TA-2899, which screened organics as well, and says nothing
+  about how the copper was measured. It is a trap: GC-MS cannot measure a metal,
+  so the comment reads like hard evidence of a mislabelled analyte and is not.
+- **Not a unit mapping fault.** `Enhet_id` is `41` on these rows, the same code
+  as all 29,681 sediment rows in the export.
+- **Not a matrix mapping fault.** `SS` is "Sediment saltvann", marine bed
+  sediment reported in dry weight, correctly mapped to Aquatic Sediment /
+  Water benthos.
+
+**No correction factor survives the landing test** (9e). The 15 rows fall in
+three site clusters with geometric means 0.166, 0.014 and 0.290. Against a peer
+20.7, a 100x correction lands two and leaves the third 15x low; a 1000x
+correction fixes that one and overshoots the other two.
+
+**Left in place because it changes nothing.** The rows sit in `G002-Wsd-Cwb-Md`,
+a member of AEP node `N012-coast-benthic-sed`, so they do reach the AEP. But
+they are 15 rows of 24,826, each with `MEASURED_N = 1`. Dropping them moves the
+group's weighted geometric mean from 20.621 to 20.688 mg/kg dry, a shift of
+0.33%. Excluding them and leaving them differ by a third of one percent, so the
+cost of getting this wrong is below the resolution of anything the paper claims.
 
 ### 9d. `row_id` and the corrections layer, 2026-08-06
 
