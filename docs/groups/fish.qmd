@@ -330,8 +330,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 - @fig-g043-bf-oot-g-mor-mus-md-d:
 - @fig-g043-bf-oot-g-mor-mus-md-e:
 
-::: {#fig-g043-bf-oot-g-mor-mus-md layout-ncol=5}
-
+::: {#fig-g043-bf-oot-g-mor-mus-md layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/G043-Bf-Oot-G-mor-Mus-Md_a_density.png){#fig-g043-bf-oot-g-mor-mus-md-a group="G043-Bf-Oot-G-mor-Mus-Md"}
 
 ![Concentration by date](../../triage/G043-Bf-Oot-G-mor-Mus-Md_b_date.png){#fig-g043-bf-oot-g-mor-mus-md-b group="G043-Bf-Oot-G-mor-Mus-Md"}
@@ -343,9 +342,7 @@ G018-Bf-Cnr-C-rup-Wbd-Mw: Fish / Ctenolabrus rupestris / Whole body / Coastal, f
 ![Spatial distribution](../../triage/G043-Bf-Oot-G-mor-Mus-Md_e_spatial.png){#fig-g043-bf-oot-g-mor-mus-md-e group="G043-Bf-Oot-G-mor-Mus-Md"}
 
 G043-Bf-Oot-G-mor-Mus-Md: Fish / Gadus morhua / Muscle / Ocean, sea, territorial waters / Other / mg/kg (dry)
-
 :::
-
 
 ::: callout-note
 **Verdict:** *(unwritten)*
@@ -365,9 +362,9 @@ G043-Bf-Oot-G-mor-Mus-Md: Fish / Gadus morhua / Muscle / Ocean, sea, territorial
 
 `G047-Bf-Cnr-G-mor-Mus-Mw` **Atlantic cod**. `n` = 44 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/kg (wet)`.
 
-- @fig-g047-bf-cnr-g-mor-mus-mw-a:
+- @fig-g047-bf-cnr-g-mor-mus-mw-a: Double-peak is slightly suspect, and we might expect the rightmost mean to be suspiciously close to the PROREF for *G. morhua* liver. But without any clear evidence of a unit or similar error I'm hesitant to remove anything.
 - @fig-g047-bf-cnr-g-mor-mus-mw-b:
-- @fig-g047-bf-cnr-g-mor-mus-mw-c:
+- @fig-g047-bf-cnr-g-mor-mus-mw-c: Biomodality is coming from Urban Fjord, and we have had problems with unit errors in this campaign elsewhere. But as above, reluctant to remove existing data without stronger evidence.
 - @fig-g047-bf-cnr-g-mor-mus-mw-d:
 - @fig-g047-bf-cnr-g-mor-mus-mw-e:
 
@@ -386,7 +383,7 @@ G047-Bf-Cnr-G-mor-Mus-Mw: Fish / Gadus morhua / Muscle / Coastal, fjord / Not re
 :::
 
 ::: callout-note
-**Verdict:** *(unwritten)*
+**Verdict:** Keep as is, but beware low quality of data.
 :::
 
 ## G048-Bf-Lnr-P-flu-Mus-Mw Fish / Perca fluviatilis / Muscle / Lake, pond, pool, reservoir / Not reported / mg/kg (wet) {#grp-G048-Bf-Lnr-P-flu-Mus-Mw}
