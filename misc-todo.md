@@ -49,4 +49,29 @@
     composite group_id, so every triage/*.png filename changes on the next
     render. `targets` will write the new files but will not delete the old
     ones under the previous slugs -- `triage/` needs a manual sweep at some
-    point to remove whatever is left unreferenced. Not urgent.
+    point to remove whatever is left unreferenced. Not urgent.17. **RESOLVED, and it was never broken.** N016-g-morhua-muscle's
+    `exclude_campaigns` works, PLAN.md 9f's short form is correct, and the
+    node resolves to the 21 rows 9e concluded with (GM 0.182 mg/kg wet,
+    0.10-0.50, dip p = 0.099, i.e. unimodal).
+
+    Recorded because the false alarm cost an afternoon and would cost another.
+    On 2026-08-12 `tar_meta()` showed `apply_node_exclusion()` warning "2
+    values in exclude_campaigns matched no rows" for this node, which was read
+    as a typo. It is not. **The warning came from a spatially scoped AEP**
+    (A002/A003), where the bounding box leaves this node with no rows at all,
+    so the exclusion legitimately matches nothing *within that scope*. The
+    same build's warning block says so one line earlier: "N016-g-morhua-muscle
+    ... resolve to no data".
+
+    Acting on it made things worse: the cell was rewritten to the long
+    `Vannmiljø Copper Monitoring 2010-2025 (...)` form, which matches
+    `CAMPAIGN_NAME` but **not `CAMPAIGN_NAME_SHORT`, which is the column
+    `resolve_node_data()` actually passes** (fct_aep_nodes.R:622). That put the
+    node back on all 44 rows including the 18 mislabelled Urban Fjord ones,
+    which is what "extremely suspect" looked like. Reverted 2026-08-13.
+
+    **The real defect is the warning, not the data.** `apply_node_exclusion()`
+    cannot tell a typo from "these rows are outside this AEP's scope", and it
+    fires the same message for both. Worth making it say which, or suppressing
+    it where the scoped subset is empty. Until then, check an exclusion against
+    A001 before believing a warning from a scoped AEP.

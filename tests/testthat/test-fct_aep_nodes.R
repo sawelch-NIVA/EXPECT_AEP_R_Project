@@ -133,23 +133,28 @@ test_that("campaign and reference exclusions are independent", {
   expect_true(all(c("RefA", "RefB") %in% out$REFERENCE_ID))
 })
 
-test_that("an exclusion matching nothing warns rather than passing silently", {
+test_that("an exclusion naming something that does not exist warns", {
   # The failure this project keeps rediscovering: the node still resolves, still
   # produces a mean, and the rows you thought you removed are still in it.
+  #
+  # Both values below are absent from the fixture's vocabulary entirely, so
+  # they are real typos and must still warn after the 2026-08-13 change. What
+  # changed is the OTHER case: a name that exists but is out of this AEP's
+  # scope is now silent. See "Typo, not scope" in apply_node_exclusion().
   d <- data_fixture()
   expect_warning(
     resolve_node_data(
       node_fixture(exclude_campaigns = "Camp Z (typo)"),
       members_fixture("G001"), d, ids_fixture()
     ),
-    "matched no rows"
+    "not a known"
   )
   expect_warning(
     resolve_node_data(
       node_fixture(exclude_references = "RefC"),
       members_fixture("G001"), d, ids_fixture()
     ),
-    "matched no rows"
+    "not a known"
   )
 })
 
@@ -584,4 +589,107 @@ test_that("weighting changes nothing where every row is one measurement", {
   v <- d$MEASURED_VALUE_STANDARD[d$SITE_GEOGRAPHIC_FEATURE == "River, stream, canal"]
   expect_equal(card$geo_mean, 10^mean(log10(v)))
   expect_equal(card$mean, mean(v))
+})
+
+# ---- Exclusions: typo versus scope (2026-08-13) --------------------------
+# The warning used to fire on both, with one message. A scoped AEP whose box
+# excludes a campaign legitimately matches nothing, and reading that as a typo
+# led to a working exclusion being "corrected" into a broken one, putting
+# N016-g-morhua-muscle back on all 44 rows.
+
+excl_node <- function(...) node_fixture(node_type = "empirical", ...)
+
+excl_data <- function(campaigns) {
+  tibble::tibble(
+    CAMPAIGN_NAME_SHORT = campaigns,
+    REFERENCE_ID = "R1",
+    MEASURED_VALUE_STANDARD = seq_along(campaigns)
+  )
+}
+
+test_that("a name that is not in the vocabulary warns", {
+  pool <- excl_data(c("Vm (Real)", "Vm (Other)"))
+  node <- excl_node(exclude_campaigns = "Vm (Typo)")
+  expect_warning(
+    apply_node_exclusion(pool, node, "exclude_campaigns",
+                         "CAMPAIGN_NAME_SHORT", vocabulary = pool),
+    "not a known"
+  )
+})
+
+test_that("a real name that is out of scope here is silent", {
+  # THE FIX. The name exists in the pool; this AEP's subset just has none of
+  # those rows. That is an ordinary consequence of a bounding box.
+  pool <- excl_data(c("Vm (Real)", "Vm (Other)"))
+  scoped <- pool[pool$CAMPAIGN_NAME_SHORT == "Vm (Other)", ]
+  node <- excl_node(exclude_campaigns = "Vm (Real)")
+  expect_no_warning(
+    apply_node_exclusion(scoped, node, "exclude_campaigns",
+                         "CAMPAIGN_NAME_SHORT", vocabulary = pool)
+  )
+})
+
+test_that("a node with no rows at all in scope is silent", {
+  # N016 in A002/A003: the box leaves nothing, so nothing can match.
+  pool <- excl_data(c("Vm (Real)", "Vm (Other)"))
+  node <- excl_node(exclude_campaigns = "Vm (Real)")
+  expect_no_warning(
+    apply_node_exclusion(pool[0, ], node, "exclude_campaigns",
+                         "CAMPAIGN_NAME_SHORT", vocabulary = pool)
+  )
+})
+
+test_that("the exclusion still actually excludes", {
+  pool <- excl_data(c("Vm (Real)", "Vm (Other)", "Vm (Real)"))
+  node <- excl_node(exclude_campaigns = "Vm (Real)")
+  out <- apply_node_exclusion(pool, node, "exclude_campaigns",
+                              "CAMPAIGN_NAME_SHORT", vocabulary = pool)
+  expect_equal(nrow(out), 1)
+  expect_equal(out$CAMPAIGN_NAME_SHORT, "Vm (Other)")
+})
+
+test_that("several names split on semicolons and are checked individually", {
+  pool <- excl_data(c("Vm (A)", "Vm (B)", "Vm (C)"))
+  node <- excl_node(exclude_campaigns = "Vm (A); Vm (Nope)")
+  expect_warning(
+    out <- apply_node_exclusion(pool, node, "exclude_campaigns",
+                                "CAMPAIGN_NAME_SHORT", vocabulary = pool),
+    "Nope", fixed = TRUE
+  )
+  # The good one still applies despite the bad one.
+  expect_false("Vm (A)" %in% out$CAMPAIGN_NAME_SHORT)
+})
+
+test_that("a missing target column still warns, and changes nothing", {
+  pool <- excl_data("Vm (Real)")
+  node <- excl_node(exclude_campaigns = "Vm (Real)")
+  expect_warning(
+    out <- apply_node_exclusion(pool, node, "exclude_campaigns",
+                                "NO_SUCH_COLUMN", vocabulary = pool),
+    "no .*NO_SUCH_COLUMN.* column"
+  )
+  expect_equal(nrow(out), nrow(pool))
+})
+
+test_that("vocabulary defaults to data, preserving the old behaviour", {
+  pool <- excl_data("Vm (Other)")
+  node <- excl_node(exclude_campaigns = "Vm (Real)")
+  expect_warning(
+    apply_node_exclusion(pool, node, "exclude_campaigns",
+                         "CAMPAIGN_NAME_SHORT"),
+    "not a known"
+  )
+})
+
+test_that("the real N016 exclusion resolves and is unimodal", {
+  # Guards the specific regression: the long CAMPAIGN_NAME form silently
+  # matches nothing, putting the node back on all 44 rows.
+  skip_if_not(file.exists(here::here("data/clean/aep/aep_nodes.csv")))
+  n <- read_aep_nodes()
+  cell <- n$exclude_campaigns[n$node_id == "N016-g-morhua-muscle"]
+  skip_if(is.na(cell))
+  expect_false(
+    grepl("Vannmiljø Copper Monitoring", cell, fixed = TRUE),
+    label = "N016 uses the SHORT campaign form"
+  )
 })

@@ -25,11 +25,52 @@
 #'   default, and not a failure.
 #' * `empirical` -- supported by evidence, which must be named in
 #'   `evidence_justification`.
+#' * `rejected` -- considered and cut. Not drawn, not counted, and the reason
+#'   must be written in `notes`.
+#'
+#' `rejected` exists because **deleting the row does not work**, and that is
+#' worth stating plainly since it was discovered the hard way (2026-08-12).
+#' `scripts/scaffold_aep_edges.R` proposes new edges with an `anti_join` on
+#' `from`/`to`, so a row that is absent is indistinguishable from one that was
+#' never proposed: every deleted edge came back on the next scaffold run. That
+#' is the same cache-versus-curation failure as the untracked
+#' `group_decisions.csv` and the missing `imports = "STOPAEP"` -- a human
+#' decision stored as an absence, which the machine then overwrites in silence.
+#'
+#' A rejected edge therefore **stays on file**, carrying its reason. The
+#' scaffolder needs no change to respect it: its `anti_join` ignores status, so
+#' the row's mere presence blocks re-proposal.
 #'
 #' @return A character vector.
 #' @export
 aep_edge_statuses <- function() {
-  c("putative", "empirical")
+  c("putative", "empirical", "rejected")
+}
+
+#' Edge Statuses That Are Drawn
+#'
+#' The complement of `rejected`. Split out rather than inlined because three
+#' places need to agree on it ([plot_aep()], [validate_aep_edges()] and
+#' [aep_edge_progress()]), and a diagram that draws a cut edge while the
+#' progress table says it is gone is worse than either error alone.
+#'
+#' @return A character vector.
+#' @export
+aep_edge_live_statuses <- function() {
+  setdiff(aep_edge_statuses(), "rejected")
+}
+
+#' Drop Rejected Edges
+#'
+#' `NA` status counts as live, matching [plot_aep()]'s longstanding
+#' `coalesce(status, "putative")`: an unfilled cell is an edge not yet
+#' considered, never one that was cut. Cutting is always a positive act.
+#'
+#' @param edges The edges table.
+#' @return `edges` without its rejected rows.
+#' @export
+drop_rejected_edges <- function(edges) {
+  edges[!(edges$status %in% "rejected"), , drop = FALSE]
 }
 
 #' An Empty Edges Table
@@ -172,6 +213,57 @@ read_aep_edges <- function(
 validate_aep_edges <- function(edges, nodes) {
   problems <- character(0)
 
+  # A cut with no recorded reason is how a decision gets re-litigated in three
+  # weeks. Same shape as the empirical/evidence_justification check below: the
+  # status asserts a judgement was made, and `notes` is the only place the
+  # judgement itself can live. `notes` rather than a dedicated column because
+  # the rejection reason is prose, not a controlled vocabulary.
+  unreasoned <- edges$edge_id[
+    edges$status %in%
+      "rejected" &
+      (is.na(edges$notes) | !nzchar(trimws(edges$notes)))
+  ]
+  if (length(unreasoned) > 0) {
+    problems <- c(
+      problems,
+      paste0(
+        length(unreasoned),
+        " edge(s) marked rejected with no reason in notes: ",
+        paste(unreasoned, collapse = ", ")
+      )
+    )
+  }
+
+  # A rejected edge is not part of the diagram, so it must not carry the
+  # scores or the magnitude of one. Left over from a change of mind, these
+  # would be counted by anything that reads the scores without filtering.
+  stale <- edges$edge_id[
+    edges$status %in%
+      "rejected" &
+      (!is.na(edges$magnitude) |
+        !is.na(edges$essentiality_score) |
+        !is.na(edges$plausibility_score) |
+        !is.na(edges$evidence_score) |
+        !is.na(edges$quantification_score))
+  ]
+  if (length(stale) > 0) {
+    problems <- c(
+      problems,
+      paste0(
+        length(stale),
+        " rejected edge(s) still carry a score or magnitude: ",
+        paste(stale, collapse = ", "),
+        " (clear them, or change the status)"
+      )
+    )
+  }
+
+  # Every check from here down asks about the diagram, and a rejected edge is
+  # not in it. Most matter little either way; the orphan check matters a lot,
+  # because a node whose only edges were cut is exactly the node that needs
+  # reporting and would otherwise look connected.
+  edges <- drop_rejected_edges(edges)
+
   # An empirical claim with no justification is the one that matters: it asserts
   # evidence exists without saying what it is, and nothing downstream can tell
   # that apart from a real citation.
@@ -258,7 +350,7 @@ validate_aep_edges <- function(edges, nodes) {
 #' wrong moves the clip boundary, which is why they are named arguments with
 #' documented defaults rather than constants buried in the drawing code.
 #'
-#' Defaults match the `aep_diagram` target: `node_cards_compact` is written at
+#' Defaults match the `aep_diagrams` target: `node_cards_compact` is written at
 #' 2.4 x 1.8 inches (`card_aspect = 1.8 / 2.4`) onto a 12 x 8 inch canvas
 #' (`device_aspect = 12 / 8`). **Change either in `_targets.R` and these defaults
 #' are wrong**, so both are passed explicitly from there.
@@ -547,6 +639,69 @@ aep_edge_bezier_points <- function(edges, curvature = 0.15) {
   )
 }
 
+#' Terminal Tangent of Each Edge, for Drawing a Solid Arrowhead
+#'
+#' **Why arrowheads are a layer of their own** (Sam 2026-08-12: the arrows
+#' "have the same dashed border as the edges, which looks noisy and silly").
+#'
+#' `grid` draws an arrowhead with the same `gpar` as the line it terminates,
+#' and that includes `lty`. A putative edge is dashed, so its arrowhead outline
+#' came out dashed too: a closed triangle with gaps chewed out of its edges,
+#' which at figure scale reads as noise rather than as a dash pattern. There is
+#' no per-arrow linetype override to reach for, so the fix is structural. The
+#' curve is drawn with no arrow at all, and the head is carried by this short
+#' **solid** segment laid along the curve's own end tangent.
+#'
+#' For a quadratic bezier the tangent at the end point is simply `P2 - P1`, so
+#' the head points exactly along the curve rather than along the chord. That
+#' distinction is visible at this curvature: on a long edge the chord direction
+#' is several degrees off, and an arrowhead skewed against its own line looks
+#' broken in a way that is hard to name when you see it.
+#'
+#' @param edges Output of [aep_edge_coords()].
+#' @param curvature As [aep_edge_bezier_points()]. Must match, or the head
+#'   points somewhere the curve does not go.
+#' @param frac Length of the stub, as a fraction of the straight-line distance
+#'   between the endpoints. Small enough to be invisible under the head itself;
+#'   non-zero because a zero-length segment has no direction for `grid` to
+#'   orient the arrow by.
+#' @return A tibble of `edge_id`, `x`, `y`, `xend`, `yend`.
+#' @export
+aep_edge_arrow_stubs <- function(edges, curvature = 0.15, frac = 0.02) {
+  if (nrow(edges) == 0) {
+    return(tibble::tibble(
+      edge_id = character(0),
+      x = numeric(0), y = numeric(0),
+      xend = numeric(0), yend = numeric(0)
+    ))
+  }
+
+  dx <- edges$xend - edges$x
+  dy <- edges$yend - edges$y
+  len <- sqrt(dx^2 + dy^2)
+
+  perp_x <- ifelse(len == 0, 0, -dy / len)
+  perp_y <- ifelse(len == 0, 0, dx / len)
+  ctrl_x <- (edges$x + edges$xend) / 2 + perp_x * curvature * len
+  ctrl_y <- (edges$y + edges$yend) / 2 + perp_y * curvature * len
+
+  # Tangent at the end of a quadratic bezier: P2 - P1.
+  tx <- edges$xend - ctrl_x
+  ty <- edges$yend - ctrl_y
+  tlen <- sqrt(tx^2 + ty^2)
+  ux <- ifelse(tlen == 0, 0, tx / tlen)
+  uy <- ifelse(tlen == 0, 0, ty / tlen)
+
+  step <- len * frac
+  tibble::tibble(
+    edge_id = edges$edge_id,
+    x = edges$xend - ux * step,
+    y = edges$yend - uy * step,
+    xend = edges$xend,
+    yend = edges$yend
+  )
+}
+
 #' Draw the AEP
 #'
 #' **Manual coordinates, never an automatic layout.** Vertical position carries
@@ -574,9 +729,13 @@ aep_edge_bezier_points <- function(edges, curvature = 0.15) {
 #' @param image_size Card width as a fraction of plot width.
 #' @param card_aspect,device_aspect Card and device shape, passed to
 #'   [node_card_extent()] so arrows can be clipped to the cards. Defaults match
-#'   the `aep_diagram` target; pass them explicitly from anywhere else.
+#'   the `aep_diagrams` target; pass them explicitly from anywhere else.
 #' @param curvature Bend applied to every edge, passed to
 #'   [aep_edge_bezier_points()]. `0` is a straight line.
+#' @param arrow_length Arrowhead length in points. **4 since 2026-08-12**, down
+#'   from 6 (Sam: "make the arrow smaller"). Drawn by a separate solid stub
+#'   layer rather than by the curve's own `arrow =`; see
+#'   [aep_edge_arrow_stubs()] for why.
 #' @param tile_size,tile_aspect Bare-node rectangle width (as a fraction of
 #'   panel width) and height-over-width, used only when `node_images` is not
 #'   supplied. `NULL` (the default for both) means "the same size as the real
@@ -609,6 +768,7 @@ plot_aep <- function(
   card_aspect = 1.8 / 2.4,
   device_aspect = 12 / 8,
   curvature = 0.15,
+  arrow_length = 4,
   tile_size = NULL,
   tile_aspect = NULL,
   x_expand = 0.15,
@@ -684,7 +844,13 @@ plot_aep <- function(
   xlim <- cx + c(-1, 1) * (ext$rx / 2)
   ylim <- cy + c(-1, 1) * (ext$ry / 2)
 
-  e <- aep_edge_coords(edges, placed, hw = ext$hw, hh = ext$hh)
+  # Rejected edges are dropped EXPLICITLY, not left to fall out of the draw
+  # loop below. They would already vanish by accident, because that loop
+  # iterates over `names(styles$linetype)` and aep_edge_styles() names only the
+  # live statuses -- but relying on that makes "cut edges are not drawn" an
+  # emergent property of the style table, which the next person to add a style
+  # entry would silently undo.
+  e <- aep_edge_coords(drop_rejected_edges(edges), placed, hw = ext$hw, hh = ext$hh)
   if (nrow(e) > 0) {
     e$status <- dplyr::coalesce(e$status, "putative")
   }
@@ -751,11 +917,12 @@ plot_aep <- function(
           linetype = styles$linetype[[st]],
           colour = styles$colour[[st]],
           linewidth = styles$linewidth[[st]],
-          alpha = styles$alpha[[st]],
-          arrow = ggplot2::arrow(
-            length = ggplot2::unit(6, "pt"),
-            type = "closed"
-          )
+          alpha = styles$alpha[[st]]
+          # NO `arrow =` HERE. grid gives the arrowhead the line's own gpar,
+          # dashed lty included, so a putative edge's head came out as a
+          # triangle with gaps chewed out of it. The head is drawn by the
+          # solid stub layer immediately below instead. See
+          # aep_edge_arrow_stubs().
           # No arrow.fill: 2026-08-07 briefly added one here on a hypothesis
           # that the arrowhead was rendering unfilled/invisible, then reverted
           # -- Sam confirmed arrowheads were actually visible before but
@@ -766,6 +933,23 @@ plot_aep <- function(
           # are clipped to a box around each card BEFORE the card image is
           # drawn on top, so an undersized box is what lets an arrowhead land
           # under the image rather than short of it.
+        ) +
+        # The arrowhead, solid regardless of the edge's own linetype. Same
+        # colour, linewidth and alpha as the curve so it reads as one object;
+        # only `linetype` differs, and that is the entire purpose.
+        ggplot2::geom_segment(
+          data = aep_edge_arrow_stubs(sub, curvature = curvature),
+          ggplot2::aes(
+            x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend
+          ),
+          linetype = "solid",
+          colour = styles$colour[[st]],
+          linewidth = styles$linewidth[[st]],
+          alpha = styles$alpha[[st]],
+          arrow = ggplot2::arrow(
+            length = ggplot2::unit(arrow_length, "pt"),
+            type = "closed"
+          )
         )
     }
 
@@ -922,6 +1106,13 @@ aep_bbox_inset <- function(base_map, lat_min, lat_max, lon_min, lon_max) {
 #' at when deciding whether to keep going or stop: how many edges are evidenced,
 #' and how many remain putative.
 #'
+#' **`edges` counts live edges only, and `rejected` is reported beside it.**
+#' Counting cut edges in the denominator would leave the progress figure
+#' measured against work that has been deliberately abandoned, so it could never
+#' reach completion however much of the real work got done. That is the opposite
+#' of what a time-box needs from its progress number: rejecting an edge is
+#' progress, and it should read as progress.
+#'
 #' @param edges The edges table.
 #' @return A one-row tibble.
 #' @export
@@ -931,21 +1122,25 @@ aep_edge_progress <- function(edges) {
   # `edges$status` then indexed the integer column just created and failed with
   # "$ operator is invalid for atomic vectors". Sequential evaluation plus data
   # masking; the fix is to not reference the argument inside the call at all.
-  n_edges <- nrow(edges)
-  n_empirical <- sum(edges$status %in% "empirical")
-  n_putative <- sum(edges$status %in% "putative")
-  n_magnitude <- sum(!is.na(edges$magnitude))
+  n_rejected <- sum(edges$status %in% "rejected")
+  live <- drop_rejected_edges(edges)
+
+  n_edges <- nrow(live)
+  n_empirical <- sum(live$status %in% "empirical")
+  n_putative <- sum(live$status %in% "putative")
+  n_magnitude <- sum(!is.na(live$magnitude))
   n_scored <- sum(
-    !is.na(edges$essentiality_score) &
-      !is.na(edges$plausibility_score) &
-      !is.na(edges$evidence_score) &
-      !is.na(edges$quantification_score)
+    !is.na(live$essentiality_score) &
+      !is.na(live$plausibility_score) &
+      !is.na(live$evidence_score) &
+      !is.na(live$quantification_score)
   )
 
   tibble::tibble(
     edges = n_edges,
     empirical = n_empirical,
     putative = n_putative,
+    rejected = n_rejected,
     with_magnitude = n_magnitude,
     fully_scored = n_scored
   )

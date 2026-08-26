@@ -1238,7 +1238,8 @@ list(
       must_include = c(
         "G033-Ba-Cnr-A-nod-Sti-Mw",
         "G036-Ba-Cnr-F-ves-Sti-Mw",
-        "G047-Bf-Cnr-G-mor-Mus-Mw"
+        "G047-Bf-Cnr-G-mor-Mus-Mw",
+        "G043-Bf-Oot-G-mor-Mus-Md"
       )
     )
   ),
@@ -1658,7 +1659,9 @@ list(
   # ggimage sizes a card as a fraction of PANEL WIDTH, so its extent in data
   # units depends on the shape of the canvas. See node_card_extent().
   tar_target(
-    name = aep_diagram,
+    # Plural since 2026-08-12 (Sam): this writes ONE FIGURE PER AEP, six of
+    # them as of today, so the singular name read as a single artefact.
+    name = aep_diagrams,
     command = write_aep_diagrams(
       scoped = aep_scoped,
       edges = aep_edges,
@@ -1675,7 +1678,18 @@ list(
       dir = here_rel("figures"),
       width = 12,
       height = 8,
-      dpi = 150,
+      # 300, not 150, and the number is not arbitrary: it is what makes the
+      # cards render at their own resolution instead of being thrown away.
+      # A compact card is written at 2.4 x 1.8in / 300dpi = 720 x 540px
+      # (write_node_cards()). ggimage sizes it as `image_size` of PANEL WIDTH,
+      # so at 12in x 150dpi = 1800px the card landed in 0.19 * 1800 = 342px and
+      # was downsampled 2.1x -- every detail tuned into the card was being
+      # discarded at placement. At 300dpi the footprint is ~684px against a
+      # 720px source, i.e. near 1:1. Raising it further only upscales.
+      #
+      # Geometry is unaffected: node_card_extent() works in inches and
+      # fractions of the panel, so arrow clipping does not move with dpi.
+      dpi = 600,
       image_size = 0.19
     ),
     format = "file"
@@ -1691,19 +1705,24 @@ list(
   # the nodes/edges/groups/cards tables, so it builds (and can be inspected)
   # independently of whether the card images are even up to date.
   tar_target(
-    name = aep_diagram_bare,
+    name = aep_diagrams_bare,
     command = write_aep_diagrams(
       scoped = aep_scoped,
       edges = aep_edges,
       cards = aep_node_cards,
       groups = aep_node_groups,
       manifest = aep_manifest,
-      # See aep_diagram above: inset locator maps disabled 2026-08-07.
+      # See aep_diagrams above: inset locator maps disabled 2026-08-07.
       bbox_map = NULL,
       dir = here_rel("figures"),
       width = 12,
       height = 8,
-      dpi = 150,
+      # Matched to aep_diagrams deliberately. The bare diagram is a diagnostic
+      # for the real one, so a geometry problem has to appear at the same
+      # scale in both; a bare render at half the resolution would show
+      # crowding and label collisions that the real figure does not have, and
+      # hide ones it does.
+      dpi = 300,
       bare = TRUE
     ),
     format = "file"

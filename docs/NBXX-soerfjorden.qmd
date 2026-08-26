@@ -1,0 +1,306 @@
+---
+title: "Notebook XX - Sørfjorden Case Study"
+date: last-modified
+lightbox: true
+format: html
+execute:
+  freeze: false   # parked 2026-07-29, see _quarto.yml render list
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| warning: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
+
+here::i_am("index.qmd")
+```
+
+Sørfjorden ("The South Fjord") is the southerly arm of Hardangerfjorden on Norway's South-West coast [@thorsnaesSorfjordenHardanger2024]. In the early 1900s a number of heavy industrial plants began operation on the fjord's shores, and it became unusually contaminated with heavy metals [@ruusMonitoringEnvironmentalQuality2010]. Copper is known to have been emitted to Sørfjord as a byproduct of zinc production in the area, and unusually high copper concentrations have been detected in the tissues of fish caught in the area [@ruusMonitoringEnvironmentalQuality2010]
+
+A003,AEP-003 - Sørfjorden,"Bounding box 59.77-60.37 N, 6.25-6.85 E, measured against load_literature_pqt the same way as A002. 760 measurements, 3 references (VannmiljøCopper2010-2025, 2003CoteurFieldContaminationOf, 2005GillanStructureOfSediment).",59.77,60.37,6.25,6.85,1900,2100,
+
+```{r}
+#| label: fig-soerfjorden-overview
+#| fig-cap: Sørfjorden AEP-003 bbox (59.77-60.37N, 6.25-6.85E). a) location within the wider study area. b-d) zoomed view (padded well beyond the bbox for geographic context; data still restricted to it) showing sampling density by compartment. Hexbinned where n sites >= 30 (b), points below that (d), a "no samples" panel where a compartment is empty in this bbox (c). Adapted from scripts/build_study_area_figure.R panel a).
+#| fig-width: 9
+#| fig-height: 11
+library(sf)
+library(patchwork)
+
+sf::sf_use_s2(FALSE)
+
+soerfjorden_bbox <- st_bbox(
+  c(xmin = 6.25, xmax = 6.85, ymin = 59.77, ymax = 60.37),
+  crs = st_crs(4326)
+)
+
+# View window for panels b-d: padded well beyond the AEP bbox above. Cropping
+# the map tightly to the bbox itself makes it ~2x taller than wide (a fjord is
+# a narrow N-S sliver) and reads as visually meaningless. The padding is a
+# viewport choice only -- site_points below still filters to the strict bbox,
+# so what counts as "in this AEP" is unaffected.
+view_bbox_deg <- st_bbox(
+  c(
+    xmin = soerfjorden_bbox[["xmin"]] - 0.35,
+    xmax = soerfjorden_bbox[["xmax"]] + 0.35,
+    ymin = soerfjorden_bbox[["ymin"]] - 0.12,
+    ymax = soerfjorden_bbox[["ymax"]] + 0.12
+  ),
+  crs = st_crs(4326)
+)
+
+# UTM 32N (6-12E) rather than the eqc-projection trick used at study-area
+# scale: that trick reprojects AFTER stat_bin_hex() has already binned in
+# plain lon/lat degrees, so it warps the hexagons it was meant to fix (they
+# came out ~2:1 height:width). Transforming points to true metres first and
+# binning there is what actually gets regular hexagons, at the cost of only
+# being valid near this UTM zone -- fine for one fjord, not for the
+# study-area map.
+utm_crs <- st_crs(32632)
+view_bbox_utm <- st_bbox(st_transform(st_as_sfc(view_bbox_deg), utm_crs))
+
+wgs84_geo <- tar_read(wgs84_geography)
+literature_merged_data <- tar_read(load_literature_pqt)
+
+# Natural Earth's rivers dataset only carries major rivers even at its finest
+# (10m) scale -- it returns zero features for this fjord's catchment (checked
+# 2026-08-26). Left wired up (and drawn if present) since fetching it is
+# genuinely one line via the project's ne_get() cache wrapper; getting an
+# Odda-scale river actually plotted needs a finer source (Kartverket N50/N250
+# elvenett, or OSM).
+rivers <- ne_get(
+  scale = 10,
+  type = "rivers_lake_centerlines",
+  category = "physical",
+  destdir = "data/raw/shapefiles/"
+) |>
+  st_crop(view_bbox_deg) |>
+  suppressWarnings()
+
+norway_bbox <- st_bbox(
+  c(xmin = 4, xmax = 31.5, ymin = 57.5, ymax = 71.5),
+  crs = st_crs(4326)
+)
+
+# --- a) Locator: bbox in the wider study area --------------------------
+
+panel_locator <- ggplot() +
+  geom_sf(
+    data = wgs84_geo$marine_polys,
+    aes(fill = I(ocean_color)),
+    color = "white",
+    linewidth = 0.15
+  ) +
+  geom_sf(
+    data = wgs84_geo$countries,
+    aes(
+      fill = I(ifelse(
+        highlight_name,
+        country_colours["highlight"],
+        country_colours["default"]
+      ))
+    ),
+    color = "white",
+    linewidth = 0.25
+  ) +
+  geom_sf(
+    data = st_as_sfc(soerfjorden_bbox),
+    fill = NA,
+    color = "#b23b3b",
+    linewidth = 0.9
+  ) +
+  coord_sf(
+    xlim = c(norway_bbox[["xmin"]], norway_bbox[["xmax"]]),
+    ylim = c(norway_bbox[["ymin"]], norway_bbox[["ymax"]]),
+    expand = FALSE
+  ) +
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(2, 2, 2, 2),
+    legend.position = "none",
+    plot.title = element_text(
+      face = "bold",
+      size = 10,
+      hjust = 0.01,
+      margin = margin(b = 2)
+    )
+  ) +
+  labs(title = "a) Location") |>
+    suppressWarnings()
+
+# --- b-d) Zoomed density by compartment ---------------------------------
+
+# Hexbin only where there's enough to bin: below n = 30 distinct sites a
+# hexbin reads as more precise than it is (CLAUDE.md 4.4, "switch on n").
+# Terrestrial has zero rows in this bbox (3 in the whole project, none here),
+# Biota has 11 distinct sites -- both fall under that line, so they get
+# points/a blank-panel message instead of a hexbin.
+build_compartment_panel <- function(
+  data,
+  compartment,
+  title,
+  min_n_for_hex = 30
+) {
+  pts <- data |>
+    filter(
+      ENVIRON_COMPARTMENT == compartment,
+      !is.na(LATITUDE),
+      !is.na(LONGITUDE),
+      !is.na(MEASURED_N),
+      LATITUDE >= soerfjorden_bbox[["ymin"]],
+      LATITUDE <= soerfjorden_bbox[["ymax"]],
+      LONGITUDE >= soerfjorden_bbox[["xmin"]],
+      LONGITUDE <= soerfjorden_bbox[["xmax"]]
+    ) |>
+    summarise(
+      total_n = sum(MEASURED_N, na.rm = TRUE),
+      .by = c(SITE_CODE, LATITUDE, LONGITUDE)
+    ) |>
+    st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = 4326, remove = FALSE) |>
+    st_transform(utm_crs)
+
+  n_sites <- nrow(pts)
+
+  base <- ggplot() +
+    geom_sf(
+      data = wgs84_geo$marine_polys,
+      aes(fill = I(ocean_color)),
+      color = "white",
+      linewidth = 0.15
+    ) +
+    geom_sf(
+      data = wgs84_geo$countries,
+      aes(
+        fill = I(ifelse(
+          highlight_name,
+          country_colours["highlight"],
+          country_colours["default"]
+        ))
+      ),
+      color = "white",
+      linewidth = 0.25
+    ) +
+    {
+      if (nrow(rivers) > 0) {
+        geom_sf(data = rivers, color = "#3a7ca8", linewidth = 0.4)
+      }
+    } +
+    ggnewscale::new_scale_fill()
+
+  if (n_sites == 0) {
+    panel <- base +
+      annotate(
+        "text",
+        x = mean(view_bbox_utm[c("xmin", "xmax")]),
+        y = mean(view_bbox_utm[c("ymin", "ymax")]),
+        label = "No samples",
+        size = 3,
+        fontface = "italic",
+        color = "grey30"
+      )
+  } else if (n_sites < min_n_for_hex) {
+    panel <- base +
+      geom_sf(data = pts, aes(size = total_n), color = "#b23b3b", alpha = 0.8) +
+      scale_size_area(name = "Samples (sum n)", max_size = 5)
+  } else {
+    coords <- st_coordinates(pts)
+    pts_df <- pts |>
+      st_drop_geometry() |>
+      mutate(X = coords[, 1], Y = coords[, 2])
+    panel <- base +
+      stat_bin_hex(
+        data = pts_df,
+        aes(x = X, y = Y, weight = total_n, fill = after_stat(count)),
+        bins = 25,
+        linewidth = 0,
+        alpha = 0.8,
+        inherit.aes = FALSE
+      ) +
+      scale_fill_viridis_c(
+        name = "Samples (sum n)",
+        trans = "log10",
+        labels = scales::comma
+      )
+  }
+
+  panel +
+    # default_crs = crs (not the usual 4326): pts_df's X/Y are already in UTM
+    # metres, so this tells coord_sf to treat them as such rather than
+    # reproject them a second time, which is what caused the squished hexes.
+    coord_sf(
+      crs = utm_crs,
+      default_crs = utm_crs,
+      xlim = c(view_bbox_utm[["xmin"]], view_bbox_utm[["xmax"]]),
+      ylim = c(view_bbox_utm[["ymin"]], view_bbox_utm[["ymax"]]),
+      expand = FALSE
+    ) +
+    theme_void() +
+    theme(
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      plot.margin = margin(2, 2, 2, 2),
+      legend.position = "bottom",
+      legend.key.height = unit(0.25, "cm"),
+      legend.key.width = unit(0.6, "cm"),
+      legend.text = element_text(size = 6),
+      legend.title = element_text(size = 7),
+      plot.title = element_text(
+        face = "bold",
+        size = 10,
+        hjust = 0.01,
+        margin = margin(b = 2)
+      )
+    ) +
+    labs(title = title) |>
+      suppressWarnings()
+}
+
+panel_aquatic <- build_compartment_panel(
+  literature_merged_data,
+  "Aquatic",
+  "b) Aquatic"
+)
+panel_terrestrial <- build_compartment_panel(
+  literature_merged_data,
+  "Terrestrial",
+  "c) Terrestrial"
+)
+panel_biota <- build_compartment_panel(
+  literature_merged_data,
+  "Biota",
+  "d) Biota"
+)
+
+panel_overview <- (panel_locator | panel_aquatic) /
+  (panel_terrestrial | panel_biota)
+
+# Written to figures/ (not .images-raw/ like the parent script) since this
+# notebook's output is a real, reviewable artefact rather than a one-off
+# manuscript-figure draft. See CLAUDE.md 2.3.1: Sam can't see this inline, so
+# the path is the thing that matters.
+ggsave(
+  "figures/soerfjorden-overview.png",
+  panel_overview,
+  width = 9,
+  height = 11,
+  dpi = 300,
+  bg = "white"
+) |>
+  suppressWarnings()
+
+panel_overview
+```
+
+```{r}
+# Table of groups filtered to bounding box
+```
+
+<!-- Embed AEP here -->

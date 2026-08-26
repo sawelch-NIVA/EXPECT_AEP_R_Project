@@ -39,5 +39,9 @@ triage/
 # 2.3.1.
 figures/dev/
 
+# Build logs from hand-run pipeline invocations (see CLAUDE.md 2.3.1: Sam
+# cannot see anything written to a scratch directory).
+logs/
+
 # rosm/ggspatial tile cache (annotation_map_tile downloads), not an artefact
 rosm.cache/

@@ -551,10 +551,43 @@ Logged here so they are not lost:
    apart (Measures Monitoring, Urban Fjord, MilFersk). Uninvestigated; looks like
    the same family of problem.
 3. **Aquatic Sediment / Screening New Contaminants**, 2.0 orders low over 19
-   rows. Uninvestigated.
+   rows. ~~Uninvestigated.~~ **Investigated 2026-08-26, no action taken.** See
+   below.
 
 `unit_anomaly_report` re-derives all three on every build, so they cannot go
 stale or be forgotten.
+
+**Anomaly 3 resolved as "leave it", 2026-08-26.** The 19 rows are really 15 plus
+4. The 4 (Norconsult TA-2852) run 3.69 to 21.1 mg/kg dry and are unremarkable.
+The 15 are one 2011 screening study, `Rapport TA-2899`, marine bed sediment by
+Van Veen grab, running 0.0042 to 0.79 against a peer geometric mean of 20.7 over
+24,807 rows.
+
+Three explanations were ruled out:
+
+- **Not a second analyte.** `Parameter_id` is `CU` on all 138,615 raw rows, and
+  Sam confirmed the Vannmiljø search returned no copper pyrithione. The
+  `Analysemetode: GC-CI-MS` string in the comment field is report-level
+  boilerplate from TA-2899, which screened organics as well, and says nothing
+  about how the copper was measured. It is a trap: GC-MS cannot measure a metal,
+  so the comment reads like hard evidence of a mislabelled analyte and is not.
+- **Not a unit mapping fault.** `Enhet_id` is `41` on these rows, the same code
+  as all 29,681 sediment rows in the export.
+- **Not a matrix mapping fault.** `SS` is "Sediment saltvann", marine bed
+  sediment reported in dry weight, correctly mapped to Aquatic Sediment /
+  Water benthos.
+
+**No correction factor survives the landing test** (9e). The 15 rows fall in
+three site clusters with geometric means 0.166, 0.014 and 0.290. Against a peer
+20.7, a 100x correction lands two and leaves the third 15x low; a 1000x
+correction fixes that one and overshoots the other two.
+
+**Left in place because it changes nothing.** The rows sit in `G002-Wsd-Cwb-Md`,
+a member of AEP node `N012-coast-benthic-sed`, so they do reach the AEP. But
+they are 15 rows of 24,826, each with `MEASURED_N = 1`. Dropping them moves the
+group's weighted geometric mean from 20.621 to 20.688 mg/kg dry, a shift of
+0.33%. Excluding them and leaving them differ by a third of one percent, so the
+cost of getting this wrong is below the resolution of anything the paper claims.
 
 ### 9d. `row_id` and the corrections layer, 2026-08-06
 
@@ -696,6 +729,22 @@ comment reads `ICP-MS`, not unit arithmetic, so C001 correctly did not touch it.
 Next correction candidate; use the cross-validation check to pick the factor
 (other trout muscle campaigns sit at 0.15-0.64).
 
+**Decided 2026-08-26: leave it, don't correct.** Re-checked against the actual
+data: only 3 of the 6 rows are the fault (`...2021-08-01-R-1/2/3`, 67,141 /
+76,815 / 73,947 mg/kg wet, comment `ICP-MS`); the other 3
+(`...2023-07-14-R-1/2/3`, 0.42-0.52 mg/kg wet, comment `EKSTERN_NILU`) are
+ordinary trout muscle values and were never part of the fault. All 6 sit in
+group **G105** only (G054/G060 were only ever the comparison set for picking a
+factor). G105 is n=15, `tier = "tail"` in `group_decisions.csv`, so it gets no
+triage panel (`n >= 100`) and no AEP node. Its only footprint is one row of a
+wrong mean/median in the all-245-group table in `docs/NBXX-Sample-Groups.qmd`.
+Sam's call: not worth building a new row-exclusion mechanism (no existing
+lever reaches this precisely -- `exclude_campaigns`/`exclude_references` on
+`aep_nodes.csv` can't separate the 3 bad rows from the 3 good ones sharing the
+same campaign and reference, and there's no G105 node to attach it to anyway;
+`unit_corrections.csv` can only scale, not drop) for a row nobody scrutinises.
+Left as-is.
+
 ### 9f. State of play, end of 2026-08-06
 
 Pipeline fully built, `tar_outdated()` reports 0. Test suite 1115 passing.
@@ -716,7 +765,10 @@ last step of 9e and everything in that section assumes it.
 
 #### Open, ordered by how much they bite
 
-1. **C002 for *S. trutta*.** See 9e. Biggest remaining data fault.
+1. ~~**C002 for *S. trutta*.**~~ **Closed 2026-08-26, not corrected.** See 9e:
+   only G105 (n=15, tail tier) is affected, no panel or node ever reaches it,
+   and no existing exclusion lever separates the 3 bad rows from 3 good ones
+   sharing the same campaign/reference. Left as-is.
 2. **The comment detector never shrinks.** `scan_comment_unit_flags()` matches on
    comment text, and the text does not change when a row is corrected, so it
    still reports 8 groups including the 33 rows C001 already fixed. Only the
@@ -730,7 +782,10 @@ last step of 9e and everything in that section assumes it.
    card work of 2026-08-05: `title_size` 2.6 against headline 3.7, and the
    compact strip drawing an x axis the test expects blank. Not caused by the
    units work; unpicked.
-5. **9c anomalies 2 and 3, and the Coteur transcription fix.** Unchanged.
+5. **9c anomalies 2 and 3, and the Coteur transcription fix.** Coteur fixed
+   2026-08-05 (raw-data edit, verified 2026-08-26). Anomaly 2 (*S. trutta*)
+   closed 2026-08-26, see item 1. Anomaly 3 (Aquatic Sediment / Screening)
+   unchanged.
 
 #### Then the actual AEP
 

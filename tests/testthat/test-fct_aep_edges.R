@@ -116,6 +116,135 @@ test_that("a complete edge validates silently", {
   expect_no_warning(validate_aep_edges(edges, nodes))
 })
 
+# ---- Rejected edges -----------------------------------------------------
+# Added 2026-08-12. A cut edge has to be RECORDED, not deleted: the scaffolder
+# proposes new edges by anti_join on from/to, so an absent row reads as "never
+# proposed" and comes back on the next run. Sam lost a round of deletions to
+# exactly this. These tests pin the status down at every point that has to
+# agree about it.
+
+test_that("rejected is an accepted status", {
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(
+    edge_fixture(status = "rejected", notes = "Indirect; mediated by N002"),
+    path, na = ""
+  )
+  expect_no_error(read_aep_edges(path, nodes = edge_nodes()))
+})
+
+test_that("drop_rejected_edges keeps everything that is not rejected", {
+  edges <- dplyr::bind_rows(
+    edge_fixture(edge_id = "E001"),
+    edge_fixture(edge_id = "E002", status = "empirical"),
+    edge_fixture(edge_id = "E003", status = "rejected", notes = "cut"),
+    # An unfilled status is an edge not yet considered, never one that was cut.
+    edge_fixture(edge_id = "E004", status = NA_character_)
+  )
+  expect_equal(drop_rejected_edges(edges)$edge_id, c("E001", "E002", "E004"))
+})
+
+test_that("a rejected edge with no reason is warned about", {
+  # The reason is the whole content of the decision. Without it the row says a
+  # judgement was made and records nothing of what it was, which is how the
+  # same edge gets argued about again in three weeks.
+  edges <- edge_fixture(status = "rejected")
+  expect_warning(
+    validate_aep_edges(edges, edge_nodes()),
+    "rejected with no reason"
+  )
+})
+
+test_that("whitespace does not pass as a rejection reason", {
+  edges <- edge_fixture(status = "rejected", notes = "   ")
+  expect_warning(
+    validate_aep_edges(edges, edge_nodes()),
+    "rejected with no reason"
+  )
+})
+
+test_that("a rejected edge still carrying a score or magnitude is warned about", {
+  # Left over from a change of mind. Anything reading the scores without
+  # filtering would count a cut edge as a scored one.
+  edges <- edge_fixture(
+    status = "rejected", notes = "cut", plausibility_score = 3
+  )
+  expect_warning(
+    validate_aep_edges(edges, edge_nodes()),
+    "still carry a score or magnitude"
+  )
+
+  edges2 <- edge_fixture(
+    status = "rejected", notes = "cut", magnitude = 42, magnitude_unit = "kg/yr"
+  )
+  expect_warning(
+    validate_aep_edges(edges2, edge_nodes()),
+    "still carry a score or magnitude"
+  )
+})
+
+test_that("a rejected edge does not count as an edge for the orphan check", {
+  # The check that matters most. A node whose only edges were cut is exactly
+  # the node needing to be reported, and before this it looked connected.
+  nodes <- edge_nodes()[1:2, ]
+  edges <- edge_fixture(status = "rejected", notes = "Indirect")
+  expect_warning(
+    validate_aep_edges(edges, nodes),
+    "no edges at all"
+  )
+})
+
+test_that("a cut edge mediated by a live path validates silently", {
+  # Sam's rule, 2026-08-12: a source never emits directly to an organism,
+  # there is always at least one matrix between. So the rejected source ->
+  # organism edge sits alongside the two live edges that carry the same flow
+  # through the medium, and nothing about that arrangement should warn.
+  edges <- dplyr::bind_rows(
+    edge_fixture(edge_id = "E001", from = "N001", to = "N002"),
+    edge_fixture(edge_id = "E002", from = "N002", to = "N003"),
+    edge_fixture(
+      edge_id = "E003", from = "N001", to = "N003", status = "rejected",
+      notes = "Indirect; mediated by N002"
+    )
+  )
+  expect_no_warning(validate_aep_edges(edges, edge_nodes()))
+})
+
+test_that("a rejected edge is not drawn", {
+  # Structural, not visual: the built plot must contain no layer holding the
+  # cut edge's geometry. Checked against the same plot with the edge live, so
+  # the assertion cannot pass because nothing was drawn either way.
+  live <- edge_fixture(from = "N001", to = "N002")
+  cut <- edge_fixture(from = "N001", to = "N002", status = "rejected",
+                      notes = "Indirect")
+
+  n_layers <- function(edges) {
+    built <- suppressWarnings(
+      ggplot2::ggplot_build(plot_aep(edge_nodes(), edges))
+    )
+    sum(vapply(built$data, function(d) nrow(d) > 0, logical(1)))
+  }
+
+  expect_lt(n_layers(cut), n_layers(live))
+})
+
+test_that("progress reports rejected separately and excludes it from the total", {
+  # Rejecting an edge IS progress. Counting cut edges in the denominator would
+  # leave the figure measured against abandoned work, so it could never reach
+  # completion however much real work got done.
+  edges <- dplyr::bind_rows(
+    edge_fixture(edge_id = "E001"),
+    edge_fixture(edge_id = "E002", status = "empirical",
+                 magnitude = 1, magnitude_unit = "kg"),
+    edge_fixture(edge_id = "E003", status = "rejected", notes = "Indirect"),
+    edge_fixture(edge_id = "E004", status = "rejected", notes = "Indirect")
+  )
+  p <- aep_edge_progress(edges)
+  expect_equal(p$edges, 2)
+  expect_equal(p$rejected, 2)
+  expect_equal(p$putative, 1)
+  expect_equal(p$empirical, 1)
+})
+
 # ---- Geometry -----------------------------------------------------------
 
 test_that("edge coordinates come from the nodes' hand-placed positions", {
@@ -324,4 +453,61 @@ test_that("the diagram clips to cards only when cards are actually drawn", {
   p <- plot_aep(nodes, edges, node_images = imgs, image_size = 0.15)
   expect_s3_class(p, "ggplot")
   expect_silent(invisible(ggplot2::ggplot_build(p)))
+})
+
+# ---- Arrowheads ----------------------------------------------------------
+# Added 2026-08-12. grid gives an arrowhead the line's own gpar, lty included,
+# so a dashed edge produced a triangle with gaps chewed out of it. The head is
+# now a separate solid layer.
+
+test_that("arrow stubs sit at the destination end and point along the curve", {
+  coords <- aep_edge_coords(edge_fixture(), edge_nodes(), trim = 0)
+  stubs <- aep_edge_arrow_stubs(coords)
+  expect_equal(nrow(stubs), 1)
+  # The head lands exactly on the edge's own end point.
+  expect_equal(stubs$xend, coords$xend)
+  expect_equal(stubs$yend, coords$yend)
+  # And the stub is short.
+  len <- sqrt((stubs$xend - stubs$x)^2 + (stubs$yend - stubs$y)^2)
+  edge_len <- sqrt((coords$xend - coords$x)^2 + (coords$yend - coords$y)^2)
+  expect_lt(len, edge_len * 0.05)
+  expect_gt(len, 0)
+})
+
+test_that("the stub follows the curve's tangent, not the chord", {
+  # At curvature 0 the two coincide; above it they must not, or the head is
+  # skewed against its own line.
+  coords <- aep_edge_coords(edge_fixture(), edge_nodes(), trim = 0)
+  straight <- aep_edge_arrow_stubs(coords, curvature = 0)
+  curved <- aep_edge_arrow_stubs(coords, curvature = 0.15)
+  expect_equal(straight$y, coords$yend)
+  expect_false(isTRUE(all.equal(curved$y, straight$y)))
+})
+
+test_that("an empty edge set gives an empty stub table, not an error", {
+  expect_equal(nrow(aep_edge_arrow_stubs(aep_edge_coords(
+    empty_aep_edges(), edge_nodes()
+  ))), 0)
+})
+
+test_that("the curve layer carries no arrow and the stub layer does", {
+  edges <- edge_fixture(from = "N001", to = "N002")
+  p <- plot_aep(edge_nodes(), edges)
+  arrows <- vapply(p$layers, function(l) !is.null(l$geom_params$arrow),
+                   logical(1))
+  beziers <- vapply(p$layers, function(l) inherits(l$geom, "GeomBezier"),
+                    logical(1))
+  # No bezier layer may carry an arrow: that is what dashed the head.
+  expect_false(any(arrows & beziers))
+  expect_true(any(arrows))
+})
+
+test_that("the diagram still builds with arrowheads split out", {
+  edges <- dplyr::bind_rows(
+    edge_fixture(edge_id = "E001", from = "N001", to = "N002"),
+    edge_fixture(edge_id = "E002", from = "N002", to = "N003",
+                 status = "empirical", evidence_justification = "x")
+  )
+  p <- plot_aep(edge_nodes(), edges)
+  expect_no_error(suppressWarnings(ggplot2::ggplot_build(p)))
 })

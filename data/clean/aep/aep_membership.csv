@@ -1,4 +1,4 @@
-aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+﻿aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
 A001,N012-coast-benthic-sed,,,,,,,Blank scores inherit from aep_nodes.csv. A001 is the unrestricted AEP so the node's own scores are already the right ones.
 A001,N013-coast-water-column,,,,,,,
 A001,N014-mussel-soft-tissue,,,,,,,
@@ -59,3 +59,16 @@ A001,N023-marine-macroalgae,,,,,,,Not previously a member of A001 despite having
 A001,N024-seabird-egg,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
 A001,N025-eider-blood,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
 A001,N026-eider-eggs,,,,,,,"Not previously a member of A001, and had no edges either; both added 2026-08-11."
+A001,N027-river-water-column,,,,,,,Added 2026-08-12 with the non-coastal matrix nodes.
+A001,N028-river-benthic-sed,,,,,,,Added 2026-08-12 with the non-coastal matrix nodes.
+A001,N029-air,,,,,,,Added 2026-08-12 with the non-coastal matrix nodes.
+A002,N004-manufacturing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N005-agriculture-forestry-and-fishing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N006-mining-and-quarrying,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N007-other-services-and-administration,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N008-wholesale-and-retail-trade,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N009-construction-and-real-estate,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N010-transportation-and-storage,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N011-water-supply-and-waste-management,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N003-mine-tailings,,,,,,,Repparfjord's very own STD.
+A002,N016-g-morhua-muscle,,,,,,,

@@ -35,7 +35,7 @@ Aquatic / Freshwater / mg/L
 
 # Comparison
 
-::: {.callout-note}
+::: callout-note
 *(Notes on how these groups relate: what should be lumped, split, or dropped, and why. This is the question the document exists to answer.)*
 :::
 
@@ -69,7 +69,7 @@ The vast majority of samples are coded as taken from *Water column, pelagic zone
 G001-Wfw-Rwc-C: Aquatic / Freshwater / River, stream, canal / Water column, pelagic zone / mg/L
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 1.  Investigate Mine Impact
@@ -105,7 +105,7 @@ G001-Wfw-Rwc-C: Aquatic / Freshwater / River, stream, canal / Water column, pela
 G003-Wfw-Lwc-C: Aquatic / Freshwater / Lake, pond, pool, reservoir / Water column, pelagic zone / mg/L
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 1.  Investigate mine impact again
@@ -133,7 +133,7 @@ G027-Wfw-Rot-C is an artefact of sub-geography coding and should be folded under
 G027-Wfw-Rot-C: Aquatic / Freshwater / River, stream, canal / Other / mg/L
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -143,7 +143,6 @@ G027-Wfw-Rot-C: Aquatic / Freshwater / River, stream, canal / Other / mg/L
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G170-Wfw-Dws-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
-

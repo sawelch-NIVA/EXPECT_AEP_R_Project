@@ -370,3 +370,49 @@ test_that("a repaired section matches one written fresh", {
   )
   expect_true(all(block %in% fresh))
 })
+
+test_that("an unidentified group does not disable the repair for every other", {
+  # THE 2026-08-26 REGRESSION. `triage_pilot_groups` carried one row whose
+  # group_id was NA: a group above min_n that had never been given a stable id.
+  # `groups$group_id == owner` then yields NA for that row, and base-R logical
+  # subsetting turns each NA index into an extra NA element, so `length(slug)`
+  # was 2 for EVERY group and the `length(slug) != 1` guard sent all of them to
+  # `next`. refresh_group_panels() reported "No sections needed panels adding"
+  # for weeks while G043 sat unrepaired with its five PNGs already on disk.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  path <- file.path(dir, "fish.qmd")
+
+  groups <- nb_groups(
+    ids = c("G001", NA_character_),
+    slugs = c("some_slug", NA_character_)
+  )
+  out <- refresh_group_panels(groups, dir = dir, verbose = FALSE)
+  after <- readLines(path, warn = FALSE)
+
+  expect_equal(out$group_id, "G001")
+  expect_true(any(startsWith(after, "::: {#fig-g001")))
+  expect_false(any(grepl("G001` to `must_include`", after, fixed = TRUE)))
+})
+
+test_that("an unidentified group is still skipped on its own account", {
+  # The other half: an NA id must not itself be repaired into a section, and a
+  # group genuinely absent from `groups` must still be left alone.
+  dir <- withr::local_tempdir()
+  generate_group_notebooks(
+    nb_decisions(), nb_groups(ids = "G999", slugs = "unused"),
+    dir = dir, verbose = FALSE
+  )
+  before <- readLines(file.path(dir, "fish.qmd"), warn = FALSE)
+
+  out <- refresh_group_panels(
+    nb_groups(ids = NA_character_, slugs = NA_character_),
+    dir = dir, verbose = FALSE
+  )
+
+  expect_equal(nrow(out), 0)
+  expect_identical(before, readLines(file.path(dir, "fish.qmd"), warn = FALSE))
+})

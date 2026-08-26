@@ -1,3 +1,4 @@
-group_key,label,node_ids,notes
-coastal,Coastal,N012-coast-benthic-sed;N013-coast-water-column;N014-mussel-soft-tissue;N015-g-morhua-liver;N016-g-morhua-muscle,Everything in the coastal fjord system.
-cod,Cod,N015-g-morhua-liver;N016-g-morhua-muscle,Gadus morhua tissues; nests inside coastal.
+﻿"group_key","label","node_ids","notes"
+"coastal","Coastal","N012-coast-benthic-sed;N013-coast-water-column;N014-mussel-soft-tissue;N015-g-morhua-liver;N016-g-morhua-muscle","Everything in the coastal fjord system."
+"cod","Cod","N015-g-morhua-liver;N016-g-morhua-muscle","Gadus morhua tissues; nests inside coastal."
+"freshwater","Freshwater","N027-river-water-column;N028-river-benthic-sed","Riverine compartments, upstream of the coastal system."
