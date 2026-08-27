@@ -36,7 +36,8 @@ suppressMessages(library(dplyr))
 nodes_path <- here::here("data/clean/aep/aep_nodes.csv")
 members_path <- here::here("data/clean/aep/aep_node_members.csv")
 groups_path <- here::here("data/clean/aep/aep_node_groups.csv")
-membership_path <- here::here("data/clean/aep/aep_membership.csv")
+# One flat file per AEP since 2026-08-27. This script only ever adds A001 rows.
+membership_path <- here::here("data/clean/aep/aep_membership_A001.csv")
 
 nodes <- readr::read_csv(nodes_path, show_col_types = FALSE)
 stopifnot(!any(c("N027-river-water-column", "N028-river-benthic-sed",
@@ -118,7 +119,7 @@ readr::write_excel_csv(groups, groups_path, na = "")
 # freshwater inside their boxes (90 river measurements in Repparfjorden alone,
 # PLAN.md 9g), so they are plausible members, but adding a node to a case-study
 # AEP is a scoping decision and those two also want their own evidence and
-# quantification scores on aep_membership.csv. Left for Sam.
+# quantification scores in their own aep_membership_A00x.csv. Left for Sam.
 membership <- readr::read_csv(membership_path, show_col_types = FALSE)
 add <- tibble::tibble(
   aep_id = "A001",

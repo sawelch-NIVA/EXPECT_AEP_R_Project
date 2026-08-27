@@ -87,6 +87,7 @@ if (nrow(new_pairs) == 0) {
       magnitude_unit = NA_character_,
       magnitude_n = NA_real_,
       magnitude_sd = NA_real_,
+      magnitude_refs = NA_real_,
       essentiality_score = NA_real_,
       essentiality_justification = NA_character_,
       plausibility_score = NA_real_,

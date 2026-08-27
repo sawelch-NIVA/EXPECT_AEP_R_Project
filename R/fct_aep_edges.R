@@ -88,6 +88,7 @@ empty_aep_edges <- function() {
     magnitude_unit = character(0),
     magnitude_n = numeric(0),
     magnitude_sd = numeric(0),
+    magnitude_refs = numeric(0),
     essentiality_score = numeric(0),
     essentiality_justification = character(0),
     plausibility_score = numeric(0),

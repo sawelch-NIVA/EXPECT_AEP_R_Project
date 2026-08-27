@@ -65,6 +65,25 @@ test_that("a missing comment column is not an error", {
   expect_equal(nrow(scan_comment_unit_flags(d)), 0)
 })
 
+test_that("rows already covered by a unit correction are dropped", {
+  # The comment text does not change when a row is corrected, so the detector
+  # would otherwise keep reporting rows C001 already fixed. Marking every "Bad"
+  # row as corrected empties the result.
+  d <- anomaly_data()
+  d$unit_correction_id <- NA_character_
+  d$unit_correction_id[d$CAMPAIGN_NAME_SHORT == "Bad"] <- "C001"
+  expect_equal(nrow(scan_comment_unit_flags(d)), 0)
+})
+
+test_that("an uncorrected comment row is still caught when the column exists", {
+  # The column being present must not suppress genuinely uncorrected flags.
+  d <- anomaly_data()
+  d$unit_correction_id <- NA_character_
+  hits <- scan_comment_unit_flags(d)
+  expect_equal(nrow(hits), 1)
+  expect_equal(hits$n_rows, 5L)
+})
+
 # ---- The statistical detector -------------------------------------------
 
 test_that("a thousandfold campaign is found, and the good ones are not", {

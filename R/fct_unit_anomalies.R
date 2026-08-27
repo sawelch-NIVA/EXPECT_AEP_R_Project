@@ -30,7 +30,15 @@
 #' Deliberately reports rather than corrects. Rewriting a measured value on the
 #' strength of a free-text comment is a judgement, and it belongs to Sam.
 #'
-#' @param data A measurements table with `MEASUREMENT_COMMENT`.
+#' **Rows already covered by a unit correction are dropped first.** The comment
+#' text does not change when a row is corrected, so without this the detector
+#' would keep reporting the 33 Urban Fjord rows C001 already fixed and would
+#' never shrink as corrections are written. `unit_correction_id` is set by
+#' [apply_unit_corrections()]; the `%in% names()` guard keeps this working on a
+#' table that predates the corrections layer.
+#'
+#' @param data A measurements table with `MEASUREMENT_COMMENT`, and optionally
+#'   `unit_correction_id`.
 #' @param pattern Regex of unit-arithmetic phrasings, Norwegian and English.
 #' @return A tibble of matching rows summarised by comment and group.
 #' @export
@@ -52,6 +60,12 @@ scan_comment_unit_flags <- function(
       !is.na(.data$MEASUREMENT_COMMENT),
       grepl(pattern, .data$MEASUREMENT_COMMENT, ignore.case = TRUE)
     )
+
+  # Already-corrected rows still carry the comment that flagged them. Drop them
+  # so this is a shrinking to-do list rather than a static one.
+  if ("unit_correction_id" %in% names(hits)) {
+    hits <- dplyr::filter(hits, is.na(.data$unit_correction_id))
+  }
 
   if (nrow(hits) == 0) {
     return(empty_unit_anomalies())

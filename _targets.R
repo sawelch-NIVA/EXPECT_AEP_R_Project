@@ -1481,15 +1481,23 @@ list(
     name = aep_manifest,
     command = read_aep_manifest(aep_manifest_file)
   ),
+  # One flat file per AEP since 2026-08-27 (aep_membership_<aep_id>.csv). The
+  # list.files() command re-runs each build (cheap) and returns identical sorted
+  # paths when nothing changed; format = "file" hashes every path, so adding or
+  # removing an AEP's file invalidates aep_membership and the AEP subtree.
   tar_target(
     name = aep_membership_file,
-    command = here_rel("data/clean/aep/aep_membership.csv"),
+    command = sort(list.files(
+      here_rel("data/clean/aep"),
+      pattern = "^aep_membership_.*\\.csv$",
+      full.names = TRUE
+    )),
     format = "file"
   ),
   tar_target(
     name = aep_membership,
     command = read_aep_membership(
-      path = aep_membership_file,
+      paths = aep_membership_file,
       nodes = aep_nodes,
       manifest = aep_manifest
     )
@@ -1644,89 +1652,31 @@ list(
     format = "file"
   ),
 
-  ### # The AEP diagram ----
-  # PLAN.md P5.1. Manual coordinates from aep_nodes.csv, never an automatic
-  # layout: vertical position carries source-to-exposure meaning, so a layout
-  # algorithm optimising for edge crossings would destroy the one thing the axis
-  # is for. A file target, per CLAUDE.md 4.4: a ggplot object captures its whole
-  # input, so the store caches the image instead.
-  #
-  # ONE FIGURE PER AEP since 2026-08-06: figures/aep_A001.png and so on. Edges
-  # and grouping boxes are narrowed to each AEP's nodes rather than declared per
-  # AEP, so they cannot disagree with the membership file.
-  #
-  # The device size is passed down to plot_aep() because arrow clipping needs it:
-  # ggimage sizes a card as a fraction of PANEL WIDTH, so its extent in data
-  # units depends on the shape of the canvas. See node_card_extent().
+  ### # Edge report cards ----
+  # One compact card per non-rejected edge, per AEP, into
+  # figures/edge_cards/<aep_id>/. Based on the node card (write_node_cards())
+  # but smaller: no distribution panel, no level-coloured background, a blank
+  # line between the quantity and the counts. Putative vs empirical is carried
+  # by the edge line style and by the card existing at all, so it is not
+  # written on the card itself. See R/fct_edge_cards.R.
   tar_target(
-    # Plural since 2026-08-12 (Sam): this writes ONE FIGURE PER AEP, six of
-    # them as of today, so the singular name read as a single artefact.
-    name = aep_diagrams,
-    command = write_aep_diagrams(
+    name = aep_edge_cards,
+    command = write_aep_edge_cards(
       scoped = aep_scoped,
       edges = aep_edges,
-      cards = aep_node_cards,
-      groups = aep_node_groups,
-      # Nodes drawn as their own report cards (PLAN.md P5.2), which is what
-      # makes this a report-card AEP rather than a labelled graph.
-      card_paths = node_cards_compact,
-      manifest = aep_manifest,
-      # Inset locator maps disabled 2026-08-07: too many rendering issues.
-      # Omitting bbox_map is write_aep_diagrams()'s documented escape hatch --
-      # AEPs stay titled but draw uninset. Re-supply wgs84_map to re-enable.
-      bbox_map = NULL,
-      dir = here_rel("figures"),
-      width = 12,
-      height = 8,
-      # 300, not 150, and the number is not arbitrary: it is what makes the
-      # cards render at their own resolution instead of being thrown away.
-      # A compact card is written at 2.4 x 1.8in / 300dpi = 720 x 540px
-      # (write_node_cards()). ggimage sizes it as `image_size` of PANEL WIDTH,
-      # so at 12in x 150dpi = 1800px the card landed in 0.19 * 1800 = 342px and
-      # was downsampled 2.1x -- every detail tuned into the card was being
-      # discarded at placement. At 300dpi the footprint is ~684px against a
-      # 720px source, i.e. near 1:1. Raising it further only upscales.
-      #
-      # Geometry is unaffected: node_card_extent() works in inches and
-      # fractions of the panel, so arrow clipping does not move with dpi.
-      dpi = 600,
-      image_size = 0.19
+      dir = here_rel("figures/edge_cards")
     ),
     format = "file"
   ),
 
-  ### # The bare AEP diagram (no card images) ----
-  # Sam 2026-08-07: "let's draw a bare aep without images every render/targets
-  # runthrough, diagnosing stuff when the images are already drawn is tricky."
-  # Card images draw LAST in plot_aep() and are opaque, so they can hide a
-  # geometry problem (an edge clipped short, a group box or label
-  # mispositioned) underneath -- see write_aep_diagrams()'s `bare` doc for the
-  # full reasoning. This target does NOT depend on node_cards_compact, only on
-  # the nodes/edges/groups/cards tables, so it builds (and can be inspected)
-  # independently of whether the card images are even up to date.
-  tar_target(
-    name = aep_diagrams_bare,
-    command = write_aep_diagrams(
-      scoped = aep_scoped,
-      edges = aep_edges,
-      cards = aep_node_cards,
-      groups = aep_node_groups,
-      manifest = aep_manifest,
-      # See aep_diagrams above: inset locator maps disabled 2026-08-07.
-      bbox_map = NULL,
-      dir = here_rel("figures"),
-      width = 12,
-      height = 8,
-      # Matched to aep_diagrams deliberately. The bare diagram is a diagnostic
-      # for the real one, so a geometry problem has to appear at the same
-      # scale in both; a bare render at half the resolution would show
-      # crowding and label collisions that the real figure does not have, and
-      # hide ones it does.
-      dpi = 300,
-      bare = TRUE
-    ),
-    format = "file"
-  ),
+  ### # AEP diagrams: auto-assembly PARKED 2026-08-27 ----
+  # Sam is assembling the AEP figures by hand from the node and edge card
+  # images, so aep_diagrams and aep_diagrams_bare are no longer built. The
+  # machinery stays available: write_aep_diagrams() and plot_aep() in
+  # R/fct_aep_edges.R + R/fct_aep_nodes.R are unchanged, and re-adding a
+  # tar_target() here brings it back. aep_scoped / aep_edges / aep_node_cards /
+  # aep_node_groups / node_cards_compact all still build, since the hand
+  # assembly draws on the same cards.
 
   ### # Source unit errors ----
   # Added 2026-08-05, after three separate 1000x faults surfaced in one day from

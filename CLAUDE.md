@@ -60,7 +60,7 @@ one a flat listing hid:
 
 | Directory | Contents | Contract |
 |---|---|---|
-| `aep/` | `aep_nodes`, `aep_node_members`, `aep_node_groups`, `aep_edges`, `aep_manifest`, `aep_membership` | Hand-edited. Pipeline reads, **never writes**. |
+| `aep/` | `aep_nodes`, `aep_node_members`, `aep_node_groups`, `aep_edges`, `aep_manifest`, `aep_membership_<aep_id>` (one flat file per AEP since 2026-08-27) | Hand-edited. Pipeline reads, **never writes**. |
 | `decisions/` | `group_ids`, `group_decisions`, `unit_corrections` | Hand-edited. Same contract. |
 | `lookups/` | `Vm_*`/`vm_*` lookups, `species_common_names_cache`, `CREED_Copper_Purpose.yml` | Reference tables, occasionally hand-corrected. |
 | `spatial/` | `study_area_shapefile.*` | Static geometry. |

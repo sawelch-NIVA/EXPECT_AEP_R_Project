@@ -16,10 +16,11 @@
 #
 # So a node is defined ONCE. What varies per AEP is:
 #
-#   * WHICH nodes are in it        -- aep_membership.csv
-#   * WHERE each node sits         -- x/y on aep_membership.csv, because a
-#                                     position is a property of a node in a
-#                                     particular diagram, not of the node
+#   * WHICH nodes are in it        -- aep_membership_<aep_id>.csv (one flat file
+#                                     per AEP since 2026-08-27)
+#   * WHERE each node sits         -- x/y on that file, because a position is a
+#                                     property of a node in a particular
+#                                     diagram, not of the node
 #   * WHAT DATA it may draw on     -- the scope columns on aep_manifest.csv
 #
 # The third is the one that makes this honest rather than merely convenient. The
@@ -39,11 +40,11 @@
 #   * EVIDENCE and QUANTIFICATION are claims about the DATASET, and the dataset
 #     is exactly what an AEP scope changes. N001 is 25,024 measurements from two
 #     references nationally and 806 from one inside the box; the same evidence
-#     score cannot honestly describe both. They live on aep_membership.csv,
-#     which is already keyed by AEP and node. See aep_scoped_epeq_cols().
+#     score cannot honestly describe both. They live on the per-AEP membership
+#     file, which is already keyed by AEP and node. See aep_scoped_epeq_cols().
 #
 # Blank inherits from the node, so an AEP that does not restrict anything needs
-# no entries at all, and the pre-existing single-AEP files keep working.
+# no entries at all, and a membership file that predates this split still reads.
 #
 # This is NOT a general per-AEP override table, which was rejected and stays
 # rejected: an arbitrary exceptions table reintroduces the drift problem through
@@ -200,39 +201,100 @@ aep_scoped_epeq_cols <- function() {
   )
 }
 
-#' Read and Validate the AEP Membership File
+#' Read and Validate the AEP Membership Files
 #'
-#' @param path Where the CSV lives.
+#' **One flat file per AEP** since 2026-08-27: `aep_membership_<aep_id>.csv` in
+#' `data/clean/aep/`. Each AEP's membership is then a self-contained diff, and
+#' editing one AEP cannot touch another's rows. The files are read, row-bound,
+#' and validated exactly as the single combined file was.
+#'
+#' Each file must contain exactly one `aep_id`, and it must match the filename
+#' suffix. A mis-named or mis-pasted file is a build failure here rather than a
+#' silent re-target.
+#'
+#' @param paths Character vector of `aep_membership_*.csv` paths. A single
+#'   directory is expanded to every matching file it holds. `NULL` (the
+#'   default) globs `dir`.
 #' @param nodes Optional nodes table, to check every `node_id` exists.
 #' @param manifest Optional manifest, to check every `aep_id` exists.
-#' @return A tibble of `aep_id`, `node_id`, `x`, `y`, `notes`.
+#' @param dir Directory the default glob runs in.
+#' @return A tibble of `aep_id`, `node_id`, `x`, `y`, `notes`, one row per node
+#'   per AEP.
 #' @export
 read_aep_membership <- function(
-  path = here_rel("data/clean/aep/aep_membership.csv"),
+  paths = NULL,
   nodes = NULL,
-  manifest = NULL
+  manifest = NULL,
+  dir = here_rel("data/clean/aep")
 ) {
-  if (!file.exists(path)) {
+  membership_glob <- function(d) {
+    sort(list.files(
+      d,
+      pattern = "^aep_membership_.*\\.csv$",
+      full.names = TRUE
+    ))
+  }
+
+  if (is.null(paths)) {
+    paths <- membership_glob(dir)
+  } else if (length(paths) == 1 && dir.exists(paths)) {
+    paths <- membership_glob(paths)
+  }
+
+  if (length(paths) == 0) {
     stop(
-      "No AEP membership file at ",
-      path,
-      ". Run scripts/scaffold_aep_manifest.R first."
+      "No AEP membership files (aep_membership_*.csv) in ",
+      dir,
+      ". Write them by hand from the schema in empty_aep_membership()."
     )
   }
+
   # Everything as text, then x/y coerced below. Naming parsers for columns the
   # file may legitimately not have yet warns ("named parsers don't match the
   # column names"), and this file is hand-edited and routinely half-typed.
   # Guessing is no better: an all-blank x column guesses as logical.
-  membership <- readr::read_csv(
-    path,
-    show_col_types = FALSE,
-    col_types = readr::cols(.default = readr::col_character())
-  )
+  per_file <- lapply(paths, function(p) {
+    if (!file.exists(p)) {
+      stop("No AEP membership file at ", p, ".")
+    }
+    mem <- readr::read_csv(
+      p,
+      show_col_types = FALSE,
+      col_types = readr::cols(.default = readr::col_character())
+    )
+
+    # A brand-new AEP's file may exist with only a header for a few minutes.
+    # The orphan-AEP warning below is the right channel for "no members yet",
+    # so skip the one-aep_id assertion rather than abort on an empty file.
+    if (nrow(mem) == 0) {
+      return(mem)
+    }
+
+    # The filename/aep_id agreement check only means something when the file is
+    # actually named aep_membership_<id>.csv (which the pipeline glob guarantees).
+    # A path that does not follow the convention is not making the claim, so it
+    # is not checked -- this is what lets tests and ad-hoc callers pass an
+    # arbitrary path.
+    if (grepl("^aep_membership_.+\\.csv$", basename(p))) {
+      want <- sub("^aep_membership_(.+)\\.csv$", "\\1", basename(p))
+      got <- unique(mem$aep_id[!is.na(mem$aep_id) & nzchar(trimws(mem$aep_id))])
+      if (length(got) != 1L || !identical(got, want)) {
+        cli::cli_abort(c(
+          "{.file {basename(p)}} must hold exactly one {.field aep_id}, \\
+           {.val {want}}.",
+          "i" = "Found: {.val {got}}."
+        ))
+      }
+    }
+    mem
+  })
+
+  membership <- dplyr::bind_rows(per_file)
 
   missing <- setdiff(c("aep_id", "node_id"), names(membership))
   if (length(missing) > 0) {
     stop(
-      "AEP membership file is missing column(s): ",
+      "AEP membership files are missing column(s): ",
       paste(missing, collapse = ", ")
     )
   }

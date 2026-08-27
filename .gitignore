@@ -41,3 +41,6 @@ figures/dev/
 # Build logs from hand-run pipeline invocations (see CLAUDE.md 2.3.1: Sam
 # cannot see anything written to a scratch directory).
 logs/
+
+# Hand-made AEPs.
+docs/manual-aeps.pptx

@@ -198,6 +198,19 @@ write_csv_fixture <- function(x) {
   path
 }
 
+# One flat file per AEP since 2026-08-27. Split a membership tibble by aep_id
+# into aep_membership_<id>.csv files in a fresh temp dir, and return the dir.
+write_membership_dir <- function(x) {
+  dir <- withr::local_tempdir(.local_envir = parent.frame())
+  for (id in unique(x$aep_id)) {
+    readr::write_csv(
+      x[x$aep_id == id, , drop = FALSE],
+      file.path(dir, paste0("aep_membership_", id, ".csv"))
+    )
+  }
+  dir
+}
+
 test_that("a duplicate aep_id is refused", {
   path <- write_csv_fixture(manifest_fixture(aep_id = c("A001", "A001")))
   expect_error(read_aep_manifest(path), "Duplicate aep_id")
@@ -266,6 +279,51 @@ test_that("x, y and notes default in when the file omits them", {
   expect_true(all(is.na(out$x)))
 })
 
+# ---- One flat file per AEP (2026-08-27) --------------------------------
+
+test_that("a directory of per-AEP files is read and row-bound", {
+  dir <- write_membership_dir(membership_fixture())
+  out <- read_aep_membership(dir)
+  expect_equal(nrow(out), 5)
+  expect_setequal(unique(out$aep_id), c("A001", "A002"))
+  # A vector of the explicit paths gives the same result.
+  paths <- sort(list.files(dir, pattern = "^aep_membership_.*\\.csv$", full.names = TRUE))
+  expect_equal(read_aep_membership(paths), out)
+})
+
+test_that("a file whose aep_id disagrees with its name is refused", {
+  dir <- withr::local_tempdir()
+  # Contents say A002, filename says A003.
+  readr::write_csv(
+    membership_fixture(aep_id = rep("A002", 5)),
+    file.path(dir, "aep_membership_A003.csv")
+  )
+  expect_error(read_aep_membership(dir), "aep_membership_A003.csv")
+})
+
+test_that("a file holding two aep_ids is refused", {
+  dir <- withr::local_tempdir()
+  readr::write_csv(
+    membership_fixture(),  # A001 and A002 together
+    file.path(dir, "aep_membership_A001.csv")
+  )
+  expect_error(read_aep_membership(dir), "exactly one")
+})
+
+test_that("a header-only per-AEP file is tolerated, not aborted", {
+  dir <- write_membership_dir(membership_fixture())
+  readr::write_csv(
+    membership_fixture()[0, , drop = FALSE],
+    file.path(dir, "aep_membership_A009.csv")
+  )
+  expect_no_error(read_aep_membership(dir))
+})
+
+test_that("an empty directory is a clear error", {
+  dir <- withr::local_tempdir()
+  expect_error(read_aep_membership(dir), "aep_membership_")
+})
+
 test_that("the real manifest and membership files read and scope", {
   # A smoke run against the files actually in the repo, per CLAUDE.md: a
   # testthat pass on fixtures does not prove the hand-edited CSVs are valid.
@@ -277,9 +335,13 @@ test_that("the real manifest and membership files read and scope", {
   expect_named(scoped, manifest$aep_id)
   expect_true(all(vapply(scoped, nrow, integer(1)) > 0))
 
-  # A002 is the spatially restricted one and must genuinely be smaller.
-  expect_lt(nrow(scoped$A002), nrow(scoped$A001))
+  # A002 carries the whole kitchen-sink node set since 2026-08-27, so its node
+  # COUNT now matches A001; what still makes it a restricted AEP is the bounding
+  # box its scoped nodes inherit.
   expect_equal(scoped$A002$lon_min[1], 23)
+  expect_true(all(scoped$A002$lon_max == 25))
+  # A004 (Gadus morhua) is a genuine node-count subset.
+  expect_lt(nrow(scoped$A004), nrow(scoped$A001))
 })
 
 # ---- The EPEQ split ------------------------------------------------------

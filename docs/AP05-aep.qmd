@@ -143,7 +143,7 @@ The same holds for the grouping boxes: their member lists are intersected with t
 | `aep_nodes.csv` | node | The scientific claim: label, level, type, data restrictions, **essentiality and plausibility** | Anything AEP-specific |
 | `aep_node_members.csv` | node x group | Which sampling groups a node pools | Restrictions, scores |
 | `aep_manifest.csv` | AEP | The AEP's identity and its **scope** (bounding box, dates) | Node facts |
-| `aep_membership.csv` | AEP x node | Which nodes are in it, **where they sit**, and **evidence and quantification** | Essentiality, plausibility |
+| `aep_membership_<aep_id>.csv` | AEP x node (one flat file per AEP) | Which nodes are in it, **where they sit**, and **evidence and quantification** | Essentiality, plausibility |
 | `aep_edges.csv` | edge | A claimed flow between two nodes, and its status | `aep_id` |
 | `aep_node_groups.csv` | box | A labelled box drawn around a set of nodes | `aep_id` |
 
@@ -201,8 +201,8 @@ Four criteria, adapted from Peng et al. 2022, each scored 1 to 3 with a written 
 |------------------|----------------------|-----------------------------|
 | `essentiality`   | `aep_nodes.csv`      | the **world**               |
 | `plausibility`   | `aep_nodes.csv`      | the **world**               |
-| `evidence`       | `aep_membership.csv` | the **dataset**             |
-| `quantification` | `aep_membership.csv` | the **dataset**             |
+| `evidence`       | `aep_membership_<aep_id>.csv` | the **dataset**             |
+| `quantification` | `aep_membership_<aep_id>.csv` | the **dataset**             |
 
 "Copper is present in highly conserved metabolic systems" is as true in Repparfjorden as it is nationally, so it is written once. But N001 is 25,024 measurements from two references nationally and 806 from one inside the Repparfjorden box, and the same evidence score cannot honestly describe both.
 
@@ -226,7 +226,7 @@ flowchart TD
     R["<b>3</b> restrictions on aep_nodes.csv<br/><i>lat, date, exclusions</i>"] --> S
     S["<b>4</b> essentiality + plausibility<br/><i>on aep_nodes.csv</i>"] --> A
     A["<b>5</b> aep_manifest.csv<br/><i>register the AEP, set scope</i>"] --> P
-    P["<b>6</b> aep_membership.csv<br/><i>x, y, evidence, quantification</i>"] --> E
+    P["<b>6</b> aep_membership_&lt;aep_id&gt;.csv<br/><i>x, y, evidence, quantification</i>"] --> E
     E["<b>7</b> aep_edges.csv<br/><i>scaffold_aep_edges.R, then triage</i>"] --> B
     B["<b>8</b> aep_node_groups.csv<br/><i>optional boxes</i>"] --> T
     T["<b>9</b> tar_make()"]
@@ -248,7 +248,7 @@ One row in `aep_nodes.csv`. Get the id with `next_node_id(nodes, label)`, which 
 | `label` | Short. The grouping boxes carry the shared part, so do not write "Coastal" five times |
 | `level` | `source`, `medium`, `organism` or `tse`. Orders the pathway |
 | `node_type` | `empirical` (computed from groups) or `external` (typed in) |
-| `x`, `y` | Default layout. Overridden per AEP by `aep_membership.csv` |
+| `x`, `y` | Default layout. Overridden per AEP by `aep_membership_<aep_id>.csv` |
 
 `level` is not decorative. It orders the pathway, `scaffold_aep_edges.R` derives the candidate edge grid from it, and vertical position on the diagram carries source-to-exposure meaning. That is also why layout is manual: an automatic graph layout optimising for edge crossings would destroy the one thing the y axis is for.
 
@@ -312,7 +312,7 @@ Note that `lon_min` / `lon_max` exist **only** at AEP level. Nodes carry latitud
 
 ## 6. Place the nodes in it
 
-One row per node in `aep_membership.csv`: `aep_id`, `node_id`, `x`, `y`, then `evidence_score` / `quantification_score` and their justifications.
+One row per node in the AEP's own `aep_membership_<aep_id>.csv` (one flat file per AEP since 2026-08-27, e.g. `aep_membership_A002.csv`): `aep_id`, `node_id`, `x`, `y`, then `evidence_score` / `quantification_score` and their justifications. The `aep_id` column is kept in each file and must match the filename; the reader aborts otherwise.
 
 **Membership is what puts a node on a diagram.** A node absent from every membership row is defined and scored but never drawn, which is a legitimate state while you are building up.
 
@@ -350,7 +350,7 @@ A label repeating "Coastal" five times is a shared property with nowhere to live
 Rscript -e "targets::tar_make()"
 ```
 
-Every one of these files is a `format = "file"` target, so editing one invalidates the node cards and the diagram. Outputs land in `figures/aep_<aep_id>.png`, with per-node cards under `figures/node_cards_compact/<aep_id>/`.
+Every one of these files is a `format = "file"` target, so editing one invalidates the node and edge cards. Per-node cards land under `figures/node_cards_compact/<aep_id>/` and per-edge cards under `figures/edge_cards/<aep_id>/`. The AEP diagrams are assembled by hand from those cards (auto-assembly was parked 2026-08-27); `figures/aep_<aep_id>.png` holds the last auto-rendered version until it is replaced.
 
 Review the diff before you rebuild: `git diff data/clean/aep/`.
 
@@ -414,7 +414,7 @@ if (is.null(mem)) {
 
 ```{r}
 #| label: tbl-membership
-#| tbl-cap: "`aep_membership.csv`. Placement and the two data-level EPEQ scores, per AEP. Blank scores inherit from the node."
+#| tbl-cap: "`aep_membership_<aep_id>.csv`, all AEPs stacked. Placement and the two data-level EPEQ scores, per AEP. Blank scores inherit from the node."
 
 ms <- tr(tar_read(aep_membership))
 if (is.null(ms)) {
@@ -541,7 +541,7 @@ The node, membership and manifest readers **stop**. The cross-file completeness 
 ::: callout-warning
 ## `Run scripts/scaffold_aep_manifest.R first`
 
-That script **does not exist**. `read_aep_manifest()` and `read_aep_membership()` both name it in their missing-file errors, but nothing in `scripts/` provides it. If `aep_manifest.csv` or `aep_membership.csv` ever goes missing, write the two files by hand from the schemas in `empty_aep_manifest()` and `empty_aep_membership()`, or copy them back out of git.
+That script **does not exist**. `read_aep_manifest()` still names it in its missing-file error, but nothing in `scripts/` provides it (`read_aep_membership()` no longer refers to it). If `aep_manifest.csv` or an `aep_membership_<aep_id>.csv` ever goes missing, write the file by hand from the schema in `empty_aep_manifest()` / `empty_aep_membership()`, or copy it back out of git.
 :::
 
 # Standing decisions
