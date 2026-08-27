@@ -41,7 +41,8 @@ want_aep <- if ("--aep" %in% args) args[which(args == "--aep") + 1] else NULL
 
 summary_path <- here("data/clean/derived/prtr_emissions_summary.csv")
 nodes_path <- here("data/clean/aep/aep_nodes.csv")
-membership_path <- here("data/clean/aep/aep_membership.csv")
+# One flat file per AEP since 2026-08-27; read_aep_membership() globs the dir.
+membership_dir <- here("data/clean/aep")
 
 if (!file.exists(summary_path)) {
   stop(
@@ -206,8 +207,13 @@ if (length(unplaced) > 0) {
     paste(unplaced, collapse = ", ")
   )
 }
-if (file.exists(membership_path)) {
-  mem <- read_aep_membership(membership_path)
+membership_files <- list.files(
+  membership_dir,
+  pattern = "^aep_membership_.*\\.csv$",
+  full.names = TRUE
+)
+if (length(membership_files) > 0) {
+  mem <- read_aep_membership(membership_files)
   orphan <- setdiff(nodes$node_id, mem$node_id)
   if (length(orphan) > 0) {
     message(
@@ -217,5 +223,5 @@ if (file.exists(membership_path)) {
 }
 message(
   "Scores and coordinates are left blank on purpose. Fill them in ",
-  "data/clean/aep/aep_nodes.csv and data/clean/aep/aep_membership.csv."
+  "data/clean/aep/aep_nodes.csv and data/clean/aep/aep_membership_<aep_id>.csv."
 )

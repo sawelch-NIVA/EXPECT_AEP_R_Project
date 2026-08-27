@@ -38,3 +38,4 @@
 "N021-marine-zooplankton","G129-Bc-Owc-C-gla-Wbd-Md","Calanus glacialis, copepod"
 "N030-lake-water-column","G003-Wfw-Lwc-C","A bit multimodal, but keeping as is anyway."
 "N031-lake-benthic-sed","G009-Wsd-Lwb-Md","More-or-less log-normal."
+"N032-ocean-benthic-sed","G016-Wsd-Owb-Md","Dominated by MAREANO, mostly log-normal."

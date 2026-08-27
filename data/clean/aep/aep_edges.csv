@@ -1,88 +1,88 @@
-edge_id,from,to,label,status,magnitude,magnitude_unit,magnitude_n,magnitude_sd,essentiality_score,essentiality_justification,plausibility_score,plausibility_justification,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-E001,N012-coast-benthic-sed,N014-mussel-soft-tissue,Coastal benthic sediment to Coastal mussels,putative,,,,,,,,,,,,,
-E002,N012-coast-benthic-sed,N015-g-morhua-liver,Coastal benthic sediment to Coastal cod livers,putative,,,,,,,,,,,,,
-E003,N012-coast-benthic-sed,N016-g-morhua-muscle,Coastal benthic sediment to Coastal cod muscle,putative,,,,,,,,,,,,,
-E004,N013-coast-water-column,N014-mussel-soft-tissue,Coastal water to Coastal mussels,empirical,,,,,,,,,,,,,
-E005,N013-coast-water-column,N015-g-morhua-liver,Coastal water to Coastal cod livers,putative,,,,,,,,,,,,,
-E006,N013-coast-water-column,N016-g-morhua-muscle,Coastal water to Coastal cod muscle,putative,,,,,,,,,,,,,
-E007,N001-natural-occurrence,N012-coast-benthic-sed,Natural copper occurrence to Coastal benthic sediment,putative,,,,,,,,,,,,,
-E008,N001-natural-occurrence,N013-coast-water-column,Natural copper occurrence to Coastal water,putative,,,,,,,,,,,,,
-E012,N002-aquaculture,N012-coast-benthic-sed,Aquaculture copper application to Coastal benthic sediment,putative,,,,,,,,,,,,,
-E013,N002-aquaculture,N013-coast-water-column,Aquaculture copper application to Coastal water,putative,,,,,,,,,,,,,
-E014,N012-coast-benthic-sed,N017-crab-total,Benthic sediment to Crab total,putative,,,,,,,,,,,,,
-E015,N012-coast-benthic-sed,N021-marine-zooplankton,Benthic sediment to Marine zooplankton,putative,,,,,,,,,,,,,
-E016,N013-coast-water-column,N017-crab-total,Water column to Crab total,putative,,,,,,,,,,,,,
-E017,N013-coast-water-column,N021-marine-zooplankton,Water column to Marine zooplankton,putative,,,,,,,,,,,,,
-E032,N001-natural-occurrence,N014-mussel-soft-tissue,Natural occurrence to Mussel soft tissue,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E033,N001-natural-occurrence,N015-g-morhua-liver,Natural occurrence to G. morhua liver,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E034,N001-natural-occurrence,N016-g-morhua-muscle,Natural occurrence to G. morhua muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E018,N001-natural-occurrence,N017-crab-total,Natural occurrence to Crab total,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E019,N001-natural-occurrence,N021-marine-zooplankton,Natural occurrence to Marine zooplankton,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E020,N002-aquaculture,N014-mussel-soft-tissue,Aquaculture to Mussel soft tissue,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E021,N002-aquaculture,N015-g-morhua-liver,Aquaculture to G. morhua liver,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E022,N002-aquaculture,N016-g-morhua-muscle,Aquaculture to G. morhua muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E023,N002-aquaculture,N017-crab-total,Aquaculture to Crab total,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E024,N002-aquaculture,N021-marine-zooplankton,Aquaculture to Marine zooplankton,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E025,N003-mine-tailings,N012-coast-benthic-sed,Submarine tailing disposal to Benthic sediment,putative,,,,,,,,,,,,,
-E026,N003-mine-tailings,N013-coast-water-column,Submarine tailing disposal to Water column,rejected,,,,,,,,,,,,,"Although STD could reasonably emit to water column, it makes more sense to me to model this through the existing Sediment -> Water column edge"
-E027,N003-mine-tailings,N014-mussel-soft-tissue,Submarine tailing disposal to Mussel soft tissue,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E028,N003-mine-tailings,N015-g-morhua-liver,Submarine tailing disposal to G. morhua liver,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E029,N003-mine-tailings,N016-g-morhua-muscle,Submarine tailing disposal to G. morhua muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E030,N003-mine-tailings,N017-crab-total,Submarine tailing disposal to Crab total,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E031,N003-mine-tailings,N021-marine-zooplankton,Submarine tailing disposal to Marine zooplankton,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E035,N001-natural-occurrence,N023-marine-macroalgae,Natural occurrence to Marine macroalgae,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E036,N002-aquaculture,N023-marine-macroalgae,Aquaculture to Marine macroalgae,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E037,N003-mine-tailings,N023-marine-macroalgae,Submarine tailing disposal to Marine macroalgae,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E038,N012-coast-benthic-sed,N023-marine-macroalgae,Benthic sediment to Marine macroalgae,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E039,N013-coast-water-column,N023-marine-macroalgae,Water column to Marine macroalgae,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E040,N001-natural-occurrence,N022-marine-benthic-inverts,Natural occurrence to Marine benthic inverts,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E041,N002-aquaculture,N022-marine-benthic-inverts,Aquaculture to Marine benthic inverts,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E042,N003-mine-tailings,N022-marine-benthic-inverts,Submarine tailing disposal to Marine benthic inverts,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E043,N012-coast-benthic-sed,N022-marine-benthic-inverts,Benthic sediment to Marine benthic inverts,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E044,N013-coast-water-column,N022-marine-benthic-inverts,Water column to Marine benthic inverts,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E045,N004-manufacturing,N012-coast-benthic-sed,Manufacturing to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E046,N004-manufacturing,N013-coast-water-column,Manufacturing to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E047,N005-agriculture-forestry-and-fishing,N012-coast-benthic-sed,"Agriculture, forestry and fishing to Coastal benthic sediment",putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E048,N005-agriculture-forestry-and-fishing,N013-coast-water-column,"Agriculture, forestry and fishing to Coastal water",putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E049,N006-mining-and-quarrying,N012-coast-benthic-sed,Mining and quarrying to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E050,N006-mining-and-quarrying,N013-coast-water-column,Mining and quarrying to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E051,N007-other-services-and-administration,N012-coast-benthic-sed,Other services and administration to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E052,N007-other-services-and-administration,N013-coast-water-column,Other services and administration to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E053,N008-wholesale-and-retail-trade,N012-coast-benthic-sed,Wholesale and retail trade to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E054,N008-wholesale-and-retail-trade,N013-coast-water-column,Wholesale and retail trade to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E055,N009-construction-and-real-estate,N012-coast-benthic-sed,Construction and real estate to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E056,N009-construction-and-real-estate,N013-coast-water-column,Construction and real estate to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E057,N010-transportation-and-storage,N012-coast-benthic-sed,Transportation and storage to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E058,N010-transportation-and-storage,N013-coast-water-column,Transportation and storage to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E059,N011-water-supply-and-waste-management,N012-coast-benthic-sed,Water supply and waste management to Coastal benthic sediment,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E060,N011-water-supply-and-waste-management,N013-coast-water-column,Water supply and waste management to Coastal water,putative,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E061,N001-natural-occurrence,N018-crab-muscle,Natural occurrence to Crab muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E062,N002-aquaculture,N018-crab-muscle,Aquaculture to Crab muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E063,N003-mine-tailings,N018-crab-muscle,Submarine tailing disposal to Crab muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E064,N012-coast-benthic-sed,N018-crab-muscle,Benthic sediment to Crab muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E065,N013-coast-water-column,N018-crab-muscle,Water column to Crab muscle,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E066,N001-natural-occurrence,N019-crab-brown-meat,Natural occurrence to Crab brown meat,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E067,N002-aquaculture,N019-crab-brown-meat,Aquaculture to Crab brown meat,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E068,N003-mine-tailings,N019-crab-brown-meat,Submarine tailing disposal to Crab brown meat,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E069,N012-coast-benthic-sed,N019-crab-brown-meat,Benthic sediment to Crab brown meat,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E070,N013-coast-water-column,N019-crab-brown-meat,Water column to Crab brown meat,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E071,N001-natural-occurrence,N020-marine-crustaceans,Natural occurrence to Marine crustaceans,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E072,N002-aquaculture,N020-marine-crustaceans,Aquaculture to Marine crustaceans,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E073,N003-mine-tailings,N020-marine-crustaceans,Submarine tailing disposal to Marine crustaceans,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E074,N012-coast-benthic-sed,N020-marine-crustaceans,Benthic sediment to Marine crustaceans,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E075,N013-coast-water-column,N020-marine-crustaceans,Water column to Marine crustaceans,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E076,N001-natural-occurrence,N024-seabird-egg,Natural occurrence to Seabird egg,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E077,N002-aquaculture,N024-seabird-egg,Aquaculture to Seabird egg,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E078,N003-mine-tailings,N024-seabird-egg,Submarine tailing disposal to Seabird egg,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E079,N012-coast-benthic-sed,N024-seabird-egg,Benthic sediment to Seabird egg,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E080,N013-coast-water-column,N024-seabird-egg,Water column to Seabird egg,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E081,N001-natural-occurrence,N025-eider-blood,Natural occurrence to Eider blood,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E082,N002-aquaculture,N025-eider-blood,Aquaculture to Eider blood,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E083,N003-mine-tailings,N025-eider-blood,Submarine tailing disposal to Eider blood,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E084,N012-coast-benthic-sed,N025-eider-blood,Benthic sediment to Eider blood,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E085,N013-coast-water-column,N025-eider-blood,Water column to Eider blood,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E086,N001-natural-occurrence,N026-eider-eggs,Natural occurrence to Eider eggs,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E087,N002-aquaculture,N026-eider-eggs,Aquaculture to Eider eggs,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E088,N003-mine-tailings,N026-eider-eggs,Submarine tailing disposal to Eider eggs,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E089,N012-coast-benthic-sed,N026-eider-eggs,Benthic sediment to Eider eggs,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E090,N013-coast-water-column,N026-eider-eggs,Water column to Eider eggs,rejected,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+edge_id,from,to,label,status,magnitude,magnitude_unit,magnitude_n,magnitude_sd,magnitude_refs,essentiality_score,essentiality_justification,plausibility_score,plausibility_justification,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+E001,N012-coast-benthic-sed,N014-mussel-soft-tissue,Coastal benthic sediment to Coastal mussels,putative,,,,,,,,,,,,,,
+E002,N012-coast-benthic-sed,N015-g-morhua-liver,Coastal benthic sediment to Coastal cod livers,putative,,,,,,,,,,,,,,
+E003,N012-coast-benthic-sed,N016-g-morhua-muscle,Coastal benthic sediment to Coastal cod muscle,putative,,,,,,,,,,,,,,
+E004,N013-coast-water-column,N014-mussel-soft-tissue,Coastal water to Coastal mussels,empirical,,,,,,,,,,,,,,
+E005,N013-coast-water-column,N015-g-morhua-liver,Coastal water to Coastal cod livers,putative,,,,,,,,,,,,,,
+E006,N013-coast-water-column,N016-g-morhua-muscle,Coastal water to Coastal cod muscle,putative,,,,,,,,,,,,,,
+E007,N001-natural-occurrence,N012-coast-benthic-sed,Natural copper occurrence to Coastal benthic sediment,putative,,,,,,,,,,,,,,
+E008,N001-natural-occurrence,N013-coast-water-column,Natural copper occurrence to Coastal water,putative,,,,,,,,,,,,,,
+E012,N002-aquaculture,N012-coast-benthic-sed,Aquaculture copper application to Coastal benthic sediment,putative,,,,,,,,,,,,,,
+E013,N002-aquaculture,N013-coast-water-column,Aquaculture copper application to Coastal water,putative,,,,,,,,,,,,,,
+E014,N012-coast-benthic-sed,N017-crab-total,Benthic sediment to Crab total,putative,,,,,,,,,,,,,,
+E015,N012-coast-benthic-sed,N021-marine-zooplankton,Benthic sediment to Marine zooplankton,putative,,,,,,,,,,,,,,
+E016,N013-coast-water-column,N017-crab-total,Water column to Crab total,putative,,,,,,,,,,,,,,
+E017,N013-coast-water-column,N021-marine-zooplankton,Water column to Marine zooplankton,putative,,,,,,,,,,,,,,
+E032,N001-natural-occurrence,N014-mussel-soft-tissue,Natural occurrence to Mussel soft tissue,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E033,N001-natural-occurrence,N015-g-morhua-liver,Natural occurrence to G. morhua liver,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E034,N001-natural-occurrence,N016-g-morhua-muscle,Natural occurrence to G. morhua muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E018,N001-natural-occurrence,N017-crab-total,Natural occurrence to Crab total,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E019,N001-natural-occurrence,N021-marine-zooplankton,Natural occurrence to Marine zooplankton,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E020,N002-aquaculture,N014-mussel-soft-tissue,Aquaculture to Mussel soft tissue,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E021,N002-aquaculture,N015-g-morhua-liver,Aquaculture to G. morhua liver,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E022,N002-aquaculture,N016-g-morhua-muscle,Aquaculture to G. morhua muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E023,N002-aquaculture,N017-crab-total,Aquaculture to Crab total,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E024,N002-aquaculture,N021-marine-zooplankton,Aquaculture to Marine zooplankton,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E025,N003-mine-tailings,N012-coast-benthic-sed,Submarine tailing disposal to Benthic sediment,putative,,,,,,,,,,,,,,
+E026,N003-mine-tailings,N013-coast-water-column,Submarine tailing disposal to Water column,rejected,,,,,,,,,,,,,,"Although STD could reasonably emit to water column, it makes more sense to me to model this through the existing Sediment -> Water column edge"
+E027,N003-mine-tailings,N014-mussel-soft-tissue,Submarine tailing disposal to Mussel soft tissue,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E028,N003-mine-tailings,N015-g-morhua-liver,Submarine tailing disposal to G. morhua liver,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E029,N003-mine-tailings,N016-g-morhua-muscle,Submarine tailing disposal to G. morhua muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E030,N003-mine-tailings,N017-crab-total,Submarine tailing disposal to Crab total,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E031,N003-mine-tailings,N021-marine-zooplankton,Submarine tailing disposal to Marine zooplankton,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E035,N001-natural-occurrence,N023-marine-macroalgae,Natural occurrence to Marine macroalgae,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E036,N002-aquaculture,N023-marine-macroalgae,Aquaculture to Marine macroalgae,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E037,N003-mine-tailings,N023-marine-macroalgae,Submarine tailing disposal to Marine macroalgae,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E038,N012-coast-benthic-sed,N023-marine-macroalgae,Benthic sediment to Marine macroalgae,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E039,N013-coast-water-column,N023-marine-macroalgae,Water column to Marine macroalgae,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E040,N001-natural-occurrence,N022-marine-benthic-inverts,Natural occurrence to Marine benthic inverts,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E041,N002-aquaculture,N022-marine-benthic-inverts,Aquaculture to Marine benthic inverts,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E042,N003-mine-tailings,N022-marine-benthic-inverts,Submarine tailing disposal to Marine benthic inverts,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E043,N012-coast-benthic-sed,N022-marine-benthic-inverts,Benthic sediment to Marine benthic inverts,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E044,N013-coast-water-column,N022-marine-benthic-inverts,Water column to Marine benthic inverts,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E045,N004-manufacturing,N012-coast-benthic-sed,Manufacturing to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E046,N004-manufacturing,N013-coast-water-column,Manufacturing to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E047,N005-agriculture-forestry-and-fishing,N012-coast-benthic-sed,"Agriculture, forestry and fishing to Coastal benthic sediment",putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E048,N005-agriculture-forestry-and-fishing,N013-coast-water-column,"Agriculture, forestry and fishing to Coastal water",putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E049,N006-mining-and-quarrying,N012-coast-benthic-sed,Mining and quarrying to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E050,N006-mining-and-quarrying,N013-coast-water-column,Mining and quarrying to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E051,N007-other-services-and-administration,N012-coast-benthic-sed,Other services and administration to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E052,N007-other-services-and-administration,N013-coast-water-column,Other services and administration to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E053,N008-wholesale-and-retail-trade,N012-coast-benthic-sed,Wholesale and retail trade to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E054,N008-wholesale-and-retail-trade,N013-coast-water-column,Wholesale and retail trade to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E055,N009-construction-and-real-estate,N012-coast-benthic-sed,Construction and real estate to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E056,N009-construction-and-real-estate,N013-coast-water-column,Construction and real estate to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E057,N010-transportation-and-storage,N012-coast-benthic-sed,Transportation and storage to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E058,N010-transportation-and-storage,N013-coast-water-column,Transportation and storage to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E059,N011-water-supply-and-waste-management,N012-coast-benthic-sed,Water supply and waste management to Coastal benthic sediment,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E060,N011-water-supply-and-waste-management,N013-coast-water-column,Water supply and waste management to Coastal water,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E061,N001-natural-occurrence,N018-crab-muscle,Natural occurrence to Crab muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E062,N002-aquaculture,N018-crab-muscle,Aquaculture to Crab muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E063,N003-mine-tailings,N018-crab-muscle,Submarine tailing disposal to Crab muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E064,N012-coast-benthic-sed,N018-crab-muscle,Benthic sediment to Crab muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E065,N013-coast-water-column,N018-crab-muscle,Water column to Crab muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E066,N001-natural-occurrence,N019-crab-brown-meat,Natural occurrence to Crab brown meat,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E067,N002-aquaculture,N019-crab-brown-meat,Aquaculture to Crab brown meat,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E068,N003-mine-tailings,N019-crab-brown-meat,Submarine tailing disposal to Crab brown meat,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E069,N012-coast-benthic-sed,N019-crab-brown-meat,Benthic sediment to Crab brown meat,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E070,N013-coast-water-column,N019-crab-brown-meat,Water column to Crab brown meat,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E071,N001-natural-occurrence,N020-marine-crustaceans,Natural occurrence to Marine crustaceans,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E072,N002-aquaculture,N020-marine-crustaceans,Aquaculture to Marine crustaceans,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E073,N003-mine-tailings,N020-marine-crustaceans,Submarine tailing disposal to Marine crustaceans,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E074,N012-coast-benthic-sed,N020-marine-crustaceans,Benthic sediment to Marine crustaceans,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E075,N013-coast-water-column,N020-marine-crustaceans,Water column to Marine crustaceans,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E076,N001-natural-occurrence,N024-seabird-egg,Natural occurrence to Seabird egg,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E077,N002-aquaculture,N024-seabird-egg,Aquaculture to Seabird egg,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E078,N003-mine-tailings,N024-seabird-egg,Submarine tailing disposal to Seabird egg,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E079,N012-coast-benthic-sed,N024-seabird-egg,Benthic sediment to Seabird egg,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E080,N013-coast-water-column,N024-seabird-egg,Water column to Seabird egg,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E081,N001-natural-occurrence,N025-eider-blood,Natural occurrence to Eider blood,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E082,N002-aquaculture,N025-eider-blood,Aquaculture to Eider blood,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E083,N003-mine-tailings,N025-eider-blood,Submarine tailing disposal to Eider blood,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E084,N012-coast-benthic-sed,N025-eider-blood,Benthic sediment to Eider blood,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E085,N013-coast-water-column,N025-eider-blood,Water column to Eider blood,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E086,N001-natural-occurrence,N026-eider-eggs,Natural occurrence to Eider eggs,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E087,N002-aquaculture,N026-eider-eggs,Aquaculture to Eider eggs,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E088,N003-mine-tailings,N026-eider-eggs,Submarine tailing disposal to Eider eggs,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E089,N012-coast-benthic-sed,N026-eider-eggs,Benthic sediment to Eider eggs,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E090,N013-coast-water-column,N026-eider-eggs,Water column to Eider eggs,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges

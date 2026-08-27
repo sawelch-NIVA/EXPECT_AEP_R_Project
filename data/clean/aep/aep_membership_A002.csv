@@ -1,0 +1,30 @@
+aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+A002,N012-coast-benthic-sed,,,,,,,"806 measurements, 1 reference (VannmiljoCopper2010-2025), 2010-2025. Nationally 25,024 from 2 references. Includes the Repparfjorden SED2-SED7 cores. No pre-1970s baseline."
+A002,N013-coast-water-column,,,,,,,"13 measurements, 1 reference. Nationally 4,969. Thin. Freshwater in the box is 90 river + 33 lake measurements and is arguably the more important pathway here given Ulveryggen runoff."
+A002,N014-mussel-soft-tissue,,,,,,,"43 measurements, 1 reference. Nationally 5,498 from 3 references."
+A002,N015-g-morhua-liver,,,,,,,"156 measurements, 1 reference. Nationally 2,796 from 1 reference."
+A002,N001-natural-occurrence,,,,,,,External. The Nussir orebody is the local instance; the justification arguably wants a Repparfjorden-specific sentence.
+A002,N002-aquaculture,,,,,,,External. Aquaculture sites are present in Hammerfest kommune; see docs/NBXX-reparfjorden.qmd.
+A002,N004-manufacturing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N005-agriculture-forestry-and-fishing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N006-mining-and-quarrying,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N007-other-services-and-administration,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N008-wholesale-and-retail-trade,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N009-construction-and-real-estate,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N010-transportation-and-storage,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N011-water-supply-and-waste-management,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A002,N003-mine-tailings,,,,,,,Repparfjord's very own STD.
+A002,N016-g-morhua-muscle,,,,,,,
+A002,N017-crab-total,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N018-crab-muscle,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N019-crab-brown-meat,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N020-marine-crustaceans,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N021-marine-zooplankton,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N022-marine-benthic-inverts,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N023-marine-macroalgae,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N024-seabird-egg,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N025-eider-blood,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N026-eider-eggs,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N027-river-water-column,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N028-river-benthic-sed,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."
+A002,N029-air,,,,,,,"Kitchen-sink node from A001, added 2026-08-27; scope and scores not yet reviewed for this AEP."

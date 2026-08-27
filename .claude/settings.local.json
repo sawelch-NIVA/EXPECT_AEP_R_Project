@@ -5,7 +5,9 @@
       "Bash(grep -ohP \"library\\\\\\(\\\\K[^\\)]+|require\\\\\\(\\\\K[^\\)]+|[a-zA-Z0-9\\\\.]+\\(?=::\\)\" C:/Users/SAW/Local Documents/EXPECT AEP/EXPECT_AEP_R_Project/docs/*.qmd)",
       "Bash(powershell -Command \"$input | Sort-Object -Unique\")",
       "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\SAW\\\\Local Documents\\\\EXPECT AEP\\\\EXPECT_AEP_R_Project\\\\docs\\\\*.qmd'' | ForEach-Object { Get-Content $_} | Select-String -Pattern ''library\\\\\\(\\(\\\\w+\\)\\\\\\)|require\\\\\\(\\(\\\\w+\\)\\\\\\)|\\(\\\\w[\\\\w\\\\.]+\\)::'' -AllMatches | ForEach-Object { $_Matches } | ForEach-Object { if \\($_Groups[1].Value\\) { $_Groups[1].Value } elseif \\($_Groups[2].Value\\) { $_Groups[2].Value } else { $_Groups[3].Value } } | Sort-Object -Unique\")",
-      "Bash(Rscript -e ' *)"
+      "Bash(Rscript -e ' *)",
+      "Bash(Rscript \"C:/Users/SAW/AppData/Local/Temp/claude/c--Users-SAW-Local-Documents-EXPECT-AEP-EXPECT-AEP-R-Project/3ff390a2-404a-4ace-a985-6d6a6a16b545/scratchpad/check_uc.R\")",
+      "Bash(Rscript -e \"pkgload::load_all\\(quiet=TRUE\\); testthat::test_file\\('tests/testthat/test-fct_unit_anomalies.R'\\)\")"
     ]
   }
 }

@@ -862,7 +862,7 @@ So **an AEP is a view over one pool of nodes**, not a node set of its own.
 |---|---|
 | `data/clean/aep/aep_nodes.csv` | The node and its scoring. Unchanged, and untouched by this work. |
 | `data/clean/aep/aep_manifest.csv` | **New.** One row per AEP: label, bounding box, date range. |
-| `data/clean/aep/aep_membership.csv` | **New.** Which nodes each AEP contains, and where they sit in it. |
+| `data/clean/aep/aep_membership_<aep_id>.csv` | **New.** Which nodes each AEP contains, and where they sit in it. One flat file per AEP since 2026-08-27 (was a single `aep_membership.csv`). |
 
 `aep_scope_nodes()` narrows the pool to one AEP and **intersects** the AEP's
 scope with each node's own restrictions. Intersection, not replacement: a node
@@ -886,13 +886,13 @@ rather than between AEPs:
 |---|---|---|
 | Essentiality | the world | `aep_nodes.csv` |
 | Plausibility | the world | `aep_nodes.csv` |
-| **Evidence** | **the dataset** | **`aep_membership.csv`** |
-| **Quantification** | **the dataset** | **`aep_membership.csv`** |
+| **Evidence** | **the dataset** | **`aep_membership_<aep_id>.csv`** |
+| **Quantification** | **the dataset** | **`aep_membership_<aep_id>.csv`** |
 
 "Copper is present in highly-conserved metabolic systems" is as true in
 Repparfjorden as nationally. "25,024 measurements from two references" is not.
 An AEP scope is precisely a change to the available data, so the two criteria
-that describe the data are the two that move, and `aep_membership.csv` was
+that describe the data are the two that move, and the membership file was
 already keyed by AEP and node.
 
 Blank inherits from the node, so A001 needs no entries. `aep_scoped_epeq_cols()`
@@ -968,7 +968,7 @@ below the sampled horizon. This is a finding to chase, not a bug to fix.
    addition, and it has no counterpart in A001.
 3. **A002's `evidence_score` and `quantification_score` are still blank**, so
    every node inherits A001's. That is exactly the thing the EPEQ split was built
-   to fix and it is now four cells per node in `aep_membership.csv`. The
+   to fix and it is now four cells per node in `aep_membership_A002.csv`. The
    measurement and reference counts are already in that file's `notes` column, so
    only the digit and the sentence are missing.
 

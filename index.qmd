@@ -31,9 +31,9 @@ pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
 here::i_am("index.qmd")
 ```
 
-Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure, and a potentially serious environmental pollutant (cite). Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
+Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure, and a potentially serious environmental pollutant. Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
 
-Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years [@amapHeavyMetalsArctic01.06.04], as well as extensive laboratory and modelling work (cite). In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury (cite), due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As the Artic undergoes rapid warming, land use change, and potentially increased anthropogenic stress, copper's adverse effects as a pollutant may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.
+Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years [@amapHeavyMetalsArctic01.06.04], as well as extensive laboratory and modelling work. In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury, due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As the Artic undergoes rapid warming, land use change, and potentially increased anthropogenic stress, copper pollution may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.
 
 ## Aggregate Exposure Pathways
 
@@ -85,8 +85,6 @@ Copper's biological properties are a consequence of its speciation/electrochemis
 
 An exhaustive version of the materials and methods are provided in the notebooks and appendices included. Materials and methods are summarised below.
 
-**Probably too many section headers. Will keep them for now as they help me organise my thoughts, and remove once closer to final version. Some sections copied from eData MS, will be written to avoid auto-plagiarism.**
-
 +------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
 | Line of Evidence             | AEP Class                | Data Type                                  | Notes                                                              |
 +==============================+==========================+============================================+====================================================================+
@@ -125,21 +123,21 @@ Web of Science returned 478 hits. PubMed returned 438 hits.
 
 In addition, data were extracted from the Norwegian Environmental Ministry (Miljødirektoratet, MD) database Vannmiljø ("Aquatic Environment", Vm) based on the following search criteria:
 
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Norwegian Term  | English Translation  | Selected Options                                     | Comments       |
-+=================+======================+======================================================+================+
-| Nedlastingsdato | Download Date        | 2025-12-05                                           |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Datoperiode     | Date Period          | 2025-01-01 to 2025-12-05                             |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Kommune         | Municipality         | All municipalities                                   |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Medium          | Medium/Matrix        | All media                                            |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Kampanje        | Campaign             | All campaigns                                        |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
-| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |                |
-+-----------------+----------------------+------------------------------------------------------+----------------+
++-----------------+----------------------+------------------------------------------------------+------------+
+| Norwegian Term  | English Translation  | Selected Options                                     | Comments   |
++=================+======================+======================================================+============+
+| Nedlastingsdato | Download Date        | 2025-12-05                                           |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Datoperiode     | Date Period          | 2025-01-01 to 2025-12-05                             |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Kommune         | Municipality         | All municipalities                                   |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Medium          | Medium/Matrix        | All media                                            |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Kampanje        | Campaign             | All campaigns                                        |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |            |
++-----------------+----------------------+------------------------------------------------------+------------+
 
 Extracted data were processed and converted to the eData format (see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd)), and validated against the format. Data from Vm covers a variety of monitoring campaigns conducted by a variety of contractors and sub-contractors across Norwegian territory. Metadata on the campaign goal (for example, monitoring reference rivers, or sites known to be contaminated) was retained and is used as a grouping variable in downstream analysis in order to understand observed variation.
 
@@ -199,7 +197,7 @@ $$
 \log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR
 $$ {#eq-tukey}
 
-We apply fences to log-transformed values because concentrations are approximately log-normally distributed (cite).
+We apply fences to log-transformed values because concentrations are approximately log-normally distributed [@ottPhysicalExplanationLognormality1990].
 
 Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
 
@@ -294,6 +292,18 @@ table <- read_csv("data/clean/aep/aep_manifest.csv")
 table |> select(label, scope_note) |> knitr::kable()
 ```
 
+How were AEPs constrcuted:
+
+1. Review groups where n >= 100, generate nodes
+2. Where appropriate (due to sample sizes, ecological/matrix similarity, etc.), put multiple groups into one node
+3. Assemble a "whole-system" AEP from all avaialable nodes (from above)
+4. For AEPs 2-3, build a subset of AEP 1 based on known sources and evidence in the given areas.
+5. For 4-6, start with a known MIE locations (from other papers) and work backwards based on AEP 1 & 2.
+
+Nodes are based on available evidence. What counts as a node is slightly arbitrary - depending on what data we have and what makes sense, we may use coarser or finer resolution.
+
+Putative edges are created between nodes based on expert opinion rather than individual pieces of evidence. In general we have a lot less direct evidence for edges (as opposed to general/plausible stuff), and a lot less quantification.
+
 # Results
 
 *Below table is obviously very big. Can be split into biota and non-biota? Or could summarise again? Also, do we need to add/remove any checks, e.g. AIC of normal vs. log-normal distributions*
@@ -304,7 +314,7 @@ table |> select(label, scope_note) |> knitr::kable()
 
 <!-- TODO: Add cumulative proportion to this v of table, use that for filtering rather than n-->
 
-@tbl-groups-summary displays all sample groups where $n >= 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped
+@tbl-groups-summary displays all sample groups where $n \ge 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped
 
 ```{r}
 #| label: tbl-groups-summary
@@ -343,9 +353,14 @@ AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sor
 
 #### AEP-002: Reppafjorden
 
+![Repparfjorden Map](figures/aep-locator-repparfjorden.png.png){#fig-repparfjorden-map}
+
 ![Case Study: Repparfjorden AEP](figures/aep_A002.png){#fig-repparfjord-aep}
 
 #### AEP-003: Sørfjorden
+
+![Sørfjorden Map](figures/aep-locator-sorfjorden.png){#fig-sorfjorden-map}
+
 
 ![Case Study: Sørfjorden AEP](figures/aep_A003.png){#fig-sorfjorden-aep}
 

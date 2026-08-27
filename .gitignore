@@ -43,5 +43,8 @@ figures/dev/
 # cannot see anything written to a scratch directory).
 logs/
 
+# Hand-made AEPs.
+docs/manual-aeps.pptx
+
 # rosm/ggspatial tile cache (annotation_map_tile downloads), not an artefact
 rosm.cache/

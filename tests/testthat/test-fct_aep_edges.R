@@ -16,6 +16,7 @@ edge_fixture <- function(...) {
     magnitude_unit = NA_character_,
     magnitude_n = NA_real_,
     magnitude_sd = NA_real_,
+    magnitude_refs = NA_real_,
     essentiality_score = NA_real_, essentiality_justification = NA_character_,
     plausibility_score = NA_real_, plausibility_justification = NA_character_,
     evidence_score = NA_real_, evidence_justification = NA_character_,

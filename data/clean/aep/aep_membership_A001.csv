@@ -1,0 +1,32 @@
+aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+A001,N012-coast-benthic-sed,,,,,,,
+A001,N013-coast-water-column,,,,,,,
+A001,N014-mussel-soft-tissue,,,,,,,
+A001,N015-g-morhua-liver,,,,,,,
+A001,N016-g-morhua-muscle,,,,,,,
+A001,N001-natural-occurrence,,,,,,,
+A001,N002-aquaculture,,,,,,,
+A001,N003-mine-tailings,,,,,,,
+A001,N017-crab-total,,,,,,,
+A001,N018-crab-muscle,,,,,,,
+A001,N019-crab-brown-meat,,,,,,,
+A001,N020-marine-crustaceans,,,,,,,
+A001,N004-manufacturing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N005-agriculture-forestry-and-fishing,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N006-mining-and-quarrying,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N007-other-services-and-administration,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N008-wholesale-and-retail-trade,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N009-construction-and-real-estate,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N010-transportation-and-storage,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N011-water-supply-and-waste-management,,,,,,,REACH source node; see docs/NBXX-REACH.qmd.
+A001,N021-marine-zooplankton,,,,,,,
+A001,N022-marine-benthic-inverts,,,,,,,
+A001,N023-marine-macroalgae,,,,,,,
+A001,N024-seabird-egg,,,,,,,
+A001,N025-eider-blood,,,,,,,
+A001,N026-eider-eggs,,,,,,,
+A001,N027-river-water-column,,,,,,,
+A001,N028-river-benthic-sed,,,,,,,
+A001,N029-air,,,,,,,
+A001,N032-ocean-benthic-sed,,,,,,,
+A001,N033-ocean-water-column,,,,,,,

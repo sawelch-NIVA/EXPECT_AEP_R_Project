@@ -165,9 +165,9 @@ node_label_slug <- function(label) {
 #'
 #' **The slug freezes at creation.** If a node is later relabelled, its id is
 #' NOT regenerated: doing so would require rewriting every file that names it
-#' (`aep_edges.csv`, `aep_node_members.csv`, `aep_node_groups.csv`,
-#' `aep_membership.csv`), turning a one-cell edit into a five-file one. A
-#' slightly stale slug is a smaller cost than that cascade.
+#' (`aep_edges.csv`, `aep_node_members.csv`, `aep_node_groups.csv`, and every
+#' `aep_membership_<aep_id>.csv`), turning a one-cell edit into a many-file one.
+#' A slightly stale slug is a smaller cost than that cascade.
 #'
 #' @param nodes The existing nodes table (for the highest number in use).
 #' @param label The new node's label, to derive the slug from.
