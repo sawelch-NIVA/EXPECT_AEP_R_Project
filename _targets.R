@@ -1104,94 +1104,17 @@ list(
   # Ranking and flag derivation are bolted on by add_triage_flags() at the end
   # (PLAN.md P1.4), so this reframe() stays a plain set of per-group statistics
   # and the interpretation lives somewhere testable.
+  #
+  # The aggregation moved to summarise_groups() (R/fct_summarise_groups.R) on
+  # 2026-08-28 so docs/NBXX-rfjord-2.qmd can re-run the same logic on rows
+  # trimmed to the A002 bounding box. Behaviour here is unchanged; the grouping,
+  # outlier and dip-test comments now live with the function.
   tar_target(
     name = summarise_literature_data,
-    command = {
-      literature_analysis_ready |>
-        group_by(
-          ENVIRON_COMPARTMENT,
-          ENVIRON_COMPARTMENT_SUB,
-          SPECIES_GROUP,
-          SAMPLE_SPECIES,
-          SAMPLE_TISSUE,
-          SITE_GEOGRAPHIC_FEATURE,
-          SITE_GEOGRAPHIC_FEATURE_SUB,
-          # we split by unit type for summary
-          MEASURED_UNIT_STANDARD
-        ) |>
-        # NA/zero/negative measured values are now dropped upstream by
-        # literature_analysis_ready, so the filter that used to sit here is
-        # redundant. Left as a comment because its removal is the reason this
-        # target's results may shift slightly on the next rebuild.
-        # REPLACED an inline copy of the outlier logic with the shared function,
-        # 2026-08-05. Two things were wrong with the copy beyond the duplication:
-        #
-        # 1. Its RMZ ran on the RAW scale while its Tukey fences ran on log10,
-        #    which made the RMZ criterion an upper-tail test in practice. See
-        #    flag_outliers() for the measurement. The plots called flag_outliers()
-        #    and this target did not, so moving one without the other would have
-        #    left the summary table disagreeing with the panels it ranks.
-        # 2. It was UNGATED, computing flags for groups of any size, while the
-        #    dip test below is gated at dip_test_safe()'s min_n. So a group of
-        #    four could be flagged for outliers but never tested for modality.
-        #    flag_outliers() applies the same min_n = 10, so the two flags now
-        #    abstain together and "untested" means the same thing for both.
-        mutate(
-          flag_outliers(MEASURED_VALUE_STANDARD)
-        ) |>
-        reframe(
-          n = sum(MEASURED_N),
-          n_sources = length(unique(REFERENCE_ID)),
-          date_min = suppressWarnings(min(SAMPLING_DATE, na.rm = TRUE)),
-          date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
-          sd = sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
-          mean = mean(MEASURED_VALUE_STANDARD, na.rm = TRUE),
-          # Geometric mean and geometric SD, added 2026-08-04 on Sam's call:
-          # "GSD is a reversal, you're right. but it clearly makes more sense
-          # than SD of non-normal data."
-          #
-          # These concentrations are log-normal over many orders of magnitude, so
-          # the arithmetic mean sits above almost every observation and the
-          # arithmetic sd is dominated by the largest value. GSD is a
-          # MULTIPLICATIVE factor: 3 means roughly threefold either side of the
-          # geometric mean, and that is the sentence the methods section needs.
-          #
-          # log10 throughout, matching every plot axis in the project.
-          # literature_analysis_ready has already dropped zeros and negatives, so
-          # the logs are all finite.
-          geo_mean = 10^mean(log10(MEASURED_VALUE_STANDARD), na.rm = TRUE),
-          gsd = 10^sd(log10(MEASURED_VALUE_STANDARD), na.rm = TRUE),
-          # FIXED 2026-07-30 (PLAN.md P1.5). This was sum(outlier_RMZ &
-          # outlier_IQR), a count of *rows*, while n is sum(MEASURED_N), a count
-          # of *measurements*. The ratio therefore divided a row count by a
-          # measurement count and systematically under-fired wherever
-          # MEASURED_N > 1. Sam's call: weight the outlier count by MEASURED_N so
-          # numerator and denominator are the same quantity.
-          #
-          # na.rm because flag_outliers() returns NA flags where the group is
-          # below min_n or the MAD is zero, and a single NA would otherwise blank
-          # the whole group's count. Untested rows therefore count as
-          # non-outliers, which is the conservative direction.
-          n_double_outliers = sum(
-            (outlier_RMZ & outlier_IQR) * MEASURED_N,
-            na.rm = TRUE
-          ),
-          # The old row-count version, kept alongside so the two are comparable
-          # and the change is auditable rather than silent.
-          n_outlier_rows = sum(outlier_RMZ & outlier_IQR, na.rm = TRUE),
-          median = median(MEASURED_VALUE_STANDARD),
-          unit = unique(MEASURED_UNIT_STANDARD),
-          # Constant within a group by construction: the group key includes
-          # SAMPLE_SPECIES and the common name is a function of the species.
-          # Carried through so the triage notebook can print it as an
-          # aide-memoire under each heading.
-          species_common_name = SPECIES_COMMON_NAME[1],
-          # Hartigan's dip test for unimodality (NA below dip_test_safe()'s min_n)
-          dip_p = dip_test_safe(MEASURED_VALUE_STANDARD)$dip_p,
-          multimodal = dip_test_safe(MEASURED_VALUE_STANDARD)$multimodal
-        ) |>
-        add_triage_flags(literature_dropped_report)
-    }
+    command = summarise_groups(
+      literature_analysis_ready,
+      literature_dropped_report
+    )
   ),
 
   ### # Sample-groups display table ----

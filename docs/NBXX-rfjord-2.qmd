@@ -1,0 +1,1083 @@
+---
+title: "Notebook XX - Repparfjorden Case Study"
+date: last-modified
+lightbox: true
+format: html
+execute:
+  freeze: false 
+  echo: fenced
+---
+
+TODO: Add data from Kogel (2026)
+
+
+Repparfjorden is a fjord in Hammerfest, Finnmark, at the far north of Norway. The area is geologically copper-rich, and between 1972 and 1978 the Folldal Verk copper mine operated in the area. Over this seven-year period, the mine generated roughly 1 million tonnes of copper-rich (?%) tailings. These were processed and then disposed of in the inner Repparfjord ([@fig-repparfjorden-conc], panel b) by pipeline.
+
+Contemporary sources on this disposal process are limited. However, a number of more recent studies have assessed the characteristics, consequences, and dynamics of historical disposal. 
+
+- In 2005, the firm Nussir ASA was founded[@amundsenAvfallshandteringsplanNUSSIRASA2025] 
+- Plan to continue extracting, license recieved for STD
+- Much debate and controversy due to environmental issues, Sami reindeer herding
+
+Hammerfest itself:
+1. Small town/city
+2. Extractative economy?
+3. Some aquaculture, fishing, etc.
+
+
+It was a submarine tailings disposal site for the Folldal Verk copper mine in the early 1970s (\~1 Mt of tailings over roughly seven years) and Nussir ASA has an approved permit to resume copper mining and marine tailings disposal there. The A002 bounding box is 23-25 E, 70-71 N.
+
+```{r}
+#| label: setup
+#| include: false
+#| warning: false
+#| message: false
+
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+library(sf)
+library(patchwork)
+library(rosm) # osm.image() Kartverket basemap tiles
+library(ggspatial) # annotation_scale(), annotation_north_arrow()
+library(shadowtext) # halo labels for towns
+library(rnaturalearth)
+pkgload::load_all(quiet = TRUE) # summarise_groups(), classify_by_thresholds(), etc.
+
+here::i_am("index.qmd")
+```
+
+```{r}
+#| label: map-prep
+#| include: false
+#| warning: false
+#| message: false
+
+# ============================================================================
+# Shared data + helpers for the two map figures below.
+#   fig-study-area          -- geography/context, no concentration data
+#   fig-repparfjorden-conc  -- the AEP sampling picture (old panels b + c)
+# ============================================================================
+
+manifest <- tar_read(aep_manifest)
+ar <- tar_read(literature_analysis_ready)
+thr <- tar_read(copper_toxicity_thresholds)
+
+a002 <- manifest |> filter(aep_id == "A002")
+study_box <- manifest |> filter(aep_id %in% c("A001", "A002"))
+red <- "#b23b3b"
+
+# --- Kartverket open WMTS (no key). kv_graa = grey topo, kv_topo = colour. ---
+rosm::register_tile_source(
+  kv_graa = rosm::source_from_url_format(
+    "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/${z}/${y}/${x}.png",
+    extension = "png",
+    max_zoom = 18
+  ),
+  kv_topo = rosm::source_from_url_format(
+    "https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/${z}/${y}/${x}.png",
+    extension = "png",
+    max_zoom = 18
+  )
+)
+# One persistent, absolute tile cache. Default is the relative "rosm.cache",
+# which splits between docs/rosm.cache (Quarto renders from docs/) and the repo
+# root (scripts) -- so tiles were re-downloaded on nearly every render.
+rosm::set_default_cachedir(here::here("rosm.cache"))
+
+# --- sampling sites, over the union of both AEP boxes ---------------------
+in_study <- function(d) {
+  d |>
+    filter(
+      !is.na(LONGITUDE),
+      !is.na(LATITUDE),
+      LONGITUDE >= min(study_box$lon_min),
+      LONGITUDE <= max(study_box$lon_max),
+      LATITUDE >= min(study_box$lat_min),
+      LATITUDE <= max(study_box$lat_max)
+    )
+}
+lump_group <- function(comp, sub, sppgrp) {
+  case_when(
+    comp == "Biota" ~ sppgrp,
+    sub == "Aquatic Sediment" ~ "Aquatic › Aquatic Sediment",
+    TRUE ~ "Aquatic › Water column"
+  )
+}
+lump_levels <- c(
+  "Aquatic › Aquatic Sediment",
+  "Aquatic › Water column",
+  "Fish",
+  "Molluscs",
+  "Algae"
+)
+lump_shape <- c(
+  "Aquatic › Aquatic Sediment" = 21,
+  "Aquatic › Water column" = 22,
+  "Fish" = 23,
+  "Molluscs" = 24,
+  "Algae" = 25
+)
+class_cols <- c(
+  threshold_class_colours()[c("I", "II", "IV", "V")],
+  "n/a (biota)" = "grey60"
+)
+klass_label <- c(
+  "I" = "Background",
+  "II" = "Good",
+  "III" = "Moderate",
+  "IV" = "Poor",
+  "V" = "Very Poor",
+  "n/a (biota)" = "n/a (biota)"
+)
+worst_class <- function(f) {
+  i <- suppressWarnings(max(as.integer(f), na.rm = TRUE))
+  if (is.infinite(i)) "n/a (biota)" else levels(f)[i]
+}
+# `drop = FALSE` keeps a legend row but ggplot draws no glyph for a break with
+# no data rows; this transparent NA-coord layer gives every combination a row.
+legend_primer <- tidyr::expand_grid(
+  klass = factor(names(class_cols), levels = names(class_cols)),
+  lump = factor(lump_levels, levels = lump_levels)
+) |>
+  mutate(X = NA_real_, Y = NA_real_)
+
+site_groups <- in_study(ar) |>
+  classify_by_thresholds(thr) |>
+  mutate(
+    lump = factor(
+      lump_group(ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB, SPECIES_GROUP),
+      levels = lump_levels
+    )
+  ) |>
+  summarise(
+    klass = worst_class(threshold_class),
+    .by = c(lump, SITE_CODE, LONGITUDE, LATITUDE)
+  ) |>
+  mutate(klass = factor(klass, levels = names(class_cols)))
+xy <- site_groups |>
+  st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = 4326) |>
+  st_transform(3857) |>
+  st_coordinates()
+site_groups$X <- xy[, 1]
+site_groups$Y <- xy[, 2]
+
+# --- point / area features ---------------------------------------------
+prtr_sites <- tibble::tribble(
+  ~name            , ~lon     , ~lat     ,
+  "Hammerfest LNG" , 23.5978  , 70.6878  ,
+  "SAR Hammerfest" , 23.6594  , 70.6321  ,
+  "Grønes deponi"  , 23.69516 , 70.56159
+) |>
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) |>
+  st_transform(3857)
+
+aqua <- sf::read_sf(here::here(
+  "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shp"
+)) |>
+  st_transform(3857)
+aqua_fill <- scales::alpha("#3a8fb7", 0.35)
+
+# Historic Folldal Verk tailings disposal: circle on the mean of the "Inner"
+# Sternal et al. (2017) coring stations; 1.4 km radius (true circle via UTM33).
+tailings <- st_sfc(st_point(c(24.2932, 70.4670)), crs = 4326) |>
+  st_transform(25833) |>
+  st_buffer(1400) |>
+  st_transform(3857)
+tailings_lab <- st_transform(
+  st_sfc(st_point(c(24.2932, 70.479)), crs = 4326),
+  3857
+)
+tailings_fill <- scales::alpha("#f08a1d", 0.22)
+
+# Ulveryggen processing plant: ~500 m SSW of Sternal station IG15-1-1039.
+ulveryggen <- st_transform(
+  st_sf(
+    name = "Ulveryggen plant",
+    geometry = st_sfc(st_point(c(24.2812, 70.4553)), crs = 4326)
+  ),
+  3857
+)
+
+# Hammerfest lufthavn (ENHF), the existing airport in town. WWTP: Seilmakerveien
+# 3 (Sam, 2026-08-30), flagged approximate -- refine against the topo tile.
+airport <- st_transform(
+  st_sf(
+    name = "Airport",
+    geometry = st_sfc(st_point(c(23.66861, 70.67944)), crs = 4326)
+  ),
+  3857
+)
+wwtp <- st_transform(
+  st_sf(
+    name = "Wastewater treatment",
+    geometry = st_sfc(st_point(c(23.64944, 70.67297)), crs = 4326)
+  ),
+  3857
+)
+
+# Every point feature that carries a text label in panel c, as one sf so a
+# single ggrepel layer lays them all out without mutual overlap.
+label_feats <- rbind(
+  prtr_sites["name"],
+  airport["name"],
+  wwtp["name"],
+  ulveryggen["name"]
+)
+
+# Snøhvit + Goliat oil/gas fields (Sodir fldArea.csv). Askeladd has no polygon
+# of its own -- it is a structure inside the Snøhvit unit. Circle radius =
+# sqrt(area / pi) from the real footprint, centred on the centroid.
+oil_raw <- read.csv(
+  here::here("data/raw/shapefiles/fldArea.csv"),
+  fileEncoding = "UTF-8-BOM",
+  check.names = FALSE
+) |>
+  filter(toupper(fldName) %in% c("SNØHVIT", "GOLIAT")) |>
+  st_as_sf(wkt = "fldAreaGeometryWKT", crs = 4326) |>
+  st_transform(25833)
+oil_ctr <- st_centroid(st_geometry(oil_raw))
+oil_circ <- st_buffer(oil_ctr, sqrt(as.numeric(st_area(oil_raw)) / pi)) |>
+  st_transform(3857)
+oil_lab <- st_sf(
+  name = stringr::str_to_title(oil_raw$fldName),
+  geometry = st_transform(oil_ctr, 3857)
+)
+oil_fill <- scales::alpha("#e0a030", 0.22)
+
+# Kommune polygons (pre-baked from csmaps b2024; csmaps segfaults under Rscript).
+# The gpkg ships with no CRS; its coordinates are plain WGS84 lon/lat.
+kommuner <- sf::read_sf(here::here("data/clean/spatial/finnmark_kommuner.gpkg")) |>
+  st_set_crs(4326)
+hammerfest_k <- kommuner |> filter(is_hammerfest)
+
+# scale = "large" is 10 m (needs rnaturalearthhires, installed). "medium" (50 m)
+# left a white seam between Finland and the csmaps kommune borders in panel a.
+neighbours <- ne_countries(
+  scale = "large",
+  returnclass = "sf",
+  country = c("Norway", "Sweden", "Finland", "Russia")
+)
+neighbours_3857 <- st_transform(neighbours, 3857) # land polygons for panel b
+
+towns <- tibble::tribble(
+  ~name        , ~lon    , ~lat    , ~focus ,
+  "Hammerfest" , 23.6820 , 70.6634 , TRUE   ,
+  "Kvalsund"   , 23.9430 , 70.4990 , FALSE  ,
+  "Alta"       , 23.2710 , 69.9689 , FALSE
+)
+towns_sf <- st_transform(
+  st_as_sf(towns, coords = c("lon", "lat"), crs = 4326),
+  3857
+)
+towns_xy <- cbind(towns, st_coordinates(towns_sf)) # X / Y in EPSG:3857
+
+# Floated italic labels over open water in panel b (no markers): the fjord, and
+# the sea. "Norwegian Sea" sits in the SW open water; strictly the water due
+# north of Hammerfest grades into the Barents Sea, so reposition if that reads
+# wrong.
+xy4326 <- function(lon, lat) {
+  as.data.frame(st_coordinates(st_transform(
+    st_sfc(st_point(c(lon, lat)), crs = 4326), 3857
+  )))
+}
+rfjord_xy <- xy4326(24.10, 70.53)
+norsea_xy <- xy4326(21.55, 70.58)
+
+# Country labels for the mainland-Norway panel a; nudge after the first render.
+country_labels <- tibble::tibble(
+  label = c("NORWAY", "SWEDEN", "FINLAND", "RUSSIA"),
+  lon = c(9.3, 15.2, 26.6, 28.9),
+  lat = c(61.3, 63.2, 64.3, 69.9)
+)
+
+# --- extents ---------------------------------------------------------
+box_a002 <- st_as_sfc(st_bbox(
+  c(
+    xmin = a002$lon_min,
+    ymin = a002$lat_min,
+    xmax = a002$lon_max,
+    ymax = a002$lat_max
+  ),
+  crs = st_crs(4326)
+))
+box_study <- st_as_sfc(st_bbox(
+  c(
+    xmin = min(study_box$lon_min),
+    ymin = min(study_box$lat_min),
+    xmax = max(study_box$lon_max),
+    ymax = max(study_box$lat_max)
+  ),
+  crs = st_crs(4326)
+))
+view_norway <- c(xmin = 4, xmax = 31.5, ymin = 57.5, ymax = 71.5) # fig1 a (mainland)
+view_hamm <- c(xmin = 20.6, xmax = 24.6, ymin = 70.28, ymax = 71.6) # fig1 b (+ oil fields)
+view_zoom <- c(xmin = 23.52, xmax = 24.40, ymin = 70.43, ymax = 70.77) # fig1 c
+view_b <- c(xmin = 23.45, xmax = 24.52, ymin = 70.34, ymax = 70.73) # fig2 a
+view_c <- c(xmin = 24.20, xmax = 24.39, ymin = 70.430, ymax = 70.490) # fig2 b
+box_c <- st_transform(st_as_sfc(st_bbox(view_c, crs = st_crs(4326))), 3857)
+box_zoom <- st_transform(st_as_sfc(st_bbox(view_zoom, crs = st_crs(4326))), 3857)
+arctic_circle <- create_arctic_circle(lon_range = c(4, 31.5), lat = 66.5622)
+
+# Bare basemap canvases for hand-tracing AEP node/edge layouts (grey topo, no
+# geometry). Padded to the ggsave aspect (30 x 20) by overview_canvas() below.
+view_canvas_rfjord <- c(xmin = 24.10, xmax = 24.45, ymin = 70.40, ymax = 70.54)
+view_canvas_hamm <- c(xmin = 23.35, xmax = 24.48, ymin = 70.42, ymax = 70.82)
+
+view_lim <- function(v) {
+  bx <- st_bbox(st_transform(
+    st_as_sfc(st_bbox(
+      c(
+        xmin = as.numeric(v["xmin"]),
+        ymin = as.numeric(v["ymin"]),
+        xmax = as.numeric(v["xmax"]),
+        ymax = as.numeric(v["ymax"])
+      ),
+      crs = st_crs(4326)
+    )),
+    3857
+  ))
+  list(x = c(bx["xmin"], bx["xmax"]), y = c(bx["ymin"], bx["ymax"]))
+}
+
+# --- feature legend ("Map features") ---------------------------------
+feature_cols <- c(
+  "PRTR facility" = "black",
+  "Aquaculture site (licensed)" = "#1f6f8b",
+  "Ulveryggen plant" = "black",
+  "Oil/gas field" = "#a5761b",
+  "Airport" = "#6a3d9a",
+  "Wastewater treatment" = "#b15928"
+)
+
+# --- themes --------------------------------------------------------
+# Tile-panel theme (fig 1b, fig 2): black border, blank margin, faint graticule.
+tile_theme <- theme_bw(base_size = 8) +
+  theme(
+    panel.grid.major = element_line(colour = "grey65", linewidth = 0.2),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7),
+    axis.title = element_blank(),
+    plot.margin = margin(7, 9, 7, 7),
+    plot.background = element_rect(fill = "white", colour = NA),
+    legend.position = "bottom",
+    legend.text = element_text(size = 6.5),
+    legend.title = element_text(size = 7),
+    legend.key.height = unit(0.3, "cm"),
+    plot.title = element_text(face = "bold", size = 10, hjust = 0.01)
+  )
+# Location-panel theme, merged from quarto-ms-template's Norway map template:
+# theme_bw with a toned-down graticule + degree axes as reference context.
+loc_theme <- theme_bw(base_size = 8) +
+  theme(
+    panel.grid = element_line(colour = "grey85", linewidth = 0.25),
+    panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7),
+    axis.text = element_text(size = 7, colour = "grey30"),
+    axis.ticks = element_line(colour = "grey50", linewidth = 0.3),
+    axis.title = element_blank(),
+    plot.margin = margin(7, 9, 7, 7),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "#dbe7ef", colour = NA),
+    plot.title = element_text(face = "bold", size = 10, hjust = 0.01),
+    plot.caption = element_text(size = 5.5, colour = "grey40")
+  )
+
+# --- tile_panel(): raster basemap + optional sample points + legends ----
+# `points = FALSE` drops the sample layer and the class/shape scales, leaving
+# only the "Map features" colour legend (used by fig 1b).
+tile_panel <- function(
+  view,
+  title,
+  layer = "kv_graa",
+  under = NULL,
+  extra = NULL,
+  zoomin = 0,
+  points = TRUE,
+  legend = FALSE,
+  feature_lv = names(feature_cols),
+  feature_key = NULL
+) {
+  bb <- matrix(
+    c(view["xmin"], view["xmax"], view["ymin"], view["ymax"]),
+    nrow = 2,
+    byrow = TRUE,
+    dimnames = list(c("x", "y"), c("min", "max"))
+  )
+  img <- rosm::osm.image(
+    bb,
+    type = layer,
+    zoomin = zoomin,
+    quiet = TRUE,
+    progress = "none"
+  )
+  bx <- attr(img, "bbox")
+  lim <- view_lim(view)
+
+  p <- ggplot() +
+    annotation_raster(
+      img,
+      bx["x", "min"],
+      bx["x", "max"],
+      bx["y", "min"],
+      bx["y", "max"],
+      interpolate = TRUE
+    )
+  if (!is.null(under)) {
+    p <- p + under
+  }
+  if (points) {
+    pts <- site_groups |>
+      filter(
+        LONGITUDE >= view["xmin"],
+        LONGITUDE <= view["xmax"],
+        LATITUDE >= view["ymin"],
+        LATITUDE <= view["ymax"]
+      )
+    p <- p +
+      geom_point(
+        data = legend_primer,
+        aes(X, Y, fill = klass, shape = lump),
+        alpha = 0,
+        na.rm = TRUE
+      ) +
+      geom_point(
+        data = pts,
+        aes(X, Y, fill = klass, shape = lump),
+        size = 1.15,
+        alpha = 0.85,
+        colour = "grey20",
+        stroke = 0.25,
+        position = position_jitter(width = 180, height = 180, seed = 1)
+      )
+  }
+  if (!is.null(extra)) {
+    p <- p + extra
+  }
+
+  if (points) {
+    p <- p +
+      scale_fill_manual(
+        values = class_cols,
+        limits = names(class_cols),
+        labels = klass_label[names(class_cols)],
+        drop = FALSE,
+        name = "Quality Threshold (M-608)",
+        na.value = "grey60"
+      ) +
+      scale_shape_manual(
+        values = lump_shape,
+        limits = lump_levels,
+        drop = FALSE,
+        name = "Sample group"
+      )
+  }
+  p <- p +
+    scale_colour_manual(
+      values = feature_cols,
+      limits = feature_lv,
+      drop = FALSE,
+      name = "Map features"
+    )
+
+  if (legend) {
+    gl <- list(
+      colour = guide_legend(
+        order = 3,
+        nrow = 2,
+        byrow = TRUE,
+        override.aes = feature_key %||%
+          list(
+            shape = c(8, 21, 15, 21),
+            fill = c(NA, aqua_fill, NA, oil_fill),
+            size = c(2.8, 2.6, 2.6, 3),
+            linewidth = 0
+          )
+      )
+    )
+    if (points) {
+      gl$fill <- guide_legend(
+        order = 1,
+        nrow = 2,
+        byrow = TRUE,
+        override.aes = list(shape = 21, size = 3.2, alpha = 1)
+      )
+      gl$shape <- guide_legend(
+        order = 2,
+        nrow = 2,
+        byrow = TRUE,
+        override.aes = list(
+          size = 3.2,
+          fill = "grey55",
+          colour = "grey20",
+          alpha = 1
+        )
+      )
+    }
+    p <- p + do.call(guides, gl)
+  } else {
+    p <- p + guides(fill = "none", shape = "none", colour = "none")
+  }
+
+  p +
+    ggspatial::annotation_scale(
+      location = "bl",
+      width_hint = 0.28,
+      height = unit(0.15, "cm"),
+      text_cex = 0.55,
+      line_width = 0.6,
+      pad_x = unit(0.2, "cm"),
+      pad_y = unit(0.2, "cm")
+    ) +
+    ggspatial::annotation_north_arrow(
+      location = "tr",
+      height = unit(0.7, "cm"),
+      width = unit(0.6, "cm"),
+      style = ggspatial::north_arrow_minimal(),
+      pad_x = unit(0.15, "cm"),
+      pad_y = unit(0.15, "cm")
+    ) +
+    coord_sf(
+      crs = 3857,
+      xlim = lim$x,
+      ylim = lim$y,
+      expand = FALSE,
+      datum = st_crs(4326)
+    ) +
+    tile_theme +
+    (if (!legend) theme(legend.position = "none") else NULL) +
+    labs(title = title)
+}
+```
+
+```{r}
+#| label: fig-study-area
+#| fig-cap: "Study area, geographic context only (no concentration data). (a) Location within mainland Norway: Finnmark kommune boundaries (csmaps, SSB 2024), Hammerfest kommune shaded, the combined Hammerfest / Repparfjord AEP extent (red box), Arctic Circle (66.56 N) dashed. (b) The Hammerfest coastal system (Natural Earth 10 m land): the Snøhvit and Goliat oil/gas fields (amber circles, sized to footprint), Hammerfest and Kvalsund marked; the red box is the extent of panel (c). (c) Hammerfest and the southern half of Repparfjord: PRTR facilities (black stars), the existing Hammerfest airport (purple triangle) and the wastewater treatment works (brown diamond, approximate), licensed aquaculture locations (blue circles, active and inactive), the Ulveryggen processing plant (black square), and the historic Folldal Verk tailings disposal area (orange circle). Basemap: Kartverket topografisk."
+#| fig-width: 15
+#| fig-height: 5.6
+#| column: page
+#| warning: false
+#| message: false
+
+# --- a) Location within mainland Norway (vector) -----------------------
+panel_a <- ggplot() +
+  geom_sf(
+    data = neighbours,
+    fill = "grey92",
+    colour = "grey75",
+    linewidth = 0.15
+  ) +
+  geom_sf(
+    data = kommuner,
+    fill = "white",
+    colour = "grey60",
+    linewidth = 0.12
+  ) +
+  geom_sf(
+    data = hammerfest_k,
+    fill = "#cfe3ef",
+    colour = "grey25",
+    linewidth = 0.45
+  ) +
+  geom_sf(
+    data = arctic_circle,
+    colour = red,
+    linetype = "dashed",
+    linewidth = 0.4
+  ) +
+  geom_sf(data = box_study, fill = NA, colour = red, linewidth = 0.7) +
+  geom_text(
+    data = country_labels,
+    aes(lon, lat, label = label),
+    colour = "grey45",
+    size = 2.6,
+    fontface = "italic"
+  ) +
+  annotate(
+    "text",
+    x = 5, y = 67.1, label = "Arctic Circle",
+    colour = red, size = 2.2, fontface = "italic", hjust = 0
+  ) +
+  coord_sf(
+    xlim = view_norway[c("xmin", "xmax")],
+    ylim = view_norway[c("ymin", "ymax")],
+    expand = FALSE,
+    crs = 4326
+  ) +
+  loc_theme +
+  labs(
+    title = "a) Location",
+    caption = "Land: Natural Earth 10m. Kommuner: csmaps (SSB, 2024)."
+  )
+
+# --- b) Hammerfest coastal system, Finnmark context (vector) ---------
+# No raster tiles here: Kartverket's topo is sparse over the Norwegian Sea and
+# its coastline is jaggy at this width, and the nautical raster is mariner
+# clutter. Flat sea (loc_theme panel fill) + Natural Earth 10 m land instead.
+lim_b <- view_lim(view_hamm)
+panel_b <- ggplot() +
+  geom_sf(
+    data = neighbours_3857,
+    fill = "grey90",
+    colour = "grey65",
+    linewidth = 0.2
+  ) +
+  geom_sf(data = oil_circ, fill = oil_fill, colour = "#a5761b", linewidth = 0.5) +
+  geom_sf(data = box_zoom, fill = NA, colour = red, linewidth = 0.7) +
+  geom_sf_text(
+    data = oil_lab[oil_lab$name == "Snøhvit", ],
+    aes(label = name),
+    colour = "#7a5510", fontface = "bold", size = 2.6
+  ) +
+  geom_sf_text(
+    data = oil_lab[oil_lab$name == "Goliat", ],
+    aes(label = name),
+    colour = "#7a5510", fontface = "bold", size = 2.6, nudge_y = 9500
+  ) +
+  geom_shadowtext(
+    data = norsea_xy,
+    aes(X, Y, label = "Norwegian Sea"),
+    bg.colour = "white", colour = "#5a7f96",
+    fontface = "italic", size = 3.3
+  ) +
+  geom_point(data = towns_xy, aes(X, Y), colour = "black", size = 1.4) +
+  geom_shadowtext(
+    data = towns_xy,
+    aes(X, Y, label = name, fontface = ifelse(focus, "bold", "plain")),
+    bg.colour = "white", colour = "black", size = 2.5,
+    hjust = 0, nudge_x = 1500
+  ) +
+  geom_shadowtext(
+    data = rfjord_xy,
+    aes(X, Y, label = "Repparfjord"),
+    bg.colour = "white", colour = "#1c3d57",
+    fontface = "italic", size = 2.8
+  ) +
+  ggspatial::annotation_scale(
+    location = "bl", width_hint = 0.28, height = unit(0.15, "cm"),
+    text_cex = 0.55, line_width = 0.6,
+    pad_x = unit(0.2, "cm"), pad_y = unit(0.2, "cm")
+  ) +
+  ggspatial::annotation_north_arrow(
+    location = "tr", height = unit(0.7, "cm"), width = unit(0.6, "cm"),
+    style = ggspatial::north_arrow_minimal(),
+    pad_x = unit(0.15, "cm"), pad_y = unit(0.15, "cm")
+  ) +
+  coord_sf(
+    crs = 3857, xlim = lim_b$x, ylim = lim_b$y,
+    expand = FALSE, datum = st_crs(4326)
+  ) +
+  loc_theme +
+  labs(
+    title = "b) Hammerfest coastal system",
+    caption = "Land: Natural Earth 10m."
+  )
+
+# --- c) Hammerfest + southern Repparfjord, all source features (topo) -
+panel_c <- tile_panel(
+  view_zoom,
+  "c) Hammerfest and Repparfjord",
+  layer = "kv_topo",
+  points = FALSE,
+  legend = TRUE,
+  feature_lv = c(
+    "PRTR facility",
+    "Aquaculture site (licensed)",
+    "Ulveryggen plant",
+    "Airport",
+    "Wastewater treatment"
+  ),
+  feature_key = list(
+    shape = c(8, 21, 15, 17, 18),
+    fill = c(NA, aqua_fill, NA, NA, NA),
+    size = c(2.6, 2.4, 2.4, 2.6, 3),
+    linewidth = 0
+  ),
+  under = list(
+    geom_sf(
+      data = aqua,
+      aes(colour = "Aquaculture site (licensed)"),
+      shape = 21,
+      fill = aqua_fill,
+      size = 1.9,
+      stroke = 0.7
+    )
+  ),
+  extra = list(
+    geom_sf(
+      data = tailings,
+      fill = tailings_fill,
+      colour = "#c96f10",
+      linewidth = 0.6
+    ),
+    geom_sf_text(
+      data = tailings_lab,
+      aes(label = "Tailings disposal"),
+      colour = "#8a4b06",
+      fontface = "bold",
+      size = 2.6,
+      hjust = 1,
+      nudge_x = -1200,
+      nudge_y = 1100
+    ),
+    geom_sf(
+      data = prtr_sites,
+      aes(colour = "PRTR facility"),
+      shape = 8,
+      size = 2.6,
+      stroke = 0.7
+    ),
+    geom_sf(
+      data = ulveryggen,
+      aes(colour = "Ulveryggen plant"),
+      shape = 15,
+      size = 2
+    ),
+    geom_sf(
+      data = airport,
+      aes(colour = "Airport"),
+      shape = 17,
+      size = 2.4
+    ),
+    geom_sf(
+      data = wwtp,
+      aes(colour = "Wastewater treatment"),
+      shape = 18,
+      size = 3
+    ),
+    # One ggrepel layer over all six labelled point features so the congested
+    # Hammerfest-town cluster (LNG / airport / WWTP) lays out without overlap.
+    ggrepel::geom_text_repel(
+      data = label_feats,
+      aes(geometry = geometry, label = name),
+      stat = "sf_coordinates",
+      colour = "grey15",
+      fontface = "bold",
+      size = 2.2,
+      seed = 1,
+      min.segment.length = 0,
+      segment.size = 0.2,
+      segment.colour = "grey40",
+      box.padding = 0.6,
+      point.padding = 0.3,
+      max.overlaps = Inf
+    )
+  )
+)
+
+fig_study_area <- patchwork::wrap_plots(
+  panel_a,
+  panel_b,
+  panel_c,
+  nrow = 1,
+  widths = c(0.75, 1, 1)
+)
+ggsave(
+  here::here("figures/fig-study-area.png"),
+  fig_study_area,
+  width = 15,
+  height = 5.6,
+  dpi = 200, # bump to 300 for final submission if needed
+  bg = "white"
+)
+fig_study_area
+```
+
+```{r}
+#| label: aep-tracing-canvases
+#| eval: false
+#| warning: false
+#| message: false
+
+# Bare 30 x 20 grey-topo canvases (no geometry) for hand-drawing the AEP
+# node/edge layout over the actual pollution-source geography. Run on demand
+# (eval: false) -- a cold tile fetch for the coastal view is ~30 s. Writes
+# straight to figures/; not a document figure.
+overview_canvas <- function(view, path, layer = "kv_graa",
+                            width = 30, height = 20, dpi = 150) {
+  # Pad the short axis in web-mercator so the tile window matches the PNG's
+  # width:height, otherwise coord_sf letterboxes and a traced overlay won't line
+  # up. Then hand osm.image a lon/lat bbox (its input CRS is WGS84).
+  bb <- st_bbox(st_transform(
+    st_as_sfc(st_bbox(view, crs = st_crs(4326))), 3857
+  ))
+  target <- width / height
+  w <- as.numeric(bb["xmax"] - bb["xmin"])
+  h <- as.numeric(bb["ymax"] - bb["ymin"])
+  if (w / h < target) {
+    pad <- (target * h - w) / 2
+    bb["xmin"] <- bb["xmin"] - pad
+    bb["xmax"] <- bb["xmax"] + pad
+  } else {
+    pad <- (w / target - h) / 2
+    bb["ymin"] <- bb["ymin"] - pad
+    bb["ymax"] <- bb["ymax"] + pad
+  }
+  ll <- st_bbox(st_transform(st_as_sfc(bb), 4326))
+  m <- matrix(
+    c(ll["xmin"], ll["xmax"], ll["ymin"], ll["ymax"]),
+    nrow = 2, byrow = TRUE,
+    dimnames = list(c("x", "y"), c("min", "max"))
+  )
+  img <- rosm::osm.image(m, type = layer, zoomin = 1, quiet = TRUE, progress = "none")
+  bx <- attr(img, "bbox")
+  p <- ggplot() +
+    annotation_raster(
+      img, bx["x", "min"], bx["x", "max"], bx["y", "min"], bx["y", "max"],
+      interpolate = TRUE
+    ) +
+    coord_sf(
+      crs = 3857,
+      xlim = c(bb["xmin"], bb["xmax"]),
+      ylim = c(bb["ymin"], bb["ymax"]),
+      expand = FALSE
+    ) +
+    theme_void() +
+    theme(plot.margin = margin(0, 0, 0, 0))
+  ggsave(here::here(path), p, width = width, height = height, dpi = dpi, bg = "white")
+  invisible(here::here(path))
+}
+
+overview_canvas(view_canvas_rfjord, "figures/aep-canvas-repparfjord-inner.png")
+overview_canvas(view_canvas_hamm, "figures/aep-canvas-hammerfest-coastal.png")
+```
+
+```{r}
+#| label: fig-repparfjorden-conc
+#| fig-cap: "Copper concentration data across the two AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box is the extent of panel (b). (b) The inner fjord (AEP-002). Sampling sites: shape = lumped sample group, fill = worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) any of that site's copper measurements reach; biota carry no M-608 ladder so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Orange circle: historic Folldal Verk tailings disposal area. Black square: Ulveryggen plant. Basemap: Kartverket topografisk gråtone."
+#| fig-width: 13
+#| fig-height: 6.6
+#| column: page
+#| warning: false
+#| message: false
+
+conc_features <- c(
+  "PRTR facility",
+  "Aquaculture site (licensed)",
+  "Ulveryggen plant"
+)
+conc_key <- list(
+  shape = c(8, 21, 15),
+  fill = c(NA, aqua_fill, NA),
+  size = c(2.8, 2.6, 2.6),
+  linewidth = 0
+)
+
+panel_conc_a <- tile_panel(
+  view_b,
+  "a) Repparfjorden and Hammerfest",
+  zoomin = 1,
+  legend = TRUE,
+  feature_lv = conc_features,
+  feature_key = conc_key,
+  under = list(
+    geom_sf(
+      data = aqua,
+      aes(colour = "Aquaculture site (licensed)"),
+      shape = 21,
+      fill = aqua_fill,
+      size = 1.9,
+      stroke = 0.8
+    )
+  ),
+  extra = list(
+    geom_sf(data = box_c, fill = NA, colour = red, linewidth = 0.8),
+    geom_sf(
+      data = prtr_sites,
+      aes(colour = "PRTR facility"),
+      shape = 8,
+      size = 2.6,
+      stroke = 0.7
+    ),
+    geom_sf(
+      data = ulveryggen,
+      aes(colour = "Ulveryggen plant"),
+      shape = 15,
+      size = 2
+    ),
+    geom_sf_text(
+      data = prtr_sites,
+      aes(label = name),
+      colour = "black",
+      fontface = "bold",
+      size = 2.5,
+      hjust = 0,
+      nudge_x = 1700
+    )
+  )
+)
+
+panel_conc_b <- tile_panel(
+  view_c,
+  "b) Inner Repparfjord",
+  zoomin = 1,
+  feature_lv = conc_features,
+  feature_key = conc_key,
+  extra = list(
+    geom_sf(
+      data = tailings,
+      fill = tailings_fill,
+      colour = "#c96f10",
+      linewidth = 0.6
+    ),
+    geom_sf_text(
+      data = tailings_lab,
+      aes(label = "Tailings Disposal"),
+      colour = "#8a4b06",
+      fontface = "bold",
+      size = 2.9
+    ),
+    geom_sf(
+      data = ulveryggen,
+      aes(colour = "Ulveryggen plant"),
+      shape = 15,
+      size = 2.4
+    ),
+    geom_sf_text(
+      data = ulveryggen,
+      aes(label = name),
+      colour = "black",
+      fontface = "bold",
+      size = 2.5,
+      hjust = 1,
+      nudge_x = -400
+    )
+  )
+)
+
+fig_repparfjorden_conc <-
+  patchwork::wrap_plots(
+    panel_conc_a,
+    panel_conc_b,
+    nrow = 1,
+    guides = "collect"
+  ) &
+  theme(legend.position = "bottom")
+ggsave(
+  here::here("figures/fig-repparfjorden-conc.png"),
+  fig_repparfjorden_conc,
+  width = 13,
+  height = 6.6,
+  dpi = 200, # bump to 300 for final submission if needed
+  bg = "white"
+)
+fig_repparfjorden_conc
+```
+
+
+
+```{r}
+#| label: tbl-groups-bbox
+#| tbl-cap: "Sample groups with at least one measurement inside the A002 bounding box (23-25 E, 70-71 N). Aggregated exactly as the national sample-groups table (summarise_groups()), on the bounded rows only. Rows with no coordinates are excluded; `ID` and the `Dropped` percentage are still the national values."
+#| warning: false
+
+a002 <- tar_read(aep_manifest) |> filter(aep_id == "A002")
+
+lit_bbox <- tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE),
+    !is.na(LATITUDE),
+    LONGITUDE >= a002$lon_min,
+    LONGITUDE <= a002$lon_max,
+    LATITUDE >= a002$lat_min,
+    LATITUDE <= a002$lat_max
+  )
+
+lit_bbox |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(ids = tar_read(group_ids)) |>
+  sample_groups_flextable()
+```
+
+# Copper Sources
+
+## 
+
+## Reported point-source releases (Norwegian PRTR)
+
+The A002 bounding box sits inside **Hammerfest kommune**, which absorbed Kvalsund in the 2020 municipal reform. The Norwegian PRTR [@miljodirektoratetNorskeUtslippUtslipp2025] reports copper released to air and water per facility; `filter_prtr_kommune()` matches both names so the pre-2020 rows are not silently lost.
+
+These are **reported releases only**. They exclude the historic submarine tailings deposit, which is not a reported release and is handled as a separate source node (N003).
+
+```{r}
+#| label: prtr-load
+#| include: false
+library(scales)
+
+prtr <- read_prtr_long(here::here("inst/extdata/emissions"))
+loc <- filter_prtr_kommune(prtr, "Hammerfest|Kvalsund")
+
+fmt <- function(x, d = 3) formatC(x, format = "g", digits = d, big.mark = ",")
+```
+
+The Norwegian PRTR [@miljodirektoratetNorskeUtslippUtslipp2025] includes six sites in the Hammerfest/Kvalsund kommuner which have reported copper emissions to the environment. Of these, only three (Hammerfest LNG), SAR AS Hammerfest department, and Finnmark Ressursselskap AS' Grøtnes landfill are currently in operation, all located near the town of Hammerfest, north of Repparfjorden. Reported copper emissions are so low as to be effectively negligible for the studied area. Hammerfest LNG reported a mean copper emission of 10.81 kg/y to air and 0.01 kg/y to water; all other facilities reported average emissions below 0.01 kg/y [@tbl-prtr-facilities]. Accordingly, we have assumed that these inputs are not relevant sources of copper for the local environmental and biota and excluded them from the AEP.
+
+```{r}
+#| label: tbl-prtr-facilities
+#| tbl-cap: "PRTR facilities reporting copper in Hammerfest or Kvalsund kommune, by release medium. Values are the mean of reported facility-years; a gap between years is an unreported year, not a nil return."
+loc |>
+  summarise(
+    `Mean kg/yr` = mean(value_kg),
+    `SD` = sd(value_kg),
+    Years = n_distinct(year),
+    Period = paste0(min(year), "-", max(year)),
+    .by = c(facility, source_category, medium)
+  ) |>
+  arrange(desc(`Mean kg/yr`)) |>
+  rename(Facility = facility, Sector = source_category, Medium = medium) |>
+  flextable() |>
+  colformat_double(digits = 2) |>
+  autofit()
+```
+
+Some coordinates for sites:
+- Hammerfest lng: 70°41′16″N 23°35′52″Ø (melkøya)
+- SAR Hammerfest: UTM 33
+X 	819556
+Y 	7859199
+- Grønes avfallsdeponi - 70.56158625226676, 23.695160571228108 (moderate certainty)
+- Finnmark gjenvinning - deponi for borekaks på ulveryggen (Finnmark gjenvinning as) . no coords available, but output is neglibile and site is long-closed anyway
+- Finnmark gjenvinning as, repparfjord - couldn't find coordinates, but likely negligable
+
+
+# AEP report cards
+
+Every node and edge card the pipeline draws for A002, dumped here so they render
+in the document. Paths come from the `node_cards_compact` and `aep_edge_cards`
+file targets (filtered to `/A002/`); click any card to enlarge.
+
+## Node cards
+
+```{r}
+#| label: fig-a002-node-cards
+#| output: asis
+#| warning: false
+
+node_cards <- tar_read(node_cards_compact)
+a002_nodes <- sort(grep("A002", node_cards, value = TRUE))
+
+cat("::: {layout-ncol=3}\n\n")
+for (p in a002_nodes) {
+  cat("![](", file.path("..", p), "){group=\"a002-node-cards\"}\n\n", sep = "")
+}
+cat(":::\n\n")
+```
+
+## Edge cards
+
+```{r}
+#| label: fig-a002-edge-cards
+#| output: asis
+#| warning: false
+
+edge_cards <- tar_read(aep_edge_cards)
+a002_edges <- sort(grep("A002", edge_cards, value = TRUE))
+
+cat("::: {layout-ncol=3}\n\n")
+for (p in a002_edges) {
+  cat("![](", file.path("..", p), "){group=\"a002-edge-cards\"}\n\n", sep = "")
+}
+cat(":::\n\n")
+```
+
+<!-- Embed AEP here -->

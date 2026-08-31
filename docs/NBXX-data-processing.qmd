@@ -1,0 +1,52 @@
+---
+title: "NotebookXX - Data Post-Processing"
+author: "Sam Welch"
+date: last-modified
+format: html
+execute:
+  freeze: true   # parked 2026-07-29, see _quarto.yml render list
+---
+
+```{r}
+#| label: setup
+
+suppressPackageStartupMessages({
+  library(targets)
+  library(tidyverse)
+  library(DT)
+  tar_meta <- tar_meta(targets_only = TRUE)
+})
+```
+
+Basically, what we did with data after we got it into the eData format:
+
+
+#### Tests for Outliers
+
+The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally @tukeyExploratoryDataAnalysis1977 but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
+
+$$
+\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR
+$$ {#eq-tukey}
+
+We apply fences to log-transformed values because concentrations are approximately log-normally distributed [@ottPhysicalExplanationLognormality1990].
+
+Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
+
+The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distributions.
+
+For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
+
+$$
+\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}
+$$ {#eq-rmz}
+
+where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute deviation. In R, `mad()` already scales MAD by a consistency factor ($\approx 1 / 0.6745$) to make it comparable to the standard deviation under normality
+
+@iglewiczHowDetectHandle1993 recommends a threshold of $|\text{RMZ}| > 3.5$ for outliers, and we have no reason to depart from this recommendation.
+
+#### Test for Non-Unimodal Distributions
+
+To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartiigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @HartiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
+
+The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold.

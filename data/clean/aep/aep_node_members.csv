@@ -1,41 +1,13 @@
-﻿"node_id","group_id","notes"
-"N012-coast-benthic-sed","G002-Wsd-Cwb-Md","Coastal sediment"
-"N013-coast-water-column","G004-Wmw-Cwc-C","Coastal water"
-"N014-mussel-soft-tissue","G005-Bl-Cnr-M-edu-Tst-Mw","Coastal mussels (SF not reported)"
-"N014-mussel-soft-tissue","G007-Bl-Cwc-M-edu-Tst-Mw","Coastal mussels (SF benthos)"
-"N015-g-morhua-liver","G006-Bf-Cnr-G-mor-Liv-Mw","Coastal cod livers"
-"N016-g-morhua-muscle","G047-Bf-Cnr-G-mor-Mus-Mw","Coastal cod muscle"
-"N017-crab-total","G014-Bc-Cnr-C-pag-Tst-Mw","Crab total soft tissues. Repointed from G148 (5 measurements) to G014 (314), which this node already named in its own notes."
-"N018-crab-muscle","G011-Bc-Cnr-C-pag-Mus-Mw","Crab muscle; split into contam and non-contam (WIP)"
-"N019-crab-brown-meat","G037-Bc-Oot-C-pag-Bmt-Md","Crab brown meat"
-"N020-marine-crustaceans","G022-Bc-Owc-P-bor-Wbd-Md","Northern shrimp, whole body"
-"N020-marine-crustaceans","G023-Bc-Cwb-G-oce-Wbd-Md","Gammarus, whole body"
-"N022-marine-benthic-inverts","G040-Bi-Cwb-A-rub-Pyl-Md","Marine benthic inverts"
-"N023-marine-macroalgae","G033-Ba-Cnr-A-nod-Sti-Mw","Marine macroalgae"
-"N023-marine-macroalgae","G147-Ba-Cnr-A-nod-Pla-Mw","Marine macroalgae; potential pollution signal but small samples"
-"N023-marine-macroalgae","G036-Ba-Cnr-F-ves-Sti-Mw","Marine macroalgae; potential pollution signal but small samples"
-"N024-seabird-egg","G186-Bb-Cnr-G-ari-Egg-Mw","Seabird egg"
-"N024-seabird-egg","G167-Bb-Cnr-L-arg-Egg-Mw","Seabird egg"
-"N024-seabird-egg","G240-Bb-Rnr-T-pil-Egg-Mw","Seabird egg"
-"N025-eider-blood","G026-Bb-Onr-S-mol-Blo-Mw","Eider blood"
-"N026-eider-eggs","G187-Bb-Cnr-S-mol-Egg-Mw","Eider egg"
-"N027-river-water-column","G001-Wfw-Rwc-C","River/stream/canal water column"
-"N028-river-benthic-sed","G008-Wsd-Rwb-Md","River/stream/canal sediment"
-"N020-marine-crustaceans","G053-Bc-Owc-H-gla-Wbd-Md","Hymenodora glacialis, pelagic decapod shrimp"
-"N020-marine-crustaceans","G097-Bc-Owc-S-sar-Wbd-Md","Sabinea sarsi, decapod shrimp"
-"N021-marine-zooplankton","G024-Bc-Owc-C-hyp-Wbd-Md","Calanus hyperboreus, copepod. Moved from N020 on the ecological split."
-"N021-marine-zooplankton","G030-Bc-Owc-T-aby-Wbd-Md","Themisto abyssorum, hyperiid amphipod"
-"N021-marine-zooplankton","G032-Bc-Owc-C-fin-Wbd-Md","Calanus finmarchicus, copepod"
-"N021-marine-zooplankton","G038-Bc-Owc-T-lib-Wbd-Md","Themisto libellula, hyperiid amphipod"
-"N021-marine-zooplankton","G050-Bc-Owc-M-lon-Wbd-Md","Metridia longa, copepod"
-"N021-marine-zooplankton","G052-Bc-Owc-C-bor-Wbd-Md","Conchoecia borealis, planktonic ostracod"
-"N021-marine-zooplankton","G068-Bc-Owc-E-ham-Wbd-Md","Eukrohnia hamata, chaetognath. Not a crustacean; included because the split is ecological and it is holoplanktonic."
-"N021-marine-zooplankton","G073-Bc-Owc-M-nor-Wbd-Md","Meganyctiphanes norvegica, krill"
-"N021-marine-zooplankton","G076-Bc-Owc-E-gla-Wbd-Md","Euchaeta glacialis, copepod"
-"N021-marine-zooplankton","G077-Bc-Owc-E-nor-Wbd-Md","Euchaeta norvegica, copepod"
-"N021-marine-zooplankton","G110-Bc-Owc-T-ine-Wbd-Md","Thysanoessa inermis, krill"
-"N021-marine-zooplankton","G115-Bc-Owc-E-bar-Wbd-Md","Euchaeta barbata, copepod"
-"N021-marine-zooplankton","G129-Bc-Owc-C-gla-Wbd-Md","Calanus glacialis, copepod"
-"N030-lake-water-column","G003-Wfw-Lwc-C","A bit multimodal, but keeping as is anyway."
-"N031-lake-benthic-sed","G009-Wsd-Lwb-Md","More-or-less log-normal."
-"N032-ocean-benthic-sed","G016-Wsd-Owb-Md","Dominated by MAREANO, mostly log-normal."
+node_id,group_id,notes
+N012-coast-benthic-sed,G002-Wsd-Cwb-Md,Coastal sediment
+N013-coast-water-column,G004-Wmw-Cwc-C,Coastal water
+N014-mussel-soft-tissue,G005-Bl-Cnr-M-edu-Tst-Mw,Coastal mussels (SF not reported)
+N014-mussel-soft-tissue,G007-Bl-Cwc-M-edu-Tst-Mw,Coastal mussels (SF benthos)
+N015-g-morhua-liver,G006-Bf-Cnr-G-mor-Liv-Mw,Coastal cod livers
+N016-g-morhua-muscle,G047-Bf-Cnr-G-mor-Mus-Mw,Coastal cod muscle
+N022-marine-benthic-inverts,G040-Bi-Cwb-A-rub-Pyl-Md,Marine benthic inverts
+N023-marine-macroalgae,G033-Ba-Cnr-A-nod-Sti-Mw,Marine macroalgae
+N023-marine-macroalgae,G147-Ba-Cnr-A-nod-Pla-Mw,Marine macroalgae; potential pollution signal but small samples
+N023-marine-macroalgae,G036-Ba-Cnr-F-ves-Sti-Mw,Marine macroalgae; potential pollution signal but small samples
+N027-river-water-column,G001-Wfw-Rwc-C,River/stream/canal water column
+N028-river-benthic-sed,G008-Wsd-Rwb-Md,River/stream/canal sediment

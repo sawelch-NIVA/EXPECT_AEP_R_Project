@@ -1,8 +1,0 @@
-aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A004,N001-natural-occurrence,,,,,,,"National scope, no override. Same as A001."
-A004,N002-aquaculture,,,,,,,"National scope, no override. Same as A001."
-A004,N003-mine-tailings,,,,,,,"National scope, no override. Same as A001."
-A004,N012-coast-benthic-sed,,,,,,,"National scope, no override. Same as A001."
-A004,N013-coast-water-column,,,,,,,"National scope, no override. Same as A001."
-A004,N015-g-morhua-liver,,,,,,,"National scope, no override. Same as A001."
-A004,N016-g-morhua-muscle,,,,,,,"National scope, no override. Same as A001."

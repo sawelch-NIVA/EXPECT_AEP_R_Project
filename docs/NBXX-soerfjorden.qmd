@@ -21,18 +21,86 @@ pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
 here::i_am("index.qmd")
 ```
 
-Sørfjorden ("The South Fjord") is the southerly arm of Hardangerfjorden on Norway's South-West coast [@thorsnaesSorfjordenHardanger2024]. In the early 1900s a number of heavy industrial plants began operation on the fjord's shores, and it became unusually contaminated with heavy metals [@ruusMonitoringEnvironmentalQuality2010]. Copper is known to have been emitted to Sørfjord as a byproduct of zinc production in the area, and unusually high copper concentrations have been detected in the tissues of fish caught in the area [@ruusMonitoringEnvironmentalQuality2010]
+Sørfjorden ("The South Fjord") is the southerly arm of Hardangerfjorden on Norway's South-West coast [@thorsnaesSorfjordenHardanger2024]. In the early 1900s a number of heavy industrial plants began operation on the fjord's shores, and it became unusually contaminated with heavy metals [@ruusMonitoringEnvironmentalQuality2010]. Copper is known to have been emitted to Sørfjord as a byproduct of zinc production in the area, and unusually high copper concentrations have been detected in the tissues of fish caught in the area [@ruusMonitoringEnvironmentalQuality2010].
 
-```{r}
-#| label: fig-soerfjorden-overview
-#| fig-cap: map goes here
-
-# map goes here
-
-```
+![](/figures/aep-locator-sorfjorden.png)
 
 ```{r}
 # Table of groups filtered to bounding box
 ```
+
+## Reported point-source releases (Norwegian PRTR)
+
+Sørfjorden lies in **Ullensvang kommune** (the 2020 merger of Odda, Ullensvang and Jondal). The Norwegian PRTR [@miljodirektoratetNorskeUtslippUtslipp2025] reports copper released to air and water per facility. The extract used here is already normalised to post-reform kommune names, so the historic Odda smelter facilities (Boliden Odda, Odda smelteverk) resolve to Ullensvang. Elkem Bjølvefossen at Ålvik is in Kvam, north of the A003 bounding box, and is correctly excluded.
+
+These are **reported releases**, not the historic total: the Odda smelters operated from the early 1900s and the PRTR series begins in 1985.
+
+```{r}
+#| label: prtr-load
+#| include: false
+library(scales)
+
+prtr <- read_prtr_long(here::here("inst/extdata/emissions"))
+loc <- filter_prtr_kommune(prtr, "Ullensvang")
+
+fmt <- function(x, d = 3) formatC(x, format = "g", digits = d, big.mark = ",")
+```
+
+```{r}
+#| label: tbl-prtr-facilities
+#| tbl-cap: "PRTR facilities reporting copper in Ullensvang kommune, by release medium. Values are the mean of reported facility-years; a gap between years is an unreported year, not a nil return."
+loc |>
+  summarise(
+    `Mean kg/yr` = mean(value_kg),
+    `SD` = sd(value_kg),
+    Years = n_distinct(year),
+    Period = paste0(min(year), "-", max(year)),
+    .by = c(facility, source_category, medium)
+  ) |>
+  arrange(desc(`Mean kg/yr`)) |>
+  rename(Facility = facility, Sector = source_category, Medium = medium) |>
+  flextable() |>
+  colformat_double(digits = 2) |>
+  autofit()
+```
+
+```{r}
+#| label: fig-prtr-series
+#| fig-cap: "Reported copper release by Ullensvang facilities over time. Points are individual reported years; shape distinguishes air from water. Log y axis. Boliden Odda's discharge to water falls by more than two orders of magnitude across the series."
+#| fig-height: 5
+n_zero <- sum(loc$value_kg <= 0)
+short <- function(x) str_trunc(str_to_sentence(sub(" [(].*[)]$", "", x)), 38)
+
+loc |>
+  filter(value_kg > 0) |>
+  mutate(facility_short = short(facility)) |>
+    reframe(.by = "medium", sum_kg = sum(value_kg)) |>
+  ggplot(aes(year, value_kg, colour = medium, shape = medium)) +
+  geom_line(
+    aes(group = interaction(facility_short, medium)),
+    linewidth = 0.5,
+    alpha = 0.7
+  ) +
+  geom_point(size = 2.4) +
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
+  scale_shape_manual(values = c(Air = 17, Water = 16), name = NULL) +
+  scale_y_log10(labels = label_log(), minor_breaks = NULL) +
+  labs(
+    x = NULL,
+    y = "Reported release (kg/yr, log scale)",
+    caption = if (n_zero > 0) {
+      paste(
+        n_zero,
+        "reported zero value(s) omitted: not plottable on a log axis."
+      )
+    } else {
+      NULL
+    }
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "right", panel.grid.minor = element_blank())
+```
+
+Reported industrial discharge to Sørfjorden water is roughly 2,500 kg/yr, about a fifth of the national land-based-industry total and dominated by Boliden Odda. Unlike Repparfjorden, where reported releases are negligible beside the historic tailings, this is a quantified ongoing source and supports a dedicated `external` source node with an edge to the coastal water column.
 
 <!-- Embed AEP here -->

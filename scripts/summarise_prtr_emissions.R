@@ -62,7 +62,30 @@ repparfjorden_total <- summarise_prtr_releases(hf, "medium") |>
     .before = 1
   )
 
-out <- bind_rows(national, by_fylke, repparfjorden, repparfjorden_total) |>
+# Sørfjorden sits in Ullensvang kommune (Odda + Ullensvang + Jondal, merged in
+# the 2020 reform). The PRTR extract is already normalised to post-reform names,
+# so the historic Odda smelter facilities (Boliden Odda, Odda smelteverk) report
+# under Ullensvang. Elkem Bjølvefossen at Ålvik is in Kvam, north of the A003
+# bounding box, and is not part of this scope.
+sf <- filter_prtr_kommune(prtr, "Ullensvang")
+
+sorfjorden <- summarise_prtr_releases(sf, c("facility", "source_category", "medium")) |>
+  rename(region = "facility") |>
+  mutate(scope = "Sørfjorden (Ullensvang kommune)", .before = 1)
+
+sorfjorden_total <- summarise_prtr_releases(sf, "medium") |>
+  mutate(
+    scope = "Sørfjorden (Ullensvang kommune)",
+    region = "All facilities",
+    source_category = "All",
+    .before = 1
+  )
+
+out <- bind_rows(
+  national, by_fylke,
+  repparfjorden, repparfjorden_total,
+  sorfjorden, sorfjorden_total
+) |>
   relocate("scope", "region", "source_category", "medium")
 
 path <- here("data/clean/derived/prtr_emissions_summary.csv")
@@ -104,6 +127,15 @@ cat("\n--- Repparfjorden (Hammerfest kommune), kg/yr ---\n")
 print(
   as.data.frame(
     bind_rows(repparfjorden, repparfjorden_total) |>
+      select("region", "source_category", "medium", "total_kg_yr", "n_years")
+  ),
+  row.names = FALSE, digits = 4
+)
+
+cat("\n--- Sørfjorden (Ullensvang kommune), kg/yr ---\n")
+print(
+  as.data.frame(
+    bind_rows(sorfjorden, sorfjorden_total) |>
       select("region", "source_category", "medium", "total_kg_yr", "n_years")
   ),
   row.names = FALSE, digits = 4

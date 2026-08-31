@@ -17,6 +17,8 @@ format:
 
 # Introduction
 
+Inverted pyramid: 1. Intro 2. AEPs 3. Copper 4.
+
 ```{r}
 #| label: setup
 #| include: false
@@ -26,14 +28,22 @@ library(targets)
 library(here)
 library(tidyverse)
 library(flextable)
-pkgload::load_all(quiet = TRUE) # sample_groups_flextable() etc.
+library(sf)
+library(patchwork)
+library(rosm) # osm.image() Kartverket basemap tiles
+library(ggspatial) # annotation_scale(), annotation_north_arrow()
+pkgload::load_all(quiet = TRUE) # sample_groups_flextable(), summarise_groups() etc.
 
 here::i_am("index.qmd")
 ```
 
-Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a much needed raw resource in manufacturing and infrastructure, and a potentially serious environmental pollutant. Demand for copper is likely to grow significantly in coming decades [@schipperEstimatingGlobalCopper2018], while climate change will open new regions for resource exploitation (cite), industry (cite), and transport [@smithNewTransArcticShipping2013].
+Copper is a vital nutrient across a broad variety of taxa and biomolecules [@wrightBacterialEvolutionaryPrecursors2021; @tangMolecularEvolutionCu2025; @lutsenkoMammalianCopperHomeostasis2025], a mainstay of electronics manufacturing, a potent biocide [@weberMarineBiofoulingRole2023], and a potentially serious environmental pollutant. Demand for copper is predicted to grow substantially in coming decades [@schipperEstimatingGlobalCopper2018], driven particularly by electrification, and the green shift. At time of writing, a number of projects aim to exploit Arctic resources to meet this demand, most notably the planned reopening of the Nussir copper deposits in Finnmark, northern Norway [@eilertsenNussirGetsOperating2019].
 
-Copper, as a common and is a well-studied pollutant, and has been the subject of numerous monitoring campaigns in and around the Arctic for many years [@amapHeavyMetalsArctic01.06.04], as well as extensive laboratory and modelling work. In general, copper is viewed as a low-priority stressor compared to persistent organic pollutants and mercury, due to its generally lower toxicity (cite) and weak bioaccumulation. Some hotspots have been identified where due to emissions and/or physico-chemical properties copper may have adverse effects on organisms. However, much existing data are focused on more southerly species and regions. As the Artic undergoes rapid warming, land use change, and potentially increased anthropogenic stress, copper pollution may grow. Identifying existing distributions and data gaps is crucial to protecting this rapidly changing wilderness.
+The Arctic landscape is predicted to undergo significant climactic and ecological changes in the coming century. Receding sea ice will open new shipping routes [@smithNewTransArcticShipping2013]. Warmer temperatures may make resource extraction easier and more economical [@krogerSocioecologicalCrisesGlobal2023] across shorter timescales. Terrestrial, marine, and freshwater ecosystems are highly likely to undergo shifts in species, structure, and phenology, while human populations, ecosystems, and economies may be vulnerable to extreme and unpredictable weather [@intergovernmentalpanelonclimatechangeipccClimateChange20222023, pp. 46].
+
+Copper is a relatively well studied pollutant both in the laboratory and the field, and has been the subject of monitoring campaigns in and around the Arctic for many years [@amapHeavyMetalsArctic01.06.04]. Copper is generally viewed as a low-priority stressor compared to persistent organic pollutants and mercury, due to its generally lower toxicity [@nysDerivationBioavailabilitybasedEnvironmental2026] (heavily depending on local physico-chemical properties) and a lack of evidence that it bioaccumulates [@barwickBiotransferenceBiomagnificationSelenium2003; @sanchez-marinDynamicModelingCopper2016] outside of certain specific organisms. However, as global climate change, copper extraction, and other copper-dependent industries grow in importance, its importance as a stressor is likely to grow accordingly.
+
+In this paper, we examine the emission and exposure dynamics of copper around Hammerfest, a town in the Norwegian arctic with a history of fishing, aquaculture, industry, and exploitation of mineral resources. We synthesise evidence from literature and monitoring campaigns, using weight of evidence assessment and the Aggregate Exposure Pathway (AEP) concept to develop conceptual models of copper's presence and exposure in marine environments.
 
 ## Aggregate Exposure Pathways
 
@@ -45,57 +55,33 @@ An AEP is a directed graph: Nodes are Key Exposure States (KESs), which represen
 
 The conceptual papers describing the AEP [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] state that both the AEP and AOP are "supported by [...] weight of evidence", although no specific approach is laid out. Consensus and standards have emerged in the AOP community on how Weight of Evidence (WoE) should be assessed, and @beckerIncreasingScientificConfidence2015 advises the use a modified form of the Bradford-Hill epidemiological criteria [@hillEnvironmentDiseaseAssociation1965] to assess the biological plausibility, empirical support, and essentiality of a given KER. @pengAggregateExposurePathways2022, which represents the most sophisticated and relevant (that it, it focuses on pollution of the environment and wildlife) AEP of which we are aware, adapts OECD guidance on AOP development [@oecdUsersHandbookSupplement2018] to AEPs.
 
-## Copper: Environmental Chemistry and Ecotoxicology
-
-Life on Earth has evolved alongside copper as both a stressor and potentially useful element, and a wide variety of both copper-containing proteins and copper-protective proteins have been found across the kingdoms of life [@festaCopperEssentialMetal2011]. Both its utility and toxicity stem from its oxidation and binding dynamics, which make it both a useful structural element in protein design, as well as a source of oxidative stress in the cell [@festaCopperEssentialMetal2011]. This long history of chronic exposure has driven organisms to develop a diverse range of effective mechanisms for controlling internal copper concentrations.
-
-By precise control of copper concentrations in different tissues or parts of the cell, organisms reduce oxidative stress in sensitive areas, but increase it where a "hostile environment" can be useful, such as within bactericidal macrophages [@focarelliCopperMicroenvironmentsHuman2022]. This rich, nuanced and complex set of interactions make copper both an interesting and difficult object of ecotoxicological study.
-
-Organisms have been shown to regulate copper uptake and detoxification to maintain homeostasis along a copper gradient [@vandenberghePosttranslationalRegulationCopper2010, @penaDelicateBalanceHomeostatic1999], which in a ecotoxicological context makes linear assumptions of bioaccumulation hard to justify.
-
-However, the relative ease of sourcing, working with, and analysing copper has made it a popular "classical" stressor in ecotoxicology.
-
-- Cite some of those AOP papers about copper toxicity, the BLM, etc.
-
-- Different species tolerance, different strategies (maybe)
-
-- But there are some that are surprisingly sensitive to copper
-
-- Metallotheins [@amiardMetallothioneinsAquaticInvertebrates2006]
-
-- Brief mention of interactions with other stressors e.g. @lealCopperPollutionExacerbates2018
-
-Copper's biological properties are a consequence of its speciation/electrochemistry - this also makes its environmental behaviour very variable:
-
-- Speciation chemistry
-- Bioavailability (dissolved, LLM fractions, etc.)
-- Dynamics in terrestrial, marine and freshwater environments
-  - Average/background copper in oceans, rock
-  - Sedimentation as main sink for oceanic copper
-
-## Global Change and Resource Use in Arctic Regions
-
-- Arctic new geopolitical flashpoint, source of raw resources, open to transport
-- Resource extraction - especially mining - has long been one of the key pillars of the arctic economy [@arcticcouncilEconomyNorthECONOR2025]
-- Biodiverse, lots of species that are only found in this area, long generation times (cite some of the sources to EXPECT)
-- Copper crucial for green shift, potentially also transport, infrastructure, antifoulant [@schipperEstimatingGlobalCopper2018]
-- Growing interest in indigenous copper resources as a strategic asset - c.f. horse trading over Nussir in Norway @nussirasaNUSSIRProjectOverview2024
-
 # Materials and Methods
 
-An exhaustive version of the materials and methods are provided in the notebooks and appendices included. Materials and methods are summarised below.
+## Study Area
 
-+------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
-| Line of Evidence             | AEP Class                | Data Type                                  | Notes                                                              |
-+==============================+==========================+============================================+====================================================================+
-| Systematic Literature Review | Matrix Node, Tissue Node | (Exposure) Matrix Concentrations           | Big dataset, hence many sub-notebooks                              |
-+------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
-| Vannmiljø Database           | Matrix Node, Tissue Node | Matrix Concentrations                      | Folded into SLR, as data of same type                              |
-+------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
-| Copper Emissions             | Emissions Edge           | Mass/year by industry and receiving matrix | Data resolution/quality generally lower than matrix concentrations |
-+------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
-| Copper PRTR                  | Source Node              | Mass/year by industry                      | As above                                                           |
-+------------------------------+--------------------------+--------------------------------------------+--------------------------------------------------------------------+
+Hammerfest is a kommune (municipality) and town in Finnmark, Norway's northernmost county. The area is a dense archipelago of islands and peninsulas riven with fjords and valleys. To the north-east the kommune opens into the Norwegian Barents sea, which supports both a thriving fishing industry and multiple oil and gas wells. To the south-west, the kommune encompasses an area of the mainland which includes the Nussir mountain and Repparfjord [@dalfestHammerfest2026]. Hammerfest has a population of 11,000 (2026), many of whom are employed in extractive industries: in 2025, of 6160 employed persons, 556 worked in oil and gas (10%), 279 in fishing and aquaculture (5%), 12 + 86 in mining and mining support (2%), and 54 (\<1%) in waste management [@statisticsnorway08536EmployedPersons2026] (todo: this is for the town? what about the kommune? worth going detailed, I think I want to use this data for weighting PR data later).. Hammerfest's importance as an oil and gas hub comes from its status as a processing hub for raw resources extracted from the Snøhvit fields. Potential point sources of pollution include the Liquid Natural Gas plant (linked to the oil feels by pipeline) on the island of Melkøya, north-east of the city, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), the city's Wastewater Treatment Plant, and Hammerfest airport.
+
+![Study area. (a) The Hammerfest / Repparfjorden region in western Finnmark: kommune boundaries (`csmaps`, 2024 division), Hammerfest kommune shaded, the red box the combined extent of the two Hammerfest-area AEPs. (b) The Hammerfest coastal system on Kartverket's colour topographic base map, showing reported point-source (PRTR) facilities (black stars), licensed aquaculture locations (blue circles), the Ulveryggen processing plant (black square), the historic (1970s Folldal Verk) submarine tailings disposal area (orange circle), and the Snøhvit and Goliat oil/gas fields (amber circles, sized to their footprints). Feature coordinates are approximate.](figures/fig-study-area.png){#fig-repparfjorden-locator}
+
+## Lines of Evidence
+
+Multiple lines of evidence were gathered in order to construct AEPs. Key lines and their characteristics are summarised below (tbl-lines-of-evidence)
+
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Line of Evidence             | Data Type                                           | AEP Class                     | Notes                                                                                                                                                                                                                                   |
++==============================+=====================================================+===============================+=========================================================================================================================================================================================================================================+
+| Systematic Literature Review | Exposure (concentrations)                           | Matrix KES, Tissue KES        | Big dataset, hence many sub-notebooks                                                                                                                                                                                                   |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| *Ad hoc* literature          | Exposure (concentrations), Mass Balance (mass/time) | Matrix KES, Tissue KES, more? | Used to gap-fill AEPs where KES/KTR were suspected but no relevant evidence was found in existing lines of evidence                                                                                                                     |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Vannmiljø Database           | Exposure (concentrations)                           | Matrix KES, Tissue KES        | Folded into SLR, as data of same type.                                                                                                                                                                                                  |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Copper Emissions             | Emissions (mass/time)                               | Emissions Edge                | Data resolution/quality generally lower than matrix concentrations                                                                                                                                                                      |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Copper PRTR                  | Mass Balance (mass/time)                            | Source Node                   | As above                                                                                                                                                                                                                                |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Aquaculture Registry         | Facility location and size                          | Source Node                   | Variation in size units make comparison difficult. No direct evidence of copper emission from aquaculture, but co-location of aquaculture facilities and data from aquaculture monitoring campaigns considered as evidence of pollution |
++------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 : lines of evidence
 
@@ -105,7 +91,7 @@ An exhaustive version of the materials and methods are provided in the notebooks
 
 A systematic literature review framework was developed from the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment.
 
-### Databases and Search Terms
+#### Databases and Search Terms
 
 The following search string was used in all open literature sources. The \* character is a wildcard and is used to match against common prefixes. The software Publish or Perish 7 was used to assist in database searches.
 
@@ -119,33 +105,9 @@ AND (aqua* OR water* OR marine OR river OR lake OR fjord OR estuary OR sea OR oc
 
 Web of Science returned 478 hits. PubMed returned 438 hits.
 
-<!-- TODO: vannmiljø  - how many rows, etc? -->
+#### Inclusion, Exclusion, Deduplication and Screening
 
-In addition, data were extracted from the Norwegian Environmental Ministry (Miljødirektoratet, MD) database Vannmiljø ("Aquatic Environment", Vm) based on the following search criteria:
-
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Norwegian Term  | English Translation  | Selected Options                                     | Comments   |
-+=================+======================+======================================================+============+
-| Nedlastingsdato | Download Date        | 2025-12-05                                           |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Datoperiode     | Date Period          | 2025-01-01 to 2025-12-05                             |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Kommune         | Municipality         | All municipalities                                   |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Medium          | Medium/Matrix        | All media                                            |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Kampanje        | Campaign             | All campaigns                                        |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-
-Extracted data were processed and converted to the eData format (see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd)), and validated against the format. Data from Vm covers a variety of monitoring campaigns conducted by a variety of contractors and sub-contractors across Norwegian territory. Metadata on the campaign goal (for example, monitoring reference rivers, or sites known to be contaminated) was retained and is used as a grouping variable in downstream analysis in order to understand observed variation.
-
-### Inclusion, Exclusion, Deduplication and Screening
-
-**Text on explicit inclusion criteria/study area will go here.** The study area is shown in @fig-study-area.
-
-![Study area, sampling density (left), points of interest, and PRTR copper release coverage by fylke (right). **Draft**: points of interest list is a placeholder seed, not reviewed data.](.images-raw/map-study-area.png){#fig-study-area}
+**Text on explicit inclusion criteria/study area will go here.**
 
 Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers.
 
@@ -171,11 +133,11 @@ The full PRISMA flow is shown in @fig-prisma. Study screening was conducted usin
 
 ![Covidence PRISMA diagram.](images/covidence_prisma.png){#fig-prisma width="500"}
 
-### Screening
+#### Screening
 
 Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as irrelevant based on abstract screening, and 46 studies were excluded after full text screening, resulting in a set of 214 manuscripts for data extraction. The decision was then taken to reduce this set of papers further to the most useful subset; papers were rated arbitrarily on a scale of 1 (least relevant) to 5 (most relevant) based on a single reviewer's holistic assessment of their relevance and utility to the research question. The reviewers then proceeded from the highest-ranked papers (ordered by score then alphabetically), began data extraction from all papers with a score of 4 or 5 (n in total, y% of ...).
 
-### Data Extraction & Validation
+#### Data Extraction & Validation
 
 - Data were extracted from manuscripts using the *eData* shiny application (cite paper once ready)
 - LLM extraction, human validation
@@ -183,45 +145,39 @@ Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as i
 - All tables merged together into single one
 - organised as unique compartments and sites
 
-### Data Post-Processing
+### *Ad hoc* literature
 
-Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded. Each group was given a sequentially-numbered ID (GXXX); these IDs are used throughout these manuscript to refer to specific groups
+Where data gaps were identified, or where relevant lines of evidence were suspected or known to exist but were not captured by the
 
-For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated (@tbl-groups-summary).
+### Vannmiljø
 
-#### Tests for Outliers
+<!-- TODO: vannmiljø  - how many rows, etc? -->
 
-The Tukey fence method (@schwertmanIdentifyingOutliersSequential2007, originally @tukeyExploratoryDataAnalysis1977 but latter not available online) flags values that fall more than $1.5 \times IQR$ beyond the first or third quartile of the log-transformed values, where $IQR = Q_3 - Q_1$. Specifically, a value $x_i$ is flagged if:
+In addition, data were extracted from the Norwegian Environmental Ministry (Miljødirektoratet, MD) database Vannmiljø ("Aquatic Environment", Vm) based on the following search criteria:
 
-$$
-\log_{10}(x_i) < Q_1 - 1.5 \cdot IQR \quad \text{or} \quad \log_{10}(x_i) > Q_3 + 1.5 \cdot IQR
-$$ {#eq-tukey}
++-----------------+----------------------+------------------------------------------------------+------------+
+| Norwegian Term  | English Translation  | Selected Options                                     | Comments   |
++=================+======================+======================================================+============+
+| Nedlastingsdato | Download Date        | 2025-12-05                                           |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Datoperiode     | Date Period          | 2025-01-01 to 2025-12-05                             |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Kommune         | Municipality         | All municipalities                                   |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Medium          | Medium/Matrix        | All media                                            |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Kampanje        | Campaign             | All campaigns                                        |            |
++-----------------+----------------------+------------------------------------------------------+------------+
+| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |            |
++-----------------+----------------------+------------------------------------------------------+------------+
 
-We apply fences to log-transformed values because concentrations are approximately log-normally distributed [@ottPhysicalExplanationLognormality1990].
+Extracted data were processed and converted to the eData format (see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd)), and validated against the format. Data from Vm covers a variety of monitoring campaigns conducted by a variety of contractors and sub-contractors across Norwegian territory. Metadata on the campaign goal (for example, monitoring reference rivers, or sites known to be contaminated) was retained and is used as a grouping variable in downstream analysis in order to understand observed variation.
 
-Tukey recommends using 1.5 or 3 times the IQR as thresholds depending on the desired degree of conservatism. We elect to use 1.5, as although this may increase the false positive rate, it is also more sensitive to outliers when the distribution is largely log-normal but with a long right tail.
+### Exposure Data Post-Processing
 
-The Robust Modified Z-Score (RMZ) is a median-based analogue of the standard Z-score that is more resistant to the influence of extreme values [@iglewiczHowDetectHandle1993; @leysDetectingOutliersNot2013], at the cost of being less appropriate for truly normal distributions.
+Samples were grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded. Each group was given a sequentially-numbered ID (GXXX); these IDs are used as shorthand to refer to specific groups.
 
-For a value $x_i$ in a group with median $\tilde{x}$, it is defined as:
-
-$$
-\text{RMZ}_i = \frac{x_i - \tilde{x}}{\text{MAD}}
-$$ {#eq-rmz}
-
-where $\text{MAD} = \text{median}(|x_i - \tilde{x}|)$ is the median absolute deviation. In R, `mad()` already scales MAD by a consistency factor ($\approx 1 / 0.6745$) to make it comparable to the standard deviation under normality
-
-@iglewiczHowDetectHandle1993 recommends a threshold of $|\text{RMZ}| > 3.5$ for outliers, and we have no reason to depart from this recommendation.
-
-#### Test for Non-Unimodal Distributions
-
-To identify groups whose distribution may be multimodal, which can indicate a mixture of genuinely distinct populations rather than a single skewed distribution, we apply Hartiigan's Dip Test via the R package `diptest` [@maechlerDiptestHartigansDip2025]. This provides a statistical adjunct to visual inspection of distributions useful for flagging. Its precise description can be found in @HartiganDipTestUnimodality1985, but in essence it compares the difference between the cumulative density function of a normal distribution and the sample distribution; with a larger "dip" between the former and the latter indicating the "wobbly" cumulative distribution indicative of a multimodal distribution.
-
-The test returns a p-value for the null hypothesis of unimodality; small p-values suggest the distribution is not unimodal. We use $p < 0.05$ as a standard threshold.
-
-#### Visual Exploration of Data
-
-Sample groups were ordered based on sample size and flagged for inspection where they met one of the following criteria:
+For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) and Robust-Modified Z-Score ($Z >= 3.5$), and Hartigan's dip test statistics ($P <= 0.05$) were calculated (@tbl-groups-summary). For a more detailed description, please see [Supplementary Information](docs/NBXX-data-processing.qmd). Sample groups were ordered based on sample size and flagged for inspection where they met one of the following criteria:
 
 1.  The group represented a matrix that was essential for the construction of aquatic Arctic AEPs (e.g. matrices that are both receiving compartments for copper and habitats for organisms of interest, such as marine and freshwater water columns and sediment, or algae (due to their trophic position)
 2.  The group's distribution was flagged as potentially multimodal (see above)
@@ -233,6 +189,16 @@ In these cases,
 - Metadata and comments were reviewed
 - Unless there was a convincing argument not to, outliers were removed
 - We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons
+
+### Norwegian PRTR and REACH Product Register
+
+The Norwegian Product Release and Transfer Register (PRTR) is a repository for self-reported emissions data in Norway, and is freely available under an open government data license [@NorwegianPRTRPollutants]. Discharges of specific pollutants, including copper, to air and water by licensed facilities (wastewater treatment plants, landfills, land-based industries, and offshore installations) are reported, typically as kg/year. Facilities locations are recorded to the county level, and it is frequently possible to geolocate these facilities from other records.
+
+Concurrently, the Norwegian Environmental Agency (EA) maintains a Product Register (REACH PR) under the REACH and CLP directives [@norwegianenvironmentagencyProductRegisterDeclaration2024]. Imports and exports of hazardous substances (including copper) are self-reported to the EA by firms. As this information is considered commercially sensitive, it is not openly available. However, the EA make available on request an aggregated version where imports and exports are reported by industry sector and/or product type. By subtracting exported copper from imported copper values, a mass-balance estimate of embedded copper in Norway can be calculated per sector or per product.
+
+Data from these registers were assessed following the weight of evidence framework below. Mass and transfer rates were graphed per industry and per licensed facility, and a mean value per year calculated. Because REACH PR data is only available at the national level, thes were weighted by... I wonder if we could weight not by % of Norway's population in Hammerfest, but % of Norwegian population
+
+are included as source KES (REACH PR) and KTR (PRTR)
 
 ### Weight of Evidence Assessment
 
@@ -292,13 +258,13 @@ table <- read_csv("data/clean/aep/aep_manifest.csv")
 table |> select(label, scope_note) |> knitr::kable()
 ```
 
-How were AEPs constrcuted:
+How were AEPs constructed:
 
-1. Review groups where n >= 100, generate nodes
-2. Where appropriate (due to sample sizes, ecological/matrix similarity, etc.), put multiple groups into one node
-3. Assemble a "whole-system" AEP from all avaialable nodes (from above)
-4. For AEPs 2-3, build a subset of AEP 1 based on known sources and evidence in the given areas.
-5. For 4-6, start with a known MIE locations (from other papers) and work backwards based on AEP 1 & 2.
+1.  Review groups where n \>= 100, generate nodes
+2.  Where appropriate (due to sample sizes, ecological/matrix similarity, etc.), put multiple groups into one node
+3.  Assemble a "whole-system" AEP from all avaialable nodes (from above)
+4.  For AEPs 2-3, build a subset of AEP 1 based on known sources and evidence in the given areas.
+5.  For 4-6, start with a known MIE locations (from other papers) and work backwards based on AEP 1 & 2.
 
 Nodes are based on available evidence. What counts as a node is slightly arbitrary - depending on what data we have and what makes sense, we may use coarser or finer resolution.
 
@@ -306,9 +272,15 @@ Putative edges are created between nodes based on expert opinion rather than ind
 
 # Results
 
+TODO: Proref for biota
+
+![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig-repparfjorden-conc.png){#fig-repparfjorden-conc}
+
 *Below table is obviously very big. Can be split into biota and non-biota? Or could summarise again? Also, do we need to add/remove any checks, e.g. AIC of normal vs. log-normal distributions*
 
 ## Group Summary Statistics
+
+TODO: Table per AEP
 
 <!-- TODO: n thresholds for Hartigans. Also dynamic update group/sample n slice reporting-->
 
@@ -333,68 +305,11 @@ tar_read(sample_groups_table) |>
 - Overall top-down view of dataset and general distribution patterns
 - More detailed, broken-down versions of plots will be in SI
 
-An example KTR plot is shown in @fig-ktr-example.
-
-![I don't have a proper version of this figure yet, but it'll be like this, but one row per KTR.](.images-raw/example-ktr-plot.png){#fig-ktr-example}
-
 ## AEPs
-
-### Kitchen Sink AEP
-
-- Includes all nodes from any spatial area
-
-- Probably too complicated to include in the final MS, but useful overview during editing
-
-![](figures/aep_A001.png){#aep-A001-all}
-
-### Geographical Case Studies
 
 AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
 
-#### AEP-002: Reppafjorden
-
-![Repparfjorden Map](figures/aep-locator-repparfjorden.png.png){#fig-repparfjorden-map}
-
-![Case Study: Repparfjorden AEP](figures/aep_A002.png){#fig-repparfjord-aep}
-
-#### AEP-003: Sørfjorden
-
-![Sørfjorden Map](figures/aep-locator-sorfjorden.png){#fig-sorfjorden-map}
-
-
-![Case Study: Sørfjorden AEP](figures/aep_A003.png){#fig-sorfjorden-aep}
-
-### Biological Case Studies
-
-#### AEP-004: Gadus morhua
-
-- Depending on how the fish distributions look I may lump them all together
-- Currently specifically G. morhua - we have a lot of data for this species
-- I assume there's not going to be a lot of variance between species, and we already know most of our data is cod livers
-- If it's relevant to distinguish between fish with different life styles/types of feeding I will cross that bridge when we get to it
-- What are the most important sources of copper to fish? Spatial, temporal patterns, etc (Based on cod liver data I don't expect to see anything interesting, but if we do there's plenty of room to discuss)
-
-The fish AEP is shown in @fig-fish-aep.
-
-![Fish AEP](figures/aep_A004.png){#fig-fish-aep}
-
-#### AEP-005: Mytuli...
-
-- Mussels are our next most common species after G. morhua, so I think it makes sense to do an AEP for them.
-
-The invertebrate AEP is shown in @fig-mussels-aep.
-
-![Mussesl AEP](figures/aep_A005.png){#fig-mussels-aep}
-
-#### AEP-006: Macroalgae
-
-- Algae aren't the most interesting, but they are key food chain species, and ecotox test species
-- Conversely, if we see something interesting for mammals they could go here instead
-- We only have data for macroalgae, so this'll have to do
-
-The algae AEP is shown in @fig-algae-aep.
-
-![Algae AEP](figures/aep_A006.png){#fig-algae-aep}
+#### AEP-001: Reppafjorden
 
 # Discussion
 

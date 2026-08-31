@@ -588,6 +588,76 @@ threshold_matrix_label <- function(thresholds) {
   dplyr::if_else(is.na(species) & is.na(sub), NA_character_, out)
 }
 
+#' Classify Measured Values Against the M-608 Classification Ladder
+#'
+#' For each row, the Norwegian M-608 class its `MEASURED_VALUE_STANDARD` falls
+#' in, given the classification boundaries that [thresholds_for_group()] matches
+#' to that row's sample group. A value below every boundary is `"I"`
+#' (Background); above the top drawn boundary it is `"V"` (Very Poor). Rows in a
+#' group with no matching classification ladder -- biota, terrestrial, anything
+#' the threshold set does not cover -- come back `NA`.
+#'
+#' Only `"Classification boundary"` thresholds are used. PROREF and BAC are
+#' single background levels, not an I-V ladder, and mixing them in would put a
+#' spurious "class" on biota points.
+#'
+#' Same caveats as the rest of this file: units are matched not converted, water
+#' classes are dissolved applied to mostly-total data, sediment classes are
+#' marine applied to all sediment. This is a sanity-check colour, not a risk
+#' assessment.
+#'
+#' @param data Rows carrying the [triage_group_cols()] group key and a measured
+#'   value column.
+#' @param thresholds The `copper_toxicity_thresholds` target.
+#' @param value_col Name of the value column. Default `MEASURED_VALUE_STANDARD`.
+#' @return `data` with a `threshold_class` factor column, levels `I`..`V`.
+#' @export
+classify_by_thresholds <- function(
+  data,
+  thresholds,
+  value_col = "MEASURED_VALUE_STANDARD"
+) {
+  key <- intersect(triage_group_cols(), names(data))
+  groups <- dplyr::distinct(data, dplyr::across(dplyr::all_of(key)))
+  cls <- rep(NA_character_, nrow(data))
+
+  for (i in seq_len(nrow(groups))) {
+    g <- groups[i, , drop = FALSE]
+    bounds <- thresholds_for_group(
+      thresholds, g,
+      types = "Classification boundary"
+    )
+    if (nrow(bounds) == 0) {
+      next
+    }
+    bounds <- bounds[order(bounds$THRESHOLD_VALUE_STANDARD), ]
+
+    # NA-safe row match on the group key (SPECIES_* are NA for abiotic groups).
+    sel <- rep(TRUE, nrow(data))
+    for (k in key) {
+      sel <- sel &
+        ((data[[k]] == g[[k]]) | (is.na(data[[k]]) & is.na(g[[k]])))
+    }
+    sel[is.na(sel)] <- FALSE
+
+    v <- data[[value_col]][sel]
+    cls[sel] <- vapply(
+      v,
+      function(x) {
+        if (is.na(x)) {
+          return(NA_character_)
+        }
+        above <- which(bounds$THRESHOLD_VALUE_STANDARD < x)
+        if (length(above) == 0) "I" else bounds$THRESHOLD_OPENS_CLASS[max(above)]
+      },
+      character(1)
+    )
+  }
+
+  data$threshold_class <- factor(cls, levels = c("I", "II", "III", "IV", "V"))
+  data
+}
+
 #' Secondary-Axis Title Naming Source and Matrix
 #'
 #' `"M-608|2016 (Freshwater, dissolved)"` rather than a bare `"M-608|2016"`.

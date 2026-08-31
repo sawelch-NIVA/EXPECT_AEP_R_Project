@@ -1,0 +1,60 @@
+session:
+  app_name: STOPeData
+  app_version: 0.0.0.9010
+  format_version: 0.0.0.9005
+  session_start: 2026-08-28 16:13:17 CEST
+  user: []
+  client: []
+extractions:
+  extraction_1:
+    extraction_n: 1
+    extraction_datetime: 2026-08-28 16:20:52 CEST
+    run_type: extraction
+    llm_provider: Anthropic
+    llm_version: claude-sonnet-4-6
+    source_pdf: Sternal et al. - 2017 - The impact of submarine copper mine tailing
+      disposal from the 1970s on repparfjorden, northern Norwa 1.pdf
+    llm_extraction_cost_USD: 0.363618
+    llm_input_tokens: .na
+    llm_output_tokens: 8064.0
+    schema_components:
+    - campaign
+    - references
+    - sites
+    - parameters
+    - compartments
+    - biota
+    - methods
+    - samples
+    - comments
+    time_from_session_start: 7 minutes 35 seconds
+screening:
+  paper_relevance: 'Score: 5: Directly relevant - reports measured concentrations
+    of multiple heavy metals (As, Ba, Cd, Co, Cr, Cu, Hg, Ni, Pb, Ti, V, Zn) in marine
+    fjord sediment cores from Repparfjorden, Norway, with clear spatial and depth
+    distribution data related to submarine mine tailing contamination. All key data
+    criteria are met: analyte, medium, location, date, and units are specified.'
+  paper_reliability: 'Score: 5: Peer-reviewed journal article with detailed methodology,
+    multiple analytical methods, quality controls (Norwegian Standards 4770 and 4768),
+    duplicate cores, two independent laboratories, and radioisotopic dating for temporal
+    context.'
+  paper_data_source: 'Score: 5: Original data generation; authors collected and analysed
+    17 sediment cores during two cruises in 2013 and 2015. Reference core SED kjerne
+    from Christensen et al. (2011) is also cited but its HM data not reproduced in
+    full.'
+  paper_data_available: 'Score: 4: Data available in tables (Table 4 with min/max/mean/median
+    statistics per core, Table 2 background values) and figures (Fig. 2 depth profiles).
+    Raw 1-cm interval data not fully tabulated in manuscript but supplementary tables
+    referenced. Units (mg/kg), locations (lat/lon), dates, and analytes all clearly
+    specified.'
+  extraction_assessement: 'Score: 4: High confidence in extraction of site coordinates
+    (converted from degree-minutes as reported in Table 1), parameters, methods, and
+    campaign metadata. The coordinates in Table 1 are given in degree-minutes notation
+    and were converted to decimal degrees; originals reported in site_comment fields.
+    Some uncertainty in exact volume of data per core from supplementary tables not
+    available in this PDF.'
+export:
+  campaign_name: Impact of submarine copper mine tailing disposal from the 1970s on
+    Repparfjorden, northern Norway
+  export_datetime: 2026-08-28 16:25:34 CEST
+  time_from_session_start: 12 minutes 18 seconds
