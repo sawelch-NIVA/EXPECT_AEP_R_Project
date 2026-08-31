@@ -299,7 +299,7 @@ layout <- panel_density | (panel_poi / panel_prtr)
 layout <- layout + plot_layout(widths = c(2, 1))
 
 ggsave(
-  ".images-raw/map-study-area.png",
+  "images/dev/map-study-area.png",
   layout,
   width = 12,
   height = 7,
@@ -307,4 +307,4 @@ ggsave(
   bg = "white"
 ) |> suppressWarnings()
 
-cat("saved .images-raw/map-study-area.png\n")
+cat("saved images/dev/map-study-area.png\n")

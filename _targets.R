@@ -1546,7 +1546,7 @@ list(
   # R/fct_reach.R). N004-N011's external_value/sd/n on aep_nodes.csv were typed
   # in by hand from reach_node_summary_data and stay hand-typed (Sam, per PLAN.md:
   # source nodes stay manual for now) -- what THIS chain buys is the per-year
-  # series behind that headline figure, so node_cards_compact can draw it rather
+  # series behind that headline figure, so node_cards can draw it rather
   # than the plain "no measured data" placeholder every other external node gets.
   #
   # NOT a group-id ledger. Sam considered and explicitly deferred giving REACH
@@ -1628,7 +1628,7 @@ list(
   ),
 
   ### # Node report cards ----
-  # PLAN.md 4.3, P3.2, P5.2. One PNG per node into figures/node_cards_compact/,
+  # PLAN.md 4.3, P3.2, P5.2. One PNG per node into images/node_cards/,
   # as a `format = "file"` target so the store caches the images rather than the
   # ggplot objects (CLAUDE.md 4.4).
   #
@@ -1639,7 +1639,7 @@ list(
   # One SUBDIRECTORY PER AEP since 2026-08-06. A node appears in several AEPs
   # with different data behind it, so `N001.png` is not a unique name.
   tar_target(
-    name = node_cards_compact,
+    name = node_cards,
     command = write_aep_node_cards(
       scoped = aep_scoped,
       cards = aep_node_cards,
@@ -1647,7 +1647,7 @@ list(
       data = literature_analysis_ready,
       ids = group_ids,
       thresholds = copper_toxicity_thresholds,
-      dir = here_rel("figures/node_cards_compact"),
+      dir = here_rel("images/node_cards"),
       limits = aep_card_limits,
       external_series = reach_external_series_data
     ),
@@ -1656,7 +1656,7 @@ list(
 
   ### # Edge report cards ----
   # One compact card per non-rejected edge, per AEP, into
-  # figures/edge_cards/<aep_id>/. Based on the node card (write_node_cards())
+  # images/edge_cards/<aep_id>/. Based on the node card (write_node_cards())
   # but smaller: no distribution panel, no level-coloured background, a blank
   # line between the quantity and the counts. Putative vs empirical is carried
   # by the edge line style and by the card existing at all, so it is not
@@ -1666,7 +1666,7 @@ list(
     command = write_aep_edge_cards(
       scoped = aep_scoped,
       edges = aep_edges,
-      dir = here_rel("figures/edge_cards")
+      dir = here_rel("images/edge_cards")
     ),
     format = "file"
   ),
@@ -1677,7 +1677,7 @@ list(
   # machinery stays available: write_aep_diagrams() and plot_aep() in
   # R/fct_aep_edges.R + R/fct_aep_nodes.R are unchanged, and re-adding a
   # tar_target() here brings it back. aep_scoped / aep_edges / aep_node_cards /
-  # aep_node_groups / node_cards_compact all still build, since the hand
+  # aep_node_groups / node_cards all still build, since the hand
   # assembly draws on the same cards.
 
   ### # Source unit errors ----

@@ -5,7 +5,7 @@ title: "Dev - Node Card Styling"
 # Code is SHOWN here, against the project default of `echo: false`. This is a
 # notebook about how the card is built, so hiding the calls that build it
 # would leave only the pictures, which is the half you can get from
-# figures/node_cards/ already.
+# images/node_cards/ already.
 execute:
   echo: true
 format:
@@ -66,7 +66,7 @@ p <- node_card(
 #| label: write
 #| include: false
 
-card_path <- here::here("figures/dummy_node_card.png")
+card_path <- here::here("images/dev/dummy_node_card.png")
 save_ggplot(
   p,
   card_path,
@@ -80,7 +80,7 @@ save_ggplot(
 ```{r}
 #| label: fig-card
 #| echo: false
-#| fig-cap: !expr sprintf("The finished card at its real size, %s x %s in at %s dpi, as written to `figures/dummy_node_card.png`. Everything below takes it apart.", card_width, card_height, card_dpi)
+#| fig-cap: !expr sprintf("The finished card at its real size, %s x %s in at %s dpi, as written to `images/dev/dummy_node_card.png`. Everything below takes it apart.", card_width, card_height, card_dpi)
 
 knitr::include_graphics(card_path)
 ```
@@ -109,7 +109,7 @@ tibble::tibble(
 
 Those inches are the constraint the whole design is fighting. The badge band is a fifth of an inch tall, and text sizes are absolute, so a panel previewed at any other size lies about its own legibility. Every preview below is therefore drawn at card width by the panel's own share of card height, not blown up to fill the page.
 
-**That takes a chunk option, not just a `canvas()`.** Under knitr the figure device is sized by `fig-width` / `fig-height`, which default project-wide to 12x8, and a `ggview::canvas()` does not bring it down to the card size: the figure the `card` chunk prints inline measures 4.5x3.2 inches, and only the written `figures/dummy_node_card.png` is a true 2.4x1.8. So each preview below sets its device explicitly with `!expr`, reading the same `frac` as the table above.
+**That takes a chunk option, not just a `canvas()`.** Under knitr the figure device is sized by `fig-width` / `fig-height`, which default project-wide to 12x8, and a `ggview::canvas()` does not bring it down to the card size: the figure the `card` chunk prints inline measures 4.5x3.2 inches, and only the written `images/dev/dummy_node_card.png` is a true 2.4x1.8. So each preview below sets its device explicitly with `!expr`, reading the same `frac` as the table above.
 
 ### The background
 
@@ -295,7 +295,7 @@ stress_card <- aep_node_report_cards(stress_node, stress_members, stress_data, s
 ```{r}
 #| label: stress-card
 
-stress_path <- here::here("figures/dummy_node_card_stress.png")
+stress_path <- here::here("images/dev/dummy_node_card_stress.png")
 
 p_stress <- node_card(
   stress_node,
@@ -320,7 +320,7 @@ save_ggplot(
 ```{r}
 #| label: fig-stress-card
 #| echo: false
-#| fig-cap: "The same card under a long composite id, a long label and five constituent groups, of which `max_groups` keeps the three largest. Written to `figures/dummy_node_card_stress.png`."
+#| fig-cap: "The same card under a long composite id, a long label and five constituent groups, of which `max_groups` keeps the three largest. Written to `images/dev/dummy_node_card_stress.png`."
 
 knitr::include_graphics(stress_path)
 ```

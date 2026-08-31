@@ -351,7 +351,7 @@ validate_aep_edges <- function(edges, nodes) {
 #' wrong moves the clip boundary, which is why they are named arguments with
 #' documented defaults rather than constants buried in the drawing code.
 #'
-#' Defaults match the `aep_diagrams` target: `node_cards_compact` is written at
+#' Defaults match the `aep_diagrams` target: `node_cards` is written at
 #' 2.4 x 1.8 inches (`card_aspect = 1.8 / 2.4`) onto a 12 x 8 inch canvas
 #' (`device_aspect = 12 / 8`). **Change either in `_targets.R` and these defaults
 #' are wrong**, so both are passed explicitly from there.

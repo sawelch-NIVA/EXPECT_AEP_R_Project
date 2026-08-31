@@ -64,7 +64,7 @@ path_reach <- here("inst/extdata/emissions/REACH_copper_prtd.xlsx")
 
 # -- By sector (hovednæring) --------------------------------------------------
 # Read via read_reach_sector_years() (R/fct_reach.R), not inline: this
-# notebook and _targets.R's node_cards_compact target both need the same
+# notebook and _targets.R's node_cards target both need the same
 # sector-name translation and "Other" -> Unclassified handling (that logic's
 # own TODO, "a mess - blank columns and negative numbers", is documented at
 # read_reach_sector_years()), and two copies of it is how they drift.
@@ -324,7 +324,7 @@ assessment below and using the mean net quantity per year as `external_value`.
 
 The lumping itself (which raw sector rolls into which node) is
 `reach_sector_lump_map()`/`reach_node_id_by_sector()` in `R/fct_reach.R`, not
-computed here: `_targets.R`'s `node_cards_compact` target needs the identical
+computed here: `_targets.R`'s `node_cards` target needs the identical
 lumping to draw each node's per-year series on its card, and two copies is how
 they drift.
 
@@ -427,7 +427,7 @@ They feed `N012` (coastal benthic sediment) and `N013` (coastal water column)
 in `data/clean/aep/aep_edges.csv`, all `putative` pending a literature check
 (PLAN.md P4.2), and are members of the national AEP (`A001`).
 
-Their cards are drawn by the same `node_cards_compact` target every other
+Their cards are drawn by the same `node_cards` target every other
 node's card comes from (via `write_aep_node_cards()`'s `external_series`
 argument, fed by `reach_external_series_data`), not written separately by this
 notebook (Sam, 2026-08-11: "why create an entirely separate dir structure for
@@ -443,7 +443,7 @@ tr <- function(expr) tryCatch(expr, error = function(e) NULL)
 
 reach_node_ids <- unname(reach_node_id_by_sector())
 
-reach_card_paths <- tr(tar_read(node_cards_compact))
+reach_card_paths <- tr(tar_read(node_cards))
 if (!is.null(reach_card_paths)) {
   reach_card_paths <- reach_card_paths[
     basename(dirname(reach_card_paths)) == "A001" &
@@ -456,26 +456,26 @@ if (!is.null(reach_card_paths)) {
 }
 ```
 
-From `figures/node_cards_compact/A001/`, largest mean net quantity first:
+From `images/node_cards/A001/`, largest mean net quantity first:
 
 ```{r}
 #| echo: false
 #| results: asis
 if (is.null(reach_card_paths) || length(reach_card_paths) == 0) {
   cat(
-    "`node_cards_compact` is not in the target store yet. Run `tar_make()`.\n"
+    "`node_cards` is not in the target store yet. Run `tar_make()`.\n"
   )
 } else {
   cat('::: {layout-ncol="4"}\n')
   for (p in reach_card_paths) {
-    # node_cards_compact's paths come from here_rel() in _targets.R, i.e.
+    # node_cards's paths come from here_rel() in _targets.R, i.e.
     # already relative to the PROJECT ROOT, not absolute. here::here(p)
     # re-anchors that to an absolute path off the real project root
     # (found via the .here/README.md anchor) regardless of the R working
     # directory this chunk runs in, which Quarto sets to this .qmd's own
     # directory (docs/) -- fs::path_rel() on the bare relative string
     # produced a link with no "../" at all, silently 404ing at
-    # docs/figures/... instead of the real ../figures/... (caught by
+    # docs/images/... instead of the real ../images/... (caught by
     # actually rendering this notebook and checking, not by inspection).
     rel <- fs::path_rel(here::here(p), here("docs"))
     cat(sprintf("![](%s)\n\n", rel))

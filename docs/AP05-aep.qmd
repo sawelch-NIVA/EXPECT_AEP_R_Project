@@ -350,7 +350,7 @@ A label repeating "Coastal" five times is a shared property with nowhere to live
 Rscript -e "targets::tar_make()"
 ```
 
-Every one of these files is a `format = "file"` target, so editing one invalidates the node and edge cards. Per-node cards land under `figures/node_cards_compact/<aep_id>/` and per-edge cards under `figures/edge_cards/<aep_id>/`. The AEP diagrams are assembled by hand from those cards (auto-assembly was parked 2026-08-27); `figures/aep_<aep_id>.png` holds the last auto-rendered version until it is replaced.
+Every one of these files is a `format = "file"` target, so editing one invalidates the node and edge cards. Per-node cards land under `images/node_cards/<aep_id>/` and per-edge cards under `images/edge_cards/<aep_id>/`. The AEP diagrams are assembled by hand from those cards (auto-assembly was parked 2026-08-27); `figures/aep_<aep_id>.png` holds the last auto-rendered version until it is replaced.
 
 Review the diff before you rebuild: `git diff data/clean/aep/`.
 

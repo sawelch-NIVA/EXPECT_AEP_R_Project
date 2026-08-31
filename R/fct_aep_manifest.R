@@ -614,7 +614,7 @@ write_aep_node_cards <- function(
   data,
   ids,
   thresholds = NULL,
-  dir = here_rel("figures/node_cards"),
+  dir = here_rel("images/node_cards"),
   limits = NULL,
   ...
 ) {
@@ -901,7 +901,7 @@ write_aep_diagrams <- function(
 
   unlist(
     purrr::imap(scoped, function(nodes, id) {
-      # Cards for THIS AEP only. They live in figures/<style dir>/<aep_id>/, so
+      # Cards for THIS AEP only. They live in images/node_cards/<aep_id>/, so
       # the directory name is the key; matching on basename alone would collide
       # across AEPs, since every AEP names its cards N001.png and so on.
       images <- if (bare) {

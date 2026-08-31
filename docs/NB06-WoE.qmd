@@ -69,7 +69,7 @@ No specific set of WoE guidelines have been developed for Aggregate Exposure Pat
 
   - Quantitative understanding
 
-![Diagram of Peng et al.'s framework for constructing and WoE assessing AEPs, based on Teeguarden et al and the OECD AOP framework.](images/peng_aep_diagram.png)
+![Diagram of Peng et al.'s framework for constructing and WoE assessing AEPs, based on Teeguarden et al and the OECD AOP framework.](../figures/peng_aep_diagram.png)
 
 Ok, so clearly "just CREED" isn't going to fly. How do we evaluate our diverse types of evidence against these different criteria?
 

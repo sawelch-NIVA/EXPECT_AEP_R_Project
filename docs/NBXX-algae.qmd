@@ -376,7 +376,7 @@ We have a fairly disordered dataset here, but rather than wait for the perfect o
 
 These criteria make a lot of sense for AOPs and anthropogenic pollutants (like microplastics), but are somewhat less informative for an essential trace nutrient and key ingredient of the earth's core.
 
-![Alt text](../images/peng_aep_diagram.png)
+![Alt text](../figures/peng_aep_diagram.png)
 
 ```{r}
 #| label: tbl-epeq-algae

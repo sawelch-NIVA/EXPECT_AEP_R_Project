@@ -192,7 +192,7 @@ edge_card <- function(edge, dpi = 300) {
 write_aep_edge_cards <- function(
   scoped,
   edges,
-  dir = here_rel("figures/edge_cards"),
+  dir = here_rel("images/edge_cards"),
   width = 2.4,
   height = 1.6,
   dpi = 300

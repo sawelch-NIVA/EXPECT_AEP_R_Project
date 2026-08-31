@@ -49,7 +49,7 @@ In this paper, we examine the emission and exposure dynamics of copper around Ha
 
 The Aggregate Exposure Pathway (AEP) [@teeguardenCompletingLinkExposure2016, @tanAggregateExposurePathways2018] concept was developed in 2016 as an exposure-based counterpart to the Adverse Outcome Pathway. AOPs assemble evidence to causally link the biological effects of stressors in organisms. AEPs do the same for the emission, transport and fate of stressors in the environment, up until the point they reach sensitive tissues or organs in selected organisms [@fig-aep-intro].
 
-![Placeholder. Planned to be an image of a simple AEP (copper, fish) and AOP (one of the ROS ones) to introduce the concept and teach the readers what an AEP looks like](images/../images/peng_aep_diagram.png){#fig-aep-intro}
+![Placeholder. Planned to be an image of a simple AEP (copper, fish) and AOP (one of the ROS ones) to introduce the concept and teach the readers what an AEP looks like](figures/peng_aep_diagram.png){#fig-aep-intro}
 
 An AEP is a directed graph: Nodes are Key Exposure States (KESs), which represent the state of stressor(s) in space and time. KES are linked by by Key Transitional Relationships (KTR), the transport or transformation of said stressor(s). An AEP has two specialised (types of) KES, a stressor Source and a Target Site Exposure (TSE), representing the state of a stressor at its origin and site of action respectively [@tanAggregateExposurePathways2018]. The TSE corresponds to the initiating Key Event of an AOP (the Molecular Initiating Event or MIE); thus, an AEP and AOP that cover the same stressor can be integrated to create a full Source-to-Outcom Pathway (STOP). AOPs have seen a rapid uptake in the ecotoxicological community at both the grass-roots and international scale: at time of writing, 561 AOPs have been drafted or published [@societyforadvancementofaopsAOPwikiV272026]. Conversely, the AEPs have seen less adoption, within a mini-review in 2025 (see SI) finding only 21 papers mentioning and 15 employing the concept. This is perhaps due to the significantly larger scale of AEPs compared to AOPs, as in any ecotoxicological setting they may have to deal with geographically massive and kinetically homogeneous KESs and KTRs.
 
@@ -162,7 +162,7 @@ The full PRISMA flow is shown in @fig-prisma. Study screening was conducted usin
 8)  paper not in English
 9)  full text not available
 
-![Covidence PRISMA diagram.](images/covidence_prisma.png){#fig-prisma width="500"}
+![Covidence PRISMA diagram.](figures/covidence_prisma.png){#fig-prisma width="500"}
 
 #### Screening
 
@@ -314,6 +314,8 @@ TODO: NACE Codes?
 - We can weight this by population proportion in Hammerfest again
 
 There are 18 Hammerfest-based facilities identified on Norske utslipp, but only those in the graph above actually report copper emissions.
+
+<!--# TODO: Notes on Hammerfest ren havn: https://hammerfest.kommune.no/tjenester/natur-klima-og-miljo/miljovern/ren-havn/prosjekt-ren-havn/ -->
 
 ### Weight of Evidence Assessment
 
@@ -477,17 +479,17 @@ tar_read(aep_node_cards) |>
 
 AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
 
-#### AEP 2: Inner Reppafjorden
+#### AEP 1: Hammerfest Inner Coastal System
 
-![AEP 1: Repparfjord Inner Fjord](figures/aep-001-repparfjord-inner.png)
-
-TODO: Node table
-
-#### AEP 2: Hammerfest Inner Coastal System
-
-TODO: Image
+![](figures/aep-001-hammerfest.png)
 
 TODO: Node Table
+
+#### AEP 2: Inner Reppafjorden
+
+![AEP 2: Repparfjord Inner Fjord](figures/aep-001-repparfjord-inner.png)
+
+TODO: Node table
 
 # Discussion
 

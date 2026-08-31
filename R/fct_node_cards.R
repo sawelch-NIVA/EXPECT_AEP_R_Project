@@ -1359,7 +1359,7 @@ write_node_cards <- function(
   data,
   ids,
   thresholds = NULL,
-  dir = here_rel("figures/node_cards"),
+  dir = here_rel("images/node_cards"),
   width = 2.4,
   height = 1.8,
   dpi = 300,

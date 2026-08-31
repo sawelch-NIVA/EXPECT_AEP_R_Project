@@ -199,7 +199,7 @@ panel_lines_weighted <- ggplot() +
 layout <- (panel_filled / panel_filled_weighted / panel_lines_weighted) |> suppressWarnings()
 
 ggsave(
-  ".images-raw/map-study-area-density-variant.png",
+  "images/dev/map-study-area-density-variant.png",
   layout,
   width = 10,
   height = 17,
@@ -207,4 +207,4 @@ ggsave(
   bg = "white"
 ) |> suppressWarnings()
 
-cat("saved .images-raw/map-study-area-density-variant.png\n")
+cat("saved images/dev/map-study-area-density-variant.png\n")

@@ -215,17 +215,24 @@ Practical consequences, and they apply to every plotting task in this repo:
   only check available, say so and flag the result as an impression, not a
   verified fix.
 
-`figures/` is the conventional destination: `figures/aep.png` for the diagram,
-`figures/node_cards/*.png` for the per-node cards, and `triage/` for the triage
-panels (which the notebooks link rather than embed).
+**`figures/` vs `images/`, split 2026-08-31.** `figures/` holds *only* what
+`index.qmd` embeds (the study-area map, the concentration figures, the
+hand-assembled AEP diagrams, plus `peng_aep_diagram.png` and
+`covidence_prisma.png`). Everything that is working material rather than a
+manuscript figure lives under `images/`: `images/node_cards/<aep_id>/*.png` and
+`images/edge_cards/<aep_id>/*.png` (the `node_cards` and `aep_edge_cards`
+targets; the target was `node_cards_compact` until this split), the
+`aep-canvas-*.png` tracing canvases, `images/manual-aeps.pptx` (the hand-drawn
+AEPs, gitignored, **do not delete**), and `triage/` for the triage panels
+(which the notebooks link rather than embed).
 
-**`figures/dev/` is where scratch renders go** (added 2026-08-10, gitignored).
-Before/after pairs for a styling change, variant sweeps, anything drawn to be
-looked at once and then thrown away. It exists because the two obvious
-alternatives are both wrong: the scratchpad is invisible to Sam, and
-`figures/` proper is where the pipeline's real artefacts live, so a comparison
-render dropped there is indistinguishable from one. Name files so the pairing
-is obvious (`before-N004.png` / `after-N004.png`) and say the path in chat.
+**`images/dev/` is where scratch renders go** (added 2026-08-10 as `figures/dev/`,
+moved 2026-08-31, gitignored). Before/after pairs for a styling change, variant
+sweeps, anything drawn to be looked at once and then thrown away. It exists
+because the two obvious alternatives are both wrong: the scratchpad is invisible
+to Sam, and `figures/` proper is where the manuscript figures live, so a
+comparison render dropped there is indistinguishable from one. Name files so the
+pairing is obvious (`before-N004.png` / `after-N004.png`) and say the path in chat.
 
 It earned its place immediately: a spacing change I had measured as real
 (5px to 12px of violin clearance) turned out to be invisible to the eye on the

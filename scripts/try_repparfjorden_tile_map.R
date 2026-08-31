@@ -2,7 +2,7 @@
 # Repparfjorden than the geom_polygon(norway_map) coastline used in
 # docs/NBXX-reparfjorden.qmd? Not wired into the pipeline. Run by hand:
 #   Rscript scripts/try_repparfjorden_tile_map.R
-# Output: figures/dev/repparfjorden-tile-map.png
+# Output: images/dev/repparfjorden-tile-map.png
 #
 # Real bug found and worked around here, not just a scripting mistake: with
 # annotation_map_tile() as the first layer and no explicit crs on coord_sf(),
@@ -150,8 +150,8 @@ p <- ggplot() +
 
 p
 
-dir.create("figures/dev", showWarnings = FALSE, recursive = TRUE)
-out_path <- sprintf("figures/dev/repparfjorden-tile-map-%s.png", tile_type)
+dir.create("images/dev", showWarnings = FALSE, recursive = TRUE)
+out_path <- sprintf("images/dev/repparfjorden-tile-map-%s.png", tile_type)
 ggsave(out_path, p, width = 8, height = 6.5, dpi = 200, bg = "white")
 
 cat("saved", out_path, "\n")

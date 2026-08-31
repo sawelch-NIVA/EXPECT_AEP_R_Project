@@ -916,8 +916,8 @@ overview_canvas <- function(
   invisible(here::here(path))
 }
 
-overview_canvas(view_canvas_rfjord, "figures/aep-canvas-repparfjord-inner.png")
-overview_canvas(view_canvas_hamm, "figures/aep-canvas-hammerfest-coastal.png")
+overview_canvas(view_canvas_rfjord, "images/aep-canvas-repparfjord-inner.png")
+overview_canvas(view_canvas_hamm, "images/aep-canvas-hammerfest-coastal.png")
 ```
 
 ```{r}
@@ -1140,7 +1140,7 @@ Y 	7859199
 # AEP report cards
 
 Every node and edge card the pipeline draws for A002, dumped here so they render
-in the document. Paths come from the `node_cards_compact` and `aep_edge_cards`
+in the document. Paths come from the `node_cards` and `aep_edge_cards`
 file targets (filtered to `/A002/`); click any card to enlarge.
 
 ## Node cards
@@ -1150,7 +1150,7 @@ file targets (filtered to `/A002/`); click any card to enlarge.
 #| output: asis
 #| warning: false
 
-node_cards <- tar_read(node_cards_compact)
+node_cards <- tar_read(node_cards)
 a002_nodes <- sort(grep("A002", node_cards, value = TRUE))
 
 cat("::: {layout-ncol=3}\n\n")

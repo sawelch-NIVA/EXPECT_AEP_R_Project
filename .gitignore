@@ -37,14 +37,14 @@ triage/
 # anything drawn to be eyeballed once and thrown away. Inside the project so
 # Sam can open them, out of git because they are not artefacts. See CLAUDE.md
 # 2.3.1.
-figures/dev/
+images/dev/
 
 # Build logs from hand-run pipeline invocations (see CLAUDE.md 2.3.1: Sam
 # cannot see anything written to a scratch directory).
 logs/
 
 # Hand-made AEPs.
-docs/manual-aeps.pptx
+images/manual-aeps.pptx
 
 # rosm/ggspatial tile cache (annotation_map_tile downloads), not an artefact
 rosm.cache/
