@@ -64,6 +64,7 @@ manifest <- tar_read(aep_manifest)
 ar <- tar_read(literature_analysis_ready)
 thr <- tar_read(copper_toxicity_thresholds)
 
+a001 <- manifest |> filter(aep_id == "A001")
 a002 <- manifest |> filter(aep_id == "A002")
 study_box <- manifest |> filter(aep_id %in% c("A001", "A002"))
 red <- "#b23b3b"
@@ -248,7 +249,9 @@ oil_fill <- scales::alpha("#e0a030", 0.22)
 
 # Kommune polygons (pre-baked from csmaps b2024; csmaps segfaults under Rscript).
 # The gpkg ships with no CRS; its coordinates are plain WGS84 lon/lat.
-kommuner <- sf::read_sf(here::here("data/clean/spatial/finnmark_kommuner.gpkg")) |>
+kommuner <- sf::read_sf(here::here(
+  "data/clean/spatial/finnmark_kommuner.gpkg"
+)) |>
   st_set_crs(4326)
 hammerfest_k <- kommuner |> filter(is_hammerfest)
 
@@ -279,7 +282,8 @@ towns_xy <- cbind(towns, st_coordinates(towns_sf)) # X / Y in EPSG:3857
 # wrong.
 xy4326 <- function(lon, lat) {
   as.data.frame(st_coordinates(st_transform(
-    st_sfc(st_point(c(lon, lat)), crs = 4326), 3857
+    st_sfc(st_point(c(lon, lat)), crs = 4326),
+    3857
   )))
 }
 rfjord_xy <- xy4326(24.10, 70.53)
@@ -293,15 +297,29 @@ country_labels <- tibble::tibble(
 )
 
 # --- extents ---------------------------------------------------------
-box_a002 <- st_as_sfc(st_bbox(
-  c(
-    xmin = a002$lon_min,
-    ymin = a002$lat_min,
-    xmax = a002$lon_max,
-    ymax = a002$lat_max
-  ),
-  crs = st_crs(4326)
-))
+# The two AEP bounding boxes, straight from aep_manifest.csv, drawn on the
+# concentration figure's panel a so the reader sees the actual scoped extents.
+manifest_box <- function(row) {
+  st_as_sfc(st_bbox(
+    c(
+      xmin = row$lon_min,
+      ymin = row$lat_min,
+      xmax = row$lon_max,
+      ymax = row$lat_max
+    ),
+    crs = st_crs(4326)
+  ))
+}
+box_a001 <- manifest_box(a001)
+box_a002 <- manifest_box(a002)
+aep_box_labels <- st_sf(
+  label = c("AEP-001", "AEP-002"),
+  geometry = st_sfc(
+    st_point(c(a001$lon_min + 0.015, a001$lat_max - 0.018)),
+    st_point(c(a002$lon_min + 0.010, a002$lat_max - 0.012)),
+    crs = 4326
+  )
+)
 box_study <- st_as_sfc(st_bbox(
   c(
     xmin = min(study_box$lon_min),
@@ -314,10 +332,13 @@ box_study <- st_as_sfc(st_bbox(
 view_norway <- c(xmin = 4, xmax = 31.5, ymin = 57.5, ymax = 71.5) # fig1 a (mainland)
 view_hamm <- c(xmin = 20.6, xmax = 24.6, ymin = 70.28, ymax = 71.6) # fig1 b (+ oil fields)
 view_zoom <- c(xmin = 23.52, xmax = 24.40, ymin = 70.43, ymax = 70.77) # fig1 c
-view_b <- c(xmin = 23.45, xmax = 24.52, ymin = 70.34, ymax = 70.73) # fig2 a
+view_b <- c(xmin = 23.33, xmax = 24.52, ymin = 70.34, ymax = 70.82) # fig2 a (contains both AEP boxes)
 view_c <- c(xmin = 24.20, xmax = 24.39, ymin = 70.430, ymax = 70.490) # fig2 b
 box_c <- st_transform(st_as_sfc(st_bbox(view_c, crs = st_crs(4326))), 3857)
-box_zoom <- st_transform(st_as_sfc(st_bbox(view_zoom, crs = st_crs(4326))), 3857)
+box_zoom <- st_transform(
+  st_as_sfc(st_bbox(view_zoom, crs = st_crs(4326))),
+  3857
+)
 arctic_circle <- create_arctic_circle(lon_range = c(4, 31.5), lat = 66.5622)
 
 # Bare basemap canvases for hand-tracing AEP node/edge layouts (grey topo, no
@@ -490,7 +511,7 @@ tile_panel <- function(
           list(
             shape = c(8, 21, 15, 21),
             fill = c(NA, aqua_fill, NA, oil_fill),
-            size = c(2.8, 2.6, 2.6, 3),
+            size = c(2.8, 2.8, 2.6, 3),
             linewidth = 0
           )
       )
@@ -595,8 +616,13 @@ panel_a <- ggplot() +
   ) +
   annotate(
     "text",
-    x = 5, y = 67.1, label = "Arctic Circle",
-    colour = red, size = 2.2, fontface = "italic", hjust = 0
+    x = 5,
+    y = 67.1,
+    label = "Arctic Circle",
+    colour = red,
+    size = 2.2,
+    fontface = "italic",
+    hjust = 0
   ) +
   coord_sf(
     xlim = view_norway[c("xmin", "xmax")],
@@ -622,50 +648,77 @@ panel_b <- ggplot() +
     colour = "grey65",
     linewidth = 0.2
   ) +
-  geom_sf(data = oil_circ, fill = oil_fill, colour = "#a5761b", linewidth = 0.5) +
+  geom_sf(
+    data = oil_circ,
+    fill = oil_fill,
+    colour = "#a5761b",
+    linewidth = 0.5
+  ) +
   geom_sf(data = box_zoom, fill = NA, colour = red, linewidth = 0.7) +
   geom_sf_text(
     data = oil_lab[oil_lab$name == "Snøhvit", ],
     aes(label = name),
-    colour = "#7a5510", fontface = "bold", size = 2.6
+    colour = "#7a5510",
+    fontface = "bold",
+    size = 2.6
   ) +
   geom_sf_text(
     data = oil_lab[oil_lab$name == "Goliat", ],
     aes(label = name),
-    colour = "#7a5510", fontface = "bold", size = 2.6, nudge_y = 9500
+    colour = "#7a5510",
+    fontface = "bold",
+    size = 2.6,
+    nudge_y = 9500
   ) +
   geom_shadowtext(
     data = norsea_xy,
     aes(X, Y, label = "Norwegian Sea"),
-    bg.colour = "white", colour = "#5a7f96",
-    fontface = "italic", size = 3.3
+    bg.colour = "white",
+    colour = "#5a7f96",
+    fontface = "italic",
+    size = 3.3
   ) +
   geom_point(data = towns_xy, aes(X, Y), colour = "black", size = 1.4) +
   geom_shadowtext(
     data = towns_xy,
     aes(X, Y, label = name, fontface = ifelse(focus, "bold", "plain")),
-    bg.colour = "white", colour = "black", size = 2.5,
-    hjust = 0, nudge_x = 1500
+    bg.colour = "white",
+    colour = "black",
+    size = 2.5,
+    hjust = 0,
+    nudge_x = 1500
   ) +
   geom_shadowtext(
     data = rfjord_xy,
     aes(X, Y, label = "Repparfjord"),
-    bg.colour = "white", colour = "#1c3d57",
-    fontface = "italic", size = 2.8
+    bg.colour = "white",
+    colour = "#1c3d57",
+    fontface = "italic",
+    size = 2.8
   ) +
   ggspatial::annotation_scale(
-    location = "bl", width_hint = 0.28, height = unit(0.15, "cm"),
-    text_cex = 0.55, line_width = 0.6,
-    pad_x = unit(0.2, "cm"), pad_y = unit(0.2, "cm")
+    location = "bl",
+    width_hint = 0.28,
+    height = unit(0.15, "cm"),
+    text_cex = 0.55,
+    line_width = 0.6,
+    pad_x = unit(0.2, "cm"),
+    pad_y = unit(0.2, "cm")
   ) +
   ggspatial::annotation_north_arrow(
-    location = "tr", height = unit(0.7, "cm"), width = unit(0.6, "cm"),
+    location = "tr",
+    height = unit(0.7, "cm"),
+    width = unit(0.6, "cm"),
     style = ggspatial::north_arrow_minimal(),
-    pad_x = unit(0.15, "cm"), pad_y = unit(0.15, "cm")
+    pad_x = unit(0.15, "cm"),
+    pad_y = unit(0.15, "cm")
   ) +
   coord_sf(
-    crs = 3857, xlim = lim_b$x, ylim = lim_b$y,
-    expand = FALSE, datum = st_crs(4326)
+    crs = 3857,
+    xlim = lim_b$x,
+    ylim = lim_b$y,
+    expand = FALSE,
+    datum = st_crs(4326)
   ) +
   loc_theme +
   labs(
@@ -793,13 +846,20 @@ fig_study_area
 # node/edge layout over the actual pollution-source geography. Run on demand
 # (eval: false) -- a cold tile fetch for the coastal view is ~30 s. Writes
 # straight to figures/; not a document figure.
-overview_canvas <- function(view, path, layer = "kv_graa",
-                            width = 30, height = 20, dpi = 150) {
+overview_canvas <- function(
+  view,
+  path,
+  layer = "kv_graa",
+  width = 30,
+  height = 20,
+  dpi = 150
+) {
   # Pad the short axis in web-mercator so the tile window matches the PNG's
   # width:height, otherwise coord_sf letterboxes and a traced overlay won't line
   # up. Then hand osm.image a lon/lat bbox (its input CRS is WGS84).
   bb <- st_bbox(st_transform(
-    st_as_sfc(st_bbox(view, crs = st_crs(4326))), 3857
+    st_as_sfc(st_bbox(view, crs = st_crs(4326))),
+    3857
   ))
   target <- width / height
   w <- as.numeric(bb["xmax"] - bb["xmin"])
@@ -816,14 +876,25 @@ overview_canvas <- function(view, path, layer = "kv_graa",
   ll <- st_bbox(st_transform(st_as_sfc(bb), 4326))
   m <- matrix(
     c(ll["xmin"], ll["xmax"], ll["ymin"], ll["ymax"]),
-    nrow = 2, byrow = TRUE,
+    nrow = 2,
+    byrow = TRUE,
     dimnames = list(c("x", "y"), c("min", "max"))
   )
-  img <- rosm::osm.image(m, type = layer, zoomin = 1, quiet = TRUE, progress = "none")
+  img <- rosm::osm.image(
+    m,
+    type = layer,
+    zoomin = 1,
+    quiet = TRUE,
+    progress = "none"
+  )
   bx <- attr(img, "bbox")
   p <- ggplot() +
     annotation_raster(
-      img, bx["x", "min"], bx["x", "max"], bx["y", "min"], bx["y", "max"],
+      img,
+      bx["x", "min"],
+      bx["x", "max"],
+      bx["y", "min"],
+      bx["y", "max"],
       interpolate = TRUE
     ) +
     coord_sf(
@@ -834,7 +905,14 @@ overview_canvas <- function(view, path, layer = "kv_graa",
     ) +
     theme_void() +
     theme(plot.margin = margin(0, 0, 0, 0))
-  ggsave(here::here(path), p, width = width, height = height, dpi = dpi, bg = "white")
+  ggsave(
+    here::here(path),
+    p,
+    width = width,
+    height = height,
+    dpi = dpi,
+    bg = "white"
+  )
   invisible(here::here(path))
 }
 
@@ -844,7 +922,7 @@ overview_canvas(view_canvas_hamm, "figures/aep-canvas-hammerfest-coastal.png")
 
 ```{r}
 #| label: fig-repparfjorden-conc
-#| fig-cap: "Copper concentration data across the two AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box is the extent of panel (b). (b) The inner fjord (AEP-002). Sampling sites: shape = lumped sample group, fill = worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) any of that site's copper measurements reach; biota carry no M-608 ladder so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Orange circle: historic Folldal Verk tailings disposal area. Black square: Ulveryggen plant. Basemap: Kartverket topografisk gråtone."
+#| fig-cap: "Copper concentration data across the two AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the two red boxes are the AEP-001 (Hammerfest coastal) and AEP-002 (Repparfjord inner) bounding boxes from aep_manifest.csv, the grey dashed box is the extent of panel (b). (b) The inner fjord, a zoom inside AEP-002. Sampling sites: shape = lumped sample group, fill = worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) any of that site's copper measurements reach; biota carry no M-608 ladder so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Orange circle: historic Folldal Verk tailings disposal area. Black square: Ulveryggen plant. Basemap: Kartverket topografisk gråtone."
 #| fig-width: 13
 #| fig-height: 6.6
 #| column: page
@@ -881,7 +959,26 @@ panel_conc_a <- tile_panel(
     )
   ),
   extra = list(
-    geom_sf(data = box_c, fill = NA, colour = red, linewidth = 0.8),
+    # AEP bounding boxes (aep_manifest.csv), the scoped extents used throughout.
+    geom_sf(data = box_a001, fill = NA, colour = red, linewidth = 0.8),
+    geom_sf(data = box_a002, fill = NA, colour = red, linewidth = 0.8),
+    geom_sf_text(
+      data = aep_box_labels,
+      aes(label = label),
+      colour = red,
+      fontface = "bold",
+      size = 2.7,
+      hjust = 0,
+      vjust = 1
+    ),
+    # Panel b covers the inner-fjord zoom (grey dashed), which sits inside A002.
+    geom_sf(
+      data = box_c,
+      fill = NA,
+      colour = "grey30",
+      linewidth = 0.5,
+      linetype = "22"
+    ),
     geom_sf(
       data = prtr_sites,
       aes(colour = "PRTR facility"),

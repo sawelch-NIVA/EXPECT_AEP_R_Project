@@ -1021,6 +1021,33 @@ list(
     }
   ),
 
+  ### # Vannmiljø dataset summary (manuscript Methods) ----
+  # Descriptive summary of the Vannmiljø contribution for index.qmd's
+  # "Materials & Methods > Vannmiljø" section. Nothing downstream depends on
+  # these; they exist as targets (not a script like summarise_ssb_employment.R)
+  # because they read pipeline data and render_index picks up the dependency
+  # from the tar_read() calls in the notebook (CLAUDE.md 4.4.2). See
+  # R/fct_vm_summary.R.
+  tar_target(
+    name = vm_dataset_summary,
+    command = summarise_vm_dataset(load_literature_pqt)
+  ),
+  # Cleaning funnel: row count after each Vannmiljø filter step. Fed the
+  # intermediate vm_* targets rather than the joined data, so it lives in its
+  # own target. Rendered into the SI / NB02, referenced from the manuscript.
+  tar_target(
+    name = vm_cleaning_funnel_table,
+    command = vm_cleaning_funnel(c(
+      raw = nrow(vm_raw_copper),
+      compartments = nrow(vm_filtered_compartments),
+      sites = nrow(vm_filtered_sites),
+      dates = nrow(vm_filtered_dates),
+      compartment_conflicts = nrow(vm_compartment_conflicts_resolved_removed),
+      geographic_conflicts = nrow(vm_compartment_geo_conflicts_resolved_removed),
+      analysis = nrow(vm_sites_split_clean)
+    ))
+  ),
+
   ### # Unit corrections ----
   # PLAN.md 9b. Overriding measured values that arrived wrong from the source,
   # from a hand-edited CSV. The pipeline reads it and never writes it, same
@@ -1546,6 +1573,58 @@ list(
   tar_target(
     name = reach_external_series_data,
     command = reach_external_series(reach_node_sectors_data)
+  ),
+
+  ### # PRTR & REACH: Hammerfest manuscript figure ----
+  # index.qmd's "Norwegian PRTR and REACH Product Register" section. One
+  # two-panel figure: (a) REACH net copper (tonnes in COMMERCE) scaled to
+  # Hammerfest by employment share, (b) PRTR copper RELEASED (kg). Different
+  # quantities, one figure. See R/fct_reach_hammerfest.R,
+  # R/fct_prtr_hammerfest.R, R/fct_hammerfest_emissions.R.
+  #
+  # This partly un-parks the emissions work (PLAN.md 10). Only these
+  # descriptive figures; the WoE assessments and source-node values stay
+  # hand-transcribed.
+  #
+  # ssb_employment_hammerfest_sections.csv is written by
+  # scripts/summarise_ssb_employment.R, NOT the pipeline (SSB is script-only,
+  # same contract as summarise_prtr_emissions.R). Re-run that script before
+  # tar_make if the SSB figures move; the format = "file" target below will
+  # then invalidate the weighting.
+  tar_target(
+    name = ssb_employment_sections_file,
+    command = here_rel("data/clean/derived/ssb_employment_hammerfest_sections.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = ssb_employment_sections,
+    command = read_ssb_section_shares(ssb_employment_sections_file)
+  ),
+  tar_target(
+    name = reach_hammerfest_weighted,
+    command = weight_reach_to_hammerfest(reach_sector_years, ssb_employment_sections)
+  ),
+  tar_target(
+    name = prtr_emissions_dir,
+    command = here_rel("inst/extdata/emissions"),
+    format = "file"
+  ),
+  tar_target(
+    name = prtr_long,
+    command = read_prtr_long(dir = prtr_emissions_dir)
+  ),
+  tar_target(
+    name = prtr_hammerfest_series_data,
+    command = prtr_hammerfest_series(prtr_long)
+  ),
+  tar_target(
+    name = hammerfest_emissions_plot,
+    command = write_hammerfest_emissions_panel(
+      reach_hammerfest_weighted,
+      prtr_hammerfest_series_data,
+      here_rel("figures/hammerfest_emissions.png")
+    ),
+    format = "file"
   ),
 
   ### # Node report cards ----

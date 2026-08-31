@@ -59,29 +59,62 @@ The conceptual papers describing the AEP [@teeguardenCompletingLinkExposure2016,
 
 ## Study Area
 
-Hammerfest is a kommune (municipality) and town in Finnmark, Norway's northernmost county. The area is a dense archipelago of islands and peninsulas riven with fjords and valleys. To the north-east the kommune opens into the Norwegian Barents sea, which supports both a thriving fishing industry and multiple oil and gas wells. To the south-west, the kommune encompasses an area of the mainland which includes the Nussir mountain and Repparfjord [@dalfestHammerfest2026]. Hammerfest has a population of 11,000 (2026), many of whom are employed in extractive industries: in 2025, of 6160 employed persons, 556 worked in oil and gas (10%), 279 in fishing and aquaculture (5%), 12 + 86 in mining and mining support (2%), and 54 (\<1%) in waste management [@statisticsnorway08536EmployedPersons2026] (todo: this is for the town? what about the kommune? worth going detailed, I think I want to use this data for weighting PR data later).. Hammerfest's importance as an oil and gas hub comes from its status as a processing hub for raw resources extracted from the Snøhvit fields. Potential point sources of pollution include the Liquid Natural Gas plant (linked to the oil feels by pipeline) on the island of Melkøya, north-east of the city, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), the city's Wastewater Treatment Plant, and Hammerfest airport.
+Hammerfest is a kommune (municipality) and town in Finnmark, Norway's northernmost county. The area is a dense archipelago of islands and peninsulas riven with fjords and valleys. To the north-east the kommune opens into the Norwegian Barents sea, which supports both a thriving fishing industry and multiple oil and gas wells. To the south-west, the kommune encompasses an area of the mainland which includes the Nussir mountain and Repparfjord [@dalfestHammerfest2026]. Hammerfest kommune has a population of 11,000 (2026), of which 8,010 live in the town itself (cite), many of whom are employed in natural resource-based industries (@tbl-hammerfest-employment).
+
+```{r}
+#| label: tbl-hammerfest-employment
+#| tbl-cap: "Register-based employment (employed persons, 4th quarter 2025, by place of residence) in Hammerfest kommune and Norway, for Cu pollution-relevant industries. NACE 2007 (SN2007) codes summed for each row are shown in parentheses; percentages in the Norway and Hammerfest columns are of that area's all-industry total. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]. SSB replaces cell values of 1 and 2 with 0 or 3 to protect confidentiality, so the smaller Hammerfest counts and their sums are approximate."
+#| echo: false
+emp <- read_csv("data/clean/derived/ssb_employment_hammerfest.csv", show_col_types = FALSE)
+
+fmt_n <- function(n) formatC(n, format = "d", big.mark = ",")
+emp |>
+  transmute(
+    Sector = paste0(sector, " (", nace_codes_display, ")"),
+    `Employees by sector (Norway)` = if_else(
+      is.na(norway_pct_of_total), fmt_n(norway),
+      paste0(fmt_n(norway), " (", formatC(norway_pct_of_total, format = "f", digits = 1), "%)")
+    ),
+    `Employees by sector (Hammerfest)` = if_else(
+      is.na(hammerfest_pct_of_total), fmt_n(hammerfest),
+      paste0(fmt_n(hammerfest), " (", formatC(hammerfest_pct_of_total, format = "f", digits = 1), "%)")
+    ),
+    `Hammerfest share of national` = paste0(
+      formatC(hammerfest_share_of_national_pct, format = "f", digits = 2), "%"
+    )
+  ) |>
+  knitr::kable(align = c("l", "r", "r", "r"))
+```
+
+<!-- todo (SW): worth going detailed here; want to use this table for weighting national product-register data later. The figures are for Hammerfest kommune (Region K.5603), not just the town. -->
+
+Hammerfest's importance as an oil and gas hub comes from its status as a processing hub for raw resources extracted from the Snøhvit fields. Potential point sources of pollution include the Liquid Natural Gas plant (linked to the oil feels by pipeline) on the island of Melkøya, north-east of the city, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), the city's Wastewater Treatment Plant, and Hammerfest airport.
 
 ![Study area. (a) The Hammerfest / Repparfjorden region in western Finnmark: kommune boundaries (`csmaps`, 2024 division), Hammerfest kommune shaded, the red box the combined extent of the two Hammerfest-area AEPs. (b) The Hammerfest coastal system on Kartverket's colour topographic base map, showing reported point-source (PRTR) facilities (black stars), licensed aquaculture locations (blue circles), the Ulveryggen processing plant (black square), the historic (1970s Folldal Verk) submarine tailings disposal area (orange circle), and the Snøhvit and Goliat oil/gas fields (amber circles, sized to their footprints). Feature coordinates are approximate.](figures/fig-study-area.png){#fig-repparfjorden-locator}
+
+TODO: Diff colours for oil fields, elevate Goliat label more, move top border of b) just a little bit higher to avoid clipping Snøhvit.
+
+- TODO: Ecology, including nature protection areas. Repparfjord is an important salmon fjord, as is its parent river
 
 ## Lines of Evidence
 
 Multiple lines of evidence were gathered in order to construct AEPs. Key lines and their characteristics are summarised below (tbl-lines-of-evidence)
 
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Line of Evidence             | Data Type                                           | AEP Class                     | Notes                                                                                                                                                                                                                                   |
-+==============================+=====================================================+===============================+=========================================================================================================================================================================================================================================+
-| Systematic Literature Review | Exposure (concentrations)                           | Matrix KES, Tissue KES        | Big dataset, hence many sub-notebooks                                                                                                                                                                                                   |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| *Ad hoc* literature          | Exposure (concentrations), Mass Balance (mass/time) | Matrix KES, Tissue KES, more? | Used to gap-fill AEPs where KES/KTR were suspected but no relevant evidence was found in existing lines of evidence                                                                                                                     |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Vannmiljø Database           | Exposure (concentrations)                           | Matrix KES, Tissue KES        | Folded into SLR, as data of same type.                                                                                                                                                                                                  |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Copper Emissions             | Emissions (mass/time)                               | Emissions Edge                | Data resolution/quality generally lower than matrix concentrations                                                                                                                                                                      |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Copper PRTR                  | Mass Balance (mass/time)                            | Source Node                   | As above                                                                                                                                                                                                                                |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Aquaculture Registry         | Facility location and size                          | Source Node                   | Variation in size units make comparison difficult. No direct evidence of copper emission from aquaculture, but co-location of aquaculture facilities and data from aquaculture monitoring campaigns considered as evidence of pollution |
-+------------------------------+-----------------------------------------------------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Line of Evidence             | Data Type                                           | Coverage | AEP Class                     | Notes                                                                                                                                                                                                                                   |
++==============================+=====================================================+==========+===============================+=========================================================================================================================================================================================================================================+
+| Systematic Literature Review | Exposure (concentrations)                           |          | Matrix KES, Tissue KES        | Big dataset, hence many sub-notebooks                                                                                                                                                                                                   |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| *Ad hoc* literature          | Exposure (concentrations), Mass Balance (mass/time) |          | Matrix KES, Tissue KES, more? | Used to gap-fill AEPs where KES/KTR were suspected but no relevant evidence was found in existing lines of evidence                                                                                                                     |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Vannmiljø Database           | Exposure (concentrations)                           |          | Matrix KES, Tissue KES        | Folded into SLR, as data of same type.                                                                                                                                                                                                  |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Copper Emissions             | Emissions (mass/time)                               |          | Emissions Edge                | Data resolution/quality generally lower than matrix concentrations                                                                                                                                                                      |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Copper PRTR                  | Mass Balance (mass/time)                            |          | Source Node                   | As above                                                                                                                                                                                                                                |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Aquaculture Registry         | Facility location and size                          |          | Source Node                   | Variation in size units make comparison difficult. No direct evidence of copper emission from aquaculture, but co-location of aquaculture facilities and data from aquaculture monitoring campaigns considered as evidence of pollution |
++------------------------------+-----------------------------------------------------+----------+-------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 : lines of evidence
 
@@ -106,8 +139,6 @@ AND (aqua* OR water* OR marine OR river OR lake OR fjord OR estuary OR sea OR oc
 Web of Science returned 478 hits. PubMed returned 438 hits.
 
 #### Inclusion, Exclusion, Deduplication and Screening
-
-**Text on explicit inclusion criteria/study area will go here.**
 
 Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers.
 
@@ -147,31 +178,87 @@ Of the 916 imported papers, 116 duplicates were removed, 540 studies marked as i
 
 ### *Ad hoc* literature
 
-Where data gaps were identified, or where relevant lines of evidence were suspected or known to exist but were not captured by the
+Where data gaps were identified, or where relevant lines of evidence were suspected or known to exist but were not captured by the existing data set, ad hoc searches were performed to locate potentially relevant literature. The following pieces of evidence were captured by ad hoc searches:
+
++------------------------+------------------------------------------------------------------------------------------------+-----------+
+| Col1                   | Col2                                                                                           | Col3      |
++========================+================================================================================================+===========+
+| Stearnal et al. (2017) | Sediment cores and historical reconstruction of sediment contamination patterns in Repparfjord |           |
++------------------------+------------------------------------------------------------------------------------------------+-----------+
+| Kogel et al (2016)     |                                                                                                |           |
++------------------------+------------------------------------------------------------------------------------------------+-----------+
+|                        |                                                                                                |           |
++------------------------+------------------------------------------------------------------------------------------------+-----------+
 
 ### Vannmiljø
 
-<!-- TODO: vannmiljø  - how many rows, etc? -->
-
 In addition, data were extracted from the Norwegian Environmental Ministry (Miljødirektoratet, MD) database Vannmiljø ("Aquatic Environment", Vm) based on the following search criteria:
 
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Norwegian Term  | English Translation  | Selected Options                                     | Comments   |
-+=================+======================+======================================================+============+
-| Nedlastingsdato | Download Date        | 2025-12-05                                           |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Datoperiode     | Date Period          | 2025-01-01 to 2025-12-05                             |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Kommune         | Municipality         | All municipalities                                   |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Medium          | Medium/Matrix        | All media                                            |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Kampanje        | Campaign             | All campaigns                                        |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
-| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) |            |
-+-----------------+----------------------+------------------------------------------------------+------------+
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Norwegian Term  | English Translation  | Selected Options                                     | Comments                                       |
++=================+======================+======================================================+================================================+
+| Nedlastingsdato | Download Date        | 2025-12-05                                           |                                                |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Datoperiode     | Date Period          | 2010-01-01 to 2025-12-05                             |                                                |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Kommune         | Municipality         | All municipalities                                   |                                                |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Medium          | Medium/Matrix        | All media                                            |                                                |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Kampanje        | Campaign             | All campaigns                                        |                                                |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+| Stressorer      | Stressors/Parameters | Kobber (Copper) & Kobberpyrition (Copper pyrithione) | No hits for *Copper pyrithione* in output data |
++-----------------+----------------------+------------------------------------------------------+------------------------------------------------+
+
+: table of Vannmiljø search terms. How many raw hits?
+
+- 138,615 rows of copper concentrations
+
+- 30,541 rows of sites
+
+- plus tables of methods, units, media, campaigns
 
 Extracted data were processed and converted to the eData format (see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd)), and validated against the format. Data from Vm covers a variety of monitoring campaigns conducted by a variety of contractors and sub-contractors across Norwegian territory. Metadata on the campaign goal (for example, monitoring reference rivers, or sites known to be contaminated) was retained and is used as a grouping variable in downstream analysis in order to understand observed variation.
+
+```{r}
+#| label: vm-summary-load
+#| include: false
+# Defined here, before the inline `r vm_val(...)` calls in the next paragraph;
+# tbl-vm-dataset below redefines these harmlessly.
+vm_sum <- tar_read(vm_dataset_summary)
+vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
+```
+
+After cleaning, the Vannmiljø extract contributes **`r vm_val("Measurements")`** copper measurements (`r vm_val("Rows")` records) from **`r vm_val("Sampling sites")`** sampling sites across **`r vm_val("Monitoring campaigns")`** monitoring campaigns, sampled over `r vm_val("Sampling period")`. `r vm_val("Censored (< LOD / < LOQ)")` were reported below a detection or quantification limit and substituted at that limit divided by $\sqrt{2}$. The record is dominated by freshwater and sediment, with marine water and biota contributing under a fifth between them (@tbl-vm-dataset). The rows removed at each cleaning step are reported in the Supplementary Information.
+
+```{r}
+#| label: tbl-vm-dataset
+#| tbl-cap: "Composition of the cleaned Vannmiljø copper dataset by environmental compartment. Measurements are the sum of `MEASURED_N`; the record count is given alongside because one Vannmiljø record is one measurement. Site counts do not sum to the total because a site may host more than one compartment. Aquatic biota span 72 species across fish, molluscs, crustaceans, birds and algae; see [NB02-vannmiljø](docs/NB02-vannmiljo.qmd) for the campaign, method and per-species breakdown."
+#| echo: false
+vm_sum <- tar_read(vm_dataset_summary)
+vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
+
+vm_sum$composition |>
+  dplyr::transmute(
+    Compartment = subcompartment,
+    Matrix = as.character(matrix),
+    Measurements = measurements,
+    Records = rows,
+    Sites = sites
+  ) |>
+  dplyr::bind_rows(dplyr::tibble(
+    Compartment = "Total", Matrix = "",
+    Measurements = vm_sum$totals$measurements,
+    Records = vm_sum$totals$rows,
+    Sites = vm_sum$totals$sites
+  )) |>
+  dplyr::mutate(dplyr::across(
+    c(Measurements, Records, Sites),
+    ~ formatC(.x, format = "d", big.mark = ",")
+  )) |>
+    rename(`Matrix (Vm)` = Matrix) |>
+  knitr::kable(align = c("l", "l", "r", "r", "r"))
+```
 
 ### Exposure Data Post-Processing
 
@@ -185,7 +272,7 @@ For each sample grouping, sample size, mean, median, standard deviation, number 
 
 In these cases,
 
-- Outliers were visually inspected by constructing heatmaps
+- Outliers were visually inspected by constructing distributions/heatmaps
 - Metadata and comments were reviewed
 - Unless there was a convincing argument not to, outliers were removed
 - We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons
@@ -196,9 +283,37 @@ The Norwegian Product Release and Transfer Register (PRTR) is a repository for s
 
 Concurrently, the Norwegian Environmental Agency (EA) maintains a Product Register (REACH PR) under the REACH and CLP directives [@norwegianenvironmentagencyProductRegisterDeclaration2024]. Imports and exports of hazardous substances (including copper) are self-reported to the EA by firms. As this information is considered commercially sensitive, it is not openly available. However, the EA make available on request an aggregated version where imports and exports are reported by industry sector and/or product type. By subtracting exported copper from imported copper values, a mass-balance estimate of embedded copper in Norway can be calculated per sector or per product.
 
-Data from these registers were assessed following the weight of evidence framework below. Mass and transfer rates were graphed per industry and per licensed facility, and a mean value per year calculated. Because REACH PR data is only available at the national level, thes were weighted by... I wonder if we could weight not by % of Norway's population in Hammerfest, but % of Norwegian population
+Data from these registers were assessed following the weight of evidence framework below, and are included as source KES (REACH PR) and KTR (PRTR).
 
-are included as source KES (REACH PR) and KTR (PRTR)
+![**(a)** REACH product register net copper (imported plus produced, minus exported) scaled to Hammerfest by each NACE section's share of Hammerfest-resident employment; complete reporting years only (2018-2021); sectors above 1 kg/yr implied; log scale. **(b)** Copper released to air and water by PRTR-licensed facilities in Hammerfest kommune, by facility; reported zeros omitted (log scale). Panel a is copper in commerce (tonnes-scale), panel b is copper released (kg); the two are not comparable. Regenerate with `tar_make(hammerfest_emissions_plot)`.](figures/hammerfest_emissions.png){#fig-hammerfest-emissions}
+
+TODO: Wrap legend text, move to bottom?
+
+TODO: NACE Codes?
+
+#### WWTP
+
+- 2014 - untreated WW direct to water (<https://www.ifinnmark.no/nyheter/fylkesmannen-har-godkjent-nytt-renseanlegg/s/1-47-7687993>)
+
+- 2016 - Rossmolla WWTP online. Primary treatment, outflow at 50-60m depth in Sorøysundet
+
+- However, frequent issues with monitoring and compliance
+
+- Norske Utslipp entry (<https://www.norskeutslipp.no/no/Diverse/Virksomhet/?CompanyID=31924>)
+
+<!-- -->
+
+- Hammerfest has a WWTP, but it doesn't report emissions
+
+  - (it does have a few available PDFs reporting that they're not doing their jobs properly, but useful details are hard to acquire)
+
+- I don't believe there's any treatment currently, the plant *may* be being upgraded, but I'm not sure. anyway, it's copper, so it seems reasonable to assume that it's all reaching the environment
+
+- At the national level, SSB reports an emission of roughly 10,000 kg copper per year for the whole country (<https://www.ssb.no/en/statbank/table/07081>)
+
+- We can weight this by population proportion in Hammerfest again
+
+There are 18 Hammerfest-based facilities identified on Norske utslipp, but only those in the graph above actually report copper emissions.
 
 ### Weight of Evidence Assessment
 
@@ -246,7 +361,7 @@ NB: Peng et al. concern themselves with the EPEQ of *relationships* between node
 
 ### AEP Construction
 
-An AEP was constructed using all available data for the study area (AEP-001). Several sub-AEPs [@tbl-aeps] were constructed to depict pollution exposure in specific geographical areas (AEP-002, AEP-003), or to specific organisms/tissues of interest (AEP-004, -005, -006). Specific sites (Repparfjorden and Sørfjorden) were selected as areas in Norway with known heavy metal contamination due to mining and industry. *Gadus morhua*, *Mytilus edulis*, and Macroalgae were selected due to their high degree of representation across lines of evidence.
+Based on exploration of copper pollution sources and dynamics in the study area, the decision was made to construct two AEPs: one representing the inner-Repparfjord submarine tailing disposal area, and another the Hammerfest coastal area [@tbl-aeps].
 
 ```{r}
 #| label: tbl-aeps
@@ -258,13 +373,14 @@ table <- read_csv("data/clean/aep/aep_manifest.csv")
 table |> select(label, scope_note) |> knitr::kable()
 ```
 
+For each AEP, nodes were selected based on both empirical and putative sources, receiving matrices, and sensitive organisms in the study area. Where relevant sampling group(s) were available, these were filtered to the site bounding box, and summary statistics calculated for group members in the relevant geographical area.
+
 How were AEPs constructed:
 
 1.  Review groups where n \>= 100, generate nodes
 2.  Where appropriate (due to sample sizes, ecological/matrix similarity, etc.), put multiple groups into one node
-3.  Assemble a "whole-system" AEP from all avaialable nodes (from above)
-4.  For AEPs 2-3, build a subset of AEP 1 based on known sources and evidence in the given areas.
-5.  For 4-6, start with a known MIE locations (from other papers) and work backwards based on AEP 1 & 2.
+3.  Assemble a "whole-system" AEP from all available nodes (from above)
+4.  
 
 Nodes are based on available evidence. What counts as a node is slightly arbitrary - depending on what data we have and what makes sense, we may use coarser or finer resolution.
 
@@ -276,17 +392,15 @@ TODO: Proref for biota
 
 ![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig-repparfjorden-conc.png){#fig-repparfjorden-conc}
 
-*Below table is obviously very big. Can be split into biota and non-biota? Or could summarise again? Also, do we need to add/remove any checks, e.g. AIC of normal vs. log-normal distributions*
-
 ## Group Summary Statistics
-
-TODO: Table per AEP
 
 <!-- TODO: n thresholds for Hartigans. Also dynamic update group/sample n slice reporting-->
 
 <!-- TODO: Add cumulative proportion to this v of table, use that for filtering rather than n-->
 
-@tbl-groups-summary displays all sample groups where $n \ge 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped
+@tbl-groups-summary displays all sample groups where $n \ge 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped data points.
+
+**Question: Since we're reducing the geographical scope to Repparfjorden, does it make sense to include a big table of all the groups. It *was* used quite heavily in the process of exploring and assessing individual group data, but it may raise more questions than it answers.**
 
 ```{r}
 #| label: tbl-groups-summary
@@ -300,6 +414,60 @@ tar_read(sample_groups_table) |>
   sample_groups_flextable()
 ```
 
+@tbl-groups-a001 and @tbl-groups-a002 give the same summary restricted to sample groups with at least one measurement inside each AEP's bounding box (no $n$ threshold). Aggregation is re-run on the bounded rows only, so the statistics differ from the national table; the group `ID` and the `Dropped` percentage stay at their national values.
+
+```{r}
+#| label: tbl-groups-a001
+#| tbl-cap: "Sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N)."
+#| warning: false
+a001_box <- tar_read(aep_manifest) |> filter(aep_id == "A001")
+tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE), !is.na(LATITUDE),
+    LONGITUDE >= a001_box$lon_min, LONGITUDE <= a001_box$lon_max,
+    LATITUDE >= a001_box$lat_min, LATITUDE <= a001_box$lat_max
+  ) |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(ids = tar_read(group_ids)) |>
+  sample_groups_flextable()
+```
+
+```{r}
+#| label: tbl-groups-a002
+#| tbl-cap: "Sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N)."
+#| warning: false
+a002_box <- tar_read(aep_manifest) |> filter(aep_id == "A002")
+tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE), !is.na(LATITUDE),
+    LONGITUDE >= a002_box$lon_min, LONGITUDE <= a002_box$lon_max,
+    LATITUDE >= a002_box$lat_min, LATITUDE <= a002_box$lat_max
+  ) |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(ids = tar_read(group_ids)) |>
+  sample_groups_flextable()
+```
+
+@tbl-nodes-a001 and @tbl-nodes-a002 give the AEP nodes: one row per node, its level (source / medium / organism) and type (empirical measured data, or external hand-entered magnitude), summary statistics of its numerical aspect (weighted mean, per-row SD, median, geometric mean; `n` is $\sum$`MEASURED_N` with rows and distinct references in brackets), the date range, and the four EPEQ scores. A blank statistics row is a node hypothesised for the AEP but with no supporting data yet. Empirical statistics are pooled over the node's member sample groups after applying the AEP bounding box and any node-specific filters.
+
+```{r}
+#| label: tbl-nodes-a001
+#| tbl-cap: "AEP-001 (Hammerfest coastal) nodes."
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A001") |>
+  node_report_flextable(tar_read(aep_scoped)[["A001"]])
+```
+
+```{r}
+#| label: tbl-nodes-a002
+#| tbl-cap: "AEP-002 (Repparfjord inner) nodes."
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A002") |>
+  node_report_flextable(tar_read(aep_scoped)[["A002"]])
+```
+
 ## Distributions
 
 - Overall top-down view of dataset and general distribution patterns
@@ -309,7 +477,17 @@ tar_read(sample_groups_table) |>
 
 AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-sorfjorden-aep.
 
-#### AEP-001: Reppafjorden
+#### AEP 2: Inner Reppafjorden
+
+![AEP 1: Repparfjord Inner Fjord](figures/aep-001-repparfjord-inner.png)
+
+TODO: Node table
+
+#### AEP 2: Hammerfest Inner Coastal System
+
+TODO: Image
+
+TODO: Node Table
 
 # Discussion
 

@@ -197,7 +197,7 @@ reach_by_product_summarised_lumped <- reach_by_product_translated |>
   arrange(desc(mean_net_kg))
 ```
 
-REACH PRTD data for copper was obtained by contacting Miljødirektoratet (personal communications, 2nd May 2025).
+REACH PR data for copper was obtained by contacting Miljødirektoratet (personal communications, 2nd May 2025).
 
 > Hei\
 > Din henvendelse REQ0014380 - Copper Pollution/Use Statistics er oppdatert med følgende: Beklager sent svar.\
@@ -462,7 +462,9 @@ From `figures/node_cards_compact/A001/`, largest mean net quantity first:
 #| echo: false
 #| results: asis
 if (is.null(reach_card_paths) || length(reach_card_paths) == 0) {
-  cat("`node_cards_compact` is not in the target store yet. Run `tar_make()`.\n")
+  cat(
+    "`node_cards_compact` is not in the target store yet. Run `tar_make()`.\n"
+  )
 } else {
   cat('::: {layout-ncol="4"}\n')
   for (p in reach_card_paths) {

@@ -1404,3 +1404,87 @@ write_node_cards <- function(
   }
   paths
 }
+
+#' Node Report Table for One AEP (flextable)
+#'
+#' The tabular companion to the per-node report cards: one row per node in an
+#' AEP, carrying the node's identity and type alongside summary statistics of
+#' whatever numerical aspect it has (measured concentrations for an empirical
+#' node, the hand-entered magnitude for an external one). First pass; expect
+#' the column set to move.
+#'
+#' Statistics come straight from [aep_all_report_cards()] (so the centre is
+#' `MEASURED_N`-weighted and the spread is per row, per `?node_statistic_weighting`);
+#' the four EPEQ scores are joined from the AEP-scoped nodes table so any
+#' per-AEP override is reflected. Nodes with no resolved data keep their row --
+#' an empty statistics row is itself the finding that the node is hypothesised
+#' but unsupported here.
+#'
+#' @param cards [aep_all_report_cards()] output, filtered to one `aep_id`.
+#' @param scoped The matching element of [aep_scoped_nodes()] (e.g.
+#'   `aep_scoped[["A001"]]`), for the EPEQ scores.
+#' @return A flextable.
+#' @export
+node_report_flextable <- function(cards, scoped) {
+  sig <- function(x, d = 3) ifelse(is.na(x), NA_character_, formatC(signif(x, d), format = "fg", big.mark = ","))
+  yr <- function(d) ifelse(is.na(d), NA_character_, format(d, "%Y"))
+
+  epeq <- scoped[c(
+    "node_id", "essentiality_score", "plausibility_score",
+    "evidence_score", "quantification_score"
+  )]
+
+  dash <- "\u2014"
+
+  tbl <- cards |>
+    dplyr::left_join(epeq, by = "node_id") |>
+    dplyr::transmute(
+      node = .data$label,
+      level = .data$level,
+      type = .data$node_type,
+      n_disp = dplyr::case_when(
+        is.na(.data$n) & .data$n_rows == 0 ~ dash,
+        .data$node_type == "external" ~ formatC(.data$n, format = "d", big.mark = ","),
+        TRUE ~ sprintf(
+          "%s (%s; %s)",
+          formatC(.data$n, format = "d", big.mark = ","),
+          formatC(.data$n_rows, format = "d", big.mark = ","),
+          .data$n_sources
+        )
+      ),
+      unit = dplyr::coalesce(.data$unit, dash),
+      mean_sd = dplyr::case_when(
+        is.na(.data$mean) ~ dash,
+        is.na(.data$sd) ~ sig(.data$mean),
+        TRUE ~ paste0(sig(.data$mean), " \u00b1 ", sig(.data$sd))
+      ),
+      median = dplyr::coalesce(sig(.data$median), dash),
+      geo_mean = dplyr::coalesce(sig(.data$geo_mean), dash),
+      dates = dplyr::case_when(
+        is.na(.data$date_min) ~ dash,
+        yr(.data$date_min) == yr(.data$date_max) ~ yr(.data$date_min),
+        TRUE ~ paste0(yr(.data$date_min), "\u2013", yr(.data$date_max))
+      ),
+      ess = .data$essentiality_score,
+      pla = .data$plausibility_score,
+      evi = .data$evidence_score,
+      qua = .data$quantification_score
+    )
+
+  tbl |>
+    flextable::flextable() |>
+    flextable::set_header_labels(
+      node = "Node", level = "Level", type = "Type",
+      n_disp = "n (rows; refs)", unit = "Unit", mean_sd = "Mean \u00b1 SD",
+      median = "Median", geo_mean = "Geo. mean", dates = "Dates",
+      ess = "Ess", pla = "Pla", evi = "Evi", qua = "Qua"
+    ) |>
+    flextable::theme_vanilla() |>
+    flextable::bold(part = "header") |>
+    flextable::colformat_num(
+      j = c("ess", "pla", "evi", "qua"), na_str = dash, digits = 0
+    ) |>
+    flextable::fontsize(size = 9, part = "all") |>
+    flextable::padding(padding = 2, part = "all") |>
+    flextable::autofit()
+}
