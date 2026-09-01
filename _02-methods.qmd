@@ -1,12 +1,46 @@
 # Materials and Methods
 
+```{r}
+#| label: setup-methods
+#| include: false
+#| warning: false
+#| message: false
+
+# Lets this section render on its own (`quarto render _02-methods.qmd`). When the
+# file is spliced into index.qmd via {{< include >}}, index.qmd's own `setup`
+# chunk has already loaded these and defined docx_flex(); re-running library()
+# and redefining the function is harmless.
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+
+# Identical to the helper in index.qmd's setup chunk. Change one, change both
+# (or promote it to an R/ function).
+docx_flex <- function(ft, widths = NULL) {
+  ft <- ft |>
+    flextable::theme_vanilla() |>
+    flextable::bold(part = "header") |>
+    flextable::fontsize(size = 9, part = "all") |>
+    flextable::padding(padding = 2, part = "all")
+  if (is.null(widths)) {
+    flextable::set_table_properties(ft, layout = "autofit", width = 1)
+  } else {
+    flextable::set_table_properties(
+      flextable::width(ft, width = widths),
+      layout = "fixed"
+    )
+  }
+}
+```
+
 ## Study Area
 
-Hammerfest is a kommune (municipality) and town in Finnmark, Norway's northernmost county. The area is a dense archipelago of islands and peninsulas riven with fjords and valleys. To the north-east the kommune opens into the Norwegian Barents sea, which supports both a thriving fishing industry and multiple oil and gas wells. To the south-west, the kommune encompasses an area of the mainland which includes the Nussir mountain and Repparfjord [@dalfestHammerfest2026]. Hammerfest kommune has a population of 11,000 (2026), of which 8,010 live in the town itself (cite), many of whom are employed in natural resource-based industries (@tbl-hammerfest-employment).
+Hammerfest is a kommune (municipality) and town in Finnmark, Norway's northernmost county. The area is a dense archipelago of islands and peninsulas riven with fjords and valleys. To the north-east the kommune opens into the Norwegian Barents sea, which supports both a thriving fishing industry and multiple oil and gas wells. To the south-west, the kommune encompasses an area of the mainland which includes the Nussir mountain and Repparfjord [@dalfestHammerfest2026]. Hammerfest kommune has a population of 11,000 (2025), of which roughly 8,000 live in the town itself, 2,000 in the southerly village of Rypefjord, and 300 in the mainland village of Kvalsund. Many of Hammerfest's population are employed in natural resource-based industries (@tbl-hammerfest-employment), and relative to its population (roughly 0.2% of mainland Norway's working population) the kommune hosts a sizable share of these sectors. 
 
 ```{r}
 #| label: tbl-hammerfest-employment
-#| tbl-cap: "Register-based employment (employed persons, 4th quarter 2025, by place of residence) in Hammerfest kommune and Norway, for Cu pollution-relevant industries. NACE 2007 (SN2007) codes summed for each row are shown in parentheses; percentages in the Norway and Hammerfest columns are of that area's all-industry total. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]. SSB replaces cell values of 1 and 2 with 0 or 3 to protect confidentiality, so the smaller Hammerfest counts and their sums are approximate."
+#| tbl-cap: "Approximate statistics for Cu-relevant sector employment for a) Norway and b) Hammerfest kommune (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per-sector. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]. "
 #| echo: false
 emp <- read_csv(
   "data/clean/derived/ssb_employment_hammerfest.csv",
@@ -47,15 +81,12 @@ emp |>
   docx_flex()
 ```
 
-<!-- todo (SW): worth going detailed here; want to use this table for weighting national product-register data later. The figures are for Hammerfest kommune (Region K.5603), not just the town. -->
+The kommune contains 18 REACH-registered facilities [@NorwegianPRTRFrontpage], the most notable of which is the Melkøya Liquid Natural Gas plant, which recieves gas from the Snøhvit and Goliat marine fields to the north [@SnohvitField]. Other notable facilities include Hammerfest Airport, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), a handful of industrial installations, and the Wastewater Treatment Plant at Rossmolla, Hammerfest (constructed 2016, primary treatment), which serves both Hammerfest town and Rypefjord  and discharges into the Sørøysundet [@fylkesmannenifinnmarkTillatelseEtterForurensningsloven2014].
 
-Hammerfest's importance as an oil and gas hub comes from its status as a processing hub for raw resources extracted from the Snøhvit fields. Potential point sources of pollution include the Liquid Natural Gas plant (linked to the oil feels by pipeline) on the island of Melkøya, north-east of the city, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), the city's Wastewater Treatment Plant, and Hammerfest airport (@fig-repparfjorden-locator).
+The Nussir and Ulveryggen mountains in the mainland to Hammerfest town's south are copper-rich, and were mined intermittently in the early 20th century and then intensively between 1972 and 1978 by the firm Folldal Verk [@sternalImpactSubmarineCopper2017]. During this period, roughly 1 million tonnes of copper-rich tailings were processed and discharged to the inner Repparfjord [@sternalImpactSubmarineCopper2017; @kvassnesWasteSitesMines2013]. In 2019, the firm Nussir ASA was licensed to conduct mining operations at Nussir/Ulveryggen [@eilertsenNussirGetsOperating2019], and in 2021 it recieved permission to discharge tailings to the Repparfjord [@NussirKobberprosjektGodkjenning]. The resumption of mining at the Nussir/Ulveryggen site has been the subject of both legal cases at the national and EU level, and direct action [@garvikGruvekonfliktenRepparfjorden2026]. Mining is planned to begin in late 2027 [@olaussenSisteBrikkePa2026] and continue for 13 years, and is estimated to release at most 30 million tonnes of tailings to the Repparfjord.
 
 ![Study area. (a) The Hammerfest / Repparfjorden region in western Finnmark: kommune boundaries (`csmaps`, 2024 division), Hammerfest kommune shaded, the red box the combined extent of the two Hammerfest-area AEPs. (b) The Hammerfest coastal system on Kartverket's colour topographic base map, showing reported point-source (PRTR) facilities (black stars), licensed aquaculture locations (blue circles), the Ulveryggen processing plant (black square), the historic (1970s Folldal Verk) submarine tailings disposal area (orange circle), and the Snøhvit and Goliat oil/gas fields (amber circles, sized to their footprints). Feature coordinates are approximate.](figures/fig-study-area.png){#fig-repparfjorden-locator}
 
-TODO: Diff colours for oil fields, elevate Goliat label more, move top border of b) just a little bit higher to avoid clipping Snøhvit.
-
-- TODO: Ecology, including nature protection areas. Repparfjord is an important salmon fjord, as is its parent river
 
 ## Lines of Evidence
 
@@ -63,7 +94,7 @@ Multiple lines of evidence were gathered in order to construct AEPs. Key lines a
 
 ```{r}
 #| label: tbl-lines-of-evidence
-#| tbl-cap: "lines of evidence"
+#| tbl-cap: "Table of key lines of evidence used in the construction of AEPs. Includes dominant data types, coverage (spatial, temporal), and downstream Key Exposure States and Key Transitional Relationships."
 #| echo: false
 tibble::tribble(
   ~`Line of Evidence`            , ~`Data Type`                                          , ~Coverage , ~`AEP Class`                    , ~Notes                                                                                                                                                                                                                                    ,
@@ -91,7 +122,7 @@ A systematic literature review framework was developed from the PRISMA2020 frame
 
 #### Databases and Search Terms
 
-The following search string was used in all open literature sources. The \* character is a wildcard and is used to match against common prefixes. The software Publish or Perish 7 was used to assist in database searches.
+The following search string was used in all open literature sources. The \* character is a wildcard and is used to match against common prefixes. 
 
 ``` txt
 (copper OR Cu OR cuprous OR cupric OR kobber OR coper OR 7440-50-8) 
@@ -258,7 +289,7 @@ In these cases,
 - Unless there was a convincing argument not to, outliers were removed
 - We report both robust and non-robust summary statistics (median, mean ± sd) below, and use them for comparisons
 
-### Norwegian PRTR and REACH Product Register
+## Norwegian PRTR and REACH Product Register
 
 The Norwegian Product Release and Transfer Register (PRTR) is a repository for self-reported emissions data in Norway, and is freely available under an open government data license [@NorwegianPRTRPollutants]. Discharges of specific pollutants, including copper, to air and water by licensed facilities (wastewater treatment plants, landfills, land-based industries, and offshore installations) are reported, typically as kg/year. Facilities locations are recorded to the county level, and it is frequently possible to geolocate these facilities from other records.
 
@@ -272,7 +303,11 @@ TODO: Wrap legend text, move to bottom?
 
 TODO: NACE Codes?
 
-#### WWTP
+### Aquaculture
+
+See notebook.
+
+### WWTP
 
 - 2014 - untreated WW direct to water (<https://www.ifinnmark.no/nyheter/fylkesmannen-har-godkjent-nytt-renseanlegg/s/1-47-7687993>)
 

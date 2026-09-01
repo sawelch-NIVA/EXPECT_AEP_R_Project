@@ -1,0 +1,315 @@
+---
+title: "Notebook XX - Aquaculture Copper Emissions (Hammerfest)"
+subtitle: "Matching the Miljodirektoratet aquaculture Cu-to-water export to licensed farm locations"
+date: last-modified
+format: html
+execute:
+  freeze: true   # parked / temporary, not in the _quarto.yml render list
+  echo: true     # working notebook: the name-matching logic is the point
+  warning: false
+  message: false
+---
+
+## What this is
+
+`data/raw/Copper-Aquaculture-Emissions.xlsx` turned up as a per-facility,
+per-year record of **copper discharged to water** by Norwegian aquaculture sites
+(Miljodirektoratet / Norske utslipp style export, sheet `Utslipp`). It is
+national, 2002-2023, one row per facility x operator x year, every value in kg
+and every value carrying basis code **`B` (*Beregnet*, i.e. modelled)** rather
+than measured. Copper from a marine farm is overwhelmingly net-pen antifouling
+coating, so a modelled figure here is expected.
+
+The file has **no location number** (`loknr`), only a free-text `Anleggsnavn` of
+the form `"<site>, matfisk (<operator>)"`. To place the emissions we match that
+name against the Fiskeridirektoratet aquaculture register
+(`inst/extdata/shapefiles/Aquaculture_Locations/`), which does carry `loknr`,
+coordinates, species and licence status.
+
+**Scope: Hammerfest kommune only** (post-2020 merged kommune, so the old
+Kvalsund sites are included; the file has already recoded them to `Hammerfest`).
+
+```{r}
+#| label: setup
+library(readxl)
+library(sf)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+library(flextable)
+library(here)
+
+here::i_am("README.md")
+pkgload::load_all(here::here(), quiet = TRUE)
+
+ft <- function(d, cap = NULL) {
+  flextable(d) |>
+    theme_vanilla() |>
+    bold(part = "header") |>
+    fontsize(size = 9, part = "all") |>
+    padding(padding = 2, part = "all") |>
+    set_caption(cap) |>
+    set_table_properties(layout = "autofit", width = 1)
+}
+
+# Site-name key: lower-case, drop the ", matfisk (...)" / " akva (...)" tail,
+# squish whitespace. Diacritics are kept -- both sources are Norwegian and
+# agree on them.
+norm_site <- function(x) {
+  x |>
+    str_to_lower() |>
+    str_replace_all("\\s*[,(].*$", "") |>
+    str_replace_all("\\s+akva$", "") |>
+    str_replace_all("[[:space:]]+", " ") |>
+    str_trim()
+}
+```
+
+## Load and key both sources
+
+```{r}
+#| label: load-emissions
+emissions <- read_excel(
+  here::here("data/raw/Copper-Aquaculture-Emissions.xlsx"),
+  sheet = "Utslipp",
+  skip = 1,
+  .name_repair = "unique_quiet"
+) |>
+  rename(
+    anlegg = 1,
+    fylke = 2,
+    kommune = 3,
+    year = 4,
+    cu_kg = 5,
+    basis = 6,
+    unit = 7
+  ) |>
+  mutate(
+    year = as.integer(year),
+    cu_kg = as.numeric(cu_kg),
+    site_key = norm_site(anlegg),
+    operator = str_match(anlegg, "\\(([^)]*)\\)\\s*$")[, 2]
+  )
+
+em_ha <- emissions |>
+  filter(str_to_upper(kommune) == "HAMMERFEST") |>
+  group_by(site_key) |>
+  summarise(
+    operators = paste(sort(unique(operator)), collapse = " | "),
+    year_from = min(year),
+    year_to = max(year),
+    n_year_rows = n(),
+    cu_total_kg = round(sum(cu_kg, na.rm = TRUE), 1),
+    cu_per_year = round(mean(cu_kg, na.rm = TRUE), 2),
+    .groups = "drop"
+  )
+```
+
+```{r}
+#| label: load-register
+register <- sf::read_sf(here::here(
+  "inst/extdata/shapefiles/Aquaculture_Locations/Fiskeridir_Akvakulturregistere.shp"
+)) |>
+  sf::st_drop_geometry() |>
+  as_tibble() |>
+  filter(str_to_upper(kommune) == "HAMMERFEST") |>
+  mutate(site_key = norm_site(navn)) |>
+  group_by(site_key) |>
+  summarise(
+    loknr = paste(sort(unique(loknr)), collapse = "/"),
+    navn = navn[1],
+    status = paste(sort(unique(status_lok)), collapse = "/"),
+    lon = mean(lon),
+    lat = mean(lat),
+    species = paste(sort(unique(til_arter)), collapse = " | "),
+    capacity = paste0(kapasitet_[1], " ", kapasitet1[1]),
+    .groups = "drop"
+  )
+
+# Combined Hammerfest-area AEP bounding box, read live from the manifest.
+aep_box <- readr::read_csv(
+  here::here("data/clean/aep/aep_manifest.csv"),
+  show_col_types = FALSE
+) |>
+  summarise(
+    lon_min = min(lon_min),
+    lon_max = max(lon_max),
+    lat_min = min(lat_min),
+    lat_max = max(lat_max)
+  )
+```
+
+## Match
+
+```{r}
+#| label: match
+matched <- em_ha |>
+  left_join(register, by = "site_key") |>
+  mutate(
+    in_aep_box = !is.na(lat) &
+      lon >= aep_box$lon_min &
+      lon <= aep_box$lon_max &
+      lat >= aep_box$lat_min &
+      lat <= aep_box$lat_max
+  )
+
+n_sites <- nrow(matched)
+n_matched <- sum(!is.na(matched$loknr))
+n_in_box <- sum(matched$in_aep_box, na.rm = TRUE)
+```
+
+`r n_matched` of `r n_sites` Hammerfest-kommune emission sites match a
+currently-licensed location by name (1:1 -- no two current Hammerfest licences
+share a normalised name). `r n_in_box` of the matched sites fall inside the
+combined AEP bounding box (`r sprintf("%.2f-%.2f E, %.2f-%.2f N", aep_box$lon_min, aep_box$lon_max, aep_box$lat_min, aep_box$lat_max)`);
+the rest are elsewhere in the kommune (Sorroysund, Revsbotn, the Kvalsund side).
+
+### Matched: emission site to register `loknr`
+
+```{r}
+#| label: tbl-matched
+#| tbl-cap: "Hammerfest-kommune aquaculture sites reporting copper to water, matched to the Fiskeridirektoratet register. Cu is the sum / mean of annual modelled discharge over the reporting years shown. Coordinates, `loknr` and species come from the register."
+matched |>
+  filter(!is.na(loknr)) |>
+  transmute(
+    Site = str_to_title(site_key),
+    loknr,
+    Lon = round(lon, 4),
+    Lat = round(lat, 4),
+    `In AEP box` = if_else(in_aep_box, "yes", "no"),
+    `Reg. status` = status,
+    Years = paste0(year_from, "-", year_to),
+    `n yr` = n_year_rows,
+    `Cu total (kg)` = cu_total_kg,
+    `Cu (kg/yr)` = cu_per_year,
+    Species = species
+  ) |>
+  arrange(desc(`Cu total (kg)`)) |>
+  ft()
+```
+
+### Emissions but no current licence
+
+Historic sites -- decommissioned or licence surrendered before the register
+snapshot, so no coordinates are available from it. Operator strings are the
+pre-2015 holders (Polarlaks, Stolt Sea Farm, early Cermaq).
+
+```{r}
+#| label: tbl-historic
+#| tbl-cap: "Hammerfest-kommune sites with reported copper discharge but no current aquaculture licence."
+matched |>
+  filter(is.na(loknr)) |>
+  transmute(
+    Site = str_to_title(site_key),
+    Operators = operators,
+    Years = paste0(year_from, "-", year_to),
+    `n yr` = n_year_rows,
+    `Cu total (kg)` = cu_total_kg
+  ) |>
+  arrange(desc(`Cu total (kg)`)) |>
+  ft()
+```
+
+### Licensed sites in the AEP box with no emissions record
+
+```{r}
+#| label: tbl-nomatch-reverse
+#| tbl-cap: "Currently-licensed aquaculture locations inside the AEP bounding box that do not appear in the copper emissions file."
+register |>
+  filter(
+    !is.na(lon),
+    lon >= aep_box$lon_min,
+    lon <= aep_box$lon_max,
+    lat >= aep_box$lat_min,
+    lat <= aep_box$lat_max,
+    !site_key %in% em_ha$site_key
+  ) |>
+  transmute(
+    loknr,
+    Site = navn,
+    Lon = round(lon, 4),
+    Lat = round(lat, 4),
+    Species = species,
+    Capacity = capacity
+  ) |>
+  ft()
+```
+
+## Totals
+
+```{r}
+#| label: totals
+tibble::tribble(
+  ~Scope                                  , ~`Cu to water 2002-2023 (kg)`                                           ,
+  "All Hammerfest-kommune emission sites" , round(sum(matched$cu_total_kg, na.rm = TRUE), 0)                        ,
+  "Matched to a current licence"          , round(sum(matched$cu_total_kg[!is.na(matched$loknr)], na.rm = TRUE), 0) ,
+  "Inside the AEP bounding box"           , round(sum(matched$cu_total_kg[matched$in_aep_box], na.rm = TRUE), 0)    ,
+  "Historic sites (no current licence)"   , round(sum(matched$cu_total_kg[is.na(matched$loknr)], na.rm = TRUE), 0)
+) |>
+  ft()
+```
+
+```{r}
+#| label: fig-cu-by-site
+#| fig-cap: "Total modelled copper to water 2002-2023 per Hammerfest-kommune aquaculture site, split by whether the site matches a current licence. Written to images/dev/ for review outside the rendered notebook."
+#| fig-width: 8
+#| fig-height: 6
+plot_df <- matched |>
+  mutate(
+    site_lab = str_to_title(site_key),
+    group = if_else(is.na(loknr), "historic (no licence)", "current licence")
+  )
+
+p <- ggplot(
+  plot_df,
+  aes(
+    x = cu_total_kg,
+    y = reorder(site_lab, cu_total_kg),
+    fill = group
+  )
+) +
+  geom_col() +
+  scale_fill_manual(
+    values = c(
+      "current licence" = "#2B5F75",
+      "historic (no licence)" = "#B5876B"
+    )
+  ) +
+  labs(
+    x = "Cu to water 2002-2023 (kg, modelled)",
+    y = NULL,
+    fill = NULL,
+    title = "Aquaculture copper discharge, Hammerfest kommune"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.major.y = element_blank())
+
+dir.create(here::here("images/dev"), showWarnings = FALSE, recursive = TRUE)
+ggsave(
+  here::here("images/dev/aquaculture-cu-by-site.png"),
+  p,
+  width = 8,
+  height = 6,
+  dpi = 150,
+  bg = "white"
+)
+p
+```
+
+## Caveats
+
+- **Name match only.** The emissions export carries no `loknr`; the join is on
+  a normalised site name within Hammerfest kommune. It is 1:1 here, but a future
+  register snapshot with two same-named Hammerfest sites would break that.
+- **Coordinates come entirely from the register side.** The seven historic
+  sites have none; they could be geolocated from Norske utslipp facility pages
+  or an older Fiskeridirektoratet extract.
+- **All discharge values are modelled** (`B`), consistent with copper being
+  back-calculated from antifouling use. Relevant to the Evidence score for any
+  aquaculture KTR edge.
+- **Operator strings change across years** with company renames (Polarlaks ->
+  Cermaq -> "Cermaq Norway Salmon AS" etc.); sites are collapsed on name, not
+  operator.
+- Not wired into `_targets.R` or the `_quarto.yml` render list. Build by hand
+  with `quarto render docs/NBXX-aquaculture.qmd`.

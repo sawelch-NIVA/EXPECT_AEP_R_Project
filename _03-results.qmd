@@ -1,5 +1,27 @@
 # Results
 
+```{r}
+#| label: setup-results
+#| include: false
+#| warning: false
+#| message: false
+
+# Lets this section render on its own (`quarto render _03-results.qmd`).
+# Redundant when the file is spliced into index.qmd, which has already run its
+# own setup.
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+
+# summarise_groups(), build_sample_groups_table(), sample_groups_flextable() and
+# node_report_flextable() are STOPAEP functions. Skip the reload when index.qmd
+# already did it: load_all() is one of the slower steps in a render.
+if (!"STOPAEP" %in% loadedNamespaces()) {
+  pkgload::load_all(quiet = TRUE)
+}
+```
+
 TODO: Proref for biota
 
 ![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig-repparfjorden-conc.png){#fig-repparfjorden-conc}

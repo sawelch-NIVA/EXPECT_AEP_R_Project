@@ -245,7 +245,10 @@ oil_lab <- st_sf(
   name = stringr::str_to_title(oil_raw$fldName),
   geometry = st_transform(oil_ctr, 3857)
 )
-oil_fill <- scales::alpha("#e0a030", 0.22)
+# Violet, deliberately well clear of the orange tailings-disposal circle in
+# panel c (#f08a1d / #c96f10) so the two source types never read as the same
+# feature.
+oil_fill <- scales::alpha("#7d4fa1", 0.20)
 
 # Kommune polygons (pre-baked from csmaps b2024; csmaps segfaults under Rscript).
 # The gpkg ships with no CRS; its coordinates are plain WGS84 lon/lat.
@@ -330,7 +333,7 @@ box_study <- st_as_sfc(st_bbox(
   crs = st_crs(4326)
 ))
 view_norway <- c(xmin = 4, xmax = 31.5, ymin = 57.5, ymax = 71.5) # fig1 a (mainland)
-view_hamm <- c(xmin = 20.6, xmax = 24.6, ymin = 70.28, ymax = 71.6) # fig1 b (+ oil fields)
+view_hamm <- c(xmin = 20.6, xmax = 24.6, ymin = 70.28, ymax = 71.7) # fig1 b (+ oil fields); ymax clears the Snøhvit circle (top ~71.60)
 view_zoom <- c(xmin = 23.52, xmax = 24.40, ymin = 70.43, ymax = 70.77) # fig1 c
 view_b <- c(xmin = 23.33, xmax = 24.52, ymin = 70.34, ymax = 70.82) # fig2 a (contains both AEP boxes)
 view_c <- c(xmin = 24.20, xmax = 24.39, ymin = 70.430, ymax = 70.490) # fig2 b
@@ -367,7 +370,7 @@ feature_cols <- c(
   "PRTR facility" = "black",
   "Aquaculture site (licensed)" = "#1f6f8b",
   "Ulveryggen plant" = "black",
-  "Oil/gas field" = "#a5761b",
+  "Oil/gas field" = "#5a3378",
   "Airport" = "#6a3d9a",
   "Wastewater treatment" = "#b15928"
 )
@@ -651,24 +654,26 @@ panel_b <- ggplot() +
   geom_sf(
     data = oil_circ,
     fill = oil_fill,
-    colour = "#a5761b",
+    colour = "#5a3378",
     linewidth = 0.5
   ) +
   geom_sf(data = box_zoom, fill = NA, colour = red, linewidth = 0.7) +
   geom_sf_text(
     data = oil_lab[oil_lab$name == "Snøhvit", ],
     aes(label = name),
-    colour = "#7a5510",
+    colour = "#4a2866",
     fontface = "bold",
     size = 2.6
   ) +
   geom_sf_text(
     data = oil_lab[oil_lab$name == "Goliat", ],
     aes(label = name),
-    colour = "#7a5510",
+    colour = "#4a2866",
     fontface = "bold",
     size = 2.6,
-    nudge_y = 9500
+    # Goliat circle radius is ~8.7k in EPSG:3857 units at this latitude; the old
+    # 9500 nudge left the label sitting on the circle edge. Clear it properly.
+    nudge_y = 16000
   ) +
   geom_shadowtext(
     data = norsea_xy,
