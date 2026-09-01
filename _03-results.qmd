@@ -1,0 +1,109 @@
+# Results
+
+TODO: Proref for biota
+
+![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig-repparfjorden-conc.png){#fig-repparfjorden-conc}
+
+## Group Summary Statistics
+
+<!-- TODO: n thresholds for Hartigans. Also dynamic update group/sample n slice reporting-->
+
+<!-- TODO: Add cumulative proportion to this v of table, use that for filtering rather than n-->
+
+@tbl-groups-summary displays all sample groups where $n \ge 100$ (regardless of measured unit), including summary statistics, date coverage, probability of multimodal distribution, number of distinct standardised units per group, and the proportion of dropped data points.
+
+**Question: Since we're reducing the geographical scope to Repparfjorden, does it make sense to include a big table of all the groups. It *was* used quite heavily in the process of exploring and assessing individual group data, but it may raise more questions than it answers.**
+
+```{r}
+#| label: tbl-groups-summary
+#| tbl-cap: "Placeholder caption. Sample-group summary statistics, groups with n >= 100."
+
+# Same target as docs/NBXX-Sample-Groups.qmd, filtered to the large groups.
+# Highlight indices are recomputed inside sample_groups_flextable(), so they
+# stay aligned after this filter.
+tar_read(sample_groups_table) |>
+  filter(n >= 100) |>
+  sample_groups_flextable() |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+@tbl-groups-a001 and @tbl-groups-a002 give the same summary restricted to sample groups with at least one measurement inside each AEP's bounding box (@fig-repparfjorden-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, so the statistics differ from the national table; the group `ID` and the `Dropped` percentage stay at their national values.
+
+```{r}
+#| label: tbl-groups-a001
+#| tbl-cap: "Sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N)."
+#| warning: false
+a001_box <- tar_read(aep_manifest) |> filter(aep_id == "A001")
+tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE),
+    !is.na(LATITUDE),
+    LONGITUDE >= a001_box$lon_min,
+    LONGITUDE <= a001_box$lon_max,
+    LATITUDE >= a001_box$lat_min,
+    LATITUDE <= a001_box$lat_max
+  ) |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(ids = tar_read(group_ids)) |>
+  sample_groups_flextable() |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r}
+#| label: tbl-groups-a002
+#| tbl-cap: "Sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N)."
+#| warning: false
+a002_box <- tar_read(aep_manifest) |> filter(aep_id == "A002")
+tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE),
+    !is.na(LATITUDE),
+    LONGITUDE >= a002_box$lon_min,
+    LONGITUDE <= a002_box$lon_max,
+    LATITUDE >= a002_box$lat_min,
+    LATITUDE <= a002_box$lat_max
+  ) |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(ids = tar_read(group_ids)) |>
+  sample_groups_flextable() |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+## Distributions
+
+- Overall top-down view of dataset and general distribution patterns
+- More detailed, broken-down versions of plots will be in SI
+
+## AEPs
+
+AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-hammerfest-aep.
+
+@tbl-nodes-a001 and @tbl-nodes-a002 give the AEP nodes: one row per node, its level (source / medium / organism) and type (empirical measured data, or external hand-entered magnitude), summary statistics of its numerical aspect (weighted mean, per-row SD, median, geometric mean; `n` is $\sum$`MEASURED_N` with rows and distinct references in brackets), the date range, and the four EPEQ scores. A blank statistics row is a node hypothesised for the AEP but with no supporting data yet. Empirical statistics are pooled over the node's member sample groups after applying the AEP bounding box and any node-specific filters.
+
+#### AEP 1: Hammerfest Inner Coastal System
+
+![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/aep-001-hammerfest.png){#fig-hammerfest-aep}
+
+```{r}
+#| label: tbl-nodes-a001
+#| tbl-cap: "AEP-001 (Hammerfest coastal) nodes."
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A001") |>
+  node_report_flextable(tar_read(aep_scoped)[["A001"]]) |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+#### AEP 2: Inner Reppafjorden
+
+![AEP 2: Repparfjord Inner Fjord](figures/aep-001-repparfjord-inner.png){#fig-repparfjord-aep}
+
+```{r}
+#| label: tbl-nodes-a002
+#| tbl-cap: "AEP-002 (Repparfjord inner) nodes."
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A002") |>
+  node_report_flextable(tar_read(aep_scoped)[["A002"]]) |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```

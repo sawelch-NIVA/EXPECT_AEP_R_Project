@@ -36,8 +36,8 @@
 #'   `docs/groups/*.qmd` point at; there is no longer a separate bare form.
 #' @return A tibble sorted by `n` descending, with columns `group_id`, `group`,
 #'   `location`, `dates`, `n`, `mean_sd`, `median`, `n_outliers`,
-#'   `dip_p_label`, `n_units`, `dropped_label`, `.is_multimodal`, `.is_outlier`,
-#'   `.anchor`.
+#'   `dip_p_label`, `n_units`, `dropped_label`, `references`, `.is_multimodal`,
+#'   `.is_outlier`, `.anchor`.
 #' @export
 build_sample_groups_table <- function(summary_data, ids = NULL) {
   # Computed before the .keep = "none" mutate below, which discards the key
@@ -104,6 +104,9 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
         ""
       ),
       n_units = .data$n_units,
+      # Every distinct REFERENCE_ID behind the group, straight from
+      # summarise_groups(). Last column because the list can be long.
+      references = .data$references,
       # "<1%" rather than a rounded "0%", which reads as "none dropped" when it
       # means "a few dropped". Blank only where nothing was dropped at all.
       dropped_label = dplyr::case_when(
@@ -134,6 +137,7 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
       "dip_p_label",
       "n_units",
       "dropped_label",
+      "references",
       ".is_multimodal",
       ".is_outlier",
       ".anchor"
@@ -193,7 +197,8 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
       n_outliers = "Outliers",
       dip_p_label = "Multimodal (p)",
       n_units = "Units",
-      dropped_label = "Dropped"
+      dropped_label = "Dropped",
+      references = "References"
     ) |>
     flextable::theme_vanilla() |>
     flextable::bold(part = "header") |>

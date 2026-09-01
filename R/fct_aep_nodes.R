@@ -792,6 +792,9 @@ node_report_card <- function(node, members, data, ids) {
       # unknown: the REACH sector nodes are one extract, so "refs = 1" is a
       # fact about them and "refs = -" was reading as missing data.
       n_sources = as.integer(node$external_refs[1]),
+      # No rows, so no REFERENCE_IDs to list. External-node provenance is a
+      # hand-entered count (n_sources above), not a set of ids we hold.
+      references = NA_character_,
       unit = node$external_unit[1],
       mean = node$external_value[1],
       sd = node$external_sd[1],
@@ -824,6 +827,9 @@ node_report_card <- function(node, members, data, ids) {
     n_rows = nrow(d),
     n_groups = length(unique(members$group_id[members$node_id == node$node_id[1]])),
     n_sources = dplyr::n_distinct(d$REFERENCE_ID),
+    # Every distinct REFERENCE_ID behind the node, comma separated and sorted so
+    # the cell is stable between rebuilds. Displayed by node_report_flextable().
+    references = paste(sort(unique(d$REFERENCE_ID)), collapse = ", "),
     unit = unique(d$MEASURED_UNIT_STANDARD)[1],
     # CENTRE: weighted by MEASURED_N, so it describes the same population as the
     # `n` reported beside it. SPREAD: per row, because we hold study means and

@@ -228,6 +228,38 @@ test_that("a card assembles and writes", {
   expect_gt(file.size(paths), 5000)
 })
 
+test_that("node_report_flextable leads with the id and lists the references", {
+  d <- data_fixture()
+  nodes <- card_nodes()
+  members <- members_fixture(c("G001", "G002"))
+  cards <- aep_node_report_cards(nodes, members, d, ids_fixture())
+
+  ft <- node_report_flextable(cards, nodes)
+  expect_s3_class(ft, "flextable")
+
+  # node_id is the first column, and it is the id, not the label.
+  expect_equal(names(ft$body$dataset)[1], "node_id")
+  expect_equal(ft$body$dataset$node_id[1], nodes$node_id[1])
+
+  html <- flextable::htmltools_value(ft) |> as.character()
+  # Both REFERENCE_IDs behind the node appear, comma joined and sorted.
+  expect_true(grepl("RefA, RefB", html, fixed = TRUE))
+  expect_true(grepl("References", html, fixed = TRUE))
+  # The EPEQ headers are single letters now, not the old three-letter forms.
+  for (old in c("Ess", "Pla", "Evi", "Qua")) {
+    expect_false(grepl(old, html, fixed = TRUE), info = old)
+  }
+})
+
+test_that("node_report_flextable shows a dash for an external node's references", {
+  d <- data_fixture()
+  nodes <- card_nodes(node_type = "external", external_value = 5, external_unit = "kg/y")
+  cards <- aep_node_report_cards(nodes, members_fixture("G001")[0, ], d, ids_fixture())
+
+  tbl_refs <- node_report_flextable(cards, nodes)$body$dataset$references
+  expect_equal(tbl_refs, "—")
+})
+
 test_that("a card with no unit does not print the string NA", {
   # An external node has no measured unit, and "geo. mean - NA" reads as a value.
   d <- data_fixture()

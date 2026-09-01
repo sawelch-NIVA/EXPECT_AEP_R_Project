@@ -14,6 +14,7 @@ flag_summary <- function(...) {
     MEASURED_UNIT_STANDARD = "mg/kg (wet)",
     n = 1000L,
     n_sources = 4L,
+    references = "RefA, RefB, RefC, RefD",
     date_min = as.Date("2001-01-01"),
     date_max = as.Date("2019-01-01"),
     sd = 5,

@@ -12,6 +12,7 @@ fake_summary <- function(...) {
     MEASURED_UNIT_STANDARD = "mg/kg (dry)",
     n = 500L,
     n_sources = 3L,
+    references = "RefA, RefB, RefC",
     date_min = as.Date("2001-01-01"),
     date_max = as.Date("2019-01-01"),
     sd = 2,
@@ -37,10 +38,21 @@ test_that("build_sample_groups_table produces the expected columns", {
     result,
     c(
       "group_id", "group", "location", "dates", "n", "mean_sd", "median",
-      "n_outliers", "dip_p_label", "n_units", "dropped_label",
+      "n_outliers", "dip_p_label", "n_units", "dropped_label", "references",
       ".is_multimodal", ".is_outlier", ".anchor"
     )
   )
+})
+
+test_that("the reference-id list is carried through verbatim", {
+  result <- build_sample_groups_table(fake_summary(references = "Zref, Aref"))
+  expect_equal(result$references, "Zref, Aref")
+
+  html <- sample_groups_flextable(result) |>
+    flextable::htmltools_value() |>
+    as.character()
+  expect_true(grepl("References", html, fixed = TRUE))
+  expect_true(grepl("Zref, Aref", html, fixed = TRUE))
 })
 
 test_that("anchors are computed for every row and ignore the unit", {

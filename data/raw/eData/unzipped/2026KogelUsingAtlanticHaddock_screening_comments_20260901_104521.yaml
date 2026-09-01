@@ -1,0 +1,28 @@
+screening:
+  paper_relevance: 'Score: 5: Highly relevant study directly addressing environmental
+    exposures to multiple elements in seafood organisms impacted by sea disposal of
+    mining waste. Provides direct measurements of element concentrations in fish and
+    mussels that could pose food safety and ecosystem health concerns.'
+  paper_reliability: 'Score: 5: Rigorous scientific study with well-documented methodology,
+    accredited analytical methods (ICP-MS), appropriate statistical analyses including
+    both parametric and non-parametric approaches, and validation through unsupervised
+    machine learning clustering. Results cross-validated with baseline studies.'
+  paper_data_source: 'Score: 5: Primary data generation through direct sampling and
+    analysis. Authors collected fish and mussels using standardized gillnet fishing
+    methods and conducted full trace element analysis. Data clearly originates from
+    the authors'' own field sampling and laboratory analysis.'
+  paper_data_available: 'Score: 5: Extensive data provided in tables and appendices
+    including mean concentrations, standard error, confidence intervals, ranges, sample
+    numbers, and statistical groupings for all elements across all species, tissues,
+    and sites. Data presented in both wet weight and dry weight formats with clear
+    units. Supplementary data referenced as available online. All minimum data standards
+    met: specific matrices (muscle, liver, soft tissue), specified analytes (15 elements),
+    location information to coordinates and country level, sampling dates to specific
+    dates in 2016-2017, and units clearly specified.'
+  extraction_assessement: 'Score: 5: High confidence in extraction quality. Document
+    is clearly structured with explicit methodology sections, detailed tables of sampling
+    information, comprehensive results tables, and well-documented analytical protocols.
+    All key information regarding sites, parameters, biota, sampling strategies, and
+    methods is explicitly stated rather than inferred. Spatial dimensions (three fjord
+    sites), temporal dimensions (two sampling years), and multiple species/tissue
+    combinations clearly documented in tables and text.'

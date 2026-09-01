@@ -1,0 +1,9 @@
+# Discussion
+
+- Lots of the detail currently in the introduction will need to be moved here
+- There are a few threads to address and wrap up:
+  - Is copper exposure important? My feeling is "probably not", and if this MS doesn't tip the balance either way I won't focus on this angle
+  - I think we'll find that even the highly copper-contaminated sites we already have (Repparfjorden) that copper's not a big deal, and is unlikely to be a big deal even if the mine re-opens
+  - AEP/LR angle - I feel that AEPs with proper WoE are going to turn out to be a good way to organise AEP results. but they're still a great deal of work, and we only scratched the surface of our dataset. we can make recommendations for future work.
+  - If any of the ecologic or site AEPs are interesting obviously we can focus on that
+  - How much do we want to tie in to our/others AOP work? This is a good idea in theory, but I fear doing it properly would require a bunch more methodological work

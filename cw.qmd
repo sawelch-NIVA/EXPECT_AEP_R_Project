@@ -1,0 +1,14 @@
+---
+title: cw
+format: docx
+---
+
++-----------+-----------------+-------+
+| Criterion | KES             | Score |
++===========+=================+=======+
+| Quantitative Understanding | some long text here that would wrap | 3 |
++-----------+-----------------+-------+
+
+: Test caption {#tbl-cw tbl-colwidths="[14,60,26]"}
+
+See @tbl-cw.

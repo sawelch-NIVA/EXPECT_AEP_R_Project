@@ -1,0 +1,5 @@
+# Conclusion
+
+- Although this isn't going to be the strongest paper in the world, I think it can be an interestingly broad-ranging review of copper pollution with a good WoE approach and an intuitive conceptual model (the AEP) to make it a bit novel
+- We can decide how much to mention future modelling work here based on how it turns out (but I don't imagine we'll get a lot done on that by Sept 14th)
+- Likewise, we can tie into AOP work, or not.

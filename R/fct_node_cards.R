@@ -1420,6 +1420,11 @@ write_node_cards <- function(
 #' an empty statistics row is itself the finding that the node is hypothesised
 #' but unsupported here.
 #'
+#' The node id (`NXXX...`) leads the table, and the last column lists every
+#' distinct `REFERENCE_ID` behind the node (a dash for an external node, which
+#' has no rows to draw ids from). The four EPEQ headers are single letters,
+#' `E P E Q`, matching how they are named in the surrounding text.
+#'
 #' @param cards [aep_all_report_cards()] output, filtered to one `aep_id`.
 #' @param scoped The matching element of [aep_scoped_nodes()] (e.g.
 #'   `aep_scoped[["A001"]]`), for the EPEQ scores.
@@ -1439,6 +1444,7 @@ node_report_flextable <- function(cards, scoped) {
   tbl <- cards |>
     dplyr::left_join(epeq, by = "node_id") |>
     dplyr::transmute(
+      node_id = .data$node_id,
       node = .data$label,
       level = .data$level,
       type = .data$node_type,
@@ -1468,16 +1474,18 @@ node_report_flextable <- function(cards, scoped) {
       ess = .data$essentiality_score,
       pla = .data$plausibility_score,
       evi = .data$evidence_score,
-      qua = .data$quantification_score
+      qua = .data$quantification_score,
+      references = dplyr::coalesce(.data$references, dash)
     )
 
   tbl |>
     flextable::flextable() |>
     flextable::set_header_labels(
-      node = "Node", level = "Level", type = "Type",
+      node_id = "ID", node = "Node", level = "Level", type = "Type",
       n_disp = "n (rows; refs)", unit = "Unit", mean_sd = "Mean \u00b1 SD",
       median = "Median", geo_mean = "Geo. mean", dates = "Dates",
-      ess = "Ess", pla = "Pla", evi = "Evi", qua = "Qua"
+      ess = "E", pla = "P", evi = "E", qua = "Q",
+      references = "References"
     ) |>
     flextable::theme_vanilla() |>
     flextable::bold(part = "header") |>

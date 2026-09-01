@@ -10,9 +10,10 @@
 #' Summarise Analysis-Ready Literature Data Into Per-Group Statistics
 #'
 #' One row per sample group (the eight columns of [analysis_group_cols()]),
-#' carrying `n`, source count, date range, arithmetic and geometric mean/SD,
-#' median, unit, two outlier counts, and Hartigan's dip test. Ranking and the
-#' triage flags are appended by [add_triage_flags()].
+#' carrying `n`, source count, the source ids themselves (`references`), date
+#' range, arithmetic and geometric mean/SD, median, unit, two outlier counts,
+#' and Hartigan's dip test. Ranking and the triage flags are appended by
+#' [add_triage_flags()].
 #'
 #' The grouping, the outlier logic and the dip-test gate are all as they were in
 #' the `summarise_literature_data` target; the reasoning behind each choice
@@ -63,6 +64,9 @@ summarise_groups <- function(data, dropped_report) {
     dplyr::reframe(
       n = sum(MEASURED_N),
       n_sources = length(unique(REFERENCE_ID)),
+      # The ids themselves, not just the count: sorted and comma separated so the
+      # cell is stable between rebuilds. Shown by build_sample_groups_table().
+      references = paste(sort(unique(REFERENCE_ID)), collapse = ", "),
       date_min = suppressWarnings(min(SAMPLING_DATE, na.rm = TRUE)),
       date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
       sd = stats::sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
