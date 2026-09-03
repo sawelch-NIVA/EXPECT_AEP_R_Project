@@ -1577,6 +1577,32 @@ list(
     command = reach_external_series(reach_node_sectors_data)
   ),
 
+  ### # REACH by product-use category: introduction figure (fig02) ----
+  # What copper is DECLARED to be used for in Norwegian commerce. Two panels:
+  # (a) mean net copper by category (top 7 plus "Other"), (b) the same
+  # categories over time. Logic pulled out of docs/NBXX-REACH.qmd into
+  # R/fct_reach_products.R so the notebook and this figure cannot drift.
+  # Embedded in _01-introduction.qmd, so render_index depends on the file target
+  # via a tar_read() there. reach_product_summary_data is kept for the notebook's
+  # table; the figure is built from the row-level years so the lumping is shared
+  # across both panels.
+  tar_target(
+    name = reach_product_years_data,
+    command = read_reach_product_years(reach_prtd_file)
+  ),
+  tar_target(
+    name = reach_product_summary_data,
+    command = reach_product_summary(reach_product_years_data)
+  ),
+  tar_target(
+    name = reach_product_figure_file,
+    command = write_reach_product_figure(
+      reach_product_years_data,
+      here_rel("figures/fig02-reach-products.png")
+    ),
+    format = "file"
+  ),
+
   ### # PRTR & REACH: Hammerfest manuscript figure ----
   # index.qmd's "Norwegian PRTR and REACH Product Register" section. One
   # two-panel figure: (a) REACH net copper (tonnes in COMMERCE) scaled to
@@ -1629,7 +1655,7 @@ list(
     command = write_hammerfest_emissions_panel(
       reach_hammerfest_weighted,
       prtr_hammerfest_series_data,
-      here_rel("figures/fig04-hammerfest-emissions.png")
+      here_rel("figures/fig05-hammerfest-emissions.png")
     ),
     format = "file"
   ),
@@ -1793,7 +1819,7 @@ list(
   # Copper in cod / mussel / coastal water / sediment inside each AEP box, over
   # time, native units, one free y-axis per compartment. Water and sediment
   # carry their M-608 class (four classes -- copper skips M-608 III --
-  # consistent with fig05-repparfjorden-concentrations); biota sit on a separate
+  # consistent with fig06-repparfjorden-concentrations); biota sit on a separate
   # above/below-PROREF scale. format = "file" per CLAUDE.md 4.4: the target
   # caches the PNG, not the ggplot. Embedded in _03-results.qmd's per-AEP
   # subsections, so render_index depends on both via a tar_read() there.
@@ -1830,7 +1856,7 @@ list(
   ### # Figure-source notebook, upstream of the manuscript ----
   # docs/NBXX-rfjord-2.qmd is not really a site page: it exists to (re)draw the
   # study-area and Repparfjorden concentration maps the manuscript embeds
-  # (figures/fig02-study-area.png, figures/fig05-repparfjorden-concentrations.png). It
+  # (figures/fig03-study-area.png, figures/fig06-repparfjorden-concentrations.png). It
   # tar_read()s aep_manifest and the literature targets, so editing a bounding
   # box now redraws these figures on tar_make() rather than needing a hand
   # `quarto render`. render_index is chained AFTER it by a hidden

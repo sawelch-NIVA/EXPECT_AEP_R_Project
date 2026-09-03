@@ -83,20 +83,8 @@ reach_by_sector_en <- tar_read(reach_sector_years) |>
   )
 
 # -- By product type ----------------------------------------------------------
-reach_by_product <- read_excel(
-  path_reach,
-  sheet = "kobber sum på produkttype"
-) |>
-  rename(
-    year = AmountYear,
-    netto_tonn = `Netto mengde i tonn`,
-    product_type = Tekst
-  ) |>
-  mutate(
-    year = as.integer(year),
-    netto_tonn = as.numeric(netto_tonn),
-    product_type = trimws(product_type)
-  )
+# Read + translate + top-7 lump now live in R/fct_reach_products.R and feed the
+# introduction figure (fig02). See the tar_read()s further down.
 
 # The Norwegian-to-English NACE sector translation formerly lived here as a
 # tribble; it's now reach_nace_sectors() in R/fct_reach.R (same source,
@@ -118,8 +106,9 @@ reach_by_sector_en_summarised <- reach_by_sector_en |>
   distinct() |>
   arrange(desc(mean_net_kg))
 
-# TODO: Product category translations via LLM. Could find a better source
-product_category_translations <- tibble::tribble(
+# Product-use category translations now live in reach_product_category_translations()
+# (R/fct_reach_products.R), joined inside read_reach_product_years().
+.reach_product_translations_removed <- tibble::tribble(
   ~category_no                                                          , ~category_en                                       , ~confidence ,
   "BRENSELTILSETNINGER"                                                 , "Fuel additives"                                   , "high"      ,
   "Absorpsjons/ og adsorpsjonsmaterialer"                               , "Absorption and adsorption materials"              , "high"      ,
@@ -159,12 +148,7 @@ product_category_translations <- tibble::tribble(
   "Poler og pleieMIDLER"                                                , "Polishes and care products"                       , "medium" # odd capitalisation in source; "poler" = polishes
 )
 
-reach_by_product_translated <- reach_by_product |>
-  left_join(
-    product_category_translations,
-    by = join_by(product_type == category_no)
-  ) |>
-  mutate(net_kg = netto_tonn * 1000)
+reach_by_product_translated <- tar_read(reach_product_years_data)
 
 reach_by_product_summarised <- reach_by_product_translated |>
   reframe(
@@ -176,25 +160,7 @@ reach_by_product_summarised <- reach_by_product_translated |>
   distinct() |>
   arrange(desc(mean_net_kg))
 
-reach_by_product_summarised_lumped <- reach_by_product_translated |>
-  # need to remove negative rows for fct_limp
-  filter(netto_tonn > 0) |>
-  mutate(
-    category_en = fct_lump_n(
-      category_en,
-      n = 7,
-      w = netto_tonn,
-      other_level = "Other"
-    )
-  ) |>
-  reframe(
-    mean_net_kg = mean(net_kg),
-    sd_net_kg = sd(net_kg),
-    n_years_reported = n(),
-    .by = "category_en"
-  ) |>
-  distinct() |>
-  arrange(desc(mean_net_kg))
+reach_by_product_summarised_lumped <- tar_read(reach_product_summary_data)
 ```
 
 REACH PR data for copper was obtained by contacting Miljødirektoratet (personal communications, 2nd May 2025).

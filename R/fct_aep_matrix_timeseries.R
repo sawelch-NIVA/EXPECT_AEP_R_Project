@@ -3,7 +3,7 @@
 # water, sediment -- inside an AEP bounding box, measured copper over time, in
 # native units with a free y-axis per panel (dry / wet / per-litre are not
 # comparable). Water and sediment points carry their M-608 quality class,
-# consistent with fig05-repparfjorden-concentrations (four classes: copper skips M-608
+# consistent with fig06-repparfjorden-concentrations (four classes: copper skips M-608
 # Class III). Biota carry no M-608 copper ladder, so cod and mussel are shown
 # on a separate above/below-PROREF colour scale.
 
@@ -234,8 +234,8 @@ aep_matrix_timeseries_plot <- function(
 #' @inheritParams aep_matrix_timeseries_plot
 #' @param dir Output directory.
 #' @param width,height,dpi Canvas.
-#' @return The written path: `figures/fig07-aep1-timeseries.png` for `"A001"`,
-#'   `figures/fig09-aep2-timeseries.png` for `"A002"`.
+#' @return The written path: `figures/fig08-aep1-timeseries.png` for `"A001"`,
+#'   `figures/fig10-aep2-timeseries.png` for `"A002"`.
 #' @export
 write_aep_matrix_timeseries <- function(
   aep_id, data, thresholds, group_ids, manifest,
@@ -247,8 +247,8 @@ write_aep_matrix_timeseries <- function(
   )
   # Manuscript figure numbers (order of appearance in index.qmd's Results).
   file <- c(
-    A001 = "fig07-aep1-timeseries.png",
-    A002 = "fig09-aep2-timeseries.png"
+    A001 = "fig08-aep1-timeseries.png",
+    A002 = "fig10-aep2-timeseries.png"
   )[aep_id]
   if (is.na(file)) {
     stop("No figure filename mapped for aep_id ", sQuote(aep_id), ".")

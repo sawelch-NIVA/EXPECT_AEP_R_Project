@@ -217,11 +217,11 @@ Practical consequences, and they apply to every plotting task in this repo:
 
 **`figures/` vs `images/`, split 2026-08-31.** `figures/` holds *only* what
 `index.qmd` embeds. Renamed to a `figNN-name1-name2` scheme on 2026-09-03,
-numbered by order of appearance: `fig01-example-aep`, `fig02-study-area`,
-`fig03-covidence-prisma`, `fig04-hammerfest-emissions`,
-`fig05-repparfjorden-concentrations`, `fig06-aep1-hammerfest` (hand-assembled),
-`fig07-aep1-timeseries`, `fig08-aep2-repparfjord` (hand-assembled),
-`fig09-aep2-timeseries`. `peng_aep_diagram.png` was deleted in the same pass
+numbered by order of appearance: `fig01-example-aep`, `fig02-reach-products`,
+`fig03-study-area`, `fig04-covidence-prisma`, `fig05-hammerfest-emissions`,
+`fig06-repparfjorden-concentrations`, `fig07-aep1-hammerfest` (hand-assembled),
+`fig08-aep1-timeseries`, `fig09-aep2-repparfjord` (hand-assembled),
+`fig10-aep2-timeseries`. `peng_aep_diagram.png` was deleted in the same pass
 (no longer embedded anywhere in the manuscript; parked notebooks NB06-WoE and
 NBXX-algae still link it and now dangle). Everything that is working material
 rather than a manuscript figure lives under `images/`: `images/node_cards/<aep_id>/*.png` and

@@ -26,7 +26,7 @@ if (!"STOPAEP" %in% loadedNamespaces()) {
 #| label: dep-figures
 #| include: false
 # Dependency edges for figures this section embeds by path (CLAUDE.md 4.4.2).
-# figures/fig02-study-area.png and figures/fig05-repparfjorden-concentrations.png come from
+# figures/fig03-study-area.png and figures/fig06-repparfjorden-concentrations.png come from
 # docs/NBXX-rfjord-2.qmd via render_nbxx_rfjord; the two matrix time series are
 # their own file targets. Values unused.
 invisible(targets::tar_read(render_nbxx_rfjord))
@@ -36,7 +36,7 @@ invisible(targets::tar_read(aep_matrix_timeseries_a002))
 
 TODO: Proref for biota
 
-![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig05-repparfjorden-concentrations.png){#fig-repparfjorden-conc}
+![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig06-repparfjorden-concentrations.png){#fig-repparfjorden-conc}
 
 ## Group Summary Statistics
 
@@ -118,7 +118,7 @@ AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-ham
 
 #### AEP 1: Hammerfest Inner Coastal System
 
-![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig06-aep1-hammerfest.png){#fig-hammerfest-aep}
+![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig07-aep1-hammerfest.png){#fig-hammerfest-aep}
 
 ```{r}
 #| label: tbl-nodes-a001
@@ -130,11 +130,11 @@ tar_read(aep_node_cards) |>
   flextable::set_table_properties(layout = "autofit", width = 1)
 ```
 
-![Measured copper in the AEP-001 bounding box (70.44--70.78 N, 23.40--24.12 E) over time, one panel per compartment (cod liver, blue mussel, coastal water, sediment) in native units with a free $y$-axis per panel; dry weight, wet weight and per-litre concentrations are not directly comparable. Water and sediment points carry their Norwegian M-608 quality class (Background / Good / Poor / Very Poor; copper has no M-608 Class III). Cod and mussel sit on a separate above-/below-PROREF colour scale, since M-608 has no copper class ladder for biota. The dashed grey line is a linear fit where $n \ge 6$ (a rough eyeball of trend, not a model; cod excluded). Faint horizontal lines mark PROREF (biota) or the M-608 class boundaries (water, sediment); the dotted vertical marks 2024. Strip text gives the compartment, its units, and the sample groups present. Coastal water is `ENVIRON_COMPARTMENT_SUB` "Marine/Salt Water" (total copper, mg/L); M-608 water classes are for dissolved copper, so treat them as indicative. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig07-aep1-timeseries.png){#fig-a001-timeseries}
+![Measured copper in the AEP-001 bounding box (70.44--70.78 N, 23.40--24.12 E) over time, one panel per compartment (cod liver, blue mussel, coastal water, sediment) in native units with a free $y$-axis per panel; dry weight, wet weight and per-litre concentrations are not directly comparable. Water and sediment points carry their Norwegian M-608 quality class (Background / Good / Poor / Very Poor; copper has no M-608 Class III). Cod and mussel sit on a separate above-/below-PROREF colour scale, since M-608 has no copper class ladder for biota. The dashed grey line is a linear fit where $n \ge 6$ (a rough eyeball of trend, not a model; cod excluded). Faint horizontal lines mark PROREF (biota) or the M-608 class boundaries (water, sediment); the dotted vertical marks 2024. Strip text gives the compartment, its units, and the sample groups present. Coastal water is `ENVIRON_COMPARTMENT_SUB` "Marine/Salt Water" (total copper, mg/L); M-608 water classes are for dissolved copper, so treat them as indicative. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig08-aep1-timeseries.png){#fig-a001-timeseries}
 
 #### AEP 2: Inner Reppafjorden
 
-![AEP 2: Repparfjord Inner Fjord](figures/fig08-aep2-repparfjord.png){#fig-repparfjord-aep}
+![AEP 2: Repparfjord Inner Fjord](figures/fig09-aep2-repparfjord.png){#fig-repparfjord-aep}
 
 ```{r}
 #| label: tbl-nodes-a002
@@ -146,4 +146,4 @@ tar_read(aep_node_cards) |>
   flextable::set_table_properties(layout = "autofit", width = 1)
 ```
 
-![Measured copper in the AEP-002 bounding box (70.42--70.52 N, 24.10--24.53 E) over time; panels, colour scales and reference lines as in @fig-a001-timeseries. The box is small and the data mostly pre-2016: two Kögel cod and two Kögel mussel samples, and Sternal (2017) plus Vannmiljø sediment cores spanning Background to Very Poor, including the 1,600 mg/kg 2022 point. Coastal water has no data. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig09-aep2-timeseries.png){#fig-a002-timeseries}
+![Measured copper in the AEP-002 bounding box (70.42--70.52 N, 24.10--24.53 E) over time; panels, colour scales and reference lines as in @fig-a001-timeseries. The box is small and the data mostly pre-2016: two Kögel cod and two Kögel mussel samples, and Sternal (2017) plus Vannmiljø sediment cores spanning Background to Very Poor, including the 1,600 mg/kg 2022 point. Coastal water has no data. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig10-aep2-timeseries.png){#fig-a002-timeseries}

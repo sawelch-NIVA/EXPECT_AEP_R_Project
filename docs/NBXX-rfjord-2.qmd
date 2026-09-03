@@ -831,7 +831,7 @@ fig_study_area <- patchwork::wrap_plots(
   widths = c(0.75, 1, 1)
 )
 ggsave(
-  here::here("figures/fig02-study-area.png"),
+  here::here("figures/fig03-study-area.png"),
   fig_study_area,
   width = 15,
   height = 5.6,
@@ -1056,7 +1056,7 @@ fig_repparfjorden_conc <-
   ) &
   theme(legend.position = "bottom")
 ggsave(
-  here::here("figures/fig05-repparfjorden-concentrations.png"),
+  here::here("figures/fig06-repparfjorden-concentrations.png"),
   fig_repparfjorden_conc,
   width = 13,
   height = 6.6,

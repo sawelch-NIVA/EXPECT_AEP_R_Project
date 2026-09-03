@@ -1,0 +1,130 @@
+---
+title: "SPIN, UCN, and the environmental relevance of copper use categories"
+date: last-modified
+execute:
+  freeze: true   # parked: not in _quarto.yml's render list, not a target
+  echo: false
+---
+
+## Why this note exists
+
+The introduction figure @fig-reach-products (`figures/fig02-reach-products.png`,
+built by `R/fct_reach_products.R`) breaks Norwegian declared copper down by
+**use category** (`anvendelseskategori`). This note records what that
+classification actually is, where it is documented, and how much each category
+matters for copper *in the environment* -- because the tonnage ranking in the
+figure is a poor proxy for that.
+
+## The classification: Use Categories Nordic (UCN)
+
+- The `anvendelseskategori` codes in Produktregisteret are **UCN -- Use
+  Categories Nordic**.
+- Norway, Sweden and Denmark **harmonised** their product-register use
+  categories into UCN in **2002**. Finland kept the EU use-category system.
+- UCN is not a REACH artefact. It predates the harmonised REACH use-descriptor
+  system (Chapter R.12), and is rooted in the earlier Nordic product-register
+  practice. So it is a *cousin* of the REACH PC list, not a copy (see below).
+
+## Where it is written down
+
+| Resource | What it gives you |
+|---|---|
+| **SPIN** database guide, section 3.1.3 -- `spin2000.net` (older) / `spin2020.com` | The UCN code list and per-category definitions. SPIN (*Substances in Preparations / Products in Nordic Countries*) is the public front end to all four Nordic product registers. |
+| **KEMI** (Swedish Chemicals Agency), "About the Products Register" | The same codes, documented on the Swedish side. |
+| **Miljodirektoratet** -- Produktregisteret + `deklareringsforskriften` (FOR-2015-05-19-541) | Who runs the register, the declaration obligation (declared chemicals, >= 100 kg/yr), and the declaration guidance. |
+
+The SPIN site was intermittently unreachable when this note was written
+(2026-09); the section reference (3.1.3) and the KEMI page are the stable
+pointers.
+
+## UCN already encodes environmental relevance
+
+This is the useful part. UCN is **not just descriptive** -- SPIN assigns, per
+use category:
+
+- an **emission potential** by compartment (soil / water / air);
+- a **Use Index** and a **Use Exposure Number** (the latter weighted by, e.g.,
+  the volatile fraction of the substances declared under that category, which
+  raises the exposure number to air).
+
+SPIN's own worked example: *"the use category 'herbicides' indicates a high
+emission potential to soil, while 'biocidal products for human use' points to a
+high human exposure."*
+
+The REACH-world equivalent is the **ERC -- Environmental Release Category** in
+ECHA Guidance R.12: each use gets an ERC encoding wide-dispersive vs
+industrial-contained, and indoor vs outdoor.
+
+## Our eight lumped categories, ranked by what matters
+
+`reach_product_summary()` keeps the seven largest categories by declared net
+quantity and pools the rest as "Other". Ordered instead by **environmental
+relevance**:
+
+| Lumped category | ~ECHA R.12 PC | Release pattern | Environmental relevance |
+|---|---|---|---|
+| Insecticides & other plant pest control agents | PC27 | applied to fields/crops; deliberate outdoor dispersion (ERC 8d/8f) | **high** |
+| Biocides | PC8 | antifoulants, wood preservatives, disinfectants -> water / soil (ERC 8a-8f) | **high** |
+| Fertilisers, general | PC12 | spread on land; Cu as a micronutrient additive -> soil (ERC 8e/8f) | **high** |
+| Drilling chemicals incl. crude oil/gas | (no clean PC; ~PC40) | offshore; produced-water and cuttings discharge to sea | **high, marine-specific** |
+| Process control agents (pH-regulators, flocculants, precipitants) | PC20 | often water-treatment-adjacent; partial release to water (ERC 8a/8b) | medium |
+| Absorption and adsorption materials | PC2 | release mostly at end-of-life (spent adsorbent disposal) | low-medium |
+| Synthesis raw materials and intermediates | PC19 | consumed in further synthesis inside industrial installations; contained (ERC 6a) | **low** |
+| Other | mixed | paint, coatings, cleaning agents are dispersive; surface treatment, printing inks, polishes less so | mixed |
+
+## The headline
+
+**Tonnage is not environmental relevance.** "Synthesis raw materials and
+intermediates" is the single largest declared category (~40,000 t/yr net) but is
+a **contained industrial use** (PC19 / ERC 6a): the copper is consumed making
+another substance, with minimal environmental release. The uses that actually
+put copper *into* the Norwegian environment are the dispersive ones --
+**biocides, plant-protection products, fertilisers, and offshore drilling
+chemicals** -- which sit lower down the tonnage ranking.
+
+Consequence for the paper: if @fig-reach-products is used to argue "where does
+Norway's copper go", it needs that caveat in the text, or panel (a) should be
+ordered / annotated by release potential rather than (or alongside) tonnage. The
+tier column above is a first pass; it could become an `emission_tier` column on
+`reach_product_category_translations()` in `R/fct_reach_products.R`.
+
+## Data provenance
+
+- Source file: `inst/extdata/emissions/REACH_copper_prtd.xlsx`, sheet
+  `kobber sum på produkttype`.
+- Obtained from Miljodirektoratet by personal communication, **2 May 2025**
+  (correspondence quoted in `docs/NBXX-REACH.qmd`).
+- "Net quantity" = imported + produced - exported, per declaration. Declared
+  (`deklareringspliktige`) chemicals only, >= 100 kg/yr.
+- Reporting years **2018--2023**.
+- Norwegian -> English translation and the top-7-plus-"Other" lumping:
+  `reach_product_category_translations()` and `reach_product_lumped()` in
+  `R/fct_reach_products.R`.
+
+## The full translation table
+
+```{r}
+#| label: tbl-ucn-translations
+suppressMessages(pkgload::load_all(quiet = TRUE))
+reach_product_category_translations() |>
+  dplyr::arrange(.data$category_en) |>
+  knitr::kable(
+    col.names = c(
+      "Register category (Norwegian)", "English", "Confidence", "Note"
+    )
+  )
+```
+
+## References
+
+- SPIN -- Use Categories Nordic (UCN), section 3.1.3: <http://spin2000.net/?p=321>
+- SPIN -- Exposure Toolbox: <http://spin2000.net/?p=302>
+- KEMI -- About the Products Register:
+  <https://www.kemi.se/en/products-register/about-the-products-register>
+- ECHA -- Guidance on Information Requirements and Chemical Safety Assessment,
+  Chapter R.12 (Use Description):
+  <https://echa.europa.eu/documents/10162/17224/information_requirements_r12_en.pdf>
+- REACH use descriptors, PC / ERC quick reference:
+  <https://www.chemsafetypro.com/Topics/CRA/List_of_REACH_Use_Descriptors.html>
+- Deklareringsforskriften (FOR-2015-05-19-541):
+  <https://lovdata.no/dokument/SF/forskrift/2015-05-19-541>

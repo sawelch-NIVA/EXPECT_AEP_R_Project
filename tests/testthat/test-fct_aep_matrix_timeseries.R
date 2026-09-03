@@ -54,5 +54,5 @@ test_that("the plot builds and writes against the real store", {
     dir = out, width = 8, height = 6, dpi = 72
   )
   expect_true(file.exists(path))
-  expect_match(basename(path), "^fig07-aep1-timeseries\\.png$")
+  expect_match(basename(path), "^fig08-aep1-timeseries\\.png$")
 })
