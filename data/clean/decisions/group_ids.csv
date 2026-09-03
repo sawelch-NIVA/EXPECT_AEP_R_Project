@@ -250,3 +250,20 @@ Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Kidney,"Ocean, sea, territori
 Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Liver,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G250-Bm-Ows-Cy-cri-Liv-Mw
 Biota,"Biota, Aquatic",Mammals,Cystophora cristata,Muscle,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G251-Bm-Ows-Cy-cri-Mus-Mw
 Biota,"Biota, Aquatic",,,,"Ocean, sea, territorial waters",Water surface,mg/kg (wet),G252
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G253
+Biota,"Biota, Aquatic",Fish,Hippoglossoides platessoides,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G254
+Biota,"Biota, Aquatic",Fish,Gadus morhua,Liver,"Coastal, fjord",Water column,mg/kg (wet),G255
+Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G256
+Biota,"Biota, Aquatic",Fish,Hippoglossus hippoglossus,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G257
+Biota,"Biota, Aquatic",Fish,Hippoglossus hippoglossus,Liver,"Coastal, fjord",Water column,mg/kg (wet),G258
+Biota,"Biota, Aquatic",Fish,Melanogrammus aeglefinus,Liver,"Coastal, fjord",Water column,mg/kg (wet),G259
+Biota,"Biota, Aquatic",Crustaceans,Paralithodes camtschaticus,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G260
+Biota,"Biota, Aquatic",Fish,Amblyraja radiata,Liver,"Coastal, fjord",Water column,mg/kg (wet),G261
+Biota,"Biota, Aquatic",Fish,Amblyraja radiata,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G262
+Biota,"Biota, Aquatic",Fish,Glyptocephalus cynoglossus,Liver,"Coastal, fjord",Water column,mg/kg (wet),G263
+Biota,"Biota, Aquatic",Fish,Glyptocephalus cynoglossus,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G264
+Biota,"Biota, Aquatic",Crustaceans,Paralithodes camtschaticus,Hepatopancreas,"Coastal, fjord",Water column,mg/kg (wet),G265
+Biota,"Biota, Aquatic",Molluscs,Mytilus edulis,Total soft tissues,"Coastal, fjord",Water column,mg/kg (wet),G266
+Biota,"Biota, Aquatic",Fish,Hippoglossoides platessoides,Liver,"Coastal, fjord",Water column,mg/kg (wet),G267
+Biota,"Biota, Aquatic",Fish,Limanda limanda,Liver,"Coastal, fjord",Water column,mg/kg (wet),G268
+Biota,"Biota, Aquatic",Fish,Limanda limanda,Muscle,"Coastal, fjord",Water column,mg/kg (wet),G269

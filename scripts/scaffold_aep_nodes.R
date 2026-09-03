@@ -35,7 +35,7 @@ if (file.exists(nodes_path)) {
   example <- tibble::tibble(
     node_id = "N001-marine-water",
     label = "Marine water",
-    level = "medium",
+    level = "exposure_medium",
     node_type = "empirical",
     x = 0,
     y = 3,

@@ -10,7 +10,7 @@ node_fixture <- function(...) {
   base <- tibble::tibble(
     node_id = "N001",
     label = "Test node",
-    level = "medium",
+    level = "exposure_medium",
     node_type = "empirical",
     x = 0, y = 1,
     lat_min = NA_real_, lat_max = NA_real_,

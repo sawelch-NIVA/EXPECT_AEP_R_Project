@@ -87,7 +87,7 @@ test_that("scores drive the badge strip, blank renders grey not '1'", {
 test_that("write_aep_edge_cards writes one PNG per live edge per AEP subdir", {
   scoped <- list(
     A001 = tibble::tibble(node_id = c(
-      "N012-coast-benthic-sed", "N014-mussel-soft-tissue", "N015-g-morhua-liver"
+      "N012-coast-benthic-sed", "N014-mussel-soft-tissue", "N015-fish-liver"
     )),
     A002 = tibble::tibble(node_id = c(
       "N012-coast-benthic-sed", "N014-mussel-soft-tissue"
@@ -96,7 +96,7 @@ test_that("write_aep_edge_cards writes one PNG per live edge per AEP subdir", {
   edges <- dplyr::bind_rows(
     edge_card_fixture(edge_id = "E001"),
     edge_card_fixture(
-      edge_id = "E002", to = "N015-g-morhua-liver",
+      edge_id = "E002", to = "N015-fish-liver",
       label = "Sediment to cod liver"
     ),
     edge_card_fixture(

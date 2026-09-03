@@ -686,7 +686,7 @@ test_that("the real N016 exclusion resolves and is unimodal", {
   # matches nothing, putting the node back on all 44 rows.
   skip_if_not(file.exists(here::here("data/clean/aep/aep_nodes.csv")))
   n <- read_aep_nodes()
-  cell <- n$exclude_campaigns[n$node_id == "N016-g-morhua-muscle"]
+  cell <- n$exclude_campaigns[n$node_id == "N016-fish-muscle"]
   skip_if(is.na(cell))
   expect_false(
     grepl("Vannmiljø Copper Monitoring", cell, fixed = TRUE),

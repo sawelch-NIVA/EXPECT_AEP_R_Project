@@ -15,6 +15,10 @@ project:
     - docs/AP04-unit-corrections.qmd
     # Reads the six data/clean/aep/ CSVs live, same argument as AP04.
     - docs/AP05-aep.qmd
+    # Draws the study-area and Repparfjorden concentration maps the manuscript
+    # embeds; reads aep_manifest live, so a bounding-box edit must redraw it.
+    # render_nbxx_rfjord in _targets.R runs it upstream of render_index.
+    - docs/NBXX-rfjord-2.qmd
     # - docs/NBXX-Triage.qmd   # Phase 2, once it exists
 
 website:
@@ -34,6 +38,9 @@ website:
         contents:
           - href: docs/NBXX-Sample-Groups.qmd
             text: "Sample Groups"
+            icon: journal-code
+          - href: docs/NBXX-rfjord-2.qmd
+            text: "Repparfjorden Case Study"
             icon: journal-code
           # - href: docs/NBXX-Triage.qmd   # Phase 2, once it exists
           #   text: "Group Triage"

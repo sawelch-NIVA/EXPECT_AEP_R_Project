@@ -22,9 +22,21 @@ if (!"STOPAEP" %in% loadedNamespaces()) {
 }
 ```
 
+```{r}
+#| label: dep-figures
+#| include: false
+# Dependency edges for figures this section embeds by path (CLAUDE.md 4.4.2).
+# figures/fig02-study-area.png and figures/fig05-repparfjorden-concentrations.png come from
+# docs/NBXX-rfjord-2.qmd via render_nbxx_rfjord; the two matrix time series are
+# their own file targets. Values unused.
+invisible(targets::tar_read(render_nbxx_rfjord))
+invisible(targets::tar_read(aep_matrix_timeseries_a001))
+invisible(targets::tar_read(aep_matrix_timeseries_a002))
+```
+
 TODO: Proref for biota
 
-![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig-repparfjorden-conc.png){#fig-repparfjorden-conc}
+![Copper concentration data across the two Hammerfest-area AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the red box marks the extent of panel (b). (b) The inner fjord (AEP-002). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Basemap: Kartverket topografisk gråtone.](figures/fig05-repparfjorden-concentrations.png){#fig-repparfjorden-conc}
 
 ## Group Summary Statistics
 
@@ -91,6 +103,8 @@ tar_read(literature_analysis_ready) |>
   flextable::set_table_properties(layout = "autofit", width = 1)
 ```
 
+1,600 mg/kg value for sediment is extremely suspect, but is correct to Vannmiljø. So we ought to find some other rivers.
+
 ## Distributions
 
 - Overall top-down view of dataset and general distribution patterns
@@ -104,7 +118,7 @@ AEPs for the two case study sites are shown in @fig-repparfjord-aep and @fig-ham
 
 #### AEP 1: Hammerfest Inner Coastal System
 
-![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/aep-001-hammerfest.png){#fig-hammerfest-aep}
+![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig06-aep1-hammerfest.png){#fig-hammerfest-aep}
 
 ```{r}
 #| label: tbl-nodes-a001
@@ -116,9 +130,11 @@ tar_read(aep_node_cards) |>
   flextable::set_table_properties(layout = "autofit", width = 1)
 ```
 
+![Measured copper in the AEP-001 bounding box over time, one panel per compartment (cod liver, blue mussel, coastal water, sediment) in native units with a free y-axis per panel. Water and sediment points carry their M-608 quality class (Background / Good / Poor / Very Poor; copper skips M-608 Class III); cod and mussel sit on a separate above/below-PROREF scale. Dashed grey line is a linear fit where n >= 6 (an eyeball of trend, not a model); faint horizontal lines are PROREF or the M-608 class boundaries; the dotted vertical marks 2024. Strip text names the sample groups present.](figures/fig07-aep1-timeseries.png){#fig-a001-timeseries}
+
 #### AEP 2: Inner Reppafjorden
 
-![AEP 2: Repparfjord Inner Fjord](figures/aep-001-repparfjord-inner.png){#fig-repparfjord-aep}
+![AEP 2: Repparfjord Inner Fjord](figures/fig08-aep2-repparfjord.png){#fig-repparfjord-aep}
 
 ```{r}
 #| label: tbl-nodes-a002
@@ -129,3 +145,5 @@ tar_read(aep_node_cards) |>
   node_report_flextable(tar_read(aep_scoped)[["A002"]]) |>
   flextable::set_table_properties(layout = "autofit", width = 1)
 ```
+
+![Measured copper in the AEP-002 bounding box over time, as in @fig-a001-timeseries. The box is small and the data mostly pre-2016: two Kogel cod and two Kogel mussel samples, and Sternal 2017 plus Vannmiljo sediment cores spanning Background to Very Poor. Coastal water has no data.](figures/fig09-aep2-timeseries.png){#fig-a002-timeseries}

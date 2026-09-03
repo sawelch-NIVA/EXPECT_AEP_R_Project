@@ -1,15 +1,15 @@
 edge_id,from,to,label,status,magnitude,magnitude_unit,magnitude_n,magnitude_sd,magnitude_refs,essentiality_score,essentiality_justification,plausibility_score,plausibility_justification,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
 E001,N012-coast-benthic-sed,N014-mussel-soft-tissue,Coastal benthic sediment to Coastal mussels,putative,,,,,,,,,,,,,,
-E002,N012-coast-benthic-sed,N015-g-morhua-liver,Coastal benthic sediment to Coastal cod livers,putative,,,,,,,,,,,,,,
-E003,N012-coast-benthic-sed,N016-g-morhua-muscle,Coastal benthic sediment to Coastal cod muscle,putative,,,,,,,,,,,,,,
+E002,N012-coast-benthic-sed,N015-fish-liver,Coastal benthic sediment to fish liver,putative,,,,,,,,,,,,,,
+E003,N012-coast-benthic-sed,N016-fish-muscle,Coastal benthic sediment to fish muscle,putative,,,,,,,,,,,,,,
 E004,N013-coast-water-column,N014-mussel-soft-tissue,Coastal water to Coastal mussels,empirical,,,,,,,,,,,,,,
-E005,N013-coast-water-column,N015-g-morhua-liver,Coastal water to Coastal cod livers,putative,,,,,,,,,,,,,,
-E006,N013-coast-water-column,N016-g-morhua-muscle,Coastal water to Coastal cod muscle,putative,,,,,,,,,,,,,,
+E005,N013-coast-water-column,N015-fish-liver,Coastal water to fish liver,putative,,,,,,,,,,,,,,
+E006,N013-coast-water-column,N016-fish-muscle,Coastal water to fish muscle,putative,,,,,,,,,,,,,,
 E025,N003-mine-tailings,N012-coast-benthic-sed,Submarine tailing disposal to Benthic sediment,putative,,,,,,,,,,,,,,
 E026,N003-mine-tailings,N013-coast-water-column,Mine tailings to fjord water,putative,,,,,,,,,,,,,,"Although STD could reasonably emit to water column, it makes more sense to me to model this through the existing Sediment -> Water column edge"
 E027,N003-mine-tailings,N014-mussel-soft-tissue,Submarine tailing disposal to Mussel soft tissue,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E028,N003-mine-tailings,N015-g-morhua-liver,Submarine tailing disposal to G. morhua liver,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
-E029,N003-mine-tailings,N016-g-morhua-muscle,Submarine tailing disposal to G. morhua muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E028,N003-mine-tailings,N015-fish-liver,Submarine tailing disposal to fish liver,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E029,N003-mine-tailings,N016-fish-muscle,Submarine tailing disposal to fish muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
 E037,N003-mine-tailings,N023-marine-macroalgae,Submarine tailing disposal to Marine macroalgae,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
 E038,N012-coast-benthic-sed,N023-marine-macroalgae,Benthic sediment to Marine macroalgae,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
 E039,N013-coast-water-column,N023-marine-macroalgae,Water column to Marine macroalgae,putative,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
@@ -22,3 +22,9 @@ E095,N027-river-water-column,N013-coast-water-column,River water to fjord water,
 E096,N028-river-benthic-sed,N012-coast-benthic-sed,River sediment to fjord sediment,putative,,,,,,,,,,,,,,
 E097,N037-reach-use-pop-weighted,N012-coast-benthic-sed,Reported REACH use to fjord sediment,putative,,,,,,,,,,,,,,
 E098,N037-reach-use-pop-weighted,N013-coast-water-column,Reported REACH use to fjord water,putative,,,,,,,,,,,,,,
+E099,N012-coast-benthic-sed,N040-crustacean-muscle,Coastal benthic sediment to crustacean muscle,putative,,,,,,,,,,,,,,Added 2026-09-02
+E100,N013-coast-water-column,N040-crustacean-muscle,Coastal water to crustacean muscle,putative,,,,,,,,,,,,,,Added 2026-09-02
+E101,N012-coast-benthic-sed,N041-crustacean-hepatopancreas,Coastal benthic sediment to crustacean hepatopancreas,putative,,,,,,,,,,,,,,Added 2026-09-02
+E102,N013-coast-water-column,N041-crustacean-hepatopancreas,Coastal water to crustacean hepatopancreas,putative,,,,,,,,,,,,,,Added 2026-09-02
+E103,N003-mine-tailings,N040-crustacean-muscle,Submarine tailing disposal to crustacean muscle,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges
+E104,N003-mine-tailings,N041-crustacean-hepatopancreas,Submarine tailing disposal to crustacean hepatopancreas,rejected,,,,,,,,,,,,,,Indirect; mediated by intermediate nodes/edges

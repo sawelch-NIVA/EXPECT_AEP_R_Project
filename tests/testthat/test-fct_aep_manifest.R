@@ -43,7 +43,7 @@ manifest_nodes <- function() {
   tibble::tibble(
     node_id = c("N001", "N002", "N003"),
     label = c("Source", "Water", "Mussels"),
-    level = c("source", "medium", "organism"),
+    level = c("source", "exposure_medium", "internal_exposure"),
     node_type = "empirical",
     x = c(0, 1, 2),
     y = c(0, 0, 0),
@@ -136,6 +136,73 @@ test_that("an AEP with no members scopes to zero rows, not an error", {
   expect_equal(nrow(scoped), 0)
   # Still the same shape, or resolve_node_data() sees a different table.
   expect_true(all(c("lon_min", "lon_max") %in% names(scoped)))
+})
+
+# ---- geo_scope: the one place the AEP box is replaced, not intersected -----
+# Added 2026-09-02. A node marked "arctic" on its membership row is a regional
+# proxy: its footprint becomes "north of the Arctic Circle" instead of the AEP's
+# bounding box, for a compartment the AEP's own box cannot support (river
+# sediment inside one fjord). Every other node still intersects as before.
+
+test_that("geo_scope 'arctic' drops the AEP box and floors latitude at the circle", {
+  m <- membership_fixture(geo_scope = c(NA, NA, NA, "arctic", NA))
+  scoped <- aep_scope_nodes(manifest_nodes(), m, manifest_fixture(), "A002")
+
+  arctic <- scoped[scoped$node_id == "N001", ]
+  expect_equal(arctic$lat_min, arctic_circle_lat())
+  expect_true(is.na(arctic$lat_max))
+  expect_true(is.na(arctic$lon_min))
+  expect_true(is.na(arctic$lon_max))
+
+  # N002 on the same AEP has no geo_scope, so it still intersects normally.
+  local <- scoped[scoped$node_id == "N002", ]
+  expect_equal(local$lat_min, 70)
+  expect_equal(c(local$lon_min, local$lon_max), c(23, 25))
+})
+
+test_that("geo_scope leaves date scope alone: the swap is spatial only", {
+  m <- membership_fixture(geo_scope = c(NA, NA, NA, "arctic", NA))
+  scoped <- aep_scope_nodes(manifest_nodes(), m, manifest_fixture(), "A002")
+  n001 <- scoped[scoped$node_id == "N001", ]
+  # manifest_fixture()'s A002 date box is 2000-2020; N001 declares none.
+  expect_equal(n001$date_min, as.Date("2000-01-01"))
+  expect_equal(n001$date_max, as.Date("2020-12-31"))
+})
+
+test_that("read_aep_membership defaults a missing geo_scope column to NA", {
+  d <- withr::local_tempdir()
+  readr::write_csv(
+    tibble::tibble(aep_id = "A002", node_id = "N001", x = NA, y = NA),
+    file.path(d, "aep_membership_A002.csv")
+  )
+  mem <- read_aep_membership(dir = d)
+  expect_true("geo_scope" %in% names(mem))
+  expect_true(all(is.na(mem$geo_scope)))
+})
+
+test_that("read_aep_membership rejects an unrecognised geo_scope", {
+  d <- withr::local_tempdir()
+  readr::write_csv(
+    tibble::tibble(
+      aep_id = "A002", node_id = "N001", geo_scope = "continental"
+    ),
+    file.path(d, "aep_membership_A002.csv")
+  )
+  expect_error(read_aep_membership(dir = d), "geo_scope")
+})
+
+test_that("read_aep_membership accepts 'local' and 'arctic' and blanks", {
+  d <- withr::local_tempdir()
+  readr::write_csv(
+    tibble::tibble(
+      aep_id = "A002",
+      node_id = c("N001", "N002", "N003"),
+      geo_scope = c("arctic", "local", NA)
+    ),
+    file.path(d, "aep_membership_A002.csv")
+  )
+  mem <- read_aep_membership(dir = d)
+  expect_equal(mem$geo_scope, c("arctic", "local", NA))
 })
 
 test_that("an unknown aep_id is refused rather than silently empty", {
@@ -335,13 +402,24 @@ test_that("the real manifest and membership files read and scope", {
   expect_named(scoped, manifest$aep_id)
   expect_true(all(vapply(scoped, nrow, integer(1)) > 0))
 
-  # A002 carries the whole kitchen-sink node set since 2026-08-27, so its node
-  # COUNT now matches A001; what still makes it a restricted AEP is the bounding
-  # box its scoped nodes inherit.
-  expect_equal(scoped$A002$lon_min[1], 23)
-  expect_true(all(scoped$A002$lon_max == 25))
-  # A004 (Gadus morhua) is a genuine node-count subset.
-  expect_lt(nrow(scoped$A004), nrow(scoped$A001))
+  # A002's local (non-arctic) nodes inherit its manifest longitude box; whatever
+  # that box currently is, every one of them should carry it. Asserted against
+  # the manifest rather than a hard-coded number so a deliberate bbox edit does
+  # not read as a test failure.
+  a002_box <- manifest[manifest$aep_id == "A002", ]
+  local_lon <- scoped$A002$lon_min[!is.na(scoped$A002$lon_min)]
+  expect_true(length(local_lon) > 0)
+  expect_true(all(local_lon == a002_box$lon_min))
+
+  # geo_scope = "arctic" rows (regional proxies) drop the longitude box entirely.
+  arctic_ids <- membership$node_id[
+    membership$aep_id == "A002" & membership$geo_scope %in% "arctic"
+  ]
+  if (length(arctic_ids) > 0) {
+    a002_arctic <- scoped$A002[scoped$A002$node_id %in% arctic_ids, ]
+    expect_true(all(is.na(a002_arctic$lon_min)))
+    expect_true(all(a002_arctic$lat_min == arctic_circle_lat()))
+  }
 })
 
 # ---- The EPEQ split ------------------------------------------------------

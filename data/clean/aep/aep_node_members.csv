@@ -3,11 +3,83 @@ N012-coast-benthic-sed,G002-Wsd-Cwb-Md,Coastal sediment
 N013-coast-water-column,G004-Wmw-Cwc-C,Coastal water
 N014-mussel-soft-tissue,G005-Bl-Cnr-M-edu-Tst-Mw,Coastal mussels (SF not reported)
 N014-mussel-soft-tissue,G007-Bl-Cwc-M-edu-Tst-Mw,Coastal mussels (SF benthos)
-N015-g-morhua-liver,G006-Bf-Cnr-G-mor-Liv-Mw,Coastal cod livers
-N016-g-morhua-muscle,G047-Bf-Cnr-G-mor-Mus-Mw,Coastal cod muscle
+N014-mussel-soft-tissue,G266,Kogel 2026 M. edulis total soft tissue (the in-box mussel data); added 2026-09-02
+N015-fish-liver,G006-Bf-Cnr-G-mor-Liv-Mw,
+N015-fish-liver,G028-Bf-Onr-G-mor-Liv-Mw,
+N015-fish-liver,G041-Bf-Cnr-P-fle-Liv-Mw,
+N015-fish-liver,G042-Bf-Lnr-C-lav-Liv-Mw,
+N015-fish-liver,G058-Bf-Lnr-S-alp-Liv-Mw,
+N015-fish-liver,G063-Bf-Lnr-E-luc-Liv-Mw,
+N015-fish-liver,G071-Bf-Lnr-P-flu-Liv-Mw,
+N015-fish-liver,G079-Bf-Lnr-S-tru-Liv-Mw,
+N015-fish-liver,G083-Bf-Cnr-L-lim-Liv-Mw,
+N015-fish-liver,G086-Bf-Lnr-L-lot-Liv-Mw,
+N015-fish-liver,G091-Bf-Lnr-T-thy-Liv-Mw,
+N015-fish-liver,G103-Bf-Rnr-B-bjo-Liv-Mw,
+N015-fish-liver,G107-Bf-Rnr-A-bra-Liv-Mw,
+N015-fish-liver,G111-Bf-Lnr-G-cer-Liv-Mw,
+N015-fish-liver,G119-Bf-Rot-S-tru-Liv-Mw,
+N015-fish-liver,G120-Bf-Rnr-S-luc-Liv-Mw,
+N015-fish-liver,G140-Bf-Cnr-P-pla-Liv-Mw,
+N015-fish-liver,G143-Bf-Rnr-R-rut-Liv-Mw,
+N015-fish-liver,G159-Bf-Cnr-B-bro-Liv-Mw,
+N015-fish-liver,G164-Bf-Rnr-P-flu-Liv-Mw,
+N015-fish-liver,G174-Bf-Rnr-E-luc-Liv-Mw,
+N015-fish-liver,G176-Bf-Onr-L-nas-Liv-Mw,
+N015-fish-liver,G180-Bf-Onr-S-aca-Liv-Mw,
+N015-fish-liver,G191-Bf-Cnr-Acti-Liv-Mw,
+N015-fish-liver,G194-Bf-Cnr-Gadi-Liv-Mw,
+N015-fish-liver,G197-Bf-Rnr-L-idu-Liv-Mw,
+N015-fish-liver,G200-Bf-Cnr-P-pol-Liv-Mw,
+N015-fish-liver,G213-Bf-Cnr-L-ber-Liv-Mw,
+N015-fish-liver,G218-Bf-Cnr-M-aeg-Liv-Mw,
+N015-fish-liver,G255,
+N015-fish-liver,G258,
+N015-fish-liver,G259,
+N015-fish-liver,G261,
+N015-fish-liver,G263,
+N015-fish-liver,G267,
+N015-fish-liver,G268,
+N016-fish-muscle,G035-Bf-Lnr-C-lav-Mus-Mw,
+N016-fish-muscle,G047-Bf-Cnr-G-mor-Mus-Mw,
+N016-fish-muscle,G048-Bf-Lnr-P-flu-Mus-Mw,
+N016-fish-muscle,G049-Bf-Owc-R-hip-Mus-Mw,
+N016-fish-muscle,G054-Bf-Lnr-S-tru-Mus-Mw,
+N016-fish-muscle,G056-Bf-Lnr-E-luc-Mus-Mw,
+N016-fish-muscle,G082-Bf-Cnr-C-har-Mus-Mw,
+N016-fish-muscle,G092-Bf-Lnr-T-thy-Mus-Mw,
+N016-fish-muscle,G095-Bf-Lnr-S-alp-Mus-Mw,
+N016-fish-muscle,G105-Bf-Rnr-S-tru-Mus-Mw,
+N016-fish-muscle,G139-Bf-Cnr-B-bro-Mus-Mw,
+N016-fish-muscle,G141-Bf-Cnr-P-pla-Mus-Mw,
+N016-fish-muscle,G161-Bf-Rnr-L-cep-Mus-Mw,
+N016-fish-muscle,G162-Bf-Cnr-M-aeg-Mus-Mw,
+N016-fish-muscle,G175-Bf-Rnr-E-luc-Mus-Mw,
+N016-fish-muscle,G177-Bf-Cnr-M-mol-Mus-Mw,
+N016-fish-muscle,G179-Bf-Cnr-P-pol-Mus-Mw,
+N016-fish-muscle,G192-Bf-Cnr-Acti-Mus-Mw,
+N016-fish-muscle,G195-Bf-Cnr-Gadi-Mus-Mw,
+N016-fish-muscle,G198-Bf-Rnr-P-flu-Mus-Mw,
+N016-fish-muscle,G214-Bf-Cnr-L-ber-Mus-Mw,
+N016-fish-muscle,G217-Bf-Cnr-L-lim-Mus-Mw,
+N016-fish-muscle,G219-Bf-Cnr-P-fle-Mus-Mw,
+N016-fish-muscle,G223-Bf-Onr-S-mic-Mus-Mw,
+N016-fish-muscle,G253,
+N016-fish-muscle,G254,
+N016-fish-muscle,G256,
+N016-fish-muscle,G257,
+N016-fish-muscle,G262,
+N016-fish-muscle,G264,
+N016-fish-muscle,G269,
 N022-marine-benthic-inverts,G040-Bi-Cwb-A-rub-Pyl-Md,Marine benthic inverts
 N023-marine-macroalgae,G033-Ba-Cnr-A-nod-Sti-Mw,Marine macroalgae
 N023-marine-macroalgae,G147-Ba-Cnr-A-nod-Pla-Mw,Marine macroalgae; potential pollution signal but small samples
 N023-marine-macroalgae,G036-Ba-Cnr-F-ves-Sti-Mw,Marine macroalgae; potential pollution signal but small samples
 N027-river-water-column,G001-Wfw-Rwc-C,River/stream/canal water column
 N028-river-benthic-sed,G008-Wsd-Rwb-Md,River/stream/canal sediment
+N040-crustacean-muscle,G011-Bc-Cnr-C-pag-Mus-Mw,Cancer pagurus (national bulk; no in-box data)
+N040-crustacean-muscle,G109-Bc-Cnr-P-bor-Mus-Mw,Pandalus borealis
+N040-crustacean-muscle,G209-Bc-Cnr-N-nor-Mus-Mw,Nephrops norvegicus
+N040-crustacean-muscle,G260,Paralithodes camtschaticus (king crab; the in-box group)
+N041-crustacean-hepatopancreas,G158-Bc-Cnr-C-pag-Liv-Mw,Cancer pagurus hepatopancreas (labelled 'liver')
+N041-crustacean-hepatopancreas,G265,Paralithodes camtschaticus hepatopancreas (the in-box group)

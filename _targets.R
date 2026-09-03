@@ -119,7 +119,7 @@ tar_option_set(
     # At 3 the aggregate branch time inflates from 117 s to 197 s: the workers
     # contend for memory rather than for cores. Do not raise this without
     # re-measuring aggregate branch seconds, not just wall clock.
-    workers = 2,
+    workers = 1,
     seconds_idle = 60
   )
 )
@@ -1043,7 +1043,9 @@ list(
       sites = nrow(vm_filtered_sites),
       dates = nrow(vm_filtered_dates),
       compartment_conflicts = nrow(vm_compartment_conflicts_resolved_removed),
-      geographic_conflicts = nrow(vm_compartment_geo_conflicts_resolved_removed),
+      geographic_conflicts = nrow(
+        vm_compartment_geo_conflicts_resolved_removed
+      ),
       analysis = nrow(vm_sites_split_clean)
     ))
   ),
@@ -1593,7 +1595,9 @@ list(
   # then invalidate the weighting.
   tar_target(
     name = ssb_employment_sections_file,
-    command = here_rel("data/clean/derived/ssb_employment_hammerfest_sections.csv"),
+    command = here_rel(
+      "data/clean/derived/ssb_employment_hammerfest_sections.csv"
+    ),
     format = "file"
   ),
   tar_target(
@@ -1602,7 +1606,10 @@ list(
   ),
   tar_target(
     name = reach_hammerfest_weighted,
-    command = weight_reach_to_hammerfest(reach_sector_years, ssb_employment_sections)
+    command = weight_reach_to_hammerfest(
+      reach_sector_years,
+      ssb_employment_sections
+    )
   ),
   tar_target(
     name = prtr_emissions_dir,
@@ -1622,7 +1629,7 @@ list(
     command = write_hammerfest_emissions_panel(
       reach_hammerfest_weighted,
       prtr_hammerfest_series_data,
-      here_rel("figures/hammerfest_emissions.png")
+      here_rel("figures/fig04-hammerfest-emissions.png")
     ),
     format = "file"
   ),
@@ -1780,6 +1787,33 @@ list(
     command = generate_copper_thresholds()
   ),
 
+  ## # Manuscript figures ----
+
+  ### # Per-AEP matrix time series ----
+  # Copper in cod / mussel / coastal water / sediment inside each AEP box, over
+  # time, native units, one free y-axis per compartment. Water and sediment
+  # carry their M-608 class (four classes -- copper skips M-608 III --
+  # consistent with fig05-repparfjorden-concentrations); biota sit on a separate
+  # above/below-PROREF scale. format = "file" per CLAUDE.md 4.4: the target
+  # caches the PNG, not the ggplot. Embedded in _03-results.qmd's per-AEP
+  # subsections, so render_index depends on both via a tar_read() there.
+  tar_target(
+    name = aep_matrix_timeseries_a001,
+    command = write_aep_matrix_timeseries(
+      "A001", literature_analysis_ready, copper_toxicity_thresholds,
+      group_ids, aep_manifest
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name = aep_matrix_timeseries_a002,
+    command = write_aep_matrix_timeseries(
+      "A002", literature_analysis_ready, copper_toxicity_thresholds,
+      group_ids, aep_manifest
+    ),
+    format = "file"
+  ),
+
   ## # Quarto Reports ----
   # Trimmed 2026-07-29 (PLAN.md P0.2 / Phase 0). Quarto rendering is by far the
   # slowest part of this pipeline, so only documents under active work get a
@@ -1792,6 +1826,23 @@ list(
   # at the repo root replaces it.)
   #
   # To un-park one: add it back here AND to the render list in _quarto.yml.
+
+  ### # Figure-source notebook, upstream of the manuscript ----
+  # docs/NBXX-rfjord-2.qmd is not really a site page: it exists to (re)draw the
+  # study-area and Repparfjorden concentration maps the manuscript embeds
+  # (figures/fig02-study-area.png, figures/fig05-repparfjorden-concentrations.png). It
+  # tar_read()s aep_manifest and the literature targets, so editing a bounding
+  # box now redraws these figures on tar_make() rather than needing a hand
+  # `quarto render`. render_index is chained AFTER it by a hidden
+  # tar_read(render_nbxx_rfjord) in _03-results.qmd (CLAUDE.md 4.4.2). Also listed
+  # in _quarto.yml's `project: render:`, or a project build would skip it.
+  # Note: it pulls Kartverket basemap tiles over the network, so it is slower and
+  # less hermetic than the other render targets.
+  tar_quarto(
+    name = render_nbxx_rfjord,
+    path = "docs/NBXX-rfjord-2.qmd",
+    quiet = FALSE
+  ),
 
   ### # Manuscript (html for review, docx for sharing) ----
   tar_quarto(

@@ -1,4 +1,4 @@
 group_key,label,node_ids,notes
-coastal,Coastal,N012-coast-benthic-sed;N013-coast-water-column;N014-mussel-soft-tissue;N015-g-morhua-liver;N016-g-morhua-muscle;N022-marine-benthic-inverts;N023-marine-macroalgae,Coastal fjord system.
-cod,Cod,N015-g-morhua-liver;N016-g-morhua-muscle,G. morhua tissues; nests inside coastal.
+coastal,Coastal,N012-coast-benthic-sed;N013-coast-water-column;N014-mussel-soft-tissue;N015-fish-liver;N016-fish-muscle;N022-marine-benthic-inverts;N023-marine-macroalgae;N040-crustacean-muscle;N041-crustacean-hepatopancreas,Coastal fjord system.
+fish,Fish,N015-fish-liver;N016-fish-muscle,Fish tissues; nests inside coastal.
 freshwater,Freshwater,N027-river-water-column;N028-river-benthic-sed,"Riverine compartments, upstream of the fjord."

@@ -167,6 +167,14 @@ read_aep_manifest <- function(
 #' it. Blank falls back to the node's own `x`/`y`, so the single-AEP files that
 #' predate this layer keep working unchanged.
 #'
+#' `geo_scope` (added 2026-09-02) is how a node's data footprint relates to the
+#' AEP's own scope. Blank or `local` (the default) clips the node to the AEP's
+#' bounding box, as before this column existed. `arctic` marks the node a
+#' **regional proxy**: its footprint is *replaced*, not intersected, with
+#' `LATITUDE >= arctic_circle_lat()` and no longitude bound. It exists for a
+#' compartment where the AEP's own box holds too little to score, e.g. river
+#' sediment inside one fjord's box. See [aep_scope_nodes()].
+#'
 #' @return A zero-row tibble.
 #' @export
 empty_aep_membership <- function() {
@@ -175,6 +183,7 @@ empty_aep_membership <- function() {
     node_id = character(0),
     x = numeric(0),
     y = numeric(0),
+    geo_scope = character(0),
     evidence_score = numeric(0),
     evidence_justification = character(0),
     quantification_score = numeric(0),
@@ -199,6 +208,18 @@ aep_scoped_epeq_cols <- function() {
     "quantification_score",
     "quantification_justification"
   )
+}
+
+#' Permitted `geo_scope` Values on the Membership File
+#'
+#' `local` (also the meaning of a blank cell) clips a node to the AEP's
+#' bounding box. `arctic` replaces that box with "north of the Arctic Circle".
+#' See [empty_aep_membership()] and [aep_scope_nodes()].
+#'
+#' @return A character vector.
+#' @export
+aep_geo_scope_levels <- function() {
+  c("local", "arctic")
 }
 
 #' Read and Validate the AEP Membership Files
@@ -320,6 +341,27 @@ read_aep_membership <- function(
     membership$notes <- NA_character_
   }
 
+  # geo_scope: blank / "local" (default) clips to the AEP box; "arctic" replaces
+  # it with LATITUDE >= arctic_circle_lat(). Absent on files that predate this
+  # column, which read as all-local. An unrecognised value is a build failure
+  # rather than a silent fall-through to "local", same treatment as an unknown
+  # decision or an inverted bound.
+  if (!"geo_scope" %in% names(membership)) {
+    membership$geo_scope <- NA_character_
+  }
+  gs <- trimws(membership$geo_scope)
+  gs[!is.na(gs) & !nzchar(gs)] <- NA_character_
+  bad_scope <- !is.na(gs) & !gs %in% aep_geo_scope_levels()
+  if (any(bad_scope)) {
+    stop(
+      sum(bad_scope), " membership row(s) have an unrecognised geo_scope: ",
+      paste(sQuote(unique(gs[bad_scope])), collapse = ", "),
+      ". Permitted: ", paste(aep_geo_scope_levels(), collapse = ", "),
+      ", or blank for local."
+    )
+  }
+  membership$geo_scope <- gs
+
   # The two AEP-scoped EPEQ criteria. Absent columns default to blank, which
   # means "inherit from the node", so a membership file written before this
   # split still reads.
@@ -433,6 +475,12 @@ read_aep_membership <- function(
 #' the two. Replacing either would let an AEP quietly widen a node past the limit
 #' its own row asserts.
 #'
+#' **The one exception is `geo_scope = "arctic"` on the membership row**, which
+#' deliberately replaces the AEP's box for that node with `LATITUDE >=`
+#' [arctic_circle_lat()] and no longitude bound. It is opt-in per node per AEP,
+#' for a compartment the AEP's own footprint cannot support (river sediment
+#' inside a single fjord). Date scope is still intersected; the swap is spatial.
+#'
 #' The result is an ordinary nodes table, which is the point: every function
 #' downstream of here ([aep_node_report_cards()], [write_node_cards()],
 #' [plot_aep()]) is unchanged and does not know that AEPs exist.
@@ -456,9 +504,11 @@ aep_scope_nodes <- function(nodes, membership, manifest, aep_id) {
   out <- nodes[nodes$node_id %in% mine$node_id, , drop = FALSE]
   if (nrow(out) == 0) {
     # Still needs the longitude columns, or resolve_node_data() sees a table
-    # shaped differently from every other AEP's.
+    # shaped differently from every other AEP's. geo_scope likewise, so the card
+    # renderer can read it off any scoped node table.
     out$lon_min <- numeric(0)
     out$lon_max <- numeric(0)
+    out$geo_scope <- character(0)
     return(out)
   }
 
@@ -485,6 +535,18 @@ aep_scope_nodes <- function(nodes, membership, manifest, aep_id) {
   out$lon_min <- scope$lon_min[1]
   out$lon_max <- scope$lon_max[1]
 
+  # Carried onto the scoped node so the card renderer can mark it (a pin for a
+  # box-specific node, a globe for a regional one). Read here rather than
+  # recomputed downstream: this is the one place that knows the membership row.
+  # `%in% names()` guarded, same as the EPEQ columns above: read_aep_membership()
+  # always supplies geo_scope, but a hand-built membership tibble in a test need
+  # not, and `$` on an absent tibble column warns.
+  out$geo_scope <- if ("geo_scope" %in% names(row)) {
+    row$geo_scope
+  } else {
+    NA_character_
+  }
+
   # NOT ifelse(). It drops attributes, so a Date column came back as a bare
   # number of days and resolve_node_data() rejected it on the spot. That refusal
   # is itself a guard added after a bare year silently emptied every node
@@ -500,6 +562,22 @@ aep_scope_nodes <- function(nodes, membership, manifest, aep_id) {
   out$lat_max <- tighter(out$lat_max, scope$lat_max[1], pmin)
   out$date_min <- tighter(out$date_min, scope$date_min[1], pmax)
   out$date_max <- tighter(out$date_max, scope$date_max[1], pmin)
+
+  # geo_scope = "arctic" is the one place a node's footprint is REPLACED rather
+  # than intersected. The node is a regional proxy: drop the AEP's longitude box
+  # entirely, and pull its latitude box down to a floor of arctic_circle_lat().
+  # Date scope still applies, the substitution is spatial only. Runs last so it
+  # overrides the intersection above for those rows and nothing else touches
+  # them afterwards. See read_aep_membership() and the header of this file.
+  if ("geo_scope" %in% names(row)) {
+    arctic <- !is.na(row$geo_scope) & row$geo_scope == "arctic"
+    if (any(arctic)) {
+      out$lon_min[arctic] <- NA_real_
+      out$lon_max[arctic] <- NA_real_
+      out$lat_min[arctic] <- arctic_circle_lat()
+      out$lat_max[arctic] <- NA_real_
+    }
+  }
 
   out
 }

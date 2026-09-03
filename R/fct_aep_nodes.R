@@ -36,20 +36,38 @@ arctic_circle_lat <- function() {
 
 #' Permitted Node Levels
 #'
-#' The vertical position of a node in the pathway, and the reason `y` is
+#' The stage of a node in the aggregate exposure pathway, and the reason `y` is
 #' hand-placed rather than laid out automatically: vertical position carries
 #' source-to-exposure meaning, so an automatic graph layout is actively wrong
 #' here (PLAN.md P5.1).
 #'
-#' * `source` -- a release: emissions, tonnage, an industrial sector.
-#' * `medium` -- an environmental compartment carrying copper.
-#' * `organism` -- a taxon or tissue in which copper is measured.
-#' * `tse` -- a target site exposure, the end of the pathway.
+#' Split from the original four (`source` / `medium` / `organism` / `tse`) into
+#' the five canonical AEP stages on 2026-09-03, so an example pathway has one
+#' node per stage (Sam). The old `medium` maps to `exposure_medium` and the old
+#' `organism` to `internal_exposure`; `external_exposure` and
+#' `target_site_exposure` are new and are empty in the real AEPs, which hold no
+#' boundary-contact or site-of-action measurements.
 #'
-#' @return A character vector.
+#' * `source` -- a release: emissions, tonnage, an industrial sector.
+#' * `exposure_medium` -- an environmental compartment carrying copper
+#'   (water, sediment, air, food).
+#' * `external_exposure` -- copper at the organism boundary: the concentration
+#'   contacted or the intake rate, before uptake.
+#' * `internal_exposure` -- copper measured inside the organism: a tissue or
+#'   whole-body burden.
+#' * `target_site_exposure` -- copper at the site of toxic action, the end of
+#'   the pathway.
+#'
+#' @return A character vector, in pathway order.
 #' @export
 aep_node_levels <- function() {
-  c("source", "medium", "organism", "tse")
+  c(
+    "source",
+    "exposure_medium",
+    "external_exposure",
+    "internal_exposure",
+    "target_site_exposure"
+  )
 }
 
 #' Permitted Node Types

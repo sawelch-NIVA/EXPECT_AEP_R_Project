@@ -9,7 +9,7 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests:
-    png,
+    rsvg,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports:
@@ -29,6 +29,7 @@ Imports:
     ggh4x,
     ggimage,
     ggiraph,
+    ggnewscale,
     ggplot2,
     ggraph,
     ggridges,
@@ -49,6 +50,7 @@ Imports:
     oce,
     patchwork,
     pkgload,
+    png,
     pointblank,
     purrr,
     qs2,

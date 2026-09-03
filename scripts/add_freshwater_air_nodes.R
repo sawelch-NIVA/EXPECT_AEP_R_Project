@@ -44,7 +44,7 @@ stopifnot(!any(c("N027-river-water-column", "N028-river-benthic-sed",
                  "N029-air") %in% nodes$node_id))
 
 # ---- 1. shift media and organisms right ---------------------------------
-shift <- nodes$level %in% c("medium", "organism") & !is.na(nodes$x)
+shift <- nodes$level %in% c("exposure_medium", "internal_exposure") & !is.na(nodes$x)
 nodes$x[shift] <- nodes$x[shift] + 1.3
 
 # ---- 2. the new nodes ----------------------------------------------------
@@ -52,7 +52,7 @@ blank <- nodes[0, ]
 new <- tibble::tibble(
   node_id = c("N027-river-water-column", "N028-river-benthic-sed", "N029-air"),
   label = c("River water", "River sediment", "Air"),
-  level = "medium",
+  level = "exposure_medium",
   # Air is external because the pipeline HAS NO AIR DATA: the raw Vannmiljo
   # export carries 1,123 ng/m3 rows and vm_filter_compartments() drops them
   # before anything downstream sees them (CLAUDE.md 9c). Making it empirical

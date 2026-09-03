@@ -32,7 +32,7 @@ edge_nodes <- function() {
   tibble::tibble(
     node_id = c("N001", "N002", "N003"),
     label = c("Source", "Water", "Mussels"),
-    level = c("source", "medium", "organism"),
+    level = c("source", "exposure_medium", "internal_exposure"),
     node_type = "empirical",
     x = c(0, 1, 2),
     y = c(0, 0, 0),

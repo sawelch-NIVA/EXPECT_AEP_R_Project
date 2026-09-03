@@ -335,7 +335,7 @@ box_study <- st_as_sfc(st_bbox(
 view_norway <- c(xmin = 4, xmax = 31.5, ymin = 57.5, ymax = 71.5) # fig1 a (mainland)
 view_hamm <- c(xmin = 20.6, xmax = 24.6, ymin = 70.28, ymax = 71.7) # fig1 b (+ oil fields); ymax clears the Snøhvit circle (top ~71.60)
 view_zoom <- c(xmin = 23.52, xmax = 24.40, ymin = 70.43, ymax = 70.77) # fig1 c
-view_b <- c(xmin = 23.33, xmax = 24.52, ymin = 70.34, ymax = 70.82) # fig2 a (contains both AEP boxes)
+view_b <- c(xmin = 23.33, xmax = 24.58, ymin = 70.34, ymax = 70.82) # fig2 a (contains both AEP boxes; xmax clears A002 lon_max 24.53)
 view_c <- c(xmin = 24.20, xmax = 24.39, ymin = 70.430, ymax = 70.490) # fig2 b
 box_c <- st_transform(st_as_sfc(st_bbox(view_c, crs = st_crs(4326))), 3857)
 box_zoom <- st_transform(
@@ -831,7 +831,7 @@ fig_study_area <- patchwork::wrap_plots(
   widths = c(0.75, 1, 1)
 )
 ggsave(
-  here::here("figures/fig-study-area.png"),
+  here::here("figures/fig02-study-area.png"),
   fig_study_area,
   width = 15,
   height = 5.6,
@@ -1056,7 +1056,7 @@ fig_repparfjorden_conc <-
   ) &
   theme(legend.position = "bottom")
 ggsave(
-  here::here("figures/fig-repparfjorden-conc.png"),
+  here::here("figures/fig05-repparfjorden-concentrations.png"),
   fig_repparfjorden_conc,
   width = 13,
   height = 6.6,

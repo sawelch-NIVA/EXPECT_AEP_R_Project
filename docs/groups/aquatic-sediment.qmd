@@ -63,7 +63,7 @@ Aquatic / Aquatic Sediment / mg/kg (dry)
 
 # Comparison
 
-::: {.callout-note}
+::: callout-note
 Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Sediment from different site times probably are slightly different, because biogeochemistry, hydrology, etc. will be different, but this might not be a strong enough signal. We also have some very small sample sizes. My initial reaction is that we should drop any samples that correspond to suspended sediment (e.g. *Water column, pelagic zone* rather than *Water benthos*), because they're a small proportion of the overall group and they require a level of resolution that I don't think we can consistently provide with the data we have.
 :::
 
@@ -81,51 +81,6 @@ Gut feeling - aquatic sediment will be a mixture of 1e3 errors and campaigns. Se
 
 Distribution here (\@fig-g002-wsd-cwb-md-a) is normal-ish and centered slightly above the background concentration, but there's clearly at least one sub-peak at \~1e+00.5. Large right tail, and many samples at extremely high concentrations, which suggests unit errors. @fig-g002-wsd-cwb-md-b shows no clear temporal pattern, but central tendency around the aquatic sediment background (I) threshold from 2016 onwards. A few big outliers in specific years are perhaps errors rather than true variation. @fig-g002-wsd-cwb-md-c shows that with a handful of exceptions, campaigns have similar medians, but different patterns of outliers. @coteurFieldContaminationStarfish2003's concentrations have a median around 1e-03 and are several orders of magnitude lower than those from @norwegianenvironmentagencyVannmiljo2026. Some campaigns have slightly higher medians (Urban Fjord Contaminants), while Screening New Contaminants has a surprisingly low median with a lot of spread (but small sample size). No campaigns are explicitly and only focused on non-contaminated sites (e.g. Reference sites), so it is difficult to determine if there's a real difference between contaminated and uncontaminated sites. Probably inconclusive without looking at sampling depth, more detailed site information, and fractionation. @fig-g002-wsd-cwb-md-d mainly shows site coding atefacts, in any case, there seems to be no substantial difference between settled and suspended sediment. @fig-g002-wsd-cwb-md-e shows that most areas (at the current resolution) fall between 1e01 and 1e04, which isn't enough concentration resolution.
 
-TODO: Figure b is missing a secondary axis for thresholds *(still open, 2026-08-05: the class numerals collide on a vertical axis, II and IV being 0.24 orders apart on a 10.7-order scale. No better idea yet. PLAN.md P1.1g.)*
-
-TODO: Have I made a unit error with Coteur
-
-> **CONFIRMED against the paper, 2026-08-05: Coteur reports μg g⁻¹ dry weight, and the source file records μg/kg (dry). Still to fix in `data/raw/eData/`.**
->
-> Chasing it turned up a **second and larger fault in the pipeline**, which was silently dividing every genuine `μg/g` row by 1000: 93 rows across 11 other references, all now corrected. It also recovered 18 rows of Julshamn seal data whose micro sign had been destroyed by an encoding round-trip. See PLAN.md section 9b.
->
-> The original evidence follows.
->
-> **Note to self, checked 2026-08-05. Almost certainly yes, and it looks like μg/g read as μg/kg.**
->
-> All 28 Coteur rows are stored as `μg/kg (dry)` and standardised by ×1e-3. Against every other source in the same compartment and unit:
->
-> |   | Coteur geo. mean | Others geo. mean | Ratio |
-> |----|---:|---:|---:|
-> | Aquatic Sediment, mg/kg (dry) | 0.034 | 21.3 | 619× (2.79 orders) |
-> | Biota, Aquatic, mg/kg (dry) | 0.012 | 2.80 | 229× (2.36 orders) |
->
-> The raw numbers as entered are 8 to 100 for sediment and 2.7 to 92 for *A. rubens* tissue. Read as **mg/kg** those are entirely ordinary values for both matrices; read as μg/kg they are implausible, since 0.03 mg/kg dry sediment is below crustal abundance. **μg/g = mg/kg**, so a source reporting μg/g transcribed as μg/kg gives exactly this 1000× error. The observed ratios are 619× and 229× rather than 1000× only because the comparison is against a different population of sites, not the same samples.
->
-> Fix belongs in the extraction, not the pipeline. Until then Coteur will keep appearing as the lowest campaign on every sediment and echinoderm panel.
-
-TODO: Looks like outliers aren't using abs, so only highlighted on the right *(FIXED 2026-08-05. The `abs()` was there; the RMZ ran on the raw scale while the Tukey fences ran on log10, which made it an upper-tail test in practice. Both are on log10 now: low-side flags across all groups went from 5 to 359, and flagged groups from 22 to 14.)*
-
-TODO: Polluted seabed's very high right conc covers up sample size *(FIXED 2026-08-05. The count labels now sit in a reserved right-hand margin outside the data, rather than right-aligned on top of the highest tiles.)*
-
-TODO: More concentration resolution for fig-e. COuld we add thresholds to the key here? *(PART DONE 2026-08-05. The key is now one bin per order of magnitude with the M-608 boundaries inserted and named, instead of ggplot2 choosing 6 breaks over 12.6 orders. Thresholds cannot be drawn as lines on this panel: its axes are lon/lat and concentration is the fill, so a threshold has no position in the panel. **The remaining resolution problem is the shared scale, and it is your call** — see the note below.)*
-
-> **Why fig-e still looks flat, measured 2026-08-05. Three separate causes, and the biggest one is the data, not the plot.**
->
-> The colour scale spans the whole `Aquatic` compartment, which is 12.3 orders of magnitude, so a sediment group occupying 3 of them uses a quarter of the palette however many bins there are.
->
-> | Change                              |               Aquatic span |
-> |-------------------------------------|---------------------------:|
-> | now (limits per compartment)        |                12.3 orders |
-> | limits per compartment **and unit** | 8.3 orders for mg/kg (dry) |
-> | 1st to 99th percentile of that      |             **2.8 orders** |
->
-> So splitting the limits by unit buys 4 orders and is a one-line change to `compute_triage_scale_limits(by = ...)`. **It costs the property P1.1d was built for**: dry and wet weight would no longer share an axis, so panel (a), whose entire purpose is comparing them, would need its own limits.
->
-> The larger finding is the third row. **99% of sediment rows sit within 2.8 orders**; the full 8.3 comes from about 1% at the two tails. The bottom is the Coteur unit error noted above (0.0013 mg/kg dry) and the top is the 270,000 mg/kg dry value flagged in PLAN.md P1.1d, which is 27% copper by mass, i.e. ore rather than sediment. Fixing those two does more for the resolution of this panel than any scale change.
->
-> Three options, in the order I would take them: (1) chase the two tails, since they are data errors that will distort means and thresholds too; (2) split the limits by unit and give panel (a) its own; (3) clip the colour scale to a percentile range and mark out-of-range cells. Not doing any of them unilaterally because all three change a figure the manuscript may use.
-
 ::: {#fig-g002-wsd-cwb-md layout-ncol="5"}
 ![Overall distribution (all units)](../../triage/G002-Wsd-Cwb-Md_a_density.png){#fig-g002-wsd-cwb-md-a group="G002-Wsd-Cwb-Md"}
 
@@ -140,7 +95,7 @@ TODO: More concentration resolution for fig-e. COuld we add thresholds to the ke
 G002-Wsd-Cwb-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -150,9 +105,9 @@ G002-Wsd-Cwb-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / m
 
 - @fig-g008-wsd-rwb-md-a: at least two log-normal distributions with slightly different means (one below I, one above), plus characteristic 1e3 unit error slopes.
 
-- @fig-g008-wsd-rwb-md-b: no obvious time trend. highest concentration of samples in 2017, doesn't look log-normal but may be resolution artifact. some outlier noise apparent.
+- @fig-g008-wsd-rwb-md-b: no obvious time trend. highest concentration of samples in 2017, doesn't look log-normal but may be resolution artefact. some outlier noise apparent.
 
-- @fig-g008-wsd-rwb-md-c: little variation between campaigns, no reference rivers for comparison but noticable difference between the two biggest groups: Polluted Seabed and Measures Monitoring, probably makes sense to group into polluted and non-polluted. A handful of unit error outliers.
+- @fig-g008-wsd-rwb-md-c: little variation between campaigns, no reference rivers for comparison but noticeable difference between the two biggest groups: Polluted Seabed and Measures Monitoring, probably makes sense to group into polluted and non-polluted. A handful of unit error outliers.
 
 - @fig-g008-wsd-rwb-md-d: as with other sediment sampling groups, suspended sediment concentrations appear to generally be higher than those taken from benthos (though this may be artefact of methodology). given the much wider spread of benthic samples, these could probably be lumped.
 
@@ -172,7 +127,7 @@ G002-Wsd-Cwb-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water benthos / m
 G008-Wsd-Rwb-Md: Aquatic / Aquatic Sediment / River, stream, canal / Water benthos / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -206,7 +161,7 @@ G008-Wsd-Rwb-Md: Aquatic / Aquatic Sediment / River, stream, canal / Water benth
 G009-Wsd-Lwb-Md: Aquatic / Aquatic Sediment / Lake, pond, pool, reservoir / Water benthos / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 - Drop outliers, split into contaminated and uncontaminated sites, use benthos group
@@ -250,7 +205,7 @@ TODO: Add bullet points with figure refs to scaffold (generate once then don't t
 G013-Wsd-Cwc-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pelagic zone / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:**
 
 - Weaker evidence for arctic stuff, because all sites are under Arctic circle
@@ -278,7 +233,7 @@ G013-Wsd-Cwc-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Water column, pel
 G016-Wsd-Owb-Md: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / Water benthos / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -306,7 +261,7 @@ G016-Wsd-Owb-Md: Aquatic / Aquatic Sediment / Ocean, sea, territorial waters / W
 G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dry)
 :::
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -316,7 +271,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G034-Wsd-Rwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -326,7 +281,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G096-Wsd-Dws-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -336,7 +291,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G128-Wsd-Oot-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -346,7 +301,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G133-Wsd-Gwb-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -356,7 +311,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G134-Wsd-Oot-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -366,7 +321,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G135-Wsd-Rwc-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -376,7 +331,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G155-Wsd-Cot-Mw` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -386,7 +341,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G168-Wsd-Cnv-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -396,7 +351,7 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G169-Wsd-Lwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
 
@@ -406,7 +361,6 @@ G019-Wsd-Cot-Md: Aquatic / Aquatic Sediment / Coastal, fjord / Other / mg/kg (dr
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G189-Wsd-Gwc-Md` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
-::: {.callout-note}
+::: callout-note
 **Verdict:** *(unwritten)*
 :::
-

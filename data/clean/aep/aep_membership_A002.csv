@@ -1,12 +1,12 @@
-aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A002,N003-mine-tailings,,,,,,,"Historic Folldal Verk submarine tailings, ~1 Mt over 7 y."
-A002,N036-catchment-runoff,,,,,,,Ulveryggen-Nussir catchment runoff / weathering.
-A002,N027-river-water-column,,,,,,,Repparfjordelva.
-A002,N028-river-benthic-sed,,,,,,,Repparfjordelva bed sediment.
-A002,N013-coast-water-column,,,,,,,Inner fjord water.
-A002,N012-coast-benthic-sed,,,,,,,"Inner fjord sediment; Sternal 2017 inner + mid cores, class IV-V."
-A002,N014-mussel-soft-tissue,,,,,,,
-A002,N015-g-morhua-liver,,,,,,,
-A002,N016-g-morhua-muscle,,,,,,,
-A002,N022-marine-benthic-inverts,,,,,,,
-A002,N023-marine-macroalgae,,,,,,,
+aep_id,node_id,x,y,geo_scope,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+A002,N003-mine-tailings,,,,,,,,"Historic Folldal Verk submarine tailings, ~1 Mt over 7 y."
+A002,N036-catchment-runoff,,,,,,,,Ulveryggen-Nussir catchment runoff / weathering.
+A002,N027-river-water-column,,,arctic,,,,,"Repparfjordelva. geo_scope=arctic: in-box data is 16 pts at one station, gm 0.299 mg/L vs 0.0014 across Arctic rivers; regional proxy from rivers >=66.5N, drop_outliers on N028/N027. Added 2026-09-02."
+A002,N028-river-benthic-sed,,,arctic,,,,,"Repparfjordelva bed sediment. geo_scope=arctic: only 1 in-box point (1600 mg/kg dry, ~80x the group mean); regional proxy from Arctic rivers. Added 2026-09-02."
+A002,N013-coast-water-column,,,,,,,,Inner fjord water.
+A002,N012-coast-benthic-sed,,,,,,,,"Inner fjord sediment; Sternal 2017 inner + mid cores, class IV-V."
+A002,N014-mussel-soft-tissue,,,,,,,,"Restored 2026-09-02; in-box data is Kogel 2026 Mytilus edulis (2 points at 24.18 / 24.29 E, via group G266)."
+A002,N015-fish-liver,,,,,,,,"All fish liver (wet weight); in-box data is Kogel 2026, 7 species."
+A002,N016-fish-muscle,,,,,,,,"All fish muscle (wet weight); in-box data is Kogel 2026, 7 species."
+A002,N040-crustacean-muscle,,,,,,,,King crab in the box (n=1); wider coastal crustacean muscle as proxy.
+A002,N041-crustacean-hepatopancreas,,,,,,,,King crab in the box (n=1); C. pagurus hepatopancreas as proxy.

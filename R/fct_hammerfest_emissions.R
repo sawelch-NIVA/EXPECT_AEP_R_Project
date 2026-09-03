@@ -23,7 +23,12 @@
 #' @param min_kg Passed to [plot_reach_hammerfest()].
 #' @return `path`.
 #' @export
-write_hammerfest_emissions_panel <- function(weighted, series, path, min_kg = 1) {
+write_hammerfest_emissions_panel <- function(
+  weighted,
+  series,
+  path,
+  min_kg = 1
+) {
   panel <- patchwork::wrap_plots(
     plot_reach_hammerfest(weighted, min_kg = min_kg),
     plot_prtr_hammerfest(series),
@@ -31,6 +36,6 @@ write_hammerfest_emissions_panel <- function(weighted, series, path, min_kg = 1)
   ) +
     patchwork::plot_annotation(tag_levels = "a")
 
-  ggplot2::ggsave(path, panel, width = 8, height = 8.5, dpi = 300)
+  ggplot2::ggsave(path, panel, width = 8, height = 5, dpi = 300)
   path
 }

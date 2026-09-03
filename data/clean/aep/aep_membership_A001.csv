@@ -1,9 +1,9 @@
-aep_id,node_id,x,y,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A001,N037-reach-use-pop-weighted,,,,,,,Pop-weighted national REACH net Cu; magnitude + EPEQ TODO.
-A001,N013-coast-water-column,,,,,,,"Fjord water, Hammerfest coastal."
-A001,N012-coast-benthic-sed,,,,,,,Fjord sediment; includes near-aquaculture MOMC B/C monitoring.
-A001,N014-mussel-soft-tissue,,,,,,,
-A001,N015-g-morhua-liver,,,,,,,
-A001,N016-g-morhua-muscle,,,,,,,
-A001,N022-marine-benthic-inverts,,,,,,,
-A001,N023-marine-macroalgae,,,,,,,
+aep_id,node_id,x,y,geo_scope,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
+A001,N037-reach-use-pop-weighted,,,,,,,,Pop-weighted national REACH net Cu; magnitude + EPEQ TODO.
+A001,N013-coast-water-column,,,,,,,,"Fjord water, Hammerfest coastal."
+A001,N012-coast-benthic-sed,,,,,,,,Fjord sediment; includes near-aquaculture MOMC B/C monitoring.
+A001,N014-mussel-soft-tissue,,,,,,,,
+A001,N015-fish-liver,,,,,,,,All fish liver (wet weight); node repurposed from cod 2026-09-02.
+A001,N016-fish-muscle,,,,,,,,All fish muscle (wet weight); node repurposed from cod 2026-09-02.
+A001,N022-marine-benthic-inverts,,,,,,,,
+A001,N023-marine-macroalgae,,,,,,,,

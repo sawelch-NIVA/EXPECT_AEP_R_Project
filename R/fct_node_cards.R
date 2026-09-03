@@ -86,21 +86,25 @@ epeq_score_colours <- function() {
 #'
 #' Keyed on `level` (`aep_node_levels()`), not `node_type`: `node_type` is only
 #' `empirical`/`external`, an internal distinction about where the numbers came
-#' from, not the source/medium/organism/target-site distinction the colouring
-#' is meant to carry. Sam specified three: orange for `source`, blue for
-#' `medium` (the "Key Exposure State" compartment nodes), pink for `organism`.
-#' `tse` (target site exposure) wasn't in that list; given a fourth pastel in
-#' the same family (lavender) rather than left uncoloured, so every node gets a
-#' background and the palette stays internally consistent.
+#' from, not the pathway-stage distinction the colouring is meant to carry. Sam
+#' specified three of the original four: orange for `source`, blue for the
+#' compartment nodes, pink for the organism nodes, with a lavender for the
+#' target-site stage so every node gets a background.
+#'
+#' Re-keyed 2026-09-03 for the five-stage split (`aep_node_levels()`): the blue
+#' carries to `exposure_medium`, the pink to `internal_exposure`, and the new
+#' `external_exposure` stage gets a pale green that sits between them in the
+#' pathway and in hue.
 #'
 #' @return A named character vector, level to hex colour.
 #' @export
 node_level_bg_colours <- function() {
   c(
     source = "#FBE3C7",
-    medium = "#D7E6F5",
-    organism = "#F9D9E6",
-    tse = "#E4DCF2"
+    exposure_medium = "#D7E6F5",
+    external_exposure = "#D9EAD3",
+    internal_exposure = "#F9D9E6",
+    target_site_exposure = "#E4DCF2"
   )
 }
 
@@ -575,6 +579,12 @@ external_series_limits <- function(external_series, max_orders = 6) {
 #'   `node_type = "external"`; a missing or empty entry falls back to the
 #'   plain "no measured data" placeholder, so passing `NULL` (the default)
 #'   reproduces the pre-2026-08-11 behaviour exactly.
+#' @param blank_when_empty When a node has no distribution to draw (an external
+#'   node with no series, no member groups, or nothing left after restrictions),
+#'   `FALSE` (the default) fills the panel with a "Not available" placeholder,
+#'   as before this argument existed. `TRUE` leaves it blank. Used by the
+#'   illustrative Figure 1 (`scripts/build_fig1_example_aep.R`), whose nodes are
+#'   deliberately data-free and where the placeholder reads as a real absence.
 #' @return A ggplot.
 #' @export
 node_group_strips <- function(
@@ -589,8 +599,16 @@ node_group_strips <- function(
   violin_alpha = 0.35,
   violin_colour = NA,
   violin_width = 0.9,
-  external_series = NULL
+  external_series = NULL,
+  blank_when_empty = FALSE
 ) {
+  empty_panel <- function(reason) {
+    if (isTRUE(blank_when_empty)) {
+      ggplot2::ggplot() + ggplot2::theme_void()
+    } else {
+      triage_empty_plot("", reason, size = 2.6)
+    }
+  }
   # AN EXTERNAL NODE HAS NO DISTRIBUTION, BUT MAY HAVE A TIME SERIES.
   # resolve_node_data() always returns zero rows for node_type = "external"
   # (there is nothing to draw a violin from), but several external sources ARE
@@ -614,19 +632,19 @@ node_group_strips <- function(
         alpha = violin_alpha
       ))
     }
-    return(triage_empty_plot("", "no measured data", size = 2.6))
+    return(empty_panel("no measured data"))
   }
 
   key <- triage_group_cols()
   my_groups <- members$group_id[members$node_id == node$node_id[1]]
 
   if (length(my_groups) == 0) {
-    return(triage_empty_plot("", "no measured data", size = 2.6))
+    return(empty_panel("no measured data"))
   }
 
   d <- resolve_node_data(node, members, data, ids)
   if (nrow(d) == 0) {
-    return(triage_empty_plot("", "no data after restrictions", size = 2.6))
+    return(empty_panel("no data after restrictions"))
   }
 
   # Label each row with the group it came from, so the strips can be split.
@@ -1259,6 +1277,10 @@ node_card_header <- function(node, card, dpi = 300) {
   # the `dpi` argument doc above.
   corner_offset <- grid::unit(2 / dpi, "inches")
 
+  # geo_scope marker for the top-right corner. NULL (no icon) unless this is a
+  # scoped AEP node carrying a geo_scope; see geo_scope_icon_path().
+  geo_icon <- geo_scope_icon_path(node[["geo_scope"]])
+
   ggplot2::ggplot() +
     # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
     # the top right later the same day): it is a handle for referring to the
@@ -1280,6 +1302,13 @@ node_card_header <- function(node, card, dpi = 300) {
         gp = grid::gpar(fontsize = 0.75 * 2.6 * ggplot2::.pt, col = "grey55")
       )
     ) +
+    # TOP-RIGHT: the geo_scope marker, mirror of the node id. A pin means the
+    # node's data is specific to this AEP's bounding box, a globe that it is
+    # drawn from a wider region (geo_scope = "arctic"). Absent on national cards.
+    # ggplot drops a NULL layer silently, so no branch is needed at draw time.
+    (if (!is.null(geo_icon)) {
+      ggplot2::annotation_custom(card_icon_grob(geo_icon, dpi = dpi))
+    }) +
     # All three centred on the SAME anchor, x = 0.5 with hjust = 0.5.
     ggplot2::annotate(
       "text",
