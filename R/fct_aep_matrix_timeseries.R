@@ -173,7 +173,10 @@ aep_matrix_timeseries_plot <- function(
 
   abiotic <- dplyr::filter(box, .data$compartment %in% c("Coastal water", "Sediment"))
   biota <- dplyr::filter(box, .data$compartment %in% c("Cod liver", "Blue mussel"))
+  # No trend line on cod liver (Sam's call): the A001 panel's flat fit reads as
+  # a finding it is not, and A002 has too few points for one anyway.
   trend <- box |>
+    dplyr::filter(.data$compartment != "Cod liver") |>
     dplyr::group_by(.data$panel) |>
     dplyr::filter(dplyr::n() >= 6) |>
     dplyr::ungroup()
@@ -211,31 +214,11 @@ aep_matrix_timeseries_plot <- function(
     ) +
     ggplot2::scale_y_log10() +
     ggplot2::facet_wrap(~panel, ncol = 2, scales = "free_y") +
+    # No title / subtitle / caption baked into the image: all of that prose
+    # lives in the Quarto figure caption in _03-results.qmd (Sam, 2026-09-03).
     ggplot2::labs(
       x = NULL,
-      y = "Measured copper concentration  (log scale, native units per panel)",
-      title = paste0("Copper in the ", aep_id, " bounding box over time"),
-      subtitle = paste(
-        strwrap(sprintf(paste(
-          "Raw concentrations, free y-axis per compartment. Dashed grey line",
-          "is a linear fit (panels with >= 6 points) - a rough eyeball of",
-          "trend, not a model. Faint lines: PROREF (biota) and M-608 class",
-          "boundaries (water, sediment). Dotted vertical marks %d. Strip text:",
-          "compartment (units) and the sample groups present."
-        ), recent_from), width = 98),
-        collapse = "\n"
-      ),
-      caption = paste(
-        strwrap(sprintf(
-          paste(
-            "%s box: %g-%g N, %g-%g E. Cod = liver, wet weight. Coastal water",
-            "= ENVIRON_COMPARTMENT_SUB 'Marine/Salt Water', total copper;",
-            "M-608 water classes are for dissolved copper, so indicative only."
-          ),
-          aep_id, m$lat_min, m$lat_max, m$lon_min, m$lon_max
-        ), width = 112),
-        collapse = "\n"
-      )
+      y = "Measured copper concentration  (log scale, native units per panel)"
     ) +
     ggplot2::theme_bw(base_size = 11) +
     ggplot2::theme(
