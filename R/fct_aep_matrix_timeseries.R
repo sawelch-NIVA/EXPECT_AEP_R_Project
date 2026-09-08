@@ -3,8 +3,9 @@
 # water, sediment -- inside an AEP bounding box, measured copper over time, in
 # native units with a free y-axis per panel (dry / wet / per-litre are not
 # comparable). Water and sediment points carry their M-608 quality class,
-# consistent with fig06-repparfjorden-concentrations (four classes: copper skips M-608
-# Class III). Biota carry no M-608 copper ladder, so cod and mussel are shown
+# consistent with fig06-aep1-concentrations / fig07-aep2-concentrations (four
+# classes: copper skips M-608 Class III). Biota carry no M-608 copper ladder, so
+# cod and mussel are shown
 # on a separate above/below-PROREF colour scale.
 
 #' M-608 Classes Used on Copper Figures
@@ -173,13 +174,6 @@ aep_matrix_timeseries_plot <- function(
 
   abiotic <- dplyr::filter(box, .data$compartment %in% c("Coastal water", "Sediment"))
   biota <- dplyr::filter(box, .data$compartment %in% c("Cod liver", "Blue mussel"))
-  # No trend line on cod liver (Sam's call): the A001 panel's flat fit reads as
-  # a finding it is not, and A002 has too few points for one anyway.
-  trend <- box |>
-    dplyr::filter(.data$compartment != "Cod liver") |>
-    dplyr::group_by(.data$panel) |>
-    dplyr::filter(dplyr::n() >= 6) |>
-    dplyr::ungroup()
 
   marker <- as.Date(sprintf("%d-01-01", recent_from))
 
@@ -190,10 +184,6 @@ aep_matrix_timeseries_plot <- function(
     ggplot2::geom_hline(
       data = reflines, ggplot2::aes(yintercept = .data$y),
       linetype = "dashed", colour = "grey60", linewidth = 0.3
-    ) +
-    ggplot2::geom_smooth(
-      data = trend, method = "lm", formula = y ~ x, se = FALSE,
-      colour = "grey30", linewidth = 0.5, linetype = "22"
     ) +
     ggplot2::geom_point(
       data = abiotic, ggplot2::aes(fill = .data$m608),
@@ -234,8 +224,8 @@ aep_matrix_timeseries_plot <- function(
 #' @inheritParams aep_matrix_timeseries_plot
 #' @param dir Output directory.
 #' @param width,height,dpi Canvas.
-#' @return The written path: `figures/fig08-aep1-timeseries.png` for `"A001"`,
-#'   `figures/fig10-aep2-timeseries.png` for `"A002"`.
+#' @return The written path: `figures/fig09-aep1-timeseries.png` for `"A001"`,
+#'   `figures/fig11-aep2-timeseries.png` for `"A002"`.
 #' @export
 write_aep_matrix_timeseries <- function(
   aep_id, data, thresholds, group_ids, manifest,
@@ -247,8 +237,8 @@ write_aep_matrix_timeseries <- function(
   )
   # Manuscript figure numbers (order of appearance in index.qmd's Results).
   file <- c(
-    A001 = "fig08-aep1-timeseries.png",
-    A002 = "fig10-aep2-timeseries.png"
+    A001 = "fig09-aep1-timeseries.png",
+    A002 = "fig11-aep2-timeseries.png"
   )[aep_id]
   if (is.na(file)) {
     stop("No figure filename mapped for aep_id ", sQuote(aep_id), ".")

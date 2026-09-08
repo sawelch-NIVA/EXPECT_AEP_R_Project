@@ -756,6 +756,10 @@ aep_edge_arrow_stubs <- function(edges, curvature = 0.15, frac = 0.02) {
 #'   2026-08-07/08 tile-sizing bug (see [node_card_extent()]'s `x_range`/
 #'   `y_range` doc). Now there is one value, threaded through everywhere it
 #'   matters.
+#' @param edge_caption Draw the "solid = empirical, dashed = putative" caption
+#'   under the panel? `TRUE` (default) keeps it on the assessed AEP diagrams.
+#'   The illustrative Figure 1 sets it `FALSE` and carries that key in its own
+#'   rewritten legend instead (`scripts/build_fig1_example_aep.R`).
 #' @return A ggplot.
 #' @export
 plot_aep <- function(
@@ -773,7 +777,8 @@ plot_aep <- function(
   tile_size = NULL,
   tile_aspect = NULL,
   x_expand = 0.15,
-  y_expand = 0.12
+  y_expand = 0.12,
+  edge_caption = TRUE
 ) {
   placed <- nodes |> dplyr::filter(!is.na(.data$x), !is.na(.data$y))
   if (nrow(placed) == 0) {
@@ -1041,10 +1046,14 @@ plot_aep <- function(
     ggplot2::labs(
       x = NULL,
       y = NULL,
-      caption = paste(
-        "Solid arrows: empirically supported.",
-        "Dashed grey: putative, not evidenced here."
-      )
+      caption = if (edge_caption) {
+        paste(
+          "Solid arrows: empirically supported.",
+          "Dashed grey: putative, not evidenced here."
+        )
+      } else {
+        NULL
+      }
     ) +
     ggplot2::theme_void(base_size = 11) +
     ggplot2::theme(

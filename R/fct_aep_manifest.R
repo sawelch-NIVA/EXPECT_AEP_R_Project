@@ -519,11 +519,18 @@ aep_scope_nodes <- function(nodes, membership, manifest, aep_id) {
   out$y <- dplyr::coalesce(row$y, out$y)
 
   # EVIDENCE AND QUANTIFICATION ARE THE AEP'S, NOT THE NODE'S. See the header.
-  # coalesce() rather than an assignment, so a blank cell inherits and A001 needs
-  # no entries at all.
+  # These columns were removed from aep_nodes.csv on 2026-09-08, so the
+  # membership row is now the sole source: assign it straight through. The
+  # coalesce() branch stays for a membership tibble hand-built in a test that
+  # still carries a node-side column to fall back on.
   for (col in aep_scoped_epeq_cols()) {
-    if (col %in% names(row) && col %in% names(out)) {
-      out[[col]] <- dplyr::coalesce(row[[col]], out[[col]])
+    if (!col %in% names(row)) {
+      next
+    }
+    out[[col]] <- if (col %in% names(out)) {
+      dplyr::coalesce(row[[col]], out[[col]])
+    } else {
+      row[[col]]
     }
   }
 

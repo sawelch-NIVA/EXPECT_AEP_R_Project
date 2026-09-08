@@ -35,6 +35,31 @@ test_that("card_icon_grob rasterises to a top-right anchored grob, or NULL", {
   expect_equal(as.numeric(g$width), 48 / 300)
 })
 
+# Trend glyphs after the headline figure (R/fct_card_icons.R, added 2026-09-04).
+
+test_that("trend_icon_path maps each level to its baked icon", {
+  for (tr in node_trend_levels()) {
+    expect_match(trend_icon_path(tr), paste0("trend-", tr, "\\.png$"), info = tr)
+    expect_true(file.exists(trend_icon_path(tr)), info = tr)
+  }
+})
+
+test_that("trend_icon_path returns NULL for blank, missing or unknown-vocab", {
+  expect_null(trend_icon_path(NULL)) # no trend column at all
+  expect_null(trend_icon_path(NA_character_)) # not yet assessed
+  expect_null(trend_icon_path("")) #
+  expect_null(trend_icon_path(character(0)))
+  expect_null(trend_icon_path("rising")) # off-vocabulary
+})
+
+test_that("trend_badge_grob rasterises a fixed-size grob, or NULL", {
+  expect_null(trend_badge_grob(NULL))
+  g <- trend_badge_grob(trend_icon_path("down"), dpi = 300, px = 34)
+  expect_s3_class(g, "rastergrob")
+  expect_equal(as.numeric(g$width), 34 / 300)
+  expect_equal(as.numeric(g$hjust), 0.5)
+})
+
 test_that("aep_scope_nodes carries geo_scope onto every scoped node", {
   skip_if_not(file.exists(here::here("data/clean/aep/aep_manifest.csv")))
   nodes <- read_aep_nodes()

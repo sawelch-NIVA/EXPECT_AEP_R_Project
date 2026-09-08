@@ -50,7 +50,7 @@ long measurements table. Everything downstream reads from that.
 | `data/clean/` | Split into subdirectories 2026-08-06, see 2.1.1 |
 | `_targets/` | Target store (`qs` format), gitignored |
 | `_site/`, `_freeze/`, `.quarto/` | Quarto build output and caches, gitignored |
-| `tests/testthat/` | 29 test files against 49 in `R/`, as of 2026-08-07. No longer the "effectively unused" single file this once was. |
+| `tests/testthat/` | 29 test files against 49 in `R/`, as of 2026-08-07. **Frozen 2026-09-08: automated tests are no longer written or run (see section 5). These files are unmaintained and expected to drift.** |
 
 ### 2.1.1 `data/clean/` is organised by authority, not by topic (2026-08-06)
 
@@ -682,25 +682,18 @@ LOD reconstruction.
   reproducible from anywhere else.
 - Prefer fixing data problems in `_targets.R` over patching them inline in a
   notebook, but note that the reverse is currently common in this repo.
-- **Test every new function before handing it over.** Not "it parses", not "the
-  target is registered": actually call it. Two levels, both required:
-  1. **A `testthat` file** in `tests/testthat/`, built on small synthetic
-     fixtures rather than the target store, so it runs in seconds and does not
-     break when the pipeline is rebuilt. Cover the degenerate cases, since
-     those are what a heterogeneous dataset supplies: empty groups, `NA`
-     grouping values, n below a switch threshold, all-missing columns.
-  2. **A smoke run against real data** for anything that touches the pipeline.
-     For plots this means forcing an actual draw (`ggplot_build()`) and an
-     actual write, because a ggplot object constructs fine and only fails when
-     rendered. `ggplot_build()` still does not exercise the device, so test the
-     `ggsave()` path too.
-
-  Run with:
-  `Rscript -e 'pkgload::load_all(quiet=TRUE); testthat::test_dir("tests/testthat")'`
-
-  Do not use `skip_on_cran()` here. This is a research compendium, never going
-  to CRAN, and `NOT_CRAN` is unset under `Rscript`, so the skip silently
-  disables the test in the only place it would ever run.
+- **Automated tests are skipped entirely from 2026-09-08 (Sam's call).** Do not
+  write new `testthat` files, do not add to existing ones, and do not run the
+  test suite as a verification step before handing work over. The existing
+  `tests/testthat/` files are left in place but are not maintained; assume they
+  will drift out of sync with `R/` and do not treat a failure there as a
+  blocker. Time to submission is the reason.
+- **Still verify by actually running the thing**, just not through `testthat`.
+  Call the new function on real data, force an actual plot draw and an actual
+  `ggsave()` (a ggplot constructs fine and only fails when rendered), and for
+  anything visual follow CLAUDE.md 2.3.1: write to a stable path, look at it,
+  describe it in words. "It parses" and "the target is registered" are still
+  not verification.
 - **Sam writes the paper.** Code and advice from an LLM are in scope; prose for
   the manuscript is not, beyond drafting bullet points when explicitly asked.
 - **Scientific judgement stays manual.** Automating the ranking of which groups

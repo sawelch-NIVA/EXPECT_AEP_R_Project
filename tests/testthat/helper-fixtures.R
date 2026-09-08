@@ -25,7 +25,8 @@ node_fixture <- function(...) {
     plausibility_score = 3, plausibility_justification = "x",
     evidence_score = 2, evidence_justification = "x",
     quantification_score = 2, quantification_justification = "x",
-    notes = NA_character_
+    notes = NA_character_,
+    trend = NA_character_, trend_basis = NA_character_
   )
   args <- list(...)
   for (nm in names(args)) base[[nm]] <- args[[nm]]

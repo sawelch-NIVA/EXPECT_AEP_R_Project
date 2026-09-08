@@ -359,6 +359,25 @@ test_that("the nodes reader rejects duplicate node ids", {
   expect_error(read_aep_nodes(path), "Duplicate node_id")
 })
 
+test_that("the nodes reader rejects an unknown trend value", {
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(node_fixture(trend = "rising"), path, na = "")
+  expect_error(read_aep_nodes(path), "Unrecognised trend value")
+})
+
+test_that("the nodes reader accepts every node_trend_levels() value and a blank", {
+  for (tr in node_trend_levels()) {
+    path <- withr::local_tempfile(fileext = ".csv")
+    readr::write_csv(node_fixture(trend = tr), path, na = "")
+    expect_no_error(read_aep_nodes(path))
+  }
+  path <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(node_fixture(trend = NA_character_), path, na = "")
+  out <- read_aep_nodes(path)
+  expect_true(all(c("trend", "trend_basis") %in% names(out)))
+  expect_true(is.na(out$trend))
+})
+
 test_that("the membership reader rejects unknown ids", {
   path <- withr::local_tempfile(fileext = ".csv")
   readr::write_csv(members_fixture("G999"), path, na = "")

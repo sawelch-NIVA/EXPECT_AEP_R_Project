@@ -1586,22 +1586,26 @@ list(
   # via a tar_read() there. reach_product_summary_data is kept for the notebook's
   # table; the figure is built from the row-level years so the lumping is shared
   # across both panels.
-  tar_target(
-    name = reach_product_years_data,
-    command = read_reach_product_years(reach_prtd_file)
-  ),
-  tar_target(
-    name = reach_product_summary_data,
-    command = reach_product_summary(reach_product_years_data)
-  ),
-  tar_target(
-    name = reach_product_figure_file,
-    command = write_reach_product_figure(
-      reach_product_years_data,
-      here_rel("figures/fig02-reach-products.png")
-    ),
-    format = "file"
-  ),
+  #
+  # Commented out 2026-09-08 (Sam) to save build time; the figure is parked in
+  # _02-methods.qmd, and the tar_read() edge in _01-introduction.qmd is
+  # commented out to match. Un-comment all three together to bring it back.
+  # tar_target(
+  #   name = reach_product_years_data,
+  #   command = read_reach_product_years(reach_prtd_file)
+  # ),
+  # tar_target(
+  #   name = reach_product_summary_data,
+  #   command = reach_product_summary(reach_product_years_data)
+  # ),
+  # tar_target(
+  #   name = reach_product_figure_file,
+  #   command = write_reach_product_figure(
+  #     reach_product_years_data,
+  #     here_rel("figures/fig02-reach-products.png")
+  #   ),
+  #   format = "file"
+  # ),
 
   ### # PRTR & REACH: Hammerfest manuscript figure ----
   # index.qmd's "Norwegian PRTR and REACH Product Register" section. One
@@ -1688,12 +1692,12 @@ list(
   ),
 
   ### # Edge report cards ----
-  # One compact card per non-rejected edge, per AEP, into
-  # images/edge_cards/<aep_id>/. Based on the node card (write_node_cards())
-  # but smaller: no distribution panel, no level-coloured background, a blank
-  # line between the quantity and the counts. Putative vs empirical is carried
-  # by the edge line style and by the card existing at all, so it is not
-  # written on the card itself. See R/fct_edge_cards.R.
+  # One small card per non-rejected edge, per AEP, into
+  # images/edge_cards/<aep_id>/. Stripped down 2026-09-08 to just the edge id
+  # over the EPEQ badge strip: no label (implied by the card's position on the
+  # arrow), no magnitude/flux (Peng et al. does not quantify inter-compartment
+  # flux), no level-coloured background. Putative vs empirical is carried by the
+  # edge line style and by the card existing at all. See R/fct_edge_cards.R.
   tar_target(
     name = aep_edge_cards,
     command = write_aep_edge_cards(
@@ -1819,23 +1823,29 @@ list(
   # Copper in cod / mussel / coastal water / sediment inside each AEP box, over
   # time, native units, one free y-axis per compartment. Water and sediment
   # carry their M-608 class (four classes -- copper skips M-608 III --
-  # consistent with fig06-repparfjorden-concentrations); biota sit on a separate
+  # consistent with fig06-aep1-concentrations / fig07-aep2-concentrations); biota sit on a separate
   # above/below-PROREF scale. format = "file" per CLAUDE.md 4.4: the target
   # caches the PNG, not the ggplot. Embedded in _03-results.qmd's per-AEP
   # subsections, so render_index depends on both via a tar_read() there.
   tar_target(
     name = aep_matrix_timeseries_a001,
     command = write_aep_matrix_timeseries(
-      "A001", literature_analysis_ready, copper_toxicity_thresholds,
-      group_ids, aep_manifest
+      "A001",
+      literature_analysis_ready,
+      copper_toxicity_thresholds,
+      group_ids,
+      aep_manifest
     ),
     format = "file"
   ),
   tar_target(
     name = aep_matrix_timeseries_a002,
     command = write_aep_matrix_timeseries(
-      "A002", literature_analysis_ready, copper_toxicity_thresholds,
-      group_ids, aep_manifest
+      "A002",
+      literature_analysis_ready,
+      copper_toxicity_thresholds,
+      group_ids,
+      aep_manifest
     ),
     format = "file"
   ),
@@ -1855,8 +1865,9 @@ list(
 
   ### # Figure-source notebook, upstream of the manuscript ----
   # docs/NBXX-rfjord-2.qmd is not really a site page: it exists to (re)draw the
-  # study-area and Repparfjorden concentration maps the manuscript embeds
-  # (figures/fig03-study-area.png, figures/fig06-repparfjorden-concentrations.png). It
+  # study-area and per-AEP concentration maps the manuscript embeds
+  # (figures/fig03-study-area.png, figures/fig06-aep1-concentrations.png,
+  # figures/fig07-aep2-concentrations.png). It
   # tar_read()s aep_manifest and the literature targets, so editing a bounding
   # box now redraws these figures on tar_make() rather than needing a hand
   # `quarto render`. render_index is chained AFTER it by a hidden

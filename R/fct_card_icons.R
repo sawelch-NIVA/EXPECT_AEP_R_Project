@@ -36,6 +36,66 @@ geo_scope_icon_path <- function(geo_scope) {
   if (nzchar(path)) path else NULL
 }
 
+#' Icon File for a Node's `trend`
+#'
+#' The small grey glyph drawn after the headline figure on a node card, marking
+#' which way that figure is judged to be moving over the study period.
+#'
+#' @param trend One value from the `trend` column of `aep_nodes.csv`: one of
+#'   [node_trend_levels()], `NA`, or the column absent (`NULL`).
+#' @return An absolute path to a baked PNG, or `NULL`. `NULL` means "draw no
+#'   glyph": a blank cell (not yet assessed), an unrecognised value, or no
+#'   `trend` column at all. `"unknown"` is *not* `NULL`; it draws a question
+#'   mark, the assessed-but-undecided case.
+#' @export
+trend_icon_path <- function(trend) {
+  if (is.null(trend) || length(trend) == 0L || is.na(trend[1])) {
+    return(NULL)
+  }
+  value <- trimws(as.character(trend[1]))
+  if (!nzchar(value) || !value %in% node_trend_levels()) {
+    return(NULL)
+  }
+  path <- system.file(
+    "extdata", "icons", paste0("trend-", value, ".png"),
+    package = "STOPAEP"
+  )
+  if (nzchar(path)) path else NULL
+}
+
+#' A Baked PNG Trend Glyph, Anchored to the End of the Headline Row
+#'
+#' Mirror of [card_icon_grob()], but pinned to the right edge of the card at the
+#' headline figure's own height rather than to a physical corner. Placed by
+#' [node_card_header()] via `annotation_custom()` with the anchor point given in
+#' the header panel's data coordinates, so the glyph tracks the headline text
+#' vertically even if that panel's y-scale is retuned.
+#'
+#' Sam 2026-09-04: put it at the end of the quantity line, do not measure the
+#' text width, keep the cards the same height. So this does not shift the
+#' headline or grow the panel; a headline long enough to reach the glyph is
+#' handled by keeping the wording short, not by code here.
+#'
+#' @param path A baked PNG, from [trend_icon_path()]. `NULL` returns `NULL`.
+#' @param dpi The card's save resolution.
+#' @param px On-card glyph side, in pixels at `dpi`.
+#' @return A [grid::rasterGrob], or `NULL`.
+#' @export
+trend_badge_grob <- function(path, dpi = 300, px = 34) {
+  if (is.null(path)) {
+    return(NULL)
+  }
+  raster <- png::readPNG(path, native = FALSE)
+  grid::rasterGrob(
+    raster,
+    width = grid::unit(px / dpi, "inches"),
+    height = grid::unit(px / dpi, "inches"),
+    hjust = 0.5,
+    vjust = 0.5,
+    interpolate = TRUE
+  )
+}
+
 #' A Baked PNG Icon as a Corner-Anchored Grob
 #'
 #' Pinned to the card's physical top-right corner, the mirror of the node-id

@@ -1,0 +1,6 @@
+<!-- Node-card trend glyph: headline figure judged to be decreasing over the
+     study period. Mirror of trend-up. Baked to PNG by scripts/bake_card_icons.R. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path d="M8 3v9M4.5 8.5 8 12l3.5-3.5" fill="none" stroke="#7F7F7F"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

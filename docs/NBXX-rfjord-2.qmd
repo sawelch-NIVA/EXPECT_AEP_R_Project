@@ -11,7 +11,7 @@ execute:
 TODO: Add data from Kogel (2026)
 
 
-Repparfjorden is a fjord in Hammerfest, Finnmark, at the far north of Norway. The area is geologically copper-rich, and between 1972 and 1978 the Folldal Verk copper mine operated in the area. Over this seven-year period, the mine generated roughly 1 million tonnes of copper-rich (?%) tailings. These were processed and then disposed of in the inner Repparfjord ([@fig-repparfjorden-conc], panel b) by pipeline.
+Repparfjorden is a fjord in Hammerfest, Finnmark, at the far north of Norway. The area is geologically copper-rich, and between 1972 and 1978 the Folldal Verk copper mine operated in the area. Over this seven-year period, the mine generated roughly 1 million tonnes of copper-rich (?%) tailings. These were processed and then disposed of in the inner Repparfjord ([@fig-aep2-conc]) by pipeline.
 
 Contemporary sources on this disposal process are limited. However, a number of more recent studies have assessed the characteristics, consequences, and dynamics of historical disposal. 
 
@@ -55,9 +55,10 @@ here::i_am("index.qmd")
 #| message: false
 
 # ============================================================================
-# Shared data + helpers for the two map figures below.
-#   fig-study-area          -- geography/context, no concentration data
-#   fig-repparfjorden-conc  -- the AEP sampling picture (old panels b + c)
+# Shared data + helpers for the map figures below.
+#   fig-study-area  -- geography/context, no concentration data
+#   fig-aep1-conc   -- AEP-001 bounding box + 10% margin, sampling sites
+#   fig-aep2-conc   -- AEP-002 bounding box + 10% margin, sampling sites
 # ============================================================================
 
 manifest <- tar_read(aep_manifest)
@@ -926,33 +927,62 @@ overview_canvas(view_canvas_hamm, "images/aep-canvas-hammerfest-coastal.png")
 ```
 
 ```{r}
-#| label: fig-repparfjorden-conc
-#| fig-cap: "Copper concentration data across the two AEPs. (a) Repparfjorden and Hammerfest, all sampling sites in the combined AEP extent; the two red boxes are the AEP-001 (Hammerfest coastal) and AEP-002 (Repparfjord inner) bounding boxes from aep_manifest.csv, the grey dashed box is the extent of panel (b). (b) The inner fjord, a zoom inside AEP-002. Sampling sites: shape = lumped sample group, fill = worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) any of that site's copper measurements reach; biota carry no M-608 ladder so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Orange circle: historic Folldal Verk tailings disposal area. Black square: Ulveryggen plant. Basemap: Kartverket topografisk gråtone."
-#| fig-width: 13
-#| fig-height: 6.6
+#| label: conc-helpers
+#| include: false
+#| warning: false
+#| message: false
+
+# fig06 was one two-panel figure (combined-extent overview + inner-fjord zoom).
+# Split 2026-09-08 into one figure per AEP: each is just that AEP's aep_manifest
+# bounding box plus a 10% margin on every side. The boxes are very different
+# shapes (A001 ~0.72 x 0.34 deg, A002 ~0.43 x 0.10 deg), which is why they are
+# no longer forced into one row. (A locator inset was tried and dropped
+# 2026-09-08.)
+
+# 10% margin on each side of an aep_manifest bounding-box row.
+pad_box <- function(row, f = 0.10) {
+  dx <- (row$lon_max - row$lon_min) * f
+  dy <- (row$lat_max - row$lat_min) * f
+  c(
+    xmin = row$lon_min - dx,
+    xmax = row$lon_max + dx,
+    ymin = row$lat_min - dy,
+    ymax = row$lat_max + dy
+  )
+}
+view_a001 <- pad_box(a001)
+view_a002 <- pad_box(a002)
+
+# Three guide blocks (M-608 fill, sample-group shape, map-feature colour)
+# stacked vertically, or they run off both sides of the narrow AEP-001 canvas.
+conc_legend <- theme(
+  legend.box = "vertical",
+  legend.box.just = "left",
+  legend.spacing.y = unit(0.1, "cm")
+)
+```
+
+```{r}
+#| label: fig-aep1-conc
+#| fig-cap: "Copper concentration data in the AEP-001 (Hammerfest coastal) bounding box plus a 10% margin on every side (red box = the aep_manifest.csv extent). Sampling sites: shape = lumped sample group, fill = worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) any of that site's copper measurements reach; biota carry no M-608 ladder so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Basemap: Kartverket topografisk gråtone."
+#| fig-width: 7.5
+#| fig-height: 10
 #| column: page
 #| warning: false
 #| message: false
 
-conc_features <- c(
-  "PRTR facility",
-  "Aquaculture site (licensed)",
-  "Ulveryggen plant"
-)
-conc_key <- list(
-  shape = c(8, 21, 15),
-  fill = c(NA, aqua_fill, NA),
-  size = c(2.8, 2.6, 2.6),
-  linewidth = 0
-)
-
-panel_conc_a <- tile_panel(
-  view_b,
-  "a) Repparfjorden and Hammerfest",
+panel_a001 <- tile_panel(
+  view_a001,
+  "AEP-001 - Hammerfest coastal",
   zoomin = 1,
   legend = TRUE,
-  feature_lv = conc_features,
-  feature_key = conc_key,
+  feature_lv = c("PRTR facility", "Aquaculture site (licensed)"),
+  feature_key = list(
+    shape = c(8, 21),
+    fill = c(NA, aqua_fill),
+    size = c(2.8, 2.6),
+    linewidth = 0
+  ),
   under = list(
     geom_sf(
       data = aqua,
@@ -964,38 +994,13 @@ panel_conc_a <- tile_panel(
     )
   ),
   extra = list(
-    # AEP bounding boxes (aep_manifest.csv), the scoped extents used throughout.
     geom_sf(data = box_a001, fill = NA, colour = red, linewidth = 0.8),
-    geom_sf(data = box_a002, fill = NA, colour = red, linewidth = 0.8),
-    geom_sf_text(
-      data = aep_box_labels,
-      aes(label = label),
-      colour = red,
-      fontface = "bold",
-      size = 2.7,
-      hjust = 0,
-      vjust = 1
-    ),
-    # Panel b covers the inner-fjord zoom (grey dashed), which sits inside A002.
-    geom_sf(
-      data = box_c,
-      fill = NA,
-      colour = "grey30",
-      linewidth = 0.5,
-      linetype = "22"
-    ),
     geom_sf(
       data = prtr_sites,
       aes(colour = "PRTR facility"),
       shape = 8,
       size = 2.6,
       stroke = 0.7
-    ),
-    geom_sf(
-      data = ulveryggen,
-      aes(colour = "Ulveryggen plant"),
-      shape = 15,
-      size = 2
     ),
     geom_sf_text(
       data = prtr_sites,
@@ -1009,13 +1014,51 @@ panel_conc_a <- tile_panel(
   )
 )
 
-panel_conc_b <- tile_panel(
-  view_c,
-  "b) Inner Repparfjord",
+fig_aep1_conc <- panel_a001 + conc_legend
+ggsave(
+  here::here("figures/fig06-aep1-concentrations.png"),
+  fig_aep1_conc,
+  width = 7.5,
+  height = 10,
+  dpi = 200, # bump to 300 for final submission if needed
+  bg = "white"
+)
+fig_aep1_conc
+```
+
+```{r}
+#| label: fig-aep2-conc
+#| fig-cap: "Copper concentration data in the AEP-002 (Repparfjord inner) bounding box plus a 10% margin on every side (red box = the aep_manifest.csv extent). Symbols and fill as in the AEP-001 concentration figure. Orange circle: historic Folldal Verk submarine tailings disposal area. Black square: Ulveryggen processing plant. Basemap: Kartverket topografisk gråtone."
+#| fig-width: 11
+#| fig-height: 7
+#| column: page
+#| warning: false
+#| message: false
+
+panel_a002 <- tile_panel(
+  view_a002,
+  "AEP-002 - Repparfjord inner",
   zoomin = 1,
-  feature_lv = conc_features,
-  feature_key = conc_key,
+  legend = TRUE,
+  feature_lv = c("Aquaculture site (licensed)", "Ulveryggen plant"),
+  feature_key = list(
+    shape = c(21, 15),
+    fill = c(aqua_fill, NA),
+    size = c(2.6, 2.6),
+    linewidth = 0
+  ),
+  under = list(
+    geom_sf(
+      data = aqua,
+      aes(colour = "Aquaculture site (licensed)"),
+      shape = 21,
+      fill = aqua_fill,
+      size = 1.9,
+      stroke = 0.8
+    )
+  ),
   extra = list(
+    geom_sf(data = box_a002, fill = NA, colour = red, linewidth = 0.8),
     geom_sf(
       data = tailings,
       fill = tailings_fill,
@@ -1047,23 +1090,18 @@ panel_conc_b <- tile_panel(
   )
 )
 
-fig_repparfjorden_conc <-
-  patchwork::wrap_plots(
-    panel_conc_a,
-    panel_conc_b,
-    nrow = 1,
-    guides = "collect"
-  ) &
-  theme(legend.position = "bottom")
+# No "Map features" legend here: there are no aquaculture sites in inner
+# Repparfjord and the Ulveryggen plant is already labelled on the map.
+fig_aep2_conc <- panel_a002 + conc_legend + guides(colour = "none")
 ggsave(
-  here::here("figures/fig06-repparfjorden-concentrations.png"),
-  fig_repparfjorden_conc,
-  width = 13,
-  height = 6.6,
+  here::here("figures/fig07-aep2-concentrations.png"),
+  fig_aep2_conc,
+  width = 11,
+  height = 8,
   dpi = 200, # bump to 300 for final submission if needed
   bg = "white"
 )
-fig_repparfjorden_conc
+fig_aep2_conc
 ```
 
 

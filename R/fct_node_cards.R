@@ -585,7 +585,11 @@ external_series_limits <- function(external_series, max_orders = 6) {
 #'   as before this argument existed. `TRUE` leaves it blank. Used by the
 #'   illustrative Figure 1 (`scripts/build_fig1_example_aep.R`), whose nodes are
 #'   deliberately data-free and where the placeholder reads as a real absence.
-#' @return A ggplot.
+#' @param omit_when_empty When there is nothing to draw, return `NULL` instead of
+#'   any panel (placeholder or blank). Takes precedence over `blank_when_empty`.
+#'   [node_card()] uses this to drop the strips band entirely and shrink the
+#'   card, rather than leave dead space where a distribution would be.
+#' @return A ggplot, or `NULL` when `omit_when_empty` and there is no data.
 #' @export
 node_group_strips <- function(
   node,
@@ -600,10 +604,13 @@ node_group_strips <- function(
   violin_colour = NA,
   violin_width = 0.9,
   external_series = NULL,
-  blank_when_empty = FALSE
+  blank_when_empty = FALSE,
+  omit_when_empty = FALSE
 ) {
   empty_panel <- function(reason) {
-    if (isTRUE(blank_when_empty)) {
+    if (isTRUE(omit_when_empty)) {
+      NULL
+    } else if (isTRUE(blank_when_empty)) {
       ggplot2::ggplot() + ggplot2::theme_void()
     } else {
       triage_empty_plot("", reason, size = 2.6)
@@ -909,6 +916,20 @@ node_card_heights <- function() {
   c(header = 1.55, badges = 0.40, strips = 1.4)
 }
 
+#' Height of a Strip-less Card as a Fraction of a Full One
+#'
+#' When [node_card()] drops the strips band (a node with no distribution and
+#' `omit_empty_strips = TRUE`), the PNG should be saved shorter in proportion,
+#' not stretched to the full height. This is that proportion, from
+#' [node_card_heights()] so the two cannot drift.
+#'
+#' @return A single number in `(0, 1)`.
+#' @export
+node_card_short_height_frac <- function() {
+  h <- node_card_heights()
+  sum(h[c("header", "badges")]) / sum(h)
+}
+
 #' Assemble One Node Card
 #'
 #' Title and statistics, the EPEQ badge strip, and one distribution strip per
@@ -934,10 +955,16 @@ node_card_heights <- function() {
 #'   `dpi = 150`, and a card occupies roughly 340px there, so beyond about 200
 #'   this buys anti-aliasing on the diagram and nothing else. It is the card
 #'   viewed on its own that gains.
+#' @param omit_empty_strips When the node has no distribution to draw, leave the
+#'   strips band off entirely and return a header-plus-badges card, with
+#'   `attr(., "short") = TRUE` so [write_node_cards()] can save it shorter.
+#'   `FALSE` (the default) keeps the three-band card with a placeholder or blank
+#'   strip, as before. The pipeline's [write_node_cards()] call passes `TRUE`.
 #' @param ... Passed to [node_group_strips()], which is where every knob worth
 #'   turning while styling a card lives (`violin_fill`, `violin_alpha`,
 #'   `violin_colour`, `violin_width`, `external_series`).
-#' @return A patchwork object.
+#' @return A patchwork object. Carries `attr(., "short") = TRUE` when the strips
+#'   band was omitted.
 #' @export
 node_card <- function(
   node,
@@ -949,6 +976,7 @@ node_card <- function(
   thresholds = NULL,
   max_groups = 3,
   dpi = 300,
+  omit_empty_strips = FALSE,
   ...
 ) {
   # A card placed on a graph node is roughly 1.6in wide, so every point size
@@ -967,8 +995,22 @@ node_card <- function(
     limits = limits,
     thresholds = thresholds,
     max_groups = max_groups,
+    omit_when_empty = omit_empty_strips,
     ...
   )
+
+  if (is.null(strips)) {
+    heights <- node_card_heights()
+    out <- patchwork::wrap_plots(
+      header,
+      badges,
+      ncol = 1,
+      heights = heights[c("header", "badges")]
+    ) &
+      node_card_theme(node)
+    attr(out, "short") <- TRUE
+    return(out)
+  }
 
   patchwork::wrap_plots(
     header,
@@ -1281,6 +1323,14 @@ node_card_header <- function(node, card, dpi = 300) {
   # scoped AEP node carrying a geo_scope; see geo_scope_icon_path().
   geo_icon <- geo_scope_icon_path(node[["geo_scope"]])
 
+  # Trend glyph, drawn after the headline figure. NULL (nothing drawn) unless
+  # the node carries a recognised, non-blank `trend`; see trend_icon_path().
+  # `[[` not `$`: a hand-built node tibble in a test need not have the column.
+  trend_grob <- trend_badge_grob(
+    trend_icon_path(if ("trend" %in% names(node)) node[["trend"]] else NULL),
+    dpi = dpi
+  )
+
   ggplot2::ggplot() +
     # NODE ID IN THE TOP LEFT, at default size (Sam 2026-08-06, moved from
     # the top right later the same day): it is a handle for referring to the
@@ -1349,6 +1399,16 @@ node_card_header <- function(node, card, dpi = 300) {
       label = headline,
       colour = if (suspect) "#A8452F" else "grey5"
     ) +
+    # Trend glyph at the right end of the headline row. Anchor in this panel's
+    # data coordinates (x in 0..1, headline text sits at y = 0.75), so it holds
+    # its height against the headline if the y-scale below is retuned. ggplot
+    # drops a NULL layer, so no branch is needed when there is no trend.
+    (if (!is.null(trend_grob)) {
+      ggplot2::annotation_custom(
+        trend_grob,
+        xmin = 0.9, xmax = 0.9, ymin = 0.75, ymax = 0.75
+      )
+    }) +
     ggplot2::annotate(
       # Dropped further below the concentration than it was: at one line's
       # spacing the sample size read as part of the number above it.
@@ -1379,6 +1439,11 @@ node_card_header <- function(node, card, dpi = 300) {
 #' @param external_series Passed straight to [node_group_strips()]; see its
 #'   own doc. `NULL` (the default) draws every external node's body panel as
 #'   "no measured data", same as before this parameter existed.
+#' @param omit_empty_strips Passed to [node_card()]. `TRUE` (the default here,
+#'   unlike `node_card()` itself) drops the strips band for a node with no
+#'   distribution and saves that card shorter
+#'   ([node_card_short_height_frac()]), rather than leaving a "no measured data"
+#'   placeholder. Pass `FALSE` to keep the old full-height placeholder cards.
 #' @return The written paths.
 #' @export
 write_node_cards <- function(
@@ -1393,7 +1458,8 @@ write_node_cards <- function(
   height = 1.8,
   dpi = 300,
   limits = NULL,
-  external_series = NULL
+  external_series = NULL,
+  omit_empty_strips = TRUE
 ) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   if (is.null(limits)) {
@@ -1417,14 +1483,20 @@ write_node_cards <- function(
       limits = lim,
       thresholds = thresholds,
       dpi = dpi,
+      omit_empty_strips = omit_empty_strips,
       external_series = external_series
     )
     path <- file.path(dir, paste0(node$node_id[1], ".png"))
+    card_height <- if (isTRUE(attr(p, "short"))) {
+      height * node_card_short_height_frac()
+    } else {
+      height
+    }
     ggplot2::ggsave(
       filename = path,
       plot = p,
       width = width,
-      height = height,
+      height = card_height,
       dpi = dpi,
       device = ragg::agg_png,
       bg = node_card_bg_colour(node)

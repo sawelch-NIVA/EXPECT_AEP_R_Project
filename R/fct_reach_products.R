@@ -212,7 +212,8 @@ reach_product_plot <- function(summary, palette = NULL) {
         as.character(.data$category_en), levels = names(palette)
       ),
       label = paste0(
-        .data$category_en, "  (", .data$n_years_reported, " yr)"
+        stringr::str_wrap(as.character(.data$category_en), width = 24),
+        "\n(", .data$n_years_reported, " yrs)"
       ),
       label = forcats::fct_reorder(.data$label, .data$mean_net_kg),
       err_lo = pmax(

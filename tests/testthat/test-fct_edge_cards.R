@@ -1,22 +1,15 @@
-# Edge report cards (2026-08-27).
+# Edge report cards (2026-08-27; stripped down 2026-09-08).
 #
-# The node card with the distribution panel and the level tint removed, and a
-# blank line added between the quantity and the counts. The tests are about
-# structure (does it assemble, does it draw, is the blank line real) rather
-# than pixels, per CLAUDE.md 2.3.1.
+# The card is now just the edge id over the shared EPEQ badge strip: no label,
+# no magnitude/flux block (Peng et al. does not quantify inter-compartment
+# flux), no level tint. Tests are about structure, not pixels (CLAUDE.md 2.3.1).
 
 edge_card_fixture <- function(...) {
   base <- tibble::tibble(
     edge_id = "E001",
     from = "N012-coast-benthic-sed",
     to = "N014-mussel-soft-tissue",
-    label = "Coastal benthic sediment to Coastal mussels",
     status = "putative",
-    magnitude = NA_real_,
-    magnitude_unit = NA_character_,
-    magnitude_n = NA_real_,
-    magnitude_sd = NA_real_,
-    magnitude_refs = NA_real_,
     essentiality_score = NA_real_,
     plausibility_score = NA_real_,
     evidence_score = NA_real_,
@@ -35,42 +28,18 @@ test_that("an all-blank putative edge still assembles and draws", {
   expect_no_error(ggplot2::ggplot_build(card[[2]]))
 })
 
-test_that("the header carries label, quantity and counts as text rows", {
-  # (The edge id is drawn as a corner grob via annotation_custom(), so it is
-  # not in ggplot_build()$data -- only the three annotate() rows are.)
-  h <- edge_card_header(edge_card_fixture(
-    magnitude = 4.2, magnitude_unit = "mg/kg/yr",
-    magnitude_n = 12, magnitude_refs = 3
-  ))
+test_that("the id strip carries the edge id and nothing else", {
+  h <- edge_card_header(edge_card_fixture(edge_id = "E042"))
   b <- ggplot2::ggplot_build(h)
   texts <- unlist(lapply(b$data, function(d) if ("label" %in% names(d)) d$label))
-  expect_true(any(grepl("Coastal benthic sediment", texts)))
-  expect_true(any(grepl("4\\.2 mg/kg/yr", texts)))
-  expect_true(any(grepl("n = 12, refs = 3", texts)))
+  expect_equal(texts, "E042")
 })
 
-test_that("the blank line: a clear gap between the quantity and the counts", {
-  # The header lays text out in a 0..10 space: label near the top (y ~ 9.6),
-  # quantity at y = 3.4, counts at y = 1.0. The 2.4-unit quantity-to-counts gap
-  # is the blank line Sam asked for; a packed card would sit them ~1.2 apart.
-  h <- edge_card_header(edge_card_fixture(magnitude = 4.2, magnitude_unit = "x"))
-  b <- ggplot2::ggplot_build(h)
-  ys <- sort(unlist(lapply(b$data, function(d) {
-    if ("label" %in% names(d) && "y" %in% names(d)) d$y[is.finite(d$y)]
-  })))
-  # Three annotate() text rows (the corner id grob is not in $data).
-  expect_length(ys, 3)
-  counts_y <- ys[1]
-  quantity_y <- ys[2]
-  expect_gt(quantity_y - counts_y, 2)
-})
-
-test_that("a missing magnitude shows as a dash, not an error", {
-  h <- edge_card_header(edge_card_fixture())
+test_that("a missing edge id renders as blank, not an error", {
+  h <- edge_card_header(edge_card_fixture(edge_id = NA_character_))
   b <- ggplot2::ggplot_build(h)
   texts <- unlist(lapply(b$data, function(d) if ("label" %in% names(d)) d$label))
-  expect_true(any(texts == "-"))
-  expect_true(any(grepl("n = -, refs = -", texts)))
+  expect_equal(texts, "")
 })
 
 test_that("scores drive the badge strip, blank renders grey not '1'", {
@@ -81,7 +50,9 @@ test_that("scores drive the badge strip, blank renders grey not '1'", {
   b <- ggplot2::ggplot_build(card[[2]])
   labs <- b$data[[2]]$label
   expect_true(any(grepl("Es 3", labs)))
+  expect_true(any(grepl("Pl 2", labs)))
   expect_true(any(grepl("Ev -", labs)))
+  expect_true(any(grepl("Qn 1", labs)))
 })
 
 test_that("write_aep_edge_cards writes one PNG per live edge per AEP subdir", {
@@ -95,14 +66,8 @@ test_that("write_aep_edge_cards writes one PNG per live edge per AEP subdir", {
   )
   edges <- dplyr::bind_rows(
     edge_card_fixture(edge_id = "E001"),
-    edge_card_fixture(
-      edge_id = "E002", to = "N015-fish-liver",
-      label = "Sediment to cod liver"
-    ),
-    edge_card_fixture(
-      edge_id = "E003", status = "rejected",
-      label = "cut edge"
-    )
+    edge_card_fixture(edge_id = "E002", to = "N015-fish-liver"),
+    edge_card_fixture(edge_id = "E003", status = "rejected")
   )
   dir <- withr::local_tempdir()
   paths <- write_aep_edge_cards(scoped, edges, dir = dir)

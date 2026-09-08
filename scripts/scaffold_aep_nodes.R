@@ -60,16 +60,8 @@ if (file.exists(nodes_path)) {
     ),
     plausibility_score = 3,
     plausibility_justification = "As above.",
-    evidence_score = 3,
-    evidence_justification = paste(
-      "The studied dataset contains substantial evidence on copper",
-      "concentrations in marine water."
-    ),
-    quantification_score = 2,
-    quantification_justification = paste(
-      "Copper kinetics in marine environments are generally well studied and",
-      "modelled."
-    ),
+    # Evidence and quantification are per-AEP: they live on
+    # aep_membership_<id>.csv, not here. See aep_node_epeq_cols().
     notes = "Example row transcribed from docs/NBXX-algae.qmd tbl-epeq-marine."
   )
   readr::write_csv(example, nodes_path, na = "")

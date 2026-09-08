@@ -85,12 +85,34 @@ aep_node_types <- function() {
   c("empirical", "external")
 }
 
+#' Permitted `trend` Values on a Node
+#'
+#' The direction the node's reported quantity is judged to be moving over the
+#' study period. Hand-entered on `aep_nodes.csv`, one value per node, and shown
+#' on the card as a small grey glyph after the headline figure
+#' ([trend_icon_path()]). The assessment itself is made holistically in the
+#' methods section, not row by row; a blank cell means "not yet assessed" and
+#' draws no glyph, which is deliberately distinct from `unknown` ("assessed, no
+#' firm direction").
+#'
+#' @return A character vector.
+#' @export
+node_trend_levels <- function() {
+  c("up", "flat", "down", "unknown")
+}
+
 #' The Four EPEQ Score Columns and Their Justifications
 #'
 #' Adapted from Peng et al. 2022, and scored 1-3 exactly as in
 #' `docs/NBXX-algae.qmd`, which is the reference implementation and is Sam's own
 #' wording. Every score carries a written justification in the adjacent column,
 #' because a bare number is not a weight of evidence assessment.
+#'
+#' This is the full set of four, as they appear on an **edge** and on a
+#' **scoped** node (after [aep_scope_nodes()] has merged the per-AEP evidence /
+#' quantification in). The `aep_nodes.csv` file itself carries only
+#' [aep_node_epeq_cols()]; evidence and quantification live on the per-AEP
+#' membership file. See the header of `R/fct_aep_manifest.R`.
 #'
 #' @return A character vector of column names, scores and justifications
 #'   interleaved.
@@ -101,6 +123,23 @@ epeq_cols <- function() {
     "plausibility_score", "plausibility_justification",
     "evidence_score", "evidence_justification",
     "quantification_score", "quantification_justification"
+  )
+}
+
+#' The EPEQ Columns That Live on `aep_nodes.csv`
+#'
+#' Essentiality and plausibility only: claims about the world, written once per
+#' node. Evidence and quantification are claims about the dataset an AEP scope
+#' selects, so they live on `aep_membership_<id>.csv` ([aep_scoped_epeq_cols()])
+#' and were removed from `aep_nodes.csv` on 2026-09-08. The two together are
+#' [epeq_cols()].
+#'
+#' @return A character vector, scores and justifications interleaved.
+#' @export
+aep_node_epeq_cols <- function() {
+  c(
+    "essentiality_score", "essentiality_justification",
+    "plausibility_score", "plausibility_justification"
   )
 }
 
@@ -152,7 +191,7 @@ aep_node_human_cols <- function() {
     "lat_min", "lat_max", "date_min", "date_max",
     "exclude_references", "exclude_campaigns", "drop_outliers",
     external_value_cols(),
-    epeq_cols(),
+    aep_node_epeq_cols(),
     "notes"
   )
 }
@@ -237,15 +276,21 @@ empty_aep_nodes <- function() {
     external_n = numeric(0),
     external_unit = character(0),
     external_refs = numeric(0),
+    # Essentiality and plausibility only; evidence and quantification are
+    # per-AEP and live on aep_membership_<id>.csv (removed here 2026-09-08).
+    # See aep_node_epeq_cols() and the header of R/fct_aep_manifest.R.
     essentiality_score = numeric(0),
     essentiality_justification = character(0),
     plausibility_score = numeric(0),
     plausibility_justification = character(0),
-    evidence_score = numeric(0),
-    evidence_justification = character(0),
-    quantification_score = numeric(0),
-    quantification_justification = character(0),
-    notes = character(0)
+    notes = character(0),
+    # Added 2026-09-04. Node-level direction of travel for the headline figure,
+    # one of node_trend_levels() or blank. `trend` drives the card glyph;
+    # `trend_basis` is free text for the reasoning, surfaced in the methods
+    # table (tbl-node-trends) rather than on the card. Both blank until the
+    # holistic assessment is done.
+    trend = character(0),
+    trend_basis = character(0)
   )
 }
 
@@ -339,6 +384,8 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep/aep_nodes.csv")) {
       exclude_campaigns = readr::col_character(),
       external_unit = readr::col_character(),
       notes = readr::col_character(),
+      trend = readr::col_character(),
+      trend_basis = readr::col_character(),
       # Read as text, then parsed by parse_node_date(). Letting readr guess is
       # what allowed a bare year through as a number, which then compared
       # against a Date as days-since-1970.
@@ -393,6 +440,18 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep/aep_nodes.csv")) {
     )
   }
 
+  # Same contract as level and node_type: a typo in a controlled-vocabulary
+  # column fails here rather than drawing a wrong (or no) glyph on a card. Blank
+  # is allowed and means "not assessed"; only non-blank values are checked.
+  trend_seen <- trimws(stats::na.omit(unique(nodes$trend)))
+  bad_trend <- setdiff(trend_seen[nzchar(trend_seen)], node_trend_levels())
+  if (length(bad_trend) > 0) {
+    stop(
+      "Unrecognised trend value(s): ", paste(sQuote(bad_trend), collapse = ", "),
+      ". Permitted: ", paste(node_trend_levels(), collapse = ", "), ", or blank."
+    )
+  }
+
   # STOPS rather than warns, and rather than ignoring. An empirical node's
   # magnitude is computed from its member groups, so a number typed into these
   # columns is never read: the node would report a value the file does not
@@ -421,8 +480,10 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep/aep_nodes.csv")) {
   }
 
   # Scores are 1-3 or blank. A 0 or a 4 is a typo, and a typo that survives into
-  # a figure is indistinguishable from a judgement.
-  for (col in epeq_cols()[c(TRUE, FALSE)]) {
+  # a figure is indistinguishable from a judgement. Only essentiality and
+  # plausibility live here now; evidence and quantification are range-checked
+  # per-AEP in read_aep_membership().
+  for (col in aep_node_epeq_cols()[c(TRUE, FALSE)]) {
     v <- nodes[[col]]
     bad <- !is.na(v) & !(v %in% 1:3)
     if (any(bad)) {
@@ -953,10 +1014,17 @@ validate_aep_nodes <- function(nodes, members, cards) {
     ))
   }
 
-  unscored <- nodes$node_id[
-    is.na(nodes$essentiality_score) | is.na(nodes$plausibility_score) |
-      is.na(nodes$evidence_score) | is.na(nodes$quantification_score)
-  ]
+  # Essentiality and plausibility are always present (aep_nodes.csv). Evidence
+  # and quantification are only present once aep_scope_nodes() has merged them
+  # from the membership file, so check whichever score columns this table
+  # actually carries.
+  score_cols <- intersect(
+    c("essentiality_score", "plausibility_score",
+      "evidence_score", "quantification_score"),
+    names(nodes)
+  )
+  any_na <- Reduce(`|`, lapply(score_cols, function(col) is.na(nodes[[col]])))
+  unscored <- nodes$node_id[any_na]
   if (length(unscored) > 0) {
     problems <- c(problems, paste0(
       length(unscored), " node(s) are not fully EPEQ scored: ",

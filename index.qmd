@@ -6,6 +6,7 @@ title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Unders
 format:
   html: 
     lightbox: true
+    sidebar: false
   docx:
     reference-doc: custom-reference-doc.docx
     fig-width: 8
