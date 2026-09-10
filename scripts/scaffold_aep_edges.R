@@ -58,7 +58,10 @@ new_pairs <- candidates |>
 if (nrow(new_pairs) == 0) {
   message("No new node pairs to propose. ", nrow(existing), " edge(s) on file.")
 } else {
-  labels <- setNames(placed$label, placed$node_id)
+  # Edge id and label both use the node-id slug: "E<num>-<from slug>-to-<to
+  # slug>" for the id, the same minus the "E<num>-" for the label. The slug is
+  # the node_id with its "N<num>-" prefix stripped (2026-09-09).
+  node_slug <- function(node_id) sub("^N[0-9]+-", "", node_id)
 
   # BUG, fixed 2026-08-08: this used to be `n_existing <- nrow(existing)`,
   # the ROW COUNT, and new ids were `n_existing + row_number()`. That is only
@@ -73,13 +76,20 @@ if (nrow(new_pairs) == 0) {
   # validate, not validate-then-append). Deriving the next id from the
   # highest NUMBER actually in use, not the row count, cannot undercount
   # regardless of how many gaps exist.
-  existing_nums <- suppressWarnings(as.integer(sub("^E", "", existing$edge_id)))
+  # The number, from either the old "E012" form or the "E012-slug-to-slug"
+  # form: strip the leading "E", then everything from the first non-digit on.
+  existing_nums <- suppressWarnings(
+    as.integer(sub("\\D.*$", "", sub("^E", "", existing$edge_id)))
+  )
   next_num <- if (all(is.na(existing_nums))) 0L else max(existing_nums, na.rm = TRUE)
 
   additions <- new_pairs |>
     mutate(
-      edge_id = sprintf("E%03d", next_num + row_number()),
-      label = paste(labels[from], "to", labels[to]),
+      edge_id = sprintf(
+        "E%03d-%s-to-%s",
+        next_num + row_number(), node_slug(from), node_slug(to)
+      ),
+      label = paste0(node_slug(from), "-to-", node_slug(to)),
       # EVERY edge starts putative. Marking one empirical is a positive act
       # requiring a citation, not the default state. PLAN.md Phase 4.
       status = "putative",

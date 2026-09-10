@@ -83,30 +83,34 @@ emp |>
 
 The kommune contains 18 PRTR-registered facilities [@NorwegianPRTRFrontpage], the most notable of which is the Melkøya Liquid Natural Gas plant, which receives gas from the Snøhvit and marine field to the north [@SnohvitField]. Other notable facilities include Hammerfest Airport, several active and former landfills and submarine disposal areas in the vicinity (including the Repparfjord Submarine Tailing Disposal (STD)), a handful of industrial installations, and the Wastewater Treatment Plant at Rossmolla, Hammerfest (constructed 2016, primary treatment), which serves both Hammerfest town and Rypefjord and discharges into the Sørøysundet [@fylkesmannenifinnmarkTillatelseEtterForurensningsloven2014]. Of these 18 facilities, 5 have reported copper emissions to the environment. Hammerfest town harbour has a long history of heavy metal and organic pollution [@vannportalenProsjektHammerfestRen2022], and was identified as a priority site ("Norway most polluted harbour" [@svendsenVarNorgesMest2024]) for cleanup under the project *Ren Havn* (Clean Harbour). The project aimed to reduce concentrations of lead, PAH16, and PCB7 to below Norwegian status class III (i.e. good or background levels of pollution with no adverse effects expected) by dredging polluted sediments and depositing them inside harbour infrastructure, and was successfully completed in 2023/2024 [@norwegiancoastaladministrationHammerfestRenHavn2019; @nccNCCHarOverlevert2023].
 
-The Nussir and Ulveryggen mountains in the mainland to Hammerfest town's south are copper-rich, and were mined intermittently in the early 20th century and then intensively between 1972 and 1978 by the firm Folldal Verk [@sternalImpactSubmarineCopper2017]. During this period, roughly 1 million tonnes of copper-rich tailings were processed and discharged to the inner Repparfjord [@sternalImpactSubmarineCopper2017; @kvassnesWasteSitesMines2013]. In 2019, the firm Nussir ASA was licensed to conduct mining operations at Nussir/Ulveryggen [@eilertsenNussirGetsOperating2019]. In 2021 it recieved permission to discharge tailings to the Repparfjord, and in 2025 its waste handling plan was approved by the NEA subject to a public hearing [@NussirKobberprosjektGodkjenning]. The resumption of mining at the Nussir/Ulveryggen site has been the subject of both legal cases at the national and EU level, and direct action [@garvikGruvekonfliktenRepparfjorden2026]. Mining is planned to begin in late 2027 [@olaussenSisteBrikkePa2026] and continue for 13 years, and is estimated to release at most 30 million tonnes of tailings to the Repparfjord.
+The Nussir and Ulveryggen mountains in the mainland to Hammerfest town's south are copper-rich, and were mined intermittently in the early 20th century and then intensively between 1972 and 1978 by the firm Folldal Verk [@sternalImpactSubmarineCopper2017]. During this period, roughly 1 million tonnes of copper-rich tailings were processed and discharged to the inner Repparfjord [@sternalImpactSubmarineCopper2017; @kvassnesWasteSitesMines2013]. In 2019, the firm Nussir ASA was licensed to conduct mining operations at Nussir/Ulveryggen [@eilertsenNussirGetsOperating2019]. In 2021 it received permission to discharge tailings to the Repparfjord, and in 2025 its waste handling plan was approved by the Norwegian Environment Agency (NEA), subject to a public hearing [@NussirKobberprosjektGodkjenning]. The resumption of mining at the Nussir/Ulveryggen site has been the subject of both legal cases at the national and EU level, and direct action [@garvikGruvekonfliktenRepparfjorden2026]. Mining is planned to begin in late 2027 [@olaussenSisteBrikkePa2026] and continue for 13 years, and is estimated to release at most 30 million tonnes of tailings to the Repparfjord over its period of operation.
+
+<!-- Increase font size of Fig 3, reduce margins between plots, remove text from under plots and place in legend. Add legend styling. -->
 
 ![Study area. (a) The Hammerfest / Repparfjorden region in western Finnmark: kommune boundaries (`csmaps`, 2024 division), Hammerfest kommune shaded, the red box the combined extent of the two Hammerfest-area AEPs. (b) The Hammerfest coastal system on Kartverket's colour topographic base map, showing reported point-source (PRTR) facilities (black stars), licensed aquaculture locations (blue circles), the Ulveryggen processing plant (black square), the historic (1970s Folldal Verk) submarine tailings disposal area (orange circle), and the Snøhvit and Goliat oil/gas fields (amber circles, sized to their footprints). Feature coordinates are approximate.](figures/fig03-study-area.png){#fig-repparfjorden-locator}
 
-Aquaculture is also an important industry in Hammerfest, with just under 5% of the kommune's population employed in fishing and aquaculture [@tbl-hammerfest-employment]. The Norwegian Fishery Agency's Aquaculture Register reports 29 (22 active, 7 inactive) licensed aquaculture facilities in the kommune that raise Atlantic salmon (*Salmo salar*), Rainbow trout (*Oncorhynchus mykiss*), and Brown trout (*Salmo trutta*). Copper is used in aquaculture both as a essential nutrient present in feed, and as an antifouling coating on fish cages [@grosvikKunnskapsstotteOmMiljoeffekter2023].
+Aquaculture is also an important industry in Hammerfest, with just under 5% of the kommune's population employed in fishing and aquaculture [@tbl-hammerfest-employment]. The Norwegian Fishery Agency's Aquaculture Register reports 29 (22 active, 7 inactive) licensed aquaculture facilities in the kommune that raise Atlantic salmon (*Salmo salar*), Rainbow trout (*Oncorhynchus mykiss*), and Brown trout (*Salmo trutta*). Copper is used in aquaculture both as an essential nutrient present in feed, and as an antifouling coating on fish cages [@grosvikKunnskapsstotteOmMiljoeffekter2023].
 
 ## Lines of Evidence
 
-Multiple lines of evidence were gathered in order to construct AEPs. Key lines and their characteristics are summarised below (@tbl-lines-of-evidence)
+Multiple Lines of Evidence (LoE) were gathered in order to construct AEPs. Key lines and their characteristics are summarised below (@tbl-lines-of-evidence).
+
+<!-- TODO: Tighten up language, make sure Norske utslipp uses consistent language. Update "AEP Class" to better name and match other stuff -->
 
 ```{r}
 #| label: tbl-lines-of-evidence
-#| tbl-cap: "Table of key lines of evidence used in the construction of AEPs. Includes dominant data types, coverage (spatial, temporal), and downstream Key Exposure States and Key Transitional Relationships."
+#| tbl-cap: "Table of key Lines of Evidence (LoE) used in the construction of AEPs. Includes dominant data types, coverage (spatial, temporal), and the Key Exposure States (KES) and Key Transitional Relationships (KTR) of which they provide evidence."
 #| echo: false
 tibble::tribble(
-  ~`Line of Evidence`                 , ~`Data Type`                                          , ~Coverage , ~`AEP Class`                    , ~Notes                                                                                                                                                                                                                                    ,
-  "Systematic Literature Review"      , "Exposure (concentrations)"                           , ""        , "Matrix KES, Tissue KES"        , ""                                                                                                                                                                                                                                        ,
-  "Ad hoc literature"                 , "Exposure (concentrations), Mass Balance (mass/time)" , ""        , "Matrix KES, Tissue KES, more?" , "Used to gap-fill AEPs where KES/KTR were suspected but no relevant evidence was found in existing lines of evidence"                                                                                                                     ,
-  "Vannmiljø Database"                , "Exposure (concentrations)"                           , ""        , "Matrix KES, Tissue KES"        , "Folded into SLR, as data of same type."                                                                                                                                                                                                  ,
-  "Copper Emissions"                  , "Emissions (mass/time)"                               , ""        , "Emissions KTR"                 , "Data resolution/quality generally lower than matrix concentrations"                                                                                                                                                                      ,
-  "Copper PRTR"                       , "Mass Balance (mass/time)"                            , ""        , "Source KES"                    , "As above"                                                                                                                                                                                                                                ,
-  "Aquaculture Registry"              , "Facility location and size"                          , ""        , "Source KES"                    , "Variation in size units make comparison difficult. No direct evidence of copper emission from aquaculture, but co-location of aquaculture facilities and data from aquaculture monitoring campaigns considered as evidence of pollution" ,
-  "Aquaculture Emissions Data"        , "Emissions (mass/time, modelled)"                     , ""        , "Emissions KTR"                 , "Aquaculture facilities report modelled copper emissions to water. These data correspond largely but not exactly with Aquaculture Registry sites."                                                                                        ,
-  "Copper Toxicity/Safety Thresholds" , "Thresholds (concentration)"                          , ""        , ""                              , "Various EU and Norwegian quality standards were used to provide an assessment of which samples showed probable pollution."
+  ~`Line of Evidence`                                 , ~`Data Type`                                          , ~Coverage , ~`AEP Elements`                                  , ~Notes                                                                                                                                                                                                                                    ,
+  "Systematic Literature Review"                      , "Exposure (concentrations)"                           , ""        , "Exposure Medium, Internal Exposure KES"         , "Primary data source, processed using exposure data pipeline."                                                                                                                                                                            ,
+  "Ad hoc literature"                                 , "Exposure (concentrations), Mass Balance (mass/time)" , ""        , "Source, Exposure Medium, Internal Exposure KES" , "Used to gap-fill AEPs where KES/KTR were suspected but no relevant evidence was found in existing lines of evidence"                                                                                                                     ,
+  "Vannmiljø Database"                                , "Exposure (concentrations)"                           , ""        , "Exposure Medium, Internal Exposure KES"         , "Processed using exposure data pipeline."                                                                                                                                                                                                ,
+  "Norwegian Product Register"                        , "Emissions (mass/time)"                               , ""        , "Source KTR"                                     , "Self-reported emissions. Methodology and QC not available."                                                                                                                                                          ,
+  "Norwegian Pollutant Release and Transfer Register" , "Mass Balance (mass/time)"                            , ""        , "Source KES"                                     , "As above"                                                                                                                                                                                                                                ,
+  "Aquaculture Registry"                              , "Facility location and size"                          , ""        , "Source KES"                                     , "Variation in size units makes comparison difficult. No direct evidence of copper emission from aquaculture, but co-location of aquaculture facilities and data from aquaculture monitoring campaigns considered as evidence of pollution" ,
+  "Aquaculture Emissions Data"                        , "Emissions (mass/time, modelled)"                     , ""        , "Emissions KTR"                                  , "Aquaculture facilities report modelled copper emissions to water. These data correspond largely but not exactly with Aquaculture Registry sites."                                                                                        ,
+  "Copper Toxicity/Safety Thresholds"                 , "Thresholds (concentration)"                          , ""        , ""                                               , "Various EU and Norwegian quality standards were used to provide an assessment of which samples showed probable pollution."
 ) |>
   flextable::flextable() |>
   flextable::compose(
@@ -121,7 +125,7 @@ tibble::tribble(
 
 ### Literature Review Protocol
 
-A systematic literature review framework was adapted elements of the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment. Additionally, the decision was made mid-review to diverge from the PRISMA2020 guidelines to complete the review within a reasonable period of time.
+A systematic literature review framework was adapted from elements of the PRISMA2020 framework (@pagePRISMA2020Statement2021). As PRISMA2020 is primarily concerned with intervention-based studies, some work was required to adapt to the scope and exigencies of an ecotoxicological exposure assessment. Additionally, the decision was made mid-review to diverge from the PRISMA2020 guidelines to complete the review within a reasonable period of time.
 
 #### Databases and Search Terms
 
@@ -146,7 +150,7 @@ Once a dataset of potentially relevant papers was compiled, the web review platf
 3)  800 studies were screened at the title and abstract level by two reviewers. 540 were excluded as irrelevant.
 4)  260 studies were screened at the full text level by one of two reviewers. 46 were excluded as irrelevant.
 5)  The remaining 214 studies were ranked informally from 1-5 (5 being highest) based on their perceived quality and relevance. The 58 papers given a score of 4 or 5 were selected as an initial batch of studies for extraction.
-6)  Of these 58 papers, 32 had data extracted. 18 were rejected based on missing data or irrelevance. 8 papers remain in the progress of extraction at the time of writing.
+6)  Of these 58 papers, 32 had data extracted. 18 were rejected based on missing data or irrelevance. 8 papers remain in the process of extraction at the time of writing.
 7)  Extraction was carried out by one of three reviewers using the eData application. No blinding was conducted, and reviewers were free to discuss and reach consensus.
 
 The full PRISMA-derived flow is shown in @fig-prisma. Study screening was conducted using the following exclusion criteria. Where a study met multiple criteria for inclusion, only the first criterion was recorded. Some criteria were based on the Criteria for Reporting and Evaluating Exposure Datasets (CREED) Gateway Criteria [@dipaoloImplementationCREEDApproach2024]. These have been coded as CREED-n.
@@ -175,14 +179,14 @@ Study ranking was conducted by a single reviewer. Study abstracts and full-texts
 5. Were reported data in a machine-readable format (text or tables preferred), or as graphics?
 6. What proportion of the sites sampled were in the Norwegian Arctic?
 7. Were the matrices sampled marine (preferred), or could they reasonably be expected to be a copper source for marine environments?
-8. What level of detail were methodologies reported to (c.f. (Di Paolo et al., 2024))?
+8. What level of detail were methodologies reported to (cf. Di Paolo et al., 2024)?
 ```
 
-Based on these criteria, an subjective score between 5 (most useful) and 1 (least useful) was assigned to each study. As all scoring was conducted by a single reviewer, no inter-reviewer statistics were calculated and no calibration was conducted.
+Based on these criteria, a subjective score between 5 (most useful) and 1 (least useful) was assigned to each study. As all scoring was conducted by a single reviewer, no inter-reviewer statistics were calculated and no calibration was conducted.
 
 #### Data Extraction & Validation
 
-Concentration data were extracted from study full texts using the eData application and structured data format [@welchEDataToolFormat2026]. For a full description of methodology, we direct readers to the cited paper. In short, data were extracted by a reviewer from PDFs using the Claude Sonnet 4 LLM into a structure format [@anthropic2024extracting_json], visually inspected and validated by same reviewer, and exported as a collection of comma-separated values. Data were subsequently checked for internal consistency and correctness to format with the eData format's validation functions, and combined into a single large table.
+Concentration data were extracted from study full texts using the eData application and structured data format [@welchEDataToolFormat2026]. For a full description of methodology, we direct readers to the cited paper. In short, data were extracted by a reviewer from PDFs using the Claude Sonnet 4 LLM into a structured format [@anthropic2024extracting_json], visually inspected and validated by the same reviewer, and exported as a collection of comma-separated values. Data were subsequently checked for internal consistency and correctness to format with the eData format's validation functions, and combined into a single large table.
 
 ### *Ad hoc* literature
 
@@ -207,16 +211,16 @@ In addition to data from literature, monitoring data were extracted from the Nor
 
 ```{r}
 #| label: tbl-vm-search
-#| tbl-cap: "table of Vannmiljø search terms. How many raw hits?"
+#| tbl-cap: "Table of Norwegian/English search terms used in Vannmiljø database query."
 #| echo: false
 tibble::tribble(
-  ~`Norwegian Term` , ~`English Translation` , ~`Selected Options`                                    , ~Comments                                                              ,
-  "Nedlastingsdato" , "Download Date"        , "2025-12-05"                                           , ""                                                                     ,
-  "Datoperiode"     , "Date Period"          , "2010-01-01 to 2025-12-05"                             , ""                                                                     ,
-  "Kommune"         , "Municipality"         , "All municipalities"                                   , "Data from mainland Norway and Svalbard"                               ,
-  "Medium"          , "Medium/Matrix"        , "All media"                                            , "All natural compartments, organism tissues, man-made materials, etc." ,
-  "Kampanje"        , "Campaign"             , "All campaigns"                                        , ""                                                                     ,
-  "Stressorer"      , "Stressors/Parameters" , "Kobber (Copper) & Kobberpyrition (Copper pyrithione)" , "No hits for Copper pyrithione in output data"
+  ~`Norwegian Term` , ~`English Translation` , ~`Selected Options`                                                                                          , ~Comments                                                              ,
+  "Nedlastingsdato" , "Download Date"        , "2025-12-05"                                                                                                 , ""                                                                     ,
+  "Datoperiode"     , "Date Period"          , "2010-01-01 to 2025-12-05"                                                                                   , ""                                                                     ,
+  "Kommune"         , "Municipality"         , "All municipalities"                                                                                         , "Data from mainland Norway and Svalbard"                               ,
+  "Medium"          , "Medium/Matrix"        , "All media"                                                                                                  , "All natural compartments, organism tissues, man-made materials, etc." ,
+  "Kampanje"        , "Campaign"             , "All campaigns"                                                                                              , ""                                                                     ,
+  "Stressorer"      , "Stressors/Parameters" , "All copper-containing substances listed by database: Kobber (Copper) & Kobberpyrition (Copper pyrithione)" , "No hits for Copper pyrithione in output data"
 ) |>
   flextable::flextable() |>
   flextable::compose(
@@ -236,7 +240,7 @@ vm_sum <- tar_read(vm_dataset_summary)
 vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
 ```
 
-These search criteria returned 90,115 rows of copper concentrations and 24,684 sites at which copper was monitored, across `r vm_val("Monitoring campaigns")` campaigns. `r vm_val("Censored (< LOD / < LOQ)")` rows reported values below an LOD or LOQ. In addition, descriptive tables of method IDs, measurement units, measured matrix IDs, and monitoring campaigns. Extracted data were processed and converted to the eData format, and checked for internal consistency and correctness to format with the eData format's validation functions. An overview of the compartments most represented in the Vannmiljø dataset is below (@tbl-vm-dataset).
+These search criteria returned 90,115 rows of copper concentrations and 24,684 sites at which copper was monitored, across `r vm_val("Monitoring campaigns")` campaigns. `r vm_val("Censored (< LOD / < LOQ)")` rows reported values below an LOD or LOQ. In addition, descriptive tables of method IDs, measurement units, measured matrix IDs, and monitoring campaigns were compiled. Extracted data were processed and converted to the eData format, and checked for internal consistency and correctness to format with the eData format's validation functions. An overview of the compartments most represented in the Vannmiljø dataset is below (@tbl-vm-dataset).
 
 ```{r}
 #| label: tbl-vm-dataset
@@ -275,7 +279,7 @@ vm_sum$composition |>
 
 Once literature review and Vannmiljø data were joined, data processing and cleaning were performed. Units and values were standardised to mg/L (concentrations) or mg/kg (dry or wet weights) as appropriate. Values reported as below LOD/LOQ were dropped.
 
-Exposure data were then grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) , *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded. Each group was given a sequentially-numbered ID (GXXX); these Group IDs are used as shorthand to refer to specific groups.
+Exposure data were then grouped by *Environmental compartment*, *environmental subcompartment*, *Site geographical feature* and *sub-feature*, (for biota) *species* and *tissue*, and standardised unit (i.e. dry and wet weights, where both units were present for a single group). Any remaining invalid (i.e. value = NA) rows of data were dropped, and the proportion of dropped rows recorded. Each group was given a sequentially-numbered ID (GXXX); these Group IDs are used as shorthand to refer to specific groups.
 
 For each sample grouping, sample size, mean, median, standard deviation, number of outliers meeting *both* Tukey Fences ($Z >= 1.5$) [@hoaglinPerformanceResistantRules1986] and Robust-Modified Z-Score ($Z >= 3.5$) [@iglewiczHowDetectHandle1993], and Hartigan's dip test statistics ($P <= 0.05$) [@hartiganDipTestUnimodality1985; @maechlerDiptestHartigansDip2025] were calculated. Sample groups were ordered based on sample size and flagged for inspection where they met one of the following criteria:
 
@@ -283,7 +287,7 @@ For each sample grouping, sample size, mean, median, standard deviation, number 
 2.  The group's distribution was flagged as potentially multimodal
 3.  Over 5% of the group's total sample size (based on `MEASURED_N`) was double-flagged as an outlier based on Tukey fences and Robust-Modified Z-Score
 
-Where any of these criteria were met, distributions and outliers were inspected manually for potential causes. Where errors were identified as being introduced during extraction/conversion, these were removed.
+Where any of these criteria were met, distributions and outliers were inspected manually for potential causes. Where errors were identified as being introduced during extraction/conversion, these were excluded.
 
 ## Source Key Exposure States
 
@@ -295,11 +299,11 @@ Data specifically on copper sources were procured from national reporting resour
 
 ### Norwegian PRTR and REACH Product Register
 
-The Norwegian Pollutant Release and Transfer Register (PRTR) is a repository for self-reported emissions data in Norway, and is freely available under an open government data license [@NorwegianPRTRPollutants]. Discharges of specific pollutants, including copper, to air and water by licensed facilities (wastewater treatment plants, landfills, land-based industries, and offshore installations) are reported, typically as kg/year. Facilities locations are recorded to the municipality level, and it is frequently possible to geolocate these facilities from other records.
+The Norwegian Pollutant Release and Transfer Register (PRTR) is a repository for self-reported emissions data in Norway, and is freely available under an open government data license [@NorwegianPRTRPollutants]. Discharges of specific pollutants, including copper, to air and water by licensed facilities (wastewater treatment plants, landfills, land-based industries, and offshore installations) are reported, typically as kg/year. Facility locations are recorded to the municipality level, and it is frequently possible to geolocate these facilities from other records.
 
-Concurrently, the NEA maintains a Product Register (REACH PR) under the REACH and CLP directives [@norwegianenvironmentagencyProductRegisterDeclaration2024]. Imports and exports of hazardous substances (including copper) are self-reported to the EA by firms. As this information is considered commercially sensitive, it is not openly available. However, the EA make available on request an aggregated version where imports and exports are reported by industry sector and/or product type. By subtracting exported copper from imported copper values, a mass-balance estimate of embedded copper in Norway can be calculated per sector or per product.
+Concurrently, the NEA maintains a Product Register (REACH PR) under the REACH and CLP directives [@norwegianenvironmentagencyProductRegisterDeclaration2024]. Imports and exports of hazardous substances (including copper) are self-reported to the NEA by firms. As this information is considered commercially sensitive, it is not openly available. However, the NEA makes available on request an aggregated version where imports and exports are reported by industry sector and/or product type. By subtracting exported copper from imported copper values, a mass-balance estimate of embedded copper in Norway can be calculated per sector or per product.
 
-Data from these registers were assessed following the weight of evidence framework below, and are included as source KES (REACH PR) and KTR (PRTR) (@fig-hammerfest-emissions). Within the Hammerfest municipality, 5 of the the 18 PRTR-registered facilities report copper emissions to air or water for at least one year.
+Data from these registers were assessed following the weight of evidence framework below, and are included as source KES (REACH PR) and KTR (PRTR) (@fig-hammerfest-emissions). Within the Hammerfest municipality, 5 of the 18 PRTR-registered facilities report copper emissions to air or water for at least one year.
 
 <!-- TODO: Wrap text in y ais, add proper source citations -->
 
@@ -314,11 +318,11 @@ match. Un-comment all together to bring the figure back.
 -->
 ```
 
-![**(a)** REACH product register net copper (imported plus produced, minus exported) scaled to Hammerfest by each NACE section's share of Hammerfest-resident employment; complete reporting years only (2018-2021); sectors above 1 kg/yr implied; log scale. **(b)** Copper released to air and water by PRTR-licensed facilities in Hammerfest kommune, by facility; reported zeros omitted (log scale). Panel a is copper in commerce (tonnes-scale), panel b is copper released (kg); the two are not comparable. Regenerate with `tar_make(hammerfest_emissions_plot)`.](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
+![**(a)** REACH product register net copper (imported plus produced, minus exported) scaled to Hammerfest by each NACE section's share of Hammerfest-resident employment; complete reporting years only (2018-2021); sectors above 1 kg/yr implied; log scale. **(b)** Copper released to air and water by PRTR-licensed facilities in Hammerfest kommune, by facility; reported zeros omitted (log scale). Panel a is copper in commerce (tonnes-scale), panel b is copper released (kg); the two are not comparable.](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
 
 ### Aquaculture
 
-Aquaculture feed/faecal matter and antifoulant net treatment both represent potentially important sources of copper pollution to the environment, typically most obvious in sediment in a 0-300m distance from a given facility [@grosvikKunnskapsstotteOmMiljoeffekter2023]. Copper is released from feed and fecal matter over time, and on nets both gradually (the release of copper ions mediates their toxicity to fouling organisms), and in spikes when nets are washed to remove fouling.
+Aquaculture feed/faecal matter and antifoulant net treatment both represent potentially important sources of copper pollution to the environment, typically most obvious in sediment in a 0-300m distance from a given facility [@grosvikKunnskapsstotteOmMiljoeffekter2023]. Copper is released from feed and faecal matter over time, and on nets both gradually (the release of copper ions mediates their toxicity to fouling organisms), and in spikes when nets are washed to remove fouling.
 
 Aquaculture represents a significant portion of Norway's agricultural (73.5%) and overall GDP (1.3%, statistics for 2024) [@faoNorwayFisheriesAquaculture2024], and is expected to double in volume by 2050 [@dnvOceansFuture20502021].
 
@@ -326,7 +330,7 @@ Aquaculture represents a significant portion of Norway's agricultural (73.5%) an
 #| label: aquaculture-biocide-use
 #| fig-width: 5.2
 #| fig-height: 3.4
-#| fig-caption: "Sales (tonnes) of copper, tralopyril and zinc pyrithone in antifouling applications in aquaculture in Norway, 2018-2024. Data from [@norwegianenvironmentagencyBiociderSomBrukes2025]"
+#| fig-cap: "Sales (tonnes) of copper, tralopyril and zinc pyrithione in antifouling applications in aquaculture in Norway, 2018-2024. Data from [@norwegianenvironmentagencyBiociderSomBrukes2025]"
 # Active ingredient sold nationally for aquaculture net antifouling, tonnes/year.
 # Source: Norwegian Environment Agency, "Biocider som brukes ..." 2025
 # (@norwegianenvironmentagencyBiociderSomBrukes2025).
@@ -381,27 +385,27 @@ ggplot2::ggplot(biocide_use, ggplot2::aes(year, tonnes, colour = series)) +
   )
 ```
 
-Although use of copper-based antifoulants on nets remains legal in Norway, their use in tonnes has dropped substantially, to be replaced with use of tralopyril and/or zinc pyrithone [@aquaculture-biocide-use]. Both the legal and market-based outlook for aquaculture antifoulants as a source of pollution is thus rather uncertain. However, as copper is an essential component of fish feed [@wangDietaryCopperFish2024a] feed's relevance as a copper source is likely to prove of continued importance.
+Although use of copper-based antifoulants on nets remains legal in Norway, their use in tonnes has dropped substantially, to be replaced with use of tralopyril and/or zinc pyrithione [@aquaculture-biocide-use]. Both the legal and market-based outlook for aquaculture antifoulants as a source of pollution is thus rather uncertain. However, as copper is an essential component of fish feed [@wangDietaryCopperFish2024a] feed's relevance as a copper source is likely to prove of continued importance.
 
-Modelled copper emissions (kg/year) per aquaculture facility are reported for 8 of the facilities in Hammerfest kommune. Although no methodology was made available for the calculation of these figures, they represent a spatially and temporarily specific dataset for copper inputs in the Sorøysundet. Reported copper emissions were summed across registered facilities within the bounding box ([@fig-aquaculture-emissions]) and an average calculated across the period (89.9 kg/year). Because it is unknown how much these aquaculture facilities may grow (which is expected to drive both feed use and antifoulant use), and how patterns of antifoulant use will evolve in the future, the decision was made to use the 89.9 kg/year figure but assign it a low degree of evidence quality.
+Modelled copper emissions (kg/year) per aquaculture facility are reported for 8 of the facilities in Hammerfest kommune. Although no methodology was made available for the calculation of these figures, they represent a spatially and temporally specific dataset for copper inputs in the Sørøysundet. Reported copper emissions were summed across registered facilities within the bounding box ([@fig-aquaculture-emissions]) and an average calculated across the period (89.9 kg/year). Because it is unknown how much these aquaculture facilities may grow (which is expected to drive both feed use and antifoulant use), and how patterns of antifoulant use will evolve in the future, the decision was made to use the 89.9 kg/year figure but assign it a low degree of evidence quality.
 
-![Reported modelled copper emissions (kg/year) to water from registered aquaculture facilities within the AEP 1 bounding box (Hammerfest town coast) (a) [@norwegianenvironmentagencyNorskeUtslippCopper2026a]. Farm species and licensed capacity (tonnes Maximum Total Bionmass) appended from Norwegian Aquaculture Registry) [@norwegiandirectorateoffisheriesAquacultureLocationsNorway2025]. Sum of facility emissions (b, last panel) averaged to 89.9 kg/year.](figures/fig12-aquaculture-emissions.png){#fig-aquaculture-emissions}
+![Reported modelled copper emissions (kg/year) to water from registered aquaculture facilities within the AEP 1 bounding box (Hammerfest town coast) (a) [@norwegianenvironmentagencyNorskeUtslippCopper2026a]. Farm species and licensed capacity (tonnes Maximum Total Biomass) appended from Norwegian Aquaculture Registry [@norwegiandirectorateoffisheriesAquacultureLocationsNorway2025]. Sum of facility emissions (b, last panel) averaged to 89.9 kg/year.](figures/fig12-aquaculture-emissions.png){#fig-aquaculture-emissions}
 
 ### Wastewater Sources
 
 Hammerfest kommune's Wastewater Treatment Plant (WWTP) at Rossmolla began operation in 2016 and serves 10,488 (95% of the kommune's population, the remainder using septic tanks). Hammerfest operates a combined sewer system [@krogsethUnderstandingCyclicVolatile2016].
 
-Waste is subject to primary/mechanical treatment and discharged via pipe into the Sorøysundet at a depth of 50-60m [@norwegianenvironmentagencyNorskeUtslippRenseanlegg2026]. No reporting or estimation of copper discharge to the environment is provided for Rossmolla, nor indeed for any similarly-sized WWTPs anywhere in Finnmark or Nordland. Consequently, the decision was made to use data for Kvalvikodden WWTP in Bodø, also a primary treatment plant discharging to marine receiving waters. Kvalvikodden reports copper emissions for 2021 - 2025. 2025's data were discarded as apparently incomplete at the time of reporting, and a mean (80.15 kg) calculated for 2021-2025. This mean was then adjusted for the population differential (10,488 / 49,780 connected population), giving an average yearly emission from WWTP of 16.89 kg/year [@statisticsnorway13144WastewaterPipelines2026]. Given the geography of the area and primary treatment, it seems likely that much of copper deposited in Hammerfest kommune quickly reaches marine receiving waters, but without more specific assessment WWTP emissions provide a first-order estimate.
+Waste is subject to primary/mechanical treatment and discharged via pipe into the Sørøysundet at a depth of 50-60m [@norwegianenvironmentagencyNorskeUtslippRenseanlegg2026]. No reporting or estimation of copper discharge to the environment is provided for Rossmolla, nor indeed for any similarly-sized WWTPs anywhere in Finnmark or Nordland. Consequently, the decision was made to use data for Kvalvikodden WWTP in Bodø, also a primary treatment plant discharging to marine receiving waters. Kvalvikodden reports copper emissions for 2021 - 2025. 2025's data were discarded as apparently incomplete at the time of reporting, and a mean (80.15 kg) calculated for 2021-2024. This mean was then adjusted for the population differential (10,488 / 49,780 connected population), giving an average yearly emission from WWTP of 16.89 kg/year [@statisticsnorway13144WastewaterPipelines2026]. Given the geography of the area and primary treatment, it seems likely that much of the copper deposited in Hammerfest kommune quickly reaches marine receiving waters, but without more specific assessment WWTP emissions provide a first-order estimate.
 
 ### Other Runoff Sources
 
-@comberSourcesCopperEuropean2023 identify a number of other sources of copper emissions to water bodies at the EU27 level: agricultural inputs to land (manure, sewage sludge application to fields, copper-based pesticides and fertilisers), atmospheric deposition, transport emissions (principally break wear but also rail and road), natural emissions from soil loss, antifoulants on marine transport, and septic tank emissions to water. Because many of these were calculated at the EU27 level (and some are not relevant to Hammerfest kommune, which has no trains, minimal land-based agriculture, but a proportionally larger aquaculture sector), it was not practical to estimate their contributions to aquatic copper loads within the AEP systems. Consequently, these sources were included (where relevant) as source KES with unquantified embedded copper or copper emissions.
+@comberSourcesCopperEuropean2023 identify a number of other sources of copper emissions to water bodies at the European Union level: agricultural inputs to land (manure, sewage sludge application to fields, copper-based pesticides and fertilisers), atmospheric deposition, transport emissions (principally brake wear but also rail and road), natural emissions from soil loss, antifoulants on marine transport, and septic tank emissions to water. Because many of these were calculated at the EU27 level (and some are not relevant to Hammerfest kommune, which has no trains, minimal land-based agriculture, but a proportionally larger aquaculture sector), it was not practical to estimate their contributions to aquatic copper loads within the AEP systems. Consequently, these sources were included (where relevant) as source KES with unquantified embedded copper or copper emissions.
 
 ### Weight of Evidence Assessment
 
 Construction of the AEP required the quantitative assessment and comparison of diverse lines of evidence on copper occurrence, emissions, and dynamics [@hardyGuidanceUseWeight2017].
 
-Evidence quality for each KES and KTR in a was assessed and scored according to the entity's Essentiality, Plausibility, Evidence, and Quantitative Understanding (abbreviated to EPEQ), based on the AOP WoE assessment guidelines [@oecdUsersHandbookSupplement2018] adapted by @pengAggregateExposurePathways2022. These criteria are summarised in @tbl-woe-criteria.
+Evidence quality for each KES and KTR was assessed against the hypothesis that copper was present at a KES, or flowed along a KTR. Each KES and KTR was scored according to the Essentiality, Plausibility, Evidence, and Quantitative Understanding (abbreviated to EPEQ) of copper presence/flows, based on the AOP WoE assessment guidelines [@oecdUsersHandbookSupplement2018] adapted by @pengAggregateExposurePathways2022. These criteria are summarised in @tbl-woe-criteria.
 
 In some cases, KESs and KTRs were given high EPEQ scores despite a lack of evidence in the available data due to the extreme degree of consensus on occurrence. For example, the natural occurrence of copper in the Earth's crust and sea water are both considered common knowledge and beyond all doubt, and were thus scored as highly essential, plausible, and evidence-based despite the absence of e.g. geological data in the lines of evidence.
 
@@ -411,21 +415,21 @@ In some cases, KESs and KTRs were given high EPEQ scores despite a lack of evide
 #| tbl-cap: "Weight of Evidence assessment criteria for Key Exposure States (KES) and Key Transitional Relationships (KTR) adapted from @pengAggregateExposurePathways2022, @oecdGuidingPrinciplesKey2019, and @dipaoloImplementationCREEDApproach2024."
 #| echo: false
 tibble::tribble(
-  ~Criterion, ~KES, ~KTR, ~Score, ~Comments,
+  ~Criterion, ~`Key Exposure State (KES)`, ~`Key Transitional Relationship (KTR)`, ~Score, ~Comments,
   "Essentiality",
   "Copper presence in downstream KES will be reduced/stopped if copper presence in this KES reduced/stopped",
   "Copper presence in downstream KES will be reduced/stopped if this KTR reduced/stopped",
   "3: Diverse, consistent evidence
 2: Some, potentially inconsistent evidence
 1: Weak or no evidence",
-  "Less applicable with copper than xenobiotic stressors.",
+  "Due to wide range of copper emissions sources and variety of uptake routes, most KES/KTR are less essential.",
   "Plausibility",
   "Theoretical knowledge supports dependent and sequential change of two adjacent KESs",
   "Theoretical knowledge supports KTR as mechanism of sequential change between KESs",
   "3: Diverse, consistent evidence
 2: Some, potentially inconsistent evidence
 1: Weak or no evidence",
-  "Environment-level occurrence and transport of stressors is far more intuitively and widely understood than metabolism. Most copper KESs and KTRs will be scored as highly plausible.",
+  "Environment-level occurrence and transport of stressors is far more intuitively and widely understood than metabolic processes. Most copper KESs and KTRs will be scored as highly plausible.",
   "Evidence",
   "Empirical data showing occurrence of copper at KES.",
   "Empirical data on transfer along KTR between KESs",
@@ -452,8 +456,8 @@ Target site exposure states were selected on a pragmatic basis. *But this sectio
 
 | Criteria | Importance | Examples | Notes |
 |------------------|------------------|------------------|------------------|
-| Is species well-represented in data local to AEPs? | High | *G. morhua, M edulis* are used as indicator species in monitoring campaigns and represent a majority of biota samples in exposure data | Although data for biota from other sites with similar sources can be used, doing so substantially weakens the the strength of evidence of causality. |
-| Was species sensitivity to copper well-characterised and well-understood? | Moderate | AOPs for copper toxicity to fish are relatively well-developed [@liaoToxicityMechanismsBioavailability2023,@brixAdverseOutcomePathways2022] |  |
+| Is species well-represented in data local to AEPs? | High | *G. morhua, M edulis* are used as indicator species in monitoring campaigns and represent a majority of biota samples in exposure data | Although data for biota from other sites with similar sources can be used, doing so substantially weakens the strength of evidence of causality. |
+| Was species sensitivity to copper well-characterised and well-understood? | Moderate | AOPs for copper toxicity to fish are relatively well-developed [@liaoToxicityMechanismsBioavailability2023; @brixAdverseOutcomePathways2022] |  |
 |  |  |  |  |
 | Is species ecologically important? | Moderate |  |  |
 | Is species economically or culturally important? |  |  |  |
@@ -468,7 +472,7 @@ Measured copper concentrations were compared against a small set of published ba
 ::: landscape
 ```{r}
 #| label: tbl-copper-thresholds
-#| tbl-cap: "Copper background and classification values used as comparators. Each value is the upper bound of the named class; the open-ended top class (Very Poor, V) is omitted. Sources: PROREF from the MILKYS coastal monitoring programme [@schoyenContaminantsCoastalWaters2024]; Norwegian M-608 classification boundaries [@miljodirektoratetGrenseverdierKlassifiseringAv2020]; EU-wide bioavailable EQS [@wilsonFollowingEvidenceUsing2023]; biota Background Assessment Concentrations from the ICES OHAT assessment criteria for metals in biota (2019). Compiled in `generate_copper_thresholds()`."
+#| tbl-cap: "Copper background and classification values used as comparators. Each value is the upper bound of the named class; the open-ended top class (Very Poor, V) is omitted. Sources: PROREF from the MILKYS coastal monitoring programme [@schoyenContaminantsCoastalWaters2024]; Norwegian M-608 classification boundaries [@norwegianenvironmentagencyThresholdsClassificationWater2020]; EU-wide bioavailable EQS [@wilsonFollowingEvidenceUsing2023]; biota Background Assessment Concentrations from the ICES OHAT assessment criteria for metals in biota (2019)."
 #| echo: false
 tar_read(copper_toxicity_thresholds) |>
   filter(!is.na(THRESHOLD_VALUE)) |>

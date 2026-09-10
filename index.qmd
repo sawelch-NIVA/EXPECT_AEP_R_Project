@@ -1,5 +1,5 @@
 ---
-title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Sinks, and Bioavailability
+title: Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Exposure, and Internal Concentrations
 # Two outputs, added 2026-07-29: html for your own review, docx for sharing
 # with co-authors. Declared here rather than in _quarto.yml so that the docx
 # is only produced for the manuscript, not for every notebook in the project.

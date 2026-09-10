@@ -36,7 +36,7 @@ edge_y_gap    <- 0.035  # clear space (data units) between the arrow and the
 # The two real AEP-001 cards, reused as-is. Their headline figures, EPEQ badges,
 # distribution panel (N013) and "local" icon are already baked into the PNGs.
 real_card <- c(
-  n1 = here::here("images/node_cards/A001/N042-aquaculture-feed.png"),
+  n1 = here::here("images/node_cards/A001/N042-aquaculture.png"),
   n2 = here::here("images/node_cards/A001/N013-coast-water-column.png")
 )
 stopifnot(file.exists(real_card))
@@ -81,11 +81,15 @@ nodes$quantification_justification <- illus
 # icon. geo_scope_icon_path(): "" (or any unrecognised value) -> no icon.
 nodes$geo_scope <- c("", "", "", "", "")
 
+# Edge id and label in the same "E<n>-<from slug>-to-<to slug>" form as the real
+# aep_edges.csv (the node_ids here are throwaway "n1".."n5", so the slug comes
+# from the node label instead).
+node_slug <- node_label_slug(nodes$label)
 edges <- tibble::tibble(
-  edge_id = sprintf("e%d", 1:4),
+  edge_id = sprintf("E%03d-%s-to-%s", 1:4, node_slug[1:4], node_slug[2:5]),
   from = nodes$node_id[1:4],
   to = nodes$node_id[2:5],
-  label = c("release", "contact", "uptake", "internal distribution"),
+  label = paste0(node_slug[1:4], "-to-", node_slug[2:5]),
   status = c("empirical", "empirical", "putative", "putative"),
   magnitude = NA_real_, magnitude_unit = NA_character_,
   magnitude_n = NA_real_, magnitude_sd = NA_real_, magnitude_refs = NA_real_,
@@ -154,7 +158,7 @@ edge_img_paths <- vapply(seq_len(nrow(edges)), function(i) {
   f <- file.path(edge_card_dir, paste0(ed$edge_id[1], ".png"))
   ggplot2::ggsave(
     f, edge_card(ed),
-    width = 1.6, height = 0.24, dpi = 300,
+    width = 0.8, height = 0.24, dpi = 300,
     device = ragg::agg_png, bg = "white"
   )
   f
@@ -185,7 +189,7 @@ p <- plot_aep(
 # Edge cards, one per arrow, at the chord midpoint but nudged UP so the card's
 # lower edge clears the arrow (which runs along y = 0): the arrow stays fully
 # visible, the card reads as a callout above it. Half-height of the edge card in
-# data units, from its saved shape (1.6 x 0.24 in -> h/w = 0.15) and the same
+# data units, from its saved shape (0.8 x 0.24 in -> h/w = 0.3) and the same
 # geom_image sizing maths node_card_extent() uses.
 ext <- node_card_extent(
   nodes,
@@ -195,7 +199,7 @@ ext <- node_card_extent(
   x_expand = 0.15, y_expand = 0.12,
   y_range = range(nodes$y)
 )
-edge_card_hh <- edge_img_size * (0.24 / 1.6) * (width / height) * ext$ry / 2
+edge_card_hh <- edge_img_size * (0.24 / 0.8) * (width / height) * ext$ry / 2
 edge_mid <- tibble::tibble(
   x = (nodes$x[1:4] + nodes$x[2:5]) / 2,
   y = edge_card_hh + edge_y_gap,

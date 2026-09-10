@@ -131,9 +131,18 @@ node_card_bg_colour <- function(node) {
 #'
 #' @param node A one-row nodes or edges tibble carrying the four score columns.
 #' @param text_size Badge text size.
+#' @param labels Prefix each score with its criterion letter (`Es`, `Pl`, `Ev`,
+#'   `Qn`) and draw the run of tiles as one solid band? `TRUE` (default) is the
+#'   node-card form. `FALSE` draws four separate coloured squares, each with the
+#'   bare digit centred in it, for the edge card: the four positions are always
+#'   in the same order, so the letters add nothing and cost width.
+#' @param square_size Marker size for the `labels = FALSE` squares, in the units
+#'   `ggplot2::geom_point()` uses (roughly mm). Ignored when `labels = TRUE`.
 #' @return A ggplot.
 #' @export
-node_epeq_badges <- function(node, text_size = 2.4) {
+node_epeq_badges <- function(
+  node, text_size = 2.4, labels = TRUE, square_size = 3
+) {
   labs <- epeq_badge_labels()
   cols <- epeq_score_colours()
 
@@ -149,12 +158,36 @@ node_epeq_badges <- function(node, text_size = 2.4) {
   d <- tibble::tibble(
     x = seq_along(labs),
     key = ifelse(is.na(scores), "NA", as.character(scores)),
-    # One line, not two (Sam 2026-08-05). Stacked letter-over-score needed a
-    # badge twice as tall for no extra information, and card height is the
-    # scarcest thing here.
-    shown = paste0(unname(labs), " ", ifelse(is.na(scores), "-", scores))
+    digit = ifelse(is.na(scores), "-", as.character(scores))
   )
   d$fill <- unname(cols[d$key])
+
+  if (!isTRUE(labels)) {
+    # Edge card: a filled-square point (shape 22) per criterion, sized in
+    # absolute units so it renders square whatever the panel's aspect, with the
+    # digit centred on it.
+    return(
+      ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = 0)) +
+        ggplot2::geom_point(
+          shape = 22, size = square_size, stroke = 0.4,
+          fill = d$fill, colour = "white"
+        ) +
+        ggplot2::geom_text(
+          ggplot2::aes(label = .data$digit),
+          size = text_size, colour = "grey10"
+        ) +
+        ggplot2::scale_x_continuous(
+          limits = (length(labs) + 1) / 2 + c(-1, 1) * (length(labs) / 2 + 0.6)
+        ) +
+        ggplot2::scale_y_continuous(limits = c(-1, 1)) +
+        ggplot2::theme_void()
+    )
+  }
+
+  # Node card: one line, not two (Sam 2026-08-05). Stacked letter-over-score
+  # needed a badge twice as tall for no extra information, and card height is
+  # the scarcest thing here.
+  d$shown <- paste0(unname(labs), " ", d$digit)
 
   ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = 0)) +
     ggplot2::geom_tile(
