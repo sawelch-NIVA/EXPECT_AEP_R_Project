@@ -993,11 +993,22 @@ node_card_short_height_frac <- function() {
 #'   `attr(., "short") = TRUE` so [write_node_cards()] can save it shorter.
 #'   `FALSE` (the default) keeps the three-band card with a placeholder or blank
 #'   strip, as before. The pipeline's [write_node_cards()] call passes `TRUE`.
+#'   Ignored when `show_strips = FALSE`.
+#' @param show_epeq Draw the EPEQ badge band? `TRUE` (the default, unchanged
+#'   pipeline behaviour) draws it as before. `FALSE` skips it entirely, for a
+#'   card that should not carry a weight-of-evidence assessment (e.g. the
+#'   illustrative Figure 1, `scripts/build_fig1_example_aep.R`).
+#' @param show_strips Draw the distribution strips band at all? `TRUE` (the
+#'   default) keeps existing behaviour, including `omit_empty_strips`.
+#'   `FALSE` skips [node_group_strips()] entirely (no `members`/`data`/`ids`
+#'   lookups are performed) regardless of whether the node has data, for a
+#'   card that should not show a distribution.
 #' @param ... Passed to [node_group_strips()], which is where every knob worth
 #'   turning while styling a card lives (`violin_fill`, `violin_alpha`,
 #'   `violin_colour`, `violin_width`, `external_series`).
-#' @return A patchwork object. Carries `attr(., "short") = TRUE` when the strips
-#'   band was omitted.
+#' @return A patchwork object. Carries `attr(., "short") = TRUE` whenever the
+#'   strips band is absent, whether because there was no distribution to draw
+#'   or because `show_strips = FALSE`.
 #' @export
 node_card <- function(
   node,
@@ -1010,6 +1021,8 @@ node_card <- function(
   max_groups = 3,
   dpi = 300,
   omit_empty_strips = FALSE,
+  show_epeq = TRUE,
+  show_strips = TRUE,
   ...
 ) {
   # A card placed on a graph node is roughly 1.6in wide, so every point size
@@ -1019,40 +1032,35 @@ node_card <- function(
   # goes: the count line, the per-group row labels, the axis, and the margin
   # counts.
   header <- node_card_header(node, card, dpi = dpi)
-  badges <- node_epeq_badges(node, text_size = 3.4)
-  strips <- node_group_strips(
-    node,
-    members,
-    data,
-    ids,
-    limits = limits,
-    thresholds = thresholds,
-    max_groups = max_groups,
-    omit_when_empty = omit_empty_strips,
-    ...
-  )
-
-  if (is.null(strips)) {
-    heights <- node_card_heights()
-    out <- patchwork::wrap_plots(
-      header,
-      badges,
-      ncol = 1,
-      heights = heights[c("header", "badges")]
-    ) &
-      node_card_theme(node)
-    attr(out, "short") <- TRUE
-    return(out)
+  badges <- if (show_epeq) node_epeq_badges(node, text_size = 3.4) else NULL
+  strips <- if (show_strips) {
+    node_group_strips(
+      node,
+      members,
+      data,
+      ids,
+      limits = limits,
+      thresholds = thresholds,
+      max_groups = max_groups,
+      omit_when_empty = omit_empty_strips,
+      ...
+    )
+  } else {
+    NULL
   }
 
-  patchwork::wrap_plots(
-    header,
-    badges,
-    strips,
+  panels <- list(header = header)
+  if (!is.null(badges)) panels$badges <- badges
+  if (!is.null(strips)) panels$strips <- strips
+
+  out <- patchwork::wrap_plots(
+    panels,
     ncol = 1,
-    heights = node_card_heights()
+    heights = node_card_heights()[names(panels)]
   ) &
     node_card_theme(node)
+  if (is.null(strips)) attr(out, "short") <- TRUE
+  out
 }
 
 #' The Theme Every Panel of a Card Shares

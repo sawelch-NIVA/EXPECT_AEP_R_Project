@@ -3,9 +3,8 @@
 #' Generate Copper Threshold and Background Values
 #'
 #' Creates a tibble containing copper threshold and background values from multiple
-#' regulatory and scientific sources. Includes PROREF values from Norwegian monitoring,
-#' classification thresholds from Miljødirektoratet (M-608), EU bioavailable EQS,
-#' and ICES BAC values for biota.
+#' regulatory and scientific sources. Includes PROREF values from Norwegian monitoring
+#' and classification thresholds from Miljødirektoratet (M-608).
 #'
 #' @return A tibble with columns matching standard eData DRF formats:
 #'   \itemize{
@@ -17,14 +16,14 @@
 #'     \item YEAR: Year of publication (integer)
 #'     \item ACCESS_DATE: Date threshold was accessed/compiled
 #'     \item URL: URL to source document
-#'     \item THRESHOLD_TYPE: Type of threshold (PROREF, BAC, EQS, Classification boundary)
+#'     \item THRESHOLD_TYPE: Type of threshold (PROREF, Classification boundary)
 #'     \item PARAMETER_NAME: Parameter name (Copper)
 #'     \item ENVIRON_COMPARTMENT: Environmental compartment (Aquatic, Terrestrial, Biota)
 #'     \item ENVIRON_COMPARTMENT_SUB: Subcompartment specification
 #'     \item MEASURED_CATEGORY: Measurement category (External, Internal, Surface)
 #'     \item SAMPLE_SPECIES: Species name (for biota only)
 #'     \item SAMPLE_TISSUE: Tissue type (for biota only)
-#'     \item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Poor (IV), Very Poor (V))
+#'     \item THRESHOLD_CLASS: Classification class (Background (I), Good - Moderate (II-III), Poor (IV), Very Poor (V))
 #'     \item THRESHOLD_VALUE: Numeric **upper** boundary of the named class. `NA`
 #'       for open-ended classes (Very Poor).
 #'     \item MEASURED_UNIT: Unit of measurement with basis (e.g., mg/kg (wet), μg/L)
@@ -37,8 +36,6 @@
 #' \itemize{
 #'   \item Norwegian monitoring program (M-8022-2024) PROREF values
 #'   \item Miljødirektoratet classification system (M-608|2016, revised 2020)
-#'   \item EU-wide bioavailable EQS from Peters et al. (2023)
-#'   \item ICES BAC for marine biota
 #' }
 #'
 #' Norwegian classification system uses five classes:
@@ -52,8 +49,16 @@
 #'
 #' **Copper has no Klasse III** in either freshwater or sediment: Klasse II runs
 #' straight into Klasse IV. M-608 does not explain the omission. The coded rows
-#' therefore carry four classes, not five. See the inline comments for the
-#' 2026-07-30 correction that established this.
+#' therefore carry four boundaries, not five, and label the merged class
+#' "Good - Moderate (II-III)" throughout (freshwater and sediment relabelled
+#' 2026-09-11 to match coastal, which already used this style). See the inline
+#' comments for the 2026-07-30 correction that established the boundaries and
+#' the 2026-09-11 relabelling.
+#'
+#' Two threshold sources previously included here, an EU-wide bioavailable EQS
+#' from Peters et al. (2023) and ICES BAC for marine biota, were removed
+#' 2026-09-11: neither surfaced in any rendered output. See the "Combine all
+#' sources" comment in the function body for detail.
 #'
 #' @export
 #' @importFrom tibble tibble
@@ -101,13 +106,20 @@ generate_copper_thresholds <- function() {
   #
   # THRESHOLD_VALUE is the UPPER boundary of the named class throughout. Class V
   # is open-ended, hence NA.
+  #
+  # RELABELLED 2026-09-11, at Sam's request: the Class II row is now labelled
+  # "Good - Moderate (II-III)", matching the merged style already used for
+  # coastal below, so @tbl-copper-thresholds no longer shows freshwater and
+  # sediment jumping straight from II to IV while coastal alone shows II-III
+  # for the same underlying fact (no Class III defined for copper).
+  # THRESHOLD_VALUE is unchanged; only the label text.
   freshwater <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
     TITLE = "Grenseverdier for klassifisering av vann, sediment og biota",
     TITLE_SHORT = c(
       "M-608: Freshwater Background (I)",
-      "M-608: Freshwater Good (II)",
+      "M-608: Freshwater Good - Moderate (II-III)",
       "M-608: Freshwater Poor (IV)",
       "M-608: Freshwater Very Poor (V)"
     ),
@@ -124,7 +136,7 @@ generate_copper_thresholds <- function() {
     SAMPLE_TISSUE = NA_character_,
     THRESHOLD_CLASS = c(
       "Background (I)",
-      "Good (II)",
+      "Good - Moderate (II-III)",
       "Poor (IV)",
       "Very Poor (V)"
     ),
@@ -133,8 +145,8 @@ generate_copper_thresholds <- function() {
     THRESHOLD_FRACTION = "Dissolved",
     THRESHOLD_COMMENT = c(
       "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-0.3)",
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-7.8)",
-      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 7.8-15.6). No Class III is defined for copper",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class II (Good: 0.3-7.8). No Class III is defined for copper",
+      "Norwegian water classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 7.8-15.6)",
       "Norwegian water classification. Revised 30.10.2020. Class V (Very Poor: >15.6). Open-ended"
     )
   )
@@ -142,11 +154,14 @@ generate_copper_thresholds <- function() {
   # M-608 Coastal water classifications ----
   #
   # Left as-is 2026-07-30, unlike freshwater and sediment above: these three
-  # boundaries and their comments already agree with each other. Note the class
-  # labelling style differs (a merged "Good - Moderate (II-III)" rather than
-  # dropping III outright), which is the same underlying fact expressed
-  # differently. Downstream plotting keys on a simplified band rather than on
-  # THRESHOLD_CLASS verbatim, so the inconsistency does not leak into figures.
+  # boundaries and their comments already agree with each other. This is also
+  # the merged "Good - Moderate (II-III)" label that freshwater and sediment
+  # were brought into line with on 2026-09-11 (see their comments above),
+  # having originally been left with a bare "Good (II)" that jumped straight
+  # to Class IV. Downstream plotting keys on a simplified band rather than on
+  # THRESHOLD_CLASS verbatim, so the class label text does not itself reach
+  # figures either way; it only reaches @tbl-copper-thresholds in the
+  # manuscript.
   # Class V (>5.2) IS now coded, as an open-ended row with THRESHOLD_VALUE = NA,
   # matching freshwater and sediment above.
   #
@@ -208,13 +223,16 @@ generate_copper_thresholds <- function() {
   # Class IV. Three finite boundaries, four classes.
   #
   # THRESHOLD_VALUE is the UPPER boundary of the named class throughout.
+  #
+  # RELABELLED 2026-09-11, at Sam's request, same as freshwater above: "Good
+  # (II)" becomes "Good - Moderate (II-III)", matching coastal's merged style.
   sediment <- tibble(
     REFERENCE_ID = "M-608|2016",
     REFERENCE_TYPE = "Report",
     TITLE = "Grenseverdier for klassifisering av vann, sediment og biota",
     TITLE_SHORT = c(
       "M-608: Sediment Background (I)",
-      "M-608: Sediment Good (II)",
+      "M-608: Sediment Good - Moderate (II-III)",
       "M-608: Sediment Poor (IV)",
       "M-608: Sediment Very Poor (V)"
     ),
@@ -231,7 +249,7 @@ generate_copper_thresholds <- function() {
     SAMPLE_TISSUE = NA_character_,
     THRESHOLD_CLASS = c(
       "Background (I)",
-      "Good (II)",
+      "Good - Moderate (II-III)",
       "Poor (IV)",
       "Very Poor (V)"
     ),
@@ -240,71 +258,25 @@ generate_copper_thresholds <- function() {
     THRESHOLD_FRACTION = "Total",
     THRESHOLD_COMMENT = c(
       "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class I (Background: 0-20)",
-      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class II (Good: 20-84)",
-      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 84-147). No Class III is defined for copper",
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class II (Good: 20-84). No Class III is defined for copper",
+      "Norwegian sediment classification. Revised 30.10.2020. Upper boundary for Class IV (Poor: 84-147)",
       "Norwegian sediment classification. Revised 30.10.2020. Class V (Very Poor: >147). Open-ended"
     )
   )
 
-  # EU bioavailable EQS from Peters et al. 2023 ----
-  eu_eqs <- tibble(
-    REFERENCE_ID = "Peters2023",
-    REFERENCE_TYPE = "Journal Article",
-    TITLE = "Following the evidence and using the appropriate regulatory tools: A European-wide risk assessment of copper in freshwaters",
-    TITLE_SHORT = "EU EQS: Bioavailable Cu",
-    DOCUMENT_NUMBER = NA_character_,
-    YEAR = 2023L,
-    ACCESS_DATE = as.Date("2025-11-19"),
-    URL = "https://academic.oup.com/ieam/article/19/6/1570/7725173",
-    THRESHOLD_TYPE = "EQS",
-    PARAMETER_NAME = "Copper",
-    ENVIRON_COMPARTMENT = "Aquatic",
-    ENVIRON_COMPARTMENT_SUB = "Freshwater",
-    MEASURED_CATEGORY = "External",
-    SAMPLE_SPECIES = NA_character_,
-    SAMPLE_TISSUE = NA_character_,
-    THRESHOLD_CLASS = NA_character_,
-    THRESHOLD_VALUE = 1.0,
-    MEASURED_UNIT = "μg/L",
-    THRESHOLD_FRACTION = "Bioavailable",
-    THRESHOLD_COMMENT = "EU-wide EQS for bioavailable Cu. Based on 5th percentile HC5 from Austrian dataset (most Cu-sensitive EU region). Typical water conditions: pH 8.4, DOC 0.7 mg/L, Ca 60 mg/L"
-  )
-
-  # ICES BAC for biota ----
-  ices_bac <- tibble(
-    REFERENCE_ID = "ICES_BAC",
-    REFERENCE_TYPE = "Database",
-    TITLE = "ICES Assessment criteria for contaminants in biota",
-    TITLE_SHORT = c("ICES BAC: Mussels", "ICES BAC: Oysters"),
-    DOCUMENT_NUMBER = NA_character_,
-    YEAR = 2019L,
-    ACCESS_DATE = as.Date("2025-11-19"),
-    URL = "https://dome.ices.dk/ohat/trDocuments/2019/help_ac_biota_metals.html",
-    THRESHOLD_TYPE = "BAC",
-    PARAMETER_NAME = "Copper",
-    ENVIRON_COMPARTMENT = "Biota",
-    ENVIRON_COMPARTMENT_SUB = c("Biota, Aquatic", "Biota, Aquatic"),
-    MEASURED_CATEGORY = "Internal",
-    SAMPLE_SPECIES = c("Mytilus spp.", "Crassostrea spp."),
-    SAMPLE_TISSUE = c("Total soft tissues", "Total soft tissues"),
-    THRESHOLD_CLASS = NA_character_,
-    THRESHOLD_VALUE = c(6000, 6000),
-    MEASURED_UNIT = "μg/kg (dry)",
-    THRESHOLD_FRACTION = "Total",
-    THRESHOLD_COMMENT = c(
-      "Background Assessment Concentration (BAC). Mean concentrations significantly below BAC are near background. Developed within OSPAR framework. Mussels",
-      "Background Assessment Concentration (BAC). Mean concentrations significantly below BAC are near background. Developed within OSPAR framework. Oysters"
-    )
-  )
-
   # Combine all sources ----
+  #
+  # Peters et al. (2023) EU bioavailable EQS and ICES BAC (biota) were removed
+  # 2026-09-11 at Sam's request: he had already filtered both out of
+  # @tbl-copper-thresholds by hand, and neither actually surfaced in any
+  # rendered figure (Peters2023's EQS type was excluded from
+  # thresholds_for_group()'s default types already; ICES BAC's dry-weight unit
+  # never matched a group's standardised unit in practice).
   all_thresholds <- bind_rows(
     proref,
     freshwater,
     coastal,
-    sediment,
-    eu_eqs,
-    ices_bac
+    sediment
   )
 
   return(all_thresholds)

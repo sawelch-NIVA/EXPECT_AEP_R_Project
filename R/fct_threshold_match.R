@@ -226,10 +226,7 @@ add_threshold_boundary_class <- function(thresholds) {
 #' @param thresholds The `copper_toxicity_thresholds` target.
 #' @param grp A one-row tibble of group-defining columns, from
 #'   [sample_triage_groups()].
-#' @param types Threshold types to consider. The EU bioavailable EQS is excluded
-#'   by default: it is a bioavailable number and mixing it with the M-608 total /
-#'   dissolved classes on one axis invites exactly the fraction confusion this
-#'   layer is trying to avoid. It stays in the dataset, just unplotted.
+#' @param types Threshold types to consider.
 #' @param unit The unit to match. Defaults to the group's own unit; pass it
 #'   explicitly for the unit-agnostic overall-distribution panel, which needs
 #'   one call per unit present.
@@ -240,7 +237,7 @@ add_threshold_boundary_class <- function(thresholds) {
 thresholds_for_group <- function(
   thresholds,
   grp,
-  types = c("Classification boundary", "PROREF", "BAC"),
+  types = c("Classification boundary", "PROREF"),
   unit = NULL
 ) {
   # `grp = NULL` is a legitimate call: the plot functions take thresholds as
@@ -269,9 +266,9 @@ thresholds_for_group <- function(
     if (is.na(taxon)) {
       return(empty_threshold_match())
     }
-    # Genus-level match, so the PROREF "Mytilus edulis" and the ICES BAC
-    # "Mytilus spp." rows both reach a Mytilus group, and neither is missed by
-    # an exact-string comparison.
+    # Genus-level match rather than exact-string, so any invertebrate group
+    # (Molluscs, Crustaceans, Worms, ...) reaches the single PROREF "Mytilus
+    # edulis" row and any vertebrate group reaches "Gadus morhua".
     genus <- if (identical(taxon, "vertebrate")) "Gadus" else "Mytilus"
     std |>
       dplyr::filter(

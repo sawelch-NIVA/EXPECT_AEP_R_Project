@@ -378,33 +378,36 @@ feature_cols <- c(
 
 # --- themes --------------------------------------------------------
 # Tile-panel theme (fig 1b, fig 2): black border, blank margin, faint graticule.
-tile_theme <- theme_bw(base_size = 8) +
+# plot.margin kept small and symmetric so the inter-panel gutter in the composed
+# figure is set by wrap_plots(widths=), not by uneven per-panel margins.
+tile_theme <- theme_bw(base_size = 10) +
   theme(
     panel.grid.major = element_line(colour = "grey65", linewidth = 0.2),
     panel.grid.minor = element_blank(),
     panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7),
     axis.title = element_blank(),
-    plot.margin = margin(7, 9, 7, 7),
+    axis.text = element_text(size = 8.5, colour = "grey30"),
+    plot.margin = margin(3, 1, 3, 1),
     plot.background = element_rect(fill = "white", colour = NA),
     legend.position = "bottom",
-    legend.text = element_text(size = 6.5),
-    legend.title = element_text(size = 7),
+    legend.text = element_text(size = 7.5),
+    legend.title = element_text(size = 8.5),
     legend.key.height = unit(0.3, "cm"),
-    plot.title = element_text(face = "bold", size = 10, hjust = 0.01)
+    plot.title = element_text(face = "bold", size = 12.5, hjust = 0.01)
   )
 # Location-panel theme, merged from quarto-ms-template's Norway map template:
 # theme_bw with a toned-down graticule + degree axes as reference context.
-loc_theme <- theme_bw(base_size = 8) +
+loc_theme <- theme_bw(base_size = 10) +
   theme(
     panel.grid = element_line(colour = "grey85", linewidth = 0.25),
     panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7),
-    axis.text = element_text(size = 7, colour = "grey30"),
+    axis.text = element_text(size = 8.5, colour = "grey30"),
     axis.ticks = element_line(colour = "grey50", linewidth = 0.3),
     axis.title = element_blank(),
-    plot.margin = margin(7, 9, 7, 7),
+    plot.margin = margin(3, 1, 3, 1),
     plot.background = element_rect(fill = "white", colour = NA),
     panel.background = element_rect(fill = "#dbe7ef", colour = NA),
-    plot.title = element_text(face = "bold", size = 10, hjust = 0.01),
+    plot.title = element_text(face = "bold", size = 12.5, hjust = 0.01),
     plot.caption = element_text(size = 5.5, colour = "grey40")
   )
 
@@ -421,7 +424,8 @@ tile_panel <- function(
   points = TRUE,
   legend = FALSE,
   feature_lv = names(feature_cols),
-  feature_key = NULL
+  feature_key = NULL,
+  feature_legend_nrow = 2 # panel c uses 3: bigger legend text needs a narrower block
 ) {
   bb <- matrix(
     c(view["xmin"], view["xmax"], view["ymin"], view["ymax"]),
@@ -509,7 +513,7 @@ tile_panel <- function(
     gl <- list(
       colour = guide_legend(
         order = 3,
-        nrow = 2,
+        nrow = feature_legend_nrow,
         byrow = TRUE,
         override.aes = feature_key %||%
           list(
@@ -549,15 +553,15 @@ tile_panel <- function(
       location = "bl",
       width_hint = 0.28,
       height = unit(0.15, "cm"),
-      text_cex = 0.55,
+      text_cex = 0.75,
       line_width = 0.6,
       pad_x = unit(0.2, "cm"),
       pad_y = unit(0.2, "cm")
     ) +
     ggspatial::annotation_north_arrow(
       location = "tr",
-      height = unit(0.7, "cm"),
-      width = unit(0.6, "cm"),
+      height = unit(0.85, "cm"),
+      width = unit(0.75, "cm"),
       style = ggspatial::north_arrow_minimal(),
       pad_x = unit(0.15, "cm"),
       pad_y = unit(0.15, "cm")
@@ -615,7 +619,7 @@ panel_a <- ggplot() +
     data = country_labels,
     aes(lon, lat, label = label),
     colour = "grey45",
-    size = 2.6,
+    size = 3.4,
     fontface = "italic"
   ) +
   annotate(
@@ -624,7 +628,7 @@ panel_a <- ggplot() +
     y = 67.1,
     label = "Arctic Circle",
     colour = red,
-    size = 2.2,
+    size = 3.0,
     fontface = "italic",
     hjust = 0
   ) +
@@ -635,10 +639,7 @@ panel_a <- ggplot() +
     crs = 4326
   ) +
   loc_theme +
-  labs(
-    title = "a) Location",
-    caption = "Land: Natural Earth 10m. Kommuner: csmaps (SSB, 2024)."
-  )
+  labs(title = "a) Location")
 
 # --- b) Hammerfest coastal system, Finnmark context (vector) ---------
 # No raster tiles here: Kartverket's topo is sparse over the Norwegian Sea and
@@ -664,14 +665,14 @@ panel_b <- ggplot() +
     aes(label = name),
     colour = "#4a2866",
     fontface = "bold",
-    size = 2.6
+    size = 3.4
   ) +
   geom_sf_text(
     data = oil_lab[oil_lab$name == "Goliat", ],
     aes(label = name),
     colour = "#4a2866",
     fontface = "bold",
-    size = 2.6,
+    size = 3.4,
     # Goliat circle radius is ~8.7k in EPSG:3857 units at this latitude; the old
     # 9500 nudge left the label sitting on the circle edge. Clear it properly.
     nudge_y = 16000
@@ -682,15 +683,15 @@ panel_b <- ggplot() +
     bg.colour = "white",
     colour = "#5a7f96",
     fontface = "italic",
-    size = 3.3
+    size = 4.2
   ) +
-  geom_point(data = towns_xy, aes(X, Y), colour = "black", size = 1.4) +
+  geom_point(data = towns_xy, aes(X, Y), colour = "black", size = 1.8) +
   geom_shadowtext(
     data = towns_xy,
     aes(X, Y, label = name, fontface = ifelse(focus, "bold", "plain")),
     bg.colour = "white",
     colour = "black",
-    size = 2.5,
+    size = 3.2,
     hjust = 0,
     nudge_x = 1500
   ) +
@@ -700,21 +701,21 @@ panel_b <- ggplot() +
     bg.colour = "white",
     colour = "#1c3d57",
     fontface = "italic",
-    size = 2.8
+    size = 3.6
   ) +
   ggspatial::annotation_scale(
     location = "bl",
     width_hint = 0.28,
     height = unit(0.15, "cm"),
-    text_cex = 0.55,
+    text_cex = 0.75,
     line_width = 0.6,
     pad_x = unit(0.2, "cm"),
     pad_y = unit(0.2, "cm")
   ) +
   ggspatial::annotation_north_arrow(
     location = "tr",
-    height = unit(0.7, "cm"),
-    width = unit(0.6, "cm"),
+    height = unit(0.85, "cm"),
+    width = unit(0.75, "cm"),
     style = ggspatial::north_arrow_minimal(),
     pad_x = unit(0.15, "cm"),
     pad_y = unit(0.15, "cm")
@@ -727,10 +728,7 @@ panel_b <- ggplot() +
     datum = st_crs(4326)
   ) +
   loc_theme +
-  labs(
-    title = "b) Hammerfest coastal system",
-    caption = "Land: Natural Earth 10m."
-  )
+  labs(title = "b) Hammerfest coastal system")
 
 # --- c) Hammerfest + southern Repparfjord, all source features (topo) -
 panel_c <- tile_panel(
@@ -739,6 +737,7 @@ panel_c <- tile_panel(
   layer = "kv_topo",
   points = FALSE,
   legend = TRUE,
+  feature_legend_nrow = 3,
   feature_lv = c(
     "PRTR facility",
     "Aquaculture site (licensed)",
@@ -749,7 +748,7 @@ panel_c <- tile_panel(
   feature_key = list(
     shape = c(8, 21, 15, 17, 18),
     fill = c(NA, aqua_fill, NA, NA, NA),
-    size = c(2.6, 2.4, 2.4, 2.6, 3),
+    size = c(3.1, 2.9, 2.9, 3.1, 3.6),
     linewidth = 0
   ),
   under = list(
@@ -774,7 +773,7 @@ panel_c <- tile_panel(
       aes(label = "Tailings disposal"),
       colour = "#8a4b06",
       fontface = "bold",
-      size = 2.6,
+      size = 3.3,
       hjust = 1,
       nudge_x = -1200,
       nudge_y = 1100
@@ -803,33 +802,25 @@ panel_c <- tile_panel(
       aes(colour = "Wastewater treatment"),
       shape = 18,
       size = 3
-    ),
-    # One ggrepel layer over all six labelled point features so the congested
-    # Hammerfest-town cluster (LNG / airport / WWTP) lays out without overlap.
-    ggrepel::geom_text_repel(
-      data = label_feats,
-      aes(geometry = geometry, label = name),
-      stat = "sf_coordinates",
-      colour = "grey15",
-      fontface = "bold",
-      size = 2.2,
-      seed = 1,
-      min.segment.length = 0,
-      segment.size = 0.2,
-      segment.colour = "grey40",
-      box.padding = 0.6,
-      point.padding = 0.3,
-      max.overlaps = Inf
     )
+    # No per-feature text labels here: PRTR facilities, aquaculture, the airport,
+    # the WWTP and the Ulveryggen plant are all identified by the "Map features"
+    # legend, so labelling them on the map as well is redundant and crowds the
+    # Hammerfest-town cluster. Only the tailings-disposal circle keeps its label.
   )
 )
 
+# widths tuned so the leftover gutter (each panel's fixed aspect letterboxes it
+# inside its cell) is roughly equal on both sides of every panel, i.e. the a|b
+# and b|c gaps match. Panel c carries the bottom legend, so its plot panel is
+# shorter and needs the narrowest cell. Verified by measuring panel pixel
+# columns in the rendered PNG, not by eye.
 fig_study_area <- patchwork::wrap_plots(
   panel_a,
   panel_b,
   panel_c,
   nrow = 1,
-  widths = c(0.75, 1, 1)
+  widths = c(0.88, 1, 0.88)
 )
 ggsave(
   here::here("figures/fig03-study-area.png"),

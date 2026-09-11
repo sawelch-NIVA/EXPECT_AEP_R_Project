@@ -37,46 +37,22 @@ invisible(targets::tar_read(aep_matrix_timeseries_a002))
 
 <!-- TODO: Proref for biota -->
 
-## Distributions
+<!-- TODO: Remove wrong-species PROREFs -->
 
-- Overall top-down view of dataset and general distribution patterns
-- More detailed, broken-down versions of plots will be in SI
+<!-- TODO: Be consistent about use of means/medians/GM -->
 
-## AEPs
-
-AEPs for the two case study sites are shown in @fig-hammerfest-aep and @fig-repparfjord-aep.
-
-@tbl-nodes-a001 and @tbl-nodes-a002 give the AEP nodes: one row per node, its level (source / medium / organism) and type (empirical measured data, or external hand-entered magnitude), summary statistics of its numerical aspect (weighted mean, per-row SD, median, geometric mean; `n` is $\sum$`MEASURED_N` with rows and distinct references in brackets), the date range, and the four EPEQ scores. A blank statistics row is a node hypothesised for the AEP but with no supporting data yet. Empirical statistics are pooled over the node's member sample groups after applying the AEP bounding box and any node-specific filters.
+## Aggregate Exposure Pathways
 
 ### AEP 1: Hammerfest Inner Coastal System
 
-#### Pathway diagram
+#### AEP Sample Groups
 
-![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig08-aep1-hammerfest.png){#fig-hammerfest-aep}
+Exposure data for the study area was filtered to the Hammerfest coastal area bounding box (insert coords here) [@tbl-groups-a001]. 13 groups were returned, with data dominated by national monitoring campaigns. Aquatic sediment measurements were most represented in the dataset, 
 
-#### Node evidence table
 
-::: {.landscape}
+@tbl-groups-a001 
 
-```{r}
-#| label: tbl-nodes-a001
-#| tbl-cap: "AEP-001 (Hammerfest coastal) nodes."
-#| warning: false
-tar_read(aep_node_cards) |>
-  filter(aep_id == "A001") |>
-  node_report_flextable(tar_read(aep_scoped)[["A001"]]) |>
-  flextable::set_table_properties(layout = "autofit", width = 1)
-```
-
-:::
-
-#### Concentration map
-
-![Copper concentration data in the AEP-001 (Hammerfest coastal) bounding box plus a 10% margin on every side (red box = the aep_manifest.csv extent). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Basemap: Kartverket topografisk gråtone. **Placeholder caption, replace before submission.**](figures/fig06-aep1-concentrations.png){#fig-aep1-conc}
-
-#### Sample groups in the bounding box
-
-@tbl-groups-a001 summarises the sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (@fig-aep1-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, so the statistics differ from a national aggregation; the group `ID` and the `Dropped` percentage stay at their national values.
+summarises the sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (@fig-aep1-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, so the statistics differ from a national aggregation; the group `ID` and the `Dropped` percentage stay at their national values.
 
 ::: {.landscape}
 
@@ -102,9 +78,44 @@ tar_read(literature_analysis_ready) |>
 
 :::
 
+
+#### Concentration map
+
+Map of points in bounding box
+
+![Copper concentration data in the AEP-001 (Hammerfest coastal) bounding box plus a 10% margin on every side (red box = the aep_manifest.csv extent). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Basemap: Kartverket topografisk gråtone. **Placeholder caption, replace before submission.**](figures/fig06-aep1-concentrations.png){#fig-aep1-conc}
+
+
 #### Concentrations over time
 
+Time trends in key sampling groups
+
 ![Measured copper in the AEP-001 bounding box (70.44--70.78 N, 23.40--24.12 E) over time, one panel per compartment (cod liver, blue mussel, coastal water, sediment) in native units with a free $y$-axis per panel; dry weight, wet weight and per-litre concentrations are not directly comparable. Water and sediment points carry their Norwegian M-608 quality class (Background / Good / Poor / Very Poor; copper has no M-608 Class III). Cod and mussel sit on a separate above-/below-PROREF colour scale, since M-608 has no copper class ladder for biota. The dashed grey line is a linear fit where $n \ge 6$ (a rough eyeball of trend, not a model; cod excluded). Faint horizontal lines mark PROREF (biota) or the M-608 class boundaries (water, sediment); the dotted vertical marks 2024. Strip text gives the compartment, its units, and the sample groups present. Coastal water is `ENVIRON_COMPARTMENT_SUB` "Marine/Salt Water" (total copper, mg/L); M-608 water classes are for dissolved copper, so treat them as indicative. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig09-aep1-timeseries.png){#fig-a001-timeseries}
+
+
+#### Pathway diagram
+
+The aEP
+
+![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig08-aep1-hammerfest.png){#fig-hammerfest-aep}
+
+#### Node evidence table
+
+Nodes
+
+::: {.landscape}
+
+```{r}
+#| label: tbl-nodes-a001
+#| tbl-cap: "AEP-001 (Hammerfest coastal) nodes."
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A001") |>
+  node_report_flextable(tar_read(aep_scoped)[["A001"]]) |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+:::
 
 ### AEP 2: Inner Repparfjorden
 

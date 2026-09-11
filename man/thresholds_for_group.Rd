@@ -7,7 +7,7 @@
 thresholds_for_group(
   thresholds,
   grp,
-  types = c("Classification boundary", "PROREF", "BAC"),
+  types = c("Classification boundary", "PROREF"),
   unit = NULL
 )
 }
@@ -17,10 +17,7 @@ thresholds_for_group(
 \item{grp}{A one-row tibble of group-defining columns, from
 \code{\link[=sample_triage_groups]{sample_triage_groups()}}.}
 
-\item{types}{Threshold types to consider. The EU bioavailable EQS is excluded
-by default: it is a bioavailable number and mixing it with the M-608 total /
-dissolved classes on one axis invites exactly the fraction confusion this
-layer is trying to avoid. It stays in the dataset, just unplotted.}
+\item{types}{Threshold types to consider.}
 
 \item{unit}{The unit to match. Defaults to the group's own unit; pass it
 explicitly for the unit-agnostic overall-distribution panel, which needs

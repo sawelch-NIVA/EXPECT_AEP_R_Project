@@ -74,3 +74,61 @@ This question was selected on the following basis:
 ## PRSIMA-5: Specify the inclusion and exclusion criteria for the review and how studies were grouped for the syntheses
 
 ## PRISMA-6: Specify all databases, registers, websites, organisations, reference lists, and other sources searched or consulted to identify studies. Specify the date when each source was last searched or consulted.
+
+#### Databases and Search Terms
+
+The following search string was used in the literature sources Web of Science (Core Collection) and PubMed.
+
+``` txt
+(copper OR Cu OR cuprous OR cupric OR kobber OR coper OR 7440-50-8) 
+AND (Barents OR Norwegian OR Arctic OR Svalbard OR North Atlantic OR Greenland*)
+AND (wildlife OR ecotox* OR biota OR environment* OR animal OR ecosystem*) 
+AND (emission OR exposure OR fate OR behaviour OR concentration OR dose OR chem* OR bioaccumul* OR trophic) 
+AND (aqua* OR water* OR marine OR river OR lake OR fjord OR estuary OR sea OR ocean OR sediment* OR soil)
+```
+
+Web of Science returned 478 hits. PubMed returned 438 hits.
+
+
+#### Inclusion, Exclusion, Deduplication and Screening
+
+Once a dataset of potentially relevant papers was compiled, the web review platform Covidence [@veritashealthinnovationHowCanCite2025] was used to coordinate screening between the spatially separate reviewers.
+
+1)  111 duplicates were automatically matched and removed
+2)  5 duplicates were manually matched and removed
+3)  800 studies were screened at the title and abstract level by two reviewers. 540 were excluded as irrelevant.
+4)  260 studies were screened at the full text level by one of two reviewers. 46 were excluded as irrelevant.
+5)  The remaining 214 studies were ranked informally from 1-5 (5 being highest) based on their perceived quality and relevance. The 58 papers given a score of 4 or 5 were selected as an initial batch of studies for extraction.
+6)  Of these 58 papers, 32 had data extracted. 18 were rejected based on missing data or irrelevance.
+7)  Extraction was carried out by one of three reviewers using the eData application. No blinding was conducted, and reviewers were free to discuss and reach consensus.
+
+The full PRISMA-derived flow is shown in @fig-prisma. Study screening was conducted using the following exclusion criteria. Where a study met multiple criteria for inclusion, only the first criterion was recorded. Some criteria were based on the Criteria for Reporting and Evaluating Exposure Datasets (CREED) Gateway Criteria [@dipaoloImplementationCREEDApproach2024]. These have been coded as CREED-n.
+
+1)  CREED-1: sampling medium/matrix not specified
+2)  CREED-2: copper-based analytes/chemistry parameters not specified
+3)  CREED-3: spatial location not specified
+4)  CREED-4: sampling period not specified
+5)  CREED-5: measurement units not specified
+6)  CREED-6: data source not specified
+7)  out of geographical study area
+8)  paper not in English
+9)  full text not available
+
+
+
+#### Study Ranking
+
+Study ranking was conducted by a single reviewer. Study abstracts and full-texts were skim-read (roughly 5 minutes per manuscript), and evaluated on the following criteria (in rough order of importance):
+
+```         
+1. Did the study report novel data on relevant copper concentrations?
+2. How much data were reported in the study?
+3. Were data directly available (preferred), via a third party (such as a repo), or on request?
+4. Were such data reported as individual data points (preferred), or as summarised/aggregated data?
+5. Were reported data in a machine-readable format (text or tables preferred), or as graphics?
+6. What proportion of the sites sampled were in the Norwegian Arctic?
+7. Were the matrices sampled marine (preferred), or could they reasonably be expected to be a copper source for marine environments?
+8. What level of detail were methodologies reported to (cf. Di Paolo et al., 2024)?
+```
+
+Based on these criteria, a subjective score between 5 (most useful) and 1 (least useful) was assigned to each study. As all scoring was conducted by a single reviewer, no inter-reviewer statistics were calculated and no calibration was conducted.

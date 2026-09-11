@@ -17,14 +17,14 @@ A tibble with columns matching standard eData DRF formats:
 \item YEAR: Year of publication (integer)
 \item ACCESS_DATE: Date threshold was accessed/compiled
 \item URL: URL to source document
-\item THRESHOLD_TYPE: Type of threshold (PROREF, BAC, EQS, Classification boundary)
+\item THRESHOLD_TYPE: Type of threshold (PROREF, Classification boundary)
 \item PARAMETER_NAME: Parameter name (Copper)
 \item ENVIRON_COMPARTMENT: Environmental compartment (Aquatic, Terrestrial, Biota)
 \item ENVIRON_COMPARTMENT_SUB: Subcompartment specification
 \item MEASURED_CATEGORY: Measurement category (External, Internal, Surface)
 \item SAMPLE_SPECIES: Species name (for biota only)
 \item SAMPLE_TISSUE: Tissue type (for biota only)
-\item THRESHOLD_CLASS: Classification class (Background (I), Good (II), Poor (IV), Very Poor (V))
+\item THRESHOLD_CLASS: Classification class (Background (I), Good - Moderate (II-III), Poor (IV), Very Poor (V))
 \item THRESHOLD_VALUE: Numeric \strong{upper} boundary of the named class. \code{NA}
 for open-ended classes (Very Poor).
 \item MEASURED_UNIT: Unit of measurement with basis (e.g., mg/kg (wet), μg/L)
@@ -34,17 +34,14 @@ for open-ended classes (Very Poor).
 }
 \description{
 Creates a tibble containing copper threshold and background values from multiple
-regulatory and scientific sources. Includes PROREF values from Norwegian monitoring,
-classification thresholds from Miljødirektoratet (M-608), EU bioavailable EQS,
-and ICES BAC values for biota.
+regulatory and scientific sources. Includes PROREF values from Norwegian monitoring
+and classification thresholds from Miljødirektoratet (M-608).
 }
 \details{
 Sources include:
 \itemize{
 \item Norwegian monitoring program (M-8022-2024) PROREF values
 \item Miljødirektoratet classification system (M-608|2016, revised 2020)
-\item EU-wide bioavailable EQS from Peters et al. (2023)
-\item ICES BAC for marine biota
 }
 
 Norwegian classification system uses five classes:
@@ -58,6 +55,14 @@ Norwegian classification system uses five classes:
 
 \strong{Copper has no Klasse III} in either freshwater or sediment: Klasse II runs
 straight into Klasse IV. M-608 does not explain the omission. The coded rows
-therefore carry four classes, not five. See the inline comments for the
-2026-07-30 correction that established this.
+therefore carry four boundaries, not five, and label the merged class
+"Good - Moderate (II-III)" throughout (freshwater and sediment relabelled
+2026-09-11 to match coastal, which already used this style). See the inline
+comments for the 2026-07-30 correction that established the boundaries and
+the 2026-09-11 relabelling.
+
+Two threshold sources previously included here, an EU-wide bioavailable EQS
+from Peters et al. (2023) and ICES BAC for marine biota, were removed
+2026-09-11: neither surfaced in any rendered output. See the "Combine all
+sources" comment in the function body for detail.
 }

@@ -1,6 +1,7 @@
 ---
 title: "Fish & Muscle Theoretical AEPs"
 format: html
+bibliography: references.bib
 ---
 
 Copper to fish gills. Not species specific. Let's look at the literature.
@@ -25,7 +26,7 @@ What's the AOP angle?
 
 Obviously the BLM occupies most of the model space, but are there any specific fish models for copper?
 
-## Fish PBPK Model 
+## Fish PBPK Model
 
 [WOS Search](https://www.webofscience.com/wos/woscc/summary/a3eb3d71-dc34-402c-a11f-76a5fd36fcfe-01c76ac4be/times-cited-descending/1) (1 hit)
 
@@ -47,7 +48,7 @@ fish AND pbpk AND copper
 
 ![Schematic figure for PBPK model.](https://ars.els-cdn.com/content/image/1-s2.0-S026974911631048X-fx1.jpg){width="396"}
 
-## BLM 
+## BLM
 
 Via @ditoroBioticLigandModel2001
 
@@ -63,18 +64,114 @@ Via @ditoroBioticLigandModel2001
 
 ![](images/paste-2.png)
 
-# AEP KTR/KER
+# Two theoretical AEPs
 
-| KES/KTR | Type | Essential | Plausible | Evidence | Quantification | Notes |
-|----------------|----------|----------|----------|----------|----------|----------|
-| Copper Emissions | KES (Source) | 3 (Axomatic) | 3 (Axomatic) | 3 (Axomatic) | 1 (Models out of scope?) |  |
-| Emission to Marine Water | KTR (Emission) |  |  |  |  |  |
-| Marine Water | KES (Exposure Medium) |  |  |  |  |  |
-| Water to Gill Interface | KTR |  |  |  |  |  |
-| Gill-Water Interface | KES (External Exposure) |  |  |  |  |  |
-| Gill Uptake | KTR |  |  |  |  | Gill uptake dynamics are complex and mediated by variety of physico-chemical and biological parameters. |
-| Gill Tissue | KES (Internal Exposure) |  |  |  |  |  |
-| Cellular Uptake of Cu |  |  |  |  |  |  |
-| Gill Cells | KES (TSE) |  |  |  |  |  |
-| Effects | MIE |  |  |  |  | Disruption of ionoregulation at gills |
+Two linear AEPs, each a chain of five Key Exposure States (KES) from a stressor Source to a Target Site Exposure (TSE), joined by Key Transitional Relationships (KTR). Structure and scoring follow @tanAggregateExposurePathways2018 and @pengAggregateExposurePathways2022 (the WoE criteria table in the Methods).
 
+**Node granularity is deliberately coarse.** Tan defines only Source, KES, KTR and TSE; the five-stage ladder (Source, Exposure Medium, External Exposure, Internal Exposure, TSE) is Peng's operationalisation, and Peng runs it at organism / organ level ("fish", "gills"), not at the level of boundary layers or molecular ligands. Tan's own TSE examples (urine, a blood cell, a benthic fish) are whole-matrix or whole-organism, and the correspondence to an AOP Molecular Initiating Event (MIE) is a bonus where it exists, not a requirement. Nodes here are pitched at the coarsest level that still tells the exposure story and for which a number could exist.
+
+**Three points of friction, stated rather than hidden.** First, @tanAggregateExposurePathways2018 defines a KES by a *quantity* of stressor in a compartment; several KES here are asserted on mechanistic grounds with no magnitude available, and are scored Quantitative Understanding = 1 on that basis. Second, that paper's KTR is *either* transport of a stressor across media *or* transformation of one stressor into another; copper speciation is neither, so the step from total dissolved copper to its bioavailable fraction is recorded as a transformation KTR, an explicit extension of the definition made necessary by a metal that exists as many co-occurring species in one medium [@ditoroBioticLigandModel2001; @mebaneBioavailabilityToxicityModels2023]. Third, the TSE and the MIE are one shared state, not a clean handoff: for copper at the fish gill or the mussel digestive cell, arrival at the site and the onset of effect are mechanistically continuous, so the final KTR is where the AEP and the AOP overlap. Throughout, the AEP represents the *state* of copper at each location; the *rates* along the internal KTRs (ventilation, feeding, assimilation, biotransformation, efflux, growth dilution) are the domain of biokinetic and biodynamic models [@ditoroBioticLigandModel2001; @luomaWhyMetalBioaccumulation2005; @gaoApplicationToxicokinetictoxicodynamicModels2024], cited *at* those steps rather than reproduced.
+
+**Reading the tables.** Each row is a KES (a node) or a KTR (an edge, marked ↳). E / P / Ev / Q are the four EPEQ scores, each 1-3. In the diagrams, solid arrows mark empirically supported transitions and dashed arrows putative ones; the greyed AOP box sits outside the AEP. Citation quality is uneven and flagged below; see *Weak or borrowed citations* and *Claims with no library support*.
+
+## AEP-T1: dissolved copper to marine fish, branchial route
+
+| Element | Type | E | P | Ev | Q | Evidence |
+|-----------|-----------|:--:|:--:|:--:|:--:|-----------|
+| Copper sources to marine water (aquaculture, WWTP, harbour and tailings resuspension, runoff, weathering) | **Source** (KES) | 1 | 3 | 3 | 1 | Study-area emissions LoE (Methods); @comberSourcesCopperEuropean2023 (EU-scale context) |
+| ↳ emission and dispersion into receiving water | KTR, transport | 2 | 3 | 2 | 1 | Study-area monitoring and source co-location (Methods) |
+| Dissolved copper in the marine water column | **Exposure medium** (KES) | 3 | 3 | 3 | 2 | Vannmiljø water-column data (Methods) |
+| ↳ bioavailability: speciation and complexation (DOC, pH, salinity, competing cations) set the fraction the fish encounters | KTR, transformation † | 3 | 3 | 3 | 2 | @ditoroBioticLigandModel2001; @arnoldPredictingCopperToxicity2005; @depoloChallengesDevelopmentBiotic2012; @nysDerivationBioavailabilitybasedEnvironmental2026a |
+| Dissolved copper exposure at the fish | **External exposure** (KES) | 3 | 3 | 2 | 2 | As exposure medium; @EffectsNaturalOrganic (organic matter modulates Cu binding at the gill) |
+| ↳ branchial uptake | KTR, transport | 3 | 3 | 2 | 2 | @liaoToxicityMechanismsBioavailability2023; *Terapon jarbua* PBPK model ‡ |
+| Copper in the gill | **Internal exposure** (KES) | 3 | 3 | 2 | 1 | @liaoToxicityMechanismsBioavailability2023 (gill Cu burden in laboratory exposures) |
+| ↳ partitioning within the gill to the ionoregulatory surface | KTR, transport | 3 | 3 | 1 | 2 | @ditoroBioticLigandModel2001; @depoloChallengesDevelopmentBiotic2012 (model-inferred, not measured) |
+| Copper at the gill ionoregulatory surface (shares a state with the ionoregulatory-failure AOP MIE: Na/K-ATPase and carbonic anhydrase inhibition) | **Target site exposure** (KES) | 3 | 3 | 1 | 2 | @ditoroBioticLigandModel2001; @liaoToxicityMechanismsBioavailability2023; @brixAdverseOutcomePathways2022 |
+
+: KES and KTR for AEP-T1. † transformation KTR in the extended sense noted above. ‡ *Environ. Pollut.* 2016, PII S0269749116310480; no `references.bib` key yet.
+
+```{mermaid}
+%%| label: fig-aep-t1
+%%| fig-cap: "AEP-T1: dissolved copper to marine fish via the gill. Solid arrows empirically supported, dashed arrows putative; the AOP box is outside the AEP."
+flowchart TD
+    S["<b>Source</b><br/>Copper sources to marine water"]
+    EM["<b>Exposure medium</b><br/>Dissolved copper in the water column"]
+    EX["<b>External exposure</b><br/>Dissolved copper exposure at the fish"]
+    IN["<b>Internal exposure</b><br/>Copper in the gill"]
+    TSE["<b>Target site exposure</b><br/>Copper at the gill ionoregulatory surface"]
+    AOP["AOP: ionoregulatory failure"]
+    S -->|"emission + dispersion"| EM
+    EM -->|"bioavailability / speciation"| EX
+    EX -->|"branchial uptake"| IN
+    IN -.->|"partitioning to ionoregulatory surface"| TSE
+    TSE -.->|"MIE"| AOP
+    style AOP fill:#eeeeee,stroke:#999999,color:#666666
+```
+
+**Where the chain is thin.** Only the last internal step is putative: Cu in the gill is measured in laboratory exposures, but its distribution to the ionoregulatory surface is inferred from the BLM, which collapses the fish to one compartment (hence Q 2, not 3). No study-area fish gill Cu data.
+
+## AEP-T2: particulate copper to marine mussels, digestive route
+
+@beyerBlueMusselsMytilus2017 (citing Marigómez et al. 2002) separates the two mussel routes: dissolved metal is taken up at the gill, particulate metal over the digestive surface into the digestive-gland cells. On the particulate pathway the gill appears only inside the filter-feeding KTR, as a capture surface.
+
+**Mechanistic basis (from the exploratory notes above).**
+
+> ... multiple routes of exposure (diet and solution), metal speciation, ligand associations and complexation, chemical composition of the surrounding medium and physiological or biochemical effects on bioavailability (Luoma 1983; Simkiss and Taylor 1989; Luoma and Rainbow 2005).
+
+> For metals, the gill tissue constitutes a key interface for uptake of dissolved metals, for binding of metals to metallothionein (MT), for incorporation of metals into lysosomes ... (Marigómez et al. 2002).
+
+> ... particulate metals are mostly taken up over the digestive surface mediated by endocytosis and then transferred further to lysosomes and residual bodies, especially in the digestive cells of the digestive gland (Marigómez et al. 2002).
+
+| Element | Type | E | P | Ev | Q | Evidence |
+|-----------|-----------|:--:|:--:|:--:|:--:|-----------|
+| Particle-associated copper sources (contaminated-sediment resuspension, tailings fines, aquaculture feed and faeces, particulate runoff) | **Source** (KES) | 1 | 3 | 3 | 2 | @anderssonGeochemistryCopperMine2018; @pedersenMetalSpeciationHistoric2017; @sternalImpactSubmarineCopper2017; @hoffmBiogeochemicalImpactHistorical2024; @grosvikKunnskapsstotteOmMiljoeffekter2023 (aquaculture) |
+| ↳ sorption to particles and resuspension / transport | KTR, transformation + transport | 2 | 3 | 2 | 1 | @pedersenLongtermDispersionAvailability2018; @pedersenkbImpactsClimateChange2022 |
+| Copper on suspended particulate matter in the water column | **Exposure medium** (KES) | 3 | 3 | 2 | 1 | @pedersenLongtermDispersionAvailability2018 (dispersion and availability; water-column SPM Cu itself is sparse) |
+| ↳ filter feeding: clearance and particle selection | KTR, transport | 3 | 3 | 2 | 1 | @beyerBlueMusselsMytilus2017; @caiReducedCopperUptake2024 |
+| Particulate copper exposure at the mussel | **External exposure** (KES) | 2 | 3 | 1 | 1 | @beyerBlueMusselsMytilus2017 (conceptual state) |
+| ↳ ingestion, gut solubilisation and uptake into digestive cells | KTR, transformation + transport | 3 | 3 | 2 | 2 | @beyerBlueMusselsMytilus2017; @amiardMetallothioneinsAquaticInvertebrates2006 |
+| Copper in the digestive gland | **Internal exposure** (KES) | 3 | 3 | 3 | 1 | Vannmiljø / MILKYS *M. edulis* data (Methods); @beyerBlueMusselsMytilus2017; @caiInterspeciesDifferenceCopper2019 |
+| ↳ intracellular partitioning and detoxification handling in the digestive cells | KTR, transport | 3 | 2 | 1 | 1 | @amiardMetallothioneinsAquaticInvertebrates2006; @amiard-triquetMetallothioneinsArcticBivalves1998; @leDevelopmentToxicokinetictoxicodynamicModel2021 |
+| Copper in the digestive gland cells (shares a state with the lysosomal-destabilisation / oxidative-stress AOP MIE in molluscs) | **Target site exposure** (KES) | 3 | 3 | 2 | 1 | @beyerBlueMusselsMytilus2017 (lysosomal membrane stability assays on digestive-gland cells); @caiInterspeciesDifferenceCopper2019; @leDevelopmentToxicokinetictoxicodynamicModel2021 |
+
+: KES and KTR for AEP-T2.
+
+```{mermaid}
+%%| label: fig-aep-t2
+%%| fig-cap: "AEP-T2: particulate copper to marine mussels via the digestive tract. Solid arrows empirically supported, dashed arrows putative; the AOP box is outside the AEP."
+flowchart TD
+    S["<b>Source</b><br/>Particle-associated copper sources"]
+    EM["<b>Exposure medium</b><br/>Copper on suspended particulate matter"]
+    EX["<b>External exposure</b><br/>Particulate copper exposure at the mussel"]
+    IN["<b>Internal exposure</b><br/>Copper in the digestive gland"]
+    TSE["<b>Target site exposure</b><br/>Copper in the digestive gland cells"]
+    AOP["AOP: lysosomal destabilisation / oxidative stress"]
+    S -->|"sorption + resuspension"| EM
+    EM -->|"filter feeding"| EX
+    EX -->|"ingestion + gut uptake"| IN
+    IN -.->|"intracellular partitioning"| TSE
+    TSE -.->|"MIE"| AOP
+    style AOP fill:#eeeeee,stroke:#999999,color:#666666
+```
+
+**Where the chain is thin.** Digestive-gland Cu is heavily monitored, so Internal exposure is the strong node. Thin points: water-column SPM-bound Cu in the study area is sparse (most tailings data is bed sediment and porewater), and the step from bulk gland burden to the sensitive intracellular pool rests on laboratory TK-TD work in other bivalves.
+
+## Weak or borrowed citations
+
+Rows where the citation is context rather than direct support, and would not survive a referee who reads them:
+
+- **T1 Source**: @comberSourcesCopperEuropean2023 is an EU-scale review with limited Norwegian coverage (the Methods already say so). The real support is the study-area emissions LoE.
+- **T1 branchial uptake / gill**: the *Terapon jarbua* PBPK paper (PII S0269749116310480, *Environ. Pollut.* 2016) has no bib key and needs adding; it is the only cited source for route partitioning.
+- **T1 External exposure**: @EffectsNaturalOrganic is a bare `@misc` (Richards et al. 2001) and is freshwater rainbow trout.
+- **T2 filter feeding**: @caiReducedCopperUptake2024 is *Mytilus coruscus* (NW Pacific); clearance and particle selection are generic mussel physiology, not Cu- or Arctic-specific.
+- **`references.bib` has duplicate entries** for `comberSourcesCopperEuropean2023` (four copies) and `raderFateCopperAdded2019` (two). Harmless to the citation processor, worth a dedupe.
+
+## Claims with no library support
+
+Need a real search or an explicit expert-judgement tag rather than a borrowed citation:
+
+- Copper concentration at the gill ionoregulatory surface, and its ratio to bulk gill Cu (T1).
+- Copper on ingested particles in the mussel gut lumen as a distinct measured quantity (T2).
+- The metabolically available intracellular Cu pool in *M. edulis* in the field (T2); only laboratory and other-species TK-TD exist.
+
+## References
