@@ -352,10 +352,6 @@ node_external_series_bars <- function(
         "segment",
         x = min(by_year$year), xend = max(by_year$year),
         y = mean_value, yend = mean_value,
-        # Same dashed style and rejection colour convention as the "(!)"
-        # suspect marker elsewhere on the card (node_card_header()), reused
-        # here for the same reason: a reference line, not new colour
-        # vocabulary to learn.
         linetype = "22", colour = "#A8452F", linewidth = 0.4
       ) +
       ggplot2::annotate(
@@ -708,7 +704,14 @@ node_group_strips <- function(
   d$.facet <- factor(d$group_id, levels = rev(keep))
 
   d <- triage_flag_by_category(d, min_n = 10)
-  thr <- thresholds_for_group(thresholds, node_group_key(node, members, ids))
+  # exact match (Sam, 2026-09-12): a card is a specific, citable comparison,
+  # not an exploration sanity check, so a herring node no longer draws the
+  # cod-liver PROREF line just because both are vertebrates. See
+  # ?thresholds_for_group.
+  thr <- thresholds_for_group(
+    thresholds, node_group_key(node, members, ids),
+    biota_match = "exact"
+  )
 
   p <- ggplot2::ggplot(
     d,
@@ -1207,35 +1210,6 @@ compact_axis_theme <- function() {
   )
 }
 
-#' Does the Headline Number Deserve to be Believed?
-#'
-#' For a lognormal distribution the geometric mean and the median coincide
-#' exactly. So when they diverge, the distribution is not lognormal, and a single
-#' central number is describing something that has no single centre, usually two
-#' populations stacked together.
-#'
-#' **This exists because the card would otherwise lie confidently.** N005 reports
-#' a bold headline of 8 mg/kg (wet) for a group that is 3 correct rows near 0.2
-#' and 15 rows near 3,000 from the Urban Fjord 1000x error; its median is 0.235.
-#' Nothing about "8" tells the reader that.
-#'
-#' `tol` is in orders of magnitude. 0.5 is a factor of roughly three, which is
-#' comfortably inside the noise for a real lognormal group and comfortably
-#' outside it for a group holding two modes.
-#'
-#' @param card A one-row report card.
-#' @param tol Divergence in log10 units beyond which the headline is marked.
-#' @return `TRUE`, `FALSE`, or `NA` where either statistic is missing.
-#' @export
-headline_is_suspect <- function(card, tol = 0.5) {
-  gm <- card$geo_mean[1]
-  md <- card$median[1]
-  if (length(gm) == 0 || is.na(gm) || is.na(md) || gm <= 0 || md <= 0) {
-    return(NA)
-  }
-  abs(log10(gm) - log10(md)) > tol
-}
-
 #' Year Range of a Node's Underlying Measurements
 #'
 #' `"2004-2019"`, or a single year where `date_min` and `date_max` fall in the
@@ -1291,55 +1265,33 @@ node_card_header <- function(node, card, dpi = 300) {
 
   # THE HEADLINE NUMBER, bold and on its own line (Sam 2026-08-05).
   #
-  # Geometric mean rather than arithmetic, because these distributions are
-  # lognormal over orders of magnitude and the arithmetic mean sits above almost
-  # every observation.
+  # ARITHMETIC mean, not geometric (Sam changed his mind 2026-09-12: GM/GSD are
+  # not how pollution concentrations are conventionally reported, and reporting
+  # them nowhere else in the project made this card the odd one out). `card$sd`
+  # rides along in the same headline, since "AM +/- SD" is the traditional pair
+  # and neither means much alone.
   #
-  # The MEDIAN IS KEPT BESIDE IT, and not as decoration: the two agree closely on
-  # a lognormal distribution and diverge when it is not one, so the gap between
-  # them is a free diagnostic. N005 is the worked example, with a geometric mean
-  # of 8.0 against a median of 0.235, a thirtyfold gap that says the node holds
-  # two populations rather than one.
+  # NO MEDIAN HERE (Sam, 2026-09-12: no room on a card this size). It still
+  # exists in node_report_flextable()'s table, just not spelled out in the
+  # headline text itself.
   #
-  # FALLS BACK TO card$mean FOR AN EXTERNAL NODE. node_report_card() never
-  # computes geo_mean for node_type = "external" (there is no distribution to
-  # take a geometric mean of; the typed-in external_value IS the figure), so
-  # geo_mean is always NA there and the coalesce is load-bearing, not
-  # defensive: without it every external node's headline silently rendered
-  # "- <unit>" rather than its value, unnoticed until the first batch of
-  # external cards (the REACH sector nodes, 2026-08-11) was actually rendered
-  # and looked at, per CLAUDE.md 2.3.1.
+  # card$mean already covers an external node (node_report_card() sets it from
+  # external_value directly), so no coalesce is needed here the way the old
+  # geo_mean version required one.
   #
-  # LABELLED "GM"/"AM" (2026-08-11), because the coalesce means the headline
-  # can now be either statistic and nothing distinguished them on the card
-  # itself -- a geometric and an arithmetic mean are not interchangeable
-  # numbers, and a reader quoting the card has no way to tell which one they
-  # have. NOT "μg"/"μa": this project has a standing, costly rule against writing a
-  # micro sign anywhere it can be avoided (CLAUDE.md 4.4.-2, 18 rows of real
-  # data lost silently to one), and half these cards' units are already
-  # "µg/kg" or similar -- putting a look-alike Greek mu directly in front of a
-  # unit that may itself start with a micro sign is exactly the collision
-  # that rule exists to prevent. Plain ASCII "GM"/"AM" is unambiguous next to
-  # any unit string. Omitted entirely when there is no value to label (an
-  # external node with nothing entered, e.g. N001).
-  headline_value <- dplyr::coalesce(card$geo_mean, card$mean)
-  headline_stat <- if (length(headline_value) == 0 || is.na(headline_value)) {
+  # NOT "μ" for the unit's micro sign, still: CLAUDE.md 4.4.-2's standing rule
+  # against writing a micro sign anywhere it can be avoided applies as much to
+  # this line as it did to "GM"/"AM" before.
+  headline_value <- card$mean[1]
+  headline_sd <- card$sd[1]
+  headline <- if (length(headline_value) == 0 || is.na(headline_value)) {
     ""
-  } else if (!is.na(card$geo_mean[1])) {
-    "GM "
   } else {
-    "AM "
-  }
-  headline <- paste0(
-    headline_stat,
-    num(headline_value),
-    if (nzchar(unit)) paste0(" ", unit) else ""
-  )
-  # A marker, not a scolding: the reader still gets the number, and a reason to
-  # go and look at the strips below before quoting it.
-  suspect <- isTRUE(headline_is_suspect(card))
-  if (suspect) {
-    headline <- paste0(headline, "  (!)")
+    paste0(
+      "AM ", num(headline_value),
+      if (!is.na(headline_sd)) paste0(" ± ", num(headline_sd)) else "",
+      if (nzchar(unit)) paste0(" ", unit) else ""
+    )
   }
   # Sample size, source count and the year range: those are what make the
   # headline a measurement rather than an assertion, and "when was this
@@ -1438,7 +1390,7 @@ node_card_header <- function(node, card, dpi = 300) {
       size = 3.7,
       fontface = "bold",
       label = headline,
-      colour = if (suspect) "#A8452F" else "grey5"
+      colour = "grey5"
     ) +
     # Trend glyph at the right end of the headline row. Anchor in this panel's
     # data coordinates (x in 0..1, headline text sits at y = 0.75), so it holds
@@ -1547,25 +1499,54 @@ write_node_cards <- function(
   paths
 }
 
+#' KES Type from a Node's `level`
+#'
+#' Recodes `aep_nodes.csv`'s own `level` values (`source` / `exposure_medium` /
+#' `internal_exposure`) onto the three practical categories the manuscript
+#' already reports data sources against in `_02-methods.qmd`'s source table:
+#' Source, Exposure Medium, Target Site Exposure. Not the full five-tier
+#' Source/Exposure Medium/External Exposure/Internal Exposure/Target Site
+#' Exposure chain from Tan/Peng -- this project's own data never populates the
+#' other two tiers, and Sam's own methods table already collapses to these
+#' three (Sam, 2026-09-12). No "(KES)" suffix on the values themselves; the
+#' column header carries that.
+#'
+#' @param level Character vector of raw `level` values.
+#' @return Character vector of display labels. An unrecognised value passes
+#'   through unchanged rather than turning into a dash, so a typo in the CSV
+#'   stays visible.
+#' @export
+kes_type_label <- function(level) {
+  dplyr::case_when(
+    level == "source" ~ "Source",
+    level == "exposure_medium" ~ "Exposure Medium",
+    level == "internal_exposure" ~ "Target Site Exposure",
+    TRUE ~ level
+  )
+}
+
 #' Node Report Table for One AEP (flextable)
 #'
-#' The tabular companion to the per-node report cards: one row per node in an
-#' AEP, carrying the node's identity and type alongside summary statistics of
-#' whatever numerical aspect it has (measured concentrations for an empirical
-#' node, the hand-entered magnitude for an external one). First pass; expect
-#' the column set to move.
+#' The tabular companion to the per-node report cards: one row per KES
+#' (Key Exposure Scenario -- consistent language with the rest of the
+#' manuscript, Sam 2026-09-12; formerly labelled "Node" here) in an AEP,
+#' carrying its type and summary statistics of whatever numerical aspect it
+#' has (measured concentrations for an empirical KES, the hand-entered
+#' magnitude for an external one).
 #'
 #' Statistics come straight from [aep_all_report_cards()] (so the centre is
 #' `MEASURED_N`-weighted and the spread is per row, per `?node_statistic_weighting`);
-#' the four EPEQ scores are joined from the AEP-scoped nodes table so any
-#' per-AEP override is reflected. Nodes with no resolved data keep their row --
-#' an empty statistics row is itself the finding that the node is hypothesised
-#' but unsupported here.
+#' the four EPEQ scores and the `notes` comment are joined from the AEP-scoped
+#' nodes table so any per-AEP override is reflected. Nodes with no resolved
+#' data keep their row -- an empty statistics row is itself the finding that
+#' the KES is hypothesised but unsupported here.
 #'
-#' The node id (`NXXX...`) leads the table, and the last column lists every
-#' distinct `REFERENCE_ID` behind the node (a dash for an external node, which
-#' has no rows to draw ids from). The four EPEQ headers are single letters,
-#' `E P E Q`, matching how they are named in the surrounding text.
+#' **The node id is hidden** (Sam, 2026-09-12): it is administrative, not
+#' something a reader of the manuscript table needs. `N` is sample size only
+#' (`sum(MEASURED_N)`) -- the row count and reference count that used to ride
+#' alongside it are dropped from this cell, since `References` already lists
+#' the sources by id. The four EPEQ headers are single letters, `E P E Q`,
+#' matching how they are named in the surrounding text.
 #'
 #' @param cards [aep_all_report_cards()] output, filtered to one `aep_id`.
 #' @param scoped The matching element of [aep_scoped_nodes()] (e.g.
@@ -1576,7 +1557,7 @@ node_report_flextable <- function(cards, scoped) {
   sig <- function(x, d = 3) ifelse(is.na(x), NA_character_, formatC(signif(x, d), format = "fg", big.mark = ","))
   yr <- function(d) ifelse(is.na(d), NA_character_, format(d, "%Y"))
 
-  epeq <- scoped[c(
+  extra <- scoped[c(
     "node_id", "essentiality_score", "plausibility_score",
     "evidence_score", "quantification_score"
   )]
@@ -1584,30 +1565,23 @@ node_report_flextable <- function(cards, scoped) {
   dash <- "\u2014"
 
   tbl <- cards |>
-    dplyr::left_join(epeq, by = "node_id") |>
+    dplyr::left_join(extra, by = "node_id") |>
     dplyr::transmute(
-      node_id = .data$node_id,
-      node = .data$label,
-      level = .data$level,
-      type = .data$node_type,
-      n_disp = dplyr::case_when(
-        is.na(.data$n) & .data$n_rows == 0 ~ dash,
-        .data$node_type == "external" ~ formatC(.data$n, format = "d", big.mark = ","),
-        TRUE ~ sprintf(
-          "%s (%s; %s)",
-          formatC(.data$n, format = "d", big.mark = ","),
-          formatC(.data$n_rows, format = "d", big.mark = ","),
-          .data$n_sources
-        )
-      ),
-      unit = dplyr::coalesce(.data$unit, dash),
+      kes = .data$label,
+      type = kes_type_label(.data$level),
       mean_sd = dplyr::case_when(
         is.na(.data$mean) ~ dash,
         is.na(.data$sd) ~ sig(.data$mean),
         TRUE ~ paste0(sig(.data$mean), " \u00b1 ", sig(.data$sd))
       ),
       median = dplyr::coalesce(sig(.data$median), dash),
-      geo_mean = dplyr::coalesce(sig(.data$geo_mean), dash),
+      unit = dplyr::coalesce(.data$unit, dash),
+      # Sample size only (sum(MEASURED_N), CLAUDE.md 4.4.-1): n_rows/n_sources
+      # no longer clutter this cell -- n_sources is its own References column.
+      n_disp = dplyr::if_else(
+        is.na(.data$n), dash, formatC(.data$n, format = "d", big.mark = ",")
+      ),
+      fractionation = dplyr::coalesce(.data$fractionation, dash),
       dates = dplyr::case_when(
         is.na(.data$date_min) ~ dash,
         yr(.data$date_min) == yr(.data$date_max) ~ yr(.data$date_min),
@@ -1618,14 +1592,18 @@ node_report_flextable <- function(cards, scoped) {
       evi = .data$evidence_score,
       qua = .data$quantification_score,
       references = dplyr::coalesce(.data$references, dash)
+      # No comment/notes column (removed 2026-09-12): Sam cleared aep_nodes.csv's
+      # notes field entirely, since it was never meant for a reader. Trivial to
+      # bring back -- one more line here plus "notes" in the extra <- select
+      # above -- once there is curated, reader-facing text to show.
     )
 
   tbl |>
     flextable::flextable() |>
     flextable::set_header_labels(
-      node_id = "ID", node = "Node", level = "Level", type = "Type",
-      n_disp = "n (rows; refs)", unit = "Unit", mean_sd = "Mean \u00b1 SD",
-      median = "Median", geo_mean = "Geo. mean", dates = "Dates",
+      kes = "KES", type = "Type", mean_sd = "Mean \u00b1 SD",
+      median = "Median", unit = "Unit", n_disp = "N",
+      fractionation = "Fraction", dates = "Date Range",
       ess = "E", pla = "P", evi = "E", qua = "Q",
       references = "References"
     ) |>

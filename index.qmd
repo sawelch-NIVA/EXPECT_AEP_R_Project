@@ -81,4 +81,6 @@ section files as standalone documents. -->
 
 {{< include _05-conclusion.qmd >}}
 
+{{< include _06-SI01.qmd >}}
+
 # References

@@ -1,0 +1,428 @@
+# Supplementary Information
+
+```{r}
+#| label: setup-si
+#| include: false
+#| warning: false
+#| message: false
+
+# Lets this section render on its own (`quarto render _02-methods.qmd`). When the
+# file is spliced into index.qmd via {{< include >}}, index.qmd's own `setup`
+# chunk has already loaded these and defined docx_flex(); re-running library()
+# and redefining the function is harmless.
+library(targets)
+library(here)
+library(tidyverse)
+library(flextable)
+
+# Identical to the helper in index.qmd's setup chunk. Change one, change both
+# (or promote it to an R/ function).
+docx_flex <- function(ft, widths = NULL) {
+  ft <- ft |>
+    flextable::theme_vanilla() |>
+    flextable::bold(part = "header") |>
+    flextable::fontsize(size = 9, part = "all") |>
+    flextable::padding(padding = 2, part = "all")
+  if (is.null(widths)) {
+    flextable::set_table_properties(ft, layout = "autofit", width = 1)
+  } else {
+    flextable::set_table_properties(
+      flextable::width(ft, width = widths),
+      layout = "fixed"
+    )
+  }
+}
+```
+
+## Population and Employment Sectors in Hammerfest and Norway
+
+```{r}
+#| label: tbl-hammerfest-employment
+#| tbl-cap: "Approximate statistics for copper emissions-relevant sector employment for a) Norway and b) Hammerfest municipality (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per-sector. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]. "
+#| echo: false
+emp <- read_csv(
+  "data/clean/derived/ssb_employment_hammerfest.csv",
+  show_col_types = FALSE
+)
+
+fmt_n <- function(n) formatC(n, format = "d", big.mark = ",")
+emp |>
+  transmute(
+    Sector = paste0(sector, " (", nace_codes_display, ")"),
+    `Employees by sector (Norway)` = if_else(
+      is.na(norway_pct_of_total),
+      fmt_n(norway),
+      paste0(
+        fmt_n(norway),
+        " (",
+        formatC(norway_pct_of_total, format = "f", digits = 1),
+        "%)"
+      )
+    ),
+    `Employees by sector (Hammerfest)` = if_else(
+      is.na(hammerfest_pct_of_total),
+      fmt_n(hammerfest),
+      paste0(
+        fmt_n(hammerfest),
+        " (",
+        formatC(hammerfest_pct_of_total, format = "f", digits = 1),
+        "%)"
+      )
+    ),
+    `Hammerfest share of national` = paste0(
+      formatC(hammerfest_share_of_national_pct, format = "f", digits = 2),
+      "%"
+    )
+  ) |>
+  flextable::flextable() |>
+  flextable::align(j = 2:4, align = "right", part = "all") |>
+  docx_flex()
+```
+
+## Ad hoc Literature 
+
+
+```{r}
+#| label: tbl-adhoc-literature
+#| tbl-cap: "Placeholder caption. Ad hoc literature sources. TODO: Add proper citations, etc. in same style as Vannmiljø. Date Range and Measurements (sum of `MEASURED_N`) are read live from the joined literature dataset."
+#| echo: false
+kogel_lit <- tar_read(load_literature_pqt) |>
+  filter(REFERENCE_ID == "2026KogelUsingAtlanticHaddock")
+
+kogel_date_min <- format(min(kogel_lit$SAMPLING_DATE, na.rm = TRUE), "%b %Y")
+kogel_date_max <- format(max(kogel_lit$SAMPLING_DATE, na.rm = TRUE), "%b %Y")
+kogel_dates <- if (kogel_date_min == kogel_date_max) {
+  kogel_date_min
+} else {
+  paste(kogel_date_min, kogel_date_max, sep = " - ")
+}
+kogel_n <- formatC(
+  sum(kogel_lit$MEASURED_N, na.rm = TRUE),
+  format = "d",
+  big.mark = ","
+)
+
+tibble::tribble(
+  ~Study                , ~Topic                                                                                                                               , ~`Date Range`                                                  , ~Measurements , ~Comments                                                                                                                 ,
+  "Kögel et al (2026)"  , "Analysis of copper in fish and other marine species in inner Repparfjord, mid-Repparfjord, and Revsbotn (reference fjord to North)" , kogel_dates                                                    , kogel_n       , "Published February 2026 and thus not captured in initial selection of study. Highly relevant to Repparfjord case study." ,
+  "Comber et al (2023)" , "Estimates of copper emissions from all source s in European Union, in kg/year"                                                      , "Not specified but primarily based on post-2010 data sources." , ""            , ""                                                                                                                        ,
+) |>
+  flextable::flextable() |>
+  flextable::align(
+    j = c("Date Range", "Measurements"),
+    align = "right",
+    part = "all"
+  ) |>
+  docx_flex(widths = c(1.15, 2.75, 0.85, 0.85, 1.7))
+```
+
+## Vannmiljø Search Terms
+
+```{r}
+#| label: tbl-vm-search
+#| tbl-cap: "Table of Norwegian/English search terms used in Vannmiljø database query."
+#| echo: false
+tibble::tribble(
+  ~`Norwegian Term` , ~`English Translation` , ~`Selected Options`                                                                                         , ~Comments                                                              ,
+  "Nedlastingsdato" , "Download Date"        , "2025-12-05"                                                                                                , ""                                                                     ,
+  "Datoperiode"     , "Date Period"          , "2010-01-01 to 2025-12-05"                                                                                  , ""                                                                     ,
+  "Kommune"         , "Municipality"         , "All municipalities"                                                                                        , "Data from mainland Norway and Svalbard"                               ,
+  "Medium"          , "Medium/Matrix"        , "All media"                                                                                                 , "All natural compartments, organism tissues, man-made materials, etc." ,
+  "Kampanje"        , "Campaign"             , "All campaigns"                                                                                             , ""                                                                     ,
+  "Stressorer"      , "Stressors/Parameters" , "All copper-containing substances listed by database: Kobber (Copper) & Kobberpyrition (Copper pyrithione)" , "No hits for Copper pyrithione in output data"
+) |>
+  flextable::flextable() |>
+  flextable::compose(
+    i = 6,
+    j = "Comments",
+    value = flextable::as_paragraph(
+      "No hits for ",
+      flextable::as_i("Copper pyrithione"),
+      " in output data"
+    )
+  ) |>
+  docx_flex(widths = c(1.15, 1.3, 2.3, 1.52))
+
+# Defined here, before the inline `r vm_val(...)` calls in the next paragraph;
+# tbl-vm-dataset below redefines these harmlessly.
+vm_sum <- tar_read(vm_dataset_summary)
+vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
+```
+
+
+## Pollutant Release and Transfer Register (Norske utslipp) and Product Register Data
+
+
+![**(a)** REACH product register net copper (imported plus produced, minus exported) scaled to Hammerfest by each NACE section's share of Hammerfest-resident employment; complete reporting years only (2018-2021); sectors above 1 kg/yr implied; log scale. **(b)** Copper released to air and water by PRTR-licensed facilities in Hammerfest municipality, by facility; reported zeros omitted (log scale). Panel a is copper in commerce (tonnes-scale), panel b is copper released (kg); the two are not comparable.](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
+
+
+## Sample Groups Tables
+
+
+### AEP 1: Hammerfest Inner Coastal System
+
+::: {.landscape}
+
+```{r}
+#| label: groups-a001-boxed
+#| include: false
+# Read once, used both by the tbl-cap below (real pandoc citations for every
+# literature source in the box, unlike text inside the flextable body -- see
+# ?literature_cite_suffix) and by the table itself.
+a001_box <- tar_read(aep_manifest) |> filter(aep_id == "A001")
+groups_a001_boxed <- tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE),
+    !is.na(LATITUDE),
+    LONGITUDE >= a001_box$lon_min,
+    LONGITUDE <= a001_box$lon_max,
+    LATITUDE >= a001_box$lat_min,
+    LATITUDE <= a001_box$lat_max
+  )
+```
+
+```{r}
+#| label: tbl-groups-a001
+#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N).", literature_cite_suffix(groups_a001_boxed$REFERENCE_ID, groups_a001_boxed$TITLE, groups_a001_boxed$YEAR))
+#| warning: false
+groups_a001_boxed |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(
+    ids = tar_read(group_ids),
+    thresholds = tar_read(copper_toxicity_thresholds)
+  ) |>
+  sample_groups_flextable() |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+:::
+
+### AEP 2: Inner Repparfjorden
+
+::: {.landscape}
+
+```{r}
+#| label: groups-a002-boxed
+#| include: false
+a002_box <- tar_read(aep_manifest) |> filter(aep_id == "A002")
+groups_a002_boxed <- tar_read(literature_analysis_ready) |>
+  filter(
+    !is.na(LONGITUDE),
+    !is.na(LATITUDE),
+    LONGITUDE >= a002_box$lon_min,
+    LONGITUDE <= a002_box$lon_max,
+    LATITUDE >= a002_box$lat_min,
+    LATITUDE <= a002_box$lat_max
+  )
+```
+
+```{r}
+#| label: tbl-groups-a002
+#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N).", literature_cite_suffix(groups_a002_boxed$REFERENCE_ID, groups_a002_boxed$TITLE, groups_a002_boxed$YEAR))
+#| warning: false
+groups_a002_boxed |>
+  summarise_groups(tar_read(literature_dropped_report)) |>
+  build_sample_groups_table(
+    ids = tar_read(group_ids),
+    thresholds = tar_read(copper_toxicity_thresholds)
+  ) |>
+  sample_groups_flextable() |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+:::
+
+## AEP Node Tables
+
+### AEP 1: Hammerfest Inner Coastal System
+
+::: {.landscape}
+
+```{r}
+#| label: nodes-a001-scoped
+#| include: false
+# Read once, used both by the tbl-cap below (a real pandoc citation, unlike
+# text inside the flextable body -- see ?external_node_cite_suffix) and by
+# the table itself.
+scoped_a001 <- tar_read(aep_scoped)[["A001"]]
+```
+
+```{r}
+#| label: tbl-nodes-a001
+#| tbl-cap: !expr paste0("AEP-001 (Hammerfest coastal) nodes.", external_node_cite_suffix(scoped_a001))
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A001") |>
+  node_report_flextable(scoped_a001) |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+:::
+
+### AEP 2: Inner Repparfjorden
+
+::: {.landscape}
+
+```{r}
+#| label: nodes-a002-scoped
+#| include: false
+scoped_a002 <- tar_read(aep_scoped)[["A002"]]
+```
+
+```{r}
+#| label: tbl-nodes-a002
+#| tbl-cap: !expr paste0("AEP-002 (Repparfjord inner) nodes.", external_node_cite_suffix(scoped_a002))
+#| warning: false
+tar_read(aep_node_cards) |>
+  filter(aep_id == "A002") |>
+  node_report_flextable(scoped_a002) |>
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+:::
+
+## Biocide Sales in Norwegian Aquaculture, 2018-2024
+
+```{r}
+#| label: fig-aquaculture-biocide-use
+#| fig-width: 5.2
+#| fig-height: 3.4
+#| fig-cap: "Sales (tonnes) of copper, tralopyril and zinc pyrithione in antifouling applications in aquaculture in Norway, 2018-2024. Data from [@norwegianenvironmentagencyBiociderSomBrukes2025]"
+# Active ingredient sold nationally for aquaculture net antifouling, tonnes/year.
+# Source: Norwegian Environment Agency, "Biocider som brukes ..." 2025
+# (@norwegianenvironmentagencyBiociderSomBrukes2025).
+biocide_use <- tibble::tribble(
+  ~year , ~series                        , ~tonnes ,
+   2018 , "Copper"                       , 1626    ,
+   2019 , "Copper"                       , 1698    ,
+   2020 , "Copper"                       , 1539    ,
+   2021 , "Copper"                       , 1097    ,
+   2022 , "Copper"                       ,  440    ,
+   2023 , "Copper"                       ,  306    ,
+   2024 , "Copper"                       ,  564    ,
+   2018 , "Tralopyril + zinc pyrithione" ,   46.3  ,
+   2019 , "Tralopyril + zinc pyrithione" ,   63.5  ,
+   2020 , "Tralopyril + zinc pyrithione" ,   87.8  ,
+   2021 , "Tralopyril + zinc pyrithione" ,  112    ,
+   2022 , "Tralopyril + zinc pyrithione" ,  108    ,
+   2023 , "Tralopyril + zinc pyrithione" ,  127    ,
+   2024 , "Tralopyril + zinc pyrithione" ,  119    ,
+   2021 , "Tralopyril"                   ,   84.2  ,
+   2022 , "Tralopyril"                   ,   98    ,
+   2023 , "Tralopyril"                   ,  116    ,
+   2024 , "Tralopyril"                   ,  108    ,
+   2021 , "Zinc pyrithione"              ,   27.9  ,
+   2022 , "Zinc pyrithione"              ,    9.8  ,
+   2023 , "Zinc pyrithione"              ,   11.4  ,
+   2024 , "Zinc pyrithione"              ,   10.8
+)
+
+ggplot2::ggplot(biocide_use, ggplot2::aes(year, tonnes, colour = series)) +
+  ggplot2::geom_line(linewidth = 0.9) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::scale_colour_manual(
+    values = c(
+      "Copper" = "#B87333",
+      "Tralopyril + zinc pyrithione" = "#3B7A9E",
+      "Zinc pyrithione" = "#aca9a7",
+      "Tralopyril" = "#b140a7"
+    ),
+    name = NULL
+  ) +
+  ggplot2::scale_x_continuous(breaks = 2018:2024) +
+  ggplot2::scale_y_continuous(
+    limits = c(0, NA),
+    expand = ggplot2::expansion(mult = c(0, 0.05))
+  ) +
+  ggplot2::labs(x = NULL, y = "Active ingredient sold (tonnes/year)") +
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(
+    legend.position = "bottom",
+    panel.grid.minor = ggplot2::element_blank()
+  )
+```
+
+## Aquaculture Copper Emissions (Hammerfest)
+
+![Reported modelled copper emissions (kg/year) to water from registered aquaculture facilities within the AEP 1 bounding box (Hammerfest town coast) (a) [@norwegianenvironmentagencyNorskeUtslippCopper2026a]. Farm species and licensed capacity (tonnes Maximum Total Biomass) appended from Norwegian Aquaculture Registry [@norwegiandirectorateoffisheriesAquacultureLocationsNorway2025]. Sum of facility emissions (b, last panel) averaged to 89.9 kg/year.](figures/fig12-aquaculture-emissions.png){#fig-aquaculture-emissions}
+
+## Vannmiljø dataset composition
+
+```{r}
+#| label: tbl-vm-dataset
+#| tbl-cap: "Composition of the cleaned Vannmiljø copper dataset by environmental compartment. Measurements are the sum of `MEASURED_N`; the record count is given alongside because one Vannmiljø record is one measurement. Site counts do not sum to the total because a site may host more than one compartment. Aquatic biota span 72 species across fish, molluscs, crustaceans, birds and algae."
+#| echo: false
+vm_sum <- tar_read(vm_dataset_summary)
+vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
+
+vm_sum$composition |>
+  dplyr::transmute(
+    Compartment = subcompartment,
+    Matrix = as.character(matrix),
+    Measurements = measurements,
+    Records = rows,
+    Sites = sites
+  ) |>
+  dplyr::bind_rows(dplyr::tibble(
+    Compartment = "Total",
+    Matrix = "",
+    Measurements = vm_sum$totals$measurements,
+    Records = vm_sum$totals$rows,
+    Sites = vm_sum$totals$sites
+  )) |>
+  dplyr::mutate(dplyr::across(
+    c(Measurements, Records, Sites),
+    ~ formatC(.x, format = "d", big.mark = ",")
+  )) |>
+  rename(`Matrix (Vm)` = Matrix) |>
+  flextable::flextable() |>
+  flextable::align(j = 3:5, align = "right", part = "all") |>
+  flextable::bold(i = ~ Compartment == "Total") |>
+  docx_flex()
+```
+
+### Environmental Quality Standards and Reference Concentrations - Table
+
+::: landscape
+```{r}
+#| label: tbl-copper-thresholds
+#| tbl-cap: "Copper background and classification values used as comparators. Each value is the upper bound of the named class; the open-ended top class (Very Poor, V) is omitted. Sources: PROREF from the MILKYS coastal monitoring programme [@schoyenContaminantsCoastalWaters2025]; Norwegian M-608 classification boundaries [@norwegianenvironmentagencyThresholdsClassificationWater2020];"
+#| echo: false
+tar_read(copper_toxicity_thresholds) |>
+  filter(
+    !is.na(THRESHOLD_VALUE),
+    THRESHOLD_TYPE %in% c("PROREF", "Classification boundary")
+  ) |>
+  transmute(
+    Source = REFERENCE_ID,
+    Type = THRESHOLD_TYPE,
+    Matrix = coalesce(ENVIRON_COMPARTMENT_SUB, ENVIRON_COMPARTMENT),
+    `Species / tissue` = if_else(
+      is.na(SAMPLE_SPECIES),
+      "",
+      paste0(
+        SAMPLE_SPECIES,
+        if_else(is.na(SAMPLE_TISSUE), "", paste0(", ", SAMPLE_TISSUE))
+      )
+    ),
+    Class = replace_na(THRESHOLD_CLASS, ""),
+    `Upper bound` = THRESHOLD_VALUE,
+    Unit = MEASURED_UNIT,
+    Fraction = THRESHOLD_FRACTION
+  ) |>
+  flextable::flextable() |>
+  docx_flex(widths = c(1.1, 1.5, 1.4, 1.9, 1.3, 0.8, 0.8, 0.9))
+```
+:::
+
+
+```{=html}
+<!-- Commented out 2026-09-08 (Sam) to save build time; the reach_product_* targets
+in _targets.R and the tar_read() edge in _01-introduction.qmd are commented out to
+match. Un-comment all together to bring the figure back.
+
+(@fig-reach-products).
+
+![Net copper declared to Norway's Product Register, 2018--2023, by use category: the seven largest by total quantity, with all others pooled as "Other". **(a)** Mean annual net copper per category; each y-axis label gives the number of reporting years and whiskers are $\pm$ 1 SD across those years where more than one was reported. **(b)** The same categories over time. Both panels use a log scale and share colours. Categories are the register's Norwegian *anvendelseskategorier*, translated here; some (e.g. "process control agents") are broad in the source. "Net" is imported plus produced minus exported; category-years with only net exports are omitted. Source: Miljødirektoratet, personal communication, 2 May 2025.](figures/fig02-reach-products.png){#fig-reach-products}
+-->
+```

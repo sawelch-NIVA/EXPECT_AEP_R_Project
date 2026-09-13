@@ -1,14 +1,13 @@
 aep_id,node_id,x,y,geo_scope,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A002,N003-mine-tailings,,,,3,Copper tailings disposal uncontroversial. Actual copper content known to rough degree.,1,Tailing Cu emission models not captured in study scope.,"Historic Folldal Verk submarine tailings, ~1 Mt over 7 y."
-A002,N048-natural-runoff,,,,1,Included in Comber and likely source but no direct evidence captured.,1,Natural Cu runoff models not captured in study scope.,Ulveryggen-Nussir catchment runoff / weathering.
-A002,N027-river-water-column,,,arctic,1,Data for arctic rivers used due to suspiciously high value in local river.,1,Relevant models not captured in study scope.,"Repparfjordelva. geo_scope=arctic: in-box data is 16 pts at one station, gm 0.299 mg/L vs 0.0014 across Arctic rivers; regional proxy from rivers >=66.5N, drop_outliers on N028/N027. Added 2026-09-02."
-A002,N028-river-benthic-sed,,,arctic,1,"One data point for Reppardfjordelva unreasonably high (1,600 mg/kg), so general arctic river dataset used in place. ",1,Relevant models not captured in study scope.,"Repparfjordelva bed sediment. geo_scope=arctic: only 1 in-box point (1600 mg/kg dry, ~80x the group mean); regional proxy from Arctic rivers. Added 2026-09-02."
-A002,N013-coast-water-column,,,,2,"Limited water samples, but little variation between measurements.",1,Relevant models not captured in study scope.,Inner fjord water.
-A002,N012-coast-benthic-sed,,,,3,Multiple sediment samples across two studies. Variation between samples driven by known pattern of tailing distribution.,1,Relevant models not captured in study scope.,"Inner fjord sediment; Sternal 2017 inner + mid cores, class IV-V."
-A002,N014-mussel-soft-tissue,,,,1,Limited samples of mussel tissues in study area.,1,Relevant models not captured in study scope.,"Restored 2026-09-02; in-box data is Kogel 2026 Mytilus edulis (2 points at 24.18 / 24.29 E, via group G266)."
-A002,N015-fish-liver,,,,2,"Although limited to single study, relatively rich range of fish tissue samples in area.",1,Relevant models not captured in study scope.,"All fish liver (wet weight); in-box data is Kogel 2026, 7 species."
-A002,N016-fish-muscle,,,,2,"Although limited to single study, relatively rich range of fish tissue samples in area.",1,Relevant models not captured in study scope.,"All fish muscle (wet weight); in-box data is Kogel 2026, 7 species."
-A002,N040-crustacean-muscle,,,,1,Limited crustacean sampling in study area.,1,Relevant models not captured in study scope.,King crab in the box (n=1); wider coastal crustacean muscle as proxy.
-A002,N041-crustacean-hepatopancreas,,,,1,Limited crustacean sampling in study area.,1,Relevant models not captured in study scope.,King crab in the box (n=1); C. pagurus hepatopancreas as proxy.
-A002,N047-anthropogenic-runoff,,,,1,Included in Comber and likely source but no direct evidence captured.,1,Anthropogenic Cu runoff models not captured in study scope.,Folldal Verk legacy enhanced weathering via Repparfjordelva; distinct from N003 (STD pipe) and N036 (natural); magnitude + EPEQ TODO. Added 2026-09-04.
-A002,N022-marine-benthic-inverts,,,,1,"No direct evidence of benthic invertebrate exposure in dataset, although sediment-benthic invert pathway is well-known.",1,Relevant models not captured in study scope.,
+A002,N003-mine-tailings,,,,3,Copper tailings disposal uncontroversial. Actual copper content known to rough degree.,1,Tailing Cu emission models not captured in study scope.,
+A002,N048-natural-runoff,,,,1,Included in Comber and likely source but no direct evidence captured.,1,Natural Cu runoff models not captured in study scope.,
+A002,N027-river-water-column,,,arctic,1,Data for arctic rivers used due to suspiciously high value in local river.,1,Relevant models not captured in study scope.,
+A002,N028-river-benthic-sed,,,arctic,1,"One data point for Reppardfjordelva unreasonably high (1,600 mg/kg), so general arctic river dataset used in place. ",1,Relevant models not captured in study scope.,
+A002,N013-coast-water-column,,,arctic,1,"Data reused from Arctic fjords.",1,Relevant models not captured in study scope.,
+A002,N012-coast-benthic-sed,,,,3,Multiple sediment samples across two studies. Variation between samples driven by known pattern of tailing distribution.,1,Relevant models not captured in study scope.,
+A002,N014-mussel-soft-tissue,,,,1,Limited samples of mussel tissues in study area.,1,Relevant models not captured in study scope.,
+A002,N015-fish-liver,,,,2,"Although limited to single study, relatively rich range of fish tissue samples in area.",1,Relevant models not captured in study scope.,
+A002,N016-fish-muscle,,,,2,"Although limited to single study, relatively rich range of fish tissue samples in area.",1,Relevant models not captured in study scope.,
+A002,N040-crustacean-muscle,,,,1,Limited crustacean sampling in study area.,1,Relevant models not captured in study scope.,
+A002,N041-crustacean-hepatopancreas,,,,1,Limited crustacean sampling in study area.,1,Relevant models not captured in study scope.,
+A002,N047-anthropogenic-runoff,,,,1,Included in Comber and likely source but no direct evidence captured.,1,Relevant models not captured in study scope.,

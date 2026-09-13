@@ -7,13 +7,109 @@
 # edit being `stats::` qualifiers on `sd()` / `median()` to match house style
 # (see fct_outlier_detection.R) now that this runs in the package namespace.
 
+#' eDataDRF's Fractionation-Protocol Vocabulary
+#'
+#' The controlled `Short_Name`/`Long_Name` pairs eDataDRF ships for the
+#' "Fractionation Protocol" method category, e.g. `Short_Name = "Total"` /
+#' `Long_Name = "Total fraction"`. Read fresh from the installed package
+#' (`inst/extdata/*-methods.parquet`) rather than copied into this project, so
+#' this always tracks whatever vocabulary eDataDRF currently ships. Matched by
+#' pattern rather than the exact (dated) filename, since that file is the only
+#' `*methods*.parquet` eDataDRF ships and the date in its name is expected to
+#' change as the package is updated.
+#'
+#' Cached after the first call (a `local()` closure): this is read once per
+#' group/node during a summary pass, which is cheap for a 19-row table but
+#' pointless to repeat hundreds of times in the same session.
+#'
+#' @return A tibble with `Short_Name` and `Long_Name`, fractionation rows only.
+fractionation_vocab <- local({
+  cached <- NULL
+  function() {
+    if (is.null(cached)) {
+      path <- list.files(
+        system.file("extdata", package = "eDataDRF"),
+        pattern = "methods.*\\.parquet$",
+        full.names = TRUE
+      )[1]
+      vocab <- arrow::read_parquet(path)
+      cached <<- vocab[vocab$Protocol_Type == "Fractionation Protocol", ]
+    }
+    cached
+  }
+})
+
+#' Standardised Short Name for a Fractionation Protocol
+#'
+#' Maps free text onto eDataDRF's controlled vocabulary ([fractionation_vocab()])
+#' so that, say, a study's own `PROTOCOL_NAME` of "Acid extractable fraction"
+#' (matching the vocabulary's `Long_Name`) and a value already given as the
+#' standardised `Short_Name` itself both resolve to the same `"Acid
+#' extractable"` label, rather than two different-looking strings for a group
+#' or node that lumps rows from both.
+#'
+#' Text that matches neither `Short_Name` nor `Long_Name` passes through
+#' unchanged (visible-but-nonstandard is safer than silently blank), and `NA`
+#' stays `NA`.
+#'
+#' @param x Character vector of raw fractionation text.
+#' @return Character vector of standardised `Short_Name` values, or the
+#'   original text/`NA` where nothing matched.
+#' @export
+fractionation_short_name <- function(x) {
+  vocab <- fractionation_vocab()
+  out <- x
+
+  by_short <- match(x, vocab$Short_Name)
+  out[!is.na(by_short)] <- vocab$Short_Name[by_short[!is.na(by_short)]]
+
+  unresolved <- is.na(by_short)
+  by_long <- match(x[unresolved], vocab$Long_Name)
+  out_unresolved <- out[unresolved]
+  out_unresolved[!is.na(by_long)] <- vocab$Short_Name[by_long[!is.na(by_long)]]
+  out[unresolved] <- out_unresolved
+
+  out
+}
+
+#' Distinct Fractionation Protocols Behind a Set of Rows
+#'
+#' Coalesces the literature side's `FRACTIONATION_PROTOCOL_CLASS` (joined from
+#' each study's own Methods table -- e.g. "Acid extractable fraction", see
+#' `fct_join_extraction_data.R`), run through [fractionation_short_name()] to
+#' standardise it, with the Vannmiljø side's own `FRACTIONATION_PROTOCOL`
+#' (already coded straight to the vocabulary's `Short_Name` values -- "Total" /
+#' "Filtered 0.45um", see `fct_vm_eData.R`), so both sources report through one
+#' standardised column. Sorted and comma-separated so more than one distinct
+#' value is the visible signal that a group or node lumps rows measured under
+#' different fractionation protocols (Total and Filtered, say), which is
+#' exactly what CLAUDE.md 4.4.-1.5 says to check before trusting a mean.
+#'
+#' @param protocol_class `FRACTIONATION_PROTOCOL_CLASS` column (literature
+#'   rows; `NA` for Vannmiljø).
+#' @param protocol `FRACTIONATION_PROTOCOL` column, same length (already a
+#'   standardised Short_Name for Vannmiljø rows; a bare protocol id for
+#'   literature rows -- only used here where `protocol_class` is `NA`).
+#' @return A single string: the sorted, comma-separated distinct labels, or
+#'   `"Not reported"` where none of the rows carry either column.
+#' @export
+fractionation_summary <- function(protocol_class, protocol) {
+  label <- dplyr::coalesce(fractionation_short_name(protocol_class), protocol)
+  label <- unique(label[!is.na(label)])
+  if (length(label) == 0) {
+    return("Not reported")
+  }
+  paste(sort(label), collapse = ", ")
+}
+
 #' Summarise Analysis-Ready Literature Data Into Per-Group Statistics
 #'
 #' One row per sample group (the eight columns of [analysis_group_cols()]),
 #' carrying `n`, source count, the source ids themselves (`references`), date
-#' range, arithmetic and geometric mean/SD, median, unit, two outlier counts,
-#' and Hartigan's dip test. Ranking and the triage flags are appended by
-#' [add_triage_flags()].
+#' range, arithmetic and geometric mean/SD, median, unit, the distinct
+#' fractionation protocols behind the group ([fractionation_summary()]), two
+#' outlier counts, and Hartigan's dip test. Ranking and the triage flags are
+#' appended by [add_triage_flags()].
 #'
 #' The grouping, the outlier logic and the dip-test gate are all as they were in
 #' the `summarise_literature_data` target; the reasoning behind each choice
@@ -64,9 +160,11 @@ summarise_groups <- function(data, dropped_report) {
     dplyr::reframe(
       n = sum(MEASURED_N),
       n_sources = length(unique(REFERENCE_ID)),
-      # The ids themselves, not just the count: sorted and comma separated so the
-      # cell is stable between rebuilds. Shown by build_sample_groups_table().
-      references = paste(sort(unique(REFERENCE_ID)), collapse = ", "),
+      # Author-Year text where the reference resolves in references.bib, the
+      # raw REFERENCE_ID otherwise (see ?reference_citation_summary): sorted
+      # and comma separated so the cell is stable between rebuilds. Shown by
+      # build_sample_groups_table().
+      references = reference_citation_summary(REFERENCE_ID, TITLE, YEAR),
       date_min = suppressWarnings(min(SAMPLING_DATE, na.rm = TRUE)),
       date_max = suppressWarnings(max(SAMPLING_DATE, na.rm = TRUE)),
       sd = stats::sd(MEASURED_VALUE_STANDARD, na.rm = TRUE),
@@ -106,6 +204,12 @@ summarise_groups <- function(data, dropped_report) {
       n_outlier_rows = sum(outlier_RMZ & outlier_IQR, na.rm = TRUE),
       median = stats::median(MEASURED_VALUE_STANDARD),
       unit = unique(MEASURED_UNIT_STANDARD),
+      # So a reader can see at a glance whether this group lumps rows measured
+      # under different fractionation protocols (Total vs Filtered, say)
+      # before trusting its mean. CLAUDE.md 4.4.-1.5.
+      fractionation = fractionation_summary(
+        FRACTIONATION_PROTOCOL_CLASS, FRACTIONATION_PROTOCOL
+      ),
       # Constant within a group by construction: the group key includes
       # SAMPLE_SPECIES and the common name is a function of the species.
       # Carried through so the triage notebook can print it as an

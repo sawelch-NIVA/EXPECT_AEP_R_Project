@@ -211,20 +211,28 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
 #' @return A character vector of markdown lines.
 #' @export
 notebook_header_markdown <- function(notebook, rows, overview = NULL) {
-  # Geometric mean and GSD alongside the arithmetic ones, added 2026-08-04.
-  # These concentrations are log-normal over orders of magnitude, so the
-  # arithmetic mean sits above almost every observation. GSD reads as a
-  # multiplicative factor: 3 means roughly threefold either side of geo_mean.
+  # Arithmetic mean +/- SD, plus median, matching build_sample_groups_table()
+  # (Sam changed his mind 2026-09-12: geometric mean/GSD are not how pollution
+  # concentrations are conventionally reported, and this table was one of the
+  # few places still leading with them).
   num <- function(x) {
     if (length(x) == 0 || is.na(x) || !is.finite(x)) {
       return("")
     }
     formatC(x, format = "g", digits = 3)
   }
+  mean_sd <- function(r) {
+    m <- opt_col(r, "mean")
+    s <- opt_col(r, "sd")
+    if (length(m) == 0 || is.na(m)) {
+      return("")
+    }
+    if (length(s) == 0 || is.na(s)) num(m) else paste0(num(m), " ± ", num(s))
+  }
 
   tbl <- c(
-    "| ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |",
-    "|---|---|---|---:|---:|---:|---:|---:|---:|---|"
+    "| ID | Group | Unit | n | Mean ± SD | Median | Fractionation | Sources | Flags |",
+    "|---|---|---|---:|---:|---:|---|---:|---|"
   )
   for (i in seq_len(nrow(rows))) {
     r <- rows[i, , drop = FALSE]
@@ -237,10 +245,9 @@ notebook_header_markdown <- function(notebook, rows, overview = NULL) {
       "| ", triage_group_label(r),
       " | `", r$MEASURED_UNIT_STANDARD[1], "`",
       " | ", format(r$n[1], big.mark = ","),
-      " | ", num(opt_col(r, "mean")),
+      " | ", mean_sd(r),
       " | ", num(opt_col(r, "median")),
-      " | ", num(opt_col(r, "geo_mean")),
-      " | ", num(opt_col(r, "gsd")),
+      " | ", dplyr::coalesce(opt_col(r, "fractionation"), ""),
       " | ", r$n_sources[1],
       " | ", paste(flags, collapse = ", "),
       " |"
@@ -472,7 +479,7 @@ generate_group_notebooks <- function(
   # hand-edited file about decisions.
   if (!is.null(summary_data)) {
     stat_cols <- intersect(
-      c("mean", "median", "geo_mean", "gsd"),
+      c("mean", "sd", "median", "fractionation"),
       names(summary_data)
     )
     if (length(stat_cols) > 0) {

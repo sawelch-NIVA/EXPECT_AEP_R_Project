@@ -123,6 +123,7 @@ lump_shape <- c(
 )
 class_cols <- c(
   threshold_class_colours()[c("I", "II", "IV", "V")],
+  proref_status_colours(),
   "n/a (biota)" = "grey60"
 )
 klass_label <- c(
@@ -131,6 +132,8 @@ klass_label <- c(
   "III" = "Moderate",
   "IV" = "Poor",
   "V" = "Very Poor",
+  "at or below PROREF" = "at or below PROREF",
+  "above PROREF" = "above PROREF",
   "n/a (biota)" = "n/a (biota)"
 )
 worst_class <- function(f) {
@@ -147,14 +150,23 @@ legend_primer <- tidyr::expand_grid(
 
 site_groups <- in_study(ar) |>
   classify_by_thresholds(thr) |>
+  classify_biota_by_proref(thr) |>
   mutate(
+    # Never both populated for the same row: threshold_class is abiotic-only,
+    # proref_status is biota-only. Coalesced so worst_class() below can treat
+    # either as one ordered scale per lump (a lump is only ever one or the
+    # other; see lump_group()).
+    combined_class = factor(
+      dplyr::coalesce(as.character(threshold_class), as.character(proref_status)),
+      levels = names(class_cols)
+    ),
     lump = factor(
       lump_group(ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB, SPECIES_GROUP),
       levels = lump_levels
     )
   ) |>
   summarise(
-    klass = worst_class(threshold_class),
+    klass = worst_class(combined_class),
     .by = c(lump, SITE_CODE, LONGITUDE, LATITUDE)
   ) |>
   mutate(klass = factor(klass, levels = names(class_cols)))
@@ -491,7 +503,7 @@ tile_panel <- function(
         limits = names(class_cols),
         labels = klass_label[names(class_cols)],
         drop = FALSE,
-        name = "Quality Threshold (M-608)",
+        name = "Quality threshold (M-608 / PROREF)",
         na.value = "grey60"
       ) +
       scale_shape_manual(

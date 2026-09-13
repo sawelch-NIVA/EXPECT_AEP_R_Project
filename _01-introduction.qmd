@@ -23,7 +23,7 @@ Copper's behaviour as a pollutant in aquatic ecosystems is remarkably complex. I
 
 The Aggregate Exposure Pathway (AEP) [@teeguardenCompletingLinkExposure2016; @tanAggregateExposurePathways2018] concept was developed in 2016 as an exposure-based counterpart to the Adverse Outcome Pathway (AOP). AOPs assemble evidence to causally link the biological effects of stressors in organisms. AEPs do the same for the emission, transport and fate of stressors in the environment, up until the point they reach sensitive tissues or organs in selected organisms ([@fig-aep-intro]).
 
-<!-- KET Suggests: Remove WOE here, keep more general. -->
+<!-- TODO: Don't have dotted lines here, since we don't use them elsewhere. -->
 
 ![A minimal example Aggegrate Exposure Pathway depicting the emission of copper from aquaculture to fjord sediments, and its subsequent uptake into mussel soft tissue. The AEP consists as three Key Exposure States (KES) including a source KES (aquaculture emissions) and a Target Site Exposure (TSE). KES are connected by Key Transitional Relationships (KTR), which describe movements or conversions of a stressor. KES and KTR can depict magnitudes of exposure/flow in different media and at different levels of organisation, and to different degrees of certainty. Based on @tanAggregateExposurePathways2018](figures/fig01-example-aep.png){#fig-aep-intro}
 

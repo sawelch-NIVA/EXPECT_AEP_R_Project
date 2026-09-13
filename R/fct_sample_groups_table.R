@@ -34,15 +34,30 @@
 #'   `R/fct_group_ids.R`'s header). That is the SAME value `lump_into` cells,
 #'   `aep_nodes.csv` notes and every `{#grp-...}` heading anchor in
 #'   `docs/groups/*.qmd` point at; there is no longer a separate bare form.
+#' @param thresholds The `copper_toxicity_thresholds` target, or `NULL`
+#'   (default) to omit the `class` column entirely. When supplied, adds the
+#'   M-608 class (`I`-`V`) the group's mean falls in, via
+#'   [classify_group_means_by_thresholds()]; blank for groups with no matching
+#'   ladder (biota, terrestrial, anything the threshold set does not cover).
 #' @return A tibble sorted by `n` descending, with columns `group_id`, `group`,
-#'   `location`, `dates`, `n`, `mean_sd`, `median`, `n_outliers`,
-#'   `dip_p_label`, `n_units`, `dropped_label`, `references`, `.is_multimodal`,
+#'   `location`, `dates`, `n`, `mean_sd`, `class` (only when `thresholds` is
+#'   supplied), `median`, `fractionation`, `n_outliers`, `dip_p_label`,
+#'   `n_units`, `dropped_label`, `references`, `.is_multimodal`,
 #'   `.is_outlier`, `.anchor`.
 #' @export
-build_sample_groups_table <- function(summary_data, ids = NULL) {
+build_sample_groups_table <- function(summary_data, ids = NULL, thresholds = NULL) {
   # Computed before the .keep = "none" mutate below, which discards the key
   # columns the anchor is derived from.
   anchors <- heading_anchor(summary_data)
+  # Computed on summary_data before the .keep = "none" mutate too: it needs
+  # ENVIRON_COMPARTMENT / SPECIES_GROUP / SAMPLE_SPECIES / SAMPLE_TISSUE /
+  # MEASURED_UNIT_STANDARD, which that mutate discards in favour of the folded
+  # display columns.
+  mean_class <- if (is.null(thresholds)) {
+    rep(NA_character_, nrow(summary_data))
+  } else {
+    classify_group_means_by_thresholds(summary_data, thresholds)$mean_class
+  }
   group_ids <- if (is.null(ids)) {
     rep(NA_character_, nrow(summary_data))
   } else {
@@ -95,7 +110,11 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
         sprintf("%.2g %s", .data$mean, .data$unit),
         sprintf("%.2g ± %.2g %s", .data$mean, .data$sd, .data$unit)
       ),
+      # Only added to the output columns when `thresholds` was supplied; see
+      # the `dplyr::select()` below.
+      class = mean_class,
       median = .data$median,
+      fractionation = .data$fractionation,
       n_outliers = .data$n_double_outliers,
       # Blank rather than NA where the dip test was not run (n below min_n)
       dip_p_label = dplyr::if_else(
@@ -125,14 +144,19 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
     # `.keep = "none"` leaves columns that already existed in the input (n,
     # median) sitting in their original positions, so without this the table
     # renders as N, Median, Group, Location, ... Order the columns explicitly.
-    dplyr::select(
+    # `class` is spliced in only when `thresholds` was supplied, so a caller
+    # that never asked for it (index.qmd's own table, the triage notebook)
+    # keeps the exact column set it always had.
+    dplyr::select(dplyr::all_of(c(
       "group_id",
       "group",
       "location",
       "dates",
       "n",
       "mean_sd",
+      if (!is.null(thresholds)) "class",
       "median",
+      "fractionation",
       "n_outliers",
       "dip_p_label",
       "n_units",
@@ -141,7 +165,7 @@ build_sample_groups_table <- function(summary_data, ids = NULL) {
       ".is_multimodal",
       ".is_outlier",
       ".anchor"
-    ) |>
+    ))) |>
     # Ranked by n descending (PLAN.md P1.4), not alphabetically: the point of the
     # table is to work down from the groups carrying the most data. Note this
     # scatters repeated group labels, so merge_v() in the formatter collapses
@@ -183,23 +207,34 @@ sample_groups_flextable <- function(tbl, link_sections = NULL) {
   # every other row.
   font_size <- 9
 
+  # Labels are a plain list rather than named arguments so that "class" (only
+  # present when build_sample_groups_table() was called with `thresholds`,
+  # e.g. the manuscript's @tbl-groups-a001 / @tbl-groups-a002) is included when
+  # the column exists and omitted otherwise, without needing two call sites.
+  header_labels <- list(
+    group_id = "ID",
+    group = "Group",
+    location = "Location",
+    dates = "Dates",
+    n = "N",
+    mean_sd = "Mean ± SD",
+    class = "Class",
+    median = "Median",
+    fractionation = "Fractionation",
+    n_outliers = "Outliers",
+    dip_p_label = "Multimodal (p)",
+    n_units = "Units",
+    dropped_label = "Dropped",
+    references = "References"
+  )
+  header_labels <- header_labels[names(header_labels) %in% names(tbl)]
+
   ft <- tbl |>
     dplyr::select(-".is_multimodal", -".is_outlier", -".anchor") |>
-    flextable::flextable() |>
-    flextable::set_header_labels(
-      group_id = "ID",
-      group = "Group",
-      location = "Location",
-      dates = "Dates",
-      n = "N",
-      mean_sd = "Mean ± SD",
-      median = "Median",
-      n_outliers = "Outliers",
-      dip_p_label = "Multimodal (p)",
-      n_units = "Units",
-      dropped_label = "Dropped",
-      references = "References"
-    ) |>
+    flextable::flextable()
+  ft <- do.call(flextable::set_header_labels, c(list(ft), header_labels))
+
+  ft <- ft |>
     flextable::theme_vanilla() |>
     flextable::bold(part = "header") |>
     flextable::colformat_double(j = "median", digits = 2) |>

@@ -717,7 +717,7 @@ aep_edge_arrow_stubs <- function(edges, curvature = 0.15, frac = 0.02) {
 #' @param nodes The nodes table, with `x` and `y` populated.
 #' @param edges The edges table.
 #' @param cards Optional report cards from [aep_node_report_cards()]. When
-#'   supplied, each node label gains its geometric mean and unit.
+#'   supplied, each node label gains its arithmetic mean and unit.
 #' @param label_edges Annotate empirical edges with their magnitude?
 #' @param groups Optional node groups from [read_aep_node_groups()], drawn as
 #'   labelled boxes behind everything else. Nested groups inset automatically;
@@ -864,19 +864,31 @@ plot_aep <- function(
   node_label <- if (!is.null(cards)) {
     placed |>
       dplyr::left_join(
-        cards |> dplyr::select("node_id", "geo_mean", "unit", "n"),
+        cards |> dplyr::select("node_id", "mean", "sd", "median", "unit", "n"),
         by = "node_id"
       ) |>
       dplyr::mutate(
+        # ARITHMETIC mean, not geometric (Sam, 2026-09-12; see node_card_header()
+        # for the full reasoning). Also fixes a latent gap: the old is.na(geo_mean)
+        # gate meant an external node -- geo_mean is always NA there, per
+        # node_report_card() -- never got a label at all on this diagram; `mean`
+        # is populated for external nodes, so it now shows like every other node.
         .label = dplyr::if_else(
-          is.na(.data$geo_mean),
+          is.na(.data$mean),
           .data$label,
           paste0(
             .data$label,
             "\n",
-            formatC(.data$geo_mean, format = "g", digits = 3),
+            "AM ", formatC(.data$mean, format = "g", digits = 3),
+            dplyr::if_else(
+              is.na(.data$sd), "", paste0(" ± ", formatC(.data$sd, format = "g", digits = 3))
+            ),
             " ",
             .data$unit,
+            dplyr::if_else(
+              is.na(.data$median), "",
+              paste0(" (md ", formatC(.data$median, format = "g", digits = 3), ")")
+            ),
             "  (n = ",
             format(.data$n, big.mark = ","),
             ")"

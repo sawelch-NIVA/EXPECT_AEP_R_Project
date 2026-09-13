@@ -35,87 +35,36 @@ invisible(targets::tar_read(aep_matrix_timeseries_a001))
 invisible(targets::tar_read(aep_matrix_timeseries_a002))
 ```
 
-<!-- TODO: Proref for biota -->
-
-<!-- TODO: Remove wrong-species PROREFs -->
-
-<!-- TODO: Be consistent about use of means/medians/GM -->
-
 ## Aggregate Exposure Pathways
 
 ### AEP 1: Hammerfest Inner Coastal System
 
 #### AEP Sample Groups
 
-Exposure data for the study area was filtered to the Hammerfest coastal area bounding box (insert coords here) [@tbl-groups-a001]. 13 groups were returned, with data dominated by national monitoring campaigns. Aquatic sediment measurements were most represented in the dataset, 
-
-
-@tbl-groups-a001 
-
-summarises the sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (@fig-aep1-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, so the statistics differ from a national aggregation; the group `ID` and the `Dropped` percentage stay at their national values.
-
-::: {.landscape}
-
-```{r}
-#| label: tbl-groups-a001
-#| tbl-cap: "Sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N)."
-#| warning: false
-a001_box <- tar_read(aep_manifest) |> filter(aep_id == "A001")
-tar_read(literature_analysis_ready) |>
-  filter(
-    !is.na(LONGITUDE),
-    !is.na(LATITUDE),
-    LONGITUDE >= a001_box$lon_min,
-    LONGITUDE <= a001_box$lon_max,
-    LATITUDE >= a001_box$lat_min,
-    LATITUDE <= a001_box$lat_max
-  ) |>
-  summarise_groups(tar_read(literature_dropped_report)) |>
-  build_sample_groups_table(ids = tar_read(group_ids)) |>
-  sample_groups_flextable() |>
-  flextable::set_table_properties(layout = "autofit", width = 1)
-```
-
-:::
-
+Exposure data for the study area was filtered to the Hammerfest coastal area bounding box (insert coords here) . 13 groups were returned, with data dominated by national monitoring campaigns (See [@tbl-groups-a001], SI for more information). 
 
 #### Concentration map
 
-Map of points in bounding box
+Mapping measured copper concentrations in the Hammerfest area (@fig-aep1-conc) revealed a highly localised pattern of both monitoring and exceedence of background/threshold levels. Most measurements were conducted at aquaculture facilities or in the Hammerfest harbour area. Marine sediment concentrations were largely at background/good levels across the area, although points in the vicinity of aquaculture facilities at Eidvåget and Kommagnes showed occasional poor or very poor concentrations. Copper concentrations in G. morhua livers and M. edulis above provisional reference levels (PROREF) were detected around Hammerfest harbour, and on the NW coast of Melkøya, home to Hammerfest LNG plant. No pattern of contamination from the Repparfjord to the south was observed. Occasional freshwater sampling sites (e.g. the site marked "lufthavn" to the East of Hammerfest, which despite the name is not an airport). These points were excluded from consideration, as freshwater lake ecosystems represent a considerably different system to Hammerfest's coast.
 
-![Copper concentration data in the AEP-001 (Hammerfest coastal) bounding box plus a 10% margin on every side (red box = the aep_manifest.csv extent). Site fill = the worst Norwegian M-608 quality class (Background / Good / Poor / Very Poor) reached by any of that site's copper measurements; site shape = lumped sample group. Biota carry no M-608 ladder, so Fish / Molluscs / Algae are grey. Black stars: PRTR facilities. Blue circles: licensed aquaculture locations. Basemap: Kartverket topografisk gråtone. **Placeholder caption, replace before submission.**](figures/fig06-aep1-concentrations.png){#fig-aep1-conc}
-
+![Copper concentration data in the Hammerfest coastal system (AEP 1). Points shaped by sample group and coloured by worst measured concentration relative to (M-608) EQS or PROREF as appropriate. Red rectangle: AEP bounding box, Black stars: PRTR facilities, Blue circles: licensed aquaculture locations.](figures/fig06-aep1-concentrations.png){#fig-aep1-conc}
 
 #### Concentrations over time
 
-Time trends in key sampling groups
+<!-- TODO: Swap theming to minimal, remove double space after group name, use same group names as elsewhere. Add subticks for years -->
 
-![Measured copper in the AEP-001 bounding box (70.44--70.78 N, 23.40--24.12 E) over time, one panel per compartment (cod liver, blue mussel, coastal water, sediment) in native units with a free $y$-axis per panel; dry weight, wet weight and per-litre concentrations are not directly comparable. Water and sediment points carry their Norwegian M-608 quality class (Background / Good / Poor / Very Poor; copper has no M-608 Class III). Cod and mussel sit on a separate above-/below-PROREF colour scale, since M-608 has no copper class ladder for biota. The dashed grey line is a linear fit where $n \ge 6$ (a rough eyeball of trend, not a model; cod excluded). Faint horizontal lines mark PROREF (biota) or the M-608 class boundaries (water, sediment); the dotted vertical marks 2024. Strip text gives the compartment, its units, and the sample groups present. Coastal water is `ENVIRON_COMPARTMENT_SUB` "Marine/Salt Water" (total copper, mg/L); M-608 water classes are for dissolved copper, so treat them as indicative. **This figure and its caption are AI-generated placeholders and must be replaced before submission.**](figures/fig09-aep1-timeseries.png){#fig-a001-timeseries}
+A simple assessment of copper concentrations in key sampling groups (G. morhua liver, Blue mussels, coastal water and marine sediment showed no obvious time trend. Cod liver concentrations only occasionally exceed PROREFs (in 2014, 2015 and 2024). Blue mussel whole body concentrations are orders of magnitude higher in 2011 and likely the result of a unit conversion error in the source data; however, measurements in 2019 and 2024 continue to show many PROREF exceedences. Measurements of copper in coastal water are few enough that no trend is detectable. Sediment concentrations appear roughly steady over the measured time period; a lack of Very Poor copper concentrations after 2022 is notable. 
+
+![Measured copper concentrations over time in the Hammerfest coastal system (AEP 1). Points coloured by EQS class/PROREF exceedence as appropriate. Dashed horizontal lines mark EQS/PROREF thresholds. Dotted vertical line (2024) marks end of Hammerfest harbour cleanup project.](figures/fig09-aep1-timeseries.png){#fig-a001-timeseries}
 
 
-#### Pathway diagram
+#### Pathway Diagram
 
-The aEP
+[@fig-hammerfest-aep] shows a proposed AEP for the Hammerfest coastal system. Copper flows to the environment from a variety of anthropogenic and natural sources, of which only WWTP discharge, aquaculture and emissions from industrial facilities are qualified to some degree. Flows of copper to receiving water and sediment are generally highly plausible but poorly evidenced, and insufficient information is available to assess their essentiality (i.e. if interrupting any specific source would change measured concentrations). Sediment concentrations are well-described by existing data and predominantly below adverse effect thresholds; water concentration data is sparse but also largely below thresholds (of 13 data points, a single falls within the Good-Moderate effect class). Tissue copper concentrations are available for G. morhua livers (largely below PROREF), M. edulis soft tissues (distributed around the PROREF boundary, but with some exceedences), and a handful of macroalgae (shoot tip) samples. 
 
-![Placeholder caption. AEP 1: Hammerfest inner coastal system.](figures/fig08-aep1-hammerfest.png){#fig-hammerfest-aep}
+![Hammerfest Coastal System Aggregate Exposure Pathway (AEP). This AEP represents emissions from a variety of copper sources (orange Key Exposure States (KES)) to receiving marine water and sediment (Blue (KES)), and eventually to Target Sites of Exposure (pink KES), linked by Key Transitional Relationships (black and grey lines) Each KES reports a mean concentration emission (if available), sample size, number of references, date range, and a Weight of Evidence (WoE) assessment. WoE includes the Essentiality, Plausibility, Evidence, and Quantification of a given KES or KTR, scored 1-3 and colour-coded. Pin/globe icon in KES top-right corner indicates that a node is based on local (i.e. Hammerfest) or whole-Arctic data.](figures/fig08-aep1-hammerfest.png){#fig-hammerfest-aep}
 
-#### Node evidence table
-
-Nodes
-
-::: {.landscape}
-
-```{r}
-#| label: tbl-nodes-a001
-#| tbl-cap: "AEP-001 (Hammerfest coastal) nodes."
-#| warning: false
-tar_read(aep_node_cards) |>
-  filter(aep_id == "A001") |>
-  node_report_flextable(tar_read(aep_scoped)[["A001"]]) |>
-  flextable::set_table_properties(layout = "autofit", width = 1)
-```
-
-:::
+Full node-level evidence and Weight-of-Evidence scores underlying [@fig-hammerfest-aep] are tabulated in [@tbl-nodes-a001] (SI).
 
 ### AEP 2: Inner Repparfjorden
 
@@ -125,19 +74,7 @@ tar_read(aep_node_cards) |>
 
 #### Node evidence table
 
-::: {.landscape}
-
-```{r}
-#| label: tbl-nodes-a002
-#| tbl-cap: "AEP-002 (Repparfjord inner) nodes."
-#| warning: false
-tar_read(aep_node_cards) |>
-  filter(aep_id == "A002") |>
-  node_report_flextable(tar_read(aep_scoped)[["A002"]]) |>
-  flextable::set_table_properties(layout = "autofit", width = 1)
-```
-
-:::
+Full node-level evidence and Weight-of-Evidence scores underlying [@fig-repparfjord-aep] are tabulated in [@tbl-nodes-a002] (SI).
 
 #### Concentration map
 
@@ -145,31 +82,7 @@ tar_read(aep_node_cards) |>
 
 #### Sample groups in the bounding box
 
-@tbl-groups-a002 summarises the sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (@fig-aep2-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, as for @tbl-groups-a001.
-
-::: {.landscape}
-
-```{r}
-#| label: tbl-groups-a002
-#| tbl-cap: "Sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N)."
-#| warning: false
-a002_box <- tar_read(aep_manifest) |> filter(aep_id == "A002")
-tar_read(literature_analysis_ready) |>
-  filter(
-    !is.na(LONGITUDE),
-    !is.na(LATITUDE),
-    LONGITUDE >= a002_box$lon_min,
-    LONGITUDE <= a002_box$lon_max,
-    LATITUDE >= a002_box$lat_min,
-    LATITUDE <= a002_box$lat_max
-  ) |>
-  summarise_groups(tar_read(literature_dropped_report)) |>
-  build_sample_groups_table(ids = tar_read(group_ids)) |>
-  sample_groups_flextable() |>
-  flextable::set_table_properties(layout = "autofit", width = 1)
-```
-
-:::
+@tbl-groups-a002 (Supplementary Information) summarises the sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (@fig-aep2-conc; no $n$ threshold). Aggregation is re-run on the bounded rows only, as for @tbl-groups-a001.
 
 The 1,600 mg/kg sediment value in this box is extremely suspect, but is correct to Vannmiljø. So we ought to find some other rivers.
 

@@ -230,6 +230,16 @@ add_threshold_boundary_class <- function(thresholds) {
 #' @param unit The unit to match. Defaults to the group's own unit; pass it
 #'   explicitly for the unit-agnostic overall-distribution panel, which needs
 #'   one call per unit present.
+#' @param biota_match `"genus"` (default) matches any vertebrate group to
+#'   *Gadus morhua* PROREF and any invertebrate group to *Mytilus edulis*
+#'   PROREF, per [threshold_taxon_map()] -- the accepted approximation for
+#'   exploratory triage plots (see the caveats at the top of this file).
+#'   `"exact"` requires `SAMPLE_SPECIES` and `SAMPLE_TISSUE` to match the
+#'   threshold row precisely, returning zero rows for every other species and
+#'   tissue. Used where a PROREF line reads as a specific, authoritative
+#'   comparison rather than a rough sanity check -- node cards and the
+#'   Repparfjorden map (Sam, 2026-09-12): a herring node showing the cod-liver
+#'   PROREF line overstated a comparison that was never made.
 #' @return A tibble of matching threshold rows with `THRESHOLD_VALUE_STANDARD`
 #'   and a `threshold_label` for annotation. Zero rows where nothing applies,
 #'   which is a normal and expected outcome.
@@ -238,8 +248,10 @@ thresholds_for_group <- function(
   thresholds,
   grp,
   types = c("Classification boundary", "PROREF"),
-  unit = NULL
+  unit = NULL,
+  biota_match = c("genus", "exact")
 ) {
+  biota_match <- match.arg(biota_match)
   # `grp = NULL` is a legitimate call: the plot functions take thresholds as
   # optional, and a caller that omits one omits both.
   if (is.null(thresholds) || nrow(thresholds) == 0 || is.null(grp)) {
@@ -261,7 +273,16 @@ thresholds_for_group <- function(
     return(empty_threshold_match())
   }
 
-  matched <- if (grp$ENVIRON_COMPARTMENT[1] == "Biota") {
+  matched <- if (grp$ENVIRON_COMPARTMENT[1] == "Biota" && biota_match == "exact") {
+    # NA-safe: dplyr::filter() drops NA comparisons, so a group with no
+    # SAMPLE_TISSUE simply matches nothing rather than erroring.
+    std |>
+      dplyr::filter(
+        .data$ENVIRON_COMPARTMENT == "Biota",
+        .data$SAMPLE_SPECIES == grp$SAMPLE_SPECIES[1],
+        .data$SAMPLE_TISSUE == grp$SAMPLE_TISSUE[1]
+      )
+  } else if (grp$ENVIRON_COMPARTMENT[1] == "Biota") {
     taxon <- unname(threshold_taxon_map()[grp$SPECIES_GROUP[1]])
     if (is.na(taxon)) {
       return(empty_threshold_match())
@@ -652,6 +673,119 @@ classify_by_thresholds <- function(
   }
 
   data$threshold_class <- factor(cls, levels = c("I", "II", "III", "IV", "V"))
+  data
+}
+
+#' Classify Group Mean Values Against the M-608 Classification Ladder
+#'
+#' Companion to [classify_by_thresholds()], which classifies individual
+#' measurements: this classifies a **group's mean**, for the sample-groups
+#' summary table (`@tbl-groups-a001` / `@tbl-groups-a002`), where a class per
+#' row helps a reader judge the mean at a glance without cross-referencing
+#' `@tbl-copper-thresholds`.
+#'
+#' Same caveats as [classify_by_thresholds()]: only `"Classification boundary"`
+#' thresholds are used (PROREF and BAC are single background levels, not a
+#' ladder), units are matched not converted, and a group with no matching
+#' ladder -- biota, terrestrial, anything the threshold set does not cover --
+#' comes back `NA`.
+#'
+#' @param groups A tibble with one row per group, carrying the columns
+#'   [thresholds_for_group()] needs (`ENVIRON_COMPARTMENT`,
+#'   `ENVIRON_COMPARTMENT_SUB`, `SPECIES_GROUP`, `SAMPLE_SPECIES`,
+#'   `SAMPLE_TISSUE`, `MEASURED_UNIT_STANDARD`) plus a `mean` column.
+#' @param thresholds The `copper_toxicity_thresholds` target.
+#' @return `groups` with a `mean_class` factor column, levels `I`..`V`.
+#' @export
+classify_group_means_by_thresholds <- function(groups, thresholds) {
+  cls <- vapply(
+    seq_len(nrow(groups)),
+    function(i) {
+      g <- groups[i, , drop = FALSE]
+      if (is.na(g$mean[1])) {
+        return(NA_character_)
+      }
+      bounds <- thresholds_for_group(
+        thresholds, g,
+        types = "Classification boundary"
+      )
+      if (nrow(bounds) == 0) {
+        return(NA_character_)
+      }
+      bounds <- bounds[order(bounds$THRESHOLD_VALUE_STANDARD), ]
+      above <- which(bounds$THRESHOLD_VALUE_STANDARD < g$mean[1])
+      if (length(above) == 0) "I" else bounds$THRESHOLD_OPENS_CLASS[max(above)]
+    },
+    character(1)
+  )
+  groups$mean_class <- factor(cls, levels = c("I", "II", "III", "IV", "V"))
+  groups
+}
+
+#' Classify Biota Rows Against Their PROREF Comparator
+#'
+#' Companion to [classify_by_thresholds()], which is restricted to
+#' `"Classification boundary"` thresholds and always returns `NA` for biota.
+#' Biota compare against a single background value (PROREF: *Gadus morhua*
+#' liver for vertebrates, *Mytilus edulis* soft tissue for invertebrates), not
+#' a five-class ladder, so the result is a two-level status rather than a
+#' class letter. Taxa with no PROREF comparator, and any species/tissue other
+#' than the exact PROREF comparator itself, come back `NA` -- this is a
+#' manuscript figure (the Repparfjorden concentration maps), so it uses
+#' [thresholds_for_group()]'s `biota_match = "exact"` rather than the
+#' genus-level fallback the triage/exploration plots use (Sam, 2026-09-12: a
+#' herring point colored by the cod-liver PROREF overstated a comparison never
+#' made).
+#'
+#' @param data Rows carrying the [triage_group_cols()] group key and a measured
+#'   value column. Non-Biota rows always come back `NA`.
+#' @param thresholds The `copper_toxicity_thresholds` target.
+#' @param value_col Name of the value column. Default `MEASURED_VALUE_STANDARD`.
+#' @return `data` with a `proref_status` factor column, levels from
+#'   [proref_status_colours()].
+#' @export
+classify_biota_by_proref <- function(
+  data,
+  thresholds,
+  value_col = "MEASURED_VALUE_STANDARD"
+) {
+  key <- intersect(triage_group_cols(), names(data))
+  status <- rep(NA_character_, nrow(data))
+  is_biota <- !is.na(data$ENVIRON_COMPARTMENT) & data$ENVIRON_COMPARTMENT == "Biota"
+
+  if (any(is_biota)) {
+    groups <- dplyr::distinct(
+      data[is_biota, , drop = FALSE],
+      dplyr::across(dplyr::all_of(key))
+    )
+    for (i in seq_len(nrow(groups))) {
+      g <- groups[i, , drop = FALSE]
+      proref <- thresholds_for_group(
+        thresholds, g,
+        types = "PROREF", biota_match = "exact"
+      )
+      if (nrow(proref) == 0) {
+        next
+      }
+      lim <- proref$THRESHOLD_VALUE_STANDARD[1]
+
+      # NA-safe row match on the group key, as in classify_by_thresholds().
+      sel <- rep(TRUE, nrow(data))
+      for (k in key) {
+        sel <- sel &
+          ((data[[k]] == g[[k]]) | (is.na(data[[k]]) & is.na(g[[k]])))
+      }
+      sel[is.na(sel)] <- FALSE
+
+      v <- data[[value_col]][sel]
+      status[sel] <- dplyr::if_else(
+        is.na(v), NA_character_,
+        dplyr::if_else(v <= lim, "at or below PROREF", "above PROREF")
+      )
+    }
+  }
+
+  data$proref_status <- factor(status, levels = names(proref_status_colours()))
   data
 }
 

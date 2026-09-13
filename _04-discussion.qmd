@@ -1,5 +1,8 @@
 # Discussion
 
+<!-- TODO: Justify not doing chosing TSEs better -->
+
+
 - Lots of the detail currently in the introduction will need to be moved here
 - There are a few threads to address and wrap up:
   - Is copper exposure important? My feeling is "probably not", and if this MS doesn't tip the balance either way I won't focus on this angle

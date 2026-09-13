@@ -1,3 +1,326 @@
+#' The Project Bibliography, Cached
+#'
+#' `RefManageR::ReadBib()` over `references.bib`, read once per session (it is
+#' a 4.6 MB, ~2400-entry file and slow to reparse). Chosen over `bib2df`:
+#' spot-checked against four real keys 2026-09-12, `bib2df` left `YEAR` blank
+#' for entries `RefManageR` parsed correctly, and produced duplicate rows for
+#' at least one key -- this file is exactly the kind of large, slightly messy
+#' real-world `.bib` `bib2df`'s own warning ("entries may have been dropped")
+#' is about.
+#'
+#' @return A `RefManageR::BibEntry` object.
+project_bibliography <- local({
+  cached <- NULL
+  function() {
+    if (is.null(cached)) {
+      cached <<- suppressWarnings(
+        RefManageR::ReadBib(here::here("references.bib"), check = FALSE)
+      )
+    }
+    cached
+  }
+})
+
+#' The Project Bibliography as a Data Frame, Cached
+#'
+#' `as.data.frame()` on a ~2400-entry `BibEntry` is itself expensive (it is
+#' RefManageR formatting every field of every entry), not just the initial
+#' `ReadBib()` parse -- caching only [project_bibliography()] and redoing this
+#' conversion inside [match_reference_bib_keys()] on every call is what turned
+#' `summarise_literature_data` into a 16-minute target (2026-09-12): with
+#' ~245 groups each calling into it, the conversion ran ~245 times instead of
+#' once. This cache is the fix; `match_reference_bib_keys()` must call this,
+#' never `as.data.frame(project_bibliography())` directly.
+#'
+#' @return A data frame with the bibliography's fields plus `BIBTEXKEY` and
+#'   `YEAR_NUM` (integer, `NA` where `year` does not parse).
+project_bibliography_df <- local({
+  cached <- NULL
+  function() {
+    if (is.null(cached)) {
+      bib <- project_bibliography()
+      df <- as.data.frame(bib)
+      df$BIBTEXKEY <- names(bib)
+      df$YEAR_NUM <- suppressWarnings(as.integer(df$year))
+      cached <<- df
+    }
+    cached
+  }
+})
+
+#' Author-Year Citation Text for One or More BibTeX Keys
+#'
+#' Formats "Surname (Year)" / "Surname1 & Surname2 (Year)" / "Surname1 et al.
+#' (Year)", looked up directly from `references.bib` via
+#' [project_bibliography()]. Built for the AEP node tables' external-node
+#' `references` cell (Sam, 2026-09-12): a flextable cell is raw OOXML inside a
+#' docx and is never seen by pandoc's citeproc, so typing a literal `[@key]`
+#' there would render as literal bracket text and never resolve to a real
+#' citation. This builds the same author-year text citeproc would, from the
+#' same source file, so the cell reads correctly regardless.
+#'
+#' A key that fails to resolve in the bibliography is shown as-is (the raw key
+#' text) rather than dropped, so a typo or a reference not yet added to
+#' `references.bib` stays visible instead of silently vanishing.
+#'
+#' **This alone does not put the reference into the manuscript's bibliography
+#' section** -- pandoc's citeproc only collects entries it saw cited as real
+#' `[@key]` syntax somewhere it parses (prose, headings, table captions), never
+#' inside a flextable cell. The AEP node-table chunks in `_03-results.qmd`
+#' additionally fold these same keys into their `tbl-cap`, which IS parsed
+#' text (this file already has real citations inside `fig-cap`/`tbl-cap`
+#' strings elsewhere, e.g. `_06-SI01.qmd`'s biocide-use figure), so the
+#' reference both displays in the table row and earns its place in the
+#' reference list.
+#'
+#' @param keys A single string of one or more BibTeX keys, `;`-separated
+#'   (matching `aep_nodes.csv`'s `external_ref_keys` column), or `NA`.
+#' @return A single string, `"; "`-joined if `keys` held more than one, or
+#'   `NA` if `keys` was `NA`, empty, or blank.
+#' @export
+format_bib_citations <- function(keys) {
+  if (length(keys) == 0 || is.na(keys) || !nzchar(trimws(keys))) {
+    return(NA_character_)
+  }
+  key_vec <- trimws(strsplit(keys, ";")[[1]])
+  key_vec <- key_vec[nzchar(key_vec)]
+  paste(vapply(key_vec, format_one_bib_citation, character(1)), collapse = "; ")
+}
+
+#' Author-Year Citation Text for One BibTeX Key, Cached
+#'
+#' The single-key worker behind [format_bib_citations()], split out so it can
+#' be memoized per key (an entry's author/year never changes within a
+#' session): called once per group/node across the whole pipeline, so without
+#' this cache the same handful of keys gets re-looked-up and re-formatted
+#' hundreds of times. See [match_reference_bib_keys()] for the sibling
+#' problem this pattern also fixes, and why it matters (16-minute target,
+#' 2026-09-12).
+#'
+#' @param k A single BibTeX key.
+#' @return A single string: "Surname (Year)" etc., or `k` itself if it does
+#'   not resolve.
+format_one_bib_citation <- local({
+  cache <- new.env(parent = emptyenv())
+  function(k) {
+    if (exists(k, envir = cache, inherits = FALSE)) {
+      return(get(k, envir = cache))
+    }
+    bib <- project_bibliography()
+    entry <- tryCatch(bib[k], error = function(e) NULL)
+    result <- if (is.null(entry) || length(entry) == 0) {
+      k
+    } else {
+      authors <- tryCatch(entry$author, error = function(e) NULL)
+      year <- tryCatch(entry$year, error = function(e) NA_character_)
+      if (is.null(authors) || length(authors) == 0 || is.na(year)) {
+        k
+      } else {
+        surnames <- format(authors, include = "family")
+        who <- if (length(surnames) == 1) {
+          surnames[1]
+        } else if (length(surnames) == 2) {
+          paste(surnames[1], "&", surnames[2])
+        } else {
+          paste(surnames[1], "et al.")
+        }
+        paste0(who, " (", year, ")")
+      }
+    }
+    assign(k, result, envir = cache)
+    result
+  }
+})
+
+#' Hardcoded eData REFERENCE_ID -> Bibliography-Key Overrides
+#'
+#' Exceptions [match_reference_bib_keys()] cannot reach by title matching,
+#' because the eData `TITLE` genuinely is not the source's own citable title.
+#'
+#' `"VannmiljøCopper2010-2025"` is this project's own description of the
+#' Vannmiljø database extract ("Vannmiljø Database - Copper and Copper
+#' Pyrithione Data"), not the database's own title ("Vannmiljø") -- the two
+#' will never token-match no matter the threshold, verified 2026-09-12.
+#'
+#' @return A named character vector, REFERENCE_ID -> bibtex key.
+reference_id_overrides <- function() {
+  c("VannmiljøCopper2010-2025" = "norwegianenvironmentagencyVannmiljo2026")
+}
+
+#' Match eData Literature References to Their Bibliography Entries
+#'
+#' `REFERENCE_ID` (e.g. `"2017SternalTheImpactOf"`, generated at extraction
+#' time from author+year+title) and a `references.bib` autokey (e.g.
+#' `"sternalImpactSubmarineCopper2017"`, generated by Zotero from the same
+#' three facts under a different slugging scheme) cannot be string-matched
+#' directly, even though they describe the same paper. This matches on the
+#' underlying facts instead: `YEAR` (+/- 1, for online-first vs print) gates
+#' the candidate set, then token-Jaccard overlap of normalised `TITLE` against
+#' the bibliography's own `title` field picks the best candidate.
+#'
+#' **Verified 2026-09-12 against all 32 distinct literature `REFERENCE_ID`s in
+#' `literature_analysis_ready`**: 30 of 32 matched at a score of exactly 1.0
+#' (the normalised title's whole token set is shared), the remaining two
+#' scored under 0.2 -- a wide, clean gap either side of the `min_score`
+#' default. Do not lower `min_score` to force a marginal case through; add it
+#' to [reference_id_overrides()] instead if it is a genuine special case, or
+#' accept that the source is not yet in `references.bib`.
+#'
+#' @param reference_id,title,year Vectors, same length, from a distinct set of
+#'   REFERENCE_ID/TITLE/YEAR triples (e.g. `literature_analysis_ready`).
+#' @param min_score Minimum token-Jaccard score to accept a match. **Cached
+#'   per `reference_id`, so a call site that needs a different `min_score`
+#'   for the same `reference_id` within one process will get the first
+#'   value's cached result.** Not a concern today: every call site in this
+#'   project uses the default. Would matter if that ever changes.
+#' @return A character vector the same length as `reference_id`: a bibtex key
+#'   where matched (or overridden), `NA` otherwise -- a study not yet added to
+#'   `references.bib` is exactly this case, e.g. `"2026KogelUsingAtlanticHaddock"`
+#'   as of 2026-09-12, which has no candidate scoring above 0.06.
+#' @export
+match_reference_bib_keys <- local({
+  cache <- new.env(parent = emptyenv())
+  function(reference_id, title, year, min_score = 0.9) {
+    norm_title <- function(x) {
+      x <- tolower(x)
+      x <- gsub("[^a-z0-9 ]", " ", x)
+      trimws(gsub("\\s+", " ", x))
+    }
+    token_jaccard <- function(a, b) {
+      ta <- unique(strsplit(a, " ")[[1]])
+      tb <- unique(strsplit(b, " ")[[1]])
+      ta <- ta[nchar(ta) > 2]
+      tb <- tb[nchar(tb) > 2]
+      if (length(ta) == 0 || length(tb) == 0) {
+        return(0)
+      }
+      length(intersect(ta, tb)) / length(union(ta, tb))
+    }
+
+    overrides <- reference_id_overrides()
+    out <- character(length(reference_id))
+    # Only ~32 distinct literature REFERENCE_IDs exist project-wide, but this
+    # is called once per GROUP/NODE (hundreds of times): without this cache,
+    # summarise_literature_data recomputed the same 32 matches ~245 times and
+    # took 16 minutes instead of the ~1.5 it should (2026-09-12).
+    uncached <- !vapply(reference_id, exists, logical(1), envir = cache, inherits = FALSE)
+
+    if (any(uncached)) {
+      bib_df <- project_bibliography_df()
+      for (i in which(uncached)) {
+        rid <- reference_id[i]
+        if (!is.na(overrides[rid])) {
+          assign(rid, unname(overrides[rid]), envir = cache)
+          next
+        }
+        yr <- suppressWarnings(as.integer(year[i]))
+        ttl <- norm_title(title[i])
+        cand <- bib_df[
+          !is.na(bib_df$YEAR_NUM) & abs(bib_df$YEAR_NUM - yr) <= 1 &
+            !is.na(bib_df$title),
+        ]
+        result <- NA_character_
+        if (nrow(cand) > 0) {
+          scores <- vapply(cand$title, function(t) token_jaccard(ttl, norm_title(t)), numeric(1))
+          best <- which.max(scores)
+          if (scores[best] >= min_score) {
+            result <- cand$BIBTEXKEY[best]
+          }
+        }
+        assign(rid, result, envir = cache)
+      }
+    }
+
+    vapply(reference_id, function(rid) get(rid, envir = cache), character(1))
+  }
+})
+
+#' Author-Year Citation Text for a Set of Literature References
+#'
+#' Companion to [format_bib_citations()] for the empirical (measured) side:
+#' resolves each distinct `REFERENCE_ID` to a bibliography entry via
+#' [match_reference_bib_keys()] and formats it "Author (Year)". A reference
+#' that does not resolve (not yet added to `references.bib`) shows as its raw
+#' `REFERENCE_ID` instead -- visible-but-unresolved, not a wrong or invented
+#' citation and not silently dropped.
+#'
+#' @param reference_id,title,year As [match_reference_bib_keys()], one row per
+#'   measurement (this function takes the distinct combinations itself).
+#' @return A single string: the sorted, comma-separated citations/ids.
+#' @export
+reference_citation_summary <- function(reference_id, title, year) {
+  d <- unique(data.frame(
+    reference_id = reference_id, title = title, year = year,
+    stringsAsFactors = FALSE
+  ))
+  keys <- match_reference_bib_keys(d$reference_id, d$title, d$year)
+  display <- ifelse(is.na(keys), d$reference_id, vapply(keys, function(k) {
+    if (is.na(k)) NA_character_ else format_bib_citations(k)
+  }, character(1)))
+  paste(sort(unique(display)), collapse = ", ")
+}
+
+#' Citation Suffix for a Table Caption, Listing External-Node Sources
+#'
+#' Real pandoc citation syntax (`[@key]`), meant to be appended to a table's
+#' `tbl-cap`. A caption **is** pandoc-parsed text, unlike a flextable body
+#' cell (see [format_bib_citations()]): this repo already has proof of that
+#' in `_06-SI01.qmd`'s biocide-use `fig-cap`, which contains a working
+#' `[@key]` citation. Putting the same syntax here means a table's sources
+#' both display (via [format_bib_citations()] / [reference_citation_summary()]
+#' in the table itself) and earn their place in the manuscript's reference
+#' list, without a fragile dynamic-`nocite` mechanism.
+#'
+#' The shared helper behind [external_node_cite_suffix()] and
+#' [literature_cite_suffix()].
+#'
+#' @param keys Character vector of bibtex keys, possibly containing `NA` or
+#'   blank entries (dropped).
+#' @param label Text introducing the citation list, e.g.
+#'   `"External-node sources"`.
+#' @return A single string: `""` where `keys` has nothing usable, else
+#'   `" <label>: [@k1]; [@k2]."`.
+cite_suffix <- function(keys, label) {
+  keys <- unique(keys[!is.na(keys) & nzchar(keys)])
+  if (length(keys) == 0) {
+    return("")
+  }
+  paste0(" ", label, ": ", paste0("[@", keys, "]", collapse = "; "), ".")
+}
+
+#' Citation Suffix for External-Node Sources
+#'
+#' @param scoped One element of [aep_scoped_nodes()] (a single AEP's nodes),
+#'   or the full `aep_nodes` tibble.
+#' @return As [cite_suffix()].
+#' @export
+external_node_cite_suffix <- function(scoped) {
+  raw <- scoped$external_ref_keys[!is.na(scoped$external_ref_keys)]
+  keys <- unique(trimws(unlist(strsplit(raw, ";"))))
+  cite_suffix(keys, "External-node sources")
+}
+
+#' Citation Suffix for a Table's Literature References
+#'
+#' Companion to [external_node_cite_suffix()] for the empirical/literature
+#' side: resolves REFERENCE_ID/TITLE/YEAR via [match_reference_bib_keys()] and
+#' appends whichever resolve to a real key. A reference that fails to resolve
+#' is silently omitted here -- it already shows as a raw REFERENCE_ID in the
+#' table itself, per [reference_citation_summary()], and there is no key to
+#' cite until the source is added to `references.bib`.
+#'
+#' @param reference_id,title,year As [match_reference_bib_keys()].
+#' @return As [cite_suffix()].
+#' @export
+literature_cite_suffix <- function(reference_id, title, year) {
+  d <- unique(data.frame(
+    reference_id = reference_id, title = title, year = year,
+    stringsAsFactors = FALSE
+  ))
+  keys <- match_reference_bib_keys(d$reference_id, d$title, d$year)
+  cite_suffix(keys, "Literature sources")
+}
+
 # The AEP node layer (PLAN.md P3.1-P3.4). Added 2026-08-05.
 #
 # WHY THIS IS NOT JUST group_decisions.csv WITH MORE COLUMNS.
@@ -176,7 +499,7 @@ aep_node_epeq_cols <- function() {
 #' @export
 external_value_cols <- function() {
   c("external_value", "external_sd", "external_n", "external_unit",
-    "external_refs")
+    "external_refs", "external_ref_keys")
 }
 
 #' Columns Owned by the Human
@@ -276,6 +599,10 @@ empty_aep_nodes <- function() {
     external_n = numeric(0),
     external_unit = character(0),
     external_refs = numeric(0),
+    # BibTeX keys behind external_refs' count, `;`-separated. Added 2026-09-12
+    # so external nodes can carry real, pandoc-resolvable citations rather
+    # than just a count; see ?format_bib_citations.
+    external_ref_keys = character(0),
     # Essentiality and plausibility only; evidence and quantification are
     # per-AEP and live on aep_membership_<id>.csv (removed here 2026-09-08).
     # See aep_node_epeq_cols() and the header of R/fct_aep_manifest.R.
@@ -383,6 +710,10 @@ read_aep_nodes <- function(path = here_rel("data/clean/aep/aep_nodes.csv")) {
       exclude_references = readr::col_character(),
       exclude_campaigns = readr::col_character(),
       external_unit = readr::col_character(),
+      # Explicit, not guessed: every row is currently blank (column added
+      # 2026-09-12, not yet filled in), and col_guess() reads an all-blank
+      # column as logical, not character.
+      external_ref_keys = readr::col_character(),
       notes = readr::col_character(),
       trend = readr::col_character(),
       trend_basis = readr::col_character(),
@@ -842,9 +1173,13 @@ NULL
 #' Arctic representativeness is a stated property of each node, in the same
 #' spirit as `n_sources`: a visible weakness rather than a silent one.
 #'
-#' Geometric mean and GSD alongside the arithmetic pair, matching
-#' `summarise_literature_data`: these concentrations are lognormal over orders of
-#' magnitude, so the arithmetic mean sits above almost every observation.
+#' Geometric mean and GSD are still computed alongside the arithmetic pair,
+#' matching `summarise_literature_data`, but are no longer the headline
+#' statistic anywhere a reader sees this card (Sam, 2026-09-12: GM/GSD are not
+#' how pollution concentrations are conventionally reported, and reporting
+#' them in only some tables was itself the inconsistency). `fractionation`
+#' (see [fractionation_summary()]) is carried for the same reason `sd` is:
+#' something a reader needs before trusting the mean, not decoration.
 #'
 #' @param node A one-row nodes tibble.
 #' @param members The membership table.
@@ -871,15 +1206,19 @@ node_report_card <- function(node, members, data, ids) {
       # unknown: the REACH sector nodes are one extract, so "refs = 1" is a
       # fact about them and "refs = -" was reading as missing data.
       n_sources = as.integer(node$external_refs[1]),
-      # No rows, so no REFERENCE_IDs to list. External-node provenance is a
-      # hand-entered count (n_sources above), not a set of ids we hold.
-      references = NA_character_,
+      # From aep_nodes.csv's own external_ref_keys (BibTeX keys, `;`-separated),
+      # formatted as author-year text. See ?format_bib_citations for why this
+      # cannot be a bare pandoc [@key] typed into the cell. NA (a dash in the
+      # rendered table) where the column is blank, i.e. not filled in yet.
+      references = format_bib_citations(node$external_ref_keys[1]),
       unit = node$external_unit[1],
       mean = node$external_value[1],
       sd = node$external_sd[1],
       geo_mean = NA_real_,
       gsd = NA_real_,
       median = NA_real_,
+      # No rows, so no fractionation protocol to report either.
+      fractionation = NA_character_,
       n_arctic = NA_real_,
       pct_arctic = NA_real_,
       lat_min = NA_real_,
@@ -906,9 +1245,11 @@ node_report_card <- function(node, members, data, ids) {
     n_rows = nrow(d),
     n_groups = length(unique(members$group_id[members$node_id == node$node_id[1]])),
     n_sources = dplyr::n_distinct(d$REFERENCE_ID),
-    # Every distinct REFERENCE_ID behind the node, comma separated and sorted so
-    # the cell is stable between rebuilds. Displayed by node_report_flextable().
-    references = paste(sort(unique(d$REFERENCE_ID)), collapse = ", "),
+    # Author-Year text where the reference resolves in references.bib, the raw
+    # REFERENCE_ID otherwise (see ?reference_citation_summary): sorted and
+    # comma separated so the cell is stable between rebuilds. Displayed by
+    # node_report_flextable().
+    references = reference_citation_summary(d$REFERENCE_ID, d$TITLE, d$YEAR),
     unit = unique(d$MEASURED_UNIT_STANDARD)[1],
     # CENTRE: weighted by MEASURED_N, so it describes the same population as the
     # `n` reported beside it. SPREAD: per row, because we hold study means and
@@ -918,6 +1259,12 @@ node_report_card <- function(node, members, data, ids) {
     geo_mean = 10^stats::weighted.mean(log10(v), w = w, na.rm = TRUE),
     gsd = 10^stats::sd(log10(v), na.rm = TRUE),
     median = weighted_median(v, w),
+    # Distinct fractionation protocols behind the node, so lumping Total and
+    # Filtered rows together shows up here rather than staying invisible in
+    # the mean. See ?fractionation_summary.
+    fractionation = fractionation_summary(
+      d$FRACTIONATION_PROTOCOL_CLASS, d$FRACTIONATION_PROTOCOL
+    ),
     n_arctic = sum(w[arctic], na.rm = TRUE),
     pct_arctic = 100 * sum(w[arctic], na.rm = TRUE) / sum(w, na.rm = TRUE),
     lat_min = suppressWarnings(min(lat, na.rm = TRUE)),

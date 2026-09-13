@@ -795,7 +795,23 @@ vm_create_edata_measurements_table <- function(
       # left join to vm_lookup_methods using Provetakmetode_id and Analysmethod
       SAMPLING_PROTOCOL = "1",
       EXTRACTION_PROTOCOL = "2",
-      FRACTIONATION_PROTOCOL = "3",
+      # Unlike the three protocols above, Vannmiljø reports fractionation
+      # directly (Filtrert_Prove), so this one doesn't need the ID-mapping
+      # fix: "Ufiltrert" is the total fraction, "Filtrert" is filtered through
+      # a 0.45 um membrane, the operational "dissolved" fraction. Definition:
+      # https://vannmiljokoder.miljodirektoratet.no/files/Om_VMS_Registreringsfelt.htm
+      #
+      # Coded straight to eDataDRF's own controlled Short_Name vocabulary for
+      # the "Fractionation Protocol" category ("Total" / "Filtered 0.45um" --
+      # see fractionation_short_name()), not a Vannmiljø-flavoured string, so
+      # this lines up character-for-character with the literature side's
+      # standardised value rather than needing fuzzy matching later (Sam,
+      # 2026-09-12).
+      FRACTIONATION_PROTOCOL = case_when(
+        Filtrert_Prove == "Ufiltrert" ~ "Total",
+        Filtrert_Prove == "Filtrert" ~ "Filtered 0.45um",
+        .default = NA_character_
+      ),
       ANALYTICAL_PROTOCOL = "4",
 
       # Comments

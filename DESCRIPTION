@@ -59,6 +59,7 @@ Imports:
     RColorBrewer,
     readr,
     readxl,
+    RefManageR,
     rlang,
     rnaturalearth,
     rosm,
