@@ -1,0 +1,25 @@
+# Abstract
+
+<!-- ES&T requirements: 150-200 words, one paragraph, no reference numbers,
+acronyms defined at first use. Must cover: purpose, methods/procedures,
+significant new results, implications.
+
+Bulleted skeleton below, one bullet per required component, pulling from what
+the paper already establishes. Not finished prose -- Sam writes the final
+paragraph. Framing note: ES&T's minimum requirements state that ambient
+monitoring findings "should not be location specific representing a case
+study, but rather generalizable and/or transferable to other contexts." The
+two AEPs (Hammerfest, Repparfjord) are the evidence base, not the headline --
+lead with the generalizable finding (what a WoE-scored AEP applied to
+existing Arctic copper data reveals about the state of that evidence base),
+and use the two systems to demonstrate it. -->
+
+
+Copper, an essential nutrient and highly-monitored pollutant faces potentially increasing emissions in Arctic regions due to expanded mining, shipping, and aquaculture. In this study we assemble Aggregate Exposure Pathways (AEPs) for Arctic copper pollution in two marine systems based on available emissions and occurrence data.  We synthesise evidence from literature, monitoring campaigns, pollutant registries, and other lines of evidence to conceptually model pollution, and evaluate the Weight of Evidence (WoE) for each network element, as well as examining distributions and trends. We find that despite copper's considerable monitoring, data needed to understand its dynamics in key Arctic ecosystems remains limited, and that the complexity of its behaviour in the marine environment renders conceptual modelling challenging. As anthropogenic stress to the Arctic and demand for copper increase, it is important that a more comprehensive understanding of copper’s sources, dynamics, and exposure to marine ecosystems is improved.
+
+
+- **Methods**:
+
+- **Significant new results**: 
+
+- **Implications**: 

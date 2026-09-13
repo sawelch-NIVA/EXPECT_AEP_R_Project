@@ -63,13 +63,7 @@ docx_flex <- function(ft, widths = NULL) {
 }
 ```
 
-```{=html}
-<!-- Manuscript body is split into one file per top-level section and spliced
-back together here at render time. Edit prose in the _NN-*.qmd files; this
-file keeps only the frontmatter, the shared `setup` chunk, and the section
-order. The leading underscore keeps Quarto's project render from treating the
-section files as standalone documents. -->
-```
+{{< include _00-abstract.qmd >}}
 
 {{< include _01-introduction.qmd >}}
 
@@ -79,8 +73,11 @@ section files as standalone documents. -->
 
 {{< include _04-discussion.qmd >}}
 
-{{< include _05-conclusion.qmd >}}
+# References
+
+::: {#refs}
+:::
 
 {{< include _06-SI01.qmd >}}
 
-# References
+{{< include _07-SI02-prisma.qmd >}}

@@ -1,8 +1,8 @@
 aep_id,node_id,x,y,geo_scope,evidence_score,evidence_justification,quantification_score,quantification_justification,notes
-A001,N013-coast-water-column,,,,2,G004 provides limited evidence of plausible/background copper concentrations in fjord waters.,2,"Behaviour of copper in marine environments is relatively well understood (models exist), atlthough less so than freshwater",
-A001,N012-coast-benthic-sed,,,,3,"G002 covers wide range (temporal/spatial) of copper sediment concentrations. Although limited number of sources (2), elevated concentrations were found in connection with known copper sources (aquaculture, historical contamination)",1,Behaviour of copper in sediment may be well modelled but such models were out of scope of this study.,
-A001,N014-mussel-soft-tissue,,,,2,"G005 - mussels well-studied as biomarker species, but limited sample size and some outliers.",1,Models of mussel uptake of copper may exist but were out of scope for this study.,
-A001,N015-fish-liver,,,,3,"G006, G017 (G. morhua liver) well studied as biomarker tissue/species in Norwegian ecosystems. Data only from one reference",2,"Copper ROS toxicity to fish relatively well modelled/quantified, including in AOP literature.",
+A001,N013-coast-water-column,,,,2,G004 provides limited evidence of plausible/background copper concentrations in fjord waters.,2,"Relevant models not captured in study scope.",
+A001,N012-coast-benthic-sed,,,,3,"G002 covers wide range (temporal/spatial) of copper sediment concentrations. Although limited number of sources (2), elevated concentrations were found in connection with known copper sources (aquaculture, historical contamination)",1,Relevant models not captured in study scope.,
+A001,N014-mussel-soft-tissue,,,,2,"G005 - mussels well-studied as biomarker species, but limited sample size and some outliers.",1,Relevant models not captured in study scope.,
+A001,N015-fish-liver,,,,3,"G006, G017 (G. morhua liver) well studied as biomarker tissue/species in Norwegian ecosystems. Data only from one reference",2,"Relevant models not captured in study scope.",
 A001,N023-marine-macroalgae,,,,2,"Limited data compared to fish/mussels, one tissue in two species.",1,Relevant models not captured in study scope.,
 A001,N042-aquaculture,,,,3,Direct evidence of (modelled) copper emissions provided by aquaculture facilities.,1,Emissions modelled but methodology unknown.,
 A001,N044-vessel-antifoulants,,,,1,Included in Comber and likely source but no direct evidence captured.,1,Relevant models not captured in study scope.,
