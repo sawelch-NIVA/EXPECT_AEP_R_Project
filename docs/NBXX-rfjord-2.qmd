@@ -1040,7 +1040,7 @@ fig_aep1_conc
 
 panel_a002 <- tile_panel(
   view_a002,
-  "AEP-002 - Repparfjord inner",
+  "AEP-002 - Repparfjord",
   zoomin = 1,
   legend = TRUE,
   feature_lv = c("Aquaculture site (licensed)", "Ulveryggen plant"),
@@ -1073,7 +1073,14 @@ panel_a002 <- tile_panel(
       aes(label = "Tailings Disposal"),
       colour = "#8a4b06",
       fontface = "bold",
-      size = 2.9
+      size = 2.9,
+      # This panel is zoomed in far enough that the plain tailings_lab point
+      # (which sits right at the circle's 1400 m edge -- fine at panel c's
+      # zoom, see the nudge_x/nudge_y there) puts the text on top of the
+      # circle. vjust = 0 draws the label upward from its anchor; nudge_y
+      # clears the circle radius with some margin (Sam, 2026-09-14).
+      vjust = 0,
+      nudge_y = 500
     ),
     geom_sf(
       data = ulveryggen,

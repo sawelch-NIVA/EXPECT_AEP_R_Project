@@ -38,7 +38,7 @@ docx_flex <- function(ft, widths = NULL) {
 
 ```{r}
 #| label: tbl-hammerfest-employment
-#| tbl-cap: "Approximate statistics for copper emissions-relevant sector employment for a) Norway and b) Hammerfest municipality (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per-sector. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]. "
+#| tbl-cap: "Approximate statistics for copper emissions-relevant sector employment for a) Norway and b) Hammerfest municipality (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per sector. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]."
 #| echo: false
 emp <- read_csv(
   "data/clean/derived/ssb_employment_hammerfest.csv",
@@ -79,7 +79,7 @@ emp |>
   docx_flex()
 ```
 
-## Ad hoc Literature 
+## *Ad hoc* Literature
 
 
 ```{r}
@@ -103,9 +103,9 @@ kogel_n <- formatC(
 )
 
 tibble::tribble(
-  ~Study                , ~Topic                                                                                                                               , ~`Date Range`                                                  , ~Measurements , ~Comments                                                                                                                 ,
-  "Kögel et al (2026)"  , "Analysis of copper in fish and other marine species in inner Repparfjord, mid-Repparfjord, and Revsbotn (reference fjord to North)" , kogel_dates                                                    , kogel_n       , "Published February 2026 and thus not captured in initial selection of study. Highly relevant to Repparfjord case study." ,
-  "Comber et al (2023)" , "Estimates of copper emissions from all source s in European Union, in kg/year"                                                      , "Not specified but primarily based on post-2010 data sources." , ""            , ""                                                                                                                        ,
+  ~Study                , ~Topic                                                                                                                                   , ~`Date Range`                                                  , ~Measurements , ~Comments                                                                                                                 ,
+  "Kögel et al (2026)"  , "Analysis of copper in fish and other marine species in inner Repparfjord, mid-Repparfjord, and Revsbotn (reference fjord to the north)" , kogel_dates                                                    , kogel_n       , "Published February 2026 and thus not captured in initial selection of study. Highly relevant to Repparfjord case study." ,
+  "Comber et al (2023)" , "Estimates of copper emissions from all sources in the European Union, in kg/year"                                                       , "Not specified but primarily based on post-2010 data sources." , ""            , ""                                                                                                                        ,
 ) |>
   flextable::flextable() |>
   flextable::align(
@@ -150,10 +150,9 @@ vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
 ```
 
 
-## Pollutant Release and Transfer Register (Norske utslipp) and Product Register Data
+## Pollutant Release and Transfer Register (Norske utslipp) Data
 
-
-![**(a)** REACH product register net copper (imported plus produced, minus exported) scaled to Hammerfest by each NACE section's share of Hammerfest-resident employment; complete reporting years only (2018-2021); sectors above 1 kg/yr implied; log scale. **(b)** Copper released to air and water by PRTR-licensed facilities in Hammerfest municipality, by facility; reported zeros omitted (log scale). Panel a is copper in commerce (tonnes-scale), panel b is copper released (kg); the two are not comparable.](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
+![Copper released to air and water by PRTR-licensed facilities in Hammerfest municipality, by facility; reported zeros omitted (log scale).](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
 
 
 ## Sample Groups Tables
@@ -197,7 +196,7 @@ groups_a001_boxed |>
 
 :::
 
-### AEP 2: Inner Repparfjorden
+### AEP 2: Repparfjord
 
 ::: {.landscape}
 
@@ -259,7 +258,7 @@ tar_read(aep_node_cards) |>
 
 :::
 
-### AEP 2: Inner Repparfjorden
+### AEP 2: Repparfjord
 
 ::: {.landscape}
 
@@ -287,7 +286,7 @@ tar_read(aep_node_cards) |>
 #| label: fig-aquaculture-biocide-use
 #| fig-width: 5.2
 #| fig-height: 3.4
-#| fig-cap: "Sales (tonnes) of copper, tralopyril and zinc pyrithione in antifouling applications in aquaculture in Norway, 2018-2024. Data from [@norwegianenvironmentagencyBiociderSomBrukes2025]"
+#| fig-cap: "Sales (tonnes) of copper, tralopyril and zinc pyrithione in antifouling applications in aquaculture in Norway, 2018-2024. Data from [@norwegianenvironmentagencyBiociderSomBrukes2025]."
 # Active ingredient sold nationally for aquaculture net antifouling, tonnes/year.
 # Source: Norwegian Environment Agency, "Biocider som brukes ..." 2025
 # (@norwegianenvironmentagencyBiociderSomBrukes2025).
@@ -386,7 +385,7 @@ vm_sum$composition |>
 ::: landscape
 ```{r}
 #| label: tbl-copper-thresholds
-#| tbl-cap: "Copper background and classification values used as comparators. Each value is the upper bound of the named class; the open-ended top class (Very Poor, V) is omitted. Sources: PROREF from the MILKYS coastal monitoring programme [@schoyenContaminantsCoastalWaters2025]; Norwegian M-608 classification boundaries [@norwegianenvironmentagencyThresholdsClassificationWater2020];"
+#| tbl-cap: "Copper background and classification values used as comparators. Each value is the upper bound of the named class; the open-ended top class (Very Poor, V) is omitted. Sources: PROREF from the MILKYS coastal monitoring programme [@schoyenContaminantsCoastalWaters2025]; Norwegian M-608 classification boundaries [@norwegianenvironmentagencyThresholdsClassificationWater2020]."
 #| echo: false
 tar_read(copper_toxicity_thresholds) |>
   filter(

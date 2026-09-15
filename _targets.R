@@ -1608,11 +1608,17 @@ list(
   # ),
 
   ### # PRTR & REACH: Hammerfest manuscript figure ----
-  # index.qmd's "Norwegian PRTR and REACH Product Register" section. One
-  # two-panel figure: (a) REACH net copper (tonnes in COMMERCE) scaled to
-  # Hammerfest by employment share, (b) PRTR copper RELEASED (kg). Different
-  # quantities, one figure. See R/fct_reach_hammerfest.R,
-  # R/fct_prtr_hammerfest.R, R/fct_hammerfest_emissions.R.
+  # index.qmd's "Norwegian PRTR and REACH Product Register" section. Was a
+  # two-panel figure -- (a) REACH net copper (tonnes in COMMERCE) scaled to
+  # Hammerfest by employment share, (b) PRTR copper RELEASED (kg) -- until the
+  # REACH/Product Register panel was dropped 2026-09-14 (Sam's call); the
+  # hammerfest_emissions_plot target below now draws PRTR only. See
+  # R/fct_reach_hammerfest.R, R/fct_prtr_hammerfest.R,
+  # R/fct_hammerfest_emissions.R.
+  #
+  # reach_hammerfest_weighted and the ssb_employment_sections* targets fed
+  # only the now-dropped REACH panel; left in place (unused) rather than
+  # pruned, in case the panel comes back.
   #
   # This partly un-parks the emissions work (PLAN.md 10). Only these
   # descriptive figures; the WoE assessments and source-node values stay
@@ -1657,7 +1663,6 @@ list(
   tar_target(
     name = hammerfest_emissions_plot,
     command = write_hammerfest_emissions_panel(
-      reach_hammerfest_weighted,
       prtr_hammerfest_series_data,
       here_rel("figures/fig05-hammerfest-emissions.png")
     ),
@@ -1845,7 +1850,10 @@ list(
       literature_analysis_ready,
       copper_toxicity_thresholds,
       group_ids,
-      aep_manifest
+      aep_manifest,
+      # No Hammerfest harbour cleanup here, so the 2024 marker means nothing
+      # for A002 (TODO in _03-results.qmd, Sam, removed 2026-09-14).
+      recent_from = NULL
     ),
     format = "file"
   ),

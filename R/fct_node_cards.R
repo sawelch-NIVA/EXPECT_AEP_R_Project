@@ -1006,6 +1006,8 @@ node_card_short_height_frac <- function() {
 #'   `FALSE` skips [node_group_strips()] entirely (no `members`/`data`/`ids`
 #'   lookups are performed) regardless of whether the node has data, for a
 #'   card that should not show a distribution.
+#' @param show_counts Passed to [node_card_header()]. `FALSE` drops the
+#'   "n = ..., refs = ..." line, for a card with no data behind it at all.
 #' @param ... Passed to [node_group_strips()], which is where every knob worth
 #'   turning while styling a card lives (`violin_fill`, `violin_alpha`,
 #'   `violin_colour`, `violin_width`, `external_series`).
@@ -1026,6 +1028,7 @@ node_card <- function(
   omit_empty_strips = FALSE,
   show_epeq = TRUE,
   show_strips = TRUE,
+  show_counts = TRUE,
   ...
 ) {
   # A card placed on a graph node is roughly 1.6in wide, so every point size
@@ -1034,7 +1037,7 @@ node_card <- function(
   # label, the headline number, the EPEQ badges, and the distribution. What
   # goes: the count line, the per-group row labels, the axis, and the margin
   # counts.
-  header <- node_card_header(node, card, dpi = dpi)
+  header <- node_card_header(node, card, dpi = dpi, show_counts = show_counts)
   badges <- if (show_epeq) node_epeq_badges(node, text_size = 3.4) else NULL
   strips <- if (show_strips) {
     node_group_strips(
@@ -1248,9 +1251,15 @@ node_card_year_range <- function(card) {
 #'   The offset itself is 2px as of 2026-08-10 (Sam cut it from 18); this
 #'   sentence used to name 18 and had gone stale, so it now points at the
 #'   constant rather than repeating it.
+#' @param show_counts Draw the "n = ..., refs = ..." line beneath the
+#'   headline? `TRUE` (the default, unchanged pipeline behaviour) draws it as
+#'   before. `FALSE` skips it, for a card with no data behind it at all (e.g.
+#'   the generic AEP 0 template cards, `scripts/build_aep0_generic_cards.R`):
+#'   "n = -, refs = -" on a card that was never claiming any reads as a
+#'   missing-data bug rather than the deliberate blank it is.
 #' @return A ggplot.
 #' @export
-node_card_header <- function(node, card, dpi = 300) {
+node_card_header <- function(node, card, dpi = 300, show_counts = TRUE) {
   num <- function(x) {
     if (length(x) == 0 || is.na(x)) {
       "-"
@@ -1402,18 +1411,20 @@ node_card_header <- function(node, card, dpi = 300) {
         xmin = 0.9, xmax = 0.9, ymin = 0.75, ymax = 0.75
       )
     }) +
-    ggplot2::annotate(
-      # Dropped further below the concentration than it was: at one line's
-      # spacing the sample size read as part of the number above it.
-      "text",
-      x = 0.5,
-      y = -0.35,
-      hjust = 0.5,
-      vjust = 0.5,
-      size = 2.7,
-      label = compact_counts,
-      colour = "grey40"
-    ) +
+    (if (show_counts) {
+      ggplot2::annotate(
+        # Dropped further below the concentration than it was: at one line's
+        # spacing the sample size read as part of the number above it.
+        "text",
+        x = 0.5,
+        y = -0.35,
+        hjust = 0.5,
+        vjust = 0.5,
+        size = 2.7,
+        label = compact_counts,
+        colour = "grey40"
+      )
+    }) +
     ggplot2::scale_x_continuous(limits = c(0, 1)) +
     ggplot2::scale_y_continuous(limits = c(-0.75, 3.1)) +
     ggplot2::theme_void()

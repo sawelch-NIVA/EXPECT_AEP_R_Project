@@ -15,11 +15,5 @@ existing Arctic copper data reveals about the state of that evidence base),
 and use the two systems to demonstrate it. -->
 
 
-Copper, an essential nutrient and highly-monitored pollutant faces potentially increasing emissions in Arctic regions due to expanded mining, shipping, and aquaculture. In this study we assemble Aggregate Exposure Pathways (AEPs) for Arctic copper pollution in two marine systems based on available emissions and occurrence data.  We synthesise evidence from literature, monitoring campaigns, pollutant registries, and other lines of evidence to conceptually model pollution, and evaluate the Weight of Evidence (WoE) for each network element, as well as examining distributions and trends. We find that despite copper's considerable monitoring, data needed to understand its dynamics in key Arctic ecosystems remains limited, and that the complexity of its behaviour in the marine environment renders conceptual modelling challenging. As anthropogenic stress to the Arctic and demand for copper increase, it is important that a more comprehensive understanding of copper’s sources, dynamics, and exposure to marine ecosystems is improved.
+Copper, an essential nutrient and highly monitored pollutant, faces potentially increasing emissions in Arctic regions due to expanded mining, shipping, and aquaculture. In this study, we assemble Aggregate Exposure Pathways (AEPs) for Arctic copper pollution in two marine systems based on available emissions and occurrence data. We synthesise evidence from literature, monitoring campaigns, pollutant registries, and other lines of evidence to conceptually model pollution, and evaluate the Weight of Evidence (WoE) for each network element, as well as examining distributions and trends. We find that despite copper's considerable monitoring, data needed to understand its dynamics in key Arctic ecosystems remains limited, and that the complexity of its behaviour in the marine environment renders conceptual modelling challenging. As anthropogenic stress to the Arctic and demand for copper increase, it is important that a more comprehensive understanding of copper's sources, dynamics, and exposure to marine ecosystems is improved.
 
-
-- **Methods**:
-
-- **Significant new results**: 
-
-- **Implications**: 

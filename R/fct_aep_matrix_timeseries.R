@@ -69,7 +69,10 @@ aep_ts_tag_compartment <- function(x) {
 #' @param thresholds The `copper_toxicity_thresholds` target.
 #' @param group_ids The `group_ids` target (to name the sample groups per panel).
 #' @param manifest The `aep_manifest` target.
-#' @param recent_from Year whose 1 January gets the dotted vertical marker.
+#' @param recent_from Year whose 1 January gets the dotted vertical marker, or
+#'   `NULL` to omit the marker entirely (it only means something for A001,
+#'   where it marks the end of the Hammerfest harbour cleanup project -- see
+#'   the fig-a001-timeseries caption in `_03-results.qmd`).
 #' @return A ggplot. If the box holds nothing in any compartment, a placeholder
 #'   plot carrying that message (so a `format = "file"` target still writes).
 #' @export
@@ -129,7 +132,12 @@ aep_matrix_timeseries_plot <- function(
     dplyr::mutate(
       value = .data$MEASURED_VALUE_STANDARD,
       date = as.Date(.data$SAMPLING_DATE),
-      grp = sub("^(G[0-9]+).*$", "\\1", .data$group_id),
+      # Full composite group_id (e.g. "G006-Bf-Cnr-G-mor-Liv-Mw"), not the bare
+      # "G006" prefix: since 2026-08-08 that composite string IS the group
+      # name everywhere else (tbl-groups-a001/a002, aep_nodes.csv, docs/groups
+      # anchors -- see fct_sample_groups_table.R). A separate bare form here
+      # made this figure's strip text disagree with the table right above it.
+      grp = .data$group_id,
       m608 = dplyr::recode(as.character(.data$threshold_class),
         I = "Background", II = "Good", IV = "Poor", V = "Very Poor"
       ),
@@ -157,8 +165,8 @@ aep_matrix_timeseries_plot <- function(
     g <- grp_by_comp$grps[match(cmp, grp_by_comp$compartment)]
     ifelse(
       is.na(g),
-      sprintf("%s  (%s)", cmp, comp_units[cmp]),
-      sprintf("%s  (%s)  ·  %s", cmp, comp_units[cmp], g)
+      sprintf("%s (%s)", cmp, comp_units[cmp]),
+      sprintf("%s (%s) · %s", cmp, comp_units[cmp], g)
     )
   }
   present <- comp_levels[comp_levels %in% box$compartment]
@@ -175,12 +183,17 @@ aep_matrix_timeseries_plot <- function(
   abiotic <- dplyr::filter(box, .data$compartment %in% c("Coastal water", "Sediment"))
   biota <- dplyr::filter(box, .data$compartment %in% c("Cod liver", "Blue mussel"))
 
-  marker <- as.Date(sprintf("%d-01-01", recent_from))
+  marker_layer <- if (is.null(recent_from)) {
+    NULL
+  } else {
+    ggplot2::geom_vline(
+      xintercept = as.Date(sprintf("%d-01-01", recent_from)),
+      linetype = "dotted", colour = "grey45"
+    )
+  }
 
   ggplot2::ggplot(box, ggplot2::aes(.data$date, .data$value)) +
-    ggplot2::geom_vline(
-      xintercept = marker, linetype = "dotted", colour = "grey45"
-    ) +
+    marker_layer +
     ggplot2::geom_hline(
       data = reflines, ggplot2::aes(yintercept = .data$y),
       linetype = "dashed", colour = "grey60", linewidth = 0.3
@@ -203,19 +216,22 @@ aep_matrix_timeseries_plot <- function(
       na.translate = FALSE
     ) +
     ggplot2::scale_y_log10() +
+    # Sub-ticks for years: yearly gridlines between the labelled 2-year breaks,
+    # so a point's year is readable without counting gridlines (2026-09-14).
+    ggplot2::scale_x_date(date_breaks = "2 years", date_labels = "%Y", date_minor_breaks = "1 year") +
     ggplot2::facet_wrap(~panel, ncol = 2, scales = "free_y") +
     # No title / subtitle / caption baked into the image: all of that prose
     # lives in the Quarto figure caption in _03-results.qmd (Sam, 2026-09-03).
     ggplot2::labs(
       x = NULL,
-      y = "Measured copper concentration  (log scale, native units per panel)"
+      y = "Measured copper concentration (log scale, native units per panel)"
     ) +
-    ggplot2::theme_bw(base_size = 11) +
+    ggplot2::theme_minimal(base_size = 11) +
     ggplot2::theme(
       legend.position = "bottom",
       legend.box = "vertical",
       plot.caption = ggplot2::element_text(size = 8, colour = "grey40", hjust = 0),
-      panel.grid.minor = ggplot2::element_blank()
+      panel.grid.minor.y = ggplot2::element_blank()
     )
 }
 
