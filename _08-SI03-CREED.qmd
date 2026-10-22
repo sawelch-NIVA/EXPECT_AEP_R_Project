@@ -1,0 +1,81 @@
+# CREED Criteria
+
+```{r}
+#| label: setup-si-creed
+#| include: false
+#| warning: false
+#| message: false
+
+# Lets this section render on its own (`quarto render _08-SI02-CREED.qmd`).
+# When spliced into index.qmd via {{< include >}}, index.qmd's own `setup`
+# chunk has already loaded these; re-running library() is harmless.
+library(here)
+library(yaml)
+library(tidyverse)
+library(flextable)
+
+# Identical to the helper in index.qmd's setup chunk. Change one, change both
+# (or promote it to an R/ function).
+docx_flex <- function(ft, widths = NULL) {
+  ft <- ft |>
+    flextable::theme_vanilla() |>
+    flextable::bold(part = "header") |>
+    flextable::fontsize(size = 9, part = "all") |>
+    flextable::padding(padding = 2, part = "all")
+  if (is.null(widths)) {
+    flextable::set_table_properties(ft, layout = "autofit", width = 1)
+  } else {
+    flextable::set_table_properties(
+      flextable::width(ft, width = widths),
+      layout = "fixed"
+    )
+  }
+}
+
+creed <- yaml::read_yaml(here::here(
+  "data/clean/lookups/CREED_Copper_Purpose.yml"
+))
+```
+
+As part of data extraction from each study, a CREED assessment was performed [@dipaoloImplementationCREEDApproach2024]. Each CREED assessment consists (in part) of a battery of Reliability (generic) and Relevance (study-specific) criteria. Studies are assessed for their relevance against a purpose statement. The purpose statement used for CREED evaluation in this study is reproduced below (@tbl-creed-relevance).
+
+> `r creed$study_purpose`
+
+::: landscape
+
+```{r}
+#| label: tbl-creed-relevance
+#| tbl-cap: "Criteria for Reporting and Evaluating Exposure Datasets relevance criteria for evaluated studies."
+#| warning: false
+#| echo: false
+
+fmt_requirements <- function(reqs) {
+  if (is.null(reqs) || length(reqs) == 0) {
+    return("")
+  }
+  paste0("• ", unlist(reqs), collapse = "\n")
+}
+
+fmt_level <- function(level) {
+  parts <- c(
+    level$description,
+    fmt_requirements(level$requirements),
+    if (!is.null(level$notes)) paste0("Note: ", trimws(level$notes))
+  )
+  paste(parts[nzchar(parts)], collapse = "\n")
+}
+
+purrr::map_dfr(creed$criteria, function(x) {
+  tibble::tibble(
+    ID = x$id,
+    Criterion = sub(paste0("^", x$id, ":\\s*"), "", x$name),
+    `Partly met` = fmt_level(x$partly_met),
+    `Fully met` = fmt_level(x$fully_met)
+  )
+}) |>
+  flextable::flextable() |>
+  flextable::valign(valign = "top", part = "body") |>
+  docx_flex(widths = c(0.55, 1.95, 2.6, 2.6))
+```
+
+:::

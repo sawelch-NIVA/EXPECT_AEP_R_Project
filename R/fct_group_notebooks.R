@@ -211,6 +211,16 @@ group_section_markdown <- function(row, plot_slug = NA_character_, captions = NU
 #' @return A character vector of markdown lines.
 #' @export
 notebook_header_markdown <- function(notebook, rows, overview = NULL) {
+  # Rescaled for display only, on this function's own local copy: nothing here
+  # classifies against thresholds (unlike build_sample_groups_table(), which
+  # rescales only after that classification runs), so it is safe to convert
+  # up front.
+  rows <- display_scale_concentration(
+    rows,
+    unit_col = "MEASURED_UNIT_STANDARD",
+    value_cols = c("mean", "sd", "geo_mean", "median")
+  )
+
   # Arithmetic mean +/- SD, plus median, matching build_sample_groups_table()
   # (Sam changed his mind 2026-09-12: geometric mean/GSD are not how pollution
   # concentrations are conventionally reported, and this table was one of the
@@ -368,7 +378,7 @@ notebook_overview_markdown <- function(
       lines <- c(
         lines,
         paste0(
-          "**Overview, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
+          "**Overview, `", display_unit_label(node$MEASURED_UNIT_STANDARD[1]), "`.** `n` = ",
           format(node$n[1], big.mark = ","), " measurements in ",
           node$n_groups[1], " groups below this sub-compartment."
         ),
@@ -397,7 +407,7 @@ notebook_overview_markdown <- function(
       lines <- c(
         lines,
         paste0(
-          "**By species, `", node$MEASURED_UNIT_STANDARD[1], "`.** `n` = ",
+          "**By species, `", display_unit_label(node$MEASURED_UNIT_STANDARD[1]), "`.** `n` = ",
           format(node$n[1], big.mark = ","), " measurements across ",
           node$n_species[1], " species and ", node$n_tissues[1], " tissues."
         ),

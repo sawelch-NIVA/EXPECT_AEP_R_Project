@@ -1,3 +1,223 @@
 # PRISMA2020 Checklist
 
-PRISMA Stuff goes here.
+As noted in *Materials and Methods*, "Literature Review Protocol", a systematic literature review framework was adapted from elements of PRISMA2020 [@pagePRISMA2020Statement2021]; as PRISMA2020 is primarily concerned with intervention-based studies, some elements were reinterpreted for an environmental exposure assessment. The checklist below follows the standard PRISMA2020 section structure. Each item's original wording is quoted from the project's internal literature review planning document, followed by where (if anywhere) it is currently addressed in this manuscript.
+
+## Title
+
+### Item 1: Title
+
+*"(should include systematic review)"*
+
+The manuscript title, "Copper Pollution in the Arctic - An Aggregate Exposure Pathway for Understanding Sources, Exposure, and Internal Concentrations", does not identify the work as a systematic review.
+
+<!-- TODO (Sam): this looks like a deliberate framing choice (CLAUDE.md 4.5 -- scale in this paper comes from Vannmiljø, not the review, and AP01 should be reframed as targeted evidence-gathering rather than a systematic review) rather than an oversight. Confirm that's the intended read, or tell me how you'd like this line phrased. -->
+
+## Abstract
+
+### Item 2: Abstract
+
+*"(See abstracts checklist)"*
+
+The Abstract is a single ES&T-format paragraph (150-200 words, per the constraints noted in `_00-abstract.qmd`) and does not follow the separate PRISMA-for-abstracts structure (objectives, eligibility criteria, sources, risk of bias, included studies, synthesis, limitations, funding, registration) item by item.
+
+<!-- TODO (Sam): decide whether the PRISMA abstract checklist should be completed separately, or whether the ES&T format constraint is a sufficient reason not to. -->
+
+## Introduction
+
+### Item 3: Rationale
+
+*"Describe the rationale for the review in the context of existing knowledge."*
+
+Reported in the Introduction, opening two paragraphs (copper's ecological/economic significance; expected Arctic ecosystem change).
+
+### Item 4: Objectives
+
+*"Provide an explicit statement of the objective(s) or question(s) the review addresses."*
+
+Reported in the Introduction, closing paragraph ("In this paper, we propose a conceptual AEP...").
+
+## Methods
+
+### Item 5: Eligibility criteria
+
+*"Specify the inclusion and exclusion criteria for the review and how studies were grouped for the syntheses."*
+
+Reported in part in *Materials and Methods*, "Literature Review Protocol" (papers ranked and selected on relevance/quantity of reported data), and via the CREED relevance criteria studies were screened against (@tbl-creed-relevance).
+
+<!-- TODO (Sam): the specific exclusion-criteria list (CREED-1 to CREED-6, out-of-area, non-English, full text unavailable) currently only exists in `docs/AP01-review-protocol.qmd`, which is parked (not rendered into the manuscript per CLAUDE.md 2.2.1). Decide whether to move that list into a built SI file, or leave this item pointing only at the CREED table. -->
+
+### Item 6: Information sources
+
+*"Specify all databases, registers, websites, organisations, reference lists, and other sources searched or consulted to identify studies. Specify the date when each source was last searched or consulted."*
+
+Reported in *Materials and Methods*: "Literature Review Protocol" (Web of Science Core Collection and PubMed) for the open literature, and "Vannmiljø" (search parameters, @tbl-vm-search) for the national monitoring database.
+
+<!-- TODO (Sam): per-database hit counts and search dates aren't given anywhere in the built manuscript. The two source documents I checked disagree with each other (docs/AP01-review-protocol.qmd, parked: WoS 478 / PubMed 438; the Admin protocol docx, dated 2025-06-30: WoS 315 / PubMed 37, both dated 2025-06-05) -- these look like different searches at different dates rather than a typo. Reconcile which numbers are final before I add them here. -->
+
+### Item 7: Search strategy
+
+*"Present the full search strategies for all databases, registers and websites, including any filters and limits used."*
+
+<!-- TODO (Sam): the full Boolean query string is not currently reproduced anywhere in the built manuscript. It exists in `docs/AP01-review-protocol.qmd` (parked) and the Admin protocol docx. Decide whether to add it here as a code block, matching how AP01 presents it. -->
+
+### Item 8: Selection process
+
+*"Specify the methods used to decide whether a study met the inclusion criteria of the review, including how many reviewers screened each record and each report retrieved, whether they worked independently, and if applicable, details of automation tools used in the process."*
+
+Reported in *Materials and Methods*, "Literature Review Protocol" (de-duplication, abstract/full-text screening, 1-5 relevance ranking) and the accompanying flow diagram (@fig-prisma).
+
+### Item 9: Data collection process
+
+*"Specify the methods used to collect data from reports, including how many reviewers collected data from each report, whether they worked independently, any processes for obtaining or confirming data from study investigators, and if applicable, details of automation tools used in the process."*
+
+Reported in *Materials and Methods*, "Data Extraction & Validation" (LLM-assisted extraction into the eData format, followed by review by one of three reviewers against the study text).
+
+### Item 10a: Data items (outcomes)
+
+*"List and define all outcomes for which data were sought. Specify whether all results that were compatible with each outcome domain in each study were sought, and if not, the methods used to decide which results to collect."*
+
+Reported in *Materials and Methods*, "Data Extraction & Validation" and "Exposure Data Post-Processing" (concentration/dose data and associated metadata, structured to the eData schema).
+
+### Item 10b: Data items (other variables)
+
+*"List and define all other variables for which data were sought. Describe any assumptions made about any missing or unclear information."*
+
+<!-- TODO (Sam): I couldn't find an explicit statement of assumptions made about missing/unclear information during extraction anywhere in the manuscript. Confirm whether this exists somewhere I haven't checked, or needs a line added. -->
+
+### Item 11: Study risk of bias assessment
+
+*"Specify the methods used to assess risk of bias in the included studies, including details of the tool(s) used, how many reviewers assessed each study and whether they worked independently, and if applicable, details of automation tools used in the process."*
+
+Reported in *Materials and Methods*, "Data Extraction & Validation" (CREED framework), with the relevance criteria reproduced in the Supplementary Information (@tbl-creed-relevance).
+
+<!-- TODO (Sam): only the Relevance half of CREED is reproduced in the SI; the generic Reliability criteria mentioned in `_08-SI03-CREED.qmd`'s intro text aren't included as a table. Confirm whether to add them. -->
+
+### Item 12: Effect measures
+
+*"Specify for each outcome the effect measure(s) (e.g. risk ratio, mean difference) used in the synthesis or presentation of results."*
+
+<!-- TODO (Sam): no formal effect measure is used -- concentrations are reported directly, with units given in Materials and Methods, "Exposure Data Post-Processing". Confirm "not applicable" is the right characterisation for this item, or point me at different wording. -->
+
+### Item 13a-13f: Synthesis methods
+
+*13a: "Describe the processes used to decide which studies were eligible for each synthesis." 13b: "Describe any methods required to prepare the data for presentation or synthesis, such as handling of missing summary statistics, or data conversions." 13c: "Describe any methods used to tabulate or visually display results of individual studies and syntheses." 13d: "Describe any methods used to synthesize results and provide a rationale for the choice(s). If meta-analysis was performed, describe the model(s), method(s) to identify the presence and extent of statistical heterogeneity, and software package(s) used." 13e: "Describe any methods used to explore possible causes of heterogeneity among study results." 13f: "Describe any sensitivity analyses conducted to assess robustness of the synthesized results."*
+
+13a/13b/13c are reported in *Materials and Methods*, "Exposure Data Post-Processing" and "AEP Construction" (grouping, unit standardisation, and tabulation into sample groups and AEP nodes).
+
+<!-- TODO (Sam): no meta-analysis was performed, so 13d-13f look like "not applicable" to me -- confirm before I write that in. -->
+
+### Item 14: Reporting bias assessment
+
+*"Describe any methods used to assess risk of bias due to missing results in a synthesis (arising from reporting biases)."*
+
+<!-- TODO (Sam): no such assessment was conducted. Confirm "not applicable", or whether the *ad hoc* literature searches (Materials and Methods, "*Ad hoc* literature") count as a partial mitigation worth noting here. -->
+
+### Item 15: Certainty assessment
+
+*"Describe any methods used to assess certainty (or confidence) in the body of evidence for an outcome."*
+
+Reported in *Materials and Methods*, "Weight of Evidence Assessment".
+
+## Results
+
+### Item 16a: Study selection
+
+*"Describe the results of the search and selection process, from the number of records identified in the search to the number of studies included in the review, ideally using a flow diagram."*
+
+Reported via the flow diagram accompanying the Literature Review Protocol (@fig-prisma, Materials and Methods).
+
+### Item 16b: Study selection (excluded studies)
+
+*"Cite studies that might appear to meet the inclusion criteria, but which were excluded, and explain why they were excluded."*
+
+<!-- TODO (Sam): studies excluded at full text aren't individually cited with reasons in the built manuscript; only the exclusion-criteria categories exist, and only in the parked `docs/AP01-review-protocol.qmd`. Confirm whether category-level reporting is sufficient here, or a per-study list is expected. -->
+
+### Item 17: Study characteristics
+
+*"Cite each included study and present its characteristics."*
+
+Reported in the Supplementary Information sample-group tables (@tbl-groups-a001, @tbl-groups-a002) and the dataset composition table (@tbl-literature-dataset).
+
+### Item 18: Risk of bias in studies
+
+*"Present assessments of risk of bias for each included study."*
+
+<!-- TODO (Sam): CREED assessment outcomes aren't reported per included study anywhere -- only the criteria themselves (@tbl-creed-relevance). Confirm whether per-study scores should be added as an SI table. -->
+
+### Item 19: Results of individual studies
+
+*"For all outcomes, present, for each study: (a) summary statistics for each group (where appropriate) and (b) an effect estimate and its precision (e.g. confidence/credible interval), ideally using structured tables or plots."*
+
+<!-- TODO (Sam): data are reported pooled by sample group (@tbl-groups-a001, @tbl-groups-a002), not broken out per individual study. Confirm this is the intended level of reporting for this item. -->
+
+### Item 20a-20d: Results of syntheses
+
+*20a: "For each synthesis, briefly summarise the characteristics and risk of bias among contributing studies." 20b: "Present results of all statistical syntheses conducted... If comparing groups, describe the direction of the effect." 20c: "Present results of all investigations of possible causes of heterogeneity among study results." 20d: "Present results of all sensitivity analyses conducted to assess the robustness of the synthesized results."*
+
+20a is reported via the Key Exposure State node tables (@tbl-nodes-a001, @tbl-nodes-a002) and the AEP 1/AEP 2 summaries in the Results section.
+
+<!-- TODO (Sam): 20b-20d assume a meta-analysis (summary estimates, heterogeneity, sensitivity analyses) -- confirm these are "not applicable" given none was conducted, consistent with Item 13d-13f above. -->
+
+### Item 21: Reporting biases
+
+*"Present assessments of risk of bias due to missing results (arising from reporting biases) for each synthesis assessed."*
+
+<!-- TODO (Sam): no such assessment is presented, consistent with Item 14. Confirm "not applicable." -->
+
+### Item 22: Certainty of evidence
+
+*"Present assessments of certainty (or confidence) in the body of evidence for each outcome assessed."*
+
+Reported via the Weight of Evidence scores embedded in the AEP node/edge tables (@tbl-nodes-a001, @tbl-nodes-a002) and discussed in the Discussion.
+
+## Discussion
+
+### Item 23a: General interpretation
+
+*"Provide a general interpretation of the results in the context of other evidence."*
+
+Reported in the Discussion.
+
+### Item 23b: Limitations of the evidence
+
+*"Discuss any limitations of the evidence included in the review."*
+
+<!-- TODO (Sam): `_04-discussion.qmd` is currently unstructured prose with no subheadings, so I can't point to a specific passage rather than "the Discussion" as a whole. Confirm this item is covered somewhere in there, or flag where it should be added. -->
+
+### Item 23c: Limitations of the review process
+
+*"Discuss any limitations of the review processes used."*
+
+<!-- TODO (Sam): as above. The single-reviewer relevance ranking and reduced systematicity are both mentioned in Materials and Methods ("Literature Review Protocol") rather than the Discussion -- confirm whether that satisfies this item or whether it belongs in the Discussion too. -->
+
+### Item 23d: Implications
+
+*"Discuss implications of the results for practice, policy, and future research."*
+
+Reported in the Discussion.
+
+## Other information
+
+### Item 24a-24c: Registration and protocol
+
+*24a: "Provide registration information for the review, including register name and registration number, or state that the review was not registered." 24b: "Indicate where the review protocol can be accessed, or state that a protocol was not prepared." 24c: "Describe and explain any amendments to information provided at registration or in the protocol."*
+
+<!-- TODO (Sam): this review was not pre-registered (24a). A protocol document exists (Admin\Copper AEP Lit Review Protocol.docx) but it isn't part of this repository or publicly accessible (24b). Confirm you're happy for the checklist to state both of those plainly, and how (if at all) you want the protocol referenced. -->
+
+### Item 25: Support
+
+*"Describe sources of financial or non-financial support for the review, and the role of the funders or sponsors in the review."*
+
+<!-- TODO (Sam): no funding/support statement currently exists anywhere in the rendered manuscript (`docs/AP02-acknowledgements.qmd` is a parked contact list, not a funding statement, and isn't in the render chain). This needs a line from you -- I'm not going to guess at EXPECT project funding details. -->
+
+### Item 26: Competing interests
+
+*"Declare any competing interests of review authors."*
+
+<!-- TODO (Sam): no competing interests statement currently exists in the rendered manuscript. Needs a line from you. -->
+
+### Item 27: Availability of data, code and other materials
+
+*"Report which of the following are publicly available and where they can be found: template data collection forms; data extracted from included studies; data used for all analyses; analytic code; any other materials used in the review."*
+
+<!-- TODO (Sam): no data/code availability statement currently exists in the rendered manuscript. Confirm what's actually available before I draft a pointer (e.g. the STOPAEP repository, whether extracted literature data can be shared given CREED/copyright constraints, Vannmiljø being third-party and already public) -- this is a factual claim about what you're willing/able to release, not something I should guess at. -->

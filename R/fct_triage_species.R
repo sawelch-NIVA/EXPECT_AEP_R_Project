@@ -214,6 +214,16 @@ triage_species_nodes <- function(data, min_n = 100, groups = NULL) {
       node_slug = slugify_name(.data$node_label)
     )
 
+  # Redone with the display unit AFTER slugify_name() above, not before: the
+  # slug (and every filename keyed on it) must stay anchored to the standardised
+  # "mg/L" string. Only the caption text a reader sees gets the µg/L relabel.
+  out$node_label <- paste(
+    out$ENVIRON_COMPARTMENT_SUB,
+    out$SPECIES_GROUP,
+    display_unit_label(out$MEASURED_UNIT_STANDARD),
+    sep = " / "
+  )
+
   # Same collision guard as triage_overview_nodes(): make.unique() would paper
   # over a duplicate with a _1 suffix, leaving the unsuffixed slug a string
   # prefix of the suffixed one and breaking filename matching downstream.

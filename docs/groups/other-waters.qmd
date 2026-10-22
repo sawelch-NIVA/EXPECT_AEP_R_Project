@@ -10,13 +10,13 @@ Figures and counts are static, written at scaffold time rather than computed on 
 
 # Overview
 
-**Overview, `mg/L`.** `n` = 153 measurements in 2 groups below this sub-compartment.
+**Overview, `µg/L`.** `n` = 153 measurements in 2 groups below this sub-compartment.
 
 ::: {#fig-aquatic-wastewater-mg-l layout-ncol=1}
 
 ![a) Distribution by site subtype](../../triage/Aquatic_Wastewater_mg_L_a_overview_site_geographic_feature_sub.png){#fig-aquatic-wastewater-mg-l-a}
 
-Aquatic / Wastewater / mg/L
+Aquatic / Wastewater / µg/L
 
 :::
 
@@ -24,13 +24,13 @@ Aquatic / Wastewater / mg/L
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
-| [G015-Wsw-Dnr-C](#grp-G015-Wsw-Dnr-C) | Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L | `mg/L` | 309 | 0.0247 | 0.0018 | 0.00163 | 2.72 | 1 |  |
-| [G020-Www-Pnr-C](#grp-G020-Www-Pnr-C) | Aquatic / Wastewater / WWTP / Not reported / mg/L | `mg/L` | 143 | 0.00173 | 0.0012 | 0.00133 | 1.81 | 1 | multimodal, outliers |
+| [G015-Wsw-Dnr-C](#grp-G015-Wsw-Dnr-C) | Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / µg/L | `µg/L` | 309 | 24.7 | 1.8 | 1.63 | 2.72 | 1 |  |
+| [G020-Www-Pnr-C](#grp-G020-Www-Pnr-C) | Aquatic / Wastewater / WWTP / Not reported / µg/L | `µg/L` | 143 | 1.73 | 1.2 | 1.33 | 1.81 | 1 | multimodal, outliers |
 | [G114-Wsl-Pot-Mw](#grp-G114-Wsl-Pot-Mw) | Aquatic / Sludge / WWTP / Other / mg/kg (wet) | `mg/kg (wet)` | 11 | 97.5 | 97.5 | 97.2 | 1.12 | 1 |  |
-| [G121-Www-Pot-C](#grp-G121-Www-Pot-C) | Aquatic / Wastewater / WWTP / Other / mg/L | `mg/L` | 10 | 0.067 | 0.0699 | 0.0624 | 1.58 | 1 |  |
+| [G121-Www-Pot-C](#grp-G121-Www-Pot-C) | Aquatic / Wastewater / WWTP / Other / µg/L | `µg/L` | 10 | 67 | 69.9 | 62.4 | 1.58 | 1 |  |
 | [G136-Wpw-Oot-Mw](#grp-G136-Wpw-Oot-Mw) | Aquatic / Porewater / Ocean, sea, territorial waters / Other / mg/kg (wet) | `mg/kg (wet)` | 7 | 0.0085 | 0.0085 | 0.00837 | 1.29 | 1 |  |
 | [G157-Wpw-Cot-Mw](#grp-G157-Wpw-Cot-Mw) | Aquatic / Porewater / Coastal, fjord / Other / mg/kg (wet) | `mg/kg (wet)` | 4 | 0.017 | 0.017 | 0.017 |  | 1 |  |
-| [G190-Wgw-Dws-C](#grp-G190-Wgw-Dws-C) | Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / mg/L | `mg/L` | 2 | 1.09 | 1.09 | 1.09 |  | 1 |  |
+| [G190-Wgw-Dws-C](#grp-G190-Wgw-Dws-C) | Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / µg/L | `µg/L` | 2 | 1090 | 1090 | 1090 |  | 1 |  |
 
 : Groups in the Other Waters notebook. {#tbl-glance}
 
@@ -44,9 +44,9 @@ dropped, and why. This is the question the document exists to answer.)*
 # Groups
 
 
-## G015-Wsw-Dnr-C Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L {#grp-G015-Wsw-Dnr-C}
+## G015-Wsw-Dnr-C Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / µg/L {#grp-G015-Wsw-Dnr-C}
 
-`G015-Wsw-Dnr-C` `n` = 309 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G015-Wsw-Dnr-C` `n` = 309 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 ::: {#fig-g015-wsw-dnr-c layout-ncol=5}
 
@@ -60,7 +60,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Spatial distribution](../../triage/G015-Wsw-Dnr-C_e_spatial.png){#fig-g015-wsw-dnr-c-e group="G015-Wsw-Dnr-C"}
 
-G015-Wsw-Dnr-C: Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / mg/L
+G015-Wsw-Dnr-C: Aquatic / Stormwater / Drainage, sewer, artificial water / Not reported / µg/L
 
 :::
 
@@ -68,9 +68,9 @@ G015-Wsw-Dnr-C: Aquatic / Stormwater / Drainage, sewer, artificial water / Not r
 **Verdict:** *(unwritten)*
 :::
 
-## G020-Www-Pnr-C Aquatic / Wastewater / WWTP / Not reported / mg/L {#grp-G020-Www-Pnr-C}
+## G020-Www-Pnr-C Aquatic / Wastewater / WWTP / Not reported / µg/L {#grp-G020-Www-Pnr-C}
 
-`G020-Www-Pnr-C` `n` = 143 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G020-Www-Pnr-C` `n` = 143 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 ::: callout-warning
 ## Flagged
@@ -90,7 +90,7 @@ G015-Wsw-Dnr-C: Aquatic / Stormwater / Drainage, sewer, artificial water / Not r
 
 ![Spatial distribution](../../triage/G020-Www-Pnr-C_e_spatial.png){#fig-g020-www-pnr-c-e group="G020-Www-Pnr-C"}
 
-G020-Www-Pnr-C: Aquatic / Wastewater / WWTP / Not reported / mg/L
+G020-Www-Pnr-C: Aquatic / Wastewater / WWTP / Not reported / µg/L
 
 :::
 
@@ -108,9 +108,9 @@ G020-Www-Pnr-C: Aquatic / Wastewater / WWTP / Not reported / mg/L
 **Verdict:** *(unwritten)*
 :::
 
-## G121-Www-Pot-C Aquatic / Wastewater / WWTP / Other / mg/L {#grp-G121-Www-Pot-C}
+## G121-Www-Pot-C Aquatic / Wastewater / WWTP / Other / µg/L {#grp-G121-Www-Pot-C}
 
-`G121-Www-Pot-C` `n` = 10 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G121-Www-Pot-C` `n` = 10 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G121-Www-Pot-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 
@@ -138,9 +138,9 @@ G020-Www-Pnr-C: Aquatic / Wastewater / WWTP / Not reported / mg/L
 **Verdict:** *(unwritten)*
 :::
 
-## G190-Wgw-Dws-C Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / mg/L {#grp-G190-Wgw-Dws-C}
+## G190-Wgw-Dws-C Aquatic / Groundwater / Drainage, sewer, artificial water / Water surface / µg/L {#grp-G190-Wgw-Dws-C}
 
-`G190-Wgw-Dws-C` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G190-Wgw-Dws-C` `n` = 2 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G190-Wgw-Dws-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 

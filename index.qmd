@@ -7,7 +7,7 @@ format:
   html: 
     lightbox: true
     sidebar: false
-  docx:
+  wordcount-docx:
     reference-doc: custom-reference-doc.docx
     fig-width: 8
     fig-height: 6
@@ -15,6 +15,7 @@ format:
     fig-format: png
     link-citations: true
     link-bibliography: true
+    count-code-blocks: false
 ---
 
 ```{r}
@@ -63,6 +64,15 @@ docx_flex <- function(ft, widths = NULL) {
 }
 ```
 
+# Word Counts:
+
+Total: {{< words-total >}}
+
+Body: {{< words-body >}}
+
+
+# Manuscript
+
 {{< include _00-abstract.qmd >}}
 
 {{< include _01-introduction.qmd >}}
@@ -78,6 +88,12 @@ docx_flex <- function(ft, widths = NULL) {
 ::: {#refs}
 :::
 
+::: {#appendix-count}
+
 {{< include _06-SI01.qmd >}}
 
 {{< include _07-SI02-prisma.qmd >}}
+
+{{< include _08-SI03-CREED.qmd >}}
+
+:::

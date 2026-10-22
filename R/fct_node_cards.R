@@ -841,7 +841,7 @@ node_group_strips <- function(
     # Drawing the ids inside the panel lets all three panels span the same
     # width, and then centring on x = 0.5 means the same thing everywhere.
     compact_group_labels(d, limits) +
-    compact_value_scale(limits, thresholds = thr) +
+    compact_value_scale(limits, thresholds = thr, unit = unique(d$MEASURED_UNIT_STANDARD)[1]) +
     compact_axis_theme()
 }
 
@@ -1129,18 +1129,27 @@ node_card_theme <- function(node, margin = 2) {
 #'   axis carries, so unlike [triage_threshold_sec_axis()] this omits the axis
 #'   title (source and matrix): at card width there is no room for it and it
 #'   would compete with the class numerals it is meant to explain.
+#' @param unit The node's `MEASURED_UNIT_STANDARD`, or `NULL`. Where `"mg/L"`,
+#'   the printed tick text is rescaled to what it would read in
+#'   `"µg/L"`. `limits`/`breaks`/the threshold secondary axis all stay in
+#'   `MEASURED_VALUE_STANDARD`'s own scale; only the label text changes, the
+#'   same displayed-vs-standardised split used by [threshold_label()].
 #' @return A ggplot2 scale.
 #' @export
-compact_value_scale <- function(limits = NULL, every = 3, thresholds = NULL) {
+compact_value_scale <- function(limits = NULL, every = 3, thresholds = NULL, unit = NULL) {
   decades <- -12:12
   major <- decades[decades %% every == 0]
+  display_mult <- if (isTRUE(unit == "mg/L")) 1000 else 1
 
   ggplot2::scale_x_log10(
     limits = limits,
     breaks = 10^major,
     minor_breaks = 10^decades,
     labels = function(x) {
-      ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
+      ifelse(
+        is.na(x), NA_character_,
+        formatC(x * display_mult, format = "e", digits = 0)
+      )
     },
     expand = ggplot2::expansion(mult = c(0.02, 0.02)),
     guide = ggplot2::guide_axis(minor.ticks = TRUE),
@@ -1272,6 +1281,17 @@ node_card_header <- function(node, card, dpi = 300, show_counts = TRUE) {
   }
   unit <- if (length(card$unit) == 0 || is.na(card$unit)) "" else card$unit
 
+  # Rescaled for display ONLY, on local copies: `card$unit`/`card$mean` stay
+  # untouched because write_node_cards() keys the shared axis limits by
+  # `card$unit[1]` (see node_card_limits()), and rescaling the card itself
+  # would silently break that lookup for every water node.
+  display <- display_scale_concentration(
+    tibble::tibble(unit = unit, mean = card$mean[1], sd = card$sd[1]),
+    unit_col = "unit",
+    value_cols = c("mean", "sd")
+  )
+  unit <- display$unit[1]
+
   # THE HEADLINE NUMBER, bold and on its own line (Sam 2026-08-05).
   #
   # ARITHMETIC mean, not geometric (Sam changed his mind 2026-09-12: GM/GSD are
@@ -1291,8 +1311,8 @@ node_card_header <- function(node, card, dpi = 300, show_counts = TRUE) {
   # NOT "μ" for the unit's micro sign, still: CLAUDE.md 4.4.-2's standing rule
   # against writing a micro sign anywhere it can be avoided applies as much to
   # this line as it did to "GM"/"AM" before.
-  headline_value <- card$mean[1]
-  headline_sd <- card$sd[1]
+  headline_value <- display$mean[1]
+  headline_sd <- display$sd[1]
   headline <- if (length(headline_value) == 0 || is.na(headline_value)) {
     ""
   } else {
@@ -1574,6 +1594,15 @@ node_report_flextable <- function(cards, scoped) {
   )]
 
   dash <- "\u2014"
+
+  # Rescaled for display only, and only here: this is the final table render,
+  # so nothing downstream keys on `cards$unit`/`cards$mean` the way
+  # write_node_cards() does on its own (unrescaled) copy of the same target.
+  cards <- display_scale_concentration(
+    cards,
+    unit_col = "unit",
+    value_cols = c("mean", "sd", "geo_mean", "median")
+  )
 
   tbl <- cards |>
     dplyr::left_join(extra, by = "node_id") |>

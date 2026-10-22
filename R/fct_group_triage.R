@@ -340,7 +340,10 @@ triage_group_label <- function(grp, sep = " / ") {
     # titled headings in the notebook and (b) left the unsuffixed slug as a
     # string prefix of the suffixed one, breaking filename matching.
     dplyr::coalesce(grp$SITE_GEOGRAPHIC_FEATURE_SUB, "Unknown sub-site"),
-    grp$MEASURED_UNIT_STANDARD,
+    # Display text only: heading_anchor() slugs the raw group-key columns
+    # directly rather than this label, so relabelling the unit here cannot
+    # touch any anchor or filename.
+    display_unit_label(grp$MEASURED_UNIT_STANDARD),
     sep = sep
   )
 }
@@ -569,7 +572,7 @@ triage_unit_label <- function(data) {
   if (length(units) != 1) {
     return("Measured value")
   }
-  paste0("Measured value (", units, ")")
+  paste0("Measured value (", display_unit_label(units), ")")
 }
 
 #' Tidy Vannmiljø Campaign Names for Display
@@ -874,11 +877,19 @@ triage_sec_axis_theme <- function(position = c("top", "right")) {
 #'
 #' @param limits Shared value-axis limits, or `NULL`.
 #' @param axis `"x"` or `"y"`.
+#' @param unit The subset's `MEASURED_UNIT_STANDARD`, or `NULL`. Where `"mg/L"`,
+#'   printed tick text is rescaled to what it would read in `"µg/L"`.
+#'   `limits`/`breaks`/`...` (including a threshold secondary axis) all stay on
+#'   `MEASURED_VALUE_STANDARD`'s own scale; only the label text changes, same
+#'   as [compact_value_scale()]. Pass `NULL` (the default; panel (a) always
+#'   does, since it deliberately mixes units -- CLAUDE.md 4.4.0 -- and there is
+#'   no single correct rescale for a mixed axis) to leave labels as printed.
 #' @return A ggplot2 scale.
 #' @export
-triage_value_scale <- function(limits = NULL, axis = c("x", "y"), ...) {
+triage_value_scale <- function(limits = NULL, axis = c("x", "y"), unit = NULL, ...) {
   axis <- match.arg(axis)
   scale_fn <- if (axis == "x") ggplot2::scale_x_log10 else ggplot2::scale_y_log10
+  display_mult <- if (isTRUE(unit == "mg/L")) 1000 else 1
 
   scale_fn(
     limits = limits,
@@ -907,7 +918,10 @@ triage_value_scale <- function(limits = NULL, axis = c("x", "y"), ...) {
     # "NA", which ggplot2 then draws: without this, an axis limited to 1e-3..1e3
     # came back with seven real labels and eighteen reading "NA".
     labels = function(x) {
-      out <- ifelse(is.na(x), NA_character_, formatC(x, format = "e", digits = 0))
+      out <- ifelse(
+        is.na(x), NA_character_,
+        formatC(x * display_mult, format = "e", digits = 0)
+      )
       # Nothing labelled beyond the data limits. The categorical panels reserve a
       # right-hand strip for their count labels
       # (triage_category_x_expansion()), and expansion widens the drawn range
@@ -1253,6 +1267,7 @@ triage_plot_by_date <- function(
     triage_value_scale(
       limits = limits,
       axis = "y",
+      unit = unique(data$MEASURED_UNIT_STANDARD)[1],
       sec.axis = triage_threshold_sec_axis(
         thresholds_for_group(thresholds, grp),
         limits = limits
@@ -1817,6 +1832,7 @@ triage_plot_by_category <- function(
     triage_value_scale(
       limits = limits,
       axis = "x",
+      unit = unique(plot_data$MEASURED_UNIT_STANDARD)[1],
       sec.axis = triage_threshold_sec_axis(thr, limits = limits),
       # Reserves the right-hand strip the count labels sit in.
       expand = triage_category_x_expansion()
@@ -2003,9 +2019,14 @@ category_x_binwidth <- function(data, limits = NULL, bins = 40) {
 #' @param thresholds Matched thresholds from [thresholds_for_group()], or `NULL`.
 #' @param tol Distance in log10 units within which a threshold absorbs a decade
 #'   break rather than sitting beside it.
+#' @param unit The subset's `MEASURED_UNIT_STANDARD`, or `NULL`. Where `"mg/L"`,
+#'   printed label text (decade and threshold) is rescaled to what it would
+#'   read in `"µg/L"`. `breaks` themselves are returned unscaled, since
+#'   they are real positions on the colour scale's own `MEASURED_VALUE_STANDARD`
+#'   domain; only the label text changes, same as [triage_value_scale()].
 #' @return A list of `breaks` and `labels`, or `NULL` where limits are unusable.
 #' @export
-spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15) {
+spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15, unit = NULL) {
   if (is.null(limits) || !all(is.finite(limits)) || any(limits <= 0)) {
     return(NULL)
   }
@@ -2014,6 +2035,7 @@ spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15) {
   if (!is.finite(lo) || !is.finite(hi) || hi <= lo) {
     return(NULL)
   }
+  display_mult <- if (isTRUE(unit == "mg/L")) 1000 else 1
 
   decades <- seq(ceiling(lo), floor(hi))
   # Values and their logs are carried in parallel, and the VALUES are what gets
@@ -2023,7 +2045,7 @@ spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15) {
   # The logs exist only for the proximity test below.
   breaks_val <- 10^decades
   breaks_log <- decades
-  labels <- formatC(breaks_val, format = "e", digits = 0)
+  labels <- formatC(breaks_val * display_mult, format = "e", digits = 0)
 
   thr <- thresholds_in_limits(thresholds %||% empty_threshold_match(), limits)
   if (nrow(thr) > 0) {
@@ -2035,7 +2057,7 @@ spatial_colour_breaks <- function(limits, thresholds = NULL, tol = 0.15) {
     # 1.56e-02 to "2e-02" would misstate the value the class actually starts at.
     thr_text <- function(i) {
       paste0(
-        formatC(thr_val[i], format = "e", digits = 1),
+        formatC(thr_val[i] * display_mult, format = "e", digits = 1),
         " (", thr_lab[i], ")"
       )
     }
@@ -2165,7 +2187,7 @@ triage_plot_spatial <- function(
   # threshold boundaries. n.breaks = 6 let ggplot2 choose, and across the Aquatic
   # limits it chose a step of two orders. See spatial_colour_breaks().
   thr_matched <- thresholds_for_group(thresholds, grp)
-  brk <- spatial_colour_breaks(limits, thr_matched)
+  brk <- spatial_colour_breaks(limits, thr_matched, unit = unique(spatial$MEASURED_UNIT_STANDARD)[1])
   strokes <- if (is.null(brk)) {
     NULL
   } else {

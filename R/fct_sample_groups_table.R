@@ -69,6 +69,16 @@ build_sample_groups_table <- function(summary_data, ids = NULL, thresholds = NUL
     attach_group_ids(summary_data, ids)$group_id
   }
 
+  # Rescaled for display ONLY after mean_class above, which classifies against
+  # M-608 thresholds still held in MEASURED_UNIT_STANDARD's "mg/L". Rescaling
+  # any earlier would compare a microgram-scaled mean against a milligram
+  # threshold and misclassify every water group by three orders of magnitude.
+  summary_data <- display_scale_concentration(
+    summary_data,
+    unit_col = "unit",
+    value_cols = c("mean", "sd", "geo_mean", "median")
+  )
+
   summary_data |>
     dplyr::mutate(
       group_id = group_ids,

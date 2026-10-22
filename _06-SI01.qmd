@@ -38,7 +38,7 @@ docx_flex <- function(ft, widths = NULL) {
 
 ```{r}
 #| label: tbl-hammerfest-employment
-#| tbl-cap: "Approximate statistics for copper emissions-relevant sector employment for a) Norway and b) Hammerfest municipality (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per sector. Source: SSB table 08536 [@statisticsnorway08536EmployedPersons2026]."
+#| tbl-cap: "Approximate statistics for copper emissions-relevant sector employment for a) Norway and b) Hammerfest municipality (2025, Q4, by place of residence), and Hammerfest's share of total national jobs per sector. Source: Statistics Norway (SSB) table 08536 [@statisticsnorway08536EmployedPersons2026]."
 #| echo: false
 emp <- read_csv(
   "data/clean/derived/ssb_employment_hammerfest.csv",
@@ -81,10 +81,9 @@ emp |>
 
 ## *Ad hoc* Literature
 
-
 ```{r}
 #| label: tbl-adhoc-literature
-#| tbl-cap: "Placeholder caption. Ad hoc literature sources. TODO: Add proper citations, etc. in same style as Vannmiljø. Date Range and Measurements (sum of `MEASURED_N`) are read live from the joined literature dataset."
+#| tbl-cap: "Ad hoc literature sources used in the construction of AEPs but not captured by the initial literature review. "
 #| echo: false
 kogel_lit <- tar_read(load_literature_pqt) |>
   filter(REFERENCE_ID == "2026KogelUsingAtlanticHaddock")
@@ -149,11 +148,78 @@ vm_sum <- tar_read(vm_dataset_summary)
 vm_val <- function(m) vm_sum$scale$value[vm_sum$scale$metric == m]
 ```
 
+## Source Key Exposure States
 
-## Pollutant Release and Transfer Register (Norske utslipp) Data
+### Norwegian Pollutant Release and Transfer Register
+
+The Norwegian PRTR is a repository for self-reported emissions data in Norway, and is freely available under an open government data license [@norwegianenvironmentagencyNorwegianPRTRPollutants2026]. Discharges of specific pollutants, including copper, to air and water by licensed facilities (wastewater treatment plants, landfills, land-based industries, and offshore installations) are reported, typically as kg/year. Facility locations are recorded to the municipality level, and it is frequently possible to geolocate these facilities from other records.
 
 ![Copper released to air and water by PRTR-licensed facilities in Hammerfest municipality, by facility; reported zeros omitted (log scale).](figures/fig05-hammerfest-emissions.png){#fig-hammerfest-emissions}
 
+Data from this register were assessed following the WoE framework (see Methods), and are included as source KES (@fig-hammerfest-emissions). Within the Hammerfest municipality, 5 of the 18 PRTR-registered facilities report copper emissions to air or water for at least one year. These data were grouped together as the *Industrial emissions* KES (AEP 1), air and water emissions summed, and a mean calculated over the reported period. 
+
+### Aquaculture
+
+Aquaculture feed/faecal matter and antifoulant net treatment both represent potentially important sources of copper pollution to the environment, typically most obvious in sediment in a 0-300m distance from a given facility [@grosvikKunnskapsstotteOmMiljoeffekter2023]. Copper is released from feed and faecal matter over time, and from nets both gradually (the release of copper ions mediates their toxicity to fouling organisms), and in spikes when nets are washed to remove fouling.
+
+Aquaculture represents a significant portion of Norway's agricultural GDP (73.5%) and overall GDP (1.3%, statistics for 2024) [@faoNorwayFisheriesAquaculture2024], and is expected to double in volume by 2050 [@dnvOceansFuture20502021].
+
+Although use of copper-based antifoulants on nets remains legal in Norway, their use in tonnes has dropped substantially, to be replaced with use of tralopyril and/or zinc pyrithione (@fig-aquaculture-biocide-use). Both the legal and market-based outlook for aquaculture antifoulants as a source of pollution is thus rather uncertain. However, as copper is an essential component of fish feed [@wangDietaryCopperFish2024a], feed's relevance as a copper source is likely to prove of continued importance.
+
+### Wastewater Sources
+
+Hammerfest municipality's WWTP at Rossmolla began operation in 2016 and serves 10,488 people (95% of the municipality's population, the remainder using septic tanks). Hammerfest operates a combined sewer system [@krogsethUnderstandingCyclicVolatile2016].
+
+Waste is subject to primary/mechanical treatment and discharged via pipe into the Sørøysundet at a depth of 50-60m [@norwegianenvironmentagencyNorskeUtslippRenseanlegg2026]. No reporting or estimation of copper discharge to the environment is provided for Rossmolla, nor indeed for any similarly sized WWTPs anywhere in Finnmark or Nordland. 
+
+## Environmental Key Exposure States
+
+```{r}
+#| label: tbl-literature-dataset
+#| tbl-cap: "Summary of samples across environmental compartments and subcompartments for Vannmiljø and literature copper occurrence data. Number of measurements exceeds number of records, because a single record may report a sample size greater than one. Likewise, a single site may report samples from multiple compartments."
+#| echo: false
+lit_all <- tar_read(load_literature_pqt)
+
+lit_composition <- lit_all |>
+  dplyr::group_by(ENVIRON_COMPARTMENT, ENVIRON_COMPARTMENT_SUB) |>
+  dplyr::summarise(
+    measurements = sum(MEASURED_N, na.rm = TRUE),
+    rows = dplyr::n(),
+    sites = dplyr::n_distinct(SITE_CODE),
+    .groups = "drop"
+  ) |>
+  dplyr::arrange(ENVIRON_COMPARTMENT, dplyr::desc(measurements))
+
+lit_totals <- dplyr::tibble(
+  measurements = sum(lit_all$MEASURED_N, na.rm = TRUE),
+  rows = nrow(lit_all),
+  sites = dplyr::n_distinct(lit_all$SITE_CODE)
+)
+
+lit_composition |>
+  dplyr::transmute(
+    Compartment = ENVIRON_COMPARTMENT,
+    Subcompartment = ENVIRON_COMPARTMENT_SUB,
+    Measurements = measurements,
+    Records = rows,
+    Sites = sites
+  ) |>
+  dplyr::bind_rows(dplyr::tibble(
+    Compartment = "Total",
+    Subcompartment = "",
+    Measurements = lit_totals$measurements,
+    Records = lit_totals$rows,
+    Sites = lit_totals$sites
+  )) |>
+  dplyr::mutate(dplyr::across(
+    c(Measurements, Records, Sites),
+    ~ formatC(.x, format = "d", big.mark = ",")
+  )) |>
+  flextable::flextable() |>
+  flextable::align(j = 3:5, align = "right", part = "all") |>
+  flextable::bold(i = ~ Compartment == "Total") |>
+  docx_flex()
+```
 
 ## Sample Groups Tables
 
@@ -182,7 +248,7 @@ groups_a001_boxed <- tar_read(literature_analysis_ready) |>
 
 ```{r}
 #| label: tbl-groups-a001
-#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP-001 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N).", literature_cite_suffix(groups_a001_boxed$REFERENCE_ID, groups_a001_boxed$TITLE, groups_a001_boxed$YEAR))
+#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP 1 (Hammerfest coastal) bounding box (23.40-24.12 E, 70.45-70.78 N).", literature_cite_suffix(groups_a001_boxed$REFERENCE_ID, groups_a001_boxed$TITLE, groups_a001_boxed$YEAR))
 #| warning: false
 groups_a001_boxed |>
   summarise_groups(tar_read(literature_dropped_report)) |>
@@ -217,7 +283,7 @@ groups_a002_boxed <- tar_read(literature_analysis_ready) |>
 
 ```{r}
 #| label: tbl-groups-a002
-#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP-002 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N).", literature_cite_suffix(groups_a002_boxed$REFERENCE_ID, groups_a002_boxed$TITLE, groups_a002_boxed$YEAR))
+#| tbl-cap: !expr paste0("Sample groups with at least one measurement inside the AEP 2 (Repparfjord inner) bounding box (24.13-24.42 E, 70.42-70.52 N).", literature_cite_suffix(groups_a002_boxed$REFERENCE_ID, groups_a002_boxed$TITLE, groups_a002_boxed$YEAR))
 #| warning: false
 groups_a002_boxed |>
   summarise_groups(tar_read(literature_dropped_report)) |>
@@ -231,7 +297,7 @@ groups_a002_boxed |>
 
 :::
 
-## AEP Node Tables
+## AEP Key Exposure State Tables
 
 ### AEP 1: Hammerfest Inner Coastal System
 
@@ -248,7 +314,7 @@ scoped_a001 <- tar_read(aep_scoped)[["A001"]]
 
 ```{r}
 #| label: tbl-nodes-a001
-#| tbl-cap: !expr paste0("AEP-001 (Hammerfest coastal) nodes.", external_node_cite_suffix(scoped_a001))
+#| tbl-cap: !expr paste0("AEP 1 (Hammerfest coastal) nodes.", external_node_cite_suffix(scoped_a001))
 #| warning: false
 tar_read(aep_node_cards) |>
   filter(aep_id == "A001") |>
@@ -270,7 +336,7 @@ scoped_a002 <- tar_read(aep_scoped)[["A002"]]
 
 ```{r}
 #| label: tbl-nodes-a002
-#| tbl-cap: !expr paste0("AEP-002 (Repparfjord inner) nodes.", external_node_cite_suffix(scoped_a002))
+#| tbl-cap: !expr paste0("AEP 2 (Repparfjord inner) nodes.", external_node_cite_suffix(scoped_a002))
 #| warning: false
 tar_read(aep_node_cards) |>
   filter(aep_id == "A002") |>

@@ -10,13 +10,13 @@ Figures and counts are static, written at scaffold time rather than computed on 
 
 # Overview
 
-**Overview, `mg/L`.** `n` = 4,970 measurements in 2 groups below this sub-compartment.
+**Overview, `µg/L`.** `n` = 4,970 measurements in 2 groups below this sub-compartment.
 
 ::: {#fig-aquatic-marine-salt-water-mg-l layout-ncol=1}
 
 ![a) Distribution by site subtype](../../triage/Aquatic_Marine_Salt_Water_mg_L_a_overview_site_geographic_feature_sub.png){#fig-aquatic-marine-salt-water-mg-l-a}
 
-Aquatic / Marine/Salt Water / mg/L
+Aquatic / Marine/Salt Water / µg/L
 
 :::
 
@@ -24,10 +24,10 @@ Aquatic / Marine/Salt Water / mg/L
 
 | ID | Group | Unit | n | Mean | Median | Geo. mean | GSD | Sources | Flags |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
-| [G004-Wmw-Cwc-C](#grp-G004-Wmw-Cwc-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L | `mg/L` | 4,969 | 0.00418 | 0.000724 | 0.000848 | 2.86 | 1 | multimodal |
+| [G004-Wmw-Cwc-C](#grp-G004-Wmw-Cwc-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / µg/L | `µg/L` | 4,969 | 4.18 | 0.724 | 0.848 | 2.86 | 1 | multimodal |
 | [G046-Wbw-Uwb-Md](#grp-G046-Wbw-Uwb-Md) | Aquatic / Brackish/Transitional Water / Estuary / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 44 |  178 |  120 |  138 | 2.03 | 1 |  |
 | [G156-Wbw-Owb-Md](#grp-G156-Wbw-Owb-Md) | Aquatic / Brackish/Transitional Water / Ocean, sea, territorial waters / Water benthos / mg/kg (dry) | `mg/kg (dry)` | 4 | 77.5 |   48 | 61.3 | 2.09 | 1 | outliers |
-| [G207-Wmw-Cnv-C](#grp-G207-Wmw-Cnv-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L | `mg/L` | 1 | 0.000305 | 0.000305 | 0.000305 |  | 1 |  |
+| [G207-Wmw-Cnv-C](#grp-G207-Wmw-Cnv-C) | Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / µg/L | `µg/L` | 1 | 0.305 | 0.305 | 0.305 |  | 1 |  |
 
 : Groups in the Marine and Brackish Water notebook. {#tbl-glance}
 
@@ -41,9 +41,9 @@ dropped, and why. This is the question the document exists to answer.)*
 # Groups
 
 
-## G004-Wmw-Cwc-C Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L {#grp-G004-Wmw-Cwc-C}
+## G004-Wmw-Cwc-C Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / µg/L {#grp-G004-Wmw-Cwc-C}
 
-`G004-Wmw-Cwc-C` `n` = 4,969 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G004-Wmw-Cwc-C` `n` = 4,969 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 ::: callout-warning
 ## Flagged
@@ -62,7 +62,7 @@ dropped, and why. This is the question the document exists to answer.)*
 
 ![Spatial distribution](../../triage/G004-Wmw-Cwc-C_e_spatial.png){#fig-g004-wmw-cwc-c-e group="G004-Wmw-Cwc-C"}
 
-G004-Wmw-Cwc-C: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / mg/L
+G004-Wmw-Cwc-C: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pelagic zone / µg/L
 
 :::
 
@@ -95,9 +95,9 @@ G004-Wmw-Cwc-C: Aquatic / Marine/Salt Water / Coastal, fjord / Water column, pel
 **Verdict:** *(unwritten)*
 :::
 
-## G207-Wmw-Cnv-C Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / mg/L {#grp-G207-Wmw-Cnv-C}
+## G207-Wmw-Cnv-C Aquatic / Marine/Salt Water / Coastal, fjord / Not relevant / µg/L {#grp-G207-Wmw-Cnv-C}
 
-`G207-Wmw-Cnv-C` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `mg/L`.
+`G207-Wmw-Cnv-C` `n` = 1 measurements, from **1** source (distinct `REFERENCE_ID`). Unit: `µg/L`.
 
 *No triage panels: this group is below the `min_n` cutoff. Add `G207-Wmw-Cnv-C` to `must_include` in the `triage_pilot_groups` target if it needs them.*
 

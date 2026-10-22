@@ -347,6 +347,56 @@ standardise_measured_units <- function(
 }
 
 
+#' Relabel a Standardised Unit for Display
+#'
+#' `MEASURED_UNIT_STANDARD` holds `"mg/L"` for every water concentration (see
+#' [standardise_measured_units()]), but this project's copper-in-water values
+#' are almost all sub-milligram, so mg/L numbers are mostly leading zeros.
+#' This maps the label a reader sees to `"µg/L"`, leaving every other
+#' standard unit (`mg/kg (dry)`, `mg/kg (wet)`) untouched. It does not rescale
+#' anything; pair it with [display_scale_concentration()] wherever a value
+#' travels with its unit.
+#'
+#' @param unit A character vector of standardised units.
+#' @return A character vector the same length, `"mg/L"` mapped to `"µg/L"`.
+#' @export
+display_unit_label <- function(unit) {
+  ifelse(!is.na(unit) & unit == "mg/L", "µg/L", unit)
+}
+
+#' Rescale Standardised Concentration Statistics for Display
+#'
+#' Mirrors the displayed-vs-standardised split already used by
+#' [threshold_label()] ("the value is quoted in the source's own unit, not the
+#' standardised one"): the value used for computation and positioning stays in
+#' `MEASURED_UNIT_STANDARD`'s `"mg/L"`, and only what a reader sees is rescaled
+#' to `"µg/L"`, by the row's own unit rather than a blanket multiply, so
+#' mg/kg rows in the same table are left alone.
+#'
+#' Only linear statistics belong in `value_cols`. A ratio such as a geometric
+#' standard deviation (`gsd`) does not change when the unit its inputs were
+#' computed from changes, and must not be passed here.
+#'
+#' @param data A tibble with a unit column and one or more value columns.
+#' @param unit_col Name of the column holding the standardised unit.
+#' @param value_cols Names of value columns to rescale alongside the unit.
+#'   Columns not present in `data` are skipped.
+#' @return `data`, with `unit_col` relabelled and `value_cols` rescaled on
+#'   rows where `unit_col` was `"mg/L"`.
+#' @export
+display_scale_concentration <- function(
+  data,
+  unit_col,
+  value_cols
+) {
+  is_water <- !is.na(data[[unit_col]]) & data[[unit_col]] == "mg/L"
+  for (col in intersect(value_cols, names(data))) {
+    data[[col]] <- ifelse(is_water, data[[col]] * 1000, data[[col]])
+  }
+  data[[unit_col]] <- display_unit_label(data[[unit_col]])
+  data
+}
+
 #' Standardise a date column to IDate format
 #'
 #' Converts Date, character, or POSIXct columns to data.table's IDate format.

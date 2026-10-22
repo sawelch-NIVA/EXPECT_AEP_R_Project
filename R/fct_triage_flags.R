@@ -255,7 +255,7 @@ group_summary_line <- function(row) {
       " (distinct `REFERENCE_ID`)"
     },
     ". Unit: `",
-    row$MEASURED_UNIT_STANDARD[1],
+    display_unit_label(row$MEASURED_UNIT_STANDARD[1]),
     "`."
   )
 
